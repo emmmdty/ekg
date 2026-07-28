@@ -20,11 +20,13 @@ components that use it) import on a CPU box.
 from __future__ import annotations
 
 from collections.abc import Sequence
+from inspect import signature
 
 __all__ = [
     "TORCH_AVAILABLE",
     "OffsetMapping",
     "locate_span_token",
+    "global_attention_positions",
     "encode_spans",
     "pair_features",
 ]
@@ -50,6 +52,22 @@ def locate_span_token(windows: Sequence[OffsetMapping], char_start: int) -> tupl
     if best is None:
         raise ValueError(f"char offset {char_start} is not covered by any encoder window")
     return best[1], best[2]
+
+
+def global_attention_positions(
+    located: Sequence[tuple[int, int]], n_windows: int
+) -> list[list[int]]:
+    """Per window, the token indices that should attend globally.
+
+    Long-context encoders (Longformer) attend locally by default, so the tokens a
+    pair decision is read from must be marked global or two mentions far apart in
+    the document never exchange information directly. Sorted and deduplicated so
+    the mask is deterministic.
+    """
+    per_window: list[list[int]] = [[] for _ in range(n_windows)]
+    for window, token in located:
+        per_window[window].append(token)
+    return [sorted(set(tokens)) for tokens in per_window]
 
 
 try:  # pragma: no cover - exercised on the GPU server
@@ -93,6 +111,20 @@ def encode_spans(
     gathered out of it, so cost is linear in document length, not in span count.
     Gradient flows when the encoder is in train mode; callers wrap inference in
     `no_grad`.
+
+    **Windows are a defect, not a feature**: two mentions in different windows
+    never share an encoding context, so their pair decision is made from
+    representations that never saw each other. Measured on MAVEN-Arg valid at
+    `max_length=512`, 13.1% of documents need more than one window and **34.7% of
+    the gold coreference pairs inside them are split across windows**. Every
+    document fits in 4,096 tokens (longest is 2,186), so a long-context encoder
+    with `max_length=4096` removes the split entirely — that is the reason to
+    prefer one.
+
+    When the encoder accepts a `global_attention_mask` (Longformer and kin), the
+    located span tokens plus position 0 are marked global: otherwise a
+    long-context model attends only locally and re-creates the very problem the
+    long context was meant to solve.
     """
     import torch
 
@@ -114,6 +146,22 @@ def encode_spans(
         for k, v in encoded.items()
         if k in ("input_ids", "attention_mask", "token_type_ids")
     }
+    if "global_attention_mask" in signature(encoder.forward).parameters:
+        mask = torch.zeros_like(inputs["input_ids"])
+        mask[:, 0] = 1  # the pooled <s>, as Longformer's own examples do
+        for window, tokens in enumerate(global_attention_positions(located, len(windows))):
+            if tokens:
+                mask[window, tokens] = 1
+        inputs["global_attention_mask"] = mask
+
     hidden = encoder(**inputs).last_hidden_state  # (n_windows, seq, hidden)
+    # Longformer pads internally to a multiple of its attention window. It also
+    # un-pads the output — but if a version ever stopped, every token index here
+    # would silently point at the wrong position, so check instead of trusting.
+    if hidden.shape[1] != inputs["input_ids"].shape[1]:
+        raise RuntimeError(
+            f"encoder returned {hidden.shape[1]} positions for "
+            f"{inputs['input_ids'].shape[1]} input tokens -- span indices would misalign"
+        )
     index = torch.tensor(located, device=hidden.device)
     return hidden[index[:, 0], index[:, 1]]

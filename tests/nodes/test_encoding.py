@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from ekg.nodes.encoding import locate_span_token
+from ekg.nodes.encoding import global_attention_positions, locate_span_token
 
 # Two overlapping windows over the same text; (0, 0) entries are special tokens.
 WINDOWS = [
@@ -37,3 +37,15 @@ def test_special_tokens_never_match() -> None:
 def test_uncovered_offset_is_fail_fast() -> None:
     with pytest.raises(ValueError, match="not covered"):
         locate_span_token(WINDOWS, 900)
+
+
+def test_global_attention_marks_every_located_token_per_window() -> None:
+    located = [(0, 2), (1, 4), (0, 1)]
+    assert global_attention_positions(located, 2) == [[1, 2], [4]]
+
+
+def test_global_attention_deduplicates_and_keeps_empty_windows() -> None:
+    # Two spans pooling the same token must not mark it twice, and a window with
+    # no span still needs its (empty) row so the mask lines up with the batch.
+    assert global_attention_positions([(0, 3), (0, 3)], 3) == [[3], [], []]
+
