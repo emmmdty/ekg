@@ -140,6 +140,93 @@ dump 在 **gpu-5090** 上产出（4090 全天 4 卡被他人占满；5090 环境
   后续要么放宽 α 到 >.48 报有意义的 τ，要么先抬 Phase A 召回。coref 一族 FNR=1.0 是因为
   supervised 抽取器在 valid 上 **coref 预测数为 0**（`n_pred=0`），不是准入把它筛掉的。
 
+### Phase C 实施（2026-07-28，CPU 全链路跑通，**神经档待 GPU**）
+
+**★ 先修正一个归因**：Phase B 报的 coref 族 FNR=1.000 **不是"模型没学会"，是结构性缺失** ——
+`relations/extractor/supervised.py` 的 `FAMILY_SUBTYPES` 只覆盖 temporal/causal/subevent，
+**抽取器根本没有 coreference 头**，`n_pred=0` 是按构造必然的。Ch1 正是补这一层。
+
+代码（只增不改）：
+
+- **MAVEN-Arg 加载器** `relations/data/maven_arg.py`：字符 offset 逐条校验 fail-fast
+  （valid 全量 **0 失配**：16,996 触发词 / 46,458 论元 / entity 引用全解析），mention id 与
+  MAVEN-ERE 共享（实测 99.78%），两套数据直接 join 无需映射表。
+- **新包 `src/ekg/nodes/`**：`detection`（lexicon 记忆基线 + supervised 神经档）/ `coref`
+  （同类型候选 + **难例负例**判别 + 采样）/ `canonical`（不确定性感知聚类 + 簇级证据/论元聚合 +
+  簇置信）/ `metrics`（误合并率）/ `encoding`（滑窗字符 offset 池化；**定位逻辑纯 Python、CPU 可测**，
+  堵住 Phase A 那类静默定位错）。
+- **新核心原语** `core/calibration/probability.py`：isotonic 概率校准 + `reliability_curve`
+  （既有 calibration 只有 conformal 风险控制，没有"分数→概率"的校准器）。
+- 脚本：`build_canonical_nodes.py`（端到端报告）、`train_event_detector.py`、`train_coref_scorer.py`。
+- 验证：**296 passed / 12 skipped**（基线 243/12）、ruff 0、`ekg-smoke` OK（新增 `[nodes]` 段）。
+
+**CPU 基线真实数字**（lexical 触发词相似度判别器 + lexicon 检测器；valid 710 篇按 **Phase B 同一切分**
+213 cal / 497 test —— gold 计数逐项与 Phase B 表相同：coref 2887 / temporal 71549 / causal 6599 /
+subevent 2165，同一把尺）：
+
+| 指标 | 值 | 目标 | 判定 |
+|---|---|---|---|
+| 检测 typed micro-F1 | **.687**（identification .781） | ~60+ | ⚠️ 见下方口径说明 |
+| coref MUC / CoNLL | **.502 / .771**（最佳档） | MUC ~86 可比区间 | ❌ 差距大 |
+| 误合并率 | **.582**（最佳档） | 显著↓ | ⚠️ 这是待打败的基线 |
+| **难例**误合并率 | **.767**（n=3077 难例对） | 显著↓ | ⚠️ 同上 |
+| coref 族 FNR | **1.000 → .398**（recall .602，天花板 .984）；**但 precision 仅 .389** | ↓ | ✅ 带代价 |
+| `node_confidence` ECE | **.2477 → .0039**（校准后，n=9319 节点） | 报出 ECE | ✅ |
+
+- ⚠️ **检测 .687 不等于达标**：这是 **候选分类口径**（MAVEN 直接给 gold 触发词 + `negative_triggers`
+  候选集），比端到端触发词检测容易；且它只是**纯记忆 lexicon 基线**。说明 "~60+" 这个目标是照更难的
+  口径定的。**神经检测器必须先超过这条记忆线才算有贡献**，不得拿 .687 宣称 Ch1 检测达标。
+- ⚠️ **coref 族 FNR 的天花板是 .9837**：MAVEN-Arg 缺 1.63% 的 ERE gold coref 对（mention 不在 Arg 里），
+  FNR 下界 .0163，报改善幅度时必须带这个天花板。
+- ⚠️ **FNR 降下来是有代价的，两面都要报**：词形基线产 4,462 条 coref 边对 2,887 条 gold，
+  **P .3893 / R .6017 / F1 .4727** —— 召回义的 FNR 改善真实，但 precision 很差。弃权带 .05 把
+  P 抬到 .4144（R .5882、F1 .4863），是同一档里 F1 更优的点。**不得只报 FNR 不报 precision。**
+- ✅ **弃权带（不确定性感知）按设计交易，且可测**：thr .90 下 band 0→0.05，难例误合并
+  **.886→.780**、误合并 .611→.586，代价是 coref FNR .398→.412（215 次弃权）。thr 1.0 + band .05
+  是退化角（全部弃权、FNR 回到 1.0），行为正确。
+- 触发词相似度基线在所有阈值档误合并率都 ≥ .582、难例误合并 ≥ .767 —— **词形匹配做不了相似事件判别**，
+  这正是本章要解的问题，现在有量化基线了。
+
+**神经档真实数字**（2026-07-28 在 **gpu-5090** 训练，作者当日逐次授权；4090 四卡被他人占满 80–100%
+util 且 ssh 间歇 reset，未挤占）。`roberta-base` 底座（5090 连不上 huggingface.co，走 `hf-mirror.com`），
+两个头各 3 epochs：
+
+- **coref 判别器** `runs/nodes/coref_supervised`：1730/2913 篇含正例，53,743 训练对
+  （15,163 正 / 12,243 难负，`hard_fraction=0.5`），loss .3809→.2628→**.2036**。
+- **检测器** `runs/nodes/detector_supervised`：全候选 plain CE，loss .5168→.2789→**.2369**。
+- ⚠️ **踩坑（已修，写进脚本注释）**：初版给线性头单独 lr=1e-3（encoder 2e-5）**发散** ——
+  loss 在 epoch 1 内从 .428 升到 .646 并平台，**高于 1:10 常数先验最优 ~.305**。
+  改回与 `train_supervised_relations.py` 一致的**单一 lr 2e-5**后正常收敛。
+
+**词形基线 → 神经档**（同一 497 篇 test，各自最优档；完整 9 格权衡表在 `runs/canonical_nodes_sweep_*.json`）：
+
+| 指标 | lexical 基线 | **supervised** | 目标 | 判定 |
+|---|---|---|---|---|
+| coref MUC | .502 | **.782** | ~86 可比区间 | ❌ **未达**（差 ~8 点） |
+| coref CoNLL（B³ .975 / CEAFe .969） | .771 | **.909** | — | — |
+| 误合并率 | .582 | **.244** | 显著↓ | ✅ |
+| **难例**误合并率（n=3077） | .767 | **.138** | 显著↓ | ✅ **5.6×** |
+| coref 族 FNR | .398 | **.215**（天花板 .0163） | ↓ | ✅ |
+| coref 族 P / F1 | .414 / .486 | **.756 / .770** | — | ✅ 两面都涨 |
+| 合并 P / R / F1 | .389 / .635 / .483 | **.756 / .829 / .791** | — | — |
+| 检测 typed micro-F1 | .687 | **.699**（ident .802） | ~60+ | ⚠️ 见下 |
+| `node_confidence` ECE | .248 → **.004** | .0062 → **.0076** | 报出 | ⚠️ 见下 |
+
+- ❌ **coref MUC .782 没到 ~86**：这是本阶段唯一明确未达标项，不粉饰。B³/CEAFe 高（.975/.969）是
+  MAVEN 96% 单例簇的结构性结果，**MUC 才是判别力所在**，要按 MUC 报。
+- ⚠️ **神经检测器只比纯记忆 lexicon 高 1.2 个点**（.6994 vs .6875，ident .8015 vs .7812）。
+  候选分类口径下 "~60+" 这条线**记忆基线就能过**，所以**不能说 Ch1 检测有实质贡献**——
+  这是一条弱结果，如实记。
+- ⚠️ **神经档的 isotonic 校准反而让 ECE 略变差（.0062 → .0076）**：簇级"最弱内部连边"原始置信
+  **本来就已校准**，校准器在这里没有增益。校准的价值出现在词形基线（.2477 → .0039）。
+  **不得只报"ECE 降了 63 倍"而不说神经档这一档没降。**
+- ✅ **弃权带的交易在神经档同样成立且更划算**：thr .5 下 band 0→0.1 使难例误合并 **.137→.116**、
+  coref precision **.756→.791**，代价 FNR .215→.251（236 次弃权）；thr .9 + band .1 是退化角
+  （2219 次弃权、全单例）。
+- 产物：`runs/canonical_nodes_supervised.json`（+ `.jsonl` 10,389 个 canonical node，
+  exact-cluster 准确率 **.9492**）、`runs/canonical_nodes_sweep_{lexical,supervised}.json`；
+  **checkpoint 留在 5090 不下本地**（`runs/nodes/{coref_supervised,detector_supervised}`）。
+
 ### Ch4 先行模块（来自 v3，降级复用）
 
 - **SeDGPL 自跑基线**：CGEP-MAVEN 单折 MRR 0.1836 / strict 0.1265，n=1908。
@@ -157,7 +244,7 @@ dump 在 **gpu-5090** 上产出（4090 全天 4 卡被他人占满；5090 环境
 | P0 | 主数据与溯源 | ✅ 主干数据完成；扩展数据部分仅 raw | 主数据 hash/manifest 可核 |
 | A | Ch2 判别式关系抽取 | ✅ **达标**（causal F1 .250 / subevent .213 / temporal .338；召回 .4%→67.5%） | causal F1 ≥25（目标 30–37），subevent ≥20 |
 | B | 一致性、repair trace、风险准入 | 🟡 **真实图闭环已跑通**（2026-07-28）：violation **清零** ✅，但 **ECG 可重建率无增益（R1/R2 微降）❌ → 止损触发**；α=0.2 不可达（召回上限） | violation↓ ✅、分层 FNR ✅、ECG 可重建率↑ ❌ |
-| C | Ch1 规范事件节点 | ⬜ 未开始；schema/coref/calibration 可复用 | 检测 F1、CoNLL、误合并率、ECE |
+| C | Ch1 规范事件节点 | 🟡 **主结果已出**（2026-07-28，5090）：难例误合并 .767→**.138** ✅、coref 族 FNR 1.000→**.215**（P .756）✅、CoNLL **.909** ✅；但 **MUC .782 未到 ~86** ❌、检测仅比记忆基线 +1.2 ❌、神经档 ECE 未获校准增益 ⚠️ | 检测 F1、CoNLL、误合并率、ECE |
 | C2 | Ch1 跨文档泛化 | ⬜ 未开始；ECB+ raw 已有，CLES 未取 | ECB+/CLES 对比 SECURE/MEET/DIE-EC |
 | D | Ch3 事实性与净化 | ⬜ 未开始；MAVEN-FACT train/valid 已就位 | macro-F1、预测图掉点、净化下游增益 |
 | E | Ch4 闭环与三图传播 | 🟡 SeDGPL/受控扫描已有；闭环控制器未做 | repaired > predicted，三图误差曲线 |
@@ -170,10 +257,11 @@ dump 在 **gpu-5090** 上产出（4090 全天 4 卡被他人占满；5090 环境
 
 1. ~~Phase A 判别式抽取器~~ ✅ 达标。~~Phase B W1–W4 代码~~ ✅。~~Phase B 真实图闭环~~ ✅ 2026-07-28 跑通
    （violation 清零，但 R1/R2 无增益 → **止损已触发**，见上文「Phase B 真实图闭环」段）。
-2. **⭐当前队首 = Phase C（Ch1 规范事件节点）**：新会话照
-   [`phases/PHASE_C_HANDOFF.md`](phases/PHASE_C_HANDOFF.md) 执行（含环境现状、A/B 真实数字、红线）。
-   **开工第一步是跟作者确认方向**（该文件 §0 列了三个选项与推荐），别直接开跑。
-   本阶段最直接的可量化贡献 = 把 coref 族 FNR 从 **1.000** 拉下来（Ch2 抽取器 coref `n_pred=0`）。
+2. **Phase C 主结果已出**（2026-07-28，方向 A，5090 训练；见上文「Phase C 实施」）。
+   **收口三件事**：① coref MUC .782 → ~86 的差距（可试更长训练 / 更强底座 / 提高 neg_ratio，
+   参照 Phase A「3→6 epochs 是决定性一步」）；② 检测器只比记忆基线 +1.2，要么调强要么**明确降级为
+   打底、不作为卖点**；③ 神经档校准无增益 → `node_confidence` 的卖点要收缩为
+   「原始簇置信本就近似校准」+ 弃权带的显式权衡，别硬讲校准。
 3. C 之后进 D（Ch3 事实性）；E（Ch4 闭环 headline）依赖 A·B·C·D 齐。
    ⚠️ **做 E 前必须先重定位 Ch4 headline**：Phase B 已证明「修复提升下游可重建性」在真实图上不成立
    （见 `PHASE_C_HANDOFF.md` §7），不得在 E 里换指标掩盖该负结果。

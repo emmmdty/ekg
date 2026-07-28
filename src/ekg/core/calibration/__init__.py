@@ -39,6 +39,10 @@ from ekg.core.calibration.metrics import (
     rolling_coverage,
     set_size_efficiency,
 )
+from ekg.core.calibration.probability import (
+    IsotonicProbabilityCalibrator,
+    reliability_curve,
+)
 from ekg.core.calibration.propagation import (
     BudgetSplit,
     CrossStageResult,
@@ -74,6 +78,9 @@ __all__ = [
     "CrossStageResult",
     "run_cross_stage",
     "compare_cross_stage_methods",
+    # probability calibration (score -> honest probability)
+    "IsotonicProbabilityCalibrator",
+    "reliability_curve",
     # diagnostics
     "rolling_coverage",
     "drift_coverage_gap",

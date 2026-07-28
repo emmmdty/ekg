@@ -16,11 +16,15 @@ baseline is a one-line `@registry.register("name")` — no caller changes.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar, cast
 
 __all__ = ["Registry"]
 
 T = TypeVar("T")
+# Bound to the *decorated* object so `@registry.register(...)` over a class keeps
+# that class's type (a plain `Callable[..., T]` return would demote it to a
+# function and break attribute/classmethod inference at every call site).
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 class Registry(Generic[T]):
@@ -30,13 +34,13 @@ class Registry(Generic[T]):
         self.kind = kind
         self._factories: dict[str, Callable[..., T]] = {}
 
-    def register(self, name: str) -> Callable[[Callable[..., T]], Callable[..., T]]:
+    def register(self, name: str) -> Callable[[F], F]:
         """Decorator: register a class/factory under ``name``."""
 
-        def decorator(factory: Callable[..., T]) -> Callable[..., T]:
+        def decorator(factory: F) -> F:
             if name in self._factories:
                 raise KeyError(f"{self.kind!r} already has an implementation named {name!r}")
-            self._factories[name] = factory
+            self._factories[name] = cast(Callable[..., T], factory)
             return factory
 
         return decorator

@@ -98,6 +98,16 @@ ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
 ## 2. 环境
 
 - SSH `ssh gpu-4090` / `ssh gpu-5090`（都走 cpolar 隧道，间歇掉线）；远端根见 §−1。
+- ⚠️ **5090 是 cpolar 免费动态地址，host:port 会变**（症状：`Connection refused` /
+  `Host key verification failed` / `kex_exchange_identification: Connection reset`）。
+  **本地有 `cpolar-ssh-update` 命令可更新 `~/.ssh/config` 里的 5090 隧道地址**（作者 2026-07-28 提供）；
+  换址后**先核对连上的是不是同一台机器**再操作：`whoami`（应为 `tongjiakai`）+ `nvidia-smi` 名称 +
+  项目目录存在 + `git log -1`。4090 是 vip 固定域名，但同样会间歇性 reset ——
+  **ssh 失败是工具失败，不得当成卡况或任务结论**。
+- ⚠️ **5090 连不上 `huggingface.co`（超时），但 `hf-mirror.com` 可达（200）、pypi 可达**。
+  拉底座模型必须带 `HF_ENDPOINT=https://hf-mirror.com`（2026-07-28 实测 roberta-base 走镜像成功）。
+- 跨机传输实测 **~85 KB/s（未压缩）**，比先前记的 400KB/s 慢得多；JSON 类数据**务必加 `-z`**
+  （`rsync -aPz --append-verify`，实测显著加速）。
 - 项目 Python 见 §0；uv 在 4090 是 `/home/TJK/.local/bin/uv`、5090 是 `/home/tongjiakai/.local/bin/uv`
   （5090 的 `~/.local/bin` 已在非交互 PATH 首位，直接 `uv` 即可）。
 - 非交互 SSH 里 `python`/`uv`/`jq`/`rg`/`tmux` 可能不在 PATH；用绝对路径或 `bash -lc`。
