@@ -3,6 +3,12 @@
 from ekg.relations.data.ccks_causal import load_ccks_causal
 from ekg.relations.data.maven_arg import ArgumentDocument, TriggerCandidate, load_maven_arg
 from ekg.relations.data.maven_ere import RelationDocument, load_maven_ere
+from ekg.relations.data.maven_fact import (
+    FACTUALITY_LABELS,
+    FactualityDocument,
+    FactualityMention,
+    load_maven_fact,
+)
 
 __all__ = [
     "RelationDocument",
@@ -11,4 +17,8 @@ __all__ = [
     "ArgumentDocument",
     "TriggerCandidate",
     "load_maven_arg",
+    "FACTUALITY_LABELS",
+    "FactualityDocument",
+    "FactualityMention",
+    "load_maven_fact",
 ]
