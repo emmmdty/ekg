@@ -67,6 +67,9 @@ from ekg.relations.data.maven_fact import (
 # 3,706 mentions of ~25 tokens), so ~15 balances the two sides.
 EVIDENCE_POS_WEIGHT = 15.0
 
+# Per-epoch dev curve written next to the checkpoint, with the epoch selected.
+DEV_CURVE_FILE = "dev_curve.json"
+
 
 def class_weights(docs: Sequence[FactualityDocument], alpha: float) -> list[float]:
     """``(N / n_c) ** alpha`` per class, normalized to mean 1.
@@ -200,6 +203,10 @@ def train_supervised(
             )
         return head(features), evidence_logits, evidence_gold
 
+    curve: list[dict] = []
+    best: dict = {"macro_f1": -1.0, "epoch": 0}
+    best_state: dict = {}
+
     order = list(range(len(train_docs)))
     for epoch in range(epochs):
         random.shuffle(order)
@@ -272,7 +279,52 @@ def train_supervised(
                 f"recall ceiling {SAME_SENTENCE_RECALL_CEILING})",
                 flush=True,
             )
+            curve.append(
+                {
+                    "epoch": epoch + 1,
+                    "macro_f1": report["macro_f1"],
+                    "accuracy": report["accuracy"],
+                    "per_class_f1": {c: p["f1"] for c, p in report["per_class"].items()},
+                    "evidence_span_f1": evidence_prf["f1"],
+                }
+            )
+            # Keep the best epoch, not the last one. The macro average here is
+            # driven by PS- and Uu, which have ~12 and ~5 dev instances: the
+            # curve is not monotone and the final epoch is not reliably the
+            # best, so "train N epochs and take what falls out" would report a
+            # worse model than the run actually produced.
+            if report["macro_f1"] > best["macro_f1"]:
+                best = {"macro_f1": report["macro_f1"], "epoch": epoch + 1}
+                best_state = {
+                    "encoder": {
+                        k: v.detach().cpu().clone() for k, v in encoder.state_dict().items()
+                    },
+                    "head": {k: v.detach().cpu().clone() for k, v in head.state_dict().items()},
+                }
+                if evidence_head is not None:
+                    best_state["evidence"] = {
+                        k: v.detach().cpu().clone() for k, v in evidence_head.state_dict().items()
+                    }
             encoder.train()
+
+    if best_state and best["epoch"] != epochs:
+        print(
+            f"restoring epoch {best['epoch']} (dev macro-F1 {best['macro_f1']:.4f}) "
+            f"over the final epoch",
+            flush=True,
+        )
+        encoder.load_state_dict(best_state["encoder"])
+        head.load_state_dict(best_state["head"])
+        if evidence_head is not None:
+            evidence_head.load_state_dict(best_state["evidence"])
+        encoder.save_pretrained(output)
+        torch.save(head.state_dict(), output / HEAD_FILE)
+        if evidence_head is not None:
+            torch.save(evidence_head.state_dict(), output / EVIDENCE_HEAD_FILE)
+    if curve:
+        (output / DEV_CURVE_FILE).write_text(
+            json.dumps({"selected_epoch": best["epoch"], "curve": curve}, indent=2)
+        )
     print(f"saved factuality detector to {output}")
 
 
