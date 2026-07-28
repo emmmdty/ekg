@@ -227,6 +227,34 @@ util 且 ssh 间歇 reset，未挤占）。`roberta-base` 底座（5090 连不�
   exact-cluster 准确率 **.9492**）、`runs/canonical_nodes_sweep_{lexical,supervised}.json`；
   **checkpoint 留在 5090 不下本地**（`runs/nodes/{coref_supervised,detector_supervised}`）。
 
+**3→6 epochs 加训（2026-07-28，照 Phase A「3→6 是决定性一步」的经验复跑）—— 有效但不决定性**：
+
+coref loss .2036→**.1056**、detector loss .2369→**.1507**（均未平台，仍在降）。
+阈值提高了模型的置信标度，所以**必须在同一难例误合并率上比**，否则就是拿阈值挪动冒充增益：
+
+| 同一 hard-misM = .116 | 3 epochs | **6 epochs** |
+|---|---|---|
+| 操作点 | thr .5 / band .1 | thr .7 / band .1 |
+| coref MUC | .789 | **.806** |
+| coref CoNLL | .913 | **.919** |
+| coref 族 FNR | .251 | **.220** |
+| coref 族 F1 | .769 | **.781** |
+| coref 族 precision | .791 | .781（基本持平，略降） |
+| 误合并率 | .209 | .219（略升） |
+
+- ✅ **同一难例误合并率下 MUC/CoNLL/FNR/F1 四项都涨**，precision 基本持平 —— 是真增益，不是阈值挪动。
+- ❌ **但没有复现 Phase A 那种量级**：MUC 距 ~86 的缺口从 ~8 点收到 **~5.4 点**，**仍未达标**。
+  loss 还在降，说明可以再加 epoch，但收益递减，不宜继续在这条线上砸时间。
+- ❌ **检测器加训基本无用**：typed F1 .6994→**.7048**（ident .8015→.8111），仍只比纯记忆
+  lexicon 高 **1.7 点**。**结论不变：Ch1 检测不作为卖点。**
+- ⚠️ **校准是否有增益取决于操作点**：6ep 最优点（band .1）raw ECE **.0382 → 校准后 .0056**（有增益）；
+  3ep 的 band 0 点 raw 本就是 .0062（无增益）。**弃权带越宽，原始簇置信越偏，校准才有活干** ——
+  要按操作点说，不能一句「校准有效/无效」了事。
+- 6ep 最优点完整数字（thr .7 / band .1）：MUC **.8055** / B³ .978 / CEAFe .9732 / CoNLL **.9189**；
+  误合并 .2191（难例 **.1157**）；合并 P/R/F1 .7809/.8238/.8018；coref 族 FNR **.2196**
+  （P/R/F1 .7809/.7804/.7807）；10,458 个 canonical node，exact-cluster **.9538**，147 次弃权。
+  产物 `runs/canonical_nodes_supervised_6ep.json` + `runs/canonical_nodes_sweep_supervised_6ep.json`。
+
 ### Ch4 先行模块（来自 v3，降级复用）
 
 - **SeDGPL 自跑基线**：CGEP-MAVEN 单折 MRR 0.1836 / strict 0.1265，n=1908。
@@ -244,7 +272,7 @@ util 且 ssh 间歇 reset，未挤占）。`roberta-base` 底座（5090 连不�
 | P0 | 主数据与溯源 | ✅ 主干数据完成；扩展数据部分仅 raw | 主数据 hash/manifest 可核 |
 | A | Ch2 判别式关系抽取 | ✅ **达标**（causal F1 .250 / subevent .213 / temporal .338；召回 .4%→67.5%） | causal F1 ≥25（目标 30–37），subevent ≥20 |
 | B | 一致性、repair trace、风险准入 | 🟡 **真实图闭环已跑通**（2026-07-28）：violation **清零** ✅，但 **ECG 可重建率无增益（R1/R2 微降）❌ → 止损触发**；α=0.2 不可达（召回上限） | violation↓ ✅、分层 FNR ✅、ECG 可重建率↑ ❌ |
-| C | Ch1 规范事件节点 | 🟡 **主结果已出**（2026-07-28，5090）：难例误合并 .767→**.138** ✅、coref 族 FNR 1.000→**.215**（P .756）✅、CoNLL **.909** ✅；但 **MUC .782 未到 ~86** ❌、检测仅比记忆基线 +1.2 ❌、神经档 ECE 未获校准增益 ⚠️ | 检测 F1、CoNLL、误合并率、ECE |
+| C | Ch1 规范事件节点 | 🟡 **主结果已出**（2026-07-28，5090，6ep 最优点）：难例误合并 .767→**.116** ✅、coref 族 FNR 1.000→**.220**（P .781）✅、CoNLL **.919** ✅、ECE **.0056** ✅；但 **MUC .806 仍未到 ~86** ❌、检测仅比记忆基线 +1.7 ❌ | 检测 F1、CoNLL、误合并率、ECE |
 | C2 | Ch1 跨文档泛化 | ⬜ 未开始；ECB+ raw 已有，CLES 未取 | ECB+/CLES 对比 SECURE/MEET/DIE-EC |
 | D | Ch3 事实性与净化 | ⬜ 未开始；MAVEN-FACT train/valid 已就位 | macro-F1、预测图掉点、净化下游增益 |
 | E | Ch4 闭环与三图传播 | 🟡 SeDGPL/受控扫描已有；闭环控制器未做 | repaired > predicted，三图误差曲线 |
@@ -258,10 +286,11 @@ util 且 ssh 间歇 reset，未挤占）。`roberta-base` 底座（5090 连不�
 1. ~~Phase A 判别式抽取器~~ ✅ 达标。~~Phase B W1–W4 代码~~ ✅。~~Phase B 真实图闭环~~ ✅ 2026-07-28 跑通
    （violation 清零，但 R1/R2 无增益 → **止损已触发**，见上文「Phase B 真实图闭环」段）。
 2. **Phase C 主结果已出**（2026-07-28，方向 A，5090 训练；见上文「Phase C 实施」）。
-   **收口三件事**：① coref MUC .782 → ~86 的差距（可试更长训练 / 更强底座 / 提高 neg_ratio，
-   参照 Phase A「3→6 epochs 是决定性一步」）；② 检测器只比记忆基线 +1.2，要么调强要么**明确降级为
-   打底、不作为卖点**；③ 神经档校准无增益 → `node_confidence` 的卖点要收缩为
-   「原始簇置信本就近似校准」+ 弃权带的显式权衡，别硬讲校准。
+   3ep 与 6ep 两档都跑了。**收口三件事**：① MUC 缺口已从 ~8 收到 **~5.4 点**（.806 vs ~86），
+   加训收益递减，**再补差距应换更强底座（roberta-large / 领域预训练）而非继续加 epoch**；
+   ② 检测器加训后仍只比记忆基线 +1.7 → **明确降级为打底、不作为卖点**；
+   ③ `node_confidence` 的表述按操作点说：**弃权带越宽、原始置信越偏、校准才有活干**
+   （band .1 档 ECE .0382→.0056；band 0 档 raw 本就 .0062）。
 3. C 之后进 D（Ch3 事实性）；E（Ch4 闭环 headline）依赖 A·B·C·D 齐。
    ⚠️ **做 E 前必须先重定位 Ch4 headline**：Phase B 已证明「修复提升下游可重建性」在真实图上不成立
    （见 `PHASE_C_HANDOFF.md` §7），不得在 E 里换指标掩盖该负结果。
