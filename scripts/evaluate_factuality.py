@@ -104,7 +104,15 @@ def predicted_edges(
     )
     edges: dict[str, list] = {}
     for i, doc in enumerate(docs, 1):
-        context = ExtractionContext(doc_text={doc.doc_id: doc.doc_text})
+        # The extractor pools each trigger from its *sentence*, indexing
+        # `doc_text.split("\n")` by `sent_id` (the MAVEN-ERE convention it was
+        # trained under). `FactualityDocument.doc_text` is the space-joined
+        # form instead, because that is the coordinate system its character
+        # offsets live in — so the extractor gets the newline-joined view of
+        # the same tokens, and the two never mix.
+        context = ExtractionContext(
+            doc_text={doc.doc_id: "\n".join(" ".join(sent) for sent in doc.sentence_tokens)}
+        )
         edges[doc.doc_id] = extractor.extract(doc.nodes, context)
         if i % 50 == 0:
             total = sum(len(v) for v in edges.values())
