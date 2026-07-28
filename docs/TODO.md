@@ -255,6 +255,36 @@ coref loss .2036→**.1056**、detector loss .2369→**.1507**（均未平台，
   （P/R/F1 .7809/.7804/.7807）；10,458 个 canonical node，exact-cluster **.9538**，147 次弃权。
   产物 `runs/canonical_nodes_supervised_6ep.json` + `runs/canonical_nodes_sweep_supervised_6ep.json`。
 
+**换长上下文底座（Longformer-4096）— ❌ 负结果，已止损**
+
+起因是一个**实测的真缺陷**（不是推测）：`encode_spans` 在 max_length=512 下把长文档切成重叠窗口，
+落在不同窗口的两个 mention **从未共享编码上下文**。MAVEN-Arg valid 实测 **13.1%**（93/710）的文档
+需要 >1 窗口，其中 **34.7%（336 条）gold coref 对跨窗口分裂**；而全部 710 篇都 ≤4096 token
+（最长 2186），所以长上下文能把分裂**彻底**消除。代码修复已落地并单独验证
+（最长文档 2186 token/107 mention 在 4096 下单窗口，512 下要 6 窗口）。
+
+但**换底座本身没换来收益，反而全面变差**（同为 6 epochs、同一扫描口径；loss .1090 vs base .1056，
+基本持平 ⇒ 不是欠拟合，是泛化更差）：
+
+| 同一 hard-misM ≈ .12 | **roberta-base 6ep** | Longformer-4096 6ep |
+|---|---|---|
+| 操作点 | thr .7 / band .1（hardM .116） | thr .9 / band 0（hardM .122） |
+| coref MUC | **.806** | .781 |
+| coref CoNLL | **.919** | .909 |
+| coref 族 FNR | **.220** | .251 |
+| coref 族 precision | **.781** | .766 |
+| coref 族 F1 | **.781** | .758 |
+
+- **每一项都输**，不是权衡换位置。**保留 roberta-base 6ep 作为系统档**。
+- 机制上的解释（**是假设，未做消融**）：文档 token 中位数只有 **278**，≈87% 的文档**根本不需要**
+  长上下文；换底座是在 100% 的文档上付代价，去修一个只出现在 13% 文档里的缺陷。
+- ⚠️ **归因有混淆**：底座（预训练不同）与上下文（512 滑窗 → 4096 单窗 + 全局注意力）**同时变了**，
+  无法把损失单独归给哪一个。要干净归因需要额外消融，**当前不值得为此花 GPU**。
+- ✅ **代码修复保留**（`global_attention_positions` + 能力检查 + 形状哨兵）：它本身是对的，
+  且是将来做跨文档/更长文档的前提；只是**当前 MAVEN-Arg 这个语料用不上它**。
+- 📌 **注意 Longformer-base 与 roberta-base 容量相同**（均 12 层 / 768 维），所以这一轮
+  **根本没有测到「容量」这个变量** —— 容量测试是 roberta-large，另行进行。
+
 ### Ch4 先行模块（来自 v3，降级复用）
 
 - **SeDGPL 自跑基线**：CGEP-MAVEN 单折 MRR 0.1836 / strict 0.1265，n=1908。
