@@ -10,6 +10,7 @@ from ekg.factuality.purification import (
     PurificationPolicy,
     purification_report,
     purify_graph,
+    random_drop_control,
 )
 
 
@@ -93,6 +94,28 @@ def test_report_quantifies_the_change_in_both_directions() -> None:
     # violations and one that merely removed edges are distinguishable.
     assert "consistency_before" in report
     assert "consistency_after" in report
+
+
+def test_random_control_isolates_the_shrinkage_confound() -> None:
+    graph = _graph()
+    control = random_drop_control(graph, n_drop=1, trials=3)
+    # Deleting one node blindly still removes edges, which is the whole point:
+    # the control says how much "fewer violations" comes for free.
+    assert control["n_edges"] < len(graph.edges)
+    assert "causal_cyclic_scc" in control
+
+
+def test_report_carries_the_control_whenever_nodes_were_dropped() -> None:
+    graph = _graph()
+    labels = {"m1": "CT+", "m2": "CT-", "m3": "CT+", "m4": "CT+"}
+    report = purification_report(graph, purify_graph(graph, labels), control_trials=3)
+    # Same number of nodes removed as the purification removed, so the two
+    # sides of the comparison are matched on size.
+    assert report["random_control"]["n_edges"] > 0
+
+    # No nodes dropped -> nothing to control for, and no misleading empty entry.
+    nothing = purify_graph(graph, {"m1": "CT+"})
+    assert purification_report(graph, nothing)["random_control"] == {}
 
 
 def test_default_policy_keeps_factual_and_probable_events() -> None:
