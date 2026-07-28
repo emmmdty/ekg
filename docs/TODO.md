@@ -95,7 +95,7 @@
   准入集大小 + before/after consistency + R1/R2 + 每 query `reachable` 标志。checkpoint 不下本地。
 
 - **合成 dump 验证（CPU，如实）**：注入因果环 m1→m2→m4→m1（最弱边 conf 0.2），repair 后——
-  `causal_cycle_count` **1→0**、`dropped=1`（violation=causal_cycle）；**R1 持平 1.0**（环不删除 query 边，
+  `causal_cyclic_scc` **1→0**、`dropped=1`（violation=causal_cycle）；**R1 持平 1.0**（环不删除 query 边，
   召回不受影响）、**R2 f1 0→1.0**（环使 m4 出度 1、破坏 query 边保真，修复恢复）。**修复增益如实落在
   precision 义 R2、非召回义 R1**——与 PHASE_B 止损口径一致（R1 受 α_edge 约束可持平/略降）。
 - **验证基线（两端不同不是回归）**：本地无 torch = **241 passed / 12 skipped**；服务器有 torch =

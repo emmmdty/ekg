@@ -46,12 +46,12 @@ def test_trace_records_causal_cycle_drop_with_before_after() -> None:
     solved, trace = GreedyConsistencySolver().solve_with_trace(graph)
 
     assert isinstance(trace, RepairTrace)
-    assert consistency_report(solved)["causal_cycle_count"] == 0.0
+    assert consistency_report(solved)["causal_cyclic_scc"] == 0.0
     drops = [e for e in trace.edits if e.action == "drop" and e.violation == "causal_cycle"]
     # The weakest pair in the cycle (c->a, conf 0.3) is the one dropped.
     assert [e.edge_key for e in drops] == [("c", "a", "causal", "CAUSE")]
-    assert trace.before["causal_cycle_count"] >= 1.0
-    assert trace.after["causal_cycle_count"] == 0.0
+    assert trace.before["causal_cyclic_scc"] >= 1.0
+    assert trace.after["causal_cyclic_scc"] == 0.0
     assert trace.counts["edges_before"] == 3
     assert trace.counts["edges_after"] == 2
 

@@ -93,8 +93,8 @@ def test_analyze_reports_full_structure_and_repairs_the_injected_cycle() -> None
     assert isinstance(result["tau"], float)
 
     # repair removes the injected causal cycle (before-after violation drop)
-    raw_cycles = result["consistency"]["raw"]["causal_cycle_count"]
-    repaired_cycles = result["consistency"]["repaired"]["causal_cycle_count"]
+    raw_cycles = result["consistency"]["raw"]["causal_cyclic_scc"]
+    repaired_cycles = result["consistency"]["repaired"]["causal_cyclic_scc"]
     assert raw_cycles >= 1.0
     assert repaired_cycles < raw_cycles
     assert result["repair_trace_totals"]["dropped"] >= 1

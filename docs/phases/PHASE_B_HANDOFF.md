@@ -16,7 +16,7 @@
   SARGE/Phase G）与 `2e6703b`（一致性收口 + 环境修复）。服务器已对齐 `origin/main`。
 - **两端校验基线**（计数不同不是回归）：本地无 torch = `241 passed / 12 skipped`；
   服务器有 torch = `252 passed / 1 skipped`。ruff 0、`ekg-smoke` OK。
-- **合成 dump 已验证**（CPU，注入因果环）：`causal_cycle 1→0`、`dropped=1`；**R1 持平 1.0、R2 f1 0→1.0**。
+- **合成 dump 已验证**（CPU，注入因果环）：`causal_cyclic_scc 1→0`、`dropped=1`；**R1 持平 1.0、R2 f1 0→1.0**。
 - **环境已修复（2026-07-27）**——此前服务器**根本跑不了任何脚本**：目录改名后 editable 安装仍指向
   `/data/TJK/Fin-EKG/src`（`import ekg` 与 `import finekg` 双双失败）、56 个 console script shebang 全废；
   待机脚本自己也 `cd` 到旧路径 → 每次 exit 2，**从 2026-07-25 起就没真正等过卡**。均已修好并验证

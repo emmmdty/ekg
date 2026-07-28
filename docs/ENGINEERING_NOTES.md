@@ -33,6 +33,22 @@
 - **`heuristic._temporal` 默认 `corpus` scope 是真 bug**（99.93% 跨主体伪影）→ 默认改 `subject`。
 - **conformal 改 `fit(train-only)` 致 fixture 指标下降是预期**，不是回归。
 - **blackboard 不可变**：agent 只读、在 **copy** 上标注。
+- **一致性诊断枚举简单环 = 稠密图上炸内存**（2026-07-28，Phase B 首跑真实 dump 时暴露）：
+  `find_cycles` 用 `nx.simple_cycles` 把**所有**简单环物化成 list，而两个调用方
+  （`temporal/causal cycle count`）只用了 `len()`。简单环数随密度**超指数**增长——完全有向图
+  10 节点 1,112,073 个、11 节点 10,976,173 个、12 节点 12 秒数不完。真实 710 篇 dump 上
+  **RSS 冲到 44GB 仍在涨**（62G 机器，被主动 kill 止损）。
+  - **为什么 Phase A 没炸**：`supervised.yaml` 是 `consistency: greedy`，solver 先把图破成无环，
+    诊断再对无环图调 `simple_cycles` 立即返回空；Phase B 的 `supervised_dump.yaml` 是
+    `consistency: identity`（**保留全部原始稠密边**，因为修复要放到离线做）→ 正好踩爆。
+  - **同库两种写法，一对一错**：solver 的 `_break_cycles_traced` 用的是 `nx.find_cycle`（**单数**，
+    找一个环，O(V+E)）——那条路径一直是对的，所以修复流程本身没问题。
+  - **修法**：诊断改报**非平凡强连通分量** `*_cyclic_scc` + 分量内边数 `*_cyclic_edges`
+    （`cyclic_scc_stats`，Tarjan O(V+E)）。一个家族一致 ⟺ 每个 SCC 都是无自环单点，所以 SCC
+    是等价判据且**单调**（破环后必减），能直接支撑 violation↓。最坏情况实测（123 节点/30,012 边
+    全稠密）**1.11 秒、额外内存 ~0**。`find_cycles` 保留但 docstring 标明只可用于小图。
+  - 复杂度回归哨兵 `test_consistency_report_stays_tractable_on_dense_graph`（25 节点稠密图 +
+    `signal.alarm` 死线）——防止有人改回枚举实现。
 - **给已调好的门控编码器加 embedding 输入流，必须 no-op 起步**（M2 结构感知编码，2026-07-17）：默认 `nn.Embedding` 是 N(0,1)（行范数 ~28）→ 碾压融合 `h2`（~8）、init 时把事件 token 的 input embedding 扰动 **185%**（`||h3−h2||/||h2||`=1.85），lr=1e-6 十轮救不回 → **MRR 腰斩 0.1867→0.088**（是 bug、不是「结构有害」的结论）。修＝**zero-init `nn.Embedding` + 门控残差** `h3=h2+g·struct`（`GatedFusion.residual`，y=0 时恒等）→ init 扰动 →0、ON 臂起点＝baseline。诊断 `diag_m2.py` 量 `||h3−h2||/||h2||`。对照 SeDGPL 对 `<a_i>` 新行专门 mean-init 同理。
 
 ## 环境 / 工具链

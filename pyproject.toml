@@ -7,7 +7,7 @@ name = "ekg"
 version = "0.1.0"
 description = "Verifiable event graph construction and successor-event reasoning (CGEP)"
 readme = "README.md"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.10,<3.13"
 license = { text = "MIT" }
 authors = [{ name = "TJK" }]
 keywords = [
@@ -33,11 +33,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# llm = GPU stack for neural relation/succession components (server only, CUDA 12.4).
-# Pinned to the stack already verified on the 4090 (Phase A supervised extractor,
-# Ch4 SeDGPL). Changing these pins means re-verifying the whole server environment.
+# llm = GPU stack for neural relation/succession components (server only, CUDA 12.8).
+# torch 2.8.0+cu128 is the single stack that runs on BOTH GPU servers: its wheel
+# ships sm_120 (5090 Blackwell) which cu124 lacks entirely, plus sm_86 which the
+# 4090 (sm_89 Ada) runs under same-major binary compatibility -- no PyTorch wheel
+# has ever shipped a dedicated sm_89. Changing these pins means re-verifying both
+# servers. Verified: 2026-07-27 on the 5090 (real matmul on sm_120).
 llm = [
-    "torch==2.6.0",
+    "torch==2.8.0",
     # transformers is capped below 4.54: Qwen3 support lands in 4.51, while trl
     # 0.18.x / peft expect the 4.5x line. transformers 5.x removes symbols peft
     # imports (e.g. BloomPreTrainedModel), so an unpinned `<6` resolves to a
@@ -51,22 +54,22 @@ llm = [
 # gnn = compatibility/future graph-model stack (server only). No current v4
 # headline experiment should require it unless its phase contract says so.
 gnn = [
-    "torch==2.6.0",
+    "torch==2.8.0",
     "torch-geometric>=2.6",
 ]
-# serve = high-throughput inference backend (server only). Co-tested with the
-# `llm` pins above; the `rl` extra reuses it for vLLM rollouts.
-serve = [
-    "vllm==0.8.5",
-]
+# NOTE: the `serve` extra (vllm) was removed on 2026-07-27 with the move to the
+# cu128 stack. vllm hard-pins an exact torch AND requires transformers>=4.55.2
+# from 0.10.2 on, so NO vllm release is co-installable with torch 2.8.0 +
+# transformers 4.53.3 (the version that wrote the Phase A checkpoint). No v4
+# chapter needs vLLM -- the RL/GRPO line is a v3 baseline. If it is ever needed
+# again, build a separate venv for it rather than bending this stack.
+#
 # rl = GRPO post-training stack (server only). TRL 0.18.x is the release line
-# co-tested with vllm 0.8.5 / torch 2.6.0; 0.19+ targets vllm 0.9.x, hence the
-# cap. vLLM rollouts reuse the `serve` extra (`trl vllm-serve`); the `hf`
-# rollout backend needs neither. GRPO is retained as a v3 relation baseline,
-# not the v4 headline method.
+# kept as a v3 relation baseline, not the v4 headline method. The `hf` rollout
+# backend needs no vLLM; the `trl vllm-serve` path is unavailable (see above).
 rl = [
     "trl>=0.17,<0.19",
-    "torch==2.6.0",
+    "torch==2.8.0",
 ]
 dev = [
     "pytest>=8.0",
@@ -92,16 +95,17 @@ name = "tuna"
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
 
-# torch + cu124 wheels come from the official PyTorch index. This index is
+# torch + cu128 wheels come from the official PyTorch index. This index is
 # `explicit`, so it is consulted ONLY for the packages mapped below — a plain
-# local `uv sync` never touches it. Mirror override documented in docs/SETUP.md.
+# local `uv sync` never touches it. PyPI's default torch 2.8.0 linux wheel is
+# already cu128, so the TUNA mirror also serves a usable build.
 [[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
 explicit = true
 
 [tool.uv.sources]
-torch = { index = "pytorch-cu124" }
+torch = { index = "pytorch-cu128" }
 
 # ---------------------------------------------------------------------------
 # tooling

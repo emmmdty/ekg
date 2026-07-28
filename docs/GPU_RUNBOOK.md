@@ -1,14 +1,34 @@
 # EKG v4 · GPU 服务器运行手册
 
-> 适用于 `gpu-4090:/data/TJK/ekg`。只覆盖 v4 主线与仍在主干的 Ch4 可靠性模块。旧 temporal GNN、
-> RE-GCN、Path-RL、hybrid 命令已失效；复现需从 tag `frozen-tkg-line` 单独建工作区，**不得在当前
-> 主干照抄旧命令**。代码/数据同步的权威是 [`PIPELINE.md`](PIPELINE.md)（代码走 git、产物走 scp）。
+> 适用于 `gpu-4090:/data/TJK/ekg`（主）与 `gpu-5090:/mnt/aidata/tongjiakai/ekg`（备，**每次使用须用户
+> 许可**）。只覆盖 v4 主线与仍在主干的 Ch4 可靠性模块。旧 temporal GNN、RE-GCN、Path-RL、hybrid
+> 命令已失效；复现需从 tag `frozen-tkg-line` 单独建工作区，**不得在当前主干照抄旧命令**。
+> 代码/数据同步的权威是 [`PIPELINE.md`](PIPELINE.md)（代码走 git、产物走 scp）。
+
+## −1. 两台服务器速查
+
+| | **`gpu-4090`（主）** | **`gpu-5090`（备）** |
+|---|---|---|
+| 何时用 | 默认 | 仅 4090 卡满/不可用，**且用户逐次许可** |
+| 远端根 | `/data/TJK/ekg` | `/mnt/aidata/tongjiakai/ekg` |
+| 用户 | `TJK` | `tongjiakai` |
+| 卡 | 4×RTX 4090 24G（card 3 故障需 NVML shim，优先 card 1） | **单卡** RTX 5090 32G，`CUDA_VISIBLE_DEVICES=0` |
+| Python | `.venv/bin/python` 3.10.20 | 同（uv 装的 CPython 3.10.20） |
+| torch | 2.8.0+cu128 | 2.8.0+cu128 |
+| GitHub | HTTPS 直连 | ⚠️ **443 不通**，remote 走 `https://gh-proxy.com/https://github.com/emmmdty/ekg.git`（SSH 22 也通，可作备选） |
+| 其他用户 | 多人共用 | 多人共用；单卡机**没有换卡余地** |
+
+**为什么两端都是 cu128**：5090 是 Blackwell `sm_120`，cu124 wheel 完全没有它的 kernel；而
+torch 2.8.0+cu128 的 `arch_list` = `[sm_70, sm_75, sm_80, sm_86, sm_90, sm_100, sm_120]`，
+4090（`sm_89` Ada）走 `sm_86` 的同 major 二进制兼容。**没有任何 PyTorch wheel 含专门的 sm_89**
+（2.6/2.8/2.11 实测都跳过），所以这不是版本新旧问题，升级换不来原生 sm_89；且 matmul/conv 走
+cuBLAS/cuDNN，那两个库内部有独立的 sm_89 路径，实际损失很小。
 
 ## 0. ⛔ 头号红线：服务器上不要跑 `uv run` / `uv sync`
 
-**服务器 venv 装的是 `llm+serve+rl+gnn+dev` 全套 extras**（torch 2.6.0+cu124 / transformers 4.53.3 /
-vllm 0.8.5 / trl 0.18.2 / peft 0.15.2 / ray / xformers）。`uv run` 与 `uv sync` 会把环境**对齐到你
-给出的 extras 集合，多出来的一律卸载**。实测（2026-07-27 `--dry-run`）：
+`uv run` 与 `uv sync` 会把环境**对齐到你给出的 extras 集合，多出来的一律卸载**——两台服务器装的
+都不是「裸 core」，所以两端都中招。4090 实测（2026-07-27 `--dry-run`，当时装的是
+`llm+serve+rl+gnn+dev` 全套 = torch 2.6.0+cu124 / vllm 0.8.5 / trl 0.18.2 / ray / xformers）：
 
 | 命令 | 后果 |
 |---|---|
@@ -19,13 +39,17 @@ vllm 0.8.5 / trl 0.18.2 / peft 0.15.2 / ray / xformers）。`uv run` 与 `uv syn
 恢复要重下数 GB。**因此服务器上一律直接用项目 Python**：
 
 ```bash
+# 4090
 /data/TJK/ekg/.venv/bin/python -u scripts/<x>.py ...        # ✅ 标准姿势
 /data/TJK/ekg/.venv/bin/pytest                              # ✅
+# 5090
+/mnt/aidata/tongjiakai/ekg/.venv/bin/python -u scripts/<x>.py ...
 # 非要用 uv 就必须加 --no-sync：
-/home/TJK/.local/bin/uv run --no-sync python -u scripts/<x>.py ...
+uv run --no-sync python -u scripts/<x>.py ...
 ```
 
 `uv pip install -e . --no-deps`（只装本项目、不碰依赖）是安全的，改名/换路径后用它重建 editable 安装。
+`uv pip install <具体包名>` 也安全（只加不减）——**5090 环境就是这么一包一包装出来的，没碰过 `uv sync`**。
 
 ## 1. 当前状态（2026-07-27）
 
@@ -33,29 +57,65 @@ vllm 0.8.5 / trl 0.18.2 / peft 0.15.2 / ray / xformers）。`uv run` 与 `uv syn
   召回 0.4%→67.5%，`hallucinated=0`。交付 checkpoint = `runs/relations/supervised_maven`。
 - **关键路径 = Phase B 真实图闭环**：代码 CPU 全绿，只差「GPU 产 dump → scp 回本地 → 离线分析 →
   回填」。逐步执行照 [`phases/PHASE_B_HANDOFF.md`](phases/PHASE_B_HANDOFF.md)。
+- **5090 于 2026-07-27 配好并验证**（`250 passed / 3 skipped`、ruff 0、`ekg-smoke` OK、sm_120 实算通过）。
+  多出的 2 个 skip 是 `ESCSubWoRe.npy` 未传（ESC 数据，Phase B 用不到），**不是回归**——两端 total 都是 253。
+  4090 当日全天 4 卡被他人占满（15–21G @ 99–100%），Phase B dump 因此改在 5090 跑。
 - 已有 GPU 证据：SeDGPL 基线、风险感知选边 / 结构编码 A/B、选择性预测 risk-coverage、受控 cross-stage。
   准确数字以 [`TODO.md`](TODO.md) 与 `runs/` 为准。
 
+## 1.5 待办：把 4090 升到统一栈（cu128）
+
+作者 2026-07-27 选的是「**先验证再原地升级**」：5090 用 torch 2.8.0+cu128 把 Phase B dump 完整跑通、
+结果正常后，再把 4090 主 `.venv` 升到同一套。**5090 已验证通过**，剩下的动作：
+
+```bash
+ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
+  uv pip install --python .venv/bin/python torch==2.8.0 && \
+  uv pip uninstall --python .venv/bin/python vllm xformers && \
+  .venv/bin/python -c \"import torch;print(torch.__version__, torch.cuda.get_arch_list())\" && \
+  .venv/bin/pytest -q"'
+```
+
+- ⛔ 仍然**不许 `uv sync`**（见 §0）；升级只用 `uv pip install <包>`（只加不减）+ 显式 `uninstall`。
+- **vllm 必须卸**：它硬 pin 精确 torch，0.10.2 起还要 `transformers>=4.55.2`，**没有任何版本能与
+  torch 2.8.0 + transformers 4.53.3 共存**（4.53.3 正是写出 Phase A checkpoint 的版本）。
+  `pyproject.toml` 的 `serve` extra 已随之移除；v4 四章无一依赖 vLLM。
+- 升级后必须重跑 `.venv/bin/pytest` 与一次小规模 GPU 推理确认，**不要只看 `import torch` 成功**。
+- 回滚：`uv pip install --python .venv/bin/python torch==2.6.0`（cu124 index），vllm 0.8.5 另装。
+
 ## 2. 环境
 
-- SSH `ssh gpu-4090`（cpolar 隧道，间歇掉线）；远端根 `/data/TJK/ekg`。
-- 项目 Python `/data/TJK/ekg/.venv/bin/python`；uv `/home/TJK/.local/bin/uv`（见 §0 限制）。
+- SSH `ssh gpu-4090` / `ssh gpu-5090`（都走 cpolar 隧道，间歇掉线）；远端根见 §−1。
+- 项目 Python 见 §0；uv 在 4090 是 `/home/TJK/.local/bin/uv`、5090 是 `/home/tongjiakai/.local/bin/uv`
+  （5090 的 `~/.local/bin` 已在非交互 PATH 首位，直接 `uv` 即可）。
 - 非交互 SSH 里 `python`/`uv`/`jq`/`rg`/`tmux` 可能不在 PATH；用绝对路径或 `bash -lc`。
-- **card 3 故障**需 NVML shim（`nvmlshim/`，remote-only）；card 0/2 常被别人占，优先 card 1，
-  但**每次启动前重新 `nvidia-smi` 原子核卡**（检查结果不隔启动复用）。
-- 判活：`uv run`/首次加载约 1 分钟才占显存；**SSH 失败 ≠ 任务死亡**，三态 ALIVE / GONE / ssh 失败，
+  5090 上**没有 `gcc`/`nvcc`**（`~/bin` 只有别的项目留的 `cc-sarge` 包装），需要编译扩展的包装不上——
+  纯 wheel 装得上，这也是不用源码编译 torch 的实际约束之一。
+- 选卡：4090 **card 3 故障**需 NVML shim（`nvmlshim/`，remote-only），card 0/2 常被别人占，优先 card 1；
+  5090 只有一张卡（`CUDA_VISIBLE_DEVICES=0`），**被占就只能等或回 4090，没有换卡余地**。
+  两台都要**每次启动前重新 `nvidia-smi` 原子核卡**（检查结果不隔启动复用）。
+- 判活：首次加载约 1 分钟才占显存；**SSH 失败 ≠ 任务死亡**，三态 ALIVE / GONE / ssh 失败，
   只有成功 SSH 读到进程 GONE 才算结束。
-- 远端仓库外备份 `/data/TJK/ekg-backup-20260727/`（历史 docs 残留等，不进 git）。
+- ⚠️ **`pgrep`/`pkill` 自匹配**：`pgrep -f "uv pip install"` 会匹配到**你自己这条命令的命令行**，
+  写成 `until ! pgrep -f "uv pip install"; do sleep 10; done` 的等待循环会永远等自己、假装任务没结束；
+  `pkill -f "<模式>"` 同理会杀掉自己的 SSH 会话。**一律用括号打断**：`pgrep -af '[u]v pip install'`。
+  （2026-07-27 实测两次踩中：安装其实早已完成，循环空转了十几分钟。）
+- 远端仓库外备份 `/data/TJK/ekg-backup-20260727/`（4090，历史 docs 残留等，不进 git）。
 
 ## 3. 同步协议
 
-**服务器是 git 仓库**（`main` 跟踪 `origin/main`），日常同步就一条：
+**两台服务器都是 git 仓库**（`main` 跟踪 `origin/main`），日常同步各一条：
 
 ```bash
 ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && git fetch origin && git reset --hard origin/main"'
+ssh gpu-5090 'bash -lc "cd /mnt/aidata/tongjiakai/ekg && git fetch origin && git reset --hard origin/main"'
 ```
 
-- 数据/产物/大文件**不在 git**，走 `scp` + 两端 `sha256sum` 核对。
+5090 的 `origin` 指向镜像 `https://gh-proxy.com/https://github.com/emmmdty/ekg.git`（它连不上
+`github.com:443`，见 [`PIPELINE.md`](PIPELINE.md) §3）——命令写法不变，只是 URL 不同。
+
+- 数据/产物/大文件**不在 git**，走 `scp`/`rsync` + 两端 `sha256sum` 核对。**两台服务器之间不能直连**，
+  跨机搬运经本地中转，用 `rsync -aP --append-verify`（可续传；带 timeout 的 scp 会静默截断）。
 - **禁 `rsync --delete` 与 `git clean -fdx`**（会删 `runs/`、`nvmlshim/`、`data/raw/` 等 remote-only 产物）。
 - 目录改名或换路径后：venv 里 console script 的 shebang 与 editable `.pth` 都写死绝对路径，
   **必须修**（做法见 [`ENGINEERING_NOTES.md`](ENGINEERING_NOTES.md) 环境/工具链节）。
@@ -64,10 +124,11 @@ ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && git fetch origin && git reset --hard
 
 ## 4. 启动纪律
 
-**GPU 使用无限制，有空就可以去用**（作者授权），无需逐次点头。仍须：
+**4090 的 GPU 使用无限制，有空就可以去用**（作者授权），无需逐次点头。
+⚠️ **该授权不覆盖 5090**——5090 每次使用都要先问作者。两台都仍须：
 
 - 本地三件套先全绿；选卡前 `nvidia-smi` 原子核卡；**不挤占他人正在跑的卡**
-  （判据：`memory.used ≤ 2500` 且 `utilization ≤ 20`，跳过 card 3）。
+  （判据：`memory.used ≤ 2500` 且 `utilization ≤ 20`；4090 跳过 card 3，5090 只有 card 0）。
 - 长任务用 `nohup` / `screen -dmS` + `python -u`，日志重定向 `logs/`，**不得用前台 SSH 承载长任务**。
 - 报数如实：升降都报；ssh/工具失败不得伪装成被观察对象的结论。
 
@@ -86,7 +147,7 @@ ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && git fetch origin && git reset --hard
 
 ## 6. 当前队首命令：Phase B 真实图 dump
 
-卡空闲时（`<card>` 优先 1、跳 3）：
+卡空闲时——**4090**（`<card>` 优先 1、跳 3）：
 
 ```bash
 cd /data/TJK/ekg
@@ -97,6 +158,22 @@ CUDA_VISIBLE_DEVICES=<card> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
   --output runs/relations/supervised_dump_metrics.json \
   > logs/phaseB_dump.log 2>&1
 ```
+
+**5090**（单卡，须用户许可后再跑）——只有根路径和卡号不同：
+
+```bash
+cd /mnt/aidata/tongjiakai/ekg
+CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  .venv/bin/python -u scripts/evaluate_relations.py \
+  --config configs/relations/supervised_dump.yaml \
+  --dump-predictions runs/relations/supervised_dump.jsonl \
+  --output runs/relations/supervised_dump_metrics.json \
+  > logs/phaseB_dump.log 2>&1
+```
+
+两端跑前都要确认 `runs/relations/supervised_maven`（checkpoint，481M）与
+`data/processed/maven_ere/valid.jsonl`（710 篇）在位——它们不在 git 里，换机器必须 scp/rsync 过去
+（**两台服务器之间不能直连，经本地中转**）。
 
 卡忙时可用服务器端待机脚本（等空卡**自动开跑**，288×5min≈24h 窗口）——
 **当前状态：已修好并验证可用，但按作者指示处于停止态**（`status` 末行 `STOPPED-BY-USER`）。

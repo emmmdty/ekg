@@ -1,16 +1,22 @@
-# EKG · 三端协作流水线（PIPELINE）
+# EKG · 多端协作流水线（PIPELINE）
 
 > **本地开发 → GitHub 中转 → 服务器 GPU 执行 → 回传结果** 的标准闭环。一句话铁律：
 > **代码走 git，数据 / 产物 / 大文件走 scp。** 设计以 [`SPEC.md`](SPEC.md) 为准；服务器内运维细节见
 > [`GPU_RUNBOOK.md`](GPU_RUNBOOK.md)；实时状态见 [`TODO.md`](TODO.md)。
 
-## 1. 三端角色
+## 1. 各端角色
 
 | 端 | 位置 | 职责 | git 角色 |
 |---|---|---|---|
 | **本地** | WSL `/home/tjk/myProjects/masterProjects/ekg` | 编辑代码 + CPU 校验（pytest / ruff / smoke） | git 仓库，**唯一编辑端** |
-| **GitHub** | `github.com/emmmdty/dee-fin`（**PUBLIC**，分支 `main`） | 代码唯一中转中心（single source of truth） | remote `origin` |
-| **服务器** | `gpu-4090:/data/TJK/ekg` | GPU 训练 / 推理执行 | git 仓库，**只拉取不编辑** |
+| **GitHub** | `github.com/emmmdty/ekg`（**PUBLIC**，分支 `main`） | 代码唯一中转中心（single source of truth） | remote `origin` |
+| **服务器（主）** | `gpu-4090:/data/TJK/ekg` | GPU 训练 / 推理执行 | git 仓库，**只拉取不编辑** |
+| **服务器（备）** | `gpu-5090:/mnt/aidata/tongjiakai/ekg` | 4090 不可用时的 GPU 执行，**须用户逐次许可** | 同上，remote 走镜像（见 §3） |
+
+⚠️ **两台服务器之间不能直连**（各自在 cpolar 隧道后）。跨服务器搬数据/checkpoint 一律
+**经本地中转**：`服务器A → 本地 → 服务器B`，两段都用 `rsync -aP --append-verify`（可断点续传）。
+实测 cpolar 约 400KB/s，481M 的 checkpoint 单程约 20 分钟——**别用带 timeout 的 scp**，
+超时会静默留下一个尺寸不足的半文件（2026-07-27 实测：210M/498M，`exit 0`）。
 
 ## 2. 什么走 git，什么不走（铁律）
 
@@ -25,8 +31,18 @@
 
 ## 3. 远端 git 状态（2026-07-27 核实）
 
-远端 `/data/TJK/ekg` **已是 git 仓库**，`main` 跟踪 `origin/main`、对齐 `2e6703b`，tracked 工作区干净；
+**4090** `/data/TJK/ekg` 已是 git 仓库，`main` 跟踪 `origin/main`，tracked 工作区干净；
 `runs/ nvmlshim/ data/raw/` 等 remote-only 产物在原位。**网络可直达 GitHub**（`git fetch` 成功，PUBLIC 免 token）。
+
+**5090** `/mnt/aidata/tongjiakai/ekg` 于 2026-07-27 新建（clone 自 `a43be0a`）。⚠️ **它连不上
+`github.com:443`**（curl 超时 136s），所以 remote 配的是镜像：
+
+```bash
+git remote set-url origin https://gh-proxy.com/https://github.com/emmmdty/ekg.git
+```
+
+镜像只用于**拉取**（服务器本就只拉不推），够用。备选：`github.com:22`（SSH）实测可连，但要另配 key。
+5090 的 PyPI 方向没有这个问题——TUNA、`download.pytorch.org`、`hf-mirror.com` 全部直连正常。
 
 - ⛔ **服务器上别跑 `uv run` / `uv sync`**（会拆掉已验证的 GPU 栈，见
   [`GPU_RUNBOOK.md`](GPU_RUNBOOK.md) §0）：一律 `.venv/bin/python`。
@@ -38,9 +54,13 @@
   `runs/ data/ nvmlshim/` 不受影响。
 - **永不 `git clean -fdx`**（会删 ignored 的 `runs/ data/ nvmlshim/`）；数据 / 产物仍走 scp。
 - git 可能不在非交互 ssh PATH → `export PATH=$HOME/.local/bin:/usr/bin:$PATH` 或 `bash -lc`。
-- 仓库若转 private：远端 remote 换 `https://<PAT>@github.com/emmmdty/dee-fin.git` 或配 deploy key。
+- 仓库若转 private：远端 remote 换 `https://<PAT>@github.com/emmmdty/ekg.git` 或配 deploy key。
 
 ## 4. 标准迭代闭环
+
+> 下面服务器端命令以 **4090** 为例。换 **5090** 只改两处：根路径 `/data/TJK/ekg` →
+> `/mnt/aidata/tongjiakai/ekg`，`CUDA_VISIBLE_DEVICES=1` → `=0`（单卡）。其余完全一致——
+> 两端 Python 环境是同一套（3.10.20 + torch 2.8.0+cu128 + transformers 4.53.3）。
 
 1. **本地开发 → 校验全绿**
    ```bash

@@ -21,8 +21,8 @@ def test_multiagent_pipeline_builds_consistent_grounded_graph(fixtures_dir) -> N
     assert len(graph.nodes) == len(nodes)
     assert len(graph.edges) > 0
     report = consistency_report(graph)
-    assert report["causal_cycle_count"] == 0.0
-    assert report["temporal_cycle_count"] == 0.0
+    assert report["causal_cyclic_scc"] == 0.0
+    assert report["temporal_cyclic_scc"] == 0.0
     # the verifier annotated faithfulness on the admitted (non-closure) edges
     assert any(e.faithfulness is not None for e in graph.edges)
 
@@ -33,7 +33,7 @@ def test_no_verifier_ablation_still_builds_consistent_graph(fixtures_dir) -> Non
         nodes
     )
     assert len(graph.edges) > 0
-    assert consistency_report(graph)["causal_cycle_count"] == 0.0
+    assert consistency_report(graph)["causal_cyclic_scc"] == 0.0
 
 
 def test_grounding_verifier_admits_grounded_and_abstains_ungrounded() -> None:

@@ -18,6 +18,7 @@ __all__ = [
     "to_networkx",
     "coreference_clusters",
     "find_cycles",
+    "cyclic_scc_stats",
     "transitive_closure_pairs",
     "close_pairs",
     "is_acyclic",
@@ -81,9 +82,42 @@ def find_cycles(
     relation_type: RelationType,
     subtypes: Collection[str] | None = None,
 ) -> list[list[str]]:
-    """Directed cycles within one relation family (e.g. causal loops)."""
+    """Every directed simple cycle within one relation family (e.g. causal loops).
+
+    ⚠️ Enumerating simple cycles is super-exponential in graph density: a complete
+    digraph on 10 nodes already holds 1.1M cycles, on 12 nodes over 15M. Use this
+    only for inspecting small graphs. For diagnostics over predicted (dense,
+    unrepaired) graphs use `cyclic_scc_stats`, which is O(V+E).
+    """
     g = _directed_subgraph(graph, relation_type, subtypes)
     return [cycle for cycle in nx.simple_cycles(g)]
+
+
+def cyclic_scc_stats(
+    graph: EventGraph,
+    relation_type: RelationType,
+    subtypes: Collection[str] | None = None,
+) -> tuple[int, int]:
+    """Contradiction structure as (non-trivial SCC count, edges inside them).
+
+    A directed family is consistent iff it is acyclic, i.e. iff every strongly
+    connected component is a single edgeless node. So non-trivial SCCs are
+    exactly the contradictions, and the edges they contain measure how much of
+    the graph is caught up in them. Both come out of Tarjan's algorithm in
+    O(V+E) — unlike counting simple cycles, which is intractable when the
+    predicted graph is dense (see `find_cycles`).
+    """
+    g = _directed_subgraph(graph, relation_type, subtypes)
+    n_scc = 0
+    n_edges = 0
+    for component in nx.strongly_connected_components(g):
+        if len(component) == 1:
+            node = next(iter(component))
+            if not g.has_edge(node, node):  # a lone node is only cyclic via a self-loop
+                continue
+        n_scc += 1
+        n_edges += g.subgraph(component).number_of_edges()
+    return n_scc, n_edges
 
 
 def is_acyclic(

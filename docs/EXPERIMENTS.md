@@ -110,7 +110,7 @@ supervised + identity + 无准入），本地 CPU 跑 repair+trace → CRC 准�
 
 **合成 dump 受控验证（CPU，如实）**——注入因果环（最弱边 conf 0.2 闭合 m1→m2→m4→m1）：
 
-| 档 | causal_cycle | R1 可达率 | R2 query f1 | 准入集 |
+| 档 | causal_cyclic_scc | R1 可达率 | R2 query f1 | 准入集 |
 |---|---|---|---|---|
 | raw（identity 无修复） | 1 | 1.0 | **0.0** | — |
 | repaired（solve_with_trace） | **0** | 1.0 | **1.0** | — |

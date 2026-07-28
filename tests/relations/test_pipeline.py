@@ -72,8 +72,8 @@ def test_heuristic_pipeline_builds_consistent_graph(fixtures_dir) -> None:
     assert len(graph.edges) > 0
     report = consistency_report(graph)
     # The greedy solver must leave no causal/temporal cycles.
-    assert report["causal_cycle_count"] == 0.0
-    assert report["temporal_cycle_count"] == 0.0
+    assert report["causal_cyclic_scc"] == 0.0
+    assert report["temporal_cyclic_scc"] == 0.0
 
 
 def test_greedy_solver_breaks_injected_causal_cycle() -> None:
@@ -84,10 +84,10 @@ def test_greedy_solver_breaks_injected_causal_cycle() -> None:
         RelationEdge(head_id="c", tail_id="a", relation_type=RelationType.CAUSAL, confidence=0.3),
     ]
     cyclic = EventGraph(nodes=nodes, edges=edges)
-    assert consistency_report(cyclic)["causal_cycle_count"] >= 1.0
+    assert consistency_report(cyclic)["causal_cyclic_scc"] >= 1.0
 
     solved = consistency_solvers.create("greedy").solve(cyclic)
-    assert consistency_report(solved)["causal_cycle_count"] == 0.0
+    assert consistency_report(solved)["causal_cyclic_scc"] == 0.0
     # The weakest edge (c->a, conf 0.3) is the one dropped.
     causal_pairs = {(e.head_id, e.tail_id) for e in solved.edges_of_type(RelationType.CAUSAL)}
     assert ("c", "a") not in causal_pairs

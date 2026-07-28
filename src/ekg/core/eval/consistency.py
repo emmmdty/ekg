@@ -7,6 +7,12 @@ before vs. after the consistency solver to show its effect.
 - temporal: a strict "before"-style order must be acyclic and transitively
   closed; cycles are contradictions, the closure gap measures incompleteness.
 - causal: a causal subgraph must be acyclic; cycles are contradictions.
+
+Cyclicity is reported as non-trivial strongly connected components (`*_cyclic_scc`)
+and the edges inside them (`*_cyclic_edges`), not as a count of simple cycles:
+a family is consistent iff every SCC is a lone edgeless node, and SCCs come out
+in O(V+E). Counting simple cycles is intractable on a dense predicted graph —
+a complete digraph on 12 nodes already holds over 15M of them.
 - coreference: clusters are transitive by definition, so we measure how far the
   *predicted edges* are from being closed within their connected components.
 """
@@ -15,8 +21,8 @@ from __future__ import annotations
 
 from ekg.core.graph import (
     coreference_clusters,
+    cyclic_scc_stats,
     edge_pair_set,
-    find_cycles,
     transitive_closure_pairs,
 )
 from ekg.core.schema import STRICT_TEMPORAL_SUBTYPES, EventGraph, RelationType
@@ -36,17 +42,20 @@ def _temporal_metrics(graph: EventGraph) -> dict[str, float]:
         graph, RelationType.TEMPORAL, subtypes=STRICT_TEMPORAL_SUBTYPES
     )
     observed = edge_pair_set(strict)
-    cycles = find_cycles(graph, RelationType.TEMPORAL, subtypes=STRICT_TEMPORAL_SUBTYPES)
+    n_scc, n_cyclic_edges = cyclic_scc_stats(
+        graph, RelationType.TEMPORAL, subtypes=STRICT_TEMPORAL_SUBTYPES
+    )
     missing = closure - observed
     return {
-        "temporal_cycle_count": float(len(cycles)),
+        "temporal_cyclic_scc": float(n_scc),
+        "temporal_cyclic_edges": float(n_cyclic_edges),
         "temporal_closure_gap": (len(missing) / len(closure)) if closure else 0.0,
     }
 
 
 def _causal_metrics(graph: EventGraph) -> dict[str, float]:
-    cycles = find_cycles(graph, RelationType.CAUSAL)
-    return {"causal_cycle_count": float(len(cycles))}
+    n_scc, n_cyclic_edges = cyclic_scc_stats(graph, RelationType.CAUSAL)
+    return {"causal_cyclic_scc": float(n_scc), "causal_cyclic_edges": float(n_cyclic_edges)}
 
 
 def _coreference_metrics(graph: EventGraph) -> dict[str, float]:
