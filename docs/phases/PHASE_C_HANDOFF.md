@@ -115,7 +115,12 @@ GPU 需求：**轻**（检测可复用小模型 fine-tune）。4090 空卡直接
 
 ## 6. Done when（验收）
 
-- [ ] 检测 micro-F1 ~60+；coref MUC ~86 可比区间；**相似事件误合并率显著↓**；`node_confidence` 报出 ECE。
+- [ ] 检测 micro-F1 ~60+；**coref MUC ≥ 81.4 可比区间**（⚠️ 原写 ~86 是错的，见下）；
+      **相似事件误合并率显著↓**；`node_confidence` 报出 ECE。
+
+> ⚠️ **2026-07-28 更正**：MAVEN-ERE 原论文 Table 7 的**官方 RoBERTa-base 基线 coref MUC F1
+> = 81.4（单任务）/ 82.1（+joint）**，86.1 是 2024 年联合图模型的 SOTA。照 86 对标会把
+> 「基本达到基线」误判成「差很远」。本项目实测 79.6（ERE 人群），差基线 −1.8。
 - [ ] 额外：报出 canonical nodes 对 **coref 族 FNR（当前 1.000）** 的改善幅度。
 - [ ] `uv run pytest && uv run ruff check src tests scripts && uv run ekg-smoke` 全绿（**只增不改**）。
 - [ ] 结果落 `runs/ch1_nodes_*.json` + 如实回填 `docs/TODO.md`（升降都报）。

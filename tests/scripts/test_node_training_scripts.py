@@ -58,6 +58,59 @@ def test_coref_training_refuses_a_split_without_any_positive(arg_docs) -> None:
         module.build_training_pairs(arg_docs[1:], neg_ratio=10.0, hard_fraction=0.5, seed=0)
 
 
+def test_ere_population_counts_unseen_mentions_as_singletons() -> None:
+    """The pipeline's population is smaller than ERE's; the gap must not vanish."""
+    module = _load("build_canonical_nodes")
+
+    class FakeNode:
+        def __init__(self, event_id, event):
+            self.event_id = event_id
+            self.metadata = {"event": event}
+
+    class FakeDoc:
+        doc_id = "d"
+        # ERE has m1..m4; m1/m2 corefer, m3/m4 corefer.
+        nodes = [
+            FakeNode("m1", "E1"),
+            FakeNode("m2", "E1"),
+            FakeNode("m3", "E2"),
+            FakeNode("m4", "E2"),
+        ]
+
+    class FakeCanonical:
+        doc_id = "d"
+        mention_cluster = ["m1", "m2"]
+
+    report = module.ere_population_coreference([FakeDoc()], {"d": [FakeCanonical()]})
+    # m3/m4 were never seen: counted as two singletons, so their gold link is a
+    # miss rather than silently dropped from the denominator.
+    assert report["n_ere_mentions"] == 4
+    assert report["n_covered"] == 2
+    assert report["mention_coverage"] == 0.5
+    assert report["muc_f1"] == pytest.approx(2 / 3)  # 1 of 2 gold links recovered
+
+
+def test_ere_population_perfect_when_fully_covered() -> None:
+    module = _load("build_canonical_nodes")
+
+    class FakeNode:
+        def __init__(self, event_id, event):
+            self.event_id = event_id
+            self.metadata = {"event": event}
+
+    class FakeDoc:
+        doc_id = "d"
+        nodes = [FakeNode("m1", "E1"), FakeNode("m2", "E1")]
+
+    class FakeCanonical:
+        doc_id = "d"
+        mention_cluster = ["m1", "m2"]
+
+    report = module.ere_population_coreference([FakeDoc()], {"d": [FakeCanonical()]})
+    assert report["muc_f1"] == 1.0
+    assert report["mention_coverage"] == 1.0
+
+
 def test_sweep_scores_each_document_once_across_cells(arg_docs) -> None:
     """The sweep varies threshold/band, which never change the pair scores."""
     module = _load("sweep_canonical_nodes")

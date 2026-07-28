@@ -39,7 +39,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from ekg.core.calibration import IsotonicProbabilityCalibrator, reliability_curve
-from ekg.core.eval import conll_coref_f1, expected_calibration_error
+from ekg.core.eval import conll_coref_f1, expected_calibration_error, muc
 from ekg.core.eval.relation import PRF, relation_prf
 from ekg.core.schema import RelationEdge, RelationType
 from ekg.nodes.canonical import CanonicalNode, canonicalize
@@ -79,6 +79,55 @@ def cluster_correctness(
         event = cluster_of.get(node.mention_cluster[0], "")
         rows.append((node.raw_confidence, members == gold_members.get(event, set())))
     return rows
+
+
+def ere_population_coreference(
+    ere_docs: Sequence, by_doc_nodes: dict[str, list[CanonicalNode]]
+) -> dict:
+    """Our clustering re-scored on **MAVEN-ERE's** mention population.
+
+    Published MAVEN-ERE coreference numbers are computed over ERE's mentions
+    (17,780 in valid); canonicalization runs on MAVEN-Arg's (16,996) because only
+    those carry exact character offsets. Both are internally consistent, but they
+    are *different populations*, so our MUC and the published MUC are not on the
+    same ruler until this is measured.
+
+    An ERE mention the pipeline never saw is counted as its own singleton — the
+    honest accounting (the system genuinely produced nothing for it), not a
+    charitable one that would quietly drop it from the denominator.
+    """
+    predicted: list[set[str]] = []
+    gold: list[set[str]] = []
+    covered = total = 0
+    for doc in ere_docs:
+        ere_ids = {node.event_id for node in doc.nodes}
+        total += len(ere_ids)
+
+        seen: set[str] = set()
+        for node in by_doc_nodes.get(doc.doc_id, []):
+            cluster = {m for m in node.mention_cluster if m in ere_ids}
+            if cluster:
+                predicted.append(cluster)
+                seen |= cluster
+        covered += len(seen)
+        predicted.extend({m} for m in sorted(ere_ids - seen))
+
+        by_event: dict[str, set[str]] = {}
+        for node in doc.nodes:
+            by_event.setdefault(node.metadata["event"], set()).add(node.event_id)
+        gold.extend(by_event.values())
+
+    report = dict(conll_coref_f1(predicted, gold))
+    # MAVEN-ERE's own table reports MUC precision and recall separately (its
+    # RoBERTa-base baseline is recall-leaning at P 79.2 / R 84.0), so carry both
+    # or there is no way to tell which side we are behind on.
+    muc_prf = muc(predicted, gold)
+    report["muc_precision"] = muc_prf["precision"]
+    report["muc_recall"] = muc_prf["recall"]
+    report["mention_coverage"] = covered / total if total else 0.0
+    report["n_ere_mentions"] = total
+    report["n_covered"] = covered
+    return report
 
 
 def coref_edges(nodes: Sequence[CanonicalNode]) -> list[RelationEdge]:
@@ -220,6 +269,8 @@ def run(
                 continue
             n_gold_coref += 1
             covered += int({edge.head_id, edge.tail_id} <= known)
+    # The same clustering on the population published numbers use.
+    report["coreference_ere_population"] = ere_population_coreference(ere_test, by_doc_nodes)
     report["coref_family_fnr"] = {
         "n_ere_test_docs": len(ere_test),
         "by_type": stratified["by_type"],
