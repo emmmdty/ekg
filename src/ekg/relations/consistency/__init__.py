@@ -186,8 +186,19 @@ def _break_cycles_traced(
 
 @consistency_solvers.register("greedy")
 class GreedyConsistencySolver(ConsistencySolver):
-    def __init__(self, close_temporal: bool = True) -> None:
+    """Greedy repair: dedup, break cycles, optionally close temporal order.
+
+    Both toggles default to the repairing behavior and exist to *attribute*
+    downstream effects, not to be tuned. Downstream ECG reconstruction reads
+    only causal+subevent topology (`succession.data.cgep`), so
+    ``close_temporal`` cannot move it by construction — while
+    ``break_causal_cycles`` deletes exactly the edge family reconstruction
+    depends on, and is therefore the only repair action that can.
+    """
+
+    def __init__(self, close_temporal: bool = True, break_causal_cycles: bool = True) -> None:
         self.close_temporal = close_temporal
+        self.break_causal_cycles = break_causal_cycles
 
     def solve(self, graph: EventGraph) -> EventGraph:
         return self._solve(graph, None)
@@ -223,11 +234,14 @@ class GreedyConsistencySolver(ConsistencySolver):
 
         # Causal: enforce acyclicity (cycles across CAUSE/PRECONDITION are
         # contradictions regardless of subtype).
-        causal_kept, causal_dropped = _break_cycles_traced(
-            graph.edges_of_type(RelationType.CAUSAL)
-        )
+        causal_edges = graph.edges_of_type(RelationType.CAUSAL)
+        if self.break_causal_cycles:
+            causal_kept, causal_dropped = _break_cycles_traced(causal_edges)
+        else:
+            causal_kept, causal_dropped = _dedup_by_key_traced(causal_edges)
         if edits is not None:
-            edits.extend(_edit("drop", "causal_cycle", e) for e in causal_dropped)
+            violation = "causal_cycle" if self.break_causal_cycles else "causal_dedup"
+            edits.extend(_edit("drop", violation, e) for e in causal_dropped)
         for e in causal_kept:
             out.add_edge(e)
 

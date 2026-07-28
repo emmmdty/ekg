@@ -131,6 +131,7 @@ def analyze(
     alpha: float = 0.2,
     cal_ratio: float = 0.3,
     close_temporal: bool = True,
+    break_causal_cycles: bool = True,
 ) -> dict:
     """Repair + risk-controlled admission over a predicted-edge dump.
 
@@ -146,7 +147,9 @@ def analyze(
     records = [
         (gold_docs[r["doc_id"]], _edges_from_dump(r)) for r in dump if r["doc_id"] in gold_docs
     ]
-    solver = consistency_solvers.create("greedy", close_temporal=close_temporal)
+    solver = consistency_solvers.create(
+        "greedy", close_temporal=close_temporal, break_causal_cycles=break_causal_cycles
+    )
 
     # Split for calibration; keep the test split non-empty (min guard) so the
     # reported trajectory always covers real documents.
@@ -210,6 +213,16 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--no-break-causal-cycles",
+        action="store_true",
+        help=(
+            "keep causal cycles instead of deleting their weakest edge. Downstream ECG "
+            "reconstruction reads causal+subevent topology only, so this is the repair "
+            "action that can actually move R1/R2 -- unlike temporal closure, which is "
+            "orthogonal to it by construction."
+        ),
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("runs/relations/consistency_repair_supervised.json"),
@@ -224,6 +237,7 @@ def main() -> int:
         alpha=args.alpha,
         cal_ratio=args.cal_ratio,
         close_temporal=not args.no_close_temporal,
+        break_causal_cycles=not args.no_break_causal_cycles,
     )
 
     text = json.dumps(result, ensure_ascii=False, indent=2)
