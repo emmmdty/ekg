@@ -378,7 +378,13 @@ coref loss .2036→**.1056**、detector loss .2369→**.1507**（均未平台，
    ② 检测器加训后仍只比记忆基线 +1.7 → **明确降级为打底、不作为卖点**；
    ③ `node_confidence` 的表述按操作点说：**弃权带越宽、原始置信越偏、校准才有活干**
    （band .1 档 ECE .0382→.0056；band 0 档 raw 本就 .0062）。
-3. C 之后进 D（Ch3 事实性）；E（Ch4 闭环 headline）依赖 A·B·C·D 齐。
+3. **⭐当前队首 = Phase D（Ch3 事实性）**：新会话照
+   [`phases/PHASE_D_HANDOFF.md`](phases/PHASE_D_HANDOFF.md) 执行（含 GPU 选择、实测环境差异、
+   MAVEN-FACT 已核实事实、Phase A/C 的超参与方法论教训）。**推荐 4090 的 card 2**——
+   MAVEN-FACT 数据只在 4090、且 4090 有标准授权无需逐次点头。
+   ⚠️ **LLM 基线延到 Phase H**：照本文件「主闭环未通前不扩张实验面」；且 competitiveness 的疑虑
+   已被 CRAC 2025（编码器仍领先）+ Phase C 的基线核对（79.6 vs 官方 81.4）答掉大半。
+   E（Ch4 闭环 headline）依赖 A·B·C·D 齐。
    ⚠️ **做 E 前必须先重定位 Ch4 headline**：Phase B 已证明「修复提升下游可重建性」在真实图上不成立
    （见 `PHASE_C_HANDOFF.md` §7），不得在 E 里换指标掩盖该负结果。
 4. 多种子和进一步调 M1/M2 放到 Phase H；主闭环未通前不扩张实验面。
