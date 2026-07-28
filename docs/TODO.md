@@ -168,13 +168,15 @@ dump 在 **gpu-5090** 上产出（4090 全天 4 卡被他人占满；5090 环境
 
 ## 下一步
 
-1. ~~Phase A 判别式抽取器~~ ✅ 达标（causal F1 .250 / subevent .213）。~~Phase B W1–W4 代码~~ ✅ CPU 全绿已推。
-2. **⭐当前队首 = Phase B 真实图闭环（唯一阻塞项 = 等空卡）**：服务器空卡后跑 dump → scp 回 →
-   `consistency_repair_report.py` → 把三档真实轨迹（violation/cycle、分层 FNR、准入集、R1/R2）回填
-   TODO/EXPERIMENTS「Phase B 实施」段（现为 PENDING）。**照
-   [`phases/PHASE_B_HANDOFF.md`](phases/PHASE_B_HANDOFF.md) 逐步执行**。环境已就绪、无待跑任务在等，
-   开工第一步是 `nvidia-smi` 看卡。
-3. Phase B 真实数字出后进 C（Ch1 规范节点）/D（Ch3 事实性）；E（Ch4 闭环 headline）依赖 A·B·C·D 齐。
+1. ~~Phase A 判别式抽取器~~ ✅ 达标。~~Phase B W1–W4 代码~~ ✅。~~Phase B 真实图闭环~~ ✅ 2026-07-28 跑通
+   （violation 清零，但 R1/R2 无增益 → **止损已触发**，见上文「Phase B 真实图闭环」段）。
+2. **⭐当前队首 = Phase C（Ch1 规范事件节点）**：新会话照
+   [`phases/PHASE_C_HANDOFF.md`](phases/PHASE_C_HANDOFF.md) 执行（含环境现状、A/B 真实数字、红线）。
+   **开工第一步是跟作者确认方向**（该文件 §0 列了三个选项与推荐），别直接开跑。
+   本阶段最直接的可量化贡献 = 把 coref 族 FNR 从 **1.000** 拉下来（Ch2 抽取器 coref `n_pred=0`）。
+3. C 之后进 D（Ch3 事实性）；E（Ch4 闭环 headline）依赖 A·B·C·D 齐。
+   ⚠️ **做 E 前必须先重定位 Ch4 headline**：Phase B 已证明「修复提升下游可重建性」在真实图上不成立
+   （见 `PHASE_C_HANDOFF.md` §7），不得在 E 里换指标掩盖该负结果。
 4. 多种子和进一步调 M1/M2 放到 Phase H；主闭环未通前不扩张实验面。
 5. 每章开跑前照 [`EXPERIMENTS.md`](EXPERIMENTS.md) 定 baseline（新老搭配）+ 消融矩阵 + 评测档；Ch4 主表
    纳入 2025 近期方法（Semantic Relation Experts / 现代 LLM），不再用旧 Llama3/GPT-3.5。
