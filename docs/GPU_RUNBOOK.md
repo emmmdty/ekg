@@ -69,9 +69,10 @@ uv run --no-sync python -u scripts/<x>.py ...
 结果正常后，再把 4090 主 `.venv` 升到同一套。**5090 已验证通过**，剩下的动作：
 
 ```bash
+# 顺序不能反：vllm 0.8.5 硬 pin torch==2.6.0，先装 torch 会直接撞版本冲突。
 ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
-  uv pip install --python .venv/bin/python torch==2.8.0 && \
   uv pip uninstall --python .venv/bin/python vllm xformers && \
+  uv pip install --python .venv/bin/python torch==2.8.0 && \
   .venv/bin/python -c \"import torch;print(torch.__version__, torch.cuda.get_arch_list())\" && \
   .venv/bin/pytest -q"'
 ```

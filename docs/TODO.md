@@ -101,11 +101,44 @@
 - **验证基线（两端不同不是回归）**：本地无 torch = **241 passed / 12 skipped**；服务器有 torch =
   **252 passed / 1 skipped**。ruff 0、ekg-smoke OK（只增不改）。交付当时是 269/12，2026-07-27 重构
   移除 SARGE/Phase G 测试后降到 241；**不得拿旧计数判断回归**。
-- **真实 predicted 图数字待跑**：dump producer 已推 origin/main、服务器已对齐 HEAD、checkpoint
-  `runs/relations/supervised_maven` + valid 710 篇均在位、链路已验证（config 解析 + `--help` 通）。
-  **2026-07-27 全天 4 卡被他人占满**（15–18GB @ 87–100%），按「卡空闲再跑」不挤占；待机脚本已修好但
-  **按作者指示主动停掉**，服务器当前无我们的进程。dump 到手后回填 violation/cycle 前后、分层 FNR、
-  准入集大小、R1/R2 三档（raw→repaired→repaired+admitted）真实轨迹。
+### Phase B 真实图闭环（2026-07-28，首次跑通，**结果混合**）
+
+dump 在 **gpu-5090** 上产出（4090 全天 4 卡被他人占满；5090 环境当日配好，见 `GPU_RUNBOOK.md` §−1）：
+710 篇 / **242,869 条原始边**（342/篇）/ 62MB，sha256 双端一致。离线分析 497 篇 held-out test
+（α=0.2、cal_ratio=0.3），产物 `runs/relations/consistency_repair_supervised.json`。
+
+| 档 | causal_cyclic_scc | causal_cyclic_edges | temporal_cyclic_scc | temporal_cyclic_edges | temporal_closure_gap | R1 可达率 | R2 query f1 |
+|---|---|---|---|---|---|---|---|
+| raw（identity） | 752 | 2,290 | 614 | 36,523 | 83.78 | **0.7310** | **0.0622** |
+| repaired | **0** | **0** | **0** | **0** | **0** | 0.7294 | 0.0620 |
+| repaired + 准入 | 0 | 0 | 0 | 0 | 0 | 0.7294 | 0.0620 |
+
+`repair_trace`：**dropped 8,119 / added 8,770**（补的闭包边多于删的矛盾边）。
+
+- ✅ **一致性违反被清零**：752 个 causal 强连通分量、614 个 temporal 强连通分量（卷入 36,523 条边）
+  全部消除，closure_gap 83.78→0。这一档是确凿的。
+- ❌ **但 ECG 可重建率没有增益，两项都微降**：R1 0.7310→**0.7294**（-2 个 query）、R2 f1
+  0.0622→**0.0620**（precision .1339→.1321）。**合成 dump 上 R2 0→1.0 的增益在真实图上没有复现。**
+  机制上看得见原因：修复主要在**补闭包边**（added 8,770 > dropped 8,119），`n_pred` 381→386 而
+  `tp` 恒为 51 —— 补进来的边没有命中 gold query，只稀释了 precision。
+- ⚠️ **按 PHASE_B 止损口径这一条已触发**（「若 R2 增益也微弱 → 退 consistency-aware reranking /
+  constrained decoding，仍成章，不换指标」）。**不粉饰、不换指标**：Ch2 的可讲点收缩为
+  「可追溯修复把结构违反清零」+ 误差传播分析，**不再声称修复提升下游可重建性**。
+
+**风控准入（分层 FNR，α=0.2）——目标不可达，原因是召回上限**：
+
+| 层 | 数值 |
+|---|---|
+| 边际 | P .2675 / R .5258 / **FNR .4742** / F1 .3546 |
+| 分族 FNR | coref **1.000**(n=2887，模型 n_pred=0) · temporal .4469(n=71549) · causal .5616(n=6599) · subevent .4065(n=2165) |
+| doc-macro FNR | .4925 |
+| 准入集 | 163,533（均值 329/篇），**τ=0.0** |
+
+- **τ 校准出 0 = 准入退化为「全收」**，故 `repaired+准入` 与 `repaired` 逐项相同。
+- 根因不是 CRC 实现，而是**可行域为空**：抽取器边际召回只有 .5258 → FNR 下界 .4742，**任何
+  α < .474 的目标都不可能满足**，即使准入全部边。α=0.2 本身超出了这个 predicted 图的能力上限。
+  后续要么放宽 α 到 >.48 报有意义的 τ，要么先抬 Phase A 召回。coref 一族 FNR=1.0 是因为
+  supervised 抽取器在 valid 上 **coref 预测数为 0**（`n_pred=0`），不是准入把它筛掉的。
 
 ### Ch4 先行模块（来自 v3，降级复用）
 
@@ -123,7 +156,7 @@
 |---|---|---|---|
 | P0 | 主数据与溯源 | ✅ 主干数据完成；扩展数据部分仅 raw | 主数据 hash/manifest 可核 |
 | A | Ch2 判别式关系抽取 | ✅ **达标**（causal F1 .250 / subevent .213 / temporal .338；召回 .4%→67.5%） | causal F1 ≥25（目标 30–37），subevent ≥20 |
-| B | 一致性、repair trace、风险准入 | 🟡 W1–W4 代码完成 CPU 全绿（RepairTrace/分层 FNR/ECG 可重建）；真实图 dump 待 GPU 空闲 | violation↓、分层 FNR、ECG 可重建率↑ |
+| B | 一致性、repair trace、风险准入 | 🟡 **真实图闭环已跑通**（2026-07-28）：violation **清零** ✅，但 **ECG 可重建率无增益（R1/R2 微降）❌ → 止损触发**；α=0.2 不可达（召回上限） | violation↓ ✅、分层 FNR ✅、ECG 可重建率↑ ❌ |
 | C | Ch1 规范事件节点 | ⬜ 未开始；schema/coref/calibration 可复用 | 检测 F1、CoNLL、误合并率、ECE |
 | C2 | Ch1 跨文档泛化 | ⬜ 未开始；ECB+ raw 已有，CLES 未取 | ECB+/CLES 对比 SECURE/MEET/DIE-EC |
 | D | Ch3 事实性与净化 | ⬜ 未开始；MAVEN-FACT train/valid 已就位 | macro-F1、预测图掉点、净化下游增益 |

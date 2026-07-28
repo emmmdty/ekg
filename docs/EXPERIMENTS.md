@@ -123,9 +123,25 @@ supervised + identity + 无准入），本地 CPU 跑 repair+trace → CRC 准�
   交付时 269 passed / 12 torch-skip、ruff 0、smoke OK（2026-07-27 移除 SARGE/Phase G 测试后
   当前主干 = 241 passed / 12 torch-skip）。
 
-**真实 predicted 图数字待跑**：dump producer 已上 origin/main + 服务器 pull（HEAD `771d5c3`），
-checkpoint `runs/relations/supervised_maven` + valid 710 篇在位；**当前 4 卡全占**（他人训练），按卡空闲再跑、
-不挤占；产物落 `runs/relations/consistency_repair_supervised.json`，回填三档真实轨迹。
+**真实 predicted 图三档轨迹（2026-07-28，gpu-5090，497 篇 held-out test，α=0.2/cal_ratio 0.3）**
+—— dump 710 篇 / 242,869 条原始边，产物 `runs/relations/consistency_repair_supervised.json`：
+
+| 档 | causal_cyclic_scc | temporal_cyclic_scc | temporal_cyclic_edges | closure_gap | R1 可达率 | R2 query f1 |
+|---|---|---|---|---|---|---|
+| raw（identity） | 752 | 614 | 36,523 | 83.78 | **0.7310** | **0.0622** |
+| repaired | **0** | **0** | **0** | **0** | 0.7294 | 0.0620 |
+| repaired + 准入（τ=0） | 0 | 0 | 0 | 0 | 0.7294 | 0.0620 |
+
+`repair_trace`：dropped 8,119 / added 8,770。分层 FNR（α=0.2）：边际 **.4742**、doc-macro .4925、
+分族 coref 1.000 / temporal .4469 / causal .5616 / subevent .4065；准入集 163,533（329/篇）。
+
+**如实结论（含负结果）**：① 结构违反被**清零**（752+614 个环状分量、36,523 条卷入边 → 0），这一档确凿；
+② **R1/R2 均无增益、微降**（R1 .7310→.7294、R2 f1 .0622→.0620），**合成 dump 上 R2 0→1.0 的增益在真实图
+上没有复现**——修复以补闭包边为主（added>dropped），`n_pred` 381→386 而 `tp` 恒为 51，补进来的边没命中
+gold query，只稀释 precision；③ **PHASE_B 止损条件已触发**，Ch2 收缩为「可追溯修复清零结构违反」+ 误差
+传播，**不声称修复提升下游可重建性、不换指标**；④ τ 校准出 **0（准入退化为全收）**，根因是**可行域为空**：
+抽取器边际召回 .5258 ⇒ FNR 下界 .4742，α<.474 在这个 predicted 图上不可满足——要报有意义的 τ，得放宽
+α 到 >.48 或先抬 Phase A 召回。coref FNR=1.0 源于抽取器 coref `n_pred=0`，非准入所致。
 
 ### Ch3 事实 —— 事件事实性检测 + 图净化
 
