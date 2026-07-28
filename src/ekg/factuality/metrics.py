@@ -25,10 +25,18 @@ from ekg.relations.data.maven_fact import FACTUALITY_LABELS
 
 __all__ = [
     "MAJORITY_LABEL",
+    "EVIDENCE_BEARING_LABELS",
     "factuality_report",
     "majority_baseline_report",
     "evidence_span_prf",
+    "evidence_span_report",
 ]
+
+# The classes MAVEN-FACT annotates supporting evidence for. Its Table 4 macro-
+# averages the evidence score over exactly these three "because only they have
+# supporting evidence in the given input text"; CT+ carries evidence on 0.1% of
+# mentions and Uu on 11%, so pooling over all five would not be comparable.
+EVIDENCE_BEARING_LABELS: tuple[str, ...] = ("CT-", "PS+", "PS-")
 
 # The class a trivial classifier collapses to (94.4% of train, 94.9% of valid).
 MAJORITY_LABEL = FACTUALITY_LABELS[0]
@@ -94,3 +102,35 @@ def evidence_span_prf(predicted: Mapping[str, Set[Span]], gold: Mapping[str, Set
     prf = PRF.from_counts(tp, n_pred, n_gold)
     prf["n_mentions_with_evidence"] = annotated
     return prf
+
+
+def evidence_span_report(
+    predicted: Mapping[str, Set[Span]],
+    gold: Mapping[str, Set[Span]],
+    gold_labels: Mapping[str, str],
+) -> dict:
+    """Evidence scores in both the pooled and the published reporting.
+
+    ``pooled`` is every mention's spans in one P/R/F1 — the number that says
+    what the head does overall. ``macro_evidence_bearing`` restricts to CT−/PS+/
+    PS− and macro-averages them, which is what MAVEN-FACT Table 4 reports
+    (DMRoBERTa 45.4, GenEFD 44.7, GPT-4 19.5). Reporting only the pooled figure
+    against those would compare two different quantities.
+
+    Mentions are bucketed by their **gold** label so the denominator is fixed
+    across systems; a system that mislabels a mention is charged for its
+    evidence under the class the mention actually belongs to.
+    """
+    per_class: dict[str, PRF] = {}
+    for label in EVIDENCE_BEARING_LABELS:
+        members = {m for m, g in gold_labels.items() if g == label}
+        per_class[label] = evidence_span_prf(
+            {m: s for m, s in predicted.items() if m in members},
+            {m: s for m, s in gold.items() if m in members},
+        )
+    return {
+        "pooled": dict(evidence_span_prf(predicted, gold)),
+        "per_class": {label: dict(prf) for label, prf in per_class.items()},
+        "macro_evidence_bearing": sum(p["f1"] for p in per_class.values())
+        / len(EVIDENCE_BEARING_LABELS),
+    }

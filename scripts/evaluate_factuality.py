@@ -39,7 +39,7 @@ from ekg.factuality.detection import (
 )
 from ekg.factuality.evidence import SAME_SENTENCE_RECALL_CEILING, gold_evidence_spans
 from ekg.factuality.metrics import (
-    evidence_span_prf,
+    evidence_span_report,
     factuality_report,
     majority_baseline_report,
 )
@@ -81,13 +81,12 @@ def score(
 ) -> dict:
     gold = {m.mention_id: m.factuality for doc in docs for m in doc.mentions}
     report = factuality_report(labels, gold)
-    span_prf = evidence_span_prf(evidence, gold_evidence_spans(docs))
     return {
         "macro_f1": report["macro_f1"],
         "accuracy": report["accuracy"],
         "per_class": {label: dict(prf) for label, prf in report["per_class"].items()},
         "n_mentions": report["n_mentions"],
-        "evidence_span": dict(span_prf),
+        "evidence": evidence_span_report(evidence, gold_evidence_spans(docs), gold),
         "evidence_recall_ceiling": SAME_SENTENCE_RECALL_CEILING,
     }
 
@@ -195,7 +194,8 @@ def main() -> int:
     print(
         f"gold-input: macro-F1 {result['gold_graph']['macro_f1']:.4f} "
         f"accuracy {result['gold_graph']['accuracy']:.4f} "
-        f"evidence-F1 {result['gold_graph']['evidence_span']['f1']:.4f}"
+        f"evidence pooled-F1 {result['gold_graph']['evidence']['pooled']['f1']:.4f} "
+        f"macro(CT-/PS+/PS-) {result['gold_graph']['evidence']['macro_evidence_bearing']:.4f}"
     )
 
     purified = purify_graph(graph_of(docs, None), gold_labels, DEFAULT_POLICY)

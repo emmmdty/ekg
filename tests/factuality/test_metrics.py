@@ -5,8 +5,10 @@ from __future__ import annotations
 import pytest
 
 from ekg.factuality.metrics import (
+    EVIDENCE_BEARING_LABELS,
     MAJORITY_LABEL,
     evidence_span_prf,
+    evidence_span_report,
     factuality_report,
     majority_baseline_report,
 )
@@ -72,6 +74,38 @@ def test_evidence_span_prf_scores_exact_spans() -> None:
     assert (prf["tp"], prf["n_pred"], prf["n_gold"]) == (2, 4, 3)
     assert prf["precision"] == pytest.approx(0.5)
     assert prf["recall"] == pytest.approx(2 / 3)
+
+
+def test_evidence_report_separates_pooled_from_the_published_macro() -> None:
+    # MAVEN-FACT Table 4 macro-averages evidence over CT-/PS+/PS- only. Pooling
+    # over all five classes is a different quantity, so both are reported and
+    # neither is silently substituted for the other.
+    assert EVIDENCE_BEARING_LABELS == ("CT-", "PS+", "PS-")
+    gold_labels = {"a": "CT-", "b": "PS+", "c": "PS-", "d": "CT+"}
+    gold = {"a": {(0, 3)}, "b": {(4, 6)}, "c": {(7, 9)}, "d": set()}
+    # Perfect on CT- and PS+, misses PS-; the CT+ mention is scored in `pooled`
+    # but excluded from the macro, exactly as the paper does.
+    predicted = {"a": {(0, 3)}, "b": {(4, 6)}, "c": set(), "d": {(1, 2)}}
+    report = evidence_span_report(predicted, gold, gold_labels)
+
+    assert set(report["per_class"]) == set(EVIDENCE_BEARING_LABELS)
+    assert report["per_class"]["CT-"]["f1"] == pytest.approx(1.0)
+    assert report["per_class"]["PS-"]["f1"] == 0.0
+    assert report["macro_evidence_bearing"] == pytest.approx(2 / 3)
+    # Pooled sees the spurious CT+ span, so it is strictly worse here.
+    assert report["pooled"]["f1"] < 1.0
+    assert report["pooled"]["n_pred"] == 3
+
+
+def test_evidence_report_buckets_by_gold_label_not_prediction() -> None:
+    # A mislabelled mention is still charged under its gold class, so the
+    # denominator per class is identical across systems.
+    gold_labels = {"a": "CT-", "b": "PS+"}
+    gold = {"a": {(0, 3)}, "b": {(4, 6)}}
+    report = evidence_span_report({"a": {(0, 3)}, "b": set()}, gold, gold_labels)
+    assert report["per_class"]["CT-"]["n_gold"] == 1
+    assert report["per_class"]["PS+"]["n_gold"] == 1
+    assert report["per_class"]["PS-"]["n_gold"] == 0
 
 
 def test_evidence_span_prf_denominator_is_annotated_mentions_only() -> None:
