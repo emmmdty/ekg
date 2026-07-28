@@ -146,6 +146,11 @@ def main() -> int:
     parser.add_argument("--stride", type=int, default=128)
     parser.add_argument("--no-structure", action="store_true")
     parser.add_argument("--limit", type=int, default=None, help="first N documents (smoke)")
+    parser.add_argument(
+        "--dump-predicted-edges",
+        type=Path,
+        help="write the Phase A predicted edges here (jsonl); Phase E reuses them",
+    )
     parser.add_argument("--output", type=Path, help="write the report JSON here")
     args = parser.parse_args()
 
@@ -206,6 +211,25 @@ def main() -> int:
     if args.extractor_checkpoint:
         edges_by_doc = predicted_edges(docs, str(args.extractor_checkpoint), args.max_length)
         result["n_predicted_edges"] = sum(len(v) for v in edges_by_doc.values())
+        if args.dump_predicted_edges:
+            # Extraction is the expensive half of this script; dumping means the
+            # downstream stage never has to re-run the GPU pass to get the same
+            # graph this report was computed on.
+            args.dump_predicted_edges.parent.mkdir(parents=True, exist_ok=True)
+            with args.dump_predicted_edges.open("w") as fh:
+                for doc in docs:
+                    fh.write(
+                        json.dumps(
+                            {
+                                "doc_id": doc.doc_id,
+                                "edges": [
+                                    e.model_dump(mode="json") for e in edges_by_doc[doc.doc_id]
+                                ],
+                            }
+                        )
+                        + "\n"
+                    )
+            print(f"wrote predicted edges to {args.dump_predicted_edges}")
         predicted_labels, predicted_evidence = run_detector(detector, docs, edges_by_doc)
         result["predicted_graph"] = score(predicted_labels, predicted_evidence, docs)
         drop = result["gold_graph"]["macro_f1"] - result["predicted_graph"]["macro_f1"]
