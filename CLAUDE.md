@@ -33,7 +33,10 @@ uv run ekg-smoke    # CPU 端到端冒烟
   cu128 是唯一同时覆盖两卡的栈：wheel 含 sm_120（5090 Blackwell，cu124 完全没有），4090（sm_89 Ada）
   走 sm_86 同 major 二进制兼容——**任何 PyTorch wheel 都不含 sm_89**，与版本新旧无关。
 - **ssh 失败 ≠ 远端进程死亡**（两台都走 cpolar 隧道，间歇掉线）：三态判活（ALIVE / GONE / ssh 失败），
-  只有成功 ssh 读到进程 GONE 才算结束。
+  只有成功 ssh 读到进程 GONE 才算结束。⚠️ 4090 是 cpolar **vip 固定域名**，5090 是**免费动态地址**
+  ——**5090 的 host:port 会变**（2026-07-28 实测 `29.tcp.cpolar.top:11517` → `1.tcp.cpolar.cn:22282`），
+  症状是 `Connection refused` 或 `Host key verification failed`。换地址后**先核对连上的是不是同一台机器**
+  （`whoami` + `nvidia-smi` 名称 + 项目目录 + `git log -1`）再操作，别对着陌生机器跑命令。
 - ⛔ **服务器上不要跑 `uv run` / `uv sync`**：会把环境对齐到你给的 extras 集合并**卸掉多余的**——
   4090 实测裸 `uv sync` 卸 165 个包（torch/vllm/trl 全没）、`--extra llm` 仍卸 109 个。
   一律用 `.venv/bin/python` / `.venv/bin/pytest`；非要用 uv 必须 `--no-sync`。

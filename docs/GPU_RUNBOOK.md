@@ -28,7 +28,8 @@ cuBLAS/cuDNN，那两个库内部有独立的 sm_89 路径，实际损失很小�
 
 `uv run` 与 `uv sync` 会把环境**对齐到你给出的 extras 集合，多出来的一律卸载**——两台服务器装的
 都不是「裸 core」，所以两端都中招。4090 实测（2026-07-27 `--dry-run`，当时装的是
-`llm+serve+rl+gnn+dev` 全套 = torch 2.6.0+cu124 / vllm 0.8.5 / trl 0.18.2 / ray / xformers）：
+`llm+serve+rl+gnn+dev` 全套 = torch 2.6.0+cu124 / vllm 0.8.5 / trl 0.18.2 / ray / xformers；
+2026-07-28 升 cu128 后 vllm/xformers/torchvision/torchaudio 已卸，见 §1.5，但结论不变）：
 
 | 命令 | 后果 |
 |---|---|
@@ -63,25 +64,35 @@ uv run --no-sync python -u scripts/<x>.py ...
 - 已有 GPU 证据：SeDGPL 基线、风险感知选边 / 结构编码 A/B、选择性预测 risk-coverage、受控 cross-stage。
   准确数字以 [`TODO.md`](TODO.md) 与 `runs/` 为准。
 
-## 1.5 待办：把 4090 升到统一栈（cu128）
+## 1.5 两端升到统一栈 cu128（2026-07-28 **已完成**）
 
-作者 2026-07-27 选的是「**先验证再原地升级**」：5090 用 torch 2.8.0+cu128 把 Phase B dump 完整跑通、
-结果正常后，再把 4090 主 `.venv` 升到同一套。**5090 已验证通过**，剩下的动作：
+作者选的是「先验证再原地升级」：5090 先用 torch 2.8.0+cu128 把 Phase B dump 完整跑通，再把 4090
+主 `.venv` 原地升到同一套。实际执行的命令（**顺序不能反**）：
 
 ```bash
-# 顺序不能反：vllm 0.8.5 硬 pin torch==2.6.0，先装 torch 会直接撞版本冲突。
+# 1) vllm 0.8.5 硬 pin torch==2.6.0，先装 torch 会直接撞版本冲突 → 必须先卸
+# 2) torchvision/torchaudio 是 vllm 拖进来的，为 torch 2.6.0 编译，换 torch 后 ABI 必碎 → 一起卸
 ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
-  uv pip uninstall --python .venv/bin/python vllm xformers && \
+  uv pip uninstall --python .venv/bin/python vllm xformers torchvision torchaudio && \
   uv pip install --python .venv/bin/python torch==2.8.0 && \
   .venv/bin/python -c \"import torch;print(torch.__version__, torch.cuda.get_arch_list())\" && \
-  .venv/bin/pytest -q"'
+  .venv/bin/pytest"'
 ```
 
 - ⛔ 仍然**不许 `uv sync`**（见 §0）；升级只用 `uv pip install <包>`（只加不减）+ 显式 `uninstall`。
 - **vllm 必须卸**：它硬 pin 精确 torch，0.10.2 起还要 `transformers>=4.55.2`，**没有任何版本能与
   torch 2.8.0 + transformers 4.53.3 共存**（4.53.3 正是写出 Phase A checkpoint 的版本）。
   `pyproject.toml` 的 `serve` extra 已随之移除；v4 四章无一依赖 vLLM。
-- 升级后必须重跑 `.venv/bin/pytest` 与一次小规模 GPU 推理确认，**不要只看 `import torch` 成功**。
+- ⚠️ **torchvision/torchaudio 的 ABI 坑（实际踩过）**：只换 torch 会留下为旧 torch 编译的
+  `torchvision 0.21.0` / `torchaudio 2.6.0`，导入即报 `operator torchvision::nms does not exist` /
+  `undefined symbol: _ZNK5torch8autograd4Node4nameEv`。**要命的是它不会直接报错退出**——`peft`
+  在 `constants.py` 里 `from transformers import BloomPreTrainedModel`，transformers 的 lazy
+  `__getattr__` 因 torchvision 崩溃而把它报成 `ModuleNotFoundError`，最终表现为
+  **10 个测试静默降级成 `SKIPPED: needs torch`**（252 passed → 242 passed，而 `import torch` 和
+  GPU 实算都正常）。v4 不用视觉/音频栈，直接卸掉即可，5090 本来就没装。
+- **验证必须看 pytest 计数，不能只看 `import torch` 成功**：升级后 4090 = `254 passed / 1 skipped`、
+  ruff 0、`ekg-smoke` OK，`cap (8,9)` 上真实 matmul 通过。5090 = `252 passed / 3 skipped`
+  （多出的 2 个 skip 是 `ESCSubWoRe.npy` 未传，非回归；两端 total 都是 255）。
 - 回滚：`uv pip install --python .venv/bin/python torch==2.6.0`（cu124 index），vllm 0.8.5 另装。
 
 ## 2. 环境

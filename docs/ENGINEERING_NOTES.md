@@ -33,6 +33,15 @@
 - **`heuristic._temporal` 默认 `corpus` scope 是真 bug**（99.93% 跨主体伪影）→ 默认改 `subject`。
 - **conformal 改 `fit(train-only)` 致 fixture 指标下降是预期**，不是回归。
 - **blackboard 不可变**：agent 只读、在 **copy** 上标注。
+- **换 torch 必须同时换 torchvision/torchaudio，否则失败会伪装成「没装 torch」**（2026-07-28，
+  4090 升 cu128 时踩）：只 `uv pip install torch==2.8.0` 会留下为 torch 2.6.0 编译的
+  `torchvision 0.21.0` / `torchaudio 2.6.0`，C 扩展 ABI 当场碎
+  （`operator torchvision::nms does not exist` / `undefined symbol: _ZNK5torch8autograd4Node4nameEv`）。
+  **但它不会直接报错退出**：`peft/utils/constants.py` 里 `from transformers import BloomPreTrainedModel`,
+  transformers 的 lazy `__getattr__` 把下游崩溃统一报成 `ModuleNotFoundError`，最终表现是
+  **10 个测试静默降级成 `SKIPPED: needs torch`**（252→242 passed），而 `import torch`、
+  `torch.cuda.is_available()`、GPU 实算**全部正常**——只看 import 会漏判。
+  **判据永远是 pytest 计数**，不是 `import torch` 成功。v4 不用视觉/音频栈，直接卸。
 - **一致性诊断枚举简单环 = 稠密图上炸内存**（2026-07-28，Phase B 首跑真实 dump 时暴露）：
   `find_cycles` 用 `nx.simple_cycles` 把**所有**简单环物化成 list，而两个调用方
   （`temporal/causal cycle count`）只用了 `len()`。简单环数随密度**超指数**增长——完全有向图
