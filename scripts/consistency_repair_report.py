@@ -130,6 +130,7 @@ def analyze(
     *,
     alpha: float = 0.2,
     cal_ratio: float = 0.3,
+    close_temporal: bool = True,
 ) -> dict:
     """Repair + risk-controlled admission over a predicted-edge dump.
 
@@ -143,11 +144,9 @@ def analyze(
     apples-to-apples (never a shrinking-population artifact).
     """
     records = [
-        (gold_docs[r["doc_id"]], _edges_from_dump(r))
-        for r in dump
-        if r["doc_id"] in gold_docs
+        (gold_docs[r["doc_id"]], _edges_from_dump(r)) for r in dump if r["doc_id"] in gold_docs
     ]
-    solver = consistency_solvers.create("greedy")
+    solver = consistency_solvers.create("greedy", close_temporal=close_temporal)
 
     # Split for calibration; keep the test split non-empty (min guard) so the
     # reported trajectory always covers real documents.
@@ -201,6 +200,16 @@ def main() -> int:
     parser.add_argument("--alpha", type=float, default=0.2, help="CRC gold-FNR bound")
     parser.add_argument("--cal-ratio", type=float, default=0.3, help="held-out calibration split")
     parser.add_argument(
+        "--no-close-temporal",
+        action="store_true",
+        help=(
+            "repair by deleting contradictions only, without adding transitive-closure "
+            "edges. Phase B added 8,770 closure edges against 8,119 drops and lost "
+            "downstream precision; closure is known to manufacture reachability that "
+            "the source text never asserted, so this isolates deletion from addition."
+        ),
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("runs/relations/consistency_repair_supervised.json"),
@@ -209,7 +218,13 @@ def main() -> int:
 
     dump = list(read_jsonl(args.dump))
     gold_docs = {doc.doc_id: doc for doc in load_maven_ere(args.gold)}
-    result = analyze(dump, gold_docs, alpha=args.alpha, cal_ratio=args.cal_ratio)
+    result = analyze(
+        dump,
+        gold_docs,
+        alpha=args.alpha,
+        cal_ratio=args.cal_ratio,
+        close_temporal=not args.no_close_temporal,
+    )
 
     text = json.dumps(result, ensure_ascii=False, indent=2)
     print(text)

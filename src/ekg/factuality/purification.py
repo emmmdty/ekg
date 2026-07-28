@@ -23,7 +23,9 @@ the same auditability contract the repair stage carries.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from bisect import bisect_left
+from collections import Counter, defaultdict
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from random import Random
 
@@ -38,6 +40,7 @@ __all__ = [
     "purify_graph",
     "purification_report",
     "random_drop_control",
+    "degree_matched_drop_control",
 ]
 
 
@@ -136,30 +139,115 @@ def purify_graph(
     )
 
 
-def random_drop_control(graph: EventGraph, n_drop: int, *, trials: int = 5, seed: int = 13) -> dict:
-    """Consistency after deleting `n_drop` nodes *at random*, averaged.
+def _node_degrees(graph: EventGraph) -> Counter[str]:
+    """Undirected degree per node (both endpoints of every edge count)."""
+    degree: Counter[str] = Counter()
+    for edge in graph.edges:
+        degree[edge.head_id] += 1
+        degree[edge.tail_id] += 1
+    return degree
 
-    The control that decides whether purification did anything. Removing any
-    nodes removes edges, and removing edges removes cycles — so "violations went
-    down after purification" is only evidence of targeted repair if it beats
-    deleting the same number of nodes blindly. Without this the claim is
-    unfalsifiable, and the same shrinkage confound already cost Phase B a
-    misread.
+
+def _shrink(graph: EventGraph, dropped: set[str]) -> EventGraph:
+    return EventGraph(
+        nodes={k: v for k, v in graph.nodes.items() if k not in dropped},
+        edges=[e for e in graph.edges if e.head_id not in dropped and e.tail_id not in dropped],
+    )
+
+
+def _average_consistency(graph: EventGraph, samples: list[set[str]]) -> dict:
+    totals: dict[str, float] = {}
+    for dropped in samples:
+        shrunk = _shrink(graph, dropped)
+        for key, value in consistency_report(shrunk).items():
+            totals[key] = totals.get(key, 0.0) + float(value)
+        totals["n_edges"] = totals.get("n_edges", 0.0) + len(shrunk.edges)
+    return {key: value / len(samples) for key, value in totals.items()}
+
+
+def random_drop_control(graph: EventGraph, n_drop: int, *, trials: int = 5, seed: int = 13) -> dict:
+    """Consistency after deleting `n_drop` nodes *uniformly at random*, averaged.
+
+    The first control: removing any nodes removes edges, and removing edges
+    removes cycles, so "violations went down after purification" is only
+    evidence of targeted repair if it beats deleting nodes blindly. Without it
+    the claim is unfalsifiable, and the same shrinkage confound already cost
+    Phase B a misread.
+
+    Note this control is *harsh*, and deliberately so: uniform random deletion
+    removes higher-degree nodes on average than a factuality policy does, and
+    random edge removal is itself a known-strong graph baseline (DropEdge,
+    ICLR 2020). Use `degree_matched_drop_control` to separate "the signal is
+    useless" from "the signal happens to select low-degree nodes".
     """
     rng = Random(seed)
     node_ids = sorted(graph.nodes)
-    totals: dict[str, float] = {}
+    samples = [set(rng.sample(node_ids, min(n_drop, len(node_ids)))) for _ in range(trials)]
+    return _average_consistency(graph, samples)
+
+
+def degree_matched_drop_control(
+    graph: EventGraph, dropped_nodes: Sequence[str], *, trials: int = 5, seed: int = 13
+) -> dict:
+    """Consistency after dropping nodes with a *matched degree distribution*.
+
+    The control that isolates the signal from the confound. CT− mentions are
+    low-degree by nature (an event asserted not to have happened attracts fewer
+    relations), so uniform random deletion removes more edges than purification
+    does and wins the comparison for free. Here each purified node is replaced
+    by an unpurified node of the nearest available degree, so the two sides
+    remove near-identical graph mass and any remaining difference is
+    attributable to *which* nodes the factuality signal picked.
+
+    ``degree_gap`` reports the mean |degree difference| of the matching, so a
+    claim of "matched" is checkable rather than asserted.
+    """
+    rng = Random(seed)
+    degree = _node_degrees(graph)
+    dropped_set = set(dropped_nodes)
+    targets = sorted(degree.get(node, 0) for node in dropped_nodes)
+
+    samples: list[set[str]] = []
+    gaps: list[float] = []
     for _ in range(trials):
-        dropped = set(rng.sample(node_ids, min(n_drop, len(node_ids))))
-        shrunk = EventGraph(
-            nodes={k: v for k, v in graph.nodes.items() if k not in dropped},
-            edges=[e for e in graph.edges if e.head_id not in dropped and e.tail_id not in dropped],
-        )
-        report = consistency_report(shrunk)
-        for key, value in report.items():
-            totals[key] = totals.get(key, 0.0) + float(value)
-        totals["n_edges"] = totals.get("n_edges", 0.0) + len(shrunk.edges)
-    return {key: value / trials for key, value in totals.items()}
+        # Pool of candidates keyed by degree; each draw consumes one so a
+        # sample never reuses a node.
+        pool: dict[int, list[str]] = defaultdict(list)
+        for node in graph.nodes:
+            if node not in dropped_set:
+                pool[degree.get(node, 0)].append(node)
+        for bucket in pool.values():
+            rng.shuffle(bucket)
+        available = sorted(pool)
+
+        chosen: set[str] = set()
+        gap = 0
+        for target in targets:
+            if not available:
+                break
+            # Nearest degree with anything left in it.
+            position = bisect_left(available, target)
+            best = min(
+                (
+                    d
+                    for d in (
+                        available[max(position - 1, 0)],
+                        available[min(position, len(available) - 1)],
+                    )
+                ),
+                key=lambda d: (abs(d - target), d),
+            )
+            gap += abs(best - target)
+            chosen.add(pool[best].pop())
+            if not pool[best]:
+                available.remove(best)
+        samples.append(chosen)
+        gaps.append(gap / len(targets) if targets else 0.0)
+
+    result = _average_consistency(graph, samples)
+    result["degree_gap"] = sum(gaps) / len(gaps)
+    result["n_dropped"] = len(samples[0]) if samples else 0
+    return result
 
 
 def purification_report(
@@ -176,13 +264,22 @@ def purification_report(
     n_nodes_before = len(before.nodes)
     n_edges_before = len(before.edges)
     n_edges_after = len(result.graph.edges)
+    run_controls = bool(result.dropped_nodes) and bool(control_trials)
     control = (
         random_drop_control(before, len(result.dropped_nodes), trials=control_trials)
-        if result.dropped_nodes and control_trials
+        if run_controls
+        else {}
+    )
+    # The uniform control is harsh (it removes higher-degree nodes on average);
+    # the degree-matched one is the fair test of the *signal*.
+    matched = (
+        degree_matched_drop_control(before, result.dropped_nodes, trials=control_trials)
+        if run_controls
         else {}
     )
     return {
         "random_control": control,
+        "degree_matched_control": matched,
         "n_nodes_before": n_nodes_before,
         "n_nodes_after": len(result.graph.nodes),
         "n_edges_before": n_edges_before,

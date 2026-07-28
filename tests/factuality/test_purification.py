@@ -8,6 +8,7 @@ from ekg.core.schema import EventGraph, EventNode, RelationEdge, RelationType
 from ekg.factuality.purification import (
     DEFAULT_POLICY,
     PurificationPolicy,
+    degree_matched_drop_control,
     purification_report,
     purify_graph,
     random_drop_control,
@@ -94,6 +95,36 @@ def test_report_quantifies_the_change_in_both_directions() -> None:
     # violations and one that merely removed edges are distinguishable.
     assert "consistency_before" in report
     assert "consistency_after" in report
+
+
+def test_degree_matched_control_picks_nodes_of_comparable_degree() -> None:
+    # m1 has degree 2 (two edges), m2 has 2, m3 has 1, m4 has 1.
+    graph = _graph()
+    matched = degree_matched_drop_control(graph, ["m3"], trials=3)
+    # m3 has degree 1, so the replacement must be the other degree-1 node.
+    assert matched["degree_gap"] == 0.0
+    assert matched["n_dropped"] == 1
+    # A matched control removes comparable graph mass, unlike the uniform one.
+    assert matched["n_edges"] >= random_drop_control(graph, 1, trials=3)["n_edges"]
+
+
+def test_degree_matched_control_reports_its_matching_quality() -> None:
+    graph = _graph()
+    matched = degree_matched_drop_control(graph, ["m1", "m3"], trials=2)
+    # The gap is reported so "matched" is checkable rather than asserted; with
+    # only 4 nodes an exact match is not always available.
+    assert "degree_gap" in matched
+    assert matched["degree_gap"] >= 0.0
+
+
+def test_report_carries_both_controls() -> None:
+    graph = _graph()
+    labels = {"m1": "CT+", "m2": "CT-", "m3": "CT+", "m4": "CT+"}
+    report = purification_report(graph, purify_graph(graph, labels), control_trials=3)
+    # Uniform answers "did it beat deleting blindly"; degree-matched answers
+    # "did the signal matter, or was it just picking low-degree nodes".
+    assert report["random_control"]["n_edges"] > 0
+    assert report["degree_matched_control"]["n_dropped"] == 1
 
 
 def test_random_control_isolates_the_shrinkage_confound() -> None:
