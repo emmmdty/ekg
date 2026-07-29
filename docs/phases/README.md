@@ -51,7 +51,7 @@ P0 主数据 ✅ ───────────────────┐
 | **C** ⭐ | Ch1 | 证据+不确定性规范事件节点（含论元、难例判别） | 检测 F1 ~60+、coref MUC ~86、误合并率↓、coref 族 FNR 从 1.000 ↓ —— **当前队首，交接见 [`PHASE_C_HANDOFF.md`](PHASE_C_HANDOFF.md)** | P0 | 轻 |
 | **C2** | Ch1 | 跨文档泛化（ECB+/CLES） | 对比 SECURE/MEET/DIE-EC | C（ECB+ raw 已有；CLES 待取） | 轻 |
 | **D** | Ch3 | 构建图上事实性检测 + 事实性驱动图净化 | macro-F1 ≥47.6、预测图掉点量化、净化下游增益 | P0(+B) | 轻 |
-| **E** | Ch4 | 下游门控闭环修复 + 三图误差传播（headline） | repaired>predicted、误差传播曲线、下游门控接受 | A·B·C·D | 重 |
+| **E** | Ch4 | 构建误差的传播、归因与预算（headline） | 三图误差曲线 + 下游损失可归因到具体动作、净化下游正面回答（~~repaired>predicted~~ **已作废**） | A·B·C·D | 重 |
 | **F** | 跨章 | 端到端误差预算（union bound+可达性，标注前提） | 端到端界 + 分层 FNR、naive vs 预算对照 | B·C·D·E | 轻 |
 | **H** | 全篇 | 多种子 13/17/42 + 消融补齐 + 投稿前新颖性扫 | 主表 mean±std、Ch2 改名定稿 | A–F | 重 |
 | **I** | — | 论文写作（非代码 phase） | 初稿 + 终辩 | 全部 | — |

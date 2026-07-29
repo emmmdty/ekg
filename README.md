@@ -14,7 +14,7 @@ EKG 从文本构建可验证的事件图谱，并研究构建误差如何影响�
 | Ch1 | 身份可信 | 证据与不确定性感知的规范事件节点 | MAVEN、MAVEN-Arg、MAVEN-ERE coref | `ekg.core` + 待建节点规范化模块 |
 | Ch2 | 结构可信 | 风险受控的多关系边、全局一致性与可追溯修复 | MAVEN-ERE | `ekg.relations` |
 | Ch3 | 事实可信 | 构建图上的事件事实性检测与图净化 | MAVEN-FACT | 待建 factuality 模块 + `core.calibration` |
-| Ch4 | 传播可信/可用 | 构建误差传播、下游门控闭环修复与可靠后继预测 | CGEP-MAVEN、ESC | `ekg.succession` + `ekg.agents` |
+| Ch4 | 传播可信/可用 | 构建误差向下游的传播、归因与预算 + 可靠后继预测 | CGEP-MAVEN、ESC | `ekg.succession` + `ekg.agents` |
 
 全篇 headline 是 **面向下游的构建误差预算 + 下游验证的闭环修复**：只在后继预测目标改善时接受
 图编辑。既有 SeDGPL、M1/M2、选择性 conformal 和受控 cross-stage 扫描是 Ch4 的可靠性模块，

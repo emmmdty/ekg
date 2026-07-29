@@ -165,7 +165,7 @@ gold query，只稀释 precision；③ **PHASE_B 止损条件已触发**，Ch2 �
 | BART-base | 2020 | 生成式 seq2seq | ⛳ | SeDGPL 最强 baseline **24.7 MRR** |
 | Llama3-8B / GPT-3.5-turbo | 2024 | 通用 LLM | 🤖 | 下界参照 |
 | **SeDGPL（DsGL+EeCE+ScEP）** | 2024 | 图 prompt learning | ⛳（**基座，自跑基线**）| 论文 27.9（不可比）/ **自跑 0.1836** |
-| **下游门控闭环修复 + CS-CRP 误差预算** | — | 闭环控制+conformal | ★ | **repaired > predicted（如实）** |
+| **三图误差分解与归因 + CS-CRP 误差预算** | — | 误差传播+conformal | ★ | **归因表 + 误差传播曲线（升降如实）**；~~repaired > predicted~~ 已作废（2026-07-29，门控天花板实测 0.24%） |
 
 ## 3. 每章消融矩阵（每个环节 = 一个可信维度的因果证据）
 

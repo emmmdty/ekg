@@ -138,3 +138,6 @@ GPU 需求：**轻**（检测可复用小模型 fine-tune）。4090 空卡直接
 - **别重蹈的两个坑**（`ENGINEERING_NOTES.md` 有详录）：① 稠密图上**不要枚举简单环**（已改 SCC 度量，
   有复杂度回归哨兵）；② 换 torch 必须连 torchvision/torchaudio 一起换，否则崩溃会伪装成
   `SKIPPED: needs torch`——**判据看 pytest 计数，不是 `import torch` 成功**。
+
+
+> ✅ **2026-07-29 更新：本条已解决。** 作者已拍板把 Ch4 headline 重定位为「构建误差向下游的传播、归因与预算」，修复降为**被测量的干预**；依据是实测的门控天花板 ≈0.24%。权威表述见 `docs/SPEC.md` §1 与重写后的 `PHASE_E_ch4_closedloop_propagation.md`。
