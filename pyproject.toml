@@ -57,20 +57,12 @@ gnn = [
     "torch==2.8.0",
     "torch-geometric>=2.6",
 ]
-# NOTE: the `serve` extra (vllm) was removed on 2026-07-27 with the move to the
-# cu128 stack. vllm hard-pins an exact torch AND requires transformers>=4.55.2
-# from 0.10.2 on, so NO vllm release is co-installable with torch 2.8.0 +
-# transformers 4.53.3 (the version that wrote the Phase A checkpoint). No v4
-# chapter needs vLLM -- the RL/GRPO line is a v3 baseline. If it is ever needed
-# again, build a separate venv for it rather than bending this stack.
-#
-# rl = GRPO post-training stack (server only). TRL 0.18.x is the release line
-# kept as a v3 relation baseline, not the v4 headline method. The `hf` rollout
-# backend needs no vLLM; the `trl vllm-serve` path is unavailable (see above).
-rl = [
-    "trl>=0.17,<0.19",
-    "torch==2.8.0",
-]
+# NOTE: the `serve` (vllm) and `rl` (trl/GRPO) extras were removed -- vllm on
+# 2026-07-27 with the move to the cu128 stack, trl on 2026-07-29 when the whole
+# generative extraction line was archived (docs/ARCHIVE_INDEX.md). No v4 chapter
+# needs either. If one is ever needed again, build a separate venv rather than
+# bending this stack: vllm hard-pins an exact torch and wants transformers>=4.55,
+# which cannot coexist with the 4.53.3 that wrote the Phase A checkpoint.
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",

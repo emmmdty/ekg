@@ -57,7 +57,7 @@ uv run --no-sync python -u scripts/<x>.py ...
 - **Phase A 已达标**：判别式 `supervised` 抽取器 causal F1 .250 / subevent .213 / temporal .338，
   召回 0.4%→67.5%，`hallucinated=0`。交付 checkpoint = `runs/relations/supervised_maven`。
 - **关键路径 = Phase B 真实图闭环**：代码 CPU 全绿，只差「GPU 产 dump → scp 回本地 → 离线分析 →
-  回填」。逐步执行照 [`phases/PHASE_B_HANDOFF.md`](phases/PHASE_B_HANDOFF.md)。
+  回填」。Phase B 的实测结果见 [`results/PHASE_B.md`](results/PHASE_B.md)。
 - **5090 于 2026-07-27 配好并验证**（`250 passed / 3 skipped`、ruff 0、`ekg-smoke` OK、sm_120 实算通过）。
   多出的 2 个 skip 是 `ESCSubWoRe.npy` 未传（ESC 数据，Phase B 用不到），**不是回归**——两端 total 都是 253。
   4090 当日全天 4 卡被他人占满（15–21G @ 99–100%），Phase B dump 因此改在 5090 跑。

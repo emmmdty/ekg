@@ -8,6 +8,8 @@ git 历史中最后一次含正文的提交是 `3390363`，可用 `git show 3390
 
 | 备份子目录 | 内容 |
 |---|---|
+| `rl_line_20260729/` | **生成式抽取 + RL 线整条**（见下） |
+| `phase_handoffs_20260729/` | Phase B/C/D/E 的四份交接稿（682 行）；实测数字已进 `docs/results/`，交接稿只是当时的一次性冷启动材料 |
 | `docs_archive/` | 下表全部 `.md` + `specs/`（三份历史设计稿） |
 | `docs_archive_large/` | `midterm/`（中期报告 38M）· `patent/`（旧专利交底书）· `chapter1/`（SARGE 图表证据）· `projects/`（答辩 PPT 工程 79M） |
 | `docs_orphans/` | `事件图谱构建研究进展.md`（v3「两章」时代综述，与 v4 四章冲突）· `OVERVIEW.html`（课题总览，内容与 SPEC 重叠） |
@@ -26,9 +28,27 @@ git 历史中最后一次含正文的提交是 `3390363`，可用 `git show 3390
 | `PHASE_G_financial_layer.md` | 旧 Phase G（金融应用验证层）契约。四章无一依赖，题目本无「金融」→ 整体移除。 |
 | `specs/` | 三份历史设计稿（2026-06-16 评测口径 · 2026-07-17 结构感知编码 · 2026-07-20 四章重设）。 |
 
+## 生成式抽取 + RL 线（2026-07-29 移出，`rl_line_20260729/`）
+
+| 移出内容 | 说明 |
+|---|---|
+| `src/ekg/rl/` → `src_ekg_rl/` | 阶段无关 RL 原语：组合奖励·组相对优势·势塑形·课程 |
+| `src/ekg/relations/rl/` → `src_relations_rl/` | GRPO-RLVR 数据集/奖励/trainer/TRL 适配 |
+| `scripts/train_relation_grpo.py`·`train_relation_extractor.py`·`_patch_vllm_nvml.py` | GRPO 训练、生成式 SFT 训练、vllm NVML 垫片 |
+| `configs/relations/grpo_rlvr*.yaml`·`ablation_grpo_*.yaml`（8 个） | GRPO 实验配置 |
+| `tests/rl/`·`tests/relations/test_{grpo_dataset,rl_rewards}.py` | 41 条测试随之移出（373 → 332） |
+| `pyproject` 的 `rl` extra（trl） | 无 v4 章节依赖 |
+
+**为何移出**：四章无一依赖。Phase A 的判别式抽取器已取代生成式那条线（生成式探针 causal 召回
+**0.4%**、subevent **0%**，判别式做到 67.5%/88.1%），SPEC §5 又表明「结构作 RLVR 奖励」是红海。
+留在仓内只增加检索面与上下文污染。**`relations/extractor/llm.py` 保留**（仍在 registry 里、被
+`llm_*` 配置与多智能体档使用）。
+
 ## 时间线
 
 - **2026-07-11**：文档体系重构，设计 / 交接 / 新颖性 / 专利类旧稿统一归档；旧「实体中心中文金融 + TKG
   外推」主线整体作废（代码在 tag `frozen-tkg-line`）。
 - **2026-07-27**：SARGE 与 Phase G 金融应用层移出主干；项目改名 `Fin-EKG` → `ekg`；归档正文与两份
   孤儿文档一并移出仓库，仓内只留本索引页。
+- **2026-07-29**：生成式抽取 + RL 线整条移出（上表）；同日 `docs/TODO.md` 的历史实测拆入
+  `docs/results/`，TODO 收为纯状态板。

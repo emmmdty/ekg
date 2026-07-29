@@ -18,7 +18,7 @@
   `relations/data/maven_ere.py`（gold events + 关系加载）、`core/schema.py`（`RelationEdge` 输出类型）、`core/registry`。
 - **新建**：`relations/extractor/supervised.py` = PLM 事件对编码（标记触发词 `<e>`）+ 逐关系类分类头。
 - **接线**：`scripts/evaluate_relations.py` 加 `--extractor supervised`，报每类 P/R/F1。
-- **参考坑**：当前 0.4% 来自生成式 SFT+GRPO（`relations/rl/`），**不是**判别式；本 phase 用判别式打底。
+- **参考坑**：当前 0.4% 来自生成式 SFT+GRPO，**不是**判别式；本 phase 用判别式打底。（生成式线已于 2026-07-29 移出仓库，见 `docs/ARCHIVE_INDEX.md`。）
 
 ## 执行内容（Steps · TDD）
 1. **测试先行**：① 从金标节点构**文档级候选对**（窗口内全配对，标签取自 gold 关系；负例=无关系对）；② 抽取器

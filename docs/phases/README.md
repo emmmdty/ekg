@@ -21,12 +21,13 @@
 ## 如何在新会话跑一个 phase
 
 **Claude Code**：进仓库 → `/clear` → 输入：
-> 读 `docs/phases/PHASE_X_*.md` 并执行。遵守 `CLAUDE.md` 硬约束与 `docs/SPEC.md` 设计。走 plan 模式先规划，能 TDD 就 TDD。完成后按该文件「验收标准」逐条自检，跑 `uv run pytest && uv run ruff check src tests scripts && uv run ekg-smoke`，把结果写进 `docs/TODO.md`。
+> 读 `docs/phases/PHASE_X_*.md` 并执行。遵守 `CLAUDE.md` 硬约束与 `docs/SPEC.md` 设计。走 plan 模式先规划，能 TDD 就 TDD。完成后按该文件「验收标准」逐条自检，跑 `uv run pytest && uv run ruff check src tests scripts && uv run ekg-smoke`，把实测数字写进 `docs/results/PHASE_X.md`、状态更新到 `docs/TODO.md`。
 
 **Codex**：仓库根有 `AGENTS.md`（与 `CLAUDE.md` 同步）→ 让 Codex 读 `docs/phases/PHASE_X_*.md`，用其 Goal/Context/Constraints/Done-when 执行，跑校验命令验收。
 
-**收尾协议（每个 phase 结束都做）**：① 校验命令全绿（`pytest` 只增不改 / `ruff` 0 / `smoke` 绿）；② 结果落 `runs/`；
-③ 更新 `docs/TODO.md`（如实：降就说降）；④ 需要提交时才提交（作者要求）。
+**收尾协议（每个 phase 结束都做）**：① 校验命令全绿（`pytest` 只增不改 / `ruff` 0 / `smoke` 绿）；
+② 产物落 `runs/`；③ **实测数字写进 `docs/results/PHASE_X.md`**（单一事实源，如实：降就说降），
+`docs/TODO.md` 只更新状态与下一步；④ 需要提交时才提交（作者要求）。
 
 ## 阶段依赖图（关键路径 A→B→C→D→E）
 
@@ -44,17 +45,20 @@ P0 主数据 ✅ ───────────────────┐
 
 ## 阶段索引（一句话 Goal + 验收 + 依赖）
 
-| Phase | 章 | Goal（一句话） | 关键验收 | 依赖 | GPU |
+| Phase | 章 | Goal（一句话） | 状态 | 依赖 | GPU |
 |---|---|---|---|---|---|
-| **A** | Ch2 | 判别式 `supervised` 关系抽取器，金标节点上 causal/subevent 可用 | causal F1 ≫0.4%（目标 ~30–37） | P0 | 重 |
-| **B** | Ch2 | 全局一致解码 + 可追溯修复 + CRC 风控准入 | ✅ 2026-07-28 跑通真实图：violation **清零**，但 R1/R2 无增益 → **止损触发**（[`PHASE_B_HANDOFF.md`](PHASE_B_HANDOFF.md)） | A | 轻 |
-| **C** | Ch1 | 证据+不确定性规范事件节点（含论元、难例判别） | 🟢 2026-07-28：MUC 79.6 vs 官方 RoBERTa-base 基线 81.4（**验收线「~86」是错的**）、难例误合并 .767→.116、ECE .0056 | P0 | 轻 |
-| **C2** | Ch1 | 跨文档泛化（ECB+/CLES） | 对比 SECURE/MEET/DIE-EC | C（ECB+ raw 已有；CLES 待取） | 轻 |
-| **D** | Ch3 | 构建图上事实性检测 + 事实性驱动图净化 | macro-F1 ≥47.6、预测图掉点量化、净化下游增益 | P0(+B) | 轻 |
-| **E** | Ch4 | 构建误差的传播、归因与预算（headline） | ✅ 2026-07-29 完成：三图 .1802/.1583/.1595，构建损失 **−.0218（唯一确凿效应）**；修复效果 100% 来自 causal 破环但与 0 及强对照均不可分；**净化下游 = 0，oracle 亦然**；风险地板 α ≥ .2935。⚠️ 图侧干预全在噪声地板 ±.003–.004 内 | A·B·C·D | 重 |
-| **F** ⭐ | 跨章 | 端到端误差预算（union bound+可达性，标注前提） | 端到端界 + 分层 FNR、naive vs 预算对照 —— **当前队首**；E 已备好实测秩/可达性掩码与风险地板 α ≥ .2935，并留下一条待决：`allocate_budget_conditional` 的 `alpha_edge` 收紧在抽取损失下不成立 | B·C·D·E | 轻 |
-| **H** | 全篇 | 多种子 13/17/42 + 消融补齐 + 投稿前新颖性扫 | 主表 mean±std、Ch2 改名定稿 | A–F | 重 |
-| **I** | — | 论文写作（非代码 phase） | 初稿 + 终辩 | 全部 | — |
+| **A** | Ch2 | 判别式 `supervised` 关系抽取器 | ⚠️ 召回已解，F1 低于官方同底座基线 → [`results/PHASE_A.md`](../results/PHASE_A.md) | P0 | 重 |
+| **B** | Ch2 | 全局一致解码 + 可追溯修复 + CRC 风控准入 | 🟡 违反清零、下游无增益（止损已触发）→ [`results/PHASE_B.md`](../results/PHASE_B.md) | A | 轻 |
+| **C** | Ch1 | 证据+不确定性规范事件节点 | ⚠️ 难例误合并大幅改善，MUC 未到官方基线 → [`results/PHASE_C.md`](../results/PHASE_C.md) | P0 | 轻 |
+| **C2** | Ch1 | 跨文档泛化（ECB+/CLES） | ⬜ 未开始；对比 SECURE/MEET/DIE-EC | C | 轻 |
+| **D** | Ch3 | 构建图上事实性检测 + 事实性驱动净化 | 🟡 检测达标、净化止损 → [`results/PHASE_D.md`](../results/PHASE_D.md) | P0(+B) | 轻 |
+| **E** | Ch4 | 构建误差的传播、归因与预算（headline） | 🟢 已完成 → [`results/PHASE_E.md`](../results/PHASE_E.md) | A·B·C·D | 重 |
+| **F** | 跨章 | 端到端误差预算（union bound+可达性） | ⬜ **暂缓**：风险地板由 Ch2 召回决定，Ch2 不抬则只是重述地板 | B·C·D·E | 轻 |
+| **H** | 全篇 | 多种子 + 消融补齐 + 投稿前新颖性扫 | ⬜ **等一个值得背书的结果**（多种子不给平结果盖章） | A–F | 重 |
+| **I** | — | 论文写作（非代码 phase） | ⬜ 等主实验 | 全部 | — |
+
+> **数字不在本表**：一律见 [`../results/`](../results/README.md)（单一事实源）。当前队首见
+> [`../TODO.md`](../TODO.md)「下一步」。
 
 > 后段（C2/F/H）细节随前段真实结果再细化——文件先给 Goal/Steps 骨架，执行前按当时产物补全。
 > 编号 A–I **刻意不重排**（大量文档引用字母编号）；G 已于 2026-07-27 整体移除，无对应 phase 文件。

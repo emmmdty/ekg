@@ -49,10 +49,11 @@ SARGE（中文金融文档级抽取）已于 **2026-07-27 移出主干**——v4
 ```text
 src/ekg/
 ├── core/         schema、I/O、图算法、registry、calibration、通用评测
-├── relations/    候选对、判别式/LLM/启发式抽取、grounding、一致性与修复、CRC 准入、旧 GRPO 基线
+├── relations/    候选对、判别式/LLM/启发式抽取、grounding、一致性与修复、CRC 准入
 ├── succession/   CGEP 数据、SeDGPL、风险感知线性化、结构编码、选择性预测、cross-stage、ECG 可重建率
-├── agents/       阶段无关的编排与黑板协议
-└── rl/           旧 GRPO 基线复用的通用奖励/课程原语
+├── nodes/        触发词检测、共指判别、规范节点与簇置信
+├── factuality/   事实性检测、证据、图净化
+└── agents/       阶段无关的编排与黑板协议
 ```
 
 ## 本地验证

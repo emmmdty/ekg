@@ -68,7 +68,7 @@
   `--extra llm` → **仍卸 109 个**（vllm/trl/ray/xformers/torchvision/torch-geometric）；全套五个 extra
   才只卸 `patchelf`/`setuptools` 构建残留。恢复要重下数 GB。**服务器一律 `.venv/bin/python`**；
   非要用 uv 就 `uv run --no-sync`。`uv pip install -e . --no-deps` 是安全的。
-  ⚠️ 这条曾潜伏在 `PHASE_B_HANDOFF` Step 1 与服务器待机脚本里（都是裸 `uv run python`）——
+  ⚠️ 这条曾潜伏在 Phase B 的交接稿与服务器待机脚本里（都是裸 `uv run python`）——
   只因待机脚本 `cd` 到改名前的旧路径先 exit 2，环境才没被拆。
 - **测试计数两端不同，不是回归**：本地无 torch = **241 passed / 12 skipped**；服务器有 torch =
   **252 passed / 1 skipped**（`test_model_skip.py` 的 skip 条件是反的：本地 skip「需要 torch」，

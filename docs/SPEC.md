@@ -92,13 +92,14 @@ src/ekg/
 ├── relations/     Ch2 关系抽取+图构建: data/·pairs.py(文档级候选与标签口径)·
 │                  extractor/(heuristic·llm·supervised 判别式对分类)·grounding/·
 │                  consistency/(全局一致解码 + RepairTrace)·admission.py(CRC 边准入 + 分层 FNR)·
-│                  rl/(GRPO-RLVR)·agents/·pipeline
+│                  agents/·pipeline
+├── nodes/         Ch1 规范节点: detection·coref(难例判别)·canonical·metrics·encoding
+├── factuality/    Ch3 事实性: detection·evidence·metrics·purification
 ├── agents/        多智能体基底: Agent/Blackboard/Stage/Orchestrator/Verifier(阶段无关)
-├── rl/            RL 基底(阶段无关): 组合奖励·组相对优势·势塑形·课程
 └── cli.py         ekg-smoke 入口(CPU 端到端冒烟)
 scripts/           功能命名 CLI: build_cgep·evaluate_cgep·profile_cgep_step / evaluate_* / train_*
 configs/relations/   YAML 实验配置
-tests/{core,succession,relations,agents,rl,scripts}/   单测 + CPU 冒烟
+tests/{core,succession,relations,nodes,factuality,agents,scripts}/   单测 + CPU 冒烟
 ```
 
 ## 4. Ch4 已有基线与可靠性模块（CGEP）
@@ -163,11 +164,10 @@ cs_crp 守覆盖到预留档(loss≤0.1)、集恒~270；**cs_cond 同覆盖下�
 "tighter sets"兑现。离散排名+无漂移下 cs_cond 覆盖在 loss=0.15/0.20 微欠 target。抽取器 0.4% 作诚实数据点；
 强抽取器诱导真实损失待 Phase A/B 完成后补齐。**这是继 M1(MRR 噪声级) 后第二个经验墙 → 价值靠方法讲干净、非端到端数字。**
 
-### 4.4 验证器即奖励（RL-reward，**降级为机制之一/消融**）
-`ekg/rl` + `relations/rl`（GRPO-RLVR：format+grounding+consistency+F1）。path RL（旧 TKG 线）已随
-主干移除（tag `frozen-tkg-line`）。**定位收缩**：新颖性复核表明「结构作 RLVR 奖励」是红海（见 §5），故 RL-reward
-不作头条卖点，仅作机制/消融。历史全设计（`RL_DESIGN.md`）已移出仓库，取回见
-[`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md)。
+### 4.4 验证器即奖励（RL-reward）—— ❌ **2026-07-29 整条线已移出主干**
+GRPO-RLVR 与生成式 SFT 抽取器（`ekg/rl`、`relations/rl`、两个训练脚本、8 个 grpo 配置）已归档到仓库外，
+四章无一依赖：Phase A 的判别式抽取器已取代它（生成式探针 causal 召回 0.4%）。新颖性复核也表明
+「结构作 RLVR 奖励」是红海（§5）。取回路径见 [`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md)。
 
 ### 4.5 下游门控的信号来源（方法论约束，防 oracle 陷阱）
 **适用范围（2026-07-29 收窄）**：门控已不是 Ch4 的 headline（见 §1），但只要论文里**出现任何**
