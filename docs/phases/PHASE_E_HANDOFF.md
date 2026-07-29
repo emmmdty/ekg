@@ -1,5 +1,11 @@
 # PHASE E · 交接（Ch4 构建误差的传播、归因与预算）
 
+> ✅ **2026-07-29 Phase E 已执行完毕，本文件转为历史交接留档，不要照它再跑一遍。**
+> 真实结果与收口意见见 [`../TODO.md`](../TODO.md) 的「Phase E 实施」段；当前队首是 **Phase F**。
+> 下面 §4 推荐的方案 3 已落地为 `succession/graph_context.py`，并额外发现一条 §4 没预见到的
+> 混淆——**边序**：SeDGPL 按存储序截断，同一边集重新序列化即可造出 p=.02 的假效应，
+> 故三图对比一律用 canonical 模板序。
+
 > **给新会话**：`/clear` 后只读本文件 + 自动载入的 `CLAUDE.md` + [`../SPEC.md`](../SPEC.md) 即可执行。
 > 原始 phase 契约见 [`PHASE_E_ch4_closedloop_propagation.md`](PHASE_E_ch4_closedloop_propagation.md)
 > （Goal/Steps 的权威，**已于 2026-07-29 整体重写**）；本文件补充上一阶段的真实结论、
