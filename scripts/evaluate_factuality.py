@@ -119,6 +119,23 @@ def predicted_edges(
     return edges
 
 
+def _load_predicted_edges(path: Path) -> dict[str, list]:
+    """Read back a `--dump-predicted-edges` file instead of re-extracting.
+
+    Extraction is the expensive half of this script and the dump exists exactly
+    so it is paid once. Reusing it also guarantees the labels here describe the
+    *same* graph the downstream propagation table scores, rather than a second
+    extraction that could differ.
+    """
+    from ekg.core.io import read_jsonl
+    from ekg.core.schema import RelationEdge
+
+    return {
+        record["doc_id"]: [RelationEdge.model_validate(e) for e in record["edges"]]
+        for record in read_jsonl(path)
+    }
+
+
 def graph_of(docs: Sequence[FactualityDocument], edges_by_doc: dict | None) -> EventGraph:
     """One corpus-level graph, from gold edges or predicted ones."""
     nodes = {n.event_id: n for doc in docs for n in doc.nodes}
@@ -150,6 +167,11 @@ def main() -> int:
         "--dump-predicted-edges",
         type=Path,
         help="write the Phase A predicted edges here (jsonl); Phase E reuses them",
+    )
+    parser.add_argument(
+        "--predicted-edges",
+        type=Path,
+        help="reuse a --dump-predicted-edges file instead of running the extractor again",
     )
     parser.add_argument(
         "--dump-labels",
@@ -214,8 +236,12 @@ def main() -> int:
         purification_report(graph_of(docs, None), purified)
     )
 
-    if args.extractor_checkpoint:
-        edges_by_doc = predicted_edges(docs, str(args.extractor_checkpoint), args.max_length)
+    if args.extractor_checkpoint or args.predicted_edges:
+        edges_by_doc = (
+            _load_predicted_edges(args.predicted_edges)
+            if args.predicted_edges
+            else predicted_edges(docs, str(args.extractor_checkpoint), args.max_length)
+        )
         result["n_predicted_edges"] = sum(len(v) for v in edges_by_doc.values())
         if args.dump_predicted_edges:
             # Extraction is the expensive half of this script; dumping means the
