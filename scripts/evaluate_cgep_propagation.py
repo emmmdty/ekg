@@ -389,6 +389,11 @@ def main() -> int:
     parser.add_argument("--limit-train", type=int, help="cap train instances (smoke)")
     parser.add_argument("--skip-perturbations", action="store_true")
     parser.add_argument(
+        "--only-arms", nargs="+",
+        help="score just these arms. Adding one arm to a finished table should cost one "
+             "arm, not a rerun of all of them -- pair it with --load-model",
+    )
+    parser.add_argument(
         "--structural-only", action="store_true",
         help="skip the predictor and report only what each arm did to the graph "
              "(consistency violations, R1/R2). Torch-free, so it runs on CPU while the "
@@ -453,6 +458,13 @@ def main() -> int:
 
     if not args.skip_perturbations:
         arms.extend(_perturbation_arms(gold_edges, args.seed))
+
+    if args.only_arms:
+        wanted = set(args.only_arms)
+        unknown = wanted - {arm.name for arm in arms}
+        if unknown:
+            raise SystemExit(f"unknown arm(s) {sorted(unknown)}; have {[a.name for a in arms]}")
+        arms = [arm for arm in arms if arm.name in wanted]
 
     if args.structural_only:
         return _run_structural(args, docs, test, arms, test_stats)
@@ -524,7 +536,9 @@ def main() -> int:
                 flush=True,
             )
 
-    baseline = report["gold"]["metrics"]["mrr"]
+    # Deltas are against gold when it was scored; otherwise absolute only, rather
+    # than silently anchoring the table to whichever arm happened to run first.
+    baseline = report["gold"]["metrics"]["mrr"] if "gold" in report else 0.0
     print(f"\n{'arm':38s}{'mrr':>9}{'d(mrr)':>9}{'strict':>9}{'reach':>8}{'tmpl':>8}")
     for key, row in report.items():
         print(f"{key:38s}{row['metrics']['mrr']:>9.4f}"
