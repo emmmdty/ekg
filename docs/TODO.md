@@ -1,6 +1,6 @@
 # EKG TODO / 实时状态
 
-> 更新于 **2026-07-28**。本文件只记录 v4 的当前执行位置、已验证证据和下一步；设计定义见
+> 更新于 **2026-07-29**。本文件只记录 v4 的当前执行位置、已验证证据和下一步；设计定义见
 > [`SPEC.md`](SPEC.md)，阶段验收见 [`phases/`](phases/README.md)，历史路线的留档索引见
 > [`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md)（正文已移出仓库）。
 
@@ -14,7 +14,7 @@
   **被精确测量、可归因的干预**，但不再声称它提升下游。依据与数字见下「文献驱动的两条探路」段与 SPEC §1。
 - **关键路径进展**：Phase A ✅ 达标（causal F1 .250，召回 .4%→67.5%）→ Phase B 🟡 违反清零但下游无增益
   （止损）→ Phase C 🟢 MUC 79.6 vs 官方 81.4 基本达标 → **Phase D 🟡 检测达标（valid macro-F1 .4823）、
-  净化止损**（2026-07-28）。**A·B·C·D 已齐，关键路径转 Phase E（Ch4 闭环 headline）。**
+  净化止损**（2026-07-28）。**A·B·C·D 已齐，关键路径转 Phase E（Ch4 headline，交接见 `phases/PHASE_E_HANDOFF.md`）。**
 - **执行状态**：P0 数据完成；A/B/C/D 均已跑出真实数字（见下各节，升降如实）。
   **两个未决口径已于 2026-07-29 拍板**：① Ch4 headline 重定位为「误差传播、归因与预算」（见上）；
   ② Phase D 净化的下游价值仍由 E 判定，**E 必须正面回答、不得绕开**；若 E 也无增益，
@@ -540,6 +540,8 @@ checkpoint 与 **预测边 dump `runs/factuality/predicted_edges_valid.jsonl`（
    ③ **净化 = 负结果**：加随机剔除对照后，净化在每项一致性指标上都不如随机剔同样数量节点
    （因 CT− 本就是低度数节点）。**结构一致性这条路已封**，价值改由 Phase E 的后继预测判定。
 4. **⭐当前队首 = Phase E（Ch4 三图误差传播与归因）**，A·B·C·D 已齐；两个口径已于 2026-07-29 拍板。
+   **新会话照 [`phases/PHASE_E_HANDOFF.md`](phases/PHASE_E_HANDOFF.md) 执行**（含 headline 重定位的依据、
+   A–D 数字、实测环境、★三图评测的接入点与设计决策、强对照与门控红线）。
    **E 的任务按新 headline 改写为**：
    (a) **三图误差分解** —— gold / predicted / repaired 上跑同一个 SeDGPL，把下游损失拆开并
    **归因到具体的构建与修复动作**（已有的归因样板：1.4 万次 temporal 编辑按构造零影响、
