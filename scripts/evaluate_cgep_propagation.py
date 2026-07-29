@@ -313,6 +313,13 @@ def main() -> int:
     parser.add_argument("--limit-train", type=int, help="cap train instances (smoke)")
     parser.add_argument("--skip-perturbations", action="store_true")
     parser.add_argument("--save-model", type=Path, help="write the fitted weights here")
+    parser.add_argument(
+        "--load-model",
+        type=Path,
+        help="score with weights from a previous --save-model instead of fitting. The "
+             "vocabulary is rebuilt from the instances, so --train/--gold/--limit-* must "
+             "match the run that saved them or every <a_i> token would re-map",
+    )
     parser.add_argument("--output", type=Path, default=Path("runs/cgep/ch4_propagation.json"))
     parser.add_argument("--ranks-output", type=Path,
                         help="per-instance gold ranks and reachability, per arm")
@@ -366,10 +373,14 @@ def main() -> int:
         arms.extend(_perturbation_arms(gold_edges, args.seed))
 
     predictor = _build_predictor(args, train, test)
-    predictor.fit(train)
-    if args.save_model:
-        predictor.save(str(args.save_model))
-        print(f"[prop] saved weights to {args.save_model}")
+    if args.load_model:
+        predictor.load(str(args.load_model))
+        print(f"[prop] scoring with weights from {args.load_model}")
+    else:
+        predictor.fit(train)
+        if args.save_model:
+            predictor.save(str(args.save_model))
+            print(f"[prop] saved weights to {args.save_model}")
 
     selectors = [args.edge_selector]
     if args.also_distance_selector:
