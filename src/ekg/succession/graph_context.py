@@ -37,6 +37,26 @@ than invented here:
 What the constructed graph *does* get to change: which edges exist, how many
 there are (the predicted MAVEN graph is ~5x denser in causal+subevent than gold,
 so the 20-edge budget starts to bite), and what they say.
+
+**Edge order is a confound and has to be chosen deliberately.** SeDGPL's budget
+keeps the first 20 edges in *stored* order, so two graphs holding the identical
+edge set can still yield different prompts if a pipeline stage re-serialised
+them. That is not hypothetical here: Phase B's repair with cycle-breaking
+disabled produces the byte-identical template *set* as the raw predicted graph on
+94/94 sampled instances, yet a different order on 58 of them -- and a measurably
+different MRR. So `order` is explicit:
+
+* ``"source"`` keeps the constructed graph's own edge order. Gold in, gold out,
+  byte-identical, which is what makes the `gold` arm the published baseline
+  rather than a re-derivation.
+* ``"canonical"`` sorts the template, making the prompt a function of the edge
+  *set* alone. Two arms that differ only in serialisation then score identically,
+  which is the precondition for attributing a difference to graph content.
+
+Instances inside the 20-edge budget are unaffected either way -- `linearize`
+re-orders survivors by distance regardless -- so the two protocols differ only on
+the over-budget minority, and the size of that difference is itself a measure of
+what the truncation policy is worth.
 """
 
 from __future__ import annotations
@@ -77,6 +97,7 @@ def swap_graph_context(
     edges_by_doc: Mapping[str, Sequence[RelationEdge]],
     *,
     include_subevent: bool = True,
+    order: str = "source",
 ) -> ContextSwap:
     """Re-template `instances` onto the graphs in `edges_by_doc`.
 
@@ -84,7 +105,13 @@ def swap_graph_context(
     error: an extractor that returned nothing for a document is a real outcome
     and must be scored, not skipped. Instances are never dropped -- the test set
     has to stay identical across graphs or the MRRs stop being comparable.
+
+    `order` picks the serialisation protocol (see the module docstring):
+    ``"source"`` preserves the constructed graph's own order, ``"canonical"``
+    sorts so the prompt depends on the edge set alone.
     """
+    if order not in ("source", "canonical"):
+        raise ValueError(f"unknown template order {order!r}")
     swapped: list[CgepInstance] = []
     reachable: list[bool] = []
     totals = {
@@ -119,6 +146,9 @@ def swap_graph_context(
                 continue
             seen.add(key)
             template.append(key)
+
+        if order == "canonical":
+            template.sort()
 
         gold_template = set(instance.template_edges)
         totals["template_edges"] += len(template)

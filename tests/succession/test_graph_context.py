@@ -84,6 +84,34 @@ def test_gold_in_gold_out_is_byte_identical() -> None:
     assert swap.reachable == (True,)
 
 
+def test_canonical_order_makes_the_prompt_a_function_of_the_edge_set() -> None:
+    """Re-serialising the same graph must not change the answer.
+
+    It does under the default protocol, because SeDGPL's budget keeps the first
+    20 edges in *stored* order -- measured on real data as 94/94 identical
+    template sets but only 36/94 identical orders between the raw predicted
+    graph and its cycle-break-disabled repair. Attribution needs the confound
+    gone, which is what `order="canonical"` is for.
+    """
+    doc = _document()
+    instances = _instances(doc)
+    shuffled = list(reversed(doc.gold_edges))
+
+    source = swap_graph_context(instances, {doc.doc_id: shuffled})
+    canonical_a = swap_graph_context(instances, {doc.doc_id: shuffled}, order="canonical")
+    canonical_b = swap_graph_context(instances, {doc.doc_id: doc.gold_edges}, order="canonical")
+
+    assert source.instances[0].edges != instances[0].edges  # order survived
+    assert set(source.instances[0].template_edges) == set(instances[0].template_edges)
+    assert canonical_a.instances[0].edges == canonical_b.instances[0].edges
+
+
+def test_unknown_template_order_is_rejected() -> None:
+    doc = _document()
+    with pytest.raises(ValueError):
+        swap_graph_context(_instances(doc), {doc.doc_id: doc.gold_edges}, order="stored")
+
+
 def test_constructed_edge_touching_the_answer_is_blocked() -> None:
     """A predicted edge into the gold successor must not print the answer token."""
     doc = _document()

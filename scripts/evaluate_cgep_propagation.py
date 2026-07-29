@@ -306,6 +306,14 @@ def main() -> int:
     parser.add_argument("--also-distance-selector", action="store_true",
                         help="re-score every arm under the distance budget too; separates "
                              "'the graph is wrong' from 'the graph is too dense for the budget'")
+    parser.add_argument(
+        "--template-order", default="canonical", choices=("source", "canonical"),
+        help="'canonical' makes the prompt a function of the edge set alone, which is "
+             "what an attribution run needs -- SeDGPL truncates by stored order, so two "
+             "arms holding the same edges but serialised differently otherwise score "
+             "differently. 'source' keeps document order and reproduces the published "
+             "gold baseline byte-for-byte",
+    )
     parser.add_argument("--alpha-total", type=float, default=0.2)
     parser.add_argument("--cal-ratio", type=float, default=0.5)
     parser.add_argument("--seed", type=int, default=209)
@@ -388,11 +396,29 @@ def main() -> int:
 
     report: dict[str, dict] = {}
     ranks_dump: dict[str, dict] = {}
+    header = {
+        "predictor": args.predictor,
+        "n_docs": len(docs),
+        "cgep_stats": test_stats,
+        "epochs": args.epochs,
+        "template_order": args.template_order,
+        "alpha_total": args.alpha_total,
+        "seed": args.seed,
+    }
+
+    def flush() -> None:
+        """Persist after every arm: this loop runs for hours on a shared GPU."""
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps({**header, "arms": report}, indent=2), encoding="utf-8")
+        if args.ranks_output:
+            args.ranks_output.parent.mkdir(parents=True, exist_ok=True)
+            args.ranks_output.write_text(json.dumps(ranks_dump), encoding="utf-8")
+
     for selector in selectors:
         if args.predictor == "sedgpl":
             predictor.set_edge_selector(selector)
         for arm in arms:
-            swap = swap_graph_context(test, arm.edges_by_doc)
+            swap = swap_graph_context(test, arm.edges_by_doc, order=args.template_order)
             ranked = rank_instances(predictor, swap.instances)
             metrics = metrics_of(ranked)
             key = arm.name if selector == args.edge_selector else f"{arm.name}::{selector}"
@@ -413,6 +439,7 @@ def main() -> int:
                 ),
             }
             ranks_dump[key] = {"ranks": ranks, "reachable": reachable}
+            flush()
             print(
                 f"[prop] {key:38s} mrr={metrics['mrr']:.4f} strict={metrics['mrr_strict']:.4f} "
                 f"h@1={metrics['hits@1']:.4f} reach={swap.stats['reachability_rate']:.4f} "
@@ -429,26 +456,9 @@ def main() -> int:
               f"{row['swap']['reachability_rate']:>8.4f}"
               f"{row['swap']['mean_template_edges']:>8.1f}")
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(
-            {
-                "predictor": args.predictor,
-                "n_docs": len(docs),
-                "cgep_stats": test_stats,
-                "epochs": args.epochs,
-                "alpha_total": args.alpha_total,
-                "seed": args.seed,
-                "arms": report,
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+    flush()
     print(f"\n[prop] wrote {args.output}")
     if args.ranks_output:
-        args.ranks_output.parent.mkdir(parents=True, exist_ok=True)
-        args.ranks_output.write_text(json.dumps(ranks_dump), encoding="utf-8")
         print(f"[prop] wrote {args.ranks_output}")
     return 0
 
