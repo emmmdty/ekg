@@ -50,6 +50,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from ekg.core.calibration.propagation import compare_cross_stage_methods
+from ekg.core.eval.consistency import consistency_report
 from ekg.core.io import read_jsonl
 from ekg.core.schema import EventGraph, RelationEdge
 from ekg.factuality.purification import (
@@ -65,6 +66,7 @@ from ekg.succession.graph_context import swap_graph_context
 from ekg.succession.linearize import EDGE_BUDGET, EventVocabulary
 from ekg.succession.perturbation import graph_perturbations
 from ekg.succession.predictor import metrics_of, rank_instances, successor_predictors
+from ekg.succession.reconstruction import corpus_reconstruction
 
 _MAVEN = Path("data/processed/maven_ere")
 
@@ -234,6 +236,31 @@ def _perturbation_arms(gold: dict[str, list[RelationEdge]], seed: int) -> list[A
     return arms
 
 
+def _structural_report(
+    docs: list[RelationDocument], edges_by_doc: dict[str, list[RelationEdge]]
+) -> dict:
+    """The structural view of one arm: consistency violations plus R1/R2.
+
+    Reported alongside the downstream metrics because Ch4's claim is that the two
+    views *disagree* -- purification removes the semantically wrong nodes without
+    removing cycles, repair removes cycles without buying reconstructability. A
+    claim like that is only checkable if both are measured on the same graphs.
+    """
+    pairs = [(doc, _graph(doc, edges_by_doc.get(doc.doc_id, []))) for doc in docs]
+    consistency: dict[str, float] = {}
+    for _, graph in pairs:
+        for key, value in consistency_report(graph).items():
+            consistency[key] = consistency.get(key, 0.0) + value
+    return {
+        "consistency": consistency,
+        "reconstruction": corpus_reconstruction(pairs),
+        "n_edges": float(sum(len(edges) for edges in edges_by_doc.values())),
+        "n_topology_edges": float(
+            sum(len(topology_triples(edges)) for edges in edges_by_doc.values())
+        ),
+    }
+
+
 def _budget_report(
     ranks: list[float], reachable: list[bool], *, alpha_total: float, cal_ratio: float, seed: int
 ) -> dict[str, dict[str, float]]:
@@ -268,6 +295,47 @@ def _budget_report(
         }
         for method, result in results.items()
     }
+
+
+def _run_structural(
+    args, docs: list[RelationDocument], test: list[CgepInstance], arms: list[Arm], stats: dict
+) -> int:
+    """The torch-free half: what each arm does to the graph, before any reasoning.
+
+    Kept in this script rather than a separate one so both halves are built from
+    exactly the same arm definitions -- a structural table assembled from a
+    second, drifting copy of the arm code would not be comparable with the
+    downstream one, which is the whole point of measuring both.
+    """
+    report: dict[str, dict] = {}
+    for arm in arms:
+        swap = swap_graph_context(test, arm.edges_by_doc, order=args.template_order)
+        structural = _structural_report(docs, arm.edges_by_doc)
+        report[arm.name] = {
+            "family": arm.family,
+            "graph_meta": arm.meta,
+            "swap": swap.stats,
+            **structural,
+        }
+        prf = structural["reconstruction"]["r2_query_prf"]
+        r1 = structural["reconstruction"]["r1_reachability_rate"]
+        scc = structural["consistency"]["causal_cyclic_scc"]
+        print(
+            f"[struct] {arm.name:38s} r1={r1:.4f} r2f1={prf['f1']:.4f} "
+            f"causal_scc={scc:.0f} topo={structural['n_topology_edges']:.0f}",
+            flush=True,
+        )
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(
+        json.dumps(
+            {"mode": "structural", "n_docs": len(docs), "cgep_stats": stats,
+             "template_order": args.template_order, "seed": args.seed, "arms": report},
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    print(f"\n[struct] wrote {args.output}")
+    return 0
 
 
 def _build_predictor(args, train: list[CgepInstance], test: list[CgepInstance]):
@@ -320,6 +388,12 @@ def main() -> int:
     parser.add_argument("--limit-docs", type=int, help="first N valid documents (smoke)")
     parser.add_argument("--limit-train", type=int, help="cap train instances (smoke)")
     parser.add_argument("--skip-perturbations", action="store_true")
+    parser.add_argument(
+        "--structural-only", action="store_true",
+        help="skip the predictor and report only what each arm did to the graph "
+             "(consistency violations, R1/R2). Torch-free, so it runs on CPU while the "
+             "GPU table is still training",
+    )
     parser.add_argument("--save-model", type=Path, help="write the fitted weights here")
     parser.add_argument(
         "--load-model",
@@ -379,6 +453,9 @@ def main() -> int:
 
     if not args.skip_perturbations:
         arms.extend(_perturbation_arms(gold_edges, args.seed))
+
+    if args.structural_only:
+        return _run_structural(args, docs, test, arms, test_stats)
 
     predictor = _build_predictor(args, train, test)
     if args.load_model:

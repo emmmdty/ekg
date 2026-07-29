@@ -27,7 +27,6 @@ import json
 from pathlib import Path
 
 from ekg.core.eval.consistency import consistency_report
-from ekg.core.eval.relation import PRF
 from ekg.core.io import read_jsonl
 from ekg.core.schema import EventGraph, RelationEdge, RelationType
 from ekg.relations.admission import (
@@ -38,7 +37,7 @@ from ekg.relations.admission import (
 from ekg.relations.consistency import RepairTrace, consistency_solvers
 from ekg.relations.data import load_maven_ere
 from ekg.relations.data.maven_ere import RelationDocument
-from ekg.succession.reconstruction import ecg_reachable_flags, reconstruction_report
+from ekg.succession.reconstruction import corpus_reconstruction, ecg_reachable_flags
 
 STAGES = ("raw", "repaired", "repaired_admitted")
 
@@ -78,30 +77,7 @@ def _sum_consistency(graphs: list[EventGraph]) -> dict[str, float]:
 
 def _aggregate_reconstruction(pairs: list[tuple[RelationDocument, EventGraph]]) -> dict:
     """Corpus R1 reachability rate + micro-aggregated R2 query-edge PRF."""
-    reachable = queries = ecgs = 0
-    tp = n_pred = n_gold = 0
-    for doc, graph in pairs:
-        report = reconstruction_report(doc, graph)
-        reachable += report["r1_reachable"]
-        queries += report["n_gold_queries"]
-        ecgs += report["n_gold_ecgs"]
-        prf = report["r2_query_prf"]
-        tp, n_pred, n_gold = tp + prf["tp"], n_pred + prf["n_pred"], n_gold + prf["n_gold"]
-    agg = PRF.from_counts(tp, n_pred, n_gold)
-    return {
-        "n_gold_ecgs": ecgs,
-        "n_gold_queries": queries,
-        "r1_reachable": reachable,
-        "r1_reachability_rate": reachable / queries if queries else 0.0,
-        "r2_query_prf": {
-            "precision": float(agg["precision"]),
-            "recall": float(agg["recall"]),
-            "f1": float(agg["f1"]),
-            "tp": int(agg["tp"]),
-            "n_pred": int(agg["n_pred"]),
-            "n_gold": int(agg["n_gold"]),
-        },
-    }
+    return corpus_reconstruction(pairs)
 
 
 def _trace_sample(trace: RepairTrace | None) -> dict | None:
