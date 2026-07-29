@@ -33,6 +33,7 @@ from __future__ import annotations
 import random
 import time
 from collections.abc import Sequence
+from pathlib import Path
 
 from ekg.succession.data.cgep import CgepInstance
 from ekg.succession.encode import EncodedInstance, build_tokenizer, encode_instance
@@ -89,6 +90,49 @@ class SeDGPLPredictor(SuccessorPredictor):
         self._vocab = vocabulary
         self._tokenizer = None
         self._model = None
+
+    def set_edge_selector(self, name: str) -> None:
+        """Swap the linearisation budget policy without refitting.
+
+        The selector only decides *which* template edges survive the 20-edge
+        budget; the trained weights never see it. So one fit can be scored under
+        both policies, which is what separates "the constructed graph is wrong"
+        from "the constructed graph is too dense for the budget" -- a real
+        confound here, since the predicted MAVEN graph is several times denser in
+        causal+subevent than gold.
+        """
+        self.edge_selector = name
+        self._select = edge_selectors.create(name)
+
+    def save(self, path: str) -> None:
+        """Persist the fitted weights.
+
+        Training is the expensive half (~2.5h) and scoring one more graph is
+        minutes, so an arm added after the fact must not cost another fit. The
+        vocabulary is *not* saved: it is derived from the instances and must be
+        rebuilt identically by the caller, and silently reloading a stale one
+        would mis-map every `<a_i>` token.
+        """
+        import torch
+
+        if self._model is None:
+            raise RuntimeError("SeDGPLPredictor.save called before fit")
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        torch.save(self._model.state_dict(), path)
+
+    def load(self, path: str) -> None:
+        """Restore weights saved by `save`, ready to `score` without fitting."""
+        import torch
+
+        from ekg.succession.encode import subword_initialisers
+
+        self._tokenizer = build_tokenizer(self.model_path, self._vocab)
+        self._model = build_sedgpl(
+            self.model_path, len(self._tokenizer), enable_structure=self.enable_structure
+        ).to(self.device)
+        self._model.initialise_event_tokens(subword_initialisers(self._tokenizer, self._vocab))
+        self._model.load_state_dict(torch.load(path, map_location=self.device))
+        self._model.eval()
 
     def _encode(self, instance: CgepInstance) -> EncodedInstance | None:
         try:

@@ -15,6 +15,7 @@ import hashlib
 from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Sequence
+from dataclasses import dataclass
 
 from ekg.core.registry import Registry
 from ekg.succession.data.cgep import CgepInstance
@@ -23,9 +24,12 @@ from ekg.succession.metrics import HITS_AT, cgep_metrics, sedgpl_rank, strict_ra
 __all__ = [
     "FrequencySuccessorPredictor",
     "RandomSuccessorPredictor",
+    "RankedInstances",
     "SuccessorPredictor",
     "UnscorableInstance",
     "evaluate",
+    "metrics_of",
+    "rank_instances",
     "successor_predictors",
 ]
 
@@ -101,6 +105,54 @@ class RandomSuccessorPredictor(SuccessorPredictor):
         return scores
 
 
+@dataclass(frozen=True)
+class RankedInstances:
+    """Gold's rank per instance under both tie-break conventions, plus failures.
+
+    `unscorable[i]` marks an instance the predictor could not encode at all. Its
+    rank is recorded as the worst possible one, which is what `evaluate` charges
+    it; a downstream calibrator that wants a guaranteed miss instead should read
+    the flag and substitute infinity rather than trusting the worst rank, since
+    "worst" is still finite and coverable by a wide enough set.
+    """
+
+    optimistic: tuple[int, ...]
+    strict: tuple[int, ...]
+    unscorable: tuple[bool, ...]
+
+
+def rank_instances(
+    predictor: SuccessorPredictor, instances: Sequence[CgepInstance]
+) -> RankedInstances:
+    """Score every instance exactly once and keep both rankings.
+
+    Split out of `evaluate` because the ranks themselves are the nonconformity
+    scores the cross-stage budget consumes, and a SeDGPL forward pass is far too
+    expensive to pay for twice just to read them out.
+    """
+    optimistic: list[int] = []
+    strict: list[int] = []
+    unscorable: list[bool] = []
+    for instance in instances:
+        try:
+            scores = predictor.score(instance)
+        except UnscorableInstance:
+            worst = len(instance.candidates) - 1
+            optimistic.append(worst)
+            strict.append(worst)
+            unscorable.append(True)
+            continue
+        if len(scores) != len(instance.candidates):
+            raise ValueError(
+                f"{type(predictor).__name__} scored {len(scores)} of "
+                f"{len(instance.candidates)} candidates for {instance.instance_id}"
+            )
+        optimistic.append(sedgpl_rank(scores, instance.label))
+        strict.append(strict_rank(scores, instance.label))
+        unscorable.append(False)
+    return RankedInstances(tuple(optimistic), tuple(strict), tuple(unscorable))
+
+
 def evaluate(
     predictor: SuccessorPredictor,
     instances: Sequence[CgepInstance],
@@ -115,28 +167,13 @@ def evaluate(
     are reported as `n_unscorable`. They are never dropped from the denominator:
     a pipeline that fails to encode an instance has not answered it.
     """
-    optimistic: list[int] = []
-    strict: list[int] = []
-    unscorable = 0
-    for instance in instances:
-        try:
-            scores = predictor.score(instance)
-        except UnscorableInstance:
-            unscorable += 1
-            worst = len(instance.candidates) - 1
-            optimistic.append(worst)
-            strict.append(worst)
-            continue
-        if len(scores) != len(instance.candidates):
-            raise ValueError(
-                f"{type(predictor).__name__} scored {len(scores)} of "
-                f"{len(instance.candidates)} candidates for {instance.instance_id}"
-            )
-        optimistic.append(sedgpl_rank(scores, instance.label))
-        strict.append(strict_rank(scores, instance.label))
+    return metrics_of(rank_instances(predictor, instances), hits_at)
 
-    metrics = cgep_metrics(optimistic, hits_at)
-    tight = cgep_metrics(strict, hits_at)
+
+def metrics_of(ranked: RankedInstances, hits_at: Sequence[int] = HITS_AT) -> dict[str, float]:
+    """The CGEP headline metrics of an already-scored instance set."""
+    metrics = cgep_metrics(ranked.optimistic, hits_at)
+    tight = cgep_metrics(ranked.strict, hits_at)
     metrics.update({f"{k}_strict": v for k, v in tight.items() if k != "n"})
-    metrics["n_unscorable"] = float(unscorable)
+    metrics["n_unscorable"] = float(sum(ranked.unscorable))
     return metrics

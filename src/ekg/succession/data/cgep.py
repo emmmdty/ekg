@@ -60,7 +60,7 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from string import punctuation
 
-from ekg.core.schema import RelationType
+from ekg.core.schema import RelationEdge, RelationType
 from ekg.relations.data.maven_ere import RelationDocument
 
 __all__ = [
@@ -73,6 +73,7 @@ __all__ = [
     "build_cgep",
     "extract_ecgs",
     "query_edge_indices",
+    "topology_triples",
 ]
 
 # SeDGPL uses 512 candidates on MAVEN and 256 on ESC.
@@ -216,15 +217,31 @@ def _representatives(doc: RelationDocument) -> dict[str, CgepNode]:
     return out
 
 
+def topology_triples(
+    edges: Iterable[RelationEdge], *, include_subevent: bool = True
+) -> list[tuple[str, str, str]]:
+    """The ``(head_id, subtype, tail_id)`` triples that carry ECG topology.
+
+    Causal ``CAUSE``/``PRECONDITION`` plus, optionally, ``subevent`` -- and
+    nothing else. Temporal edges are excluded here and therefore *cannot* reach
+    the downstream reader, which is why a temporal-only edit is a structural
+    no-op on CGEP rather than a small effect (docs/phases/PHASE_E, §0).
+
+    Shared by the gold ECG builder and by anything that feeds a *constructed*
+    graph downstream, so one rule decides what counts as topology.
+    """
+    triples: list[tuple[str, str, str]] = []
+    for edge in edges:
+        if edge.relation_type is RelationType.CAUSAL and edge.subtype in _CAUSAL_SUBTYPES:
+            triples.append((edge.head_id, edge.subtype, edge.tail_id))
+        elif include_subevent and edge.relation_type is RelationType.SUBEVENT:
+            triples.append((edge.head_id, edge.subtype or "SUBEVENT_OF", edge.tail_id))
+    return triples
+
+
 def _topology_edges(doc: RelationDocument, *, include_subevent: bool) -> list[tuple[str, str, str]]:
     """Causal (+ optionally subevent) edges between representative mentions."""
-    edges: list[tuple[str, str, str]] = []
-    for edge in doc.gold_edges:
-        if edge.relation_type is RelationType.CAUSAL and edge.subtype in _CAUSAL_SUBTYPES:
-            edges.append((edge.head_id, edge.subtype, edge.tail_id))
-        elif include_subevent and edge.relation_type is RelationType.SUBEVENT:
-            edges.append((edge.head_id, edge.subtype or "SUBEVENT_OF", edge.tail_id))
-    return edges
+    return topology_triples(doc.gold_edges, include_subevent=include_subevent)
 
 
 def extract_ecgs(

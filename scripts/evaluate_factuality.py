@@ -151,6 +151,12 @@ def main() -> int:
         type=Path,
         help="write the Phase A predicted edges here (jsonl); Phase E reuses them",
     )
+    parser.add_argument(
+        "--dump-labels",
+        type=Path,
+        help="write {mention_id: factuality} for the predicted graph here (json); "
+             "Phase E's purification arm reads it instead of re-running the detector",
+    )
     parser.add_argument("--output", type=Path, help="write the report JSON here")
     args = parser.parse_args()
 
@@ -247,6 +253,13 @@ def main() -> int:
         result["purification_predicted_graph"] = _serializable(
             purification_report(before, purify_graph(before, predicted_labels, DEFAULT_POLICY))
         )
+        if args.dump_labels:
+            # The labels conditioned on the *predicted* graph, which is the graph
+            # Phase E purifies. Dumping them means the downstream propagation
+            # table can add a purification arm without re-running the detector.
+            args.dump_labels.parent.mkdir(parents=True, exist_ok=True)
+            args.dump_labels.write_text(json.dumps(predicted_labels), encoding="utf-8")
+            print(f"wrote {len(predicted_labels)} predicted labels to {args.dump_labels}")
 
     _write(result, args.output)
     return 0

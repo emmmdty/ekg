@@ -41,6 +41,7 @@ __all__ = [
     "purification_report",
     "random_drop_control",
     "degree_matched_drop_control",
+    "degree_matched_samples",
 ]
 
 
@@ -186,21 +187,15 @@ def random_drop_control(graph: EventGraph, n_drop: int, *, trials: int = 5, seed
     return _average_consistency(graph, samples)
 
 
-def degree_matched_drop_control(
+def degree_matched_samples(
     graph: EventGraph, dropped_nodes: Sequence[str], *, trials: int = 5, seed: int = 13
-) -> dict:
-    """Consistency after dropping nodes with a *matched degree distribution*.
+) -> tuple[list[set[str]], list[float]]:
+    """`trials` node sets matching `dropped_nodes`' degree distribution, and the gaps.
 
-    The control that isolates the signal from the confound. CT− mentions are
-    low-degree by nature (an event asserted not to have happened attracts fewer
-    relations), so uniform random deletion removes more edges than purification
-    does and wins the comparison for free. Here each purified node is replaced
-    by an unpurified node of the nearest available degree, so the two sides
-    remove near-identical graph mass and any remaining difference is
-    attributable to *which* nodes the factuality signal picked.
-
-    ``degree_gap`` reports the mean |degree difference| of the matching, so a
-    claim of "matched" is checkable rather than asserted.
+    Split out from `degree_matched_drop_control` so the same matched sample can
+    be turned into an actual control *graph* for a downstream evaluation, not
+    only into consistency statistics. Each returned gap is the mean absolute
+    degree difference of that trial's matching.
     """
     rng = Random(seed)
     degree = _node_degrees(graph)
@@ -244,6 +239,26 @@ def degree_matched_drop_control(
         samples.append(chosen)
         gaps.append(gap / len(targets) if targets else 0.0)
 
+    return samples, gaps
+
+
+def degree_matched_drop_control(
+    graph: EventGraph, dropped_nodes: Sequence[str], *, trials: int = 5, seed: int = 13
+) -> dict:
+    """Consistency after dropping nodes with a *matched degree distribution*.
+
+    The control that isolates the signal from the confound. CT− mentions are
+    low-degree by nature (an event asserted not to have happened attracts fewer
+    relations), so uniform random deletion removes more edges than purification
+    does and wins the comparison for free. Here each purified node is replaced
+    by an unpurified node of the nearest available degree, so the two sides
+    remove near-identical graph mass and any remaining difference is
+    attributable to *which* nodes the factuality signal picked.
+
+    ``degree_gap`` reports the mean |degree difference| of the matching, so a
+    claim of "matched" is checkable rather than asserted.
+    """
+    samples, gaps = degree_matched_samples(graph, dropped_nodes, trials=trials, seed=seed)
     result = _average_consistency(graph, samples)
     result["degree_gap"] = sum(gaps) / len(gaps)
     result["n_dropped"] = len(samples[0]) if samples else 0
