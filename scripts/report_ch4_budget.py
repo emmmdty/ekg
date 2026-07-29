@@ -16,6 +16,17 @@ so any ``alpha_total`` below the measured unreachability is unattainable by
 construction. A budget table that omits that floor would show three methods
 "failing" where in fact no method could succeed.
 
+A fifth method sits beside the four `compare_cross_stage_methods` returns.
+`cs_crp_cond` certifies the unreachability rate ``u`` from held-out outcomes and
+then *tightens* it with the construction stage's CRC bound ``alpha_edge``, taking
+the minimum of the two. That is sound only while the reachability loss is
+produced by the admission stage ``alpha_edge`` bounds. Here it is not -- the loss
+comes from **extraction**, which no CRC bound covers -- so the tightening asserts
+an upper bound that does not hold and the recycler under-covers. Running the
+budget against measured rather than synthetic loss is what makes that visible, so
+``cs_crp_measured`` (the same recycler with the tightening dropped) is reported
+next to it rather than the library being quietly changed.
+
     uv run python scripts/report_ch4_budget.py --ranks runs/cgep/ch4_propagation_ranks.json
 """
 
@@ -27,9 +38,13 @@ import math
 import random
 from pathlib import Path
 
-from ekg.core.calibration.propagation import compare_cross_stage_methods
+from ekg.core.calibration.propagation import (
+    allocate_budget_conditional,
+    compare_cross_stage_methods,
+    run_cross_stage,
+)
 
-_METHODS = ("naive", "bonferroni", "cs_crp", "cs_crp_cond")
+_METHODS = ("naive", "bonferroni", "cs_crp", "cs_crp_cond", "cs_crp_measured")
 _DEFAULT_ALPHAS = (0.1, 0.2, 0.3, 0.4, 0.5)
 
 
@@ -60,7 +75,15 @@ def budget_curve(
         results = compare_cross_stage_methods(
             reach_test, masked, cal_ranks, alpha_total=alpha, cal_reachable=reach_cal
         )
+        # The recycler without the CRC tightening: here the reachability loss is
+        # extraction's, which alpha_edge does not bound (see the module docstring).
+        measured = allocate_budget_conditional(reach_cal, alpha, alpha_edge=None)
+        results["cs_crp_measured"] = run_cross_stage(
+            reach_test, masked, cal_ranks,
+            alpha_total=alpha, alpha_pred=measured.alpha_pred, reasoning="aci",
+        )
         row: dict[str, float] = {
+            "u_certified": measured.alpha_edge,
             "alpha_total": alpha,
             "target": 1.0 - alpha,
             # The ceiling: an unreachable gold answer is a miss no calibrator can
@@ -111,12 +134,12 @@ def main() -> int:
         floor = report[name]["min_feasible_alpha_total"]
         print(f"\n{name}   min feasible alpha_total = {floor:.4f}")
         print(f"{'alpha':>7}{'target':>8}{'feas':>6}"
-              + "".join(f"{m:>11}" for m in _METHODS))
+              + "".join(f"{m:>17}" for m in _METHODS))
         for row in report[name]["curve"]:
             print(
                 f"{row['alpha_total']:>7.2f}{row['target']:>8.2f}"
                 f"{'y' if row['feasible'] else 'n':>6}"
-                + "".join(f"{row[f'{m}_coverage']:>11.4f}" for m in _METHODS)
+                + "".join(f"{row[f'{m}_coverage']:>17.4f}" for m in _METHODS)
             )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
