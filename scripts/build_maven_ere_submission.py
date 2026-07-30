@@ -210,6 +210,12 @@ def main() -> int:
         help="also assert each relation between the cluster-mates of its endpoints",
     )
     parser.add_argument("--limit", type=int, help="first N documents (smoke)")
+    parser.add_argument(
+        "--shard", metavar="K/N",
+        help="process only documents with index %% N == K, so N processes can split the "
+             "corpus across GPUs. Shards are merged by concatenation; document order "
+             "within a shard is preserved and the scorer keys by id, so order is free",
+    )
     parser.add_argument("--output", type=Path,
                         default=Path("runs/submission/test_prediction.jsonl"))
     parser.add_argument("--zip", dest="make_zip", action="store_true",
@@ -224,6 +230,13 @@ def main() -> int:
         records = [strip_to_test_shape(r) for r in records]
     if args.limit:
         records = records[: args.limit]
+    if args.shard:
+        k, _, n = args.shard.partition("/")
+        k, n = int(k), int(n)
+        if not 0 <= k < n:
+            raise SystemExit(f"--shard K/N needs 0 <= K < N, got {args.shard}")
+        records = records[k::n]
+        print(f"[submission] shard {k}/{n}: {len(records)} documents")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     n_clusters = n_rel = 0
