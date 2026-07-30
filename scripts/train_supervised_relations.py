@@ -23,6 +23,7 @@ pure Python and unit-tested on CPU; training needs the `llm` extra + a GPU:
 from __future__ import annotations
 
 import argparse
+import math
 import random
 from pathlib import Path
 
@@ -52,7 +53,18 @@ def downsample_negatives(
     Deterministic for a given seed. Raises when there is no positive at all:
     training on NONE only silently learns the majority class — exactly the failure
     behind the 0.4% causal recall — so this fails loudly instead of hiding it.
+
+    ``ratio=inf`` keeps every negative, i.e. turns downsampling off. That is what
+    the official MAVEN-ERE baseline does: its `Document.get_labels` enumerates all
+    ``n^2 - n`` ordered mention pairs and labels the rest NONE, with no sampling
+    anywhere (`THU-KEG/MAVEN-ERE/causal/src/data.py`). Ours defaulted to 30:1 and
+    *also* applied inverse-frequency class weights — two corrections pushing the
+    same way, which is the leading suspect for our collapsed precision.
     """
+    if math.isinf(ratio):
+        if not any(r.labels for r in rows):
+            raise ValueError("no positive pair in the training rows")
+        return list(rows)
     positives = [r for r in rows if r.labels]
     negatives = [r for r in rows if not r.labels]
     if not positives:
@@ -122,7 +134,11 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path, help="checkpoint directory")
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--lr", type=float, default=2e-5)
-    parser.add_argument("--neg-ratio", type=float, default=3.0, help="negatives per positive")
+    parser.add_argument(
+        "--neg-ratio", type=float, default=3.0,
+        help="negatives per positive; `inf` keeps every negative, which is what the "
+             "official MAVEN-ERE baseline does (no sampling at all)",
+    )
     parser.add_argument(
         "--weight-alpha",
         type=str,
@@ -134,6 +150,17 @@ def main() -> int:
     parser.add_argument("--max-distance", type=int, default=None, help="None = document-level")
     parser.add_argument(
         "--max-length", type=int, default=512, help="512 covers the longest sentence (322 tokens)"
+    )
+    parser.add_argument(
+        "--head-lr", type=float, default=None,
+        help="separate learning rate for the pair heads; the official baseline runs the "
+             "encoder at 1e-5 and the scorer at 1e-4. Default None keeps one rate for "
+             "everything. ⚠️ Phase C diverged at head lr 1e-3 -- that is 10x the official "
+             "value, not evidence against 1e-4",
+    )
+    parser.add_argument(
+        "--warmup-steps", type=int, default=0,
+        help="linear warmup on the encoder rate (the official baseline uses 200); 0 = off",
     )
     parser.add_argument("--seed", type=int, default=13)
     args = parser.parse_args()
@@ -159,7 +186,13 @@ def main() -> int:
     rows_by_doc: dict[str, list[PairExample]] = {}
     for row in rows:
         rows_by_doc.setdefault(row.doc_id, []).append(row)
-    print(f"[train] {len(docs)} docs, {len(rows)} rows after downsampling", flush=True)
+    kept = "all (no downsampling)" if math.isinf(args.neg_ratio) else f"{args.neg_ratio}:1"
+    print(
+        f"[train] {len(docs)} docs, {len(rows)} rows (negatives {kept}), "
+        f"weight_alpha={args.weight_alpha}, lr={args.lr}, head_lr={args.head_lr}, "
+        f"warmup={args.warmup_steps}, max_length={args.max_length}",
+        flush=True,
+    )
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(args.seed)
@@ -171,7 +204,26 @@ def main() -> int:
         {f: torch.tensor(w, device=device) for f, w in weights.items()} if weights else {}
     )
     label_index = {f: {s: i for i, s in enumerate(subs)} for f, subs in FAMILY_SUBTYPES.items()}
-    optimiser = torch.optim.AdamW([*encoder.parameters(), *heads.parameters()], lr=args.lr)
+    # Two param groups rather than one rate: the official baseline trains the encoder
+    # at 1e-5 and the scorer head at 1e-4, and gives the head plain Adam (no decoupled
+    # weight decay), which `weight_decay=0.0` reproduces inside AdamW.
+    optimiser = torch.optim.AdamW(
+        [
+            {"params": list(encoder.parameters()), "lr": args.lr},
+            {
+                "params": list(heads.parameters()),
+                "lr": args.head_lr if args.head_lr is not None else args.lr,
+                "weight_decay": 0.0,
+            },
+        ],
+        lr=args.lr,
+    )
+    scheduler = None
+    if args.warmup_steps > 0:
+        from transformers import get_linear_schedule_with_warmup
+
+        total = args.epochs * len(rows_by_doc)
+        scheduler = get_linear_schedule_with_warmup(optimiser, args.warmup_steps, total)
 
     encoder.train()
     heads.train()
@@ -202,6 +254,8 @@ def main() -> int:
             optimiser.zero_grad()
             loss.backward()
             optimiser.step()
+            if scheduler is not None:
+                scheduler.step()
             running += float(loss)
             if seen % 500 == 0:  # long run: report progress inside the epoch too
                 print(
