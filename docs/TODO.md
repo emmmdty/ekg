@@ -62,19 +62,20 @@
 
 ## 下一步
 
-1. **⭐ 队首 = 提交 CodaLab 拿官方 test 分**（操作说明见 [`CODALAB.md`](CODALAB.md)）。
-   理由：现在**缺口有多大根本不知道**——我们报 valid、官方报 test，而这个数据集 dev 比 test 低
-   3.7–6.4 点。不先把口径拉平，「补 5.6 点」这个目标本身就可能是假的。主表本来也要这个数
-   （[`EXPERIMENTS.md`](EXPERIMENTS.md) §1 档 A：Ch2 关系主表首选官方 test）。
-   ⚠️ 提交需要先补两件代码：**test 只给扁平 `event_mentions`、不给共指簇**，所以要把 Ch1 的共指
-   与 Ch2 的关系抽取**首次端到端接起来**；且 temporal 要预测 event–TIMEX 对，我们的抽取器没有这个头
-   —— **temporal 分会很低且不冤**，causal/subevent 才是这次要拿的数。
-2. **然后才是 Ch2 打到官方基线**（causal 25.0 → 30.6，或 test 口径下的真实目标）。
-   线索：官方 **P 35.0 / R 27.2**（precision 主导）、整篇编码后直接对事件对分类、**未做负采样**；
-   我们召回 67.5% 而 precision 崩，用了 neg-ratio 30 + 逆频加权 CE(α=0.5)，方向正好相反。
-   ⇒ 首个假设：**类不平衡处理本身就是 precision 崩的原因**，那轮 α 扫描是在错误设定里找局部最优。
-   RESIJ 代码公开（`github.com/zjcerwin/RESIJ`）可对照实现细节；但其消融显示增益是 1–2 点的累加，
-   **没有便宜的单点技巧可抄**。
+1. **⭐ 队首 = 自己复现官方 RoBERTa-base baseline，在 valid 上比**。
+   🛑 CodaLab 通道 2026-07-30 实测已关（`Submissions have been disabled by admins`），官方 test 分拿不到。
+   替代路径**更干净**：官方 baseline 的训练代码公开（`THU-KEG/MAVEN-ERE` 下各任务 `main.py + src/`），
+   把它在**同一份 valid** 上跑出来，用**官方 `evaluate.py`** 打分 —— 同 split、同评测器、同数据，
+   还能重复、能做消融，不受提交配额约束。
+   ✅ **我们这一侧已经就位**：2026-07-30 的 valid 干跑已用官方评测器打过分（见下），
+   缺的只是把**对标方**也拉到 valid。
+   优先只做 **causal**（关键路径），官方配方是 `main.py --eval_steps 500 --epochs 50 --batch_size 4`。
+   顺带读它的 `src/` 数据构造，直接验证「未做负采样 ⇒ precision 主导」这个假设。
+2. **我们在官方口径 valid 上的真实数字**（2026-07-30，官方 `evaluate.py`，710 篇）：
+   **causal F1 23.91**（P 23.96 / R 23.86）、**subevent 24.03**（P 20.45 / R 29.14）、
+   **temporal 22.25**（P 42.59 / **R 15.06** ← 缺 TIMEX 头的量化证据）、
+   coref MUC 45.83（词形兜底档；supervised 档回传中）。
+   ⚠️ 这组数**不能**直接跟官方论文的 test 数（30.6/26.7/55.8/81.4）相减 —— 见「对标与达成度」三条修正。
 3. **Ch1 MUC 缺口同源**：缺口全在 recall（80.8 vs 84.0），官方归因于四关系联合建模。
    与第 1 条指向同一个技术动作，**做完 Ch2 再回头，不要并行开两条**。
 4. **暂缓 Phase F 与 Phase H**（理由见阶段状态表）。

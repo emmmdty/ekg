@@ -24,12 +24,13 @@ MAVEN 四件套官方 **test 标签隐藏**，走 CodaLab。这是该领域**常
 
 | 档 | 做法 | 先例 | v4 落到哪章 |
 |---|---|---|---|
-| **A. 官方 test（CodaLab 提交）** | 产 `test_prediction.jsonl`→`submission.zip`→提交拿官方分；开发/消融只用 valid。**操作说明见 [`CODALAB.md`](CODALAB.md)** | MAVEN 检测 / MAVEN-ERE 均有永久竞赛（Ends: Never） | **Ch1 检测/共指、Ch2 关系** 主表首选 |
-| **B. dev/valid 当 test** | 无官方 test 时，用 development set 当 test 报数并**显式声明** | **SeDGPL 本人**："因 MAVEN-ERE 未发布 test，用 dev 当 test" | **Ch4 后继预测**（CGEP 派生任务无官方 test） |
+| ~~**A. 官方 test（CodaLab 提交）**~~ | 🛑 **2026-07-30 实测 MAVEN-ERE 通道已关**（`Submissions have been disabled by admins`）。「Ends: Never」只指没有截止日，不等于在收提交 | — | **不可用**，见 [`CODALAB.md`](CODALAB.md) |
+| **B. dev/valid 当 test** ⭐ | 无官方 test 时，用 development set 当 test 报数并**显式声明**；对标方也必须拉到同一 split —— **自己复现官方 baseline 在 valid 上的数**（其训练代码公开） | **SeDGPL 本人**："因 MAVEN-ERE 未发布 test，用 dev 当 test" | **Ch1 共指、Ch2 关系、Ch4 后继预测**（A 档关闭后全部落此） |
 | **C. train 调参 / valid 报数** | 只发 train/valid 时，train 选模、valid 报最终 | MAVEN-FACT（只发 train/valid） | **Ch3 事实性**；Ch1 论元(MAVEN-Arg) |
 
 **硬规矩**：
-- **官方 test 一次性**：CodaLab 提交次数有限，**严禁**拿 test 反复调参。所有超参/早停/模型选择只用 valid。
+- ~~官方 test 一次性~~ **已无关**：MAVEN-ERE 的 CodaLab 通道 2026-07-30 实测关闭。**所有数字都在 valid 上报**，
+  对标方也必须在 valid 上重跑，不得拿我们的 valid 去比官方论文的 test（该数据集 dev 比 test 低 3.7–6.4 点）。
 - **Ch4 可比性红线**：SeDGPL 的 MAVEN 版重建数据**未公开**（论文承诺 review 后发，实际只发 ESC 的 `.npy`），
   其公开 MRR **27.9 不可比**。Ch4 主表**必以我们自跑的 SeDGPL 为基线**（当前单折 MRR 0.1836 / strict 0.1265），
   引用 27.9 须标注"原论文数据构建，非同数据可比"。

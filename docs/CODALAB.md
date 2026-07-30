@@ -1,4 +1,18 @@
-# MAVEN-ERE 官方 test 提交（CodaLab）
+# MAVEN-ERE 官方 test 提交（CodaLab）—— 🛑 **通道已关闭，勿再尝试**
+
+> **2026-07-30 实测：上传时返回 `Submissions have been disabled by admins`。**
+> 竞赛页写着「Competition Ends: Never」，但那只说明竞赛没有截止日，**不等于还在收提交**。
+> ⇒ **官方 test 分拿不到**，`EXPERIMENTS.md` §1 的档 A 对 MAVEN-ERE **不可用**，Ch1/Ch2 落到档 B
+> （valid 当 test 报数并显式声明，先例是 SeDGPL 本人）。
+>
+> **替代路径（现行）**：官方 baseline 的**训练代码是公开的**
+> （`THU-KEG/MAVEN-ERE` 下 `causal/` `temporal/` `subevent/` `coreference/` `joint/`，各有 `main.py + src/`）。
+> **自己把官方 RoBERTa-base baseline 在 valid 上复现一遍**，用官方 `evaluate.py` 打分 ——
+> 同 split、同评测器、同数据，比 CodaLab 的跨 split 比较**更干净**，且可重复、可做消融。
+> 见 [`TODO.md`](TODO.md)「下一步」。
+>
+> 本文件其余部分保留：提交件生成器 `scripts/build_maven_ere_submission.py` 与格式知识仍然有效
+> （若通道日后重开，或需要向组织者 `wangxz098` 申请），且 valid 干跑正是靠它做的。
 
 > 用途：拿 Ch1 共指 / Ch2 关系的**官方 test 分**，把「我们 valid vs 官方 test」这个跨 split 比较
 > 拉平（这个数据集 dev 比 test 低 3.7–6.4 点，见 [`EXPERIMENTS.md`](EXPERIMENTS.md) Ch2 段）。
