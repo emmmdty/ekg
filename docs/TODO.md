@@ -20,21 +20,30 @@
 
 ## 对标与达成度（★ 定方向唯一依据，数字须回一手表格核）
 
-| 章 | 指标 | 同底座官方基线 | 公开 SOTA | 我们 | 缺口 |
+| 章 | 指标 | 同底座官方基线<br>(test) | 同输入 SOTA<br>RESIJ(Trigger)@test | 我们<br>(valid) | 表观缺口 |
 |---|---|---|---|---|---|
-| Ch1 | coref MUC F1 | **81.4** ±0.51（+joint 82.1） | 86.1 | **79.6** | **−1.8** |
+| Ch1 | coref MUC F1 | **81.4** ±0.51（+joint 82.1） | 82.5 | **79.6** | −1.8 |
 | Ch1 | 难例误合并率 | 无官方对标 | — | .767 → **.116** | ✅ 6.6×（自建基线） |
-| Ch2 | causal pair F1 | **30.6** ±0.44（+joint 31.5） | 37.4 | **25.0** | **−5.6** |
-| Ch2 | subevent pair F1 | **26.7** ±1.34（+joint 27.5） | 32.9 | **21.3** | **−5.4** |
-| Ch2 | temporal pair F1 | **55.8** ±0.42（+joint 56.0） | 60.7 | **33.8** | **−22.0** |
-| Ch3 | 事实性 macro-F1 | DMRoBERTa **47.1** / RoBERTa+CLS 45.4 | DMBERT 47.6 | **48.2** | ✅ **+1.1**（⚠️ 官方 test / 我们 valid） |
+| Ch2 | causal pair F1 | **30.6** ±0.44（+joint 31.5） | 34.8 | **25.0** | −5.6 |
+| Ch2 | subevent pair F1 | **26.7** ±1.34（+joint 27.5） | 30.8 | **21.3** | −5.4 |
+| Ch2 | temporal pair F1 | 55.8 ±0.42 | 59.0 | 33.8 | 🛑 **不可比，见下** |
+| Ch3 | 事实性 macro-F1 | DMRoBERTa **47.1** / RoBERTa+CLS 45.4 | DMBERT 47.6 | **48.2** | ✅ +1.1（跨 split） |
 | Ch3 | evidence macro(3 类) | DMRoBERTa **45.4** | — | **61.4** | ✅ |
 | Ch4 | CGEP-MAVEN MRR | 无可比（SeDGPL 的 MAVEN 构建未发布） | — | 自跑 .1836 | 只能自比 |
 
-- Ch1/Ch2 官方基线取自 **MAVEN-ERE 原论文 Table 7/8**（EMNLP 2022，RoBERTa-base，报在 **test**）；
-  2026-07-29 已回一手 PDF 核，**替换了此前错误的「MUC ~86」验收线与缺数字的 causal 行**。
-- Ch3 官方数取自 **MAVEN-FACT（arXiv 2407.15352）Table 3/4**，2026-07-28 已回一手核。
-- ⏳ **待核**：SOTA 行（graph propagation，IPM 2024）的 split 未从一手确认（ScienceDirect 付费墙）。
+**「表观缺口」三个字是认真的——直接相减不成立，三条修正**（详见 [`EXPERIMENTS.md`](EXPERIMENTS.md) Ch2 段）：
+
+1. 🛑 **temporal 两边不是同一个任务**：原始 MAVEN-ERE 的 temporal 有 **39% 触及 TIMEX**（事件–时间
+   表达式），我们的 loader 因 `representative` 查不到 TIMEX id 而**静默丢弃**。causal/subevent 的
+   TIMEX 占比是 0%，那两条口径干净。
+2. ⚠️ **dev 明显低于 test**：RESIJ 自己 dev 比 test 低 causal −3.7 / temporal −6.4 / subevent −4.4 /
+   MUC −4.5。**我们报 valid、官方报 test**，所以 −5.6 是被高估的；按同幅度外推 causal 实际约 −1.9
+   （**外推，非实测**）。
+3. ⚠️ **37.4 不是我们的天花板**：那是 RESIJ-One(**Full**)，用了 AMR 抽的跨句隐式论元；我们和 Ch4 的
+   CGEP 都是纯触发词 ⇒ 同输入的 SOTA 是 **34.8**。
+
+- 来源：Ch1/Ch2 官方基线 = MAVEN-ERE EMNLP 2022 Table 7/8；SOTA = IPM 2024 (103811) Table 2/4
+  （**两处对官方基线的引用逐格一致，交叉验证通过**）；Ch3 = MAVEN-FACT 2407.15352 Table 3/4。三处均已回一手 PDF 核。
 
 ## 阶段状态
 
@@ -53,17 +62,23 @@
 
 ## 下一步
 
-1. **⭐ 队首 = Ch2 pair-classification 打到官方基线**（causal 25.0 → 30.6）。
-   理由：它同时卡住 Ch2 自己的对标**和** Ch4 的天花板（R2 f1 仅 .077、风险地板 .2935 都是它的后果），
-   而联合建模在官方表里只值 +0.9（30.6→31.5）——**先补上 5.6 的基线差，再谈联合建模**。
-   线索：官方 **P 35.0 / R 27.2**（precision 主导），我们召回 67.5% 而 precision 崩；官方整篇编码后
-   直接对事件对分类、**未做负采样**，我们用了 neg-ratio 30 + 逆频加权 CE(α=0.5)，方向正好相反。
-   ⇒ 首个假设：**Phase A 的类不平衡处理就是 precision 崩的原因，那轮 α 扫描是在错误设定里找局部最优**。
-   开跑前先核 SOTA 行的 split（见上「待核」），并按官方附录 C 对齐实现细节。
-2. **Ch1 MUC 缺口同源**：缺口全在 recall（80.8 vs 84.0），官方归因于四关系联合建模。
+1. **⭐ 队首 = 提交 CodaLab 拿官方 test 分**（操作说明见 [`CODALAB.md`](CODALAB.md)）。
+   理由：现在**缺口有多大根本不知道**——我们报 valid、官方报 test，而这个数据集 dev 比 test 低
+   3.7–6.4 点。不先把口径拉平，「补 5.6 点」这个目标本身就可能是假的。主表本来也要这个数
+   （[`EXPERIMENTS.md`](EXPERIMENTS.md) §1 档 A：Ch2 关系主表首选官方 test）。
+   ⚠️ 提交需要先补两件代码：**test 只给扁平 `event_mentions`、不给共指簇**，所以要把 Ch1 的共指
+   与 Ch2 的关系抽取**首次端到端接起来**；且 temporal 要预测 event–TIMEX 对，我们的抽取器没有这个头
+   —— **temporal 分会很低且不冤**，causal/subevent 才是这次要拿的数。
+2. **然后才是 Ch2 打到官方基线**（causal 25.0 → 30.6，或 test 口径下的真实目标）。
+   线索：官方 **P 35.0 / R 27.2**（precision 主导）、整篇编码后直接对事件对分类、**未做负采样**；
+   我们召回 67.5% 而 precision 崩，用了 neg-ratio 30 + 逆频加权 CE(α=0.5)，方向正好相反。
+   ⇒ 首个假设：**类不平衡处理本身就是 precision 崩的原因**，那轮 α 扫描是在错误设定里找局部最优。
+   RESIJ 代码公开（`github.com/zjcerwin/RESIJ`）可对照实现细节；但其消融显示增益是 1–2 点的累加，
+   **没有便宜的单点技巧可抄**。
+3. **Ch1 MUC 缺口同源**：缺口全在 recall（80.8 vs 84.0），官方归因于四关系联合建模。
    与第 1 条指向同一个技术动作，**做完 Ch2 再回头，不要并行开两条**。
-3. **暂缓 Phase F 与 Phase H**（理由见阶段状态表）。
-4. 每章开跑前照 [`EXPERIMENTS.md`](EXPERIMENTS.md) 定 baseline + 消融矩阵 + 评测档。
+4. **暂缓 Phase F 与 Phase H**（理由见阶段状态表）。
+5. 每章开跑前照 [`EXPERIMENTS.md`](EXPERIMENTS.md) 定 baseline + 消融矩阵 + 评测档。
    **对标数字必须回一手表格核**——Phase C 因此白跑两轮、Phase A 的「达标」因此判错。
 
 ## 止损与人工判断

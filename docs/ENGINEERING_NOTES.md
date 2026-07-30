@@ -117,3 +117,17 @@
 - **`EventNode` schema 零新增字段**（扩展用 `metadata`）；`CgepNode` 可加字段。
 - 不可改的测试锁：`tests/core/test_propagation.py`。
 - 报告结果**如实**：数字降就说降；专利 / 论文写作不在计划范围。
+
+## MAVEN-ERE loader 会**静默丢掉** temporal 里的 TIMEX 对（2026-07-30 发现）
+
+`relations/data/maven_ere.py` 用 `rep(eid)` 把关系端点映射到共指代表 mention，而
+`representative` 只由 `events`（事件簇）构建 —— **TIMEX 的 id 不在里面**，于是
+`rh`/`rt` 为 `None`，那一对被 `if rh and rt` 悄悄跳过。
+
+实测（valid 前 200 篇）：原始 `temporal_relations` 有 **60,299 对，其中 39.0% 触及 TIMEX**，
+我们的 `gold_edges` 里是 **0%**。`causal`/`subevent` 的 TIMEX 占比是 0%，不受影响。
+
+后果：**我们的 temporal 与官方 temporal 不是同一个任务**，两边的 F1 不可比
+（详见 `EXPERIMENTS.md` Ch2 段）。要么把 TIMEX 接进候选与抽取器，要么在论文里显式声明
+「只做 event–event temporal」。**这也是「fail-fast、不要静默丢数据」那条规矩的一个反例**：
+loader 对失配是容忍的，代价是一个隐藏了很久的口径错误。

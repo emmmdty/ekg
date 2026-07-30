@@ -24,7 +24,7 @@ MAVEN 四件套官方 **test 标签隐藏**，走 CodaLab。这是该领域**常
 
 | 档 | 做法 | 先例 | v4 落到哪章 |
 |---|---|---|---|
-| **A. 官方 test（CodaLab 提交）** | 预测 `results.jsonl`→zip→提交竞赛拿官方分；开发/消融用 valid | MAVEN 检测 / MAVEN-ERE 均有永久竞赛 | **Ch1 检测、Ch2 关系** 主表首选 |
+| **A. 官方 test（CodaLab 提交）** | 产 `test_prediction.jsonl`→`submission.zip`→提交拿官方分；开发/消融只用 valid。**操作说明见 [`CODALAB.md`](CODALAB.md)** | MAVEN 检测 / MAVEN-ERE 均有永久竞赛（Ends: Never） | **Ch1 检测/共指、Ch2 关系** 主表首选 |
 | **B. dev/valid 当 test** | 无官方 test 时，用 development set 当 test 报数并**显式声明** | **SeDGPL 本人**："因 MAVEN-ERE 未发布 test，用 dev 当 test" | **Ch4 后继预测**（CGEP 派生任务无官方 test） |
 | **C. train 调参 / valid 报数** | 只发 train/valid 时，train 选模、valid 报最终 | MAVEN-FACT（只发 train/valid） | **Ch3 事实性**；Ch1 论元(MAVEN-Arg) |
 
@@ -66,18 +66,39 @@ X-AMR 线性共指（🆕LREC-COLING 2024）｜反事实数据增强（🆕2024�
 | **同上 +joint（四任务联合训练）** | 2022 | 判别式 + 联合 | ⛳ | **temporal 56.0 / causal 31.5 / subevent 27.5 / MUC 82.1** |
 | ProtoEM | 2023 | 原型增强匹配 | 🆕 | 多关系联合 |
 | TacoERE | 2024 | 聚类感知压缩 | 🆕 | 长文档关系 |
-| **graph propagation（富事件结构）** | 2024 | 联合+图传播 | 🆕（**当前公开 SOTA**） | **temporal 60.7 / causal 37.4 / subevent 32.9 / MUC 86.1** |
+| **RESIJ-One(Trigger)**（IPM 2024，联合+图传播，**只用触发词**） | 2024 | 联合+图传播 | 🆕（**同输入假设下的 SOTA，这才是我们的天花板参照**） | **temporal 59.0 / causal 34.8 / subevent 30.8 / MUC 82.5** |
+| **RESIJ-One(Full)**（+AMR 抽的跨句隐式论元/角色/类型/描述文本） | 2024 | 联合+图传播+论元富化 | 🆕（**公开 SOTA，但输入不同**） | **temporal 60.7 / causal 37.4 / subevent 32.9 / MUC 86.1** |
 | MAQInstruct | 2025 | 指令式统一 ERE | 🆕 | 生成式统一 |
 | LLMERE（带 rationale, O(n)） | 2025 | LLM 生成 + rationale | 🤖/🆕 | 降 O(n²)→O(n) |
 | Llama3 / GPT-4（few-shot） | 2024 | 通用 LLM | 🤖 | 下界参照 |
 | **判别式 supervised + 一致解码 + CRC 准入** | — | 判别式+全局解码+风控 | ★ | **先打到官方单任务基线（causal 30.6），再谈联合** |
 
-> **口径（2026-07-29 回一手 PDF 核，MAVEN-ERE EMNLP 2022 Table 7/8）**：上面两行官方数字是
-> RoBERTa-base 在 **test** 上 5 次随机试验的均值（causal 30.6 ±0.44 / subevent 26.7 ±1.34 /
-> temporal 55.8 ±0.42；MUC 81.4 ±0.51）。**我们只能报 valid，属不同 split，写作须声明。**
-> ⚠️ 此前本表把官方基线那行的 F1 栏写成「causal/subevent 偏低」**没填数字**，导致 Phase A 只对着
-> 自设的 ≥.25 判「达标」——实际低于官方 5.6 点。与 Phase C 的「MUC ~86」是同一类错误。
-> ⏳ SOTA 行（graph propagation, IPM 2024）的 split **未从一手确认**（付费墙），引用时须标注。
+> **口径（2026-07-29 核 MAVEN-ERE EMNLP 2022 Table 7/8；07-30 核 IPM 2024 原文，两处互相印证）**
+>
+> 1. 官方两行是 RoBERTa-base 在 **test** 上 5 次随机试验的均值（causal 30.6 ±0.44 / subevent
+>    26.7 ±1.34 / temporal 55.8 ±0.42；MUC 81.4 ±0.51）。**IPM 2024 的 Table 2 原样引用了这两行**
+>    （脚注 a: "copied from Wang et al. (2022)"），数值逐格一致 —— 两个独立来源交叉验证通过。
+> 2. **SOTA 行的 split 已确认 = test**（IPM Table 2 标题 "Main results (%) on the MAVEN-ERE test set"）。
+> 3. ⚠️ **37.4 不是我们的可比线**。论文原文：RESIJ-One(Trigger) 是 "the simplified version of this
+>    work **using trigger words only**"；Full 档的论元是**用 AMR 从跨句上下文抽的**（MAVEN-ERE 本身
+>    不标论元）。我们与 Ch4 的 CGEP 都是纯触发词输入 ⇒ **同输入下的天花板是 causal 34.8**，
+>    论元富化单独值 +2.6。
+> 4. ⚠️ **这个数据集上 dev 明显低于 test**：RESIJ-Full 在 dev（Table 4 消融）只有 temporal 54.3 /
+>    causal 33.7 / subevent 28.5 / MUC 81.6，比自己 test 低 **6.4 / 3.7 / 4.4 / 4.5**。
+>    **我们报 valid（=dev）、官方报 test ⇒ 直接相减会高估我们的缺口。** 唯一干净的解法是走
+>    CodaLab 拿官方 test 分，见 [`CODALAB.md`](CODALAB.md)。
+> 5. 🛑 **temporal 两边根本不是同一个任务**：原始 MAVEN-ERE 的 temporal 有 **39% 的对触及 TIMEX**
+>    （事件–时间表达式），我们的 loader 因 `representative` 查不到 TIMEX id 而**静默丢弃**了它们
+>    （valid 前 200 篇：60,299 → 我们只留 event–event）。**temporal 的「−22.0」不可用**；
+>    causal/subevent 的 TIMEX 占比是 **0%**，那两条缺口成立。
+> 6. 此前本表把官方基线那行的 F1 栏写成「causal/subevent 偏低」**没填数字**，导致 Phase A 只对着
+>    自设的 ≥.25 判「达标」。与 Phase C 的「MUC ~86」是同一类错误。
+>
+> 📎 IPM 2024 = Junchi Zhang et al., *A graph propagation model with rich event structures for joint
+> event relation extraction*, Information Processing and Management 61 (2024) 103811,
+> doi:10.1016/j.ipm.2024.103811；**代码公开** `github.com/zjcerwin/RESIJ`。
+> 其消融（dev）显示增益是累加而非单点：w/o TCL causal −2.3、w/o Event Tree −2.0、w/o SAGCN −1.6、
+> w/o Graph.Propa. −1.3、w/o MS-AMR −1.1 —— **没有便宜的单点技巧可抄**。
 
 > Phase A 现状对照：**生成式 SFT+GRPO 探针 causal 召回 0.4%（3/810）/ subevent 0%（0/139）**——
 > 文献已证"文档内事件多时生成长度受限、覆盖不全"是生成式通病，**判别式成对分类召回一致更高**，故换判别式打底。
