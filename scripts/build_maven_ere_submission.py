@@ -81,6 +81,22 @@ def strip_to_test_shape(record: dict) -> dict:
     }
 
 
+def tokenised_view(record: dict) -> str:
+    """`tokens` joined the way the relation extractor was trained to index it.
+
+    Two coordinate systems coexist in a MAVEN-ERE record and mixing them is a
+    silent failure. The coreference scorer pools by *character* offset into
+    `RelationDocument.doc_text`, which `_doc_text` builds from the raw
+    `sentences`; the relation extractor instead indexes `doc_text.split("\n")` by
+    `sent_id` and locates the trigger inside that line, and it was trained on the
+    space-joined `tokens` view. They are not interchangeable: a trigger recorded
+    as "UNK" is a tokenisation artefact that exists only in `tokens`, and
+    punctuation spacing differs throughout. So each consumer is handed the view
+    it was built for rather than one shared string.
+    """
+    return "\n".join(" ".join(str(t) for t in sentence) for sentence in record.get("tokens", []))
+
+
 def _bare_id(namespaced: str) -> str:
     """`{doc_id}::{mention_id}` -> `mention_id`; the scorer wants the bare form."""
     return namespaced.split("::", 1)[1] if "::" in namespaced else namespaced
@@ -253,7 +269,8 @@ def main() -> int:
 
                 try:
                     edges = extractor.extract(
-                        list(doc.nodes), ExtractionContext(doc_text={doc.doc_id: doc.doc_text})
+                        list(doc.nodes),
+                        ExtractionContext(doc_text={doc.doc_id: tokenised_view(record)}),
                     )
                 except ValueError as exc:
                     # The extractor is fail-fast on an unlocatable trigger, which is
