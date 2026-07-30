@@ -240,6 +240,7 @@ def main() -> int:
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     n_clusters = n_rel = 0
+    failed: list[tuple[str, str]] = []
     with args.output.open("w", encoding="utf-8") as fh:
         for index, record in enumerate(records, start=1):
             doc, _ = _parse_unlabeled(record)
@@ -250,9 +251,18 @@ def main() -> int:
             if extractor is not None and doc.nodes:
                 from ekg.relations.extractor.base import ExtractionContext
 
-                edges = extractor.extract(
-                    list(doc.nodes), ExtractionContext(doc_text={doc.doc_id: doc.doc_text})
-                )
+                try:
+                    edges = extractor.extract(
+                        list(doc.nodes), ExtractionContext(doc_text={doc.doc_id: doc.doc_text})
+                    )
+                except ValueError as exc:
+                    # The extractor is fail-fast on an unlocatable trigger, which is
+                    # right while training. Here one bad document must not throw away
+                    # an hours-long pass over 857 of them -- so it is skipped, counted,
+                    # and printed. A silent `except` would hide a systematic problem;
+                    # this makes it impossible to miss in the log or the summary.
+                    failed.append((doc.doc_id, str(exc)))
+                    print(f"[submission] SKIPPED relations for {doc.doc_id}: {exc}", flush=True)
             payload = relation_payload(
                 edges,
                 threshold=args.relation_threshold,
@@ -271,6 +281,9 @@ def main() -> int:
 
     print(f"[submission] wrote {len(records)} documents to {args.output}")
     print(f"[submission] {n_clusters} non-singleton clusters, {n_rel} relation pairs")
+    if failed:
+        print(f"[submission] ⚠️ {len(failed)}/{len(records)} documents produced NO relations "
+              f"(unlocatable trigger); first: {failed[0]}")
 
     if args.make_zip:
         archive = args.output.parent / "submission.zip"

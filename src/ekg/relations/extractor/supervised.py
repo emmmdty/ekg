@@ -60,12 +60,21 @@ def locate_trigger_token(sentence: str, trigger: str, offsets: list[tuple[int, i
     **case-insensitive on a word boundary**: MAVEN-ERE's `trigger_word` is
     lower-cased while the sentence keeps its original casing, so a sentence-initial
     or proper-noun trigger ("armed" in "Armed police officers ...") only matches
-    case-insensitively -- 0.65% of mentions, which an exact `find` loses. The word
+    case-insensitively -- 0.65% of mentions, which an exact `find` loses. The
     boundary stops a substring ("arm" inside "armed") from pooling a wrong token.
+
+    The boundary is a pair of lookarounds rather than `\b`, because `\b` is
+    defined against *word* characters and so can never match a trigger that
+    starts or ends with punctuation: `\b%\b` matches nothing at all. MAVEN-ERE's
+    test split has 154 such triggers ("%", ".45", "a.m."), 0.37% of its mentions,
+    which `\b` turned into hard failures; valid happens to have none, which is
+    why this only surfaced on the submission run. For word-delimited triggers the
+    two forms are equivalent, so no previously-located mention moves.
+
     Anything still unlocatable raises rather than silently reading position 0;
     shared by inference and training so both pool identically.
     """
-    match = re.search(rf"\b{re.escape(trigger)}\b", sentence, re.IGNORECASE)
+    match = re.search(rf"(?<!\w){re.escape(trigger)}(?!\w)", sentence, re.IGNORECASE)
     if match is None:
         raise ValueError(f"trigger {trigger!r} not in sentence -- unlocatable mention")
     tok = next((i for i, (s, e) in enumerate(offsets) if s <= match.start() < e), None)

@@ -51,7 +51,8 @@ def _mention_span(
     keeps its casing, so a sentence-initial or proper-noun trigger never matches
     exactly. Without the fallback those mentions are pooled at character 0 --
     0.64% of valid and **2.5% of the test split**, silently encoding the wrong
-    token. The word boundary stops "arm" from matching inside "armed".
+    token. The lookaround boundary stops "arm" matching inside "armed" while still
+    admitting punctuation triggers ("%", "a.m."), which `\\b` can never match.
     """
     sent_id = mention.get("sent_id")
     sid = sent_id if isinstance(sent_id, int) and sent_id >= 0 else None
@@ -60,7 +61,7 @@ def _mention_span(
     if sid is not None and sid < len(lines) and trigger:
         pos = lines[sid].find(trigger)
         if pos < 0:
-            loose = re.search(rf"\b{re.escape(trigger)}\b", lines[sid], re.IGNORECASE)
+            loose = re.search(rf"(?<!\w){re.escape(trigger)}(?!\w)", lines[sid], re.IGNORECASE)
             pos = loose.start() if loose else -1
         if pos >= 0:
             char_start = line_starts[sid] + pos
