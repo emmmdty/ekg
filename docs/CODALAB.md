@@ -61,18 +61,33 @@
 
 ## 3. 操作步骤
 
-### 3.1 本地产出预测（**代码待写**）
+### 3.1 本地产出预测
 
-现在**还没有**提交生成器。需要新增 `scripts/build_maven_ere_submission.py`，串三步：
+生成器已就位：**`scripts/build_maven_ere_submission.py`**（2026-07-30）。
 
-1. 读 `data/processed/maven_ere/test_unlabeled.jsonl`（857 篇）。
-2. **共指**：用 Ch1 的 `nodes/coref` + `nodes/canonical`，在每篇的 `event_mentions` 上聚簇
-   → `coreference` 字段。checkpoint 是 `runs/nodes/coref_supervised_6ep`（当时训在 **5090**，
-   要先确认它在哪台机器上、必要时经本地中转到 4090）。
-3. **关系**：用 Phase A 的 `supervised` 抽取器（checkpoint `runs/relations/supervised_maven`，
-   在 **4090**）对 mention 对打分，按 valid 上选定的阈值（**0.7**）二值化
-   → 三个关系字段。**阈值不许在 test 上重调。**
-4. 写 `test_prediction.jsonl`，逐篇自检：`id` 齐全、字段齐全、id 都在该篇的 mention/TIMEX 集合里。
+```bash
+# 需 GPU（两个模型各一遍 forward）
+CUDA_VISIBLE_DEVICES=<空卡> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+  .venv/bin/python -u scripts/build_maven_ere_submission.py \
+    --test data/processed/maven_ere/test_unlabeled.jsonl \
+    --coref-checkpoint runs/nodes/coref_supervised_6ep \
+    --relation-checkpoint runs/relations/supervised_maven \
+    --coref-threshold 0.7 --coref-band 0.1 --relation-threshold 0.7 \
+    --output runs/submission/test_prediction.jsonl --zip
+```
+
+阈值是 Phase C / Phase A 在 **valid** 上选定的操作点，**不许在 test 上重调**。
+`--propagate-coref` 默认关闭（把关系复制到预测簇的同伴上，召回更高但风险更大）。
+
+**⚠️ checkpoint 分处两台机器**：关系抽取器在 **4090**（`runs/relations/supervised_maven`），
+共指判别器 Phase C 是在 **5090** 训的（`runs/nodes/coref_supervised_6ep`）。跑之前要么把共指
+checkpoint 经本地中转到 4090（约 500MB，cpolar ~400KB/s 单程约 20 分钟，用
+`rsync -aP --append-verify`），要么在 5090 上跑（**须逐次问作者**）。
+
+**格式已用官方脚本验过**（2026-07-30）：把金标按本生成器的格式写成 prediction 喂给
+`THU-KEG/MAVEN-ERE/evaluate.py`，四项指标全部返回 **100.0** —— 说明「簇级关系展开到所有
+mention 对」「有序对」「单例免填」这三条语义都对上了。不变量锁在
+`tests/scripts/test_maven_ere_submission.py`。
 
 ### 3.2 打包
 

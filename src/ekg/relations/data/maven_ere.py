@@ -13,6 +13,7 @@ official dataset is fetched by `scripts/download_datasets.py`.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from itertools import combinations
@@ -21,7 +22,7 @@ from pathlib import Path
 from ekg.core.io import read_jsonl
 from ekg.core.schema import EventNode, EvidenceSpan, RelationEdge, RelationType
 
-__all__ = ["RelationDocument", "load_maven_ere"]
+__all__ = ["RelationDocument", "load_maven_ere", "load_maven_ere_unlabeled"]
 
 
 @dataclass
@@ -42,6 +43,15 @@ def _mention_span(
     character positions; instead the trigger word is located in its `sent_id`
     line of the doc text. An unlocatable trigger gets an unpositioned span
     (start == end == 0) whose `text` still supports quote-based grounding.
+
+    Exact `find` runs first and its result is never overridden, so every mention
+    that already resolved keeps the identical span. Only what it *misses* falls
+    back to the case-insensitive word-boundary rule `locate_trigger_token` uses
+    on the training side: MAVEN-ERE lower-cases `trigger_word` while the sentence
+    keeps its casing, so a sentence-initial or proper-noun trigger never matches
+    exactly. Without the fallback those mentions are pooled at character 0 --
+    0.64% of valid and **2.5% of the test split**, silently encoding the wrong
+    token. The word boundary stops "arm" from matching inside "armed".
     """
     sent_id = mention.get("sent_id")
     sid = sent_id if isinstance(sent_id, int) and sent_id >= 0 else None
@@ -49,6 +59,9 @@ def _mention_span(
     char_start = char_end = 0
     if sid is not None and sid < len(lines) and trigger:
         pos = lines[sid].find(trigger)
+        if pos < 0:
+            loose = re.search(rf"\b{re.escape(trigger)}\b", lines[sid], re.IGNORECASE)
+            pos = loose.start() if loose else -1
         if pos >= 0:
             char_start = line_starts[sid] + pos
             char_end = char_start + len(trigger)
@@ -174,3 +187,52 @@ def load_maven_ere(path: str | Path) -> Iterator[RelationDocument]:
     """Yield one `RelationDocument` per line of a MAVEN-ERE jsonl file."""
     for record in read_jsonl(path):
         yield _parse_document(record)
+
+
+def _parse_unlabeled(record: dict) -> tuple[RelationDocument, list[str]]:
+    """Parse the **test** format: flat `event_mentions`, no clusters, no relations.
+
+    MAVEN-ERE's released test file withholds `events` (the coreference clusters)
+    and every relation field, giving only `event_mentions`. Coreference is
+    therefore part of what has to be predicted, and relations must be emitted
+    over *mention* ids -- which is also how the official scorer reads them
+    (`evaluate.py` expands each gold cluster-level relation to every mention pair
+    across the two clusters).
+
+    Each mention becomes its own singleton `representative` entry so downstream
+    code that walks clusters sees a valid, if maximally split, frame. Returns the
+    document plus its TIMEX ids, which participate in gold *temporal* relations
+    (39% of them) and so must be reported even when nothing predicts them.
+    """
+    doc_id = str(record.get("id", record.get("doc_id", "")))
+    doc_text = _doc_text(record)
+    lines = doc_text.split("\n")
+    line_starts = [0]
+    for line in lines[:-1]:
+        line_starts.append(line_starts[-1] + len(line) + 1)
+
+    nodes = [
+        EventNode(
+            event_id=f"{doc_id}::{m.get('id')}",
+            event_type=str(m.get("type", "Unknown")),
+            doc_id=doc_id,
+            trigger=m.get("trigger_word", ""),
+            trigger_evidence=_mention_span(doc_id, m, lines, line_starts),
+            metadata={"mention": str(m.get("id"))},
+        )
+        for m in record.get("event_mentions", [])
+    ]
+    document = RelationDocument(
+        doc_id=doc_id,
+        nodes=nodes,
+        gold_edges=[],
+        doc_text=doc_text,
+        representative={n.event_id: n.event_id for n in nodes},
+    )
+    return document, [str(t.get("id")) for t in record.get("TIMEX", [])]
+
+
+def load_maven_ere_unlabeled(path: str | Path) -> Iterator[tuple[RelationDocument, list[str]]]:
+    """Yield `(document, timex_ids)` per line of the MAVEN-ERE **test** jsonl."""
+    for record in read_jsonl(path):
+        yield _parse_unlabeled(record)
