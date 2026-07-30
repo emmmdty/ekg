@@ -231,3 +231,24 @@ CUDA_VISIBLE_DEVICES=<空卡> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
 - 日志：`tail` 任务自己的日志，不用 SSH 连通性推断训练状态。
 - 结束：成功 SSH 确认进程 GONE → 查退出码与产物完整性；**文件存在不等于训练成功**。
 - 回传：指标 JSON、必要日志、manifest 定向 scp；checkpoint 只在明确需要时传。
+
+## checkpoint 留存策略（2026-07-30 作者定）
+
+**4090 是主力，5090 只做可行性验证；所有 checkpoint 必须在 4090 留存**，方便复现与改进。
+在 5090 训出来的东西**训完立刻回传 4090**，不要留在那边。
+
+**代价是实测出来的**：5090 走免费版 cpolar，实测 **130 KB/s**；4090 是 vip 隧道，约 450 KB/s。
+一个 roberta-base 档（476 MB）两跳（5090 → 本地 → 4090）**约 70 分钟**。Phase C 的共指
+checkpoint 因为只在 5090，直接导致 2026-07-30 的 CodaLab 提交先跑了一版词形兜底档。
+
+| checkpoint | 在哪 | 处置 |
+|---|---|---|
+| `runs/relations/supervised_maven`（Phase A 系统档） | 4090 ✅ | — |
+| `runs/factuality/struct_best`·`supervised_6ep`（Phase D） | 4090 ✅ | — |
+| `runs/cgep/ch4_sedgpl.pt`（Phase E，1.5G） | 4090 ✅ | — |
+| `runs/nodes/coref_supervised_6ep`（Phase C 系统档） | 5090 → 4090 | 2026-07-30 回传中 |
+| `runs/nodes/detector_supervised_6ep`（Phase C 检测头） | 5090 | 待回传 |
+| `coref_large`·`coref_longformer`·`coref_*_diverged_*`（换底座失败档 / 发散档） | 5090 | **不回传**：数字已在 `docs/results/PHASE_C.md`，权重无复现价值 |
+
+⚠️ 两跳都用 `rsync -aP --append-verify`（可断点续传），**别用带 timeout 的 scp**——会静默截断出半个文件。
+落地后核 `sha256` 或至少核字节数。

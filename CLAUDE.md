@@ -34,6 +34,10 @@ uv run ekg-smoke                       # CPU 端到端冒烟
 
 - **GPU 授权**：4090 有空即可自用，本地三件套全绿后无需逐次点头；**5090 须逐次问用户**。
   选卡前 `nvidia-smi` 核卡，不挤占他人正在跑的卡。
+- **checkpoint 一律在 4090 留存**（作者 2026-07-30 定）：4090 是主力，5090 只做可行性验证；
+  **任何在 5090 训出来的 checkpoint，训完立刻回传 4090**，否则复现与改进都会卡在跨机传输上
+  （Phase C 的共指 checkpoint 只在 5090，导致 CodaLab 提交被迫先用词形兜底档）。
+  失败/发散档只留数字进 `docs/results/`，权重不必回传。
 - ⛔ **服务器上不要跑 `uv run` / `uv sync`**——会按 extras 卸包（实测卸 165 个，torch 全没）。
   一律 `.venv/bin/python`；非用 uv 不可时加 `--no-sync`。
 - ⛔ **禁 `rsync --delete` 与远端 `git clean -fdx`**（会删 `runs/`、`nvmlshim/` 等 remote-only 产物）。
