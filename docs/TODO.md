@@ -62,15 +62,13 @@
 
 ## 下一步
 
-1. **⭐ 队首 = 自己复现官方 RoBERTa-base baseline，在 valid 上比**。
-   🛑 CodaLab 通道 2026-07-30 实测已关（`Submissions have been disabled by admins`），官方 test 分拿不到。
-   替代路径**更干净**：官方 baseline 的训练代码公开（`THU-KEG/MAVEN-ERE` 下各任务 `main.py + src/`），
-   把它在**同一份 valid** 上跑出来，用**官方 `evaluate.py`** 打分 —— 同 split、同评测器、同数据，
-   还能重复、能做消融，不受提交配额约束。
-   ✅ **我们这一侧已经就位**：2026-07-30 的 valid 干跑已用官方评测器打过分（见下），
-   缺的只是把**对标方**也拉到 valid。
-   优先只做 **causal**（关键路径），官方配方是 `main.py --eval_steps 500 --epochs 50 --batch_size 4`。
-   顺带读它的 `src/` 数据构造，直接验证「未做负采样 ⇒ precision 主导」这个假设。
+1. **⭐ 队首 = Phase A2：按官方配方重训 Ch2 抽取器**
+   —— 契约与交接见 [`phases/PHASE_A2_ch2_official_recipe.md`](phases/PHASE_A2_ch2_official_recipe.md)。
+   🛑 CodaLab 通道 2026-07-30 已关，官方 test 分拿不到，**不再产提交件**。
+   唯一可比的尺是「**官方 `evaluate.py` 打 valid**」，脚本已就位（`scripts/score_maven_ere_official.py`）。
+   我们的架构与官方基线本就是同一个（RoBERTa-base 成对分类），差的全是配方——读源码确认四处差异，
+   其中**零负采样 + 无类权重**两条同向叠加，是 precision 崩（官方 P 35.0 vs 我们 23.96）的首要嫌疑。
+   判据不是 F1 涨没涨，是 **P/R 结构有没有从召回主导翻到精度主导**。
 2. **我们在官方口径 valid 上的真实数字**（2026-07-30，官方 `evaluate.py`，710 篇）：
    **causal F1 23.91**（P 23.96 / R 23.86）、**subevent 24.03**（P 20.45 / R 29.14）、
    **temporal 22.25**（P 42.59 / **R 15.06** ← 缺 TIMEX 头的量化证据）、

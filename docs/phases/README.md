@@ -48,6 +48,7 @@ P0 主数据 ✅ ───────────────────┐
 | Phase | 章 | Goal（一句话） | 状态 | 依赖 | GPU |
 |---|---|---|---|---|---|
 | **A** | Ch2 | 判别式 `supervised` 关系抽取器 | ⚠️ 召回已解，F1 低于官方同底座基线 → [`results/PHASE_A.md`](../results/PHASE_A.md) | P0 | 重 |
+| **A2** ⭐ | Ch2 | 按**官方 baseline 配方**重训（关下采样 / 无类权重 / 分离 LR） | ⬜ **当前队首** —— 契约与交接见 [`PHASE_A2_ch2_official_recipe.md`](PHASE_A2_ch2_official_recipe.md) | A | 重 |
 | **B** | Ch2 | 全局一致解码 + 可追溯修复 + CRC 风控准入 | 🟡 违反清零、下游无增益（止损已触发）→ [`results/PHASE_B.md`](../results/PHASE_B.md) | A | 轻 |
 | **C** | Ch1 | 证据+不确定性规范事件节点 | ⚠️ 难例误合并大幅改善，MUC 未到官方基线 → [`results/PHASE_C.md`](../results/PHASE_C.md) | P0 | 轻 |
 | **C2** | Ch1 | 跨文档泛化（ECB+/CLES） | ⬜ 未开始；对比 SECURE/MEET/DIE-EC | C | 轻 |

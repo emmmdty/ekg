@@ -43,3 +43,37 @@
     - **✅ 达标（2026-07-24）**：`neg30 · α=0.5 · 6 epochs` —— **causal F1 .250 / subevent .213 /
       temporal .338**（阈值 0.7，micro .311，`hallucinated=0`）。3→6 epochs 是决定性一步（loss 1.25→0.92
       仍在降＝3ep 欠拟合），把 causal .234→**.250** 推到目标下沿。交付 checkpoint = `runs/relations/supervised_maven`。
+
+---
+
+## 官方口径复评（2026-07-30，Phase A 的 checkpoint 不变，只换评测器）
+
+**为什么要重评**：我们的 `evaluate_relation_pairs` 与 MAVEN-ERE 官方 `evaluate.py` **不是同一个量**。
+官方枚举文档内**全部有序 mention 对**、把每条簇级金标关系**展开到两簇间每一对 mention**、
+temporal 还把 **TIMEX id 一并加入 mention 列表**，最后只对正类做 micro 平均。
+拿我们的数去比论文里的数，此前一直不是同口径。
+
+复现命令（`runs/relations/official_protocol_valid.json`）：
+
+```bash
+uv run python scripts/build_maven_ere_submission.py --from-labeled \
+  --test data/processed/maven_ere/valid.jsonl --coref-predictor supervised \
+  --coref-checkpoint runs/nodes/coref_supervised_6ep \
+  --relation-checkpoint runs/relations/supervised_maven \
+  --output runs/relations/valid_prediction.jsonl
+uv run python scripts/score_maven_ere_official.py --evaluator <官方 evaluate.py> \
+  --gold data/processed/maven_ere/valid.jsonl --pred runs/relations/valid_prediction.jsonl
+```
+
+| 指标 | 我们内部口径 | **官方口径 @valid** | 官方 RoBERTa-base @test |
+|---|---|---|---|
+| causal F1 | .250 | **23.91**（P 23.96 / R 23.86） | 30.6 ±0.44 |
+| subevent F1 | .213 | **24.03**（P 20.45 / R 29.14） | 26.7 ±1.34 |
+| temporal F1 | .338 | **22.25**（P 42.59 / **R 15.06**） | 55.8 ±0.42 |
+
+- **causal 两个口径接近**（.250 vs 23.91），我们内部那把尺对 causal 基本可信。
+- **subevent 官方口径反而更高**（21.3 → 24.03）：金标被展开到所有 mention 对，我们逐对预测因而多吃到真正例。
+- 🛑 **temporal 不可比且这次量化了**：官方 recall 只有 **15.06** 而 precision 42.59 —— 缺 TIMEX 头
+  （39% 的金标 temporal 对触及 TIMEX）的直接证据。**这个数不能用来下任何关于模型能力的结论。**
+- ⚠️ 仍存的不可比处：**我们 valid、官方 test**，且该数据集 dev 明显低于 test（RESIJ 自测 causal −3.7）。
+  CodaLab 通道 2026-07-30 已关，拿不到我们的 test 分 ⇒ **只能把对标方也拉到 valid**（见 `PHASE_A2`）。
