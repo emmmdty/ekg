@@ -69,6 +69,15 @@
    我们的架构与官方基线本就是同一个（RoBERTa-base 成对分类），差的全是配方——读源码确认四处差异，
    其中**零负采样 + 无类权重**两条同向叠加，是 precision 崩（官方 P 35.0 vs 我们 23.96）的首要嫌疑。
    判据不是 F1 涨没涨，是 **P/R 结构有没有从召回主导翻到精度主导**。
+   **2026-08-02 50 epochs 全量已跑完（含阈值扫描），触发预定止损**：precision 方向假设部分兑现
+   （causal/subevent precision 确实高于现役档），但 F1 未达标——**causal 最佳阈值 22.26 < 止损线 28**，
+   且 subevent 反而比现役档腰斩（10.55 vs 24.03）。已排除欠拟合、阈值未调对两种解释。
+   **同日跑完契约步骤 4（官方原版代码在我们的 valid 上出对照数）：causal F1 31.37**（P31.03/R31.72），
+   基本追平论文 test 数（30.6），**排除了"跨 split 假象"和"候选 population 不一致"两种解释**。
+   逐行核对官方 `utils/model.py` 找到真正差距来源——**是架构，不是训练配方**：官方对触发词整个
+   span 做 mean-pooling（我们只取单 token）、pair 分类头是 2 层 MLP+Dropout（我们是单层线性）。
+   **下一步明确**：把 `PairClassifier` 升级为同容量 MLP+Dropout、`encode_trigger_reps` 改 span
+   mean-pooling——不再是超参问题。数字与逐条推导见 `results/PHASE_A.md`。
 2. **我们在官方口径 valid 上的真实数字**（2026-07-30，官方 `evaluate.py`，710 篇）：
    **causal F1 23.91**（P 23.96 / R 23.86）、**subevent 24.03**（P 20.45 / R 29.14）、
    **temporal 22.25**（P 42.59 / **R 15.06** ← 缺 TIMEX 头的量化证据）、
