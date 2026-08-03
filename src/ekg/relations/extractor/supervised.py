@@ -2,14 +2,17 @@
 
 Reproduces the official MAVEN-ERE strong baseline: gold event mentions are
 given and the model labels every candidate mention pair. A RoBERTa encoder pools
-each trigger's representation `h_i`; the pair feature `[h_i; h_j; h_i⊙h_j;
-|h_i−h_j|]` feeds one linear head per relation family (index 0 = NONE).
+each trigger's representation `h_i` (mean over every token of the trigger span,
+not just its first token -- multi-token triggers like "took place" need every
+piece); the pair feature `[h_i; h_j; h_i⊙h_j; |h_i−h_j|]` feeds a small MLP
+(2 hidden layers + dropout, matching the official baseline's classifier
+capacity) per relation family (index 0 = NONE).
 
 torch/transformers are imported behind an availability guard (as in
 `succession/model.py`), so the module imports and the extractor **registers** on a
 CPU box; only running `extract` (encoding + scoring) needs the `llm` extra + GPU.
 
-`locate_trigger_token` (pure-Python, fail-fast) and `encode_trigger_reps` (the
+`locate_trigger_span` (pure-Python, fail-fast) and `encode_trigger_reps` (the
 shared encoder pooling) are reused by both inference and training so a mention is
 pooled identically either way; an unlocatable trigger raises rather than reading a
 wrong token (as in `succession/encode.py`).
@@ -34,7 +37,7 @@ __all__ = [
     "FAMILY_SUBTYPES",
     "SupervisedRelationExtractor",
     "encode_trigger_reps",
-    "locate_trigger_token",
+    "locate_trigger_span",
 ]
 
 # family value (RelationType.value) -> contract RelationType
@@ -53,8 +56,10 @@ FAMILY_SUBTYPES: dict[str, tuple[str, ...]] = {
 }
 
 
-def locate_trigger_token(sentence: str, trigger: str, offsets: list[tuple[int, int]]) -> int:
-    """Token index whose char span covers the trigger; fail-fast if unlocatable.
+def locate_trigger_span(
+    sentence: str, trigger: str, offsets: list[tuple[int, int]]
+) -> tuple[int, int]:
+    """Token range `[start, end)` covering the trigger; fail-fast if unlocatable.
 
     `offsets` is a tokenizer's `offset_mapping` for `sentence`. Matching is
     **case-insensitive on a word boundary**: MAVEN-ERE's `trigger_word` is
@@ -71,16 +76,21 @@ def locate_trigger_token(sentence: str, trigger: str, offsets: list[tuple[int, i
     why this only surfaced on the submission run. For word-delimited triggers the
     two forms are equivalent, so no previously-located mention moves.
 
+    Returns every token overlapping the trigger's full character range, not just
+    the one covering its start: multi-token triggers ("took place", "came under
+    fire") need every piece mean-pooled, matching the official baseline's span
+    pooling rather than pooling a single token.
+
     Anything still unlocatable raises rather than silently reading position 0;
     shared by inference and training so both pool identically.
     """
     match = re.search(rf"(?<!\w){re.escape(trigger)}(?!\w)", sentence, re.IGNORECASE)
     if match is None:
         raise ValueError(f"trigger {trigger!r} not in sentence -- unlocatable mention")
-    tok = next((i for i, (s, e) in enumerate(offsets) if s <= match.start() < e), None)
-    if tok is None:
+    toks = [i for i, (s, e) in enumerate(offsets) if s < match.end() and e > match.start()]
+    if not toks:
         raise ValueError(f"trigger {trigger!r} fell outside the tokenised span (truncated)")
-    return tok
+    return toks[0], toks[-1] + 1
 
 
 try:  # pragma: no cover - exercised on the GPU server
@@ -96,12 +106,32 @@ except ImportError:  # pragma: no cover - the local CPU path
 if TORCH_AVAILABLE:
 
     class PairClassifier(nn.Module):
-        """One linear head per family over the 4-way pair feature."""
+        """Per-family MLP head over the 4-way pair feature.
 
-        def __init__(self, hidden_size: int, subtype_counts: dict[str, int]) -> None:
+        Two hidden layers + dropout (`Linear -> ReLU -> Dropout -> Linear -> ReLU
+        -> Dropout -> Linear`), matching the official MAVEN-ERE baseline's scorer
+        capacity (`utils/model.py::Score`) -- a single linear layer here was the
+        main gap to the official baseline's causal F1 (Phase A2 contract step 4).
+        """
+
+        def __init__(
+            self, hidden_size: int, subtype_counts: dict[str, int], mlp_hidden: int = 150
+        ) -> None:
             super().__init__()
+            in_dim = hidden_size * 4
             self.heads = nn.ModuleDict(
-                {fam: nn.Linear(hidden_size * 4, n) for fam, n in subtype_counts.items()}
+                {
+                    fam: nn.Sequential(
+                        nn.Linear(in_dim, mlp_hidden),
+                        nn.ReLU(),
+                        nn.Dropout(0.2),
+                        nn.Linear(mlp_hidden, mlp_hidden),
+                        nn.ReLU(),
+                        nn.Dropout(0.2),
+                        nn.Linear(mlp_hidden, n),
+                    )
+                    for fam, n in subtype_counts.items()
+                }
             )
 
         def forward(self, pair_feats: torch.Tensor) -> dict[str, torch.Tensor]:
@@ -114,9 +144,10 @@ if TORCH_AVAILABLE:
         )
 
     def encode_trigger_reps(encoder, tokenizer, nodes, doc_text, max_length, device="cpu"):
-        """Per-node trigger representation: encode each sentence once, pool the token
-        covering the trigger. Gradient flows when the encoder is in train mode --
-        the caller wraps inference in `no_grad`. Fail-fast on unlocatable triggers.
+        """Per-node trigger representation: encode each sentence once, mean-pool
+        every token covering the trigger span. Gradient flows when the encoder is
+        in train mode -- the caller wraps inference in `no_grad`. Fail-fast on
+        unlocatable triggers.
         """
         lines = doc_text.split("\n")
         by_sent: dict[int, list] = {}
@@ -144,7 +175,8 @@ if TORCH_AVAILABLE:
             inputs = {k: v.to(device) for k, v in enc.items() if k != "offset_mapping"}
             hidden = encoder(**inputs).last_hidden_state[0]
             for node in group:
-                embs[node.event_id] = hidden[locate_trigger_token(sentence, node.trigger, offsets)]
+                start, end = locate_trigger_span(sentence, node.trigger, offsets)
+                embs[node.event_id] = hidden[start:end].mean(dim=0)
         return embs
 
 
@@ -157,7 +189,7 @@ class SupervisedRelationExtractor(RelationExtractor):
 
     `max_length` is 512 because MAVEN-ERE's longest sentence is 1691 chars = 322 BPE
     tokens: at 256 such a sentence is truncated before its trigger, and
-    `locate_trigger_token` (correctly) refuses to pool a wrong token instead.
+    `locate_trigger_span` (correctly) refuses to pool a wrong token instead.
     """
 
     def __init__(

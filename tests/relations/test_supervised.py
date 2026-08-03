@@ -60,37 +60,45 @@ def test_candidate_pairs_document_level_all_ordered_pairs():
     assert all(h != t for h, t in pairs)
 
 
-def test_locate_trigger_token_and_fail_fast():
+def test_locate_trigger_span_and_fail_fast():
     # offsets mimic a tokenizer's offset_mapping: (char_start, char_end) per token,
     # specials carrying (0, 0).
     offsets = [(0, 0), (0, 3), (4, 8), (0, 0)]  # <s>, "The", "bomb", </s>
-    assert sup.locate_trigger_token("The bomb", "bomb", offsets) == 2
+    assert sup.locate_trigger_span("The bomb", "bomb", offsets) == (2, 3)
     with pytest.raises(ValueError):  # unlocatable -> raise, never read a wrong token
-        sup.locate_trigger_token("The bomb", "missile", offsets)
+        sup.locate_trigger_span("The bomb", "missile", offsets)
 
 
-def test_locate_trigger_token_is_case_insensitive():
+def test_locate_trigger_span_is_case_insensitive():
     # MAVEN-ERE's trigger_word is lower-cased while the sentence keeps its original
     # casing, so a sentence-initial or proper-noun trigger ("armed" in "Armed police
     # officers ...") only matches case-insensitively. 0.65% of mentions hit this.
     offsets = [(0, 0), (0, 5), (6, 12), (0, 0)]  # <s>, "Armed", "police", </s>
-    assert sup.locate_trigger_token("Armed police", "armed", offsets) == 1
+    assert sup.locate_trigger_span("Armed police", "armed", offsets) == (1, 2)
 
 
-def test_locate_trigger_token_respects_word_boundaries():
+def test_locate_trigger_span_respects_word_boundaries():
     # "arm" must not match inside "armed" -- a substring hit would pool a wrong token.
     offsets = [(0, 0), (0, 5), (6, 12), (0, 0)]  # <s>, "armed", "police", </s>
     with pytest.raises(ValueError):
-        sup.locate_trigger_token("armed police", "arm", offsets)
+        sup.locate_trigger_span("armed police", "arm", offsets)
 
 
-def test_locate_trigger_token_raises_when_truncated_away():
+def test_locate_trigger_span_raises_when_truncated_away():
     # A trigger past the tokenised span (long sentence + truncation) must raise
     # rather than pool a wrong token. max_length=512 is what keeps this from
     # firing on MAVEN-ERE (longest sentence = 322 BPE tokens).
     offsets = [(0, 0), (0, 5), (0, 0)]  # truncation kept only the first word
     with pytest.raises(ValueError, match="truncated"):
-        sup.locate_trigger_token("armed police officers", "officers", offsets)
+        sup.locate_trigger_span("armed police officers", "officers", offsets)
+
+
+def test_locate_trigger_span_covers_multi_token_trigger():
+    # "took place" spans two separate BPE tokens; the caller mean-pools every
+    # token the trigger covers, not just the first -- this is the point of the
+    # span change (single-token pooling was the Phase A2 architecture gap).
+    offsets = [(0, 0), (0, 3), (4, 8), (9, 14), (0, 0)]  # <s>, "The", "took", "place", </s>
+    assert sup.locate_trigger_span("The took place", "took place", offsets) == (2, 4)
 
 
 def test_extract_builds_grounded_edges_from_scores(monkeypatch):
