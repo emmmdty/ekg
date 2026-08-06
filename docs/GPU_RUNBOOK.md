@@ -262,7 +262,9 @@ CodaLab 提交先跑了一版词形兜底档。所以放弃回传不等于放弃
 | `runs/nodes/detector_supervised_6ep`（Phase C 检测头） | 5090 | 不再要求回传 |
 | `runs/relations/official_arch_6ep`（A2 新架构·官方配方） | 5090 | 2026-08-06 训；欠拟合平台，无分辨力 |
 | `runs/relations/neg30_arch_6ep`（A2 新架构·现役配方） | 5090 | 2026-08-06 训；架构证伪的对照档，causal 24.06 |
-| `runs/relations/neg30_window_6ep`（**文档窗口编码**） | 5090 | 2026-08-07 训；**当前最好档** causal 26.95 / temporal 28.40 |
+| `runs/relations/neg30_window_6ep`（**文档窗口编码**） | 5090 | 2026-08-07 训；causal 26.95 / temporal 28.40 |
+| `runs/relations/neg30_window_dist_6ep`（窗口+距离流） | 5090 | 2026-08-07 训；causal **27.60** / temporal 28.59；subevent −0.71 |
+| `runs/relations/window_dist_20ep_best`（+20ep+best 选择） | 5090 | 2026-08-07 训；held-out dev 200 篇选最佳 epoch |
 | `coref_large`·`coref_longformer`·`coref_*_diverged_*`（换底座失败档 / 发散档） | 5090 | **不搬**：数字已在 `docs/results/PHASE_C.md`，权重无复现价值 |
 
 ⚠️ 两跳都用 `rsync -aP --append-verify`（可断点续传），**别用带 timeout 的 scp**——会静默截断出半个文件。
