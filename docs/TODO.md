@@ -24,9 +24,9 @@
 |---|---|---|---|---|---|
 | Ch1 | coref MUC F1 | **81.4** ±0.51（+joint 82.1） | 82.5 | **79.6** | −1.8 |
 | Ch1 | 难例误合并率 | 无官方对标 | — | .767 → **.116** | ✅ 6.6×（自建基线） |
-| Ch2 | causal pair F1 | **30.6** ±0.44（+joint 31.5） | 34.8 | **28.20** | **−3.17**（对 31.37，见下★） |
-| Ch2 | subevent pair F1 | **26.7** ±1.34（+joint 27.5） | 30.8 | **19.65** ❌ | 反降，见 `results/PHASE_A.md` |
-| Ch2 | temporal pair F1 | 55.8 ±0.42 | 59.0 | 32.43 | 🛑 **不可比，见下** |
+| Ch2 | causal pair F1 | **30.6** ±0.44（+joint 31.5） | 34.8 | **28.50** | **−2.87**（对 31.37，见下★） |
+| Ch2 | subevent pair F1 | **26.7** ±1.34（+joint 27.5） | 30.8 | **21.05** ⚠️ | 仍低于起点 24.03，见 `results/PHASE_A.md` |
+| Ch2 | temporal pair F1 | 55.8 ±0.42 | 59.0 | 31.55 | 🛑 **不可比，见下** |
 | Ch3 | 事实性 macro-F1 | DMRoBERTa **47.1** / RoBERTa+CLS 45.4 | DMBERT 47.6 | **48.2** | ✅ +1.1（跨 split） |
 | Ch3 | evidence macro(3 类) | DMRoBERTa **45.4** | — | **61.4** | ✅ |
 | Ch4 | CGEP-MAVEN MRR | 无可比（SeDGPL 的 MAVEN 构建未发布） | — | 自跑 .1836 | 只能自比 |
@@ -55,7 +55,7 @@ test 列，而是「官方原版代码在我们同一份 valid 上」跑出的 c
 | 阶段 | 状态 | 一句话结论 | 档案 |
 |---|---|---|---|
 | P0 | ✅ | 主数据 hash/manifest 可核；扩展数据部分仅 raw | [`DATASETS.md`](DATASETS.md) |
-| A | 🟢 | **根因=跨句表示隔离**（按句编码 vs 官方多句拼窗口）+ 漏配 warmup/decay；修复后 causal 23.91→**28.20**、temporal→**32.43**，与官方 31.37 差距 7.46→**3.17**；❌ subevent 反降至 19.65 | [`results/PHASE_A.md`](results/PHASE_A.md) |
+| A | 🟢 | **两个根因：跨句表示隔离 + 漏配 warmup/decay**（均由读官方一手代码定位）；causal 23.91→**28.50**、temporal→**31.55**，与官方 31.37 差距 7.46→**2.87**；⚠️ subevent 21.05 仍低于起点 24.03 | [`results/PHASE_A.md`](results/PHASE_A.md) |
 | B | 🟡 | 结构违反**清零**✅，ECG 可重建率**无增益**❌；α=0.2 因召回上限**不可达** | [`results/PHASE_B.md`](results/PHASE_B.md) |
 | C | ⚠️ | 难例误合并 6.6×✅、ECE ✅；MUC 79.6 **低于官方 81.4**；换底座三次全败 | [`results/PHASE_C.md`](results/PHASE_C.md) |
 | D | 🟡 | 检测 **超官方同底座档**✅、预测图掉点 ±.0001 ✅；净化**结构+下游双负**❌ | [`results/PHASE_D.md`](results/PHASE_D.md) |
