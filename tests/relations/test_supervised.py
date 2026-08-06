@@ -137,10 +137,22 @@ def test_pair_classifier_and_features_shapes():
     feats = _pair_features(h, h)
     assert feats.shape == (3, 32)  # [h; h; h*h; |h-h|] = 4 * 8
     model = PairClassifier(8, {"temporal": 7, "causal": 3, "subevent": 2})
-    out = model(feats)
+    dist = torch.tensor([0, 3, 10])
+    out = model(feats, dist)
     assert out["causal"].shape == (3, 3)
     assert out["temporal"].shape == (3, 7)
     assert out["subevent"].shape == (3, 2)
+
+    # The distance stream must start as a no-op: a fresh N(0,1) embedding would
+    # swamp the tuned feature path before learning anything.
+    assert torch.count_nonzero(model.distance.weight) == 0
+    model.eval()
+    with torch.no_grad():
+        near, far = model(feats, torch.zeros(3, dtype=torch.long)), model(feats, dist)
+    for family in ("temporal", "causal", "subevent"):
+        assert torch.allclose(near[family], far[family]), (
+            f"{family}: distance changed the logits at init -- stream is not a no-op"
+        )
 
     # The batched path (what extract/training use) must equal per-pair construction.
     a, b = torch.randn(4, 8), torch.randn(4, 8)
