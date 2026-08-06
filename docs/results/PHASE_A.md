@@ -440,3 +440,32 @@ MAVEN-ERE 全量的**实际负正比只有 3.9 : 1**，而阈值要的是 30 : 1
   单种子分不清真实效应与噪声。**多种子之前不得写成「距离流有效」。**
 - 之所以在后续长训练里保留它：causal 是口径最干净的主指标，且其 precision 28.18→29.68
   朝官方的 31.03 靠。**这是工程取舍，不是已验证的结论。**
+
+### ⚠️ 一直漏配的官方成分：warmup + linear decay（2026-08-07 发现）
+
+起 20-epoch 长训练时漏传 `--warmup-steps`（default **0**），而脚本里
+`scheduler = None unless warmup > 0` ⇒ 那一跑是**恒定 lr、无 warmup、无 decay**。
+`--warmup-steps` 的 help 原文就写着「the official baseline uses 200」。
+
+**这不是一次性失误，是所有既有档的共同状态**：现役档、`neg30_arch_6ep`、`neg30_window_6ep`、
+`neg30_window_dist_6ep` **全部**用 `--lr 2e-5` 且不带 warmup ⇒ 全程无 schedule。
+官方是 `get_linear_schedule_with_warmup(warmup=200, total=len(dataloader)*epochs)`
+作用在 encoder 优化器上，head 用独立 Adam(1e-4) 不进 scheduler。
+
+⇒ **「学习率 + 调度」这一项，在窗口编码下从未测过**。
+`official_recipe_50ep` 虽测过 lr 1e-5/1e-4 + warmup 200，但那是**按句编码**时代（causal 22.26），
+编码缺陷压倒一切，结论不可外推到窗口编码。
+
+**两条被撤回的判断**（当时基于那一跑的 dev 曲线 0.4343→0.3913→0.4321→0.4153→0.4151→0.4196→0.4228）：
+- ~~「lr 2e-5 偏高」~~ —— 没有依据。震荡是**缺 schedule 的特征**，官方追的正是这个量级。
+- ~~「epoch 8 无提升就停」~~ —— 循环论证。恒定 lr 无 decay 下，后期收敛增益**本就不可能出现**，
+  拿它当停止判据等于用前提证明前提。
+
+**官方默认值（一手核 `causal/main.py` argparse）**：`--lr 1e-4`（scorer）、`--bert_lr 1e-5`（encoder）、
+`--epochs 20`（**不是 README 命令行里的 50**）、`--batch_size 8`、`--eval_steps 50`。
+
+⇒ 该跑已作废并标记（`runs/relations/ABORTED_20ep_nowarmup`），改跑
+`window_dist_20ep_officiallr`：窗口 + 距离流 + **官方 lr 配方（1e-5 / 1e-4 / warmup 200 / linear decay）**
++ 20 epochs + held-out dev best 选择，保留我们实测更优的 α=0.5。
+⚠️ 该档相对 `neg30_window_dist_6ep` **同时变了 lr/schedule/epochs/选择四项**，
+是「求最好结果」而非消融，**归因需另做单变量实验**。
