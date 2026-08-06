@@ -98,6 +98,13 @@ ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
 ## 2. 环境
 
 - SSH `ssh gpu-4090` / `ssh gpu-5090`（都走 cpolar 隧道，间歇掉线）；远端根见 §−1。
+- 🛑 **2026-08-06 起 4090 整机够不着，唯一可用的卡是 5090**。诊断（别重做）：
+  DNS 正常；`1.tcp.vip.cpolar.top:12644` **`Connection refused`**（连测 5/5 一致，不是超时也不是
+  reset）；**同一个 IP 上 a6000 的 14462 端口正常握手** ⇒ cpolar 边缘节点本身健康，
+  是 **4090 那侧的隧道后端没起**（机器关了 / cpolar 客户端挂了 / VIP 保留端口到期被释放），
+  **客户端无解**。`~/.config/cpolar/tunnels.conf` **只托管 5090 与 a6000 两个账号**，
+  4090 的隧道挂在第三个账号上 ⇒ `cpolar-ssh-update` 管不到它，也查不到它的状态。
+  ⇒ 恢复要作者去 cpolar 控制台看那个账号的 `ssh` 隧道，或到机器本地重启 cpolar。
 - ⚠️ **5090 是 cpolar 免费动态地址，host:port 会变**（症状：`Connection refused` /
   `Host key verification failed` / `kex_exchange_identification: Connection reset`）。
   **本地有 `cpolar-ssh-update` 命令可更新 `~/.ssh/config` 里的 5090 隧道地址**（作者 2026-07-28 提供）；
@@ -232,23 +239,30 @@ CUDA_VISIBLE_DEVICES=<空卡> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
 - 结束：成功 SSH 确认进程 GONE → 查退出码与产物完整性；**文件存在不等于训练成功**。
 - 回传：指标 JSON、必要日志、manifest 定向 scp；checkpoint 只在明确需要时传。
 
-## checkpoint 留存策略（2026-07-30 作者定）
+## checkpoint 留存策略（2026-08-06 作者改）
 
-**4090 是主力，5090 只做可行性验证；所有 checkpoint 必须在 4090 留存**，方便复现与改进。
-在 5090 训出来的东西**训完立刻回传 4090**，不要留在那边。
+**训在哪就留在哪，不强制回传；要跨机搬运先问用户。**
+原策略是「4090 是主力，所有 checkpoint 必须回传 4090」（2026-07-30 定）。2026-08-06 4090 的
+cpolar 隧道后端挂掉、整台机器够不着，**那条规则反而把工作卡死**（新档没处放、旧档取不出）
+⇒ 改为按需搬运。
 
-**代价是实测出来的**：5090 走免费版 cpolar，实测 **130 KB/s**；4090 是 vip 隧道，约 450 KB/s。
-一个 roberta-base 档（476 MB）两跳（5090 → 本地 → 4090）**约 70 分钟**。Phase C 的共指
-checkpoint 因为只在 5090，直接导致 2026-07-30 的 CodaLab 提交先跑了一版词形兜底档。
+**搬运代价是实测的**：5090 走免费版 cpolar，实测 **130 KB/s**；4090 是 vip 隧道，约 450 KB/s。
+一个 roberta-base 档（476 MB）两跳（5090 → 本地 → 4090）**约 70 分钟**——这就是要先问的原因。
 
-| checkpoint | 在哪 | 处置 |
+**但不搬的代价也是实测的**：Phase C 的共指 checkpoint 因为只在 5090，直接导致 2026-07-30 的
+CodaLab 提交先跑了一版词形兜底档。所以放弃回传不等于放弃记账——
+**档在哪台必须记进 `docs/results/` 的对应 PHASE 文件**，别让下一个窗口去猜。
+
+| checkpoint | 在哪 | 说明 |
 |---|---|---|
-| `runs/relations/supervised_maven`（Phase A 系统档） | 4090 ✅ | — |
-| `runs/factuality/struct_best`·`supervised_6ep`（Phase D） | 4090 ✅ | — |
-| `runs/cgep/ch4_sedgpl.pt`（Phase E，1.5G） | 4090 ✅ | — |
-| `runs/nodes/coref_supervised_6ep`（Phase C 系统档） | 5090 → 4090 | 2026-07-30 回传中 |
-| `runs/nodes/detector_supervised_6ep`（Phase C 检测头） | 5090 | 待回传 |
-| `coref_large`·`coref_longformer`·`coref_*_diverged_*`（换底座失败档 / 发散档） | 5090 | **不回传**：数字已在 `docs/results/PHASE_C.md`，权重无复现价值 |
+| `runs/relations/supervised_maven`（Phase A 系统档） | 4090 + 5090 | 现役对照档 |
+| `runs/factuality/struct_best`·`supervised_6ep`（Phase D） | 4090 | 4090 恢复前取不到 |
+| `runs/cgep/ch4_sedgpl.pt`（Phase E，1.5G） | 4090 | 同上 |
+| `runs/nodes/coref_supervised_6ep`（Phase C 系统档） | 4090 + 5090 | 2026-07-30 已回传，sha256 三端一致 |
+| `runs/nodes/detector_supervised_6ep`（Phase C 检测头） | 5090 | 不再要求回传 |
+| `runs/relations/official_arch_6ep`（A2 新架构·官方配方） | 5090 | 2026-08-06 训；欠拟合平台，无分辨力 |
+| `runs/relations/neg30_arch_6ep`（A2 新架构·现役配方） | 5090 | 2026-08-06 训；**架构证伪的主对照档**，causal 24.06 |
+| `coref_large`·`coref_longformer`·`coref_*_diverged_*`（换底座失败档 / 发散档） | 5090 | **不搬**：数字已在 `docs/results/PHASE_C.md`，权重无复现价值 |
 
 ⚠️ 两跳都用 `rsync -aP --append-verify`（可断点续传），**别用带 timeout 的 scp**——会静默截断出半个文件。
 落地后核 `sha256` 或至少核字节数。

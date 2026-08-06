@@ -33,6 +33,16 @@
 - **`heuristic._temporal` 默认 `corpus` scope 是真 bug**（99.93% 跨主体伪影）→ 默认改 `subject`。
 - **conformal 改 `fit(train-only)` 致 fixture 指标下降是预期**，不是回归。
 - **blackboard 不可变**：agent 只读、在 **copy** 上标注。
+- ⚠️ **`43e62df` 起旧关系 checkpoint 一律加载不了**（2026-08-06 实测）：`PairClassifier`
+  从单层线性换成 2 隐层 MLP，`state_dict` 从 **6 个 key 变 18 个**
+  （`heads.causal.weight` → `heads.causal.{0,3,6}.{weight,bias}`），
+  `_ensure_model` 的 `load_state_dict` 是默认 `strict=True` ⇒ 直接 `RuntimeError`。
+  **受影响**：`build_maven_ere_submission.py --relation-checkpoint`、
+  `evaluate_relations.py --checkpoint-path`、`evaluate_factuality.py --extractor-checkpoint`
+  ——最后这个的 docstring 示例就写着 `runs/relations/supervised_maven`，**照抄会崩**。
+  ⇒ 要复现 Phase A/B/D/E 里**用旧档现跑抽取器**的部分，必须 `git checkout 43e62df~1`；
+  **不要**为此加自动判别结构的 fallback（掩盖问题，违反 fail-fast）。
+  下游若已用 dump 好的边（如 `runs/relations/supervised_dump.jsonl`）则不受影响。
 - **换 torch 必须同时换 torchvision/torchaudio，否则失败会伪装成「没装 torch」**（2026-07-28，
   4090 升 cu128 时踩）：只 `uv pip install torch==2.8.0` 会留下为 torch 2.6.0 编译的
   `torchvision 0.21.0` / `torchaudio 2.6.0`，C 扩展 ABI 当场碎

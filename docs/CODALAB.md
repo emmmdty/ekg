@@ -93,10 +93,10 @@ CUDA_VISIBLE_DEVICES=<空卡> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
 阈值是 Phase C / Phase A 在 **valid** 上选定的操作点，**不许在 test 上重调**。
 `--propagate-coref` 默认关闭（把关系复制到预测簇的同伴上，召回更高但风险更大）。
 
-**⚠️ checkpoint 分处两台机器**：关系抽取器在 **4090**（`runs/relations/supervised_maven`），
-共指判别器 Phase C 是在 **5090** 训的（`runs/nodes/coref_supervised_6ep`）。跑之前要么把共指
-checkpoint 经本地中转到 4090（约 500MB，cpolar ~400KB/s 单程约 20 分钟，用
-`rsync -aP --append-verify`），要么在 5090 上跑（**须逐次问作者**）。
+**⚠️ checkpoint 位置**（2026-08-06 核）：关系抽取器 `runs/relations/supervised_maven` 与共指
+判别器 `runs/nodes/coref_supervised_6ep` **两台都有**，不再需要中转。但 **4090 自 2026-08-06
+起整机够不着**（cpolar 隧道后端没起，见 `GPU_RUNBOOK.md`），当前一律在 5090 跑
+（**须逐次问作者**）。
 
 **格式已用官方脚本验过**（2026-07-30）：把金标按本生成器的格式写成 prediction 喂给
 `THU-KEG/MAVEN-ERE/evaluate.py`，四项指标全部返回 **100.0** —— 说明「簇级关系展开到所有

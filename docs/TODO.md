@@ -50,7 +50,7 @@
 | 阶段 | 状态 | 一句话结论 | 档案 |
 |---|---|---|---|
 | P0 | ✅ | 主数据 hash/manifest 可核；扩展数据部分仅 raw | [`DATASETS.md`](DATASETS.md) |
-| A | ⚠️ | 判别式解了召回（causal .4%→67.5%、`hallucinated=0`），但 F1 **低于官方同底座基线 5.6 点** | [`results/PHASE_A.md`](results/PHASE_A.md) |
+| A | ⚠️ | 判别式解了召回，但 causal 24.06 vs 官方原版同 valid **31.37**；A2 的四条解释（配方/跨split/population/架构）**已全部排除**，差距未解释 | [`results/PHASE_A.md`](results/PHASE_A.md) |
 | B | 🟡 | 结构违反**清零**✅，ECG 可重建率**无增益**❌；α=0.2 因召回上限**不可达** | [`results/PHASE_B.md`](results/PHASE_B.md) |
 | C | ⚠️ | 难例误合并 6.6×✅、ECE ✅；MUC 79.6 **低于官方 81.4**；换底座三次全败 | [`results/PHASE_C.md`](results/PHASE_C.md) |
 | D | 🟡 | 检测 **超官方同底座档**✅、预测图掉点 ±.0001 ✅；净化**结构+下游双负**❌ | [`results/PHASE_D.md`](results/PHASE_D.md) |
@@ -66,18 +66,20 @@
    —— 契约与交接见 [`phases/PHASE_A2_ch2_official_recipe.md`](phases/PHASE_A2_ch2_official_recipe.md)。
    🛑 CodaLab 通道 2026-07-30 已关，官方 test 分拿不到，**不再产提交件**。
    唯一可比的尺是「**官方 `evaluate.py` 打 valid**」，脚本已就位（`scripts/score_maven_ere_official.py`）。
-   我们的架构与官方基线本就是同一个（RoBERTa-base 成对分类），差的全是配方——读源码确认四处差异，
-   其中**零负采样 + 无类权重**两条同向叠加，是 precision 崩（官方 P 35.0 vs 我们 23.96）的首要嫌疑。
-   判据不是 F1 涨没涨，是 **P/R 结构有没有从召回主导翻到精度主导**。
-   **2026-08-02 50 epochs 全量已跑完（含阈值扫描），触发预定止损**：precision 方向假设部分兑现
-   （causal/subevent precision 确实高于现役档），但 F1 未达标——**causal 最佳阈值 22.26 < 止损线 28**，
-   且 subevent 反而比现役档腰斩（10.55 vs 24.03）。已排除欠拟合、阈值未调对两种解释。
-   **同日跑完契约步骤 4（官方原版代码在我们的 valid 上出对照数）：causal F1 31.37**（P31.03/R31.72），
-   基本追平论文 test 数（30.6），**排除了"跨 split 假象"和"候选 population 不一致"两种解释**。
-   逐行核对官方 `utils/model.py` 找到真正差距来源——**是架构，不是训练配方**：官方对触发词整个
-   span 做 mean-pooling（我们只取单 token）、pair 分类头是 2 层 MLP+Dropout（我们是单层线性）。
-   **下一步明确**：把 `PairClassifier` 升级为同容量 MLP+Dropout、`encode_trigger_reps` 改 span
-   mean-pooling——不再是超参问题。数字与逐条推导见 `results/PHASE_A.md`。
+   我们的架构与官方基线本就是同一个（RoBERTa-base 成对分类）。**四条候选解释已逐条排除**
+   （数字与推导全在 `results/PHASE_A.md`，此处只记结论）：
+   - ❌ **训练配方**（负采样/类权重/学习率/epoch）：2026-08-02 50ep 全量跑完，causal 22.26 < 现役档。
+   - ❌ **跨 split 假象 / 候选 population 不一致**：2026-08-02 跑**官方原版代码在我们同一份 valid**
+     上得 **causal 31.37**（P31.03/R31.72，比论文 test 的 30.6 还高）⇒ 两条同时排除。
+   - ❌ **`--neg-ratio 30` 的下采样**：2026-08-06 实测**它从未生效**（正例 20.44%，实际负正比 3.9:1
+     < 阈值 30:1）⇒ neg30 与 inf 训练集逐行相同，契约「四处差异」的第一条**不存在**。
+   - ❌ **架构**（span mean-pooling + MLP 头，`43e62df`）：2026-08-06 在现役档配方下做单变量对照，
+     **causal 23.91→24.06（+0.15，噪声级）、subevent 24.03→22.56（−1.47）**⇒ **架构假设证伪**，
+     与官方 31.37 的 **7.31 点差距仍未解释**。
+   **⇒ 队首任务的原定路线已走完，且是负结果。** 下一步候选（按可疑度）：
+   ① **单关系训练 vs 我们的三族多头联合**（官方 `causal/` 只出 causal，存在多任务干扰）；
+   ② 优化器/调度/batch 构造其余细节；③ pair 特征构造（官方 `[e1;e2]` 1536 维 vs 我们 4 路 3072 维，
+   `43e62df` 没动这处）。⛔ **不要再碰负采样/类权重/学习率/epoch**。
 2. **我们在官方口径 valid 上的真实数字**（2026-07-30，官方 `evaluate.py`，710 篇）：
    **causal F1 23.91**（P 23.96 / R 23.86）、**subevent 24.03**（P 20.45 / R 29.14）、
    **temporal 22.25**（P 42.59 / **R 15.06** ← 缺 TIMEX 头的量化证据）、
