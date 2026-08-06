@@ -156,8 +156,10 @@ CGEP**（`succession/selective.py`：候选分数→gold 排名→`run_cross_sta
 （90%覆盖 243 vs 425/−43%、70% 99 vs 313/−68%）——强 ranker 价值=覆盖保证下的集收缩、不依赖 MRR。
 **M3b（跨阶段 reachability）：真实构建版 ECG 曾被 Ch2 生成式抽取器堵死**——SFT+GRPO LoRA causal 召回
 **0.4%（3/810）、subevent 0%（0/139）**，构建版 ECG 退化（reachability 损失 ~1.0，非可扫描范围）。
-**Phase A（2026-07-24）已用判别式抽取器解此瓶颈**（causal 召回 67.5%、F1 .250 / subevent .213，`hallucinated=0`；
-见 EXPERIMENTS §Ch2），真实 predicted ECG 的 reachability 待 Phase B/E 接入。故 M3b 此前落为
+**Phase A（2026-07-24）已用判别式抽取器解此瓶颈**（causal 召回 0.4%→67.5%，`hallucinated=0`）。
+⚠️ 那里的 F1 `.250`/`.213` 是**内部口径**，2026-08-07 起全项目改用官方 `evaluate.py` 口径，
+**数字一律以 [`results/PHASE_A.md`](results/PHASE_A.md) 为准**（本文件不复制）。
+真实 predicted ECG 的 reachability 待 Phase B/E 接入。故 M3b 此前落为
 **受控 reachability 扫描**（`succession/cross_stage.py` + `scripts/evaluate_cgep_cross_stage.py`）：真 SeDGPL 推理排名 +
 受控 reachability 损失。**真 SeDGPL 排名实证**（954，α_total=0.2）：naive 覆盖崩(0.80→0.56)、集恒~140（忽略剪枝）；
 cs_crp 守覆盖到预留档(loss≤0.1)、集恒~270；**cs_cond 同覆盖下自适应更紧集**(loss=0: 152 vs 272，−44%)——原语的
@@ -273,7 +275,7 @@ DropEdge ICLR'20），净化类干预要与**度数匹配**的随机剔除比（
   tie-break 同报 `mrr`（乐观/SeDGPL）与 `mrr_strict`。
 - **既有受控实验**：真实构建版 ECG 此前被 Ch2 生成式抽取器堵死（causal 召回 0.4%），故先做**受控
   reachability 扫描**（真 SeDGPL 排名 + 受控损失，`cross_stage.py`）。**Phase A 判别式抽取器已解召回瓶颈
-  （causal F1 .250），可产真实 predicted ECG**；v4 Phase E 必须在 Phase B 后补 gold/predicted/repaired
+  （数字见 [`results/PHASE_A.md`](results/PHASE_A.md)），可产真实 predicted ECG**；v4 Phase E 必须在 Phase B 后补 gold/predicted/repaired
   三图闭环，受控扫描不能替代真实图结果。
 - **旧 TKG 线**：re_gcn/hybrid/path_rl **已移出主干**（git tag `frozen-tkg-line`），不在当前测试/CI。
 - **多种子最后**：seeds 13/17/42，报 mean±std。
