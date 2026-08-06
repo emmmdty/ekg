@@ -163,6 +163,13 @@ def main() -> int:
         help="linear warmup on the encoder rate (the official baseline uses 200); 0 = off",
     )
     parser.add_argument("--seed", type=int, default=13)
+    parser.add_argument(
+        "--dev-docs", type=int, default=0,
+        help="hold out this many TRAIN docs as dev and keep the best-scoring epoch "
+             "(the official baseline selects on dev; 0 = off, keep the last epoch). "
+             "Never carved from valid -- selecting and reporting on the same split "
+             "would bias the reported number",
+    )
     args = parser.parse_args()
 
     # torch-only imports stay inside main so the data helpers above import on CPU.
@@ -226,10 +233,68 @@ def main() -> int:
         total = args.epochs * len(rows_by_doc)
         scheduler = get_linear_schedule_with_warmup(optimiser, args.warmup_steps, total)
 
+    # Held-out dev carved out of TRAIN, never from valid: selecting the checkpoint on
+    # valid and then reporting valid would bias the reported number. The official
+    # baseline selects on dev and reports test; we have no test, so the split has to
+    # come out of train instead.
+    all_ids = list(rows_by_doc)
+    random.Random(args.seed).shuffle(all_ids)
+    dev_ids = all_ids[: args.dev_docs] if args.dev_docs else []
+    train_ids = all_ids[args.dev_docs :] if args.dev_docs else all_ids
+    if args.dev_docs:
+        print(
+            f"[train] holdout dev: {len(dev_ids)} docs (from train), "
+            f"training on {len(train_ids)}",
+            flush=True,
+        )
+
+    def save_checkpoint() -> None:
+        args.output.mkdir(parents=True, exist_ok=True)
+        encoder.save_pretrained(args.output)
+        tokenizer.save_pretrained(args.output)
+        torch.save(heads.state_dict(), args.output / "heads.pt")
+
+    def dev_micro_f1() -> float:
+        """Pair-level micro F1 over non-NONE classes -- the official selection signal."""
+        encoder.eval()
+        heads.eval()
+        tp = fp = fn = 0
+        with torch.no_grad():
+            for doc_id in dev_ids:
+                doc = docs_by_id[doc_id]
+                doc_rows = rows_by_doc[doc_id]
+                embs = encode_trigger_reps(
+                    encoder, tokenizer, doc.nodes, doc.doc_text, args.max_length, device
+                )
+                logits = heads(
+                    _pair_features(
+                        torch.stack([embs[r.head_id] for r in doc_rows]),
+                        torch.stack([embs[r.tail_id] for r in doc_rows]),
+                    ),
+                    torch.tensor([distance_bucket(r.distance) for r in doc_rows], device=device),
+                )
+                for family in FAMILY_SUBTYPES:
+                    gold = torch.tensor(
+                        [label_index[family][r.labels.get(family, "NONE")] for r in doc_rows],
+                        device=device,
+                    )
+                    pred = logits[family].argmax(dim=-1)
+                    hit = pred == gold
+                    tp += int(((gold > 0) & hit).sum())
+                    fp += int(((pred > 0) & ~hit).sum())
+                    fn += int(((gold > 0) & ~hit).sum())
+        encoder.train()
+        heads.train()
+        if tp == 0:
+            return 0.0
+        p, r = tp / (tp + fp), tp / (tp + fn)
+        return 2 * p * r / (p + r)
+
+    best_f1 = -1.0
     encoder.train()
     heads.train()
     for epoch in range(args.epochs):
-        doc_ids = list(rows_by_doc)
+        doc_ids = list(train_ids)
         random.Random(args.seed + epoch).shuffle(doc_ids)
         running = 0.0
         for seen, doc_id in enumerate(doc_ids, start=1):
@@ -268,12 +333,23 @@ def main() -> int:
                     flush=True,
                 )
         print(f"[train] epoch {epoch} mean_loss={running / max(1, len(doc_ids)):.4f}", flush=True)
+        if dev_ids:
+            f1 = dev_micro_f1()
+            better = f1 > best_f1
+            print(
+                f"[dev] epoch {epoch} micro_f1={f1:.4f}"
+                + (f"  <- best (was {best_f1:.4f}), saving" if better else "  (keeping best)"),
+                flush=True,
+            )
+            if better:
+                best_f1 = f1
+                save_checkpoint()
 
-    args.output.mkdir(parents=True, exist_ok=True)
-    encoder.save_pretrained(args.output)
-    tokenizer.save_pretrained(args.output)
-    torch.save(heads.state_dict(), args.output / "heads.pt")
-    print(f"[train] saved encoder + heads to {args.output}")
+    if not dev_ids:  # no selection signal: last epoch is all we have
+        save_checkpoint()
+        print(f"[train] saved last-epoch encoder + heads to {args.output}")
+    else:
+        print(f"[train] best dev micro_f1={best_f1:.4f}; checkpoint at {args.output}")
     return 0
 
 
