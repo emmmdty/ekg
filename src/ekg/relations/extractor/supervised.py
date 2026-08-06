@@ -144,12 +144,33 @@ if TORCH_AVAILABLE:
         )
 
     def encode_trigger_reps(encoder, tokenizer, nodes, doc_text, max_length, device="cpu"):
-        """Per-node trigger representation: encode each sentence once, mean-pool
-        every token covering the trigger span. Gradient flows when the encoder is
-        in train mode -- the caller wraps inference in `no_grad`. Fail-fast on
-        unlocatable triggers.
+        """Per-node trigger representation, mean-pooled from **document windows**.
+
+        Consecutive sentences are packed into one `<= max_length` window (CLS in
+        front, SEP after each sentence) and encoded in a **single forward pass**,
+        so triggers in different sentences attend to each other.
+
+        **This is not a detail.** Measured on MAVEN-ERE valid, **68.8% of causal
+        pairs and 85.8% of subevent pairs are cross-sentence**. Encoding one
+        sentence at a time leaves every one of those pairs holding two
+        representations that never met in an attention map, and no amount of
+        pair-head capacity downstream recovers what the encoder never mixed --
+        which is why enlarging the head and fixing span pooling both moved causal
+        F1 by ~0 (see `docs/results/PHASE_A.md`). Mirrors the official baseline
+        (`THU-KEG/MAVEN-ERE`, `causal/src/data.py`), which packs sentences up to
+        its own `max_length` and records event spans in the packed sequence.
+
+        `max_length` is therefore a **window** budget, not a per-sentence one --
+        the same quantity the official baseline's 256 refers to.
+
+        Gradient flows when the encoder is in train mode; callers wrap inference in
+        `no_grad`. Fail-fast on unlocatable triggers and on any sentence too long
+        to ever fit a window.
         """
+        if not nodes:
+            return {}
         lines = doc_text.split("\n")
+        doc_id = nodes[0].doc_id
         by_sent: dict[int, list] = {}
         for node in nodes:
             span = node.trigger_evidence[0] if node.trigger_evidence else None
@@ -157,26 +178,47 @@ if TORCH_AVAILABLE:
                 raise ValueError(
                     f"supervised: node {node.event_id} lacks a sentence-anchored trigger"
                 )
+            if not 0 <= span.sent_id < len(lines):
+                raise ValueError(f"supervised: sent_id {span.sent_id} out of range in {doc_id}")
             by_sent.setdefault(span.sent_id, []).append(node)
 
         embs: dict[str, torch.Tensor] = {}
-        for sent_id, group in by_sent.items():
-            if not 0 <= sent_id < len(lines):
-                raise ValueError(f"supervised: sent_id {sent_id} out of range in {group[0].doc_id}")
-            sentence = lines[sent_id]
-            enc = tokenizer(
-                sentence,
-                return_offsets_mapping=True,
-                truncation=True,
-                max_length=max_length,
-                return_tensors="pt",
-            )
-            offsets = enc["offset_mapping"][0].tolist()
-            inputs = {k: v.to(device) for k, v in enc.items() if k != "offset_mapping"}
-            hidden = encoder(**inputs).last_hidden_state[0]
-            for node in group:
-                start, end = locate_trigger_span(sentence, node.trigger, offsets)
+        window: list[int] = [tokenizer.cls_token_id]
+        pending: list[tuple] = []
+
+        def flush() -> None:
+            """Encode the packed window and pool every trigger recorded in it."""
+            if not pending:
+                return
+            ids = torch.tensor([window], device=device)
+            hidden = encoder(
+                input_ids=ids, attention_mask=torch.ones_like(ids)
+            ).last_hidden_state[0]
+            for node, start, end in pending:
                 embs[node.event_id] = hidden[start:end].mean(dim=0)
+
+        for sent_id, sentence in enumerate(lines):
+            enc = tokenizer(sentence, add_special_tokens=False, return_offsets_mapping=True)
+            sent_ids, offsets = enc["input_ids"], enc["offset_mapping"]
+            if len(sent_ids) + 2 > max_length:  # CLS + sentence + SEP
+                raise ValueError(
+                    f"supervised: sentence {sent_id} of {doc_id} needs {len(sent_ids) + 2} "
+                    f"tokens, over the {max_length} window budget"
+                )
+            # Locate in the sentence's own token coords, then shift into the window.
+            located = [
+                (node, *locate_trigger_span(sentence, node.trigger, offsets))
+                for node in by_sent.get(sent_id, [])
+            ]
+            if len(window) + len(sent_ids) + 1 > max_length:
+                flush()
+                window = [tokenizer.cls_token_id]
+                pending = []
+            base = len(window)
+            window.extend(sent_ids)
+            window.append(tokenizer.sep_token_id)
+            pending.extend((node, base + s, base + e) for node, s, e in located)
+        flush()
         return embs
 
 
