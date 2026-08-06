@@ -162,6 +162,13 @@ def main() -> int:
         "--warmup-steps", type=int, default=0,
         help="linear warmup on the encoder rate (the official baseline uses 200); 0 = off",
     )
+    parser.add_argument(
+        "--accum-steps", type=int, default=1,
+        help="accumulate gradients over N documents before stepping. The official "
+             "baseline batches 8 documents; ours updates per document (= batch 1), "
+             "which both adds gradient noise and makes --warmup-steps mean 8x fewer "
+             "documents than the official 200",
+    )
     parser.add_argument("--seed", type=int, default=13)
     parser.add_argument(
         "--dev-docs", type=int, default=0,
@@ -198,7 +205,8 @@ def main() -> int:
     print(
         f"[train] {len(docs)} docs, {len(rows)} rows (negatives {kept}), "
         f"weight_alpha={args.weight_alpha}, lr={args.lr}, head_lr={args.head_lr}, "
-        f"warmup={args.warmup_steps}, max_length={args.max_length}",
+        f"warmup={args.warmup_steps}, accum={args.accum_steps}, "
+        f"max_length={args.max_length}",
         flush=True,
     )
 
@@ -226,13 +234,6 @@ def main() -> int:
         ],
         lr=args.lr,
     )
-    scheduler = None
-    if args.warmup_steps > 0:
-        from transformers import get_linear_schedule_with_warmup
-
-        total = args.epochs * len(rows_by_doc)
-        scheduler = get_linear_schedule_with_warmup(optimiser, args.warmup_steps, total)
-
     # Held-out dev carved out of TRAIN, never from valid: selecting the checkpoint on
     # valid and then reporting valid would bias the reported number. The official
     # baseline selects on dev and reports test; we have no test, so the split has to
@@ -241,6 +242,19 @@ def main() -> int:
     random.Random(args.seed).shuffle(all_ids)
     dev_ids = all_ids[: args.dev_docs] if args.dev_docs else []
     train_ids = all_ids[args.dev_docs :] if args.dev_docs else all_ids
+
+    scheduler = None
+    if args.warmup_steps > 0:
+        from transformers import get_linear_schedule_with_warmup
+
+        # Count optimiser steps, not documents: with --accum-steps N the schedule
+        # advances once per N docs, and dev docs never enter the training loop.
+        # Getting this wrong stretches the decay past the end of training, so the
+        # rate never actually anneals.
+        steps_per_epoch = math.ceil(len(train_ids) / args.accum_steps)
+        scheduler = get_linear_schedule_with_warmup(
+            optimiser, args.warmup_steps, args.epochs * steps_per_epoch
+        )
     if args.dev_docs:
         print(
             f"[train] holdout dev: {len(dev_ids)} docs (from train), "
@@ -320,12 +334,16 @@ def main() -> int:
                 loss = loss + F.cross_entropy(
                     logits[family], target, weight=weight_tensors.get(family)
                 )
-            optimiser.zero_grad()
-            loss.backward()
-            optimiser.step()
-            if scheduler is not None:
-                scheduler.step()
             running += float(loss)
+            # Scale so the accumulated gradient matches a true batch of that size,
+            # and step the scheduler with the optimiser -- stepping it per document
+            # would race through the warmup N times too fast.
+            (loss / args.accum_steps).backward()
+            if seen % args.accum_steps == 0 or seen == len(doc_ids):
+                optimiser.step()
+                if scheduler is not None:
+                    scheduler.step()
+                optimiser.zero_grad()
             if seen % 500 == 0:  # long run: report progress inside the epoch too
                 print(
                     f"[train] epoch {epoch} {seen}/{len(doc_ids)} docs "
