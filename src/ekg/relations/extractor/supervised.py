@@ -30,12 +30,14 @@ from ekg.relations.extractor.base import (
     RelationExtractor,
     relation_extractors,
 )
-from ekg.relations.pairs import candidate_pairs
+from ekg.relations.pairs import candidate_pairs, mention_order
 
 __all__ = [
     "TORCH_AVAILABLE",
     "FAMILY_SUBTYPES",
+    "DISTANCE_BUCKETS",
     "SupervisedRelationExtractor",
+    "distance_bucket",
     "encode_trigger_reps",
     "locate_trigger_span",
 ]
@@ -93,6 +95,25 @@ def locate_trigger_span(
     return toks[0], toks[-1] + 1
 
 
+# Upper bounds of the mention-order distance buckets; index len(...) is the overflow
+# bucket. Geometric-ish because the pair count decays that way (31% of causal pairs
+# are same-sentence, then a long tail out past 10 sentences).
+DISTANCE_BUCKETS = (0, 1, 2, 3, 4, 6, 9, 14, 22, 35)
+
+
+def distance_bucket(distance: int) -> int:
+    """Bucket a `mention_order` separation. Deterministic and vocabulary-free.
+
+    Deliberately not a learned vocabulary: a bucket id computed the same way at
+    train and inference time cannot drift out of alignment, which is the failure
+    mode a learned event-type vocabulary would have introduced here.
+    """
+    for i, upper in enumerate(DISTANCE_BUCKETS):
+        if distance <= upper:
+            return i
+    return len(DISTANCE_BUCKETS)
+
+
 try:  # pragma: no cover - exercised on the GPU server
     import torch
     import torch.nn as nn
@@ -106,19 +127,35 @@ except ImportError:  # pragma: no cover - the local CPU path
 if TORCH_AVAILABLE:
 
     class PairClassifier(nn.Module):
-        """Per-family MLP head over the 4-way pair feature.
+        """Per-family MLP head over the 4-way pair feature plus a distance embedding.
 
         Two hidden layers + dropout (`Linear -> ReLU -> Dropout -> Linear -> ReLU
         -> Dropout -> Linear`), matching the official MAVEN-ERE baseline's scorer
-        capacity (`utils/model.py::Score`) -- a single linear layer here was the
-        main gap to the official baseline's causal F1 (Phase A2 contract step 4).
+        capacity (`utils/model.py::Score`).
+
+        **The distance stream** carries `mention_order` separation, bucketed. The
+        pair feature is permutation-symmetric in magnitude and says nothing about
+        how far apart the two triggers are, yet 75% of gold causal pairs are
+        cross-sentence and their F1 trails same-sentence pairs by ~11 points --
+        "location information" is the standard remedy in the document-level RE
+        literature. `PairExample.distance` was already computed and never used.
+
+        The embedding is **zero-initialised so the stream starts as a no-op** and
+        has to earn its weight: a default `N(0,1)` stream can swamp a tuned
+        feature path before it learns anything (cost us an MRR halving once).
         """
 
         def __init__(
-            self, hidden_size: int, subtype_counts: dict[str, int], mlp_hidden: int = 150
+            self,
+            hidden_size: int,
+            subtype_counts: dict[str, int],
+            mlp_hidden: int = 150,
+            dist_dim: int = 32,
         ) -> None:
             super().__init__()
-            in_dim = hidden_size * 4
+            self.distance = nn.Embedding(len(DISTANCE_BUCKETS) + 1, dist_dim)
+            nn.init.zeros_(self.distance.weight)
+            in_dim = hidden_size * 4 + dist_dim
             self.heads = nn.ModuleDict(
                 {
                     fam: nn.Sequential(
@@ -134,8 +171,11 @@ if TORCH_AVAILABLE:
                 }
             )
 
-        def forward(self, pair_feats: torch.Tensor) -> dict[str, torch.Tensor]:
-            return {fam: head(pair_feats) for fam, head in self.heads.items()}
+        def forward(
+            self, pair_feats: torch.Tensor, dist_ids: torch.Tensor
+        ) -> dict[str, torch.Tensor]:
+            feats = torch.cat([pair_feats, self.distance(dist_ids)], dim=-1)
+            return {fam: head(feats) for fam, head in self.heads.items()}
 
     def _pair_features(head_emb: torch.Tensor, tail_emb: torch.Tensor) -> torch.Tensor:
         """`[h_i; h_j; h_i⊙h_j; |h_i−h_j|]` — the standard pair-classification feature."""
@@ -327,8 +367,14 @@ class SupervisedRelationExtractor(RelationExtractor):
         # pair launches a kernel per candidate (thousands in a single document).
         head_emb = torch.stack([embs[h] for h, _ in pairs])
         tail_emb = torch.stack([embs[t] for _, t in pairs])
+        # Same mention_order the training rows were bucketed from, so a bucket id
+        # means the same thing on both sides.
+        order = mention_order(RelationDocument(doc_id=nodes[0].doc_id, nodes=nodes, gold_edges=[]))
+        dist_ids = torch.tensor(
+            [distance_bucket(abs(order[h] - order[t])) for h, t in pairs], device=self._device
+        )
         with torch.no_grad():
-            logits = self._model(_pair_features(head_emb, tail_emb))
+            logits = self._model(_pair_features(head_emb, tail_emb), dist_ids)
         result: dict[tuple[str, str], dict[str, tuple[str, float]]] = {}
         for family, subtypes in FAMILY_SUBTYPES.items():
             probs = torch.softmax(logits[family], dim=-1)

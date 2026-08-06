@@ -161,3 +161,27 @@ def test_supervised_config_wires_the_pipeline_on_cpu():
     assert config.extractor == "supervised"
     pipeline = RelationPipeline(config)
     assert type(pipeline.extractor).__name__ == "SupervisedRelationExtractor"
+
+
+def test_distance_bucket_is_monotone_and_bounded() -> None:
+    from ekg.relations.extractor.supervised import DISTANCE_BUCKETS, distance_bucket
+
+    n_ids = len(DISTANCE_BUCKETS) + 1
+    prev = -1
+    for d in range(0, 200):
+        b = distance_bucket(d)
+        assert 0 <= b < n_ids, f"distance {d} bucketed outside the embedding table"
+        assert b >= prev, "buckets must be monotone in distance"
+        prev = b
+    # everything past the last bound collapses into the single overflow bucket
+    assert distance_bucket(DISTANCE_BUCKETS[-1] + 1) == n_ids - 1
+    assert distance_bucket(10**6) == n_ids - 1
+
+
+def test_distance_bucket_separates_same_sentence_from_far_pairs() -> None:
+    """0 is its own bucket: same-sentence pairs score ~11 F1 above cross-sentence
+    ones, so the head must be able to tell them apart at all."""
+    from ekg.relations.extractor.supervised import distance_bucket
+
+    assert distance_bucket(0) != distance_bucket(1)
+    assert distance_bucket(1) != distance_bucket(50)

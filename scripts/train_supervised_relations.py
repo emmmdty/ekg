@@ -173,6 +173,7 @@ def main() -> int:
     from ekg.relations.extractor.supervised import (
         PairClassifier,
         _pair_features,
+        distance_bucket,
         encode_trigger_reps,
     )
 
@@ -241,7 +242,10 @@ def main() -> int:
             # a kernel per candidate (thousands in a single document).
             head_emb = torch.stack([embs[r.head_id] for r in doc_rows])
             tail_emb = torch.stack([embs[r.tail_id] for r in doc_rows])
-            logits = heads(_pair_features(head_emb, tail_emb))
+            dist_ids = torch.tensor(
+                [distance_bucket(r.distance) for r in doc_rows], device=device
+            )
+            logits = heads(_pair_features(head_emb, tail_emb), dist_ids)
             loss = torch.zeros((), device=device)
             for family in FAMILY_SUBTYPES:
                 target = torch.tensor(
