@@ -163,6 +163,12 @@ def main() -> int:
         help="linear warmup on the encoder rate (the official baseline uses 200); 0 = off",
     )
     parser.add_argument(
+        "--dev-metric", choices=("micro", "macro"), default="micro",
+        help="how --dev-docs scores an epoch. micro pools all families and is "
+             "dominated by temporal (~39x subevent's pair count); macro weights the "
+             "three families equally. Default stays micro so existing runs reproduce",
+    )
+    parser.add_argument(
         "--accum-steps", type=int, default=1,
         help="accumulate gradients over N documents before stepping. The official "
              "baseline batches 8 documents; ours updates per document (= batch 1), "
@@ -268,11 +274,17 @@ def main() -> int:
         tokenizer.save_pretrained(args.output)
         torch.save(heads.state_dict(), args.output / "heads.pt")
 
-    def dev_micro_f1() -> float:
-        """Pair-level micro F1 over non-NONE classes -- the official selection signal."""
+    def dev_f1() -> tuple[float, dict[str, float]]:
+        """Pair-level F1 over non-NONE classes; `--dev-metric` picks micro or macro.
+
+        Micro pools every family, so it is dominated by whichever family has the most
+        candidate pairs -- temporal outnumbers subevent ~39:1 on valid. A run selected
+        on micro happily trades subevent away for temporal (measured: temporal +3.84
+        while subevent fell 22.26 -> 19.65). Macro weights the three families equally.
+        """
         encoder.eval()
         heads.eval()
-        tp = fp = fn = 0
+        per_family = {fam: [0, 0, 0] for fam in FAMILY_SUBTYPES}  # tp, fp, fn
         with torch.no_grad():
             for doc_id in dev_ids:
                 doc = docs_by_id[doc_id]
@@ -294,15 +306,23 @@ def main() -> int:
                     )
                     pred = logits[family].argmax(dim=-1)
                     hit = pred == gold
-                    tp += int(((gold > 0) & hit).sum())
-                    fp += int(((pred > 0) & ~hit).sum())
-                    fn += int(((gold > 0) & ~hit).sum())
+                    per_family[family][0] += int(((gold > 0) & hit).sum())
+                    per_family[family][1] += int(((pred > 0) & ~hit).sum())
+                    per_family[family][2] += int(((gold > 0) & ~hit).sum())
         encoder.train()
         heads.train()
-        if tp == 0:
-            return 0.0
-        p, r = tp / (tp + fp), tp / (tp + fn)
-        return 2 * p * r / (p + r)
+
+        def f1_of(tp: int, fp: int, fn: int) -> float:
+            if tp == 0:
+                return 0.0
+            p, r = tp / (tp + fp), tp / (tp + fn)
+            return 2 * p * r / (p + r)
+
+        by_family = {fam: f1_of(*counts) for fam, counts in per_family.items()}
+        if args.dev_metric == "macro":
+            return sum(by_family.values()) / len(by_family), by_family
+        pooled = [sum(c[i] for c in per_family.values()) for i in range(3)]
+        return f1_of(*pooled), by_family
 
     best_f1 = -1.0
     encoder.train()
@@ -352,10 +372,11 @@ def main() -> int:
                 )
         print(f"[train] epoch {epoch} mean_loss={running / max(1, len(doc_ids)):.4f}", flush=True)
         if dev_ids:
-            f1 = dev_micro_f1()
+            f1, by_family = dev_f1()
             better = f1 > best_f1
+            detail = " ".join(f"{fam[:4]}={v:.3f}" for fam, v in by_family.items())
             print(
-                f"[dev] epoch {epoch} micro_f1={f1:.4f}"
+                f"[dev] epoch {epoch} {args.dev_metric}_f1={f1:.4f} ({detail})"
                 + (f"  <- best (was {best_f1:.4f}), saving" if better else "  (keeping best)"),
                 flush=True,
             )
@@ -367,7 +388,7 @@ def main() -> int:
         save_checkpoint()
         print(f"[train] saved last-epoch encoder + heads to {args.output}")
     else:
-        print(f"[train] best dev micro_f1={best_f1:.4f}; checkpoint at {args.output}")
+        print(f"[train] best dev {args.dev_metric}_f1={best_f1:.4f}; checkpoint at {args.output}")
     return 0
 
 
