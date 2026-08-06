@@ -50,7 +50,7 @@
 | 阶段 | 状态 | 一句话结论 | 档案 |
 |---|---|---|---|
 | P0 | ✅ | 主数据 hash/manifest 可核；扩展数据部分仅 raw | [`DATASETS.md`](DATASETS.md) |
-| A | 🟢 | **根因=跨句表示隔离**（我们按句编码、官方多句拼窗口）；修复后 causal 24.06→**26.95**、temporal→**28.40**，与官方 31.37 差距 7.31→**4.42**，增益全在跨句 | [`results/PHASE_A.md`](results/PHASE_A.md) |
+| A | 🟢 | **根因=跨句表示隔离**（按句编码 vs 官方多句拼窗口）+ 漏配 warmup/decay；修复后 causal 23.91→**28.20**、temporal→**32.43**，与官方 31.37 差距 7.46→**3.17**；❌ subevent 反降至 19.65 | [`results/PHASE_A.md`](results/PHASE_A.md) |
 | B | 🟡 | 结构违反**清零**✅，ECG 可重建率**无增益**❌；α=0.2 因召回上限**不可达** | [`results/PHASE_B.md`](results/PHASE_B.md) |
 | C | ⚠️ | 难例误合并 6.6×✅、ECE ✅；MUC 79.6 **低于官方 81.4**；换底座三次全败 | [`results/PHASE_C.md`](results/PHASE_C.md) |
 | D | 🟡 | 检测 **超官方同底座档**✅、预测图掉点 ±.0001 ✅；净化**结构+下游双负**❌ | [`results/PHASE_D.md`](results/PHASE_D.md) |
@@ -84,9 +84,16 @@
    修复（`abbdbfd` 文档窗口编码）后，官方口径 valid：
    **causal 24.06→26.95（+2.89）、temporal 23.06→28.40（+5.34）**，与官方 31.37 的差距 **7.31→4.42**。
    **机制已验证**：分层诊断显示增益全在跨句（19.99→**24.11**，+4.12），同句 −1.13。
-   ⇒ **下一步仍攻跨句**（占 75% 正例、只有 24.11 vs 同句 35.48）：
-   ① `PairExample.distance` 已算好但分类头从未用（零成本接入）；② 13.3% 文档仍需多窗口（重叠滑窗）；
-   ③ 事件类型 embedding（⚠️ 词表须随 checkpoint 存）。⛔ 不要再碰负采样/类权重/学习率/epoch。
+   **2026-08-07 续**：又查出**一直漏配官方的 warmup+linear decay**（`--warmup-steps` default 0，
+   scheduler 只在 >0 时创建）——所有既有档都是恒定 lr。补上并对齐官方 lr（1e-5/1e-4）+ 20ep +
+   held-out dev best 选择后：**causal 28.20 / temporal 32.43**，与官方差距 **7.46→3.17**。
+   ⇒ **下一步（按证据排序）**：
+   ① 🛑 **subevent 从 24.03 跌到 19.65 必须先解**——怀疑 dev 选择信号是三族合并 micro F1、
+      被 temporal（pair 数 39×）主导，待验证的修法是按族选 checkpoint 或用宏平均信号；
+   ② **跨句仍是主瓶颈**（24.17 vs 同句 38.07），且**窗口编码之后三轮优化都没能再推动它**；
+   ③ 梯度累积已实现未验证（官方 batch 8，我们逐文档=batch 1；且这让 warmup 200 只等于 200 篇
+      而非官方的 1600 篇）；④ 事件类型 embedding（⚠️ 词表须随 checkpoint 存）。
+   ⛔ 已排除：负采样、类权重方向、span pooling/MLP 头、重叠滑窗（causal 仅 3.3% 跨窗）。
 2. **我们在官方口径 valid 上的真实数字**（2026-07-30，官方 `evaluate.py`，710 篇）：
    **causal F1 23.91**（P 23.96 / R 23.86）、**subevent 24.03**（P 20.45 / R 29.14）、
    **temporal 22.25**（P 42.59 / **R 15.06** ← 缺 TIMEX 头的量化证据）、
