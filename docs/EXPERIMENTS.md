@@ -69,7 +69,8 @@ X-AMR 线性共指（🆕LREC-COLING 2024）｜反事实数据增强（🆕2024�
 | TacoERE | 2024 | 聚类感知压缩 | 🆕 | 长文档关系 |
 | **RESIJ-One(Trigger)**（IPM 2024，联合+图传播，**只用触发词**） | 2024 | 联合+图传播 | 🆕（**同输入假设下的 SOTA，这才是我们的天花板参照**） | **temporal 59.0 / causal 34.8 / subevent 30.8 / MUC 82.5** |
 | **RESIJ-One(Full)**（+AMR 抽的跨句隐式论元/角色/类型/描述文本） | 2024 | 联合+图传播+论元富化 | 🆕（**公开 SOTA，但输入不同**） | **temporal 60.7 / causal 37.4 / subevent 32.9 / MUC 86.1** |
-| MAQInstruct | 2025 | 指令式统一 ERE | 🆕 | 生成式统一 |
+| **MAQInstruct（Llama2-7B-Chat）** | **2025** | 指令式统一 ERE | 🆕（**★ 唯一同 split 对照**） | **valid**：causal **32.5** / subevent **25.2** / temporal 53.8 / coref 80.2 |
+| **BertERE**（MAQInstruct 复现的判别式基线） | 2025 | 判别式成对分类 | ⛳ | **valid**：causal **30.9** / subevent **23.7** / temporal 52.1 / coref 79.8 |
 | LLMERE（带 rationale, O(n)） | 2025 | LLM 生成 + rationale | 🤖/🆕 | 降 O(n²)→O(n) |
 | Llama3 / GPT-4（few-shot） | 2024 | 通用 LLM | 🤖 | 下界参照 |
 | **判别式 supervised + 一致解码 + CRC 准入** | — | 判别式+全局解码+风控 | ★ | **先打到官方单任务基线（causal 30.6），再谈联合** |
@@ -95,9 +96,26 @@ X-AMR 线性共指（🆕LREC-COLING 2024）｜反事实数据增强（🆕2024�
 > 6. 此前本表把官方基线那行的 F1 栏写成「causal/subevent 偏低」**没填数字**，导致 Phase A 只对着
 >    自设的 ≥.25 判「达标」。与 Phase C 的「MUC ~86」是同一类错误。
 >
+> **★ MAQInstruct 分栏裁决（2026-08-07 回一手核 arXiv 2502.03954，HTML 全文）——两栏可信度不同，
+> 必须分开处理**：
+>
+> - 原文 **"since MAVEN-ERE does not have an open test set, we chose to use the validation set for
+>   testing"** ⇒ **与我们同 split**。这同时证明「valid 当 test」有 **2025 年的先例**（不只 SeDGPL 一家），
+>   写作时不再是把柄。
+> - ✅ **关系栏（causal/subevent/temporal）可用**：论文只写 "standard micro-averaged precision,
+>   recall, and F1"、**未声明评测脚本**，但有独立佐证——我们自跑**官方原版代码**在同一份 valid 上得
+>   causal **31.37**，其 BertERE 得 **30.9**，两个对同一官方基线的独立复现差 0.5 ⇒ 协议大概率一致。
+>   **同 split 缺口：causal −4.0 / subevent −4.2。**
+> - 🛑 **共指栏不可用，不得进 Ch1 主表**：指标定义已核清是 **MUC 单指标**（原文 B³/CEAFe/MUC/BLANC
+>   四列分列，不是平均），但**评测脚本、mention 来源（gold 还是预测）、valid 篇数全部未声明**。
+>   且有反证：按 RESIJ 实测「dev 比 test 低 4.5 MUC」外推，dev 应在 **76.9** 左右——
+>   **我们的 77.47 恰好落在外推值上，其 79.8 高出近 3 点** ⇒ 两边协议大概率不同。
+>   ⇒ Ch1 的锚仍是官方 **81.4@test** + 显式 dev/test 差声明。
+>
 > 📎 IPM 2024 = Junchi Zhang et al., *A graph propagation model with rich event structures for joint
 > event relation extraction*, Information Processing and Management 61 (2024) 103811,
 > doi:10.1016/j.ipm.2024.103811；**代码公开** `github.com/zjcerwin/RESIJ`。
+> 📎 MAQInstruct = arXiv 2502.03954 (2025)，backbone = ChatGLM3-6b / Qwen-7B-Chat / Llama2-7B-Chat。
 > 其消融（dev）显示增益是累加而非单点：w/o TCL causal −2.3、w/o Event Tree −2.0、w/o SAGCN −1.6、
 > w/o Graph.Propa. −1.3、w/o MS-AMR −1.1 —— **没有便宜的单点技巧可抄**。
 
@@ -210,16 +228,44 @@ gold query，只稀释 precision；③ **PHASE_B 止损条件已触发**，Ch2 �
 > ② ~~净化后下游 MRR 增益~~ **已证为零**（可部署档 −.0001、oracle 金标档 −.0000，见
 > [`results/PHASE_E.md`](results/PHASE_E.md)），**不得再作为 delta 主张**。
 
-### Ch4 传播 —— 后继事件预测（headline）
+### Ch4 构建质量的下游代价与消费者依赖性（headline）
 
-| 方法 | 年 | 方法族 | 角色 | 参考（CGEP-MAVEN，SeDGPL 自建数据）|
+> **★ 2026-08-07 重设**：v4 的 Ch4 只有 CGEP-MAVEN 一个下游，而 SeDGPL 的 MAVEN 版重建数据未发布
+> ⇒ **无公开可比基线，只能自比**，违反「每章超过多个公开方法」。
+> ⇒ 本章改为**双消费者臂**：微调臂（CGEP-MAVEN，自比）+ **in-context 臂（叙事完形 / CRAB，有公开对手）**。
+
+**A. 微调消费者臂**（自比，如实声明无公开可比基线）
+
+| 方法 | 年 | 方法族 | 角色 | 参考（CGEP-MAVEN）|
 |---|---:|---|---|---|
-| MCPredictor | — | 脚本事件预测 | ⛳ | script chain 参照 |
-| CSProm-KG / SimKG | 2023 | KG embedding 补全 | ⛳/🆕 | 图补全式 |
-| BART-base | 2020 | 生成式 seq2seq | ⛳ | SeDGPL 最强 baseline **24.7 MRR** |
-| Llama3-8B / GPT-3.5-turbo | 2024 | 通用 LLM | 🤖 | 下界参照 |
-| **SeDGPL（DsGL+EeCE+ScEP）** | 2024 | 图 prompt learning | ⛳（**基座，自跑基线**）| 论文 27.9（不可比）/ **自跑 0.1836** |
-| **三图误差分解与归因 + CS-CRP 误差预算** | — | 误差传播+conformal | ★ | **归因表 + 误差传播曲线（升降如实）**；~~repaired > predicted~~ 已作废（2026-07-29，门控天花板实测 0.24%） |
+| BART-base | 2020 | 生成式 seq2seq | ⛳ | SeDGPL 论文内最强 baseline 24.7 MRR（**原论文数据，不可比**）|
+| **SeDGPL（DsGL+EeCE+ScEP）** | 2024 | 图 prompt learning | ⛳（**基座，自跑基线**）| 论文 27.9（**不可比**）/ **自跑 gold .1802 / predicted .1583** |
+
+**B. in-context 消费者臂**（★ 本章「超过多个公开方法」靠这条兑现）
+
+| 方法 | 年 | 方法族 | 角色 | 叙事完形准确率 |
+|---|---:|---|---|---|
+| ELM | — | 事件语言模型 | ⛳ | 46.0 |
+| QGELM | — | 事件语言模型 | ⛳ | 46.0 |
+| EGELM | — | 事件语言模型 | ⛳ | 50.0 |
+| one-shot baseline（无图） | 2025 | LLM 提示 | 🤖 | 13.0（含上下文 38.0）|
+| **CGEL**（Koupaee et al.） | **2025** | LLM 多智能体因果图 + in-context 推理 | 🆕（**★ 本章直接对手**） | **55.0**（含上下文 **61.0**）|
+| **我们：同一批图 × 两类消费者** | — | 消费者依赖性归因 | ★ | **待跑** |
+
+> **口径（2026-08-07 回一手核 ACL 2025 pp.26169-26199，Table 5/6）**
+>
+> 1. CGEL = *Causal Graph based Event Reasoning using Semantic Relation Experts*（Koupaee, Bai, Chen,
+>    Durrett, Chambers, Balasubramanian）。四个「关系专家」（temporal/discourse/precondition/commonsense）
+>    多轮辩论 + 因果法官，**GPT-4o / Llama-70B-instruct，不微调**。代码 `github.com/StonyBrookNLP/causal-graphs`。
+> 2. 🛑 **它不是 CGEP 的对手**：内在评测用 **CRAB**（~2.7k 因果对，新闻域），下游用自建 EEL（520 对，
+>    Annotated NYT）、ForecastQA、叙事完形；**不用 MAVEN-ERE、不用 SeDGPL、不报 MRR**。
+> 3. 🛑 **ForecastQA 档不进我们的主表**：需 MDS 摘要流水线 + GPT-4o（其 Table 5：GPT-4 基线 51.3 /
+>    CGEL 62.7 / BERT-large+MDS 67.4 / 人类 74.6）。我们跑不动，**硬比是不公平对照**。
+> 4. ⚠️ **叙事完形档的可比性边界**：CGEL 用 GPT-4o；我们受 5090 单卡限制只能上 7–14B 量级
+>    ⇒ **不与 CGEL 的 55.0/61.0 直接相减**，对标目标是三个事件语言模型 **ELM 46.0 / QGELM 46.0 /
+>    EGELM 50.0**（它们是微调的专用模型，与我们同量级，可比）。
+> 5. ★ **本章的科学论点不靠绝对分数，靠对照结构**：同一批图、同一批扰动，**两类消费者结果相反**
+>    才是结论。绝对分数只用来证明我们的 in-context 臂是可信实现（须先复现出「有图 > 无图」的大间距）。
 
 ## 3. 每章消融矩阵（每个环节 = 一个可信维度的因果证据）
 
@@ -265,6 +311,7 @@ gold query，只稀释 precision；③ **PHASE_B 止损条件已触发**，Ch2 �
 | CASCADE | 2605.20468 | 两阶段临床区间，上游不确定性传播 | 医疗回归区间，非事件图/reachability |
 | **DeepRefine** | **2605.10488** | **下游导向 KB 精化 + 无 gold GBD 奖励 RL + downstream gains** | **通用 KB 非事件因果图；RL 无覆盖保证；无 reachability/三图误差分解**（★最近威胁，2026-05）|
 | MedCEG | 2512.13510 | 结构/因果图作 RLVR 奖励 | 结构作奖励**非新** → RL-reward 仅作消融、**不写"首次"** |
+| **CGEL / 关系专家** | **ACL 2025**<br>(2506.06910) | **LLM 多智能体（temporal/discourse/precondition/commonsense 四专家辩论）生成因果图 + 内在评测(CRAB) + 下游评测(EEL/ForecastQA/叙事完形)，证明「更好的图 → 下游大涨」** | **★★2026-08-07 新发现，两处相关**：① **占了「多智能体协作构建事件因果图」这一般命题** ⇒ `agents/` 若要作卖点必须逐点区分（我们是判别式微调抽取器 + 校准/风控，非 LLM 辩论）；② **其正面结论与我们的零效应正面冲突** ⇒ 这不是威胁而是 **Ch4 的立论起点**（消费者依赖性）。**不得回避、必须正面引用并解释。** |
 
 **口径**：一律"据我们所知"+显式区分先例，不写全球首创；headline claim 收窄为
 **"事件因果图上、带 reachability 与 conformal 误差预算的下游门控修复"**（区别于 DeepRefine 的通用 KB RL 精化）。
