@@ -98,13 +98,18 @@ ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
 ## 2. 环境
 
 - SSH `ssh gpu-4090` / `ssh gpu-5090`（都走 cpolar 隧道，间歇掉线）；远端根见 §−1。
-- 🛑 **2026-08-06 起 4090 整机够不着，唯一可用的卡是 5090**。诊断（别重做）：
+- ✅ **2026-08-07 4090 已恢复**：ssh 通、`git reset --hard origin/main` 同步成功、
+  **四张卡全空**（0/1/2/3 各 15 MiB / 24564 MiB，利用率 0%）。
+  ~~2026-08-06 起 4090 整机够不着~~ 已解除。
+  <details><summary>断线期的诊断留档（若再次出现同样症状，别重做这一轮）</summary>
+
   DNS 正常；`1.tcp.vip.cpolar.top:12644` **`Connection refused`**（连测 5/5 一致，不是超时也不是
   reset）；**同一个 IP 上 a6000 的 14462 端口正常握手** ⇒ cpolar 边缘节点本身健康，
   是 **4090 那侧的隧道后端没起**（机器关了 / cpolar 客户端挂了 / VIP 保留端口到期被释放），
   **客户端无解**。`~/.config/cpolar/tunnels.conf` **只托管 5090 与 a6000 两个账号**，
   4090 的隧道挂在第三个账号上 ⇒ `cpolar-ssh-update` 管不到它，也查不到它的状态。
   ⇒ 恢复要作者去 cpolar 控制台看那个账号的 `ssh` 隧道，或到机器本地重启 cpolar。
+  </details>
 - ⚠️ **5090 是 cpolar 免费动态地址，host:port 会变**（症状：`Connection refused` /
   `Host key verification failed` / `kex_exchange_identification: Connection reset`）。
   **本地有 `cpolar-ssh-update` 命令可更新 `~/.ssh/config` 里的 5090 隧道地址**（作者 2026-07-28 提供）；

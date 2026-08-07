@@ -189,10 +189,11 @@ setsid nohup .venv/bin/python -u scripts/train_supervised_relations.py \
 
 ## GPU
 
-重（全量有序对训练）。🛑 **2026-08-06 起 4090 整机够不着**——cpolar 隧道后端没起
-（边缘节点healthy、该端口 `Connection refused`，客户端无解，诊断见 `../GPU_RUNBOOK.md`）。
-**当前唯一可用的卡是 5090**：单卡 32.6G，其中约 5.3G 被作者自己的 embed_server 长期占用，
-**别去动它们**。5090 **仍须逐次问作者**；开工前自己 `nvidia-smi` 原子核卡，不得挤占他人。
+重（全量有序对训练）。✅ **2026-08-07 4090 已恢复且四卡全空**（~~2026-08-06 隧道断线~~ 已解除）
+⇒ **优先用 4090**（有空即可自用，无需逐次点头；card 3 故障需 NVML shim，**优先 card 1**）。
+⚠️ **现役 checkpoint 大多在 5090**（`window_dist_20ep_macro` 等，见 `../GPU_RUNBOOK.md` 的
+checkpoint 表）——**在 4090 起新训练前先确认要不要对照档**；跨机搬运约 70 分钟/档，**先问作者**。
+5090 备用，**仍须逐次问作者**；两台都要开工前 `nvidia-smi` 原子核卡，不得挤占他人。
 
 ## 达不到怎么办（止损）
 
