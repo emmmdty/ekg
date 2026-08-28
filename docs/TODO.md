@@ -16,8 +16,9 @@
   `global_protocol_status=PASS`；没有发现课题级硬阻塞；
 - P1.6 的 4090 历史 checkpoint load、最长 internal-dev 与 frozen 10-doc 真实前向均通过，
   `a3_entry_status=PASS`；允许进入 A3.0 同协议 baseline 实验，但尚未放行 A3 主方法三种子。
-- 权威 P1 trust root 是 `p1-v6-20260828-r3` / `e449e731...1c4f84f`；A3 r3 CPU preflight 与三个
-  no-execute launcher 检查已通过，尚未在远端物化或启动训练。
+- 权威 P1 trust root 是 `p1-v6-20260828-r4` / `09e7e392...a85fc46`；r4 在 clean commit 上重跑
+  380 tests/ruff/smoke 并独立复验。A3 r4 CPU preflight 与三个 no-execute launcher 检查已通过，尚未在
+  远端物化或启动训练；r3 因 local gate 绑定 dirty-tree 文件数而 superseded。
 - P1 分开记录 `global_protocol_status` 与 `a3_entry_status`；只有全局协议失败阻塞全链，A3 baseline
   closure 失败只产生 A3 `blocked/executed=false` handoff，D3 仍可继续。
 
@@ -66,8 +67,8 @@ pass/failed/blocked 均可完成 handoff；局部失败不阻断后续方法章�
 ## 当前唯一下一步：执行 A3.0 baseline 全协议重跑
 
 P1.1–P1.6 已交付，见 [`results/PHASE_P1.md`](results/PHASE_P1.md) 和
-`runs/stages/P1/p1-v6-20260828-r3/`。A3.0 先在 4090 仓库物化
-`runs/stages/A3/a3-v6-baselines-r3/preflight/`，记录并显式传入 materializer 打印的 plan SHA-256，再用
+`runs/stages/P1/p1-v6-20260828-r4/`。A3.0 先在 4090 仓库物化
+`runs/stages/A3/a3-v6-baselines-r4/preflight/`，记录并显式传入 materializer 打印的 plan SHA-256，再用
 train/internal-dev 在冻结 candidate/evaluator/schema 下重跑
 local pair、official single、official joint，方法结果产生前解析并冻结 primary anchor；不得提前查看新
 baseline 的 final-valid 分数。完整命令、产物和 promotion 规则见

@@ -10,12 +10,12 @@ subevent 的前提下提高 causal，并稳定超过预注册主锚。类型/方
 
 ## Inputs
 
-- P1 r3 trust root：`runs/stages/P1/p1-v6-20260828-r3/`，其 `protocol.json` SHA-256 固定为
-  `e449e7313c2b0b9235b413f3292877f1a842e4ed85be4d7ba020d28601c4f84f`；任何 A3 命令都必须显式传入，
+- P1 r4 trust root：`runs/stages/P1/p1-v6-20260828-r4/`，其 `protocol.json` SHA-256 固定为
+  `09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46`；任何 A3 命令都必须显式传入，
   不能从待验证 bundle 自取 hash；
 - P1 冻结的 train/internal-dev/final-valid manifests、official evaluator 与 stage schema v2；
 - P1 通过同 schema smoke 的 local pair、official single、official joint；
-- CPU 预检计划 `runs/stages/A3/a3-v6-baselines-r3/preflight/execution_plan.json`；远端须从当前 P1
+- CPU 预检计划 `runs/stages/A3/a3-v6-baselines-r4/preflight/execution_plan.json`；远端须从当前 P1
   trust root 重新物化，不直接复制本地绝对路径；
 - 当前长窗口 relation extractor 与历史 checkpoint，仅作初始化/对照；
 - gold mentions。predicted mentions 只进入端到端副表，不进入组件主表。
@@ -30,7 +30,8 @@ subevent 的前提下提高 causal，并稳定超过预注册主锚。类型/方
 
   ```bash
   .venv/bin/python scripts/prepare_a3_baselines.py \
-    --p1-protocol-sha256 e449e7313c2b0b9235b413f3292877f1a842e4ed85be4d7ba020d28601c4f84f
+    --output runs/stages/A3/a3-v6-baselines-r4/preflight \
+    --p1-protocol-sha256 09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46
   ```
 
   物化器必须重新验证 P1 v2 bundle、source/manifests/candidate/label digests，只写 P1 train 与 internal-dev；
@@ -41,8 +42,9 @@ subevent 的前提下提高 causal，并稳定超过预注册主锚。类型/方
 
   ```bash
   .venv/bin/python scripts/run_a3_baseline.py \
-    --p1-protocol-sha256 e449e7313c2b0b9235b413f3292877f1a842e4ed85be4d7ba020d28601c4f84f \
-    --plan-sha256 9ea3aa84acc1e781256aadc45cf3078775952f91a71ba78526718356f2a18bdf \
+    --preflight runs/stages/A3/a3-v6-baselines-r4/preflight \
+    --p1-protocol-sha256 09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46 \
+    --plan-sha256 4935bd2f72f7c83dd4b9e8694c06cbb9f06a50eb6ab037a8a5fcf2428f8f3444 \
     --baseline local_pair --seed 13
   ```
 

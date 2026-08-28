@@ -7,7 +7,7 @@
 
 | 档案 | 章 | 一句话结论 |
 |---|---|---|
-| [`PHASE_P1.md`](PHASE_P1.md) | 协议 | P1 r3 trust root 与 A3 plan-bound CPU preflight PASS；GPU baseline 尚未启动 |
+| [`PHASE_P1.md`](PHASE_P1.md) | 协议 | P1 r4 clean-commit trust root 与 A3 plan-bound CPU preflight PASS；GPU baseline 尚未启动 |
 | [`PHASE_A.md`](PHASE_A.md) | Ch2 | 长窗口与训练协议修正有效，但 causal 尚未超过统一 official anchor，subevent 仍回退 |
 | [`PHASE_B.md`](PHASE_B.md) | Ch2 | 结构违反清零 ✅，ECG 可重建率无增益 ❌；α=0.2 因召回上限不可达 |
 | [`PHASE_C.md`](PHASE_C.md) | Ch1 | official-valid 错误以过并为主；换底座失败，旧非对称方向被推翻 |

@@ -5,8 +5,8 @@
 > 本 phase 不做科研提分，不启动完整训练。
 
 > **执行快照（2026-08-28）**：P1.1–P1.6 与本地三件套全部通过，bundle 为
-> `runs/stages/P1/p1-v6-20260828-r3/`，可信 `protocol.json` SHA-256 为
-> `e449e7313c2b0b9235b413f3292877f1a842e4ed85be4d7ba020d28601c4f84f`，
+> `runs/stages/P1/p1-v6-20260828-r4/`，可信 `protocol.json` SHA-256 为
+> `09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46`，
 > `global_protocol_status=pass, a3_entry_status=pass`；详见
 > [`../results/PHASE_P1.md`](../results/PHASE_P1.md)。P1 未产生科研 baseline 分数。
 

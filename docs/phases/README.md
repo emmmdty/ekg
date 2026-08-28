@@ -22,7 +22,7 @@ P1 协议冻结
 
 | Phase | 作用 | 当前状态 | GPU | 契约 |
 |---|---|---|---|---|
-| **P1** | 冻结 manifests、scorer、baseline smoke 与 stage bundle | **COMPLETED / PASS；r3 trust root；global=PASS，A3 entry=PASS** | 4090 小样本 smoke 已完成 | [`PHASE_P1_protocol_freeze.md`](PHASE_P1_protocol_freeze.md) |
+| **P1** | 冻结 manifests、scorer、baseline smoke 与 stage bundle | **COMPLETED / PASS；r4 clean-commit trust root；global=PASS，A3 entry=PASS** | 4090 小样本 smoke 已完成 | [`PHASE_P1_protocol_freeze.md`](PHASE_P1_protocol_freeze.md) |
 | **A3** | Ch2 关系族均衡长上下文方法 | **ACTIVE / ENTRY PASS** | 4090 | [`PHASE_A3_relation_balanced.md`](PHASE_A3_relation_balanced.md) |
 | **D3** | Ch3 evidence-conditioned 事实性 | BLOCKED BY A3 handoff | 4090 | [`PHASE_D3_evidence_conditioned.md`](PHASE_D3_evidence_conditioned.md) |
 | **C4** | Ch1 语境判别身份消解 | BLOCKED BY D3 handoff | 4090 | [`PHASE_C4_context_identity.md`](PHASE_C4_context_identity.md) |

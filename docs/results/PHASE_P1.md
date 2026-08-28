@@ -9,11 +9,12 @@
 - P1 phase/status 为 `pass`，P1.1–P1.6 全部闭合；
 - 允许进入 A3.0 baseline 解析与同协议 GPU 实验；D3/C4/E3 的章节本地前置仍按各自契约后置。
 
-权威 bundle：`runs/stages/P1/p1-v6-20260828-r3/`；可信 `protocol.json` SHA-256 为
-`e449e7313c2b0b9235b413f3292877f1a842e4ed85be4d7ba020d28601c4f84f`。其四件套已由
+权威 bundle：`runs/stages/P1/p1-v6-20260828-r4/`；可信 `protocol.json` SHA-256 为
+`09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46`。其四件套已由
 `ekg.core.stage_bundle.validate_stage_bundle` 使用该外部可信根重读通过。先建的 r1 因 A3 precheck 发现
-本地/远端 run-dir 混用而失效；r2 又因缺少 execution-plan 外部 hash 而失效。两者均保留作审计，未被
-覆盖或继续选用。
+本地/远端 run-dir 混用而失效；r2 因缺少 execution-plan 外部 hash 而失效；r3 在 clean 远端复验时暴露
+local gate 绑定了本地 dirty-tree Python 文件数，不能代表已推送提交。r4 在 detached clean `53ce6f1` 上
+重跑门禁后生成。r1–r3 均保留作审计，未被覆盖或继续选用。
 
 ## P1.1/P1.2：manifest 与 source
 
@@ -92,7 +93,7 @@ final-valid 解封规则。`primary_anchor=null` 是正确状态：P1 未运行 
 
 ## 本地验证
 
-- `uv run pytest`：392 passed、12 skipped；skip 均为本地无 torch 的 GPU tests；
+- `uv run pytest`：380 passed、12 skipped；skip 均为本地无 torch 的 GPU tests；
 - `uv run ruff check src tests scripts`：PASS；
 - `uv run ekg-smoke`：PASS。
 
@@ -133,11 +134,11 @@ candidate digest。原始 metadata/predictions/log 在 `data/protocols/v6/remote
 
 ## A3 正式入口预检
 
-本地 CPU 已生成 `runs/stages/A3/a3-v6-baselines-r3/preflight/execution_plan.json`：重新验证 r3 trust root、
+clean commit CPU 已生成 `runs/stages/A3/a3-v6-baselines-r4/preflight/execution_plan.json`：重新验证 r4 trust root、
 2,622 train + 291 internal-dev manifests/candidate/label digests，物化官方代码期望的 train/valid/test 形状，
 并明确 `final_valid_accessed=false`。official source 的 model path 适配仅作用于隔离副本，逐文件保存前后
 hash 与替换次数。plan SHA-256 为
-`9ea3aa84acc1e781256aadc45cf3078775952f91a71ba78526718356f2a18bdf`；launcher 强制由调用方传入，
+`4935bd2f72f7c83dd4b9e8694c06cbb9f06a50eb6ab037a8a5fcf2428f8f3444`；launcher 强制由调用方传入，
 并拒绝 source/data 文件集合的增删。local pair、official single、official joint 的 seed-13 launcher 均以 no-execute 模式通过，
 输出的 Python、cwd、run-dir 与预期产物全部位于 `/data/TJK/ekg`；尚未启动 A3 GPU 训练。
 

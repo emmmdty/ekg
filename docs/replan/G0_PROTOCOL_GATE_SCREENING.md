@@ -20,8 +20,9 @@ bundle reader/writer、三个 Ch2 10-doc schema adapters 与本地三件套均�
 
 - `global_protocol_status=PASS`；
 - `a3_entry_status=PASS`；
-- P1 v2 bundle/status 为 PASS，权威 bundle 是 `p1-v6-20260828-r3`，可信 protocol SHA-256 为
-  `e449e7313c2b0b9235b413f3292877f1a842e4ed85be4d7ba020d28601c4f84f`；允许进入 A3.0。
+- P1 v2 bundle/status 为 PASS，权威 bundle 是 `p1-v6-20260828-r4`，可信 protocol SHA-256 为
+  `09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46`；允许进入 A3.0。r4 在 clean
+  Git commit 上重跑本地 gate；r3 因绑定 dirty-tree 文件数、不能在 clean 远端复验而降为 superseded。
 
 4090 隧道初始握手失败后，经有界 ControlMaster 重连恢复；历史 checkpoint 的 longest internal-dev 与
 10-doc 真实 forward、回传 hash 和 strict schema 均通过，未访问 5090。权威实测与 bundle 见
