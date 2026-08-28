@@ -5,7 +5,7 @@ consistency diagnostics, and temporal-link-prediction ranking (MRR/Hits@k).
 """
 
 from ekg.core.eval.consistency import consistency_report
-from ekg.core.eval.coreference import b_cubed, ceafe, conll_coref_f1, muc
+from ekg.core.eval.coreference import b_cubed, ceafe, conll_coref_f1, muc, muc_link_errors
 from ekg.core.eval.faithfulness import (
     RiskCoveragePoint,
     aurc,
@@ -21,6 +21,7 @@ __all__ = [
     "relation_prf",
     "PRF",
     "muc",
+    "muc_link_errors",
     "b_cubed",
     "ceafe",
     "conll_coref_f1",

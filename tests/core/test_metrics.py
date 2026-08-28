@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from ekg.core.eval import conll_coref_f1, mrr_hits, relation_prf
+from ekg.core.eval import conll_coref_f1, mrr_hits, muc, muc_link_errors, relation_prf
 from ekg.core.schema import RelationEdge, RelationType
 
 
@@ -137,3 +137,44 @@ def test_relation_prf_temporal_closure_omits_reflexive_pairs_from_cycles() -> No
     assert temporal["n_pred"] == 2
     assert temporal["n_gold"] == 2
     assert temporal["f1"] == pytest.approx(1.0)
+
+
+def test_muc_link_errors_perfect_clustering_has_none() -> None:
+    clusters = [{"a", "b", "c"}, {"d"}]
+    errors = muc_link_errors(clusters, clusters)
+    assert errors["missing_links"] == 0
+    assert errors["spurious_links"] == 0
+    assert errors["gold_links"] == 2  # the singleton contributes nothing
+    assert errors["predicted_links"] == 2
+    assert errors["f1"] == pytest.approx(1.0)
+
+
+def test_muc_link_errors_counts_a_split_cluster_as_missing() -> None:
+    """One gold cluster torn into two pieces costs exactly one recall link."""
+    errors = muc_link_errors([{"a", "b"}, {"c"}], [{"a", "b", "c"}])
+    assert (errors["missing_links"], errors["gold_links"]) == (1, 2)
+    assert (errors["spurious_links"], errors["predicted_links"]) == (0, 1)
+    assert errors["recall"] == pytest.approx(0.5)
+    assert errors["precision"] == pytest.approx(1.0)
+
+
+def test_muc_link_errors_counts_a_merged_pair_as_spurious() -> None:
+    """Two gold singletons joined costs one precision link and nothing in recall."""
+    errors = muc_link_errors([{"a", "b"}], [{"a"}, {"b"}])
+    assert (errors["missing_links"], errors["gold_links"]) == (0, 0)
+    assert (errors["spurious_links"], errors["predicted_links"]) == (1, 1)
+    assert errors["precision"] == pytest.approx(0.0)
+    assert errors["recall"] == pytest.approx(0.0)  # nothing to recover
+
+
+def test_muc_link_errors_agrees_with_muc_ratios() -> None:
+    """The decomposition must reproduce the ratio-only `muc`, or the table drifts."""
+    gold = [{"a", "b", "c"}, {"d", "e"}, {"f"}]
+    pred = [{"a", "b"}, {"c", "d"}, {"e"}, {"f"}]
+    errors, ratios = muc_link_errors(pred, gold), muc(pred, gold)
+    assert errors["missing_links"] == 2  # {a,b,c} -> 2 pieces, {d,e} -> 2 pieces
+    assert errors["gold_links"] == 3
+    assert errors["spurious_links"] == 1  # {c,d} straddles two gold clusters
+    assert errors["predicted_links"] == 2
+    for key in ("precision", "recall", "f1"):
+        assert errors[key] == pytest.approx(ratios[key])

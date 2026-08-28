@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-__all__ = ["muc", "b_cubed", "ceafe", "conll_coref_f1"]
+__all__ = ["muc", "muc_link_errors", "b_cubed", "ceafe", "conll_coref_f1"]
 
 Cluster = set[str]
 
@@ -24,21 +24,61 @@ def _mention_to_cluster(clusters: list[Cluster]) -> dict[str, frozenset[str]]:
     return {m: frozenset(c) for c in clusters for m in c}
 
 
-def muc(predicted: list[Cluster], gold: list[Cluster]) -> dict[str, float]:
-    def _score(key: list[Cluster], response: list[Cluster]) -> float:
-        m2c = _mention_to_cluster(response)
-        numerator = denominator = 0
-        for cluster in key:
-            if len(cluster) == 0:
-                continue
-            partitions = {m2c.get(m, frozenset([m])) for m in cluster}
-            numerator += len(cluster) - len(partitions)
-            denominator += len(cluster) - 1
-        return numerator / denominator if denominator else 0.0
+def _muc_counts(key: list[Cluster], response: list[Cluster]) -> tuple[int, int]:
+    """MUC's numerator/denominator: links recovered, links available.
 
-    recall = _score(gold, predicted)
-    precision = _score(predicted, gold)
-    return _prf(precision, recall)
+    A key cluster of size n needs n-1 links; the response recovers all but one
+    per extra piece it scatters that cluster into. A mention the response never
+    mentions counts as its own singleton, which is how the official scorer fills
+    in unclustered mentions.
+    """
+    m2c = _mention_to_cluster(response)
+    numerator = denominator = 0
+    for cluster in key:
+        if len(cluster) == 0:
+            continue
+        partitions = {m2c.get(m, frozenset([m])) for m in cluster}
+        numerator += len(cluster) - len(partitions)
+        denominator += len(cluster) - 1
+    return numerator, denominator
+
+
+def muc(predicted: list[Cluster], gold: list[Cluster]) -> dict[str, float]:
+    r_num, r_den = _muc_counts(gold, predicted)
+    p_num, p_den = _muc_counts(predicted, gold)
+    return _prf(
+        p_num / p_den if p_den else 0.0,
+        r_num / r_den if r_den else 0.0,
+    )
+
+
+def muc_link_errors(predicted: list[Cluster], gold: list[Cluster]) -> dict[str, float]:
+    """MUC as raw link counts rather than the three ratios it collapses into.
+
+    ``muc`` reports 77.47 without saying *how many* decisions went each way, and
+    the two error directions are not interchangeable downstream: a missing link
+    splits one event into two nodes, a spurious link fuses two events into one.
+    Sizing an asymmetric objective needs the counts, so this returns them:
+
+    * ``missing_links``   -- gold links the prediction failed to assert (under-merge)
+    * ``spurious_links``  -- links the prediction asserted that gold does not have
+                             (over-merge)
+
+    with their denominators, so ``recall = 1 - missing/gold_links`` and
+    ``precision = 1 - spurious/predicted_links`` reconcile exactly with ``muc``.
+    """
+    r_num, r_den = _muc_counts(gold, predicted)
+    p_num, p_den = _muc_counts(predicted, gold)
+    return {
+        "missing_links": r_den - r_num,
+        "gold_links": r_den,
+        "spurious_links": p_den - p_num,
+        "predicted_links": p_den,
+        **_prf(
+            p_num / p_den if p_den else 0.0,
+            r_num / r_den if r_den else 0.0,
+        ),
+    }
 
 
 def b_cubed(predicted: list[Cluster], gold: list[Cluster]) -> dict[str, float]:
