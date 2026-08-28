@@ -18,3 +18,7 @@ relations:
 data:
   loader: maven_ere
   path: data/processed/maven_ere/valid.jsonl
+  loader_kwargs:
+    # Must match training: without TIMEX nodes the extractor structurally cannot
+    # emit the 39% of temporal relations that have a TIMEX endpoint.
+    include_timex: true

@@ -16,9 +16,11 @@
   `global_protocol_status=PASS`；没有发现课题级硬阻塞；
 - P1.6 的 4090 历史 checkpoint load、最长 internal-dev 与 frozen 10-doc 真实前向均通过，
   `a3_entry_status=PASS`；允许进入 A3.0 同协议 baseline 实验，但尚未放行 A3 主方法三种子。
-- 权威 P1 trust root 是 `p1-v6-20260828-r4` / `09e7e392...a85fc46`；r4 在 clean commit 上重跑
-  380 tests/ruff/smoke 并独立复验。A3 r4 已在 4090 端 CPU 物化出相同 plan hash，三个 seed-13
-  no-execute launcher 检查通过；尚未启动 GPU baseline。r3 因 local gate 绑定 dirty-tree 文件数而 superseded。
+- 权威 P1 trust root 是 `p1-v6-20260829-r9` / `440516dc...a6d4fdc`；399 tests/ruff/smoke 全绿并独立复验。
+  r7 解开了信任根与执行面的耦合：A3 materializer/launcher 已移出 `CODE_PATHS`，local gate 改为逐文件
+  记录、只校验 P1 代码路径。**r7 因此是在当前脏工作树里直接建成并复验的，不再需要 detached clean
+  worktree**；r1–r6 保留为不可变审计物。A3 plan 已按 r7 重新物化，三路 seed-13 no-execute 通过；
+  尚未启动 GPU baseline（远端需用同一命令重新物化 plan）。
 - P1 分开记录 `global_protocol_status` 与 `a3_entry_status`；只有全局协议失败阻塞全链，A3 baseline
   closure 失败只产生 A3 `blocked/executed=false` handoff，D3 仍可继续。
 
@@ -67,12 +69,16 @@ pass/failed/blocked 均可完成 handoff；局部失败不阻断后续方法章�
 ## 当前唯一下一步：执行 A3.0 baseline 全协议重跑
 
 P1.1–P1.6 已交付，见 [`results/PHASE_P1.md`](results/PHASE_P1.md) 和
-`runs/stages/P1/p1-v6-20260828-r4/`。A3.0 先在 4090 仓库物化
-`runs/stages/A3/a3-v6-baselines-r4/preflight/`，记录并显式传入 materializer 打印的 plan SHA-256，再用
+`runs/stages/P1/p1-v6-20260829-r9/`。A3.0 先在 4090 仓库物化
+`runs/stages/A3/a3-v6-baselines-r9b/preflight/`，记录并显式传入 materializer 打印的 plan SHA-256，再用
 train/internal-dev 在冻结 candidate/evaluator/schema 下重跑
 local pair、official single、official joint，方法结果产生前解析并冻结 primary anchor；不得提前查看新
 baseline 的 final-valid 分数。完整命令、产物和 promotion 规则见
 [`PHASE_A3`](phases/PHASE_A3_relation_balanced.md)。
+
+A3 的 causal 主锚从 official single/joint 三种子 mean 选择，subevent 护栏锚固定为 official joint；模型
+资产统一置于 `/data/TJK/models/<repo>/<revision>/`。RoBERTa-base 用于忠实 official-recipe 与同 backbone
+主表；核心机制通过后再做 ModernBERT-base 的对称迁移，不以换 backbone 代替方法贡献。
 
 P1 对 Ch4 只冻结 ID namespace、query 生成器版本/来源 hash 与 schema；完整 query/candidate manifest 在 E3.0
 冻结。P1 不要求 Ch1/Ch3 baseline 或 Ch4 consumer 实现。

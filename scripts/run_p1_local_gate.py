@@ -7,7 +7,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from ekg.core.stage_bundle import tree_sha256
+from ekg.core.stage_bundle import sha256_file, tree_sha256
 
 COMMANDS = {
     "pytest": ["uv", "run", "pytest"],
@@ -43,10 +43,13 @@ def main() -> int:
         if completed.stderr:
             print(completed.stderr, end="")
     payload = {
-        "schema_version": "ekg.p1_local_gate.v1",
+        "schema_version": "ekg.p1_local_gate.v2",
         "status": "pass" if passed else "failed",
         "tested_tree_sha256": before_hash,
         "tested_file_count": len(tested_files),
+        "tested_file_sha256": {
+            path.as_posix(): sha256_file(Path.cwd() / path) for path in tested_files
+        },
         "results": results,
     }
     after_hash = tree_sha256(Path.cwd(), tested_files)

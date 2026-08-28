@@ -15,7 +15,6 @@ from ekg.core.stage_bundle import (
     create_stage_bundle,
     is_sha256,
     sha256_file,
-    tree_sha256,
     validate_stage_bundle,
 )
 from ekg.relations.maven_ere_official import (
@@ -39,9 +38,11 @@ CODE_PATHS = (
     "scripts/verify_p1_scorer.py",
     "scripts/build_maven_ere_submission.py",
     "scripts/evaluate_relation_pairs.py",
-    "scripts/prepare_a3_baselines.py",
-    "scripts/run_a3_baseline.py",
 )
+
+# A3 的 materializer/launcher 是执行面，不是协议身份：它们由 execution_plan.json 的
+# plan SHA-256 与每个 run 的 launcher_sha256 绑定。放进 CODE_PATHS 会让一次路径修复
+# 作废整个 P1 信任根（r1..r5 即由此而来），且不增加任何科研上的约束力。
 
 LOCAL_HASH_CATEGORIES = ("data", "manifests", "candidate", "evaluator", "config", "code")
 EXPECTED_BASELINES = {"local_pair", "official_single", "official_joint"}
@@ -186,25 +187,29 @@ def _validate_evaluator_assets(
 
 
 def _validate_local_gate(repo: Path, local_gate: dict) -> None:
-    _require(local_gate.get("schema_version") == "ekg.p1_local_gate.v1", "local gate schema")
+    """The three commands passed on a tree whose P1 code equals what we hash now.
+
+    Deliberately not asserted: that every unrelated repository file is unchanged. The
+    tested tree is recorded as provenance, but binding it would let any edit anywhere
+    invalidate a protocol bundle whose evidence did not move.
+    """
+    _require(local_gate.get("schema_version") == "ekg.p1_local_gate.v2", "local gate schema")
     _require(local_gate.get("status") == "pass", "local gate status")
+    _require(not local_gate.get("tree_changed_during_gate"), "tree changed during local gate")
     results = local_gate.get("results")
     _require(
         isinstance(results, dict) and set(results) == {"pytest", "ruff", "ekg_smoke"},
         "local gate roster",
     )
     _require(all(item.get("returncode") == 0 for item in results.values()), "local command failed")
-    tested_files = [Path("pyproject.toml"), Path("uv.lock")]
-    for directory in (Path("src"), Path("tests"), Path("scripts")):
-        tested_files.extend(path for path in directory.rglob("*.py") if path.is_file())
-    _require(
-        local_gate.get("tested_file_count") == len(tested_files),
-        "local tested file count drift",
-    )
-    _require(
-        local_gate.get("tested_tree_sha256") == tree_sha256(repo, tested_files),
-        "local gate was not run on the current code tree",
-    )
+    _require(is_sha256(local_gate.get("tested_tree_sha256", "")), "local gate tree digest")
+    tested = local_gate.get("tested_file_sha256")
+    _require(isinstance(tested, dict) and tested, "local gate file hashes")
+    for path in CODE_PATHS:
+        _require(
+            tested.get(path) == sha256_file(repo / path),
+            f"local gate did not cover current {path}",
+        )
 
 
 def _validate_baselines(repo: Path, root: Path, baseline: dict, source_lock: dict) -> None:
@@ -341,11 +346,8 @@ def _validate_remote_smoke(repo: Path, root: Path, remote: dict, baseline: dict)
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--protocol-root", type=Path, default=Path("data/protocols/v6"))
-    parser.add_argument(
-        "--bundle",
-        type=Path,
-        default=Path("runs/stages/P1/p1-v6-20260828-r3"),
-    )
+    # 默认跟随 registry 选中的 bundle：写死版本号会在每次 supersede 后变成过期地雷。
+    parser.add_argument("--bundle", type=Path, default=None)
     parser.add_argument(
         "--remote-smoke",
         type=Path,
@@ -393,6 +395,9 @@ def main() -> int:
         access_ledger.get("v6_confirmatory_eval_count") == 0,
         "P1 requires zero confirmatory final-valid evaluations",
     )
+
+    if args.bundle is None:
+        args.bundle = repo / "runs/stages/P1" / registry["p1_bundle_id"]
 
     remote = _load(args.remote_smoke) if args.remote_smoke.exists() else None
     if remote is not None:

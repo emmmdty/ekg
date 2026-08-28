@@ -23,6 +23,10 @@ from pathlib import Path
 from ekg.core.io import read_jsonl
 from ekg.core.schema import EventNode, EvidenceSpan, RelationEdge, RelationType
 
+# Marks a node as a TIMEX mention rather than an event mention. Official MAVEN-ERE
+# scores temporal over events + TIMEX but causal/subevent over events only.
+TIMEX_EVENT_TYPE = "TIMEX"
+
 __all__ = ["RelationDocument", "load_maven_ere", "load_maven_ere_unlabeled"]
 
 
@@ -96,7 +100,74 @@ def _doc_text(record: dict) -> str:
     return ""
 
 
-def _parse_document(record: dict) -> RelationDocument:
+def _timex_surface(record: dict, timex: dict, lines: list[str]) -> str:
+    """The TIMEX text *as it appears in the canonical doc text*.
+
+    MAVEN-ERE carries two views of every sentence: raw `sentences` ("July 29, 2012")
+    and whitespace-joined `tokens` ("July 29 , 2012"). `TIMEX.mention` is the
+    tokenised view while the doc text this loader builds is the raw one, so a
+    literal search for the mention string can never match a multi-token TIMEX.
+    Single-token event triggers happen to be identical in both views, which is why
+    only TIMEX exposes the mismatch.
+
+    The token offsets are authoritative, so rebuild the surface from them and allow
+    flexible whitespace between tokens.
+    """
+    sent_id = timex.get("sent_id")
+    offset = timex.get("offset") or []
+    tokens = record.get("tokens") or []
+    if not isinstance(sent_id, int) or sent_id >= len(lines) or len(offset) != 2:
+        raise ValueError(f"TIMEX {timex.get('id')} has no usable sentence/offset")
+    pieces = tokens[sent_id][offset[0] : offset[1]]
+    if not pieces:
+        raise ValueError(f"TIMEX {timex.get('id')} offset selects no tokens")
+    # The corpus replaces a few characters with a literal UNK token (3 TIMEX across
+    # train+valid), which cannot be matched against the raw sentence. Treat it as a
+    # wildcard rather than dropping the document or degrading the span silently.
+    pattern = r"\s*".join(
+        r"\S+" if str(piece).upper() == "UNK" else re.escape(str(piece))
+        for piece in pieces
+    )
+    # `tokens` are lower-cased while `sentences` keep their casing (same reason
+    # `trigger_word` needs a case-insensitive fallback), so match case-insensitively
+    # and return the *raw* surface so downstream span location sees real text.
+    match = re.search(pattern, lines[sent_id], re.IGNORECASE)
+    if match is None:
+        raise ValueError(
+            f"TIMEX {timex.get('id')} tokens {pieces} not locatable in sentence {sent_id}"
+        )
+    return match.group(0)
+
+
+def _timex_nodes(
+    record: dict, doc_id: str, lines: list[str], line_starts: list[int]
+) -> list[EventNode]:
+    """TIMEX mentions as scoreable nodes.
+
+    Official MAVEN-ERE appends TIMEX to the mention list (`joint/src/data.py`:
+    ``self.events += data["TIMEX"]``) because 39% of gold temporal relations have a
+    TIMEX endpoint. They are marked in `metadata` so causal/subevent candidate
+    enumeration can exclude them exactly as official does (``ignore_timex=True``).
+    """
+    nodes = []
+    for t in record.get("TIMEX", []):
+        surface = _timex_surface(record, t, lines)
+        located = dict(t)
+        located["trigger_word"] = surface
+        nodes.append(
+            EventNode(
+                event_id=f"{doc_id}::{t.get('id')}",
+                event_type=TIMEX_EVENT_TYPE,
+                doc_id=doc_id,
+                trigger=surface,
+                trigger_evidence=_mention_span(doc_id, located, lines, line_starts),
+                metadata={"timex": str(t.get("id")), "timex_type": str(t.get("type", ""))},
+            )
+        )
+    return nodes
+
+
+def _parse_document(record: dict, *, include_timex: bool = False) -> RelationDocument:
     doc_id = str(record.get("id", record.get("doc_id", "")))
     nodes: list[EventNode] = []
     gold: list[RelationEdge] = []
@@ -140,21 +211,39 @@ def _parse_document(record: dict) -> RelationDocument:
                 )
             )
 
+    if include_timex:
+        for node in _timex_nodes(record, doc_id, lines, line_starts):
+            nodes.append(node)
+            timex_id = str(node.metadata["timex"])
+            representative[timex_id] = node.event_id
+            clusters[timex_id] = (node.event_id,)
+
+    dropped_timex_endpoints = 0
+
     def rep(eid: str) -> str | None:
         return representative.get(str(eid))
 
     for subtype, pairs in (record.get("temporal_relations") or {}).items():
         for h, t in pairs:
             rh, rt = rep(h), rep(t)
-            if rh and rt:
-                gold.append(
-                    RelationEdge(
-                        head_id=rh,
-                        tail_id=rt,
-                        relation_type=RelationType.TEMPORAL,
-                        subtype=str(subtype).upper(),
+            if not (rh and rt):
+                # Without TIMEX nodes these endpoints are unrepresentable. Count the
+                # loss instead of dropping it silently: 39% of gold temporal relations
+                # touch a TIMEX, which previously vanished with no trace at all.
+                if include_timex:
+                    raise ValueError(
+                        f"{doc_id}: temporal relation endpoint not resolvable ({h}, {t})"
                     )
+                dropped_timex_endpoints += 1
+                continue
+            gold.append(
+                RelationEdge(
+                    head_id=rh,
+                    tail_id=rt,
+                    relation_type=RelationType.TEMPORAL,
+                    subtype=str(subtype).upper(),
                 )
+            )
     for subtype, pairs in (record.get("causal_relations") or {}).items():
         for h, t in pairs:
             rh, rt = rep(h), rep(t)
@@ -189,10 +278,17 @@ def _parse_document(record: dict) -> RelationDocument:
     )
 
 
-def load_maven_ere(path: str | Path) -> Iterator[RelationDocument]:
-    """Yield one `RelationDocument` per line of a MAVEN-ERE jsonl file."""
+def load_maven_ere(
+    path: str | Path, *, include_timex: bool = False
+) -> Iterator[RelationDocument]:
+    """Yield one `RelationDocument` per line of a MAVEN-ERE jsonl file.
+
+    `include_timex` adds TIMEX mentions as scoreable nodes, which the official
+    temporal protocol requires. It is opt-in so existing graph consumers keep the
+    event-only node set they were built and measured on.
+    """
     for record in read_jsonl(path):
-        yield _parse_document(record)
+        yield _parse_document(record, include_timex=include_timex)
 
 
 def _parse_unlabeled(record: dict) -> tuple[RelationDocument, list[str]]:

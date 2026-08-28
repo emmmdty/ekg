@@ -101,8 +101,9 @@ official prediction schema。保存 candidate-ID digest 与 population counts。
 在 baseline 运行前预注册 primary-eligible 强 roster（official single/joint）与 anchor 选择规则：默认取其中
 合格 baseline 的 internal-dev causal mean 最高者，平分按 roster 顺序。本地 pair 不进入强锚 roster。另
 预注册 matched seeds 13/17/42、document-cluster paired-bootstrap 10,000
-次、subevent 非劣 margin 和 final-valid 解封规则。A3.0 在看到方法结果前解析并冻结同 split 主锚；主锚若
-随机，必须与最终方法运行 matched seeds。
+次、subevent 非劣 margin 和 final-valid 解封规则。subevent 护栏锚固定为 official joint 的 matched-seed
+mean，不能引用可能没有 subevent 输出的 causal official single。A3.0 在看到方法结果前解析并冻结同 split
+causal 主锚；主锚若随机，必须与最终方法运行 matched seeds。
 
 ### P1.6 历史 checkpoint load smoke（4090 小样本）
 

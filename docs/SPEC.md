@@ -38,7 +38,7 @@ CGEP-MAVEN 负责端到端桥接。
 | 章 | 研究任务 | 冻结主数据 | 公认主指标 | 最小贡献 |
 |---|---|---|---|---|
 | Ch1 方法章 | 事件身份消解 | MAVEN-ERE，gold mentions | MUC F1；B³/CEAFe/BLANC 全报 | 上下文判别的 occurrence identity；聚类校准为二级机制 |
-| Ch2 方法章 | causal/subevent 关系抽取 | MAVEN-ERE，组件表用 gold mentions | causal 正类 micro-F1；subevent P/R/F1 强制副报 | 非固定的关系族风险/梯度平衡与长上下文建模 |
+| Ch2 方法章 | causal/subevent/temporal 关系抽取 | MAVEN-ERE，组件表用 gold mentions | causal 正类 micro-F1；subevent 与 temporal P/R/F1 强制副报 | 非固定的关系族风险/梯度平衡与长上下文建模 |
 | Ch3 方法章 | 事实性与证据联合检测 | MAVEN-FACT，gold mentions | 五类 macro-F1；evidence 宏平均与 pooled span F1 | evidence→label 或联合软耦合；label→evidence 为二级机制 |
 | Ch4 系统评估章 | 构建错误的下游代价与消费者依赖性 | 同一 710 文档上的本地重建 CGEP-MAVEN 协议 | MRR、Hit@1/3/10/20/50；配对效应与 CI | 同实例 factorial 与消费者依赖性的成立边界 |
 
@@ -73,12 +73,12 @@ gold/permuted 或 graph/no-graph 正控。frozen arm 是消费者类型因子，
 且 B³、CEAFe、BLANC 和跨句 recall 满足阶段预注册的非劣界。非对称 loss 或阈值只能作为
 baseline/消融，不能在错误方向已被推翻后继续充当主方法。
 
-**Ch2：关系族均衡的长上下文抽取。** 在共享文档窗口表示上联合建模 causal 与 subevent。核心机制必须
+**Ch2：关系族均衡的长上下文抽取。** 在共享文档窗口表示上联合建模 causal、subevent 与 temporal。核心机制必须
 是区别于 MAVEN-ERE official joint 固定任务权重的非固定方法，例如归一化 family risk、自适应梯度平衡
 或等价的可证伪机制；固定权重网格、手调常数或仅按 checkpoint 选族不算贡献。类型/方向约束是二级
 机制，失败时删除对应主张，不阻断核心 family balance。至少消融：句级替代长窗口、去关系族平衡、去
 类型/方向约束。补齐 warmup、epoch、梯度累积或官方输入格式属于复现修正，不单独算方法贡献。
-temporal 在 TIMEX 输入闭环前不进入主贡献表。
+temporal 自 2026-08-29 起进入主贡献表：TIMEX 端点已闭环，候选按族分离（causal/subevent 纯 event、temporal 含 TIMEX，对应官方 `ignore_timex`），三族各有预注册非劣护栏锚。
 
 **Ch3：证据条件化事实性。** 核心机制是 evidence→label 或证据与标签的联合软耦合，必须区别于共享
 编码器后的平行双头。公开 MAVEN-FACT 已包含先预测标签再定位证据的 label→evidence pipeline，因此该
@@ -195,11 +195,16 @@ P1 分开维护 `global_protocol_status` 与 `a3_entry_status`。只有前者失
 
 1. baseline closure：local pair、official single、official joint 同协议运行；RESIJ 仅在公开实现或忠实复现
    闭环时可选纳入；
-2. anchor freeze：看到方法结果前冻结同 split `primary anchor`、guardrail margins 与 matched seeds；
+2. anchor freeze：看到方法结果前冻结同 split causal `primary anchor`、guardrail margins 与 matched seeds；
+   subevent 护栏锚固定为有 subevent 输出的 official joint，不随 causal 主锚身份切换；
 3. core pilot：seed 13，最多两个 family-balance 核心设计周期；固定权重/网格不计有效机制；
 4. promotion：pilot 主指标高于 seed-matched anchor 且 subevent 过预注册非劣界，才跑三种子；
 5. final PASS：满足 §2.1 主锚 + 不同方法族胜出规则；type/direction 二级机制失败只删除对应 claim；
 6. export：无论 pass/failed 都冻结身份明确的 Ch2 产物并 handoff。
+
+RoBERTa-base 只承担 official-recipe 可比轴和同 backbone 因果识别。核心机制通过 seed-13 promotion 后，
+增加 ModernBERT-base 的 reproduction/proposed 对称迁移作为二级鲁棒性证据；backbone/context 本身的提升
+不得计作方法贡献，也不得反向改变 RoBERTa 主表结论。
 
 **立即停止**：两个有效核心设计周期后仍不领先主锚或 subevent 过不了非劣界；停止无界扫参，保留长
 上下文复现与关系族冲突诊断，降级为系统组件。A3 失败不阻塞 D3。
@@ -305,7 +310,7 @@ bootstrap 内先重算各 seed effect 再取均值。frozen-vs-fine-tuned 除 en
 - 不添加掩盖错误的 fallback 或默认值，输入不完整时 fail-fast；
 - 现有结果数字下降就如实记录；ssh/工具失败不能写成远端进程或科研结论；
 - checkpoint 训在哪就留在哪，位置和 hash 写入结果文档；跨机搬运必须先问作者；
-- 提交和推送只在作者明确要求时执行。
+- 提交和推送可自行执行（2026-08-29 解除旧约束）；按逻辑单元分次提交、内容不丢失、可回滚、不强推。
 
 代码域：`ekg.nodes`（身份）、`ekg.relations`（关系）、`ekg.factuality`（事实性）、
 `ekg.succession`（CGEP 消费者），共享 `ekg.core.schema/io/eval/registry`。

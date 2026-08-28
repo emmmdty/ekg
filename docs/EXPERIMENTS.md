@@ -80,6 +80,9 @@ baseline 纳入数量与必须胜过数量分别报告。
 
 P1 必须闭合本地 pair、official single、official joint；主表至少三个代表方法。A3 的 primary-eligible 强
 roster 是 official single/joint，本地 pair 只作代表底座。RESIJ 是可选多样性对照，不阻塞 A3。
+causal `primary anchor` 仍按 official single/joint 的三种子 internal-dev mean 选择；subevent 护栏不得引用
+可能没有 subevent 输出的 official single，固定以 official joint 的 matched-seed mean 为参照，非劣 margin
+为 1.0 F1 point。
 official joint 已使用手调固定任务 loss factors，因此 fixed-weight/grid search 不能作为 family balance 创新。
 本地 pair 的 v6 确认性 loss 与 checkpoint selection 只覆盖 causal/subevent；generic extractor 必须读取
 checkpoint `run_metadata.json` 的 active families，禁止未训练 temporal head 产生预测。三个 baseline 都须经
@@ -94,10 +97,14 @@ checkpoint `run_metadata.json` 的 active families，禁止未训练 temporal he
 | `+ type representation` | 使用事件类型信息 | 二级；类型词表随 checkpoint |
 | `+ direction constraint` | 抑制不合法方向 | 二级；candidate population 不变 |
 | 句级替代窗口 | 证明长上下文必要性 | 同训练预算 |
+| ModernBERT-base transfer | 检查方法是否只对旧 backbone 有效 | reproduction/proposed 对称替换、同 512 window；不计核心创新 |
 
 两个有效核心设计周期只计已经过实现/测试/协议 smoke 的 family-balance 设计。type/direction 失败时删除
 对应 claim，不阻断核心 promotion。promotion 同时看 causal 与 subevent 的预注册非劣界；只提升 causal、
 持续牺牲 subevent 不算通过。
+RoBERTa-base 保留为 MAVEN-ERE official recipe 与主因果识别表的共同 backbone。核心机制 seed-13 通过后，
+用固定 revision 的 ModernBERT-base 对 reproduction/proposed 做对称迁移；先保持 512 window，8k context
+只作为独立长度消融，不能把 backbone 或 context 增益计入 family-balance 贡献。
 
 ## 4. Ch3：事实性与证据
 

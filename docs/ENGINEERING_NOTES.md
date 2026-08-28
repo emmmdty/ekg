@@ -68,6 +68,27 @@
     全稠密）**1.11 秒、额外内存 ~0**。`find_cycles` 保留但 docstring 标明只可用于小图。
   - 复杂度回归哨兵 `test_consistency_report_stays_tractable_on_dense_graph`（25 节点稠密图 +
     `signal.alarm` 死线）——防止有人改回枚举实现。
+- ★ **只报比率不报计数 ⇒ 把整个 phase 的方向定反**（2026-08-07，`PHASE_C3` 步骤 1 暴露）：
+  `77.47` 这类 P/R/F1 说得出「缺口偏 recall 还是 precision」，说不出**每个方向各错了多少次**。
+  Ch1 就是靠比率推出「缺口全在 recall＝欠并」，据此写了一整个「加重欠并」的 phase 契约；
+  实际拆开计数是**过并 1,391 对（63.5%）＞ 欠并 801 对（36.5%）**，方向相反。
+  ⇒ **任何要拿来设代价/权重的指标，先把混淆矩阵的两个方向数出来**，别从 P/R 反推。
+  修法已落地：`ekg.core.eval.muc_link_errors` 返回 MUC 的原始链计数（既有 `muc()` 只返回比率）。
+- ★ **换口径不是只换那一行数字——所有由旧数字推出的结论都要重算**（同上）：
+  2026-07-30 Ch1 从内部口径（497 篇 + ERE 人群校正，P −0.8 / R −3.2）换成官方 `evaluate.py`
+  全量口径（P **−6.22** / R **−1.44**），**P/R 排序整个翻转**，但「缺口全在 recall」那句结论
+  被原样搬进 `TODO.md` 与 phase 契约，活了 8 天。这是同类口径错误的**第四次**
+  （前三次：Phase C 白跑两轮 / Phase A 判错达标 / Ch1 79.6 vs 77.47）。
+  ⇒ 换口径时 `grep` 一遍依赖旧数字的**结论句**，不只是替换数字。
+- ✅ **对外报表脚本要自带对官方评测器的强制对账**（本轮采用的护栏）：
+  `scripts/report_coref_error_profile.py` 把自己算的 MUC P/R 与官方 `evaluate_coreference` 比对、
+  把成对计数与逐文档官方 `blanc()` 比对，**任一不合就 `SystemExit`**，于是产出的表
+  **不可能漂离权威口径**。新做对外表格照抄这个形制，比事后人工核对可靠。
+- ⚠️ **用 `importlib` 从文件加载脚本时，`@dataclass` 会炸**（本轮写 `tests/scripts/` 测试时踩）：
+  `dataclasses._is_type` 要用 `sys.modules[cls.__module__].__dict__` 解析注解，而
+  `module_from_spec` 出来的模块**还没进 `sys.modules`** ⇒ `AttributeError: 'NoneType' object
+  has no attribute '__dict__'`。**修法是 `sys.modules[spec.name] = module` 放在 `exec_module` 之前**
+  （官方 importlib 推荐写法）。`tests/scripts/` 下已有的几个测试没踩到，只是因为被测脚本里没有 dataclass。
 - **给已调好的门控编码器加 embedding 输入流，必须 no-op 起步**（M2 结构感知编码，2026-07-17）：默认 `nn.Embedding` 是 N(0,1)（行范数 ~28）→ 碾压融合 `h2`（~8）、init 时把事件 token 的 input embedding 扰动 **185%**（`||h3−h2||/||h2||`=1.85），lr=1e-6 十轮救不回 → **MRR 腰斩 0.1867→0.088**（是 bug、不是「结构有害」的结论）。修＝**zero-init `nn.Embedding` + 门控残差** `h3=h2+g·struct`（`GatedFusion.residual`，y=0 时恒等）→ init 扰动 →0、ON 臂起点＝baseline。诊断 `diag_m2.py` 量 `||h3−h2||/||h2||`。对照 SeDGPL 对 `<a_i>` 新行专门 mean-init 同理。
 
 ## 环境 / 工具链
@@ -120,9 +141,10 @@
 
 ## 纪律（硬约束）
 
-- 主干验证（2026-07-27 重构后）：本地 `uv run pytest` = **241 passed / 12 skipped**（skip 均为本地
+- 主干验证：本地 `uv run pytest` = **354 passed / 12 skipped**（2026-08-07；skip 均为本地
   无 torch 的神经门控测试）；`uv run ruff check src tests scripts` **0 error（≤100 列）**；
-  `ekg-smoke` 通过。测试计数随旧线移出主干而变化，不得拿旧计数（239/11、269/12）判断当前回归。
+  `ekg-smoke` 通过。测试计数随旧线移出主干与新测试加入而变化，**不得拿旧计数
+  （239/11、241/12、269/12、342/12）判断当前回归**——比的是「改动前后」，不是某个固定数。
 - 包/函数名**不得含 `ch1/ch2/ch3`**；新组件走 registry + lazy import；GPU 组件配 CPU 缓存回放。
 - **`EventNode` schema 零新增字段**（扩展用 `metadata`）；`CgepNode` 可加字段。
 - 不可改的测试锁：`tests/core/test_propagation.py`。
@@ -141,3 +163,32 @@
 （详见 `EXPERIMENTS.md` Ch2 段）。要么把 TIMEX 接进候选与抽取器，要么在论文里显式声明
 「只做 event–event temporal」。**这也是「fail-fast、不要静默丢数据」那条规矩的一个反例**：
 loader 对失配是容忍的，代价是一个隐藏了很久的口径错误。
+
+### 上条已修复（2026-08-28），以及修它时撞到的三层文本口径
+
+上面那条给了两个选项：接 TIMEX，或声明「只做 event–event temporal」。v6 选**接进去**——
+理由是官方 `joint`/`temporal` 都做（`self.events += data["TIMEX"]`），官方 `evaluate.py` 也评它，
+按「靶子由对手定」的口径就不能少做。改动：
+
+- `load_maven_ere(..., include_timex=True)` 把 TIMEX 建成节点并登记进 `representative`/`clusters`；
+- 端点解析不再 `if rh and rt` 静默跳过：开了 TIMEX 就 fail-fast，没开则**计数**；
+- 候选按族分离：causal/subevent 仍是纯 event，temporal 才含 TIMEX（官方 `ignore_timex` 语义），
+  训练/评测对非本族的对写 `-100` 而不是当负例。**若合并成一个全集，causal 会凭空多 ~70 万假负例。**
+
+**修它时撞到的坑：MAVEN-ERE 的一条记录里有三层文本视图，混用必错。**
+
+| 视图 | 长相 | 谁在用 |
+|---|---|---|
+| `sentences`（原始） | `UCLA, from July 29, 2012,` | `_doc_text` 建 doc_text ⇒ 所有 span 定位 |
+| `tokens`（分词，**且小写**） | `ucla , from july 29 , 2012 ,` | `offset` 字段的索引基准 |
+| `TIMEX.mention` | `July 29 , 2012`（分词拼接） | 字段自带 |
+
+后果：TIMEX 的 `mention` 字符串**永远**在原始句子里找不到（标点空格不同），单 token 的
+`trigger_word` 却碰巧两边一样，所以这个坑只有 TIMEX 才暴露。正确做法是**以 token offset 为准**
+重建表面形式：按 token 序列构造 `\s*` 容忍空白的正则、**大小写不敏感**匹配原始句子、取
+`match.group(0)` 作为真实表面形式。语料里另有 3 个 TIMEX 含字面 `UNK` token（train+valid 共
+3,623 篇里的 3 个），按通配符 `\S+` 处理，不因此丢文档。实测：**3,623 篇 / 20,827 个 TIMEX，零失败。**
+
+⚠️ **推理侧也要开同一个开关**：`evaluate_relations.py` 的 `data.loader_kwargs.include_timex`
+必须与 checkpoint 训练时一致，否则模型结构上产不出带 TIMEX 的边（实测 0% → 37.6%，
+与 gold 的 39% 吻合）。这是「训练/推理口径必须成对」的又一个实例。

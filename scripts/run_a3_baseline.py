@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 
 from ekg.core.schema import RelationEdge, RelationType
+from ekg.relations.extractor.supervised import checkpoint_active_families
 from ekg.relations.maven_ere_official import (
     CAUSAL_SUBTYPES,
     TEMPORAL_SUBTYPES,
@@ -127,14 +128,28 @@ def _write_jsonl(path: Path, records: list[dict]) -> None:
     )
 
 
-def _local_relation_payload(edges: list[RelationEdge]) -> dict:
+def _local_relation_payload(
+    edges: list[RelationEdge], *, active_families: tuple[str, ...]
+) -> dict:
+    """Project local edges onto the official shape, family-gated by the checkpoint.
+
+    The gate is what stops an untrained head from emitting predictions. It is keyed
+    on the checkpoint's declared `active_families` rather than a hard-coded family
+    list, so adding a family to the protocol does not silently disable the check.
+    """
     causal = {subtype: set() for subtype in CAUSAL_SUBTYPES}
+    temporal = {subtype: set() for subtype in TEMPORAL_SUBTYPES}
     subevent: set[tuple[str, str]] = set()
     for edge in edges:
         head = edge.head_id.split("::", 1)[-1]
         tail = edge.tail_id.split("::", 1)[-1]
         if head == tail:
             raise A3LaunchError("local pair inference emitted a self relation")
+        if edge.relation_type.value not in active_families:
+            raise A3LaunchError(
+                f"formal local pair output contains inactive family "
+                f"{edge.relation_type.value}"
+            )
         if edge.relation_type == RelationType.CAUSAL:
             if edge.subtype not in causal:
                 raise A3LaunchError(f"unknown local causal subtype: {edge.subtype}")
@@ -143,12 +158,19 @@ def _local_relation_payload(edges: list[RelationEdge]) -> dict:
             if edge.subtype != "SUBEVENT_OF":
                 raise A3LaunchError(f"unknown local subevent subtype: {edge.subtype}")
             subevent.add((head, tail))
+        elif edge.relation_type == RelationType.TEMPORAL:
+            if edge.subtype not in temporal:
+                raise A3LaunchError(f"unknown local temporal subtype: {edge.subtype}")
+            temporal[edge.subtype].add((head, tail))
         else:
             raise A3LaunchError(
                 f"formal local pair output contains inactive family {edge.relation_type.value}"
             )
     return {
-        "temporal_relations": {subtype: [] for subtype in TEMPORAL_SUBTYPES},
+        "temporal_relations": {
+            subtype: sorted(list(pair) for pair in temporal[subtype])
+            for subtype in TEMPORAL_SUBTYPES
+        },
         "causal_relations": {
             subtype: sorted(list(pair) for pair in causal[subtype])
             for subtype in CAUSAL_SUBTYPES
@@ -164,6 +186,7 @@ def normalize_predictions(
     gold_path: Path,
     output: Path,
     candidate_digest: str,
+    active_families: tuple[str, ...] = (),
 ) -> None:
     gold_records = _read_jsonl(gold_path)
     gold = records_by_id(gold_records, source=str(gold_path))
@@ -183,7 +206,9 @@ def normalize_predictions(
                 RelationEdge.model_validate(item)
                 for item in raw_by_id[record["id"]].get("edges", [])
             ]
-            prediction.update(_local_relation_payload(edges))
+            prediction.update(
+                _local_relation_payload(edges, active_families=active_families)
+            )
             predictions.append(prediction)
     elif baseline == "official_single":
         raw = records_by_id(_read_jsonl(raw_path), source=str(raw_path))
@@ -270,10 +295,13 @@ def main() -> int:
         raise SystemExit(f"refusing to overwrite immutable A3 run directory: {run_dir}")
     python = Path(argv[0])
     model_path = Path(plan["model_assumptions"]["path"])
+    model_revision = plan["model_assumptions"].get("revision")
     if not python.is_file():
         raise SystemExit(f"planned Python does not exist: {python}")
     if not model_path.exists():
         raise SystemExit(f"planned model path does not exist: {model_path}")
+    if model_revision is None or model_path.name != model_revision:
+        raise SystemExit("planned model path is not pinned to its declared revision")
     gpu_check = subprocess.run(
         ("nvidia-smi", "--query-gpu=name,memory.total,memory.used", "--format=csv,noheader"),
         text=True,
@@ -300,6 +328,7 @@ def main() -> int:
         "p1_bundle_id": plan["p1_bundle_id"],
         "p1_bundle_protocol_sha256": args.p1_protocol_sha256,
         "preflight_plan_sha256": sha256_file(plan_path),
+        "base_model": plan["model_assumptions"],
         "launcher_sha256": sha256_file(Path(__file__).resolve()),
         "gpu_preflight": gpu_check.stdout.strip().splitlines(),
         "final_valid_accessed": False,
@@ -358,6 +387,11 @@ def main() -> int:
                 "candidate_id_digest_sha256"
             ]
             normalize_predictions(
+                active_families=(
+                    checkpoint_active_families(run_dir / "checkpoint")
+                    if args.baseline == "local_pair"
+                    else ()
+                ),
                 baseline=args.baseline,
                 raw_path=raw_path,
                 gold_path=preflight / "data/MAVEN_ERE/valid.jsonl",

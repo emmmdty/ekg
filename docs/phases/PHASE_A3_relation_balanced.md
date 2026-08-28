@@ -10,17 +10,19 @@ subevent 的前提下提高 causal，并稳定超过预注册主锚。类型/方
 
 ## Inputs
 
-- P1 r4 trust root：`runs/stages/P1/p1-v6-20260828-r4/`，其 `protocol.json` SHA-256 固定为
-  `09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46`；任何 A3 命令都必须显式传入，
+- P1 r9 trust root：`runs/stages/P1/p1-v6-20260829-r9/`，其 `protocol.json` SHA-256 固定为
+  `440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc`；任何 A3 命令都必须显式传入，
   不能从待验证 bundle 自取 hash；
 - P1 冻结的 train/internal-dev/final-valid manifests、official evaluator 与 stage schema v2；
 - P1 通过同 schema smoke 的 local pair、official single、official joint；
-- CPU 预检计划 `runs/stages/A3/a3-v6-baselines-r4/preflight/execution_plan.json`；远端须从当前 P1
+- CPU 预检计划 `runs/stages/A3/a3-v6-baselines-r9b/preflight/execution_plan.json`；远端须从当前 P1
   trust root 重新物化，不直接复制本地绝对路径；
 - 当前长窗口 relation extractor 与历史 checkpoint，仅作初始化/对照；
 - gold mentions。predicted mentions 只进入端到端副表，不进入组件主表。
 
-禁止：TIMEX 未闭环时把 temporal 放进主贡献；用 valid 选 epoch/阈值；把 warmup/epoch/梯度累积写成创新。
+**temporal 已进入主贡献表**（2026-08-29）：TIMEX 端点已闭环，官方 `joint`/`temporal` 都评它，候选按族分离（causal/subevent 纯 event，temporal 含 TIMEX）。三族各有预注册护栏锚 = official joint。
+
+禁止：用 valid 选 epoch/阈值；把 warmup/epoch/梯度累积或换 backbone 写成创新。
 
 ## Tasks
 
@@ -30,8 +32,8 @@ subevent 的前提下提高 causal，并稳定超过预注册主锚。类型/方
 
   ```bash
   .venv/bin/python scripts/prepare_a3_baselines.py \
-    --output runs/stages/A3/a3-v6-baselines-r4/preflight \
-    --p1-protocol-sha256 09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46
+    --output runs/stages/A3/a3-v6-baselines-r9b/preflight \
+    --p1-protocol-sha256 440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc
   ```
 
   物化器必须重新验证 P1 v2 bundle、source/manifests/candidate/label digests，只写 P1 train 与 internal-dev；
@@ -42,9 +44,9 @@ subevent 的前提下提高 causal，并稳定超过预注册主锚。类型/方
 
   ```bash
   .venv/bin/python scripts/run_a3_baseline.py \
-    --preflight runs/stages/A3/a3-v6-baselines-r4/preflight \
-    --p1-protocol-sha256 09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46 \
-    --plan-sha256 4935bd2f72f7c83dd4b9e8694c06cbb9f06a50eb6ab037a8a5fcf2428f8f3444 \
+    --preflight runs/stages/A3/a3-v6-baselines-r9b/preflight \
+    --p1-protocol-sha256 440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc \
+    --plan-sha256 0694c2b5ec13afe6b0a2a4c927e003c99f62a93948f48331c063abc9ab11fb1f \
     --baseline local_pair --seed 13
   ```
 
@@ -54,10 +56,12 @@ subevent 的前提下提高 causal，并稳定超过预注册主锚。类型/方
 - 使用相同 manifests、candidate population、输入字段、evaluator 和输出 schema；
 - 必含本地 pair、official single、official joint；RESIJ 仅在公开实现或忠实复现闭环时可选纳入；
 - local pair 的 v6 loss/选模只包含 causal+subevent；未训练 temporal head 不得进入推理。official single/joint
-  保持官方 README recipe，透明 model-path 适配只改隔离副本中的模型路径并保存前后 hash；
+  保持官方 README recipe，透明 model-path 适配只改隔离副本中的模型路径并保存前后 hash；模型必须位于
+  `/data/TJK/models/` 下按 Hugging Face repo ID/revision 固定的目录，不再使用上游机器私有 `/data/MODELS`；
 - 先只用 train/internal-dev 完成训练、选模和主锚选择；不得提前查看新 baseline 的 final-valid 分数；
 - 在任何方法结果产生前冻结 internal-dev `primary anchor`；随机主锚必须跑 matched seeds 13/17/42；
-- 保存 candidate-ID digest/population counts，并预注册 subevent 非劣 margin 与 document-cluster CI；
+- 保存 candidate-ID digest/population counts，并预注册 subevent 非劣 margin 与 document-cluster CI；causal
+  主锚按 official single/joint mean 选择，subevent 护栏锚固定为 official joint matched-seed mean；
 - 完成后冻结 baseline table，不因主方法结果不好临时换弱对手。
 
 ### A3.1 复现底座冻结
@@ -93,6 +97,10 @@ seed 13 做 internal-dev pilot。只有实现、测试和协议 smoke 均通过�
 同一个 sealed batch 中运行 final valid；final valid 不反馈到结构、阈值、epoch 或候选选择。只有未返回
 指标且 hashes 完全一致的基础设施失败可原样重试；否则相关运行标 `exploratory`。
 
+RoBERTa-base 主表完成且核心机制通过 seed-13 promotion 后，使用固定 revision 的 ModernBERT-base 对
+reproduction base 与 A3.2 做对称迁移。首轮保持相同 512-token window、candidate/evaluator/seed；8k context
+另作长度消融。该迁移只检验机制是否依赖旧 backbone，不改变 promotion，也不把 backbone 增益算作创新。
+
 ### A3.5 导出与端到端副表
 
 无论最终 pass/failed，都导出冻结的 710-doc gold-mention 逐 pair probabilities/labels，并投影到 Ch4 所需
@@ -106,6 +114,8 @@ graph edges；failed 产物保留身份。predicted-mention 端到端副表依�
   paired-bootstrap 95% CI 下界大于 0，至少 2/3 matched-seed delta 为正；
 - subevent 通过预注册非劣界，逐族 P/R/F1 和跨句分层完整；
 - adaptive family-balance 核心消融齐全；实际保留的 type/direction claim 才要求对应消融；
+- ModernBERT-base 对称迁移至少完成 seed-13；若方向与 RoBERTa 主表相反，必须报告并删除跨-backbone
+  泛化主张，但不据此改选主表；
 - stage bundle hashes/IDs/schema 校验 PASS；
 - `docs/results/PHASE_A.md` 追加 v6 小节，本文件不复制数字；
 - 本地三件套全绿，4090 checkpoint/log 位置可追溯。
@@ -127,5 +137,8 @@ graph edges；failed 产物保留身份。predicted-mention 端到端副表依�
 
 ## GPU
 
-4090 单卡。先展示命令、`/data/TJK/ekg` 工作目录和预期 `runs/stages/a3/...`、checkpoint、log。
-5090 仅在作者逐次授权后作备用，不跨机搬 checkpoint，除非作者另行决定。
+4090 上每次只运行一个实验任务。official single/joint 只有在相同 workload 的单卡/多卡短时 smoke 证明
+多卡更快时才使用同任务 DataParallel；global batch、LR、累积步数保持官方 recipe。local pair 因单文档
+encoder batch=1 保持单卡，不把不同 baseline/seed 分摊并发。先展示命令、`/data/TJK/ekg` 工作目录和
+预期 `runs/stages/A3/...`、checkpoint、log。5090 仅在作者逐次授权后作备用，不跨机搬 checkpoint，除非
+作者另行决定。

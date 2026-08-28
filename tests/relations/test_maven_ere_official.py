@@ -9,8 +9,10 @@ import pytest
 from ekg.relations.maven_ere_official import (
     OfficialProtocolError,
     candidate_population_digest,
+    candidate_protocol_summary,
     gold_to_official_prediction,
     records_by_id,
+    temporal_candidate_summary,
     validate_official_predictions,
 )
 
@@ -114,3 +116,55 @@ def test_wrapper_rejects_repeated_coreference_mention() -> None:
 
     with pytest.raises(OfficialProtocolError, match="repeats mention m1"):
         validate_official_predictions({"d1": gold}, {"d1": prediction})
+
+
+def test_temporal_universe_includes_timex_and_causal_universe_does_not() -> None:
+    """Official MAVEN-ERE uses a different candidate universe per relation family.
+
+    `joint/src/data.py` scores temporal with ``ignore_timex=False`` but causal and
+    subevent with ``ignore_timex=True``. Merging the two universes would silently
+    change the causal/subevent denominators.
+    """
+    record = {
+        "id": "doc-1",
+        "events": [
+            {"id": "EV1", "mention": [{"id": "m1", "sent_id": 0, "offset": [0, 1]}]},
+            {"id": "EV2", "mention": [{"id": "m2", "sent_id": 0, "offset": [2, 3]}]},
+        ],
+        "TIMEX": [{"id": "TIME_1", "sent_id": 0, "offset": [4, 5]}],
+        "temporal_relations": {"BEFORE": [["EV1", "TIME_1"]]},
+        "causal_relations": {"CAUSE": [["EV1", "EV2"]]},
+        "subevent_relations": [],
+    }
+
+    causal = candidate_protocol_summary([record])["population_counts"]
+    temporal = temporal_candidate_summary([record])["population_counts"]
+
+    # causal/subevent: 2 event mentions -> 2 ordered pairs, no TIMEX endpoint
+    assert causal["event_mentions"] == 2
+    assert causal["ordered_mention_pairs"] == 2
+    # temporal: 2 events + 1 TIMEX -> 3*2 ordered pairs, TIMEX is scoreable
+    assert temporal["timex_mentions"] == 1
+    assert temporal["scoreable_mentions"] == 3
+    assert temporal["ordered_mention_pairs"] == 6
+    assert temporal["positive_temporal:BEFORE"] == 1
+
+
+def test_bidirectional_temporal_subtypes_are_scored_both_ways() -> None:
+    """SIMULTANEOUS/BEGINS-ON are symmetric in official BIDIRECTIONAL_REL."""
+    def _record(subtype: str) -> dict:
+        return {
+            "id": "doc-1",
+            "events": [
+                {"id": "EV1", "mention": [{"id": "m1", "sent_id": 0, "offset": [0, 1]}]},
+                {"id": "EV2", "mention": [{"id": "m2", "sent_id": 0, "offset": [2, 3]}]},
+            ],
+            "TIMEX": [],
+            "temporal_relations": {subtype: [["EV1", "EV2"]]},
+        }
+
+    symmetric = temporal_candidate_summary([_record("SIMULTANEOUS")])["population_counts"]
+    directed = temporal_candidate_summary([_record("BEFORE")])["population_counts"]
+
+    assert symmetric["positive_temporal:SIMULTANEOUS"] == 2
+    assert directed["positive_temporal:BEFORE"] == 1

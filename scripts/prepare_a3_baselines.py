@@ -18,11 +18,22 @@ from pathlib import Path
 
 from ekg.core.stage_bundle import StageBundleError, is_sha256, validate_stage_bundle
 from ekg.relations.maven_ere_official import (
-    candidate_protocol_summary,
+    frozen_candidate_protocol,
     records_by_id,
 )
 
 SEEDS = (13, 17, 42)
+ROBERTA_BASE_MODEL_ID = "FacebookAI/roberta-base"
+# Content digest of the pinned snapshot (SHA-256 over the canonical map of each
+# file's SHA-256), NOT an upstream Git revision. The server already held a complete
+# roberta-base snapshot with no revision metadata; claiming an unverified upstream
+# commit would be a provenance we never checked. A content digest is strictly
+# stronger for the property the protocol needs -- every run used byte-identical
+# weights -- and anyone can recompute it from the directory.
+ROBERTA_BASE_REVISION = "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+DEFAULT_ROBERTA_BASE_PATH = (
+    f"/data/TJK/models/local/roberta-base/{ROBERTA_BASE_REVISION}"
+)
 
 
 class A3PreflightError(ValueError):
@@ -183,7 +194,7 @@ def _select_protocol_records(
             raise A3PreflightError(f"{role} manifest references missing source documents")
         seen.update(ids)
         records = [raw[item] for item in ids]
-        if candidate_protocol_summary(records) != frozen_candidates.get(role):
+        if frozen_candidate_protocol(records) != frozen_candidates.get(role):
             raise A3PreflightError(f"{role} candidate or label population drift")
         selected[role] = records
     if seen != set(raw):
@@ -232,7 +243,7 @@ def _commands(
         "--repo-root", str(remote_repo),
         "--p1-protocol-sha256", p1_hash,
         "--official-mention-expansion",
-        "--families", "causal", "subevent",
+        "--families", "causal", "subevent", "temporal",
         "--model", model_path,
         "--epochs", "3",
         "--lr", "1e-5",
@@ -317,7 +328,9 @@ def main() -> int:
         default=Path("runs/stages/A3/a3-v6-baselines-r3/preflight"),
     )
     parser.add_argument("--p1-protocol-sha256", required=True)
-    parser.add_argument("--model-path", default="/data/MODELS/roberta-base")
+    parser.add_argument("--model-path", default=DEFAULT_ROBERTA_BASE_PATH)
+    parser.add_argument("--model-id", default=ROBERTA_BASE_MODEL_ID)
+    parser.add_argument("--model-revision", default=ROBERTA_BASE_REVISION)
     parser.add_argument("--remote-repo-root", type=Path, default=Path("/data/TJK/ekg"))
     parser.add_argument(
         "--remote-python", type=Path, default=Path("/data/TJK/ekg/.venv/bin/python")
@@ -337,6 +350,8 @@ def main() -> int:
         raise SystemExit("--output must be inside --repo-root") from exc
     if output.exists():
         raise SystemExit(f"refusing to overwrite immutable A3 preflight: {output}")
+    if Path(args.model_path).name != args.model_revision:
+        raise SystemExit("--model-path must end in the exact --model-revision")
 
     try:
         selected, registry = _select_protocol_records(
@@ -369,6 +384,19 @@ def main() -> int:
         path.name: sha256_file(path) for path in sorted((output / "data/MAVEN_ERE").iterdir())
     }
     remote_preflight = args.remote_repo_root / output_relative
+    # 执行面（materializer/launcher）按 plan 粒度留痕，不进 P1 信任根：改动只产生新的
+    # plan SHA-256，不作废协议。launcher 另在每个 run 的 run_metadata.json 里记录自身哈希。
+    execution_surface = {
+        relative: sha256_file(repo / relative)
+        for relative in (
+            "scripts/prepare_a3_baselines.py",
+            "scripts/run_a3_baseline.py",
+            # The inference config selects the consistency mode and the loader's
+            # TIMEX setting: both change what the baseline predicts, so it belongs
+            # in the plan's hash rather than travelling unverified.
+            "configs/relations/supervised_dump.yaml",
+        )
+    }
     plan = {
         "schema_version": "ekg.a3_baseline_preflight.v1",
         "status": "pass",
@@ -381,7 +409,7 @@ def main() -> int:
             "test.jsonl": "same P1 internal-dev IDs in unlabeled official test shape",
         },
         "candidate_summaries": {
-            role: candidate_protocol_summary(records) for role, records in selected.items()
+            role: frozen_candidate_protocol(records) for role, records in selected.items()
         },
         "hashes": {
             "data": data_hashes,
@@ -396,9 +424,13 @@ def main() -> int:
         },
         "model_assumptions": {
             "path": args.model_path,
+            "model_id": args.model_id,
+            "revision": args.model_revision,
+            "revision_kind": "local_content_digest",
             "must_exist_before_execute": True,
             "closed_api_required": False,
         },
+        "execution_surface": execution_surface,
         "execution_environment": {
             "remote_repo_root": str(args.remote_repo_root),
             "remote_preflight": str(remote_preflight),

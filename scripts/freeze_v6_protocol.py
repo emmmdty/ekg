@@ -10,7 +10,7 @@ import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from ekg.relations.maven_ere_official import candidate_protocol_summary
+from ekg.relations.maven_ere_official import frozen_candidate_protocol
 
 DEV_DOCS = 291
 SPLIT_PREFIX = "ekg-v6:"
@@ -103,7 +103,7 @@ def _expanded_labels(record: dict) -> dict[tuple[str, str], tuple[str, ...]]:
 
 
 def _candidate_protocol(records: list[dict]) -> dict:
-    return candidate_protocol_summary(records)
+    return frozen_candidate_protocol(records)
 
 
 def _ere_support(records: list[dict]) -> dict:
@@ -391,7 +391,7 @@ def main() -> int:
     }
     namespace_hash = _write_json(output / "shared_id_namespace.json", namespace)
     preregistration = {
-        "schema_version": "ekg.p1_preregistration.v1",
+        "schema_version": "ekg.p1_preregistration.v2",
         "primary_eligible_roster": ["maven_ere_official_single", "maven_ere_official_joint"],
         "primary_anchor_selection_rule": (
             "highest internal-dev causal micro-F1 mean among eligible baselines; "
@@ -404,11 +404,29 @@ def main() -> int:
             "recompute each seed metric inside each document-cluster resample, then compare "
             "the mean across matched seeds; at least 2/3 seed deltas must agree in direction"
         ),
+        # Guardrail anchors must be a baseline that actually predicts the family.
+        # official_single is causal-only, so it can win the causal anchor while
+        # having no subevent/temporal output at all; joint is the only roster
+        # member scoring every family.
+        "subevent_guardrail_anchor": "maven_ere_official_joint",
         "subevent_noninferiority_margin": {
             "metric": "micro_f1_percentage_points",
             "value": 1.0,
-            "rule": "method_mean >= primary_anchor_mean - 1.0",
+            "reference": "subevent_guardrail_anchor matched-seed mean",
+            "rule": "method_mean >= subevent_guardrail_anchor_mean - 1.0",
         },
+        "temporal_guardrail_anchor": "maven_ere_official_joint",
+        "temporal_noninferiority_margin": {
+            "metric": "micro_f1_percentage_points",
+            "value": 1.0,
+            "reference": "temporal_guardrail_anchor matched-seed mean",
+            "rule": "method_mean >= temporal_guardrail_anchor_mean - 1.0",
+        },
+        "scored_relation_families": ["causal", "subevent", "temporal"],
+        "temporal_candidate_universe": (
+            "event mentions + TIMEX (official ignore_timex=False); causal/subevent "
+            "remain event-only, matching official ignore_timex=True"
+        ),
         "final_valid_unlock": (
             "baseline anchors and method checkpoints/configs/thresholds must be frozen first; "
             "all are unsealed in one batch; infrastructure retry is allowed only when no metrics "

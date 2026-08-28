@@ -101,7 +101,11 @@ def main() -> int:
     # Optional risk-controlled admission: calibrate a CRC threshold on a held-out
     # fraction of documents, then enforce the gold-FNR bound on the rest. Absent
     # the `admission` config this is a no-op and the loop is the original pass.
-    docs = list(loader(path))
+    # `include_timex` must match what the checkpoint was trained on: without TIMEX
+    # nodes the model structurally cannot emit the 39% of temporal relations that
+    # have a TIMEX endpoint, which silently caps temporal recall.
+    loader_kwargs = dict(cfg["data"].get("loader_kwargs") or {})
+    docs = list(loader(path, **loader_kwargs))
     if args.limit_docs:
         docs = docs[: args.limit_docs]
     admission_spec = cfg.get("relations", {}).get("admission") or cfg.get("admission")

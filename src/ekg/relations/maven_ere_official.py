@@ -157,6 +157,116 @@ def _add_candidate_labels(
                     labels[(head, tail)].append(f"{family}:{subtype}")
 
 
+# Official MAVEN-ERE scores SIMULTANEOUS/BEGINS-ON in both directions
+# (joint/src/data.py::BIDIRECTIONAL_REL).
+BIDIRECTIONAL_TEMPORAL = ("SIMULTANEOUS", "BEGINS-ON")
+
+
+def _mention_sort_key(item: Mapping) -> tuple:
+    return (
+        item.get("sent_id", 10**9),
+        (item.get("offset") or [10**9])[0],
+        str(item.get("id")),
+    )
+
+
+def _event_mentions(record: Mapping) -> list[Mapping]:
+    mentions = [
+        mention for event in record.get("events", []) for mention in event.get("mention", [])
+    ]
+    mentions.sort(key=_mention_sort_key)
+    return mentions
+
+
+def _event_cluster_members(record: Mapping) -> dict[str, tuple[str, ...]]:
+    """Event-cluster membership only. Distinct from `_event_members`, which also
+    exposes TIMEX ids for the official-prediction converter."""
+    return {
+        str(event["id"]): tuple(str(item["id"]) for item in event.get("mention", []))
+        for event in record.get("events", [])
+    }
+
+
+def temporal_candidate_summary(records: Iterable[Mapping]) -> dict:
+    """Hash the temporal candidate/label population, which includes TIMEX endpoints.
+
+    Official MAVEN-ERE builds a *different* candidate universe per relation family
+    (`joint/src/data.py`): temporal uses ``ignore_timex=False`` so TIMEX mentions are
+    scoreable endpoints, while causal/subevent use ``ignore_timex=True``. Hashing one
+    merged universe would silently change the causal/subevent denominators, so the two
+    populations are frozen separately.
+    """
+    candidate_hash = hashlib.sha256()
+    label_hash = hashlib.sha256()
+    counts: Counter[str] = Counter()
+    for record in sorted(records, key=lambda item: str(item["id"])):
+        doc_id = str(record["id"])
+        mentions = _event_mentions(record) + list(record.get("TIMEX", []))
+        mentions.sort(key=_mention_sort_key)
+        mention_ids = [str(item["id"]) for item in mentions]
+        members = _event_cluster_members(record)
+        members.update({str(item["id"]): (str(item["id"]),) for item in record.get("TIMEX", [])})
+        labels: dict[tuple[str, str], list[str]] = defaultdict(list)
+
+        for subtype, pairs in (record.get("temporal_relations") or {}).items():
+            name = str(subtype).upper()
+            _add_candidate_labels(
+                pairs,
+                family="temporal",
+                subtype=name,
+                members=members,
+                labels=labels,
+            )
+            if name in BIDIRECTIONAL_TEMPORAL:
+                _add_candidate_labels(
+                    [tuple(reversed(list(pair))) for pair in pairs],
+                    family="temporal",
+                    subtype=name,
+                    members=members,
+                    labels=labels,
+                )
+
+        counts["documents"] += 1
+        counts["event_mentions"] += len(_event_mentions(record))
+        counts["timex_mentions"] += len(record.get("TIMEX", []))
+        counts["scoreable_mentions"] += len(mention_ids)
+        for head in mention_ids:
+            for tail in mention_ids:
+                if head == tail:
+                    continue
+                candidate_id = f"{doc_id}::{head}->{doc_id}::{tail}"
+                candidate_hash.update(f"{candidate_id}\n".encode())
+                pair_labels = tuple(sorted(set(labels.get((head, tail), ()))))
+                rendered = ",".join(pair_labels) if pair_labels else "NONE"
+                label_hash.update(f"{candidate_id}\t{rendered}\n".encode())
+                counts["ordered_mention_pairs"] += 1
+                for label in pair_labels:
+                    counts[f"positive_{label}"] += 1
+    return {
+        "candidate_id_format": "{doc_id}::{head_mention_id}->{doc_id}::{tail_mention_id}",
+        "candidate_id_digest_sha256": candidate_hash.hexdigest(),
+        "candidate_label_digest_sha256": label_hash.hexdigest(),
+        "population_counts": dict(sorted(counts.items())),
+        "endpoint_universe": "event mentions + TIMEX (official ignore_timex=False)",
+        "bidirectional_subtypes": list(BIDIRECTIONAL_TEMPORAL),
+        "mention_order": "(sent_id, offset[0], mention_id); all ordered pairs excluding self",
+        "event_relation_expansion": "Cartesian product of both gold event clusters",
+    }
+
+
+def frozen_candidate_protocol(records: Iterable[Mapping]) -> dict:
+    """The complete per-family frozen candidate protocol for one split role.
+
+    Top-level fields stay the causal/subevent (event-only) universe so previously
+    frozen digests remain byte-identical; `temporal` carries the TIMEX-inclusive
+    universe that official MAVEN-ERE scores separately.
+    """
+    records = list(records)
+    summary = candidate_protocol_summary(records)
+    summary["temporal"] = temporal_candidate_summary(records)
+    return summary
+
+
 def candidate_protocol_summary(records: Iterable[Mapping]) -> dict:
     """Hash v6's complete causal/subevent candidate and expanded-label population."""
     candidate_hash = hashlib.sha256()
@@ -164,23 +274,9 @@ def candidate_protocol_summary(records: Iterable[Mapping]) -> dict:
     counts: Counter[str] = Counter()
     for record in sorted(records, key=lambda item: str(item["id"])):
         doc_id = str(record["id"])
-        mentions = [
-            mention
-            for event in record.get("events", [])
-            for mention in event.get("mention", [])
-        ]
-        mentions.sort(
-            key=lambda item: (
-                item.get("sent_id", 10**9),
-                (item.get("offset") or [10**9])[0],
-                str(item.get("id")),
-            )
-        )
+        mentions = _event_mentions(record)
         mention_ids = [str(item["id"]) for item in mentions]
-        members = {
-            str(event["id"]): tuple(str(item["id"]) for item in event.get("mention", []))
-            for event in record.get("events", [])
-        }
+        members = _event_cluster_members(record)
         labels: dict[tuple[str, str], list[str]] = defaultdict(list)
 
         for subtype, pairs in (record.get("causal_relations") or {}).items():

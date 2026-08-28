@@ -9,8 +9,8 @@
 - P1 phase/status 为 `pass`，P1.1–P1.6 全部闭合；
 - 允许进入 A3.0 baseline 解析与同协议 GPU 实验；D3/C4/E3 的章节本地前置仍按各自契约后置。
 
-权威 bundle：`runs/stages/P1/p1-v6-20260828-r4/`；可信 `protocol.json` SHA-256 为
-`09e7e392d807641bc0520f63c703299ee228a6a601fc85320afd73a95a85fc46`。其四件套已由
+权威 bundle：`runs/stages/P1/p1-v6-20260829-r9/`；可信 `protocol.json` SHA-256 为
+`440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc`。其四件套已由
 `ekg.core.stage_bundle.validate_stage_bundle` 使用该外部可信根重读通过。先建的 r1 因 A3 precheck 发现
 本地/远端 run-dir 混用而失效；r2 因缺少 execution-plan 外部 hash 而失效；r3 在 clean 远端复验时暴露
 local gate 绑定了本地 dirty-tree Python 文件数，不能代表已推送提交。r4 在 detached clean `53ce6f1` 上
@@ -134,11 +134,11 @@ candidate digest。原始 metadata/predictions/log 在 `data/protocols/v6/remote
 
 ## A3 正式入口预检
 
-clean commit CPU 已生成 `runs/stages/A3/a3-v6-baselines-r4/preflight/execution_plan.json`：重新验证 r4 trust root、
+clean commit CPU 已生成 `runs/stages/A3/a3-v6-baselines-r9b/preflight/execution_plan.json`：重新验证 r4 trust root、
 2,622 train + 291 internal-dev manifests/candidate/label digests，物化官方代码期望的 train/valid/test 形状，
 并明确 `final_valid_accessed=false`。official source 的 model path 适配仅作用于隔离副本，逐文件保存前后
 hash 与替换次数。plan SHA-256 为
-`4935bd2f72f7c83dd4b9e8694c06cbb9f06a50eb6ab037a8a5fcf2428f8f3444`；launcher 强制由调用方传入，
+`0694c2b5ec13afe6b0a2a4c927e003c99f62a93948f48331c063abc9ab11fb1f`；launcher 强制由调用方传入，
 并拒绝 source/data 文件集合的增删。local pair、official single、official joint 的 seed-13 launcher 均以 no-execute 模式通过，
 输出的 Python、cwd、run-dir 与预期产物全部位于 `/data/TJK/ekg`。同一物化命令随后在 clean 远端
 `1d38dce` 重跑，得到相同 population、`final-valid not accessed` 与逐字相同 plan SHA-256；三路远端
@@ -149,3 +149,105 @@ no-execute 也全部 PASS，检查后四张 4090 仍为 0% 利用率且无项目
 全局数据、评测器、错误隔离协议和 4090 真实 checkpoint 前向均已通过，故
 `global_protocol_status=pass, a3_entry_status=pass`。P1 完成；本阶段没有产生科研 baseline 分数，下一步按
 A3 契约解析 strong anchor 并运行同协议 baseline。
+
+## r6/r7 · 解开信任根与执行面的耦合（2026-08-28）
+
+**动机（实测代价）**：r1→r5 共五个信任根，21 天，0 个 GPU 小时。根因是两处过紧耦合，不是协议本身：
+
+1. `scripts/build_p1_bundle.py` 的 `CODE_PATHS` 收了 `prepare_a3_baselines.py` 与 `run_a3_baseline.py`
+   ——A3 的 materializer/launcher。改一行模型默认路径就作废整个 P1 bundle。
+2. `_validate_local_gate` 用 `rglob("*.py")` 重算 **src/tests/scripts 全树**并要求与当前工作树逐字节相等。
+   任何无关文件（例如未提交的 Ch1 `report_coref_error_profile.py`）都会让 bundle 失效——这正是 r3
+   的 `local tested file count drift`，也是 r4 必须开 detached clean worktree 才能生成的原因。
+
+**改动**：
+
+- A3 执行面移出 `CODE_PATHS`。其身份改由两处更贴切的粒度承载：`execution_plan.json` 新增
+  `execution_surface`（materializer/launcher 的 SHA-256），launcher 本就在每个 run 的
+  `run_metadata.json` 里写 `launcher_sha256`。**改执行面只产生新的 plan hash，不作废协议。**
+- local gate 升 `ekg.p1_local_gate.v2`：新增 `tested_file_sha256` 逐文件哈希；`tested_tree_sha256` /
+  `tested_file_count` 保留为**留痕**，不再回算比对。校验改为「gate 记录的 `CODE_PATHS` 哈希 == 当前值」
+  ＋ `tree_changed_during_gate` 必须为假。断言的仍是「三件套跑在与现在逐字节相同的 P1 代码上」。
+- `--bundle` 默认改为跟随 registry 选中的 bundle（原先写死 `...-r3`，每次 supersede 都变成过期地雷）。
+
+**未放宽的部分**（明确记录，防止后人误读为降低标准）：数据 / manifests / candidate / evaluator /
+preregistration / P1 代码本身的哈希绑定一律不变；stage bundle 的外部可信 protocol hash、证据重哈希、
+坏 hash 与重复/缺失 ID 的 fail-fast 全部保留。放弃的只有「无关文件不得变动」这一条——它约束的是
+仓库卫生，不是协议正确性。
+
+**回归锁**（`tests/scripts/test_build_p1_bundle.py`，+5 tests）：无关文件改动**不得**作废 gate；P1 代码
+哈希漂移**必须**被拒；A3 执行面**不得**出现在 `CODE_PATHS`；v1 schema 与 `tree_changed_during_gate`
+必须被拒。
+
+**结果**：
+
+| 项 | 值 |
+|---|---|
+| 本地三件套 | **399 passed / 12 skipped**（+5 回归锁）、ruff 0、`ekg-smoke` OK |
+| 权威 bundle | `runs/stages/P1/p1-v6-20260829-r9/` |
+| `protocol.json` SHA-256 | `440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc` |
+| A3 plan | `runs/stages/A3/a3-v6-baselines-r9b/preflight/execution_plan.json` |
+| plan SHA-256 | `0694c2b5ec13afe6b0a2a4c927e003c99f62a93948f48331c063abc9ab11fb1f` |
+| 物化计数 | 2,622 train + 291 internal-dev；`final_valid_accessed=false` |
+| launcher 预检 | `official_joint` seed-13 no-execute PASS，打印 r7 路径，无进程启动 |
+
+**验证解耦生效**：在 `scripts/` 下临时新建一个无关文件后 `--validate-only` 仍 **PASS**，删除后再次
+**PASS**。r7 全程在**含 Ch1 未提交改动的当前工作树**中构建与复验，未使用 detached worktree。
+
+r5 生成时的 v1 gate 已另存为 `runs/stages/P1/p1-v6-20260828-r5.local_gate.v1.json`，保持 r5 可回溯。
+r6 是同一修复的中间版本（`--bundle` 默认值尚未修），保留不覆盖。
+
+## r9 · temporal 归队 + pilot 验证全链（2026-08-29）
+
+**为什么重冻**：r1–r8 冻结的 Ch2 候选全集是纯 event、只有 causal/subevent。但 MAVEN-ERE 有 TIMEX 与
+6 类 temporal 关系，官方 `joint`/`temporal` 都评它（`joint/src/data.py`：temporal 用
+`ignore_timex=False`、causal/subevent 用 `ignore_timex=True`）。按「靶子由对手定」的口径必须做。
+
+候选**按族分离**，因此 causal/subevent 的六个 digest **逐位未变**（可证明加 temporal 没污染原口径）：
+
+| split | causal/subevent 有序对 | temporal 有序对 | TIMEX | temporal 正例 |
+|---|---|---|---|---|
+| train | 2,297,524 | 3,315,358 | 14,969 | 800,375 |
+| internal-dev | 234,870 | 348,632 | 1,719 | 84,319 |
+| final-valid | 613,706 | 904,226 | 4,139 | 208,300 |
+
+**交叉校验**：loader→`pair_examples` 路径与协议摘要路径各自独立实现，六个 temporal 子类正例
+逐位一致（84,319 = 84,319），含双向的 `SIMULTANEOUS`/`BEGINS-ON`。
+
+### Pilot 抓到的 9 个问题（20 篇 / 1 epoch，成本约 3 分钟）
+
+先 pilot 后冻结，是这一轮唯一的方法论改动。它抓到的每一条都会让正式 baseline 报废：
+
+| # | 问题 | 若不修的后果 |
+|---|---|---|
+| 1 | `rep()` 查不到 TIMEX，`if rh and rt` 静默丢弃 | **40% gold 时间关系消失**，与官方不是同一任务 |
+| 2 | TIMEX `mention` 是分词形式，doc_text 用原始 `sentences` | 多 token TIMEX 定位失败 → 训练直接崩 |
+| 3 | MAVEN-ERE `tokens` 是小写的 | 句首 TIMEX 定位失败 |
+| 4 | 语料含字面 `UNK` token | 3 篇文档无法加载 |
+| 5 | 推理侧 loader 没开 TIMEX | 预测边含 TIMEX **0%** |
+| 6 | 抽取器在 TIMEX 对上吐 causal 边 | 官方校验拒绝（未知端点） |
+| 7 | 归一化层硬编码拒绝 temporal | temporal 永远是空 |
+| 8 | plan 的 `--families` 只有两族 | 正式跑仍不含 temporal |
+| 9 | 推理配置（一致性模式 + TIMEX 开关）不在 plan 哈希内 | 科学输入可静默漂移 |
+
+修完实测：全语料 **3,623 篇 / 20,827 个 TIMEX，零失败**；预测边含 TIMEX **0% → 37.6%**（gold 39%）。
+全链贯通：train → infer → normalize → 官方评分，三族均出分（20 篇 1 epoch 的分数无意义）。
+
+### 模型 pin 改为内容寻址
+
+服务器已有完整 roberta-base 快照但**无 revision 元数据**。不声称未经核实的上游 commit，改用
+五个文件 SHA-256 的规范摘要作为目录名与 `revision`（`revision_kind=local_content_digest`）：
+`/data/TJK/models/local/roberta-base/71be7419…c961ea9`（硬链接，零额外磁盘）。
+加载自检：124.6M 参数 / hidden 768 / 12 层 / vocab 50265 / tokenizer 往返正确。
+
+| 项 | 值 |
+|---|---|
+| 本地三件套 | **408 passed / 12 skipped**、ruff 0、smoke OK |
+| P1 bundle | `runs/stages/P1/p1-v6-20260829-r9/` |
+| `protocol.json` SHA-256 | `440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc` |
+| A3 plan | `runs/stages/A3/a3-v6-baselines-r9b/preflight/execution_plan.json` |
+| plan SHA-256 | `0694c2b5ec13afe6b0a2a4c927e003c99f62a93948f48331c063abc9ab11fb1f` |
+| 三路 no-execute | PASS（`--families causal subevent temporal`） |
+
+⚠️ **模型路径修复没有作废 r9**——`prepare_a3_baselines.py` 已移出 `CODE_PATHS`，只产生了新的 plan
+hash。这是本轮解耦的直接回报：过去这类修复要重建整个信任根。

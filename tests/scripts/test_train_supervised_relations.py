@@ -101,13 +101,21 @@ def test_parse_weight_alpha_requires_every_family():
         tr.parse_weight_alpha("causal=0.7,temporal=0.25,subevent=0.5,bogus=1.0")  # unknown
 
 
-def test_v6_confirmation_families_exclude_temporal() -> None:
-    assert tr.validate_confirmation_families(["causal", "subevent"]) == (
+def test_v6_confirmation_requires_all_three_relation_families() -> None:
+    """Temporal is in scope as of the TIMEX-inclusive protocol re-freeze.
+
+    The previous rule excluded temporal because our pipeline had no TIMEX
+    endpoints, which silently dropped 39% of gold temporal relations. The
+    official baselines score temporal with TIMEX, so a causal+subevent-only
+    confirmation would report a narrower task than the compared methods.
+    """
+    assert tr.validate_confirmation_families(["causal", "subevent", "temporal"]) == (
         "causal",
         "subevent",
+        "temporal",
     )
-    with pytest.raises(ValueError, match="temporal is outside"):
-        tr.validate_confirmation_families(["temporal", "causal", "subevent"])
+    with pytest.raises(ValueError, match="all three"):
+        tr.validate_confirmation_families(["causal", "subevent"])
     with pytest.raises(ValueError, match="duplicates"):
         tr.validate_confirmation_families(["causal", "causal", "subevent"])
 
@@ -233,14 +241,14 @@ def test_v6_protocol_binding_rejects_recomputed_label_drift(
 ) -> None:
     monkeypatch.setattr(tr, "validate_stage_bundle", lambda *args, **kwargs: {})
     protocol = _ready_protocol(tmp_path)
-    real_summary = tr.candidate_protocol_summary
+    real_summary = tr.frozen_candidate_protocol
 
     def drifted(records):
         summary = real_summary(records)
         summary["candidate_label_digest_sha256"] = "0" * 64
         return summary
 
-    monkeypatch.setattr(tr, "candidate_protocol_summary", drifted)
+    monkeypatch.setattr(tr, "frozen_candidate_protocol", drifted)
     with pytest.raises(ValueError, match="candidate or expanded-label population drift"):
         tr.validate_v6_protocol_inputs(
             repo_root=_REPO,

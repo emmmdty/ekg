@@ -25,7 +25,7 @@ import re
 from pathlib import Path
 
 from ekg.core.schema import EventNode, RelationEdge, RelationType
-from ekg.relations.data.maven_ere import RelationDocument
+from ekg.relations.data.maven_ere import TIMEX_EVENT_TYPE, RelationDocument
 from ekg.relations.extractor.base import (
     ExtractionContext,
     RelationExtractor,
@@ -397,13 +397,21 @@ class SupervisedRelationExtractor(RelationExtractor):
         )
         with torch.no_grad():
             logits = self._model(_pair_features(head_emb, tail_emb), dist_ids)
+        # Official MAVEN-ERE scores only temporal on TIMEX endpoints
+        # (`ignore_timex=True` for causal/subevent). Emitting a causal edge onto a
+        # TIMEX would be an unknown endpoint to the official scorer, and it is a
+        # pair the model was never trained on: those targets are -100 in training.
+        timex_ids = {n.event_id for n in nodes if n.event_type == TIMEX_EVENT_TYPE}
         result: dict[tuple[str, str], dict[str, tuple[str, float]]] = {}
         for family in self._active_families:
             subtypes = FAMILY_SUBTYPES[family]
             probs = torch.softmax(logits[family], dim=-1)
             conf, idx = probs.max(dim=-1)
+            scoreable = family == "temporal" or not timex_ids
             for pair, i, c in zip(pairs, idx.tolist(), conf.tolist(), strict=True):
                 if i == 0:  # NONE
+                    continue
+                if not scoreable and (pair[0] in timex_ids or pair[1] in timex_ids):
                     continue
                 result.setdefault(pair, {})[family] = (subtypes[i], float(c))
         return result

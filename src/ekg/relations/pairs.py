@@ -32,7 +32,7 @@ from dataclasses import dataclass
 
 from ekg.core.eval.relation import PRF
 from ekg.core.schema import RelationEdge, RelationType
-from ekg.relations.data.maven_ere import RelationDocument
+from ekg.relations.data.maven_ere import TIMEX_EVENT_TYPE, RelationDocument
 
 __all__ = [
     "PairExample",
@@ -65,6 +65,10 @@ class PairExample:
     tail_id: str
     distance: int
     labels: dict[str, str]
+    # Families this pair is not scoreable for. Official MAVEN-ERE emits -100 for
+    # causal/subevent on any pair touching a TIMEX (`ignore_timex=True`); treating
+    # them as negatives instead would inflate the candidate denominator.
+    ignored_families: frozenset[str] = frozenset()
 
 
 def mention_order(doc: RelationDocument) -> dict[str, int]:
@@ -225,6 +229,12 @@ def pair_examples(
         )
         for family in _FAMILIES
     }
+    timex_ids = {
+        node.event_id for node in doc.nodes if node.event_type == TIMEX_EVENT_TYPE
+    }
+    timex_ignored = frozenset(
+        family.value for family in _FAMILIES if family is not RelationType.TEMPORAL
+    )
     examples: list[PairExample] = []
     for head, tail in candidate_pairs(doc, max_distance):
         labels = {
@@ -232,6 +242,7 @@ def pair_examples(
             for family, table in by_family.items()
             if (head, tail) in table
         }
+        touches_timex = head in timex_ids or tail in timex_ids
         examples.append(
             PairExample(
                 doc_id=doc.doc_id,
@@ -239,6 +250,7 @@ def pair_examples(
                 tail_id=tail,
                 distance=abs(order[head] - order[tail]),
                 labels=labels,
+                ignored_families=timex_ignored if touches_timex else frozenset(),
             )
         )
     return examples

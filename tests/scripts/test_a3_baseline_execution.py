@@ -86,7 +86,13 @@ def test_official_single_partial_payload_is_completed(tmp_path: Path) -> None:
     assert all("coreference" in row for row in _records(output))
 
 
-def test_local_normalizer_rejects_inactive_temporal_head() -> None:
+def test_local_normalizer_gates_on_the_checkpoint_declared_families() -> None:
+    """An untrained head must never reach the official payload.
+
+    The gate now keys on the checkpoint's declared `active_families` instead of a
+    hard-coded exclusion, so temporal is emitted when the checkpoint actually
+    trained it and still rejected when it did not.
+    """
     edge = RelationEdge(
         head_id="d::m1",
         tail_id="d::m2",
@@ -95,8 +101,15 @@ def test_local_normalizer_rejects_inactive_temporal_head() -> None:
         directed=True,
         confidence=0.9,
     )
+
     with pytest.raises(launcher.A3LaunchError, match="inactive family temporal"):
-        launcher._local_relation_payload([edge])
+        launcher._local_relation_payload([edge], active_families=("causal", "subevent"))
+
+    payload = launcher._local_relation_payload(
+        [edge], active_families=("causal", "subevent", "temporal")
+    )
+    assert payload["temporal_relations"]["BEFORE"] == [["m1", "m2"]]
+    assert payload["causal_relations"]["CAUSE"] == []
 
 
 def test_model_path_adaptation_is_exact_and_traceable(tmp_path: Path) -> None:
@@ -122,6 +135,29 @@ def test_model_path_adaptation_is_exact_and_traceable(tmp_path: Path) -> None:
     )
 
 
+def test_default_model_path_is_under_data_tjk_and_content_pinned() -> None:
+    """The pin is a content digest, not an unverified upstream revision string."""
+    path = Path(prepare.DEFAULT_ROBERTA_BASE_PATH)
+
+    assert path.is_relative_to("/data/TJK")
+    assert path.name == prepare.ROBERTA_BASE_REVISION
+    assert len(prepare.ROBERTA_BASE_REVISION) == 64
+    assert all(c in "0123456789abcdef" for c in prepare.ROBERTA_BASE_REVISION)
+    assert prepare.ROBERTA_BASE_MODEL_ID == "FacebookAI/roberta-base"
+
+
+def test_preregistration_uses_a_subevent_capable_guardrail_anchor() -> None:
+    preregistration = json.loads(
+        (_REPO / "data/protocols/v6/preregistration.json").read_text(encoding="utf-8")
+    )
+
+    assert preregistration["schema_version"] == "ekg.p1_preregistration.v2"
+    assert preregistration["subevent_guardrail_anchor"] == "maven_ere_official_joint"
+    assert "subevent_guardrail_anchor_mean" in preregistration[
+        "subevent_noninferiority_margin"
+    ]["rule"]
+
+
 def test_execution_plan_uses_frozen_families_and_official_recipes() -> None:
     plan = prepare._commands(
         remote_repo=Path("/repo"),
@@ -132,10 +168,11 @@ def test_execution_plan_uses_frozen_families_and_official_recipes() -> None:
     )
 
     local = plan["local_pair"]["13"]["argv"]
-    assert local[local.index("--families") + 1 : local.index("--families") + 3] == [
-        "causal",
-        "subevent",
-    ]
+    # All three families: temporal is in the frozen protocol because the official
+    # baselines score it. Slicing only the first two would hide a missing family.
+    start = local.index("--families") + 1
+    end = next(i for i, part in enumerate(local[start:], start) if part.startswith("--"))
+    assert local[start:end] == ["causal", "subevent", "temporal"]
     single = plan["official_single"]["13"]["argv"]
     assert single[single.index("--epochs") + 1] == "50"
     joint = plan["official_joint"]["13"]["argv"]
@@ -187,3 +224,20 @@ def test_launcher_binds_plan_hash_and_exact_file_sets(tmp_path: Path) -> None:
     (source / "unplanned.py").write_text("raise RuntimeError\n", encoding="utf-8")
     with pytest.raises(launcher.A3LaunchError, match="file set differs"):
         launcher._load_plan(plan_path, p1_hash, plan_hash)
+
+
+def test_preregistration_covers_every_scored_relation_family() -> None:
+    """Temporal needs the same guardrail treatment as subevent.
+
+    It entered the protocol when TIMEX endpoints were wired in; without a
+    pre-registered anchor a method could trade temporal away for causal and
+    nothing would catch it.
+    """
+    preregistration = json.loads(
+        (_REPO / "data/protocols/v6/preregistration.json").read_text(encoding="utf-8")
+    )
+
+    assert preregistration["scored_relation_families"] == ["causal", "subevent", "temporal"]
+    for family in ("subevent", "temporal"):
+        assert preregistration[f"{family}_guardrail_anchor"] == "maven_ere_official_joint"
+        assert preregistration[f"{family}_noninferiority_margin"]["value"] == 1.0

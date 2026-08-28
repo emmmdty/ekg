@@ -33,8 +33,12 @@ from pathlib import Path
 from ekg.core.stage_bundle import StageBundleError, is_sha256, validate_stage_bundle
 from ekg.relations.data.maven_ere import load_maven_ere
 from ekg.relations.extractor.supervised import FAMILY_SUBTYPES
-from ekg.relations.maven_ere_official import candidate_protocol_summary, records_by_id
+from ekg.relations.maven_ere_official import frozen_candidate_protocol, records_by_id
 from ekg.relations.pairs import PairExample, pair_examples
+
+# Official MAVEN-ERE marks unscoreable family/pair combinations with -100
+# (`joint/src/data.py::get_relation_labels`), which is also torch's default.
+_IGNORE_INDEX = -100
 
 
 def sha256_file(path: Path) -> str:
@@ -159,7 +163,7 @@ def validate_v6_protocol_inputs(
         if overlap:
             raise ValueError(f"v6 train/internal-dev overlap on {len(overlap)} documents")
         selected_ids.update(ids)
-        summary = candidate_protocol_summary(raw_by_id[item] for item in ids)
+        summary = frozen_candidate_protocol(raw_by_id[item] for item in ids)
         if summary != frozen_candidates.get(role):
             raise ValueError(f"{role} candidate or expanded-label population drift")
         summaries[role] = summary
@@ -310,6 +314,11 @@ def class_weights(
         index = {s: i for i, s in enumerate(subtypes)}
         counts = [0] * len(subtypes)
         for row in rows:
+            # Pairs the official protocol does not score for this family (a TIMEX
+            # endpoint under causal/subevent) are not negatives — counting them
+            # would distort the inverse-frequency weights by ~700k phantom NONEs.
+            if family in row.ignored_families:
+                continue
             # No gold label for this family = the negative class. An *unknown*
             # subtype must not be silently folded into NONE — that is how positives
             # go missing — so the lookup raises instead.
@@ -342,14 +351,19 @@ def parse_weight_alpha(spec: str) -> float | dict[str, float]:
 
 
 def validate_confirmation_families(families: list[str]) -> tuple[str, ...]:
-    """A3's frozen public candidate protocol covers causal and subevent only."""
+    """A3's frozen candidate protocol covers all three relation families.
+
+    Temporal is in scope because the official baselines score it (with TIMEX
+    endpoints) and MAVEN-ERE supplies the gold; excluding it would report a
+    narrower task than the methods we compare against.
+    """
     if len(families) != len(set(families)):
         raise ValueError("--families contains duplicates")
     selected = tuple(families)
-    if set(selected) != {"causal", "subevent"}:
+    if set(selected) != {"causal", "subevent", "temporal"}:
         raise ValueError(
-            "v6 confirmation requires exactly --families causal subevent; "
-            "temporal is outside the frozen A3 primary protocol"
+            "v6 confirmation requires exactly --families causal subevent temporal; "
+            "the frozen A3 protocol scores all three"
         )
     return selected
 
@@ -529,7 +543,9 @@ def main() -> int:
         encode_trigger_reps,
     )
 
-    docs = list(load_maven_ere(args.train))
+    # TIMEX nodes are required whenever temporal is scored: 39% of gold temporal
+    # relations have a TIMEX endpoint and are otherwise unrepresentable.
+    docs = list(load_maven_ere(args.train, include_timex="temporal" in selected_families))
     if args.train_manifest:
         train_docs, dev_docs = split_docs_by_manifests(
             docs, args.train_manifest, args.dev_manifest
@@ -661,11 +677,19 @@ def main() -> int:
                 )
                 for family in selected_families:
                     gold = torch.tensor(
-                        [label_index[family][r.labels.get(family, "NONE")] for r in doc_rows],
+                        [
+                            _IGNORE_INDEX
+                            if family in r.ignored_families
+                            else label_index[family][r.labels.get(family, "NONE")]
+                            for r in doc_rows
+                        ],
                         device=device,
                     )
+                    scored = gold != _IGNORE_INDEX
                     pred = logits[family].argmax(dim=-1)
-                    hit = pred == gold
+                    hit = (pred == gold) & scored
+                    gold = torch.where(scored, gold, torch.zeros_like(gold))
+                    pred = torch.where(scored, pred, torch.zeros_like(pred))
                     per_family[family][0] += int(((gold > 0) & hit).sum())
                     per_family[family][1] += int(((pred > 0) & ~hit).sum())
                     per_family[family][2] += int(((gold > 0) & ~hit).sum())
@@ -710,11 +734,19 @@ def main() -> int:
             loss = torch.zeros((), device=device)
             for family in selected_families:
                 target = torch.tensor(
-                    [label_index[family][r.labels.get(family, "NONE")] for r in doc_rows],
+                    [
+                        _IGNORE_INDEX
+                        if family in r.ignored_families
+                        else label_index[family][r.labels.get(family, "NONE")]
+                        for r in doc_rows
+                    ],
                     device=device,
                 )
                 loss = loss + F.cross_entropy(
-                    logits[family], target, weight=weight_tensors.get(family)
+                    logits[family],
+                    target,
+                    weight=weight_tensors.get(family),
+                    ignore_index=_IGNORE_INDEX,
                 )
             running += float(loss)
             # Scale so the accumulated gradient matches a true batch of that size,

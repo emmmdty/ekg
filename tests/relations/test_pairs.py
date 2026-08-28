@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 
 from ekg.core.schema import EventNode, EvidenceSpan, RelationEdge, RelationType
-from ekg.relations.data.maven_ere import RelationDocument
+from ekg.relations.data.maven_ere import RelationDocument, _parse_document
 from ekg.relations.pairs import (
     candidate_pairs,
     edges_to_pair_labels,
@@ -156,3 +156,73 @@ def test_official_event_relation_expansion_labels_all_cluster_mention_pairs() ->
     rows = pair_examples(doc, expand_event_relations=True)
     by_pair = {(row.head_id, row.tail_id): row for row in rows}
     assert by_pair[("m2", "m3")].labels["causal"] == "CAUSE"
+
+
+def test_timex_nodes_recover_temporal_gold_without_touching_causal_universe() -> None:
+    """Official parity: temporal scores TIMEX endpoints, causal/subevent do not.
+
+    Loading without TIMEX silently dropped every temporal relation with a TIMEX
+    endpoint (39% of gold). Loading with TIMEX must recover them while leaving the
+    causal/subevent candidate population byte-identical.
+    """
+    record = {
+        "id": "doc-1",
+        "tokens": [["a", "b", "c", "d"]],
+        "events": [
+            {
+                "id": "EV1",
+                "type": "Attack",
+                "mention": [{"id": "m1", "trigger_word": "a", "sent_id": 0, "offset": [0, 1]}],
+            },
+            {
+                "id": "EV2",
+                "type": "Attack",
+                "mention": [{"id": "m2", "trigger_word": "b", "sent_id": 0, "offset": [1, 2]}],
+            },
+        ],
+        "TIMEX": [{"id": "TIME_1", "mention": "c", "type": "DATE", "sent_id": 0, "offset": [2, 3]}],
+        "temporal_relations": {"BEFORE": [["EV1", "TIME_1"], ["EV1", "EV2"]]},
+        "causal_relations": {"CAUSE": [["EV1", "EV2"]]},
+        "subevent_relations": [],
+    }
+
+    without = _parse_document(record, include_timex=False)
+    with_timex = _parse_document(record, include_timex=True)
+
+    temporal_without = [
+        e for e in without.gold_edges if e.relation_type is RelationType.TEMPORAL
+    ]
+    temporal_with = [
+        e for e in with_timex.gold_edges if e.relation_type is RelationType.TEMPORAL
+    ]
+    assert len(temporal_without) == 1  # the TIMEX endpoint was unrepresentable
+    assert len(temporal_with) == 2  # ... and is recovered
+
+    rows = pair_examples(with_timex, expand_event_relations=True)
+    causal_rows = [r for r in rows if "causal" not in r.ignored_families]
+    assert len(causal_rows) == 2  # exactly the two event-event ordered pairs
+    assert sum(1 for r in causal_rows if r.labels.get("causal") == "CAUSE") == 1
+    # every pair touching the TIMEX is ignored for the non-temporal families rather
+    # than counted as a negative; official excludes TIMEX from coreference too
+    ignored = [r for r in rows if r.ignored_families]
+    assert len(ignored) == 4
+    assert all("temporal" not in r.ignored_families for r in ignored)
+    assert all({"causal", "subevent"} <= r.ignored_families for r in ignored)
+
+
+def test_loader_fails_fast_on_unresolvable_endpoint_when_timex_enabled() -> None:
+    record = {
+        "id": "doc-1",
+        "tokens": [["a", "b"]],
+        "events": [
+            {
+                "id": "EV1",
+                "type": "Attack",
+                "mention": [{"id": "m1", "trigger_word": "a", "sent_id": 0, "offset": [0, 1]}],
+            }
+        ],
+        "TIMEX": [],
+        "temporal_relations": {"BEFORE": [["EV1", "GHOST"]]},
+    }
+    with pytest.raises(ValueError, match="not resolvable"):
+        _parse_document(record, include_timex=True)
