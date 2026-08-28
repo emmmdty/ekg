@@ -1,0 +1,79 @@
+diff --git a/causal/main.py b/causal/main.py
+index 45c2868..bc151dc 100644
+--- a/causal/main.py
++++ b/causal/main.py
+@@ -7,8 +7,8 @@ import numpy as np
+ from tqdm import tqdm
+ from src.data import get_dataloader
+-from transformers import AdamW, RobertaTokenizer, get_linear_schedule_with_warmup
++from transformers import RobertaTokenizer, get_linear_schedule_with_warmup
+ import argparse
+-from torch.optim import Adam
++from torch.optim import Adam, AdamW
+ import torch.nn as nn
+ from sklearn.metrics import classification_report
+ from src.data import REL2ID, ID2REL
+diff --git a/joint/main.py b/joint/main.py
+index 0a97a8d..e263d67 100644
+--- a/joint/main.py
++++ b/joint/main.py
+@@ -5,11 +5,11 @@ import random
+ import numpy as np
+ from tqdm import tqdm
+ from src.data import myDataset, get_dataloader
+-from transformers import AdamW, RobertaTokenizer, get_linear_schedule_with_warmup
++from transformers import RobertaTokenizer, get_linear_schedule_with_warmup
+ from src.utils import get_predicted_clusters, get_event2cluster, fill_expand
+ from src.metrics import evaluate_documents, b_cubed, ceafe, muc, Evaluator, blanc
+ from src.dump_result import coref_dump,causal_dump,temporal_dump,subevent_dump
+ import argparse
+-from torch.optim import Adam
++from torch.optim import Adam, AdamW
+ import torch.nn as nn
+ from sklearn.metrics import classification_report
+diff --git a/joint/src/model.py b/joint/src/model.py
+index 3929a32..419e4fa 100644
+--- a/joint/src/model.py
++++ b/joint/src/model.py
+@@ -1,5 +1,5 @@
+ import torch.nn as nn
+-from transformers import AutoConfig, AutoModel, BertConfig, RobertaModel
++from transformers import AutoConfig, AutoModel
+ import torch
+ from .utils import to_cuda, pad_and_stack, to_var
+ import torch.nn.functional as F
+@@ -9,10 +9,7 @@ class EventEncoder(nn.Module):
+     def __init__(self, vocab_size, model_name="/data/MODELS/roberta-base", aggr="mean"):
+         nn.Module.__init__(self)
+         config = AutoConfig.from_pretrained(model_name)
+-        if isinstance(config, BertConfig):
+-            self.model = RobertaModel.from_pretrained(model_name)
+-        else:
+-            raise NotImplementedError
++        self.model = AutoModel.from_pretrained(model_name, config=config)
+         self.model.resize_token_embeddings(vocab_size)
+         self.model = nn.DataParallel(self.model)
+         self.aggr = aggr
+diff --git a/utils/model.py b/utils/model.py
+index e3a5adb..49842dd 100644
+--- a/utils/model.py
++++ b/utils/model.py
+@@ -1,5 +1,5 @@
+ import torch.nn as nn
+-from transformers import AutoConfig, AutoModel, BertConfig, RobertaModel
++from transformers import AutoConfig, AutoModel
+ import torch
+ from .utils import to_cuda, pad_and_stack
+ import torch.nn.functional as F
+@@ -8,10 +8,7 @@ class EventEncoder(nn.Module):
+     def __init__(self, vocab_size, model_name="roberta-base", aggr="mean"):
+         nn.Module.__init__(self)
+         config = AutoConfig.from_pretrained(model_name)
+-        if isinstance(config, BertConfig):
+-            self.model = RobertaModel.from_pretrained(model_name)
+-        else:
+-            raise NotImplementedError
++        self.model = AutoModel.from_pretrained(model_name, config=config)
+         self.model.resize_token_embeddings(vocab_size)
+         self.model = nn.DataParallel(self.model)
+         self.aggr = aggr

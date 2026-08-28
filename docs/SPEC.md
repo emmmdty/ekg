@@ -1,310 +1,344 @@
-# EKG 项目总纲（SPEC）
+# EKG 学位论文与工程总纲（v6，独立审查修订版）
 
-> **单一权威的开发驱动文档。** 讲清「做什么、怎么组织、当前机制、定位约束、实验设计」。
-> 动态内容分流：**当前在做/待办/止损条件** 见 [`TODO.md`](TODO.md)；**工程坑** 见
-> [`ENGINEERING_NOTES.md`](ENGINEERING_NOTES.md)；**服务器运维** 见 [`GPU_RUNBOOK.md`](GPU_RUNBOOK.md)；
-> **三端协作流水线** 见 [`PIPELINE.md`](PIPELINE.md)；
-> **baseline/消融/评测协议** 见 [`EXPERIMENTS.md`](EXPERIMENTS.md)；**数据与切分** 见
-> [`DATASETS.md`](DATASETS.md)。历史设计/交接稿正文已移出仓库，索引见
-> [`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md)（勿作依据）。
+> 生效日期：**2026-08-27**。这是当前研究设计与开发约束的单一权威。
+> 当前动作与状态见 [`TODO.md`](TODO.md)，实验数字只认 [`results/`](results/README.md)，
+> baseline 与消融见 [`EXPERIMENTS.md`](EXPERIMENTS.md)，阶段准入见
+> [`phases/`](phases/README.md)，工程和服务器规则见
+> [`ENGINEERING_NOTES.md`](ENGINEERING_NOTES.md) 与 [`GPU_RUNBOOK.md`](GPU_RUNBOOK.md)。
+> 本文件不复制实验结果；历史方案只从 [`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md) 查取。
 
-## 1. 主线与任务（v4 · 2026-07-21 重设）
+## 1. 研究目标与边界
 
-课题主线 = **可信事件图谱的自动化构建与下游可靠应用**。学位论文 **4 章脊柱 = 四个有公开对手的任务**
-（身份消解 → 关系抽取 → 事实性检测 → 下游代价与消费者依赖性），代码按功能域组织、
-**名字不含 `ch1/ch2/ch3`**（章节↔代码映射见 §3）。
-> ~~旧脊柱＝「可信度四维」（v4, 2026-07-21）~~ **已于 2026-08-07 作废**，理由见下方 v5 重设框。
+课题研究 occurrence-level 事件图谱的自动构建与下游使用：
 
-> **★ 2026-08-07 v5 重设（作者定标尺）**：这是**学位论文**，每一章都必须在**公开可比的主指标**上
-> **超过多个（不是一个）** 经典或近年方法。「不用超 SOTA」**不等于**「不用超 baseline」。
-> ⇒ 章节按**「有公开对手的任务」**组织，**不再按自造的辅助指标**（难例误合并率、ECG 可重建率
-> R1/R2、结构违反数都只有我们自己在测，无法支撑「超过多个方法」）。v4 的「可信度四维」并列脊柱
-> **作废**，六个自研机制的零效应结论**保留为 Ch4 的归因证据**。
+> **如何分别降低事件身份、事件关系和事件事实性错误，并在同一批实例上量化这些错误对不同图谱
+> 消费者造成的边际与交互代价？**
 
-| 章 | 任务 | 主数据（公开 gold） | 主指标 | 公开对手 | 代码域 |
-|---|---|---|---|---|---|
-| Ch1 | 事件身份消解（共指） | MAVEN-ERE coref | MUC/B³/CEAFe/CoNLL | 官方单任务 81.4 / +joint 82.1 / RESIJ-Trigger 82.5 | `ekg.nodes` |
-| Ch2 | 事件关系抽取 | MAVEN-ERE | per-relation P/R/F1（官方 `evaluate.py`） | 官方 30.6/26.7 · +joint 31.5/27.5 · BertERE 30.9/23.7 · MAQInstruct 32.5/25.2 · RESIJ 34.8/30.8 | `ekg.relations` |
-| Ch3 | 事件事实性检测 | MAVEN-FACT（+跨数据集） | 5 类 macro-F1 / evidence 三类宏平均 | DMBERT 47.6 · DMRoBERTa 47.1 · RoBERTa+CLS 45.4 · GPT-4 42.8 | `ekg.factuality` |
-| **Ch4** | **构建质量的下游代价与消费者依赖性** | CGEP-MAVEN（微调臂）+ 叙事完形/CRAB（in-context 臂） | MRR/Hit@k · 完形准确率 · 图质量 macro-F1 | ELM 46.0 · EGELM 50.0 · QGELM 46.0 · one-shot 13.0 · CGEL 55.0 | `ekg.succession` + `agents` |
+论文采用“三个方法章 + 一个系统评估章”。统一性来自同一 `EventGraph` 契约和一条可执行的数据流，
+不要求各章使用同一种语料。MAVEN-ERE 与 MAVEN-FACT 负责三章组件评测；MAVEN 文档交集与
+CGEP-MAVEN 负责端到端桥接。
 
-**全篇统一命题（headline = Ch4）** = **构建质量的下游收益依赖于下游消费者如何使用图**。
-依据是一个**与已发表结论的正面冲突**：Koupaee et al.（ACL 2025）用 in-context LLM 消费因果图，
-下游大涨（叙事完形 13.0→55.0）；我们用**微调**的 SeDGPL 消费同类图，六种图侧干预**全部零效应**
-（且是构造性的零：oracle 金标净化 −.0000、`repaired_nobreak` 与 `predicted` 逐位相同）。
-**可检验的解释**：微调消费者会学会绕过图噪声使改进不可见，in-context 消费者直接依赖图结构。
-Ch1–Ch3 按 Ch4 测出的**误差代价排序**（身份 2.3–3.9× > 关系）决定各自优化方向，
-再把真实构建图回灌 Ch4，形成实测因果链而非概念并列。
-**CS-CRP / conformal（§4.3）保留为 Ch4 的可靠性模块，不充当 headline。**
+边界如下：
 
-> ⚠️ **2026-07-29 重定位（依据是实测，不是设想）**：原 headline 是「下游门控闭环修复」，即
-> 「修复控制器**仅在下游后继预测改善时接受编辑**」。**该主张已被自己的实验否定，故降级**：
-> ① Phase B 真实图上修复使 ECG 可重建率**微降**（R1 .7310→.7294、R2 f1 .0622→.0620）；
-> ② 2026-07-28 归因实验进一步定位——1.5 万次修复编辑中约 **1.4 万次（temporal 相关）对下游按构造零影响**
-> （ECG 重建只读 causal+subevent 拓扑，与 temporal 闭包正交），真正动下游的只有 causal 环破除的 858 条边，
-> 代价是 R1 掉 3/1260（**0.24%**）、收益 R2 tp +1；**不破 causal 环时下游与 raw 逐位相同**。
-> ⇒ **门控能挽回的天花板已被测出 ≈ 0.24%**，撑不起 headline；且 R2 f1 绝对值仅 .078，
-> 下游天花板由 **Ch2 抽取器质量**决定而非由修复决定。
-> ⇒ 同时「仅在下游改善时接受编辑」的**一般命题已被 Kintsugi(2605.09487) 等占先**（见 §5）。
-> **修复仍然保留**（它是 Ch2 的交付物，且能把 causal SCC 661→0），但在 Ch4 里的身份从
-> 「headline 方法」变为**「被精确测量、可归因的干预」**——这恰是新 headline 的实证内容。
-> **不得在 E 中换指标把该负结果重新包装成正面主张。**
+- 不新增人工标注，不使用人工重标、人工偏好或人工筛选样本作训练、选模或主指标；
+- 可使用公开可取得或依协议合法用于研究的数据，不要求把受限原始语料随仓库再分发；
+- 不依赖闭源模型、14B/70B 模型、多 GPU 或多智能体系统才能完成主线；
+- 不把金融应用、专利、旧 TKG、生成式抽取/RL 或跨数据集扩展放入关键路径；
+- 允许修复 baseline 的环境、路径、数据接口和 checkpoint 载入，但必须记录补丁与命令；
+- 论文原分数若 split、输入前提或 scorer 不同，只能放背景表，不能与本地分数直接相减。
 
-贯穿属性 = **evidence-grounded / verifiable**：节点挂 evidence provenance、边带 repair trace、预测带
-`evidence_chain`。验证器跨阶段「货币」三身份：**门控 · 奖励 · 风险控制器（带有限样本保证）**。
+修订前独立可行性审查结论为 **CONDITIONAL**，见
+[`replan/INDEPENDENT_THESIS_FEASIBILITY_REVIEW.md`](replan/INDEPENDENT_THESIS_FEASIBILITY_REVIEW.md)。
+本轮反方裁决为 **ACCEPT WITH REQUIRED REVISIONS**；必要修订已写入本版总纲和 active phases。研究设计
+因此可接受，但实验放行仍保持 `G0=CONDITIONAL`，直到 P1 机械验收通过。代码存在或单次高分不等于
+章节成立。
 
-> ⚠️ 旧「实体中心中文金融事件图谱 + TKG 外推」（re_gcn/path_rl/hybrid）**已从主干移除**（见 git tag
-> `frozen-tkg-line`，消融时从 tag 取）；Astock 与 entity-mode 是已证死路。**金融应用层
-> （Phase G / SARGE）已于 2026-07-27 整体移出主干**——v4 四章无一依赖，结果快照的取回路径见
-> [`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md)。
-> ⚠️ 数据看**公开可下载性**：MAVEN 四件套（检测/Arg/ERE/FACT）全 THU-KEG 公开 gold、同 4480 文档、
-> test 隐藏走 CodaLab；截至 2026-07-22，MAVEN-ERE / Arg / FACT 的公开 train/valid 已在 WSL 与 4090
-> 就位。扩展数据的 raw/processed 边界以 `DATASET_SURVEY.md` 为准。
+## 2. 四章结构与可检验贡献
 
-## 2. 架构不变量（升级=加实现，不返工）
+| 章 | 研究任务 | 冻结主数据 | 公认主指标 | 最小贡献 |
+|---|---|---|---|---|
+| Ch1 方法章 | 事件身份消解 | MAVEN-ERE，gold mentions | MUC F1；B³/CEAFe/BLANC 全报 | 上下文判别的 occurrence identity；聚类校准为二级机制 |
+| Ch2 方法章 | causal/subevent 关系抽取 | MAVEN-ERE，组件表用 gold mentions | causal 正类 micro-F1；subevent P/R/F1 强制副报 | 非固定的关系族风险/梯度平衡与长上下文建模 |
+| Ch3 方法章 | 事实性与证据联合检测 | MAVEN-FACT，gold mentions | 五类 macro-F1；evidence 宏平均与 pooled span F1 | evidence→label 或联合软耦合；label→evidence 为二级机制 |
+| Ch4 系统评估章 | 构建错误的下游代价与消费者依赖性 | 同一 710 文档上的本地重建 CGEP-MAVEN 协议 | MRR、Hit@1/3/10/20/50；配对效应与 CI | 同实例 factorial 与消费者依赖性的成立边界 |
 
-三条机制保证「把某阶段从 baseline 升到 full method 只是**加一个实现**」：
+### 2.1 公开可比的操作定义
 
-1. **冻结的跨阶段契约**（`ekg.core.schema`）：v4 主链类型
-   `EventNode → RelationEdge / EventGraph → CgepInstance → Prediction`；`TemporalQuad / ForecastQuery`
-   仅为旧 TKG 兼容类型，不再驱动主线。
-   规则：**只加可选字段，绝不复用/改义既有字段**。`EventNode` schema 零新增字段（扩展走
-   `metadata`）；`CgepNode` 是 succession 自己的类型、可加字段。
-2. **插件式 registry**（`ekg.core.registry`）：可换组件各自注册，config 按名选择。加方法 =
-   `@registry.register("name")` + 写实现，pipeline/config schema/调用方零改动。
-3. **CPU/GPU 惰性分层**：`core` + 启发式 baseline 无 torch，可在纯 CPU 机导入整包；神经代码
-   （LLM/PyG/SeDGPL）**lazy import torch**，只有实例化才需 `llm`/`gnn` extra。故本地
-   `uv run pytest` / `ekg-smoke` 全绿，GPU 路径在服务器跑。GPU 组件必须配 CPU 缓存回放。
+“公开可比”同时满足：
 
-**不可违反的纪律**：包/函数名不得含 `ch1/2/3`；新组件走 registry + lazy import；报告结果如实
-（数字降就说降；观察失败如 ssh/工具，不得伪装成被观察对象的结论）。不可改的测试锁见
-`tests/core/test_propagation.py`。
+1. 同一主表使用同一 test manifest、输入前提、候选全集和 evaluator；
+2. 多个代表方法由本项目实际运行，不能只抄不同 split 的论文数字；
+3. split、数据 hash、baseline 修补、命令、checkpoint、seed 和结果可追溯；
+4. 每个方法章在 baseline 运行前预注册强 roster 与 `primary_anchor_selection_rule`；默认规则是从合格强
+   baseline 中选 internal-dev 主指标 mean 最高者，平分按预登记 roster 顺序裁决。锚点身份须在看到本章
+   方法结果前冻结，不得按方法结果事后更换；
+5. 随机性 `primary anchor` 与最终方法均用 matched seeds 13/17/42。章节 PASS 要求方法主指标均值同时
+   高于该主锚和另一不同方法族的强统一重跑 baseline，且相对主锚的 document-cluster paired-bootstrap
+   95% CI 下界大于 0，且至少 2/3 matched seeds 的差值为正；确定性下界可只运行一次；
+6. Ch1/Ch2 主表至少含三个代表 baseline，Ch3 至少含两个强 baseline；“主表纳入数”与“必须胜过数”
+   分开计算，majority、random、frequency、lexical 等简单下界不计作强对手；
+7. 改善须落在该章主指标上，难例率、结构违反数、可重建率只能作诊断或副指标。
 
-## 3. 代码地图（chapters ↔ code）
+Ch4 也不豁免公开对照，但分开检验两件事：预测有效性要求强的 fine-tuned graph consumer 在同一本地
+重建协议上可信地超过 BART/text-only 与 frequency 下界；图敏感性要求至少一个消费者通过预注册的
+gold/permuted 或 graph/no-graph 正控。frozen arm 是消费者类型因子，不预设必须超过所有公开消费者，也
+不预设必须对图敏感。consumer×quality 交互允许为正、零或负；若两个消费者都未通过图依赖正控，Ch4
+收缩为错误传播副章，不作独立的消费者依赖性贡献。
 
+### 2.2 章节最小方法与必要消融
+
+**Ch1：语境判别身份消解。** 核心机制是对同 trigger、同类型的高混淆候选联合编码局部论元、句内
+语境与跨句语境；校准聚类是可独立删除的二级机制。至少消融：去局部论元、去跨句语境、去校准聚类。
+核心上下文表示过线而校准失败时，删除校准贡献表述并保留全局阈值，不否定整章。成功要求 MUC 上升，
+且 B³、CEAFe、BLANC 和跨句 recall 满足阶段预注册的非劣界。非对称 loss 或阈值只能作为
+baseline/消融，不能在错误方向已被推翻后继续充当主方法。
+
+**Ch2：关系族均衡的长上下文抽取。** 在共享文档窗口表示上联合建模 causal 与 subevent。核心机制必须
+是区别于 MAVEN-ERE official joint 固定任务权重的非固定方法，例如归一化 family risk、自适应梯度平衡
+或等价的可证伪机制；固定权重网格、手调常数或仅按 checkpoint 选族不算贡献。类型/方向约束是二级
+机制，失败时删除对应主张，不阻断核心 family balance。至少消融：句级替代长窗口、去关系族平衡、去
+类型/方向约束。补齐 warmup、epoch、梯度累积或官方输入格式属于复现修正，不单独算方法贡献。
+temporal 在 TIMEX 输入闭环前不进入主贡献表。
+
+**Ch3：证据条件化事实性。** 核心机制是 evidence→label 或证据与标签的联合软耦合，必须区别于共享
+编码器后的平行双头。公开 MAVEN-FACT 已包含先预测标签再定位证据的 label→evidence pipeline，因此该
+方向只作 reproduction、二级机制或消融，不能单独主张创新；双向耦合失败也不否定已过线的
+evidence→label 核心。至少消融：平行双头、去 evidence→label、去可选 label→evidence。现有 valid
+分数与论文隐藏 test 分数不可直接比较；必须先在同一 valid 上重跑强 baseline。事实性净化的下游零
+效应保留为 Ch4 证据，不得复活成方法卖点。
+
+**Ch4：构建误差系统评估。** 不再提出第四个抽取算法。固定 queries、候选集、事件文本和 canonical
+graph serialization，构造 identity、relation、factuality 三因子的 gold/predicted/masked 或受控档，
+由可信的 fine-tuned 与 frozen 消费者读取。若要声称“微调导致绕过图”，必须使用同 backbone 的
+frozen-vs-finetuned 控制；不同 backbone 只能支持“两个系统敏感性不同”。
+
+## 3. 冻结评测协议
+
+### 3.1 数据、选模与 final-valid 解封
+
+- Ch1/Ch2：MAVEN-ERE train 用于训练并按显式 ID manifest 划出内部 dev；original valid 作为统一最终
+  报数集。test 无 gold 且官方提交通道不可用，不进入主表。
+- Ch3：MAVEN-FACT train 同样按显式 ID manifest 划内部 dev；public valid 作为统一最终报数集。
+- P1 只冻结 Ch4 的共享 doc/event ID namespace、query 生成器版本/来源 hash 与目标 schema；完整
+  query/candidate manifest 在 E3 开始前生成并冻结，不得阻塞 A3/D3/C4。
+- Ch4 的完整轴称为“冻结的本地重建 CGEP-MAVEN 协议”；所有 arms 和消费者必须逐 query 对齐，不能
+  各自丢弃难例，也不得声称它逐项复现公开论文未发布的候选构造。
+- 从 v6 生效起，模型结构、超参、epoch 和阈值只能看 train-internal-dev。每章首次解封 final-valid 前
+  必须写入 config/code/checkpoint/threshold hashes、主锚、种子和访问账本；解封后不得回调结构、超参或
+  阈值。若解封后重调，该次及后续相关运行只能标 `exploratory`，不能进入确认性主表。
+- baseline 的 final-valid 分数也不得先行解封用于方法设计。每章应在方法配置冻结后，用一个 sealed batch
+  一并评估冻结 baselines、主锚和方法三种子；只有在没有返回任何指标且 hashes 完全一致的基础设施失败时
+  才可原样重试，并在账本记录。任何看过部分指标后的重跑都不恢复确认性身份。
+- 历史工作已经查看过 valid，论文须披露此前探索使用，并以统一 baseline 重跑、matched seeds、冻结
+  访问账本降低偏差，不得宣称严格 blind test。
+- 访问账本分开保存 `historical_final_access_disclosed=true`、逐次 `final_valid_access_ledger`（含 purpose）与
+  v6 生效后的 `v6_confirmatory_eval_count`；gold-self 标 `protocol_fixture`，不得用确认性计数为 0 掩盖
+  历史或协议访问。
+- manifest 必须保存 doc/query IDs、生成脚本参数、源文件 SHA-256 和 manifest 自身 SHA-256；随机划分
+  不得只保存 seed。
+
+### 3.2 两层评测，防止上游错误污染方法结论
+
+每个方法章都分两层：
+
+1. **组件隔离层**：使用 gold upstream 输入，回答本章方法本身是否优于 baseline；这是 Ch1–Ch3 主表。
+2. **端到端层**：使用冻结的上游预测产物，回答误差如何传播；组件层通过的产物可作 validated-method
+   arm，未通过的产物只能作现实构建器/负结果 arm。
+
+端到端结果不能反过来替代组件主指标；上游失败也不能被下游容错掩盖。某章未过线时，其预测仍可作为
+“现有构建器”或负结果输入 Ch4，但必须带 `baseline/failed-gate` 身份，不能标作已验证方法产物。
+
+### 3.3 统计、护栏与报数
+
+- 单种子 pilot 只负责决定机制是否值得继续；不得写成最终胜出；
+- 最终 Ch1–Ch3 的方法与随机主锚使用 matched seeds 13/17/42，报告 mean、sample std、每种子原值；
+- 所有确认性 paired bootstrap 都以 document 为 cluster 重采样，并在一次抽样中保留该文档的全部
+  mention/pair/query；Ch1–Ch3 每次抽样对三个 matched seeds 分别重算主指标，再对 seed-level delta 取均值；
+  相对主锚至少 10,000 次，95% CI 下界大于 0 才算胜出；
+- Ch4 预注册有限的主 contrasts，对同一确认性家族作 Holm 校正；未预注册的多重比较标 `exploratory`；
+- 每章在看到方法结果前为 mandatory guardrails 预注册非劣 margin 和方向。稀有类支持过小时不用单点
+  per-class F1 作硬门，改用“anchor 非零时不得崩为零”与稀有类合并的 document-cluster 非劣 CI；
+- 对 higher-is-better 护栏，方法减主锚的 95% CI 下界必须 `>= -margin`；对 lower-is-better 护栏，95% CI
+  上界必须 `<= margin`。要求“改善”的机制诊断则用预注册方向的 CI 严格越过 0，不得混用非劣判据；
+- 多类别/关系族必须同时报告各族 P/R/F1，不允许宏平均掩盖 subevent 或稀有事实类别崩塌；
+- 所有数字只写入对应 `docs/results/PHASE_*.md`；SPEC、TODO、phase 只链接，不复制。
+
+## 4. 跨章数据契约
+
+```text
+gold mentions
+    └─ Ch1: mention → occurrence cluster
+          └─ Ch2: cluster/mention pairs → typed directed edges
+                └─ Ch3: event node → factuality + evidence
+                      └─ Ch4: fixed query + serialized graph → ranked successor candidates
 ```
-src/ekg/
-├── core/          冻结契约: schema, io, graph, registry, config,
-│                  calibration/(split·aci·weighted·crc·propagation), eval/(faithfulness·指标)
-├── succession/    ★Ch4 CGEP 后继事件预测(SeDGPL 基座 + selective/structure/cross_stage)
-│   ├── data/cgep.py     从 MAVEN-ERE 重建 CGEP 实例(ECG 抽取/anchor 选取/候选采样)
-│   ├── data/esc.py      官方 ESCSubWoRe.npy 白名单 Unpickler + topic 交叉验证切分
-│   ├── linearize.py     DsGL 图线性化 + EventVocabulary(<a_i> token) + 距离选边
-│   ├── metrics.py       MRR/Hit@k, 乐观(SeDGPL)+strict 两套 tie-break
-│   ├── predictor.py     SuccessorPredictor ABC + registry + random/frequency + UnscorableInstance
-│   ├── model.py         EeCE 两级门控 + ScEP 对比头(torch 守卫, CPU 可导入)
-│   ├── encode.py        批编码(保「第 i 个事件 token ↔ 第 i 个句子」不变量)
-│   ├── structure.py     reach_anchor 结构特征(zero-init embedding + 门控残差)
-│   ├── selective.py     推理侧选择性 conformal 头(risk-coverage 曲线)
-│   ├── cross_stage.py   受控 reachability 扫描(CS-CRP 组合)
-│   ├── reconstruction.py  ECG 可重建率 R1(query 边可达)/R2(query 边保真)
-│   └── sedgpl.py        SeDGPLPredictor: linearize→encode→model, 纳入统一 evaluate
-├── relations/     Ch2 关系抽取+图构建: data/·pairs.py(文档级候选与标签口径)·
-│                  extractor/(heuristic·llm·supervised 判别式对分类)·grounding/·
-│                  consistency/(全局一致解码 + RepairTrace)·admission.py(CRC 边准入 + 分层 FNR)·
-│                  agents/·pipeline
-├── nodes/         Ch1 规范节点: detection·coref(难例判别)·canonical·metrics·encoding
-├── factuality/    Ch3 事实性: detection·evidence·metrics·purification
-├── agents/        多智能体基底: Agent/Blackboard/Stage/Orchestrator/Verifier(阶段无关)
-└── cli.py         ekg-smoke 入口(CPU 端到端冒烟)
-scripts/           功能命名 CLI: build_cgep·evaluate_cgep·profile_cgep_step / evaluate_* / train_*
-configs/relations/   YAML 实验配置
-tests/{core,succession,relations,nodes,factuality,agents,scripts}/   单测 + CPU 冒烟
-```
 
-## 4. Ch4 已有基线与可靠性模块（CGEP）
+冻结工程类型为 `EventNode → RelationEdge / EventGraph → CgepInstance → Prediction`。
 
-### 4.1 基座 SeDGPL（自跑基线）
-监督式 prompt learning，三组件：**DsGL**（距离敏感图线性化，按存储顺序取前 20 条边，最短路距离
-只用于排序幸存边）+ **EeCE**（事件富集因果编码，两级门控）+ **ScEP**（语义对比事件预测头）。
-CGEP 只消费 (事件类型, 触发词, 所在句子)，**不用论元**。词表 **transductive**（覆盖 train+test 的
-`<a_i>` token 清单，与 SeDGPL 的 `to_add.json` 一致，只 token 清单跨切分、无标签/图/梯度泄漏）。
+- `EventNode` schema 零新增字段；cluster confidence、factuality、evidence 与阶段状态写入 `metadata`；
+- Ch1 必须导出 mention-to-cluster 映射、doc IDs、confidence 和源 checkpoint/manifest hash；
+- Ch2 必须导出原始概率、关系族、方向、端点 IDs 与 source mention/cluster IDs；
+- Ch3 必须导出五类概率、预测标签、evidence spans 和 source mention/node IDs；
+- Ch4 必须验证四章 doc/query ID 集合一致、无重复、无静默丢失，并使用同一候选集和模板序；
+- factuality 在 Ch4 中必须作为节点属性被消费者读取；仅删节点不是事实性输入的替代实现；
+- 任何映射失败、未知端点或缺失输出都 fail-fast，禁止填默认标签、空边或启用掩盖问题的 fallback。
 
-### 4.2 我们的三个机制（加在已完成的自跑 SeDGPL 基线之上；状态见 TODO.md）
-**M1/M2/M3a 与 M3b 受控扫描均已实现并完成单折实验。**
-✅ **2026-07-29 更新：三图误差分解已完成**（Phase E，见 TODO「Phase E 实施」）。M3b 不再只有合成掩码
-——CS-CRP 已首次吃**实测**可达性掩码，并测出端到端风险地板 **α ≥ .2935**。
-⚠️ **噪声地板现已实测，不再是估计**：配对 bootstrap 的 95% CI 半宽 **±.003–.004** MRR，
-同配置重训一次 gold 波动 **−.0029**。M1（+.0009）、M2、修复（+.0011）、净化（−.0000）
-**全部落在地板之内**。**在 SeDGPL 这个下游上，图侧的干预普遍只有噪声级效应** —— 这是要被
-**解释**的现象，不要反复用新机制去撞同一堵墙；Phase H 多种子之前不得对任何图侧干预作正面主张。
-⚠️ **方法学红线**：任何图与图的下游对比**必须用 canonical 模板序**。SeDGPL 按**存储序**截断前 20 条，
-实测同一边集重新序列化即可造出 p=.02 的假效应（`succession/graph_context.py` 的 `order` 参数）。代码：
-- **M1 风险感知线性化**（✅ CPU + 测试 + GPU A/B）：`linearize.select_nearest_edges` 按**全图 BFS
-  距离**保留离 query 最近的 budget 条边，替换 SeDGPL「按存储序取前 20」的任意切片。registry
-  `edge_selectors`（`sedgpl` 默认 / `distance`）+ `evaluate_cgep.py --edge-selector` flag，**默认关闭**
-  保基线逐字节一致（测试锁全绿）。**发力面实测 = 22.83% 实例触发预算**（触发时平均丢 17 条）。
-  定位：gold ECG 无 confidence → 主表用**距离（structure-aware）**；admission 打分留给构建版 ECG / CS-CRP。
-- **M2 结构感知编码**（✅ CPU + 测试 + GPU A/B；**噪声级、入消融**）：EeCE 加第四路 = 每事件 token 的
-  **`reach_anchor` bit**（是否经有向因果边可达 anchor＝是否为预测的上游证据），经 **zero-init `nn.Embedding(2,768)`
-  + 门控残差** `h3=h2+g·struct` 融入（`succession/structure.py` + `model.py`）。默认关、baseline 逐字节一致。
-  **信号收敛依据**（真实数据 CPU 预筛）：结构解释真实 SeDGPL 难度的 5 折 CV R² **≤5%**、`reach_anchor` 是**唯一**带
-  出样本信号的 per-token 特征（加度/proximity 出样本 R² 反降）→ 从 4 维收为 1 bit。**GPU A/B（单折 10ep）**：
-  ON MRR 0.1852/0.1290 vs OFF 0.1867/0.1281 = **持平**（ΔMRR −0.0015 乐观 / +0.0009 strict、hits@10 +0.010）→
-  与 M1 同类，噪声级、如实入消融附录。⚠️初版「插值门 + 默认 `nn.Embedding`」曾 MRR 腰斩（0.088）：默认 N(0,1)
-  embedding 范数 ~28 碾压 `h2` ~8，init 扰动事件表示 185%、lr=1e-6 救不回；根因修复＝no-op 起步（诊断见 ENGINEERING_NOTES）。
-- **M3 = CS-CRP 选择性头**（✅ M3a + GPU 曲线；✅ M3b 受控扫描；真实构建图待 Phase A/B）：`succession/selective.py`
-  把预测器候选分数经 `core/calibration` 桥成 conformal 预测集，产 **risk-coverage 曲线 + 覆盖保证**（gold
-  ECG `reachable` 全 True → 退化为推理侧选择性预测器）。跨阶段 reachability 预算（§4.3）由 M3b
-  受控扫描验证；真实 predicted/repaired ECG 留给 Phase A/B/E。机制见 §4.3。
+## 5. 严格串行闸门
 
-### 4.3 CS-CRP（跨阶段漂移鲁棒 conformal 风险传播）——Ch4 可靠性模块
-代码 `core/calibration/propagation.py`。把两个**异质**保证在单一预算 α_total=α_e+α_p 下组合成
-端到端选择性预测器：
-1. **构建阶段**：CRC 边准入，**召回**保证 FNR≤α_e（`relations/admission.py`，Angelopoulos CRC）。
-2. **推理阶段**：**漂移自适应覆盖**保证 miss≤α_p（`core/calibration` 的 ACI/weighted 流式校准器）。
-3. **关键**：边准入**移除候选** → 丢金标边使答案**不可达**（推理校准器看不到的 miss）。为此单列
-   reachability 预算，union bound：P(miss) ≤ P(unreachable)+P(reason miss|reachable) ≤ α_e+α_p。
-4. **条件回收**（`allocate_budget_conditional`）：用 held-out 准入结果证不可达率上界 u
-   （Clopper-Pearson，CRC 界收紧），推理侧跑修正水平 **α_p'=(α_total−u)/(1−u)**，收紧预测集。
-5. 推理侧**非可交换**（漂移自适应），区别于可交换 pipeline-CP。
+全局执行顺序固定为：
 
-**实现状态**：通用原语已实现并测试（`core/calibration` 的 aci/weighted/crc/propagation + `relations/admission`
-的 CRC 边准入；`propagation.py::compare_cross_stage_methods` 是其头号实验）。**M3a（推理侧选择性头）已接入
-CGEP**（`succession/selective.py`：候选分数→gold 排名→`run_cross_stage`，产 risk-coverage 曲线 + 覆盖保证）。
-**SeDGPL 主表曲线已跑**（GPU，954/954）：覆盖保证成立（aci 每档 ≥1−α），**同覆盖下集大小 SeDGPL≪frequency**
-（90%覆盖 243 vs 425/−43%、70% 99 vs 313/−68%）——强 ranker 价值=覆盖保证下的集收缩、不依赖 MRR。
-**M3b（跨阶段 reachability）：真实构建版 ECG 曾被 Ch2 生成式抽取器堵死**——SFT+GRPO LoRA causal 召回
-**0.4%（3/810）、subevent 0%（0/139）**，构建版 ECG 退化（reachability 损失 ~1.0，非可扫描范围）。
-**Phase A（2026-07-24）已用判别式抽取器解此瓶颈**（causal 召回 0.4%→67.5%，`hallucinated=0`）。
-⚠️ 那里的 F1 `.250`/`.213` 是**内部口径**，2026-08-07 起全项目改用官方 `evaluate.py` 口径，
-**数字一律以 [`results/PHASE_A.md`](results/PHASE_A.md) 为准**（本文件不复制）。
-真实 predicted ECG 的 reachability 待 Phase B/E 接入。故 M3b 此前落为
-**受控 reachability 扫描**（`succession/cross_stage.py` + `scripts/evaluate_cgep_cross_stage.py`）：真 SeDGPL 推理排名 +
-受控 reachability 损失。**真 SeDGPL 排名实证**（954，α_total=0.2）：naive 覆盖崩(0.80→0.56)、集恒~140（忽略剪枝）；
-cs_crp 守覆盖到预留档(loss≤0.1)、集恒~270；**cs_cond 同覆盖下自适应更紧集**(loss=0: 152 vs 272，−44%)——原语的
-"tighter sets"兑现。离散排名+无漂移下 cs_cond 覆盖在 loss=0.15/0.20 微欠 target。抽取器 0.4% 作诚实数据点；
-强抽取器诱导真实损失待 Phase A/B 完成后补齐。**这是继 M1(MRR 噪声级) 后第二个经验墙 → 价值靠方法讲干净、非端到端数字。**
+> **G0 协议冻结 → G1 Ch2 → G2 Ch3 → G3 Ch1 → G4 Ch4 → G5 总体验收**
 
-### 4.4 验证器即奖励（RL-reward）—— ❌ **2026-07-29 整条线已移出主干**
-GRPO-RLVR 与生成式 SFT 抽取器（`ekg/rl`、`relations/rl`、两个训练脚本、8 个 grpo 配置）已归档到仓库外，
-四章无一依赖：Phase A 的判别式抽取器已取代它（生成式探针 causal 召回 0.4%）。新颖性复核也表明
-「结构作 RLVR 奖励」是红海（§5）。取回路径见 [`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md)。
+论文写作顺序仍为 Ch1 → Ch2 → Ch3 → Ch4，不与实验顺序混淆。
 
-### 4.5 下游门控的信号来源（方法论约束，防 oracle 陷阱）
-**适用范围（2026-07-29 收窄）**：门控已不是 Ch4 的 headline（见 §1），但只要论文里**出现任何**
-「按下游信号接受/拒绝编辑」的实验档，本约束就适用，且**已从待办升级为发表阻断项**。
+### G0：协议与资产冻结（CPU/只读优先）
 
-self-correction 的收益常来自 **oracle label**（Huang et al. 2310.01798：intrinsic self-correction 掉点、
-收益多源于金标）；TACL 自纠综述（2406.01297）把 **oracle 信号泄漏**列为致命实验设计缺陷。故门控信号
-来源**必须二选一**并在论文写清：**(a) 在线可得的无标签代理**（自一致性/校准置信/约束满足度，部署可算）；
-或 **(b) 显式定位为「离线诊断/构建期质检工具」**（用 held-out 金标算 MRR delta，交付前一次性修图，
-不声称在线自愈）。**⛔ 不得用金标 MRR 直接当门控信号而不作 (b) 定位。**
-DeepRefine（2605.10488）的 Gain-Beyond-Draft 无金标奖励即为绕开 oracle 的先例（见 §5）。
+P1 分开维护 `global_protocol_status` 与 `a3_entry_status`。只有前者失败才阻塞全篇；A3 baseline closure
+失败只阻塞 A3，必须交付 `blocked` handoff 后允许 D3 继续。第一轮 A3 GPU baseline 前的最小条件只有：
 
-⚠️ 同一 checklist 的另外两条也适用于 Ch4 的实验表：**不得与人为削弱的初始图比**（初始构建必须用上
-修复档能用的全部资源）；**必须有强对照**——修复类干预要与「随机等量删边」比（随机删边本身是强基线，
-DropEdge ICLR'20），净化类干预要与**度数匹配**的随机剔除比（均匀随机对低度数策略不公平，
-实测差 3,573 条边）。Ch3 的净化负结果正是靠后者才站得住（见 `TODO.md`）。
+1. ERE/FACT train/internal-dev/final-valid manifests、source hashes、ID 集合和支持数冻结；
+2. evaluator 持久化 source/hash，gold-self 与手算 adversarial fixtures（空预测、反向边、coref
+   merge/split、重复/缺失 ID 拒绝）通过；
+3. Ch2 candidate universe、labels、输入前提、candidate-ID digest 与 population counts 冻结；
+4. local pair、official single、official joint 完成同 schema 10-doc smoke；RESIJ 不属 A3 必需项；
+5. baseline roster、primary-anchor 选择规则、matched seeds、document-cluster CI/guardrail 规则预注册；
+6. stage bundle 四件套通过外部可信 protocol hash、外部证据重哈希及坏 hash、重复/缺失/多余 ID、矛盾
+   status fail-fast 测试；完整 candidate protocol 与 append-only access ledger 均被绑定；
+7. 4090 完成 checkpoint/最长输入加载显存 smoke；远端命令须先展示；
+8. 本地 pytest/ruff/CPU smoke 通过，且当前选模未访问 final-valid。
 
-## 5. 新颖性定位约束（硬约束，投稿安全）
+`global_protocol_status` 的 **PASS/CONDITIONAL/BLOCKED** 只由 1、2、6 及共享 ID/schema 完整性决定；
+`a3_entry_status` 由 3、4、5、7、8 决定。Ch1/Ch3 baseline 与完整 Ch4 query/consumer 是对应阶段前置，
+不是 P1 全局阻断。
 
-复核证据底稿（`NOVELTY_A1_2026-07-11.md` / `NOVELTY_CSCRP_2026-07-11.md`）已移出仓库；
-**投稿前重扫新颖性时须按 [`ARCHIVE_INDEX.md`](ARCHIVE_INDEX.md) 取回**。
+### G1：Ch2 方法闸门
 
-> **v4 重定位（2026-07-21 立，2026-07-29 按实测修订）**：全篇创新是**组合式 + 系统集成 + 窄 delta**，
-> headline = **Ch4 构建误差向下游的传播、归因与预算**（非单个颠覆算法）。逐章防审稿
-> = 最近邻 / 精确 delta / 质疑→反驳：Ch1 下游可消费校准置信 + 难例判别；Ch2 风险目标是**下游可达性损失**
-> 而非泛化 FNR（**改名避 SCRC 2512.12844**）；Ch3 novelty = **预测图鲁棒性**（净化的下游主张见下）；
-> Ch4 = **三图（gold/predicted/repaired）误差分解 + 把下游损失归因到具体构建/修复动作**
-> （区分 CFEP/self-healing KG）。
-> ⚠️ **两处主张已按实测收回，写作时不得复活**：
-> ① Ch4 **不再主张「下游目标门控接受能治 self-refine 掉点」**——门控天花板实测 ≈0.24%，
-> 且一般命题被 Kintsugi/DeepRefine/CauScientist 占先；
-> ② Ch3 **不再主张「净化下游」**——净化在结构一致性上**不如度数匹配的随机剔除**（6 项中 5 项）；
-> **2026-07-29 下游那一半已判定：可部署档 ΔMRR −.0001（p=.92）、gold 标签 oracle 档 −.0000（p=.97）。
-> oracle 即天花板 ⇒ 检测器再好也救不活这条路**，Ch3 按止损口径退为「事实性检测 + 预测图鲁棒性分析」。
-> **两条负结果都要正面写进论文**，它们是「一致性指标与『该删什么』不对齐」这一发现的证据。
->
-> ✅ **2026-07-29 Ch4 delta 已由实测坐实为三条**（均在 Phase E 落地，见 TODO「Phase E 实施」）：
-> ① **「一致性 ↮ 可重建性」已量化**：25 个受控图上 causal_scc vs R1 的 Spearman ρ = **−0.064**
-> （拓扑边数 −0.008、closure_gap −0.163），而 R1 与 R2 之间 ρ = **+0.783**。反例：拆节点 rate .25 时
-> 三项一致性指标全说健康、R2 却从 1.0 崩到 .365；增边 rate 1.0 说有 316 个 causal 环、R1 却是满分。
-> ② **误差类型的下游代价排序**：同幅度下**身份错误 > 关系错误** —— 拆节点 −.0184 是等幅删边（−.0081）
-> 的 2.3 倍、等幅增边（−.0047）的 3.9 倍；按可达性损失归一后拆节点 −.0777 vs 随机删边 −.0305，
-> ⇒ **可达性损失单独解释不了伤害**。这给 Ch1 的重要性提供了下游量化依据。
-> ③ **端到端风险地板**：`predicted` 图上 alpha_total < **.2935** 时任何校准方法都不可能达标。
-> 并测出一条库级限制：`allocate_budget_conditional` 的 `alpha_edge` 收紧只在损失由**准入**阶段
-> 产生时成立，抽取损失下会欠覆盖（详见 TODO 与 `scripts/report_ch4_budget.py`）。
-> 权威缺口引用用**事件领域文献**（EKG 综述 2112.15280 / EE 综述 2512.19537 / MAVEN-FACT），不靠通用 LLM-KG 综述。
-> 下列 A1/CS-CRP 结论仍成立（作 Ch4 可靠性模块的护栏）：
+1. baseline closure：local pair、official single、official joint 同协议运行；RESIJ 仅在公开实现或忠实复现
+   闭环时可选纳入；
+2. anchor freeze：看到方法结果前冻结同 split `primary anchor`、guardrail margins 与 matched seeds；
+3. core pilot：seed 13，最多两个 family-balance 核心设计周期；固定权重/网格不计有效机制；
+4. promotion：pilot 主指标高于 seed-matched anchor 且 subevent 过预注册非劣界，才跑三种子；
+5. final PASS：满足 §2.1 主锚 + 不同方法族胜出规则；type/direction 二级机制失败只删除对应 claim；
+6. export：无论 pass/failed 都冻结身份明确的 Ch2 产物并 handoff。
 
-- **A1（RLVR 奖励）**：❌ **不得写「首次把结构/事理当 RLVR 奖励」**。MedCEG(2512.13510) 直接先例
-  （gold 推理图路径作可验证奖励），另 Structure-R1/GraphThinker/K2V。VeriGate(2605.30451)/
-  Faithful GRPO(2604.08476) 已排除不抢先。注：2409.17480=SeDGPL 本体（监督、无 RL），是 base 非竞品。
-- **CS-CRP**：一般命题「cross-stage/selective conformal（甚至 under drift）」也非新（C-RAG 2402.03181/
-  PASC 2605.18812/SCRC 2512.12844/CASCADE 2605.20468）；但**具体组合**（召回⊗漂移自适应覆盖 +
-  上游剪枝致不可达的 reachability 预算 + 条件回收）**未见先例**——**比 RL 线干净**，作为 Ch4
-  可靠性模块的窄 delta，不再单独充当章节 headline。
-  相关工作须逐条区分上述四篇；**reachability 预算**是最硬差异点。
-- **DeepRefine（2605.10488，2026-05）★最近威胁，前次复核未覆盖**：下游导向的 agent-compiled KB 精化，用无金标
-  **Gain-Beyond-Draft 奖励**端到端 RL，报「downstream gains」——与 Ch4「下游导向修图」高度重叠。**故 headline
-  claim 收窄**：不主张「首次做下游导向图修复」，只主张 **事件因果图上、带 reachability 与 conformal 误差预算
-  （覆盖保证）的下游门控修复 + gold/predicted/repaired 三图误差分解**。DeepRefine 是通用 KB、RL 无覆盖保证、
-  无 reachability/三图分解——逐点区分。门控信号来源须按 §4.5 交代。投稿前重扫一次同类新论文（此域 2026 增长快）。
-- **Kintsugi（2605.09487，2026-05-10）★★2026-07-28 联网复核新发现，此前完全未覆盖**：
-  「确定性验证门**仅当**候选通过类型检查、KB 可执行、且聚焦验证成功率或轨迹健康度**改善而不违反
-  保护性回归检查**时才接受编辑」——这是 Ch4「下游门控接受」的**直接先例**，且带形式化接受规则。
-  ⇒ **「只在下游改善时才接受修改」这个一般命题已被占，不得主张为新**。
-  可区分处：Kintsugi 在**可执行 KB / agent 策略**域（下游是 agent 任务成功率与轨迹健康度），
-  非事件因果图；无 conformal 覆盖保证，无 reachability 预算，无 gold/predicted/repaired 三图分解。
-  另 **CauScientist（2601.13614）** 也是「仅当 BIC 提升才接受编辑 + 记录被拒编辑」的同类接受规则。
-  连同 DeepRefine，**下游导向修复这一族已相当拥挤**，Ch4 的 delta 只能落在
-  「事件因果图 + 覆盖保证 + reachability 预算 + 三图误差分解」，且须逐篇区分。
-- **★★ CGEL / 关系专家（ACL 2025, 2506.06910）——2026-08-07 回一手核，此前完全未覆盖**：
-  Koupaee et al.（Stony Brook / UPenn / UT Austin / USNA），四个 LLM「关系专家」多轮辩论生成因果图，
-  内在评测 CRAB、下游评测 EEL/ForecastQA/叙事完形，**GPT-4o + Llama-70B，不微调**。两处影响：
-  ① **「多智能体协作构建事件因果图」这一般命题已被占** ⇒ `agents/` 不得作为独立卖点，
-     写作时逐点区分（我们是判别式微调抽取器 + 校准/风控，非 LLM 辩论；我们有覆盖保证，它没有）。
-  ② **它证明「更好的图 → 下游大涨」（叙事完形 13.0→55.0），与我们六机制零效应正面冲突。**
-     ⇒ 这**不是威胁，是 Ch4 的立论起点**：`headline` 由此变为**「图质量的下游收益依赖消费者类型」**
-     （in-context 消费者 vs 微调消费者）。**必须正面引用它、正面报告冲突，不得回避或只字不提。**
-- **支持我们立场的两条**（2026-07-28 查到，写作时引用）：**KGrEaT（CIKM'23, 2308.10537）** 明确指出
-  KG 精化研究「以下游会提升为动机，但**这几乎从不被评估**」，且实测 KG 效用因任务剧烈变化、
-  更全的 KG 未必更好 —— 我们做了这步评估并拿到否定答案，属于填该缺口；
-  **TACL 自纠综述（2406.01297）** 结论「无可靠外部反馈的自我修复不改善甚至掉点，有可靠外部反馈才有效」，
-  与 Phase B（无门控修复掉点）一致 —— 但其 checklist 同时把 **oracle 信号泄漏**列为致命设计缺陷，
-  故 §4.5 的「门控信号来源」**从待办升级为发表阻断项**：不得用金标 MRR 当门控信号。
-- ⚠️ **CS-CRP 与 SCRC(2512.12844) 撞名**，建议改名（突出 reachability-budgeted/recall-coverage 组合），
-  待定；改名涉及 docs/代码多处，须统一。
-- 置信度：结构作 RLVR 奖励非新=HIGH；CS-CRP 具体组合未占=MEDIUM（投稿前须做一次穷尽 pipeline-CP 扫）。
-- 口径：不 claim 全球首创；一律「据我们所知」+显式区分先例。**专利已归档、不再安排专利写作。**
+**立即停止**：两个有效核心设计周期后仍不领先主锚或 subevent 过不了非劣界；停止无界扫参，保留长
+上下文复现与关系族冲突诊断，降级为系统组件。A3 失败不阻塞 D3。
 
-## 6. 数据与切分（要点，详见 DATASETS.md / ENGINEERING_NOTES.md）
+### G2：Ch3 方法闸门
 
-- **CGEP-MAVEN 重建口径**（`succession/data/cgep.py` 权威）：ECG = 文档内 **causal(CAUSE+PRECONDITION)
-  +subevent** 无向连通分量、**节点≥4**；时序 BEFORE **不进拓扑**（只作 M2 结构特征）；查询边 =
-  **出度 0 且入度 1**；候选 512、同 split 均匀采样。验收：2994 文档 / 8.82 节点·ECG / 13.21 边·ECG。
-- **ESC 必须 topic 交叉验证**（EventStoryLine topic）；**文档级切分会泄漏**（同 topic 同一故事）。
-  实测：SeDGPL 公开的 **ESC 19.6 依赖切分泄漏**（topic-CV 0.0599 vs doc-split 0.1802≈复现 0.196）。
-- **MAVEN 版数据未发布**（SeDGPL 只发 ESCSubWoRe.npy）→ 论文 CGEP-MAVEN 27.9 **不可比**；主表**必须以
-  我们自跑的 SeDGPL 为基线**，公开数字标「原论文数据构建，非同数据可比」。
-- ICEWS14/FinDKG 仅作冻结旧 TKG 线的兼容数据；若从 tag 复现实验，ICEWS 必须用 timestamps 计数切分，
-  不得把旧结果混入 v4 主表。
+1. baseline closure：RoBERTa+CLS 与 DMRoBERTa 在同一 split 重跑；DMBERT 仅在 DMRoBERTa 两轮工程
+   修复仍不闭环时作预登记替代；
+2. anchor freeze：看到方法结果前冻结同 split `primary anchor`、稀有类支持数/非劣规则与 matched seeds；
+3. core pilot：比较 evidence→label/联合软耦合与平行双头，seed 13，最多两个核心设计周期；
+4. promotion/final：按 §2.1 胜出且 evidence/稀有类过预注册护栏；label→evidence/bidirectional 失败只
+   删除二级 claim；
+5. export：无论 pass/failed 都冻结节点属性与 evidence 输出供 Ch4，不先做外部数据扩展。
 
-## 7. 实验设计
+**立即停止**：两个有效核心设计周期后同 split 不领先，或增量只来自多数类并越过护栏；本章降级为
+系统组件，停止 FactBank/UW/MEANTIME 扩展，不复活净化路线。D3 失败不阻塞 C4。
 
-> **完整 baseline 矩阵（新老搭配）+ 消融矩阵 + 评测协议见 [`EXPERIMENTS.md`](EXPERIMENTS.md)。** 要点：
-> 每章 = 主表(vs baseline) + 消融表(每环节 ±) + 多种子；baseline 覆盖**经典/原文 + 近 1–2 年代表 + 通用 LLM**；
-> test 无金标按 EXPERIMENTS §1 三档（Ch1/2 走 CodaLab、Ch4 valid 当 test 有 SeDGPL 先例、Ch3 valid 报数）。
+### G3：Ch1 方法闸门
 
-- **主表基线**：自跑 SeDGPL 在 CGEP-MAVEN（Phase 2，单折 10ep ≈ 2.5h）。M1/M2/M3 都挂它上。
-- **协议**：ESC 报 **topic 交叉验证**（`--split-mode document` 只作「论文数字来源解释」，绝不当协议）；
-  tie-break 同报 `mrr`（乐观/SeDGPL）与 `mrr_strict`。
-- **既有受控实验**：真实构建版 ECG 此前被 Ch2 生成式抽取器堵死（causal 召回 0.4%），故先做**受控
-  reachability 扫描**（真 SeDGPL 排名 + 受控损失，`cross_stage.py`）。**Phase A 判别式抽取器已解召回瓶颈
-  （数字见 [`results/PHASE_A.md`](results/PHASE_A.md)），可产真实 predicted ECG**；v4 Phase E 必须在 Phase B 后补 gold/predicted/repaired
-  三图闭环，受控扫描不能替代真实图结果。
-- **旧 TKG 线**：re_gcn/hybrid/path_rl **已移出主干**（git tag `frozen-tkg-line`），不在当前测试/CI。
-- **多种子最后**：seeds 13/17/42，报 mean±std。
+1. baseline closure：lexical/lemma、local pair、official single、official joint 同协议运行；RESIJ 仅在公开
+   实现或忠实复现闭环时可选纳入；
+2. anchor freeze：看到方法结果前冻结同 split `primary anchor`、多指标非劣 margin 与 matched seeds；
+3. core pilot：上下文判别表示 seed 13，最多两个核心设计周期；校准聚类是二级机制；
+4. promotion/final：按 §2.1 胜出并守住 B³/CEAFe/BLANC 与跨句 recall；校准失败时保留全局阈值并删除
+   校准 claim；
+5. export：无论 pass/failed 都冻结 mention-to-cluster 与 confidence 产物供端到端层。
 
-## 8. 复现（本地 CPU 冒烟；GPU 训练在服务器）
+**立即停止**：两个有效核心设计周期后仍不超过同 split 主锚，或增益只是越过护栏的 precision/recall
+交换；停止换 backbone、非对称权重扫描和 ECB+ 换榜单，保留错误剖析并降级为系统组件。C4 失败不阻塞 E3。
+
+### G4：Ch4 系统评估闸门
+
+1. protocol freeze：E3 冻结本地重建 query/candidate manifest、生成器/seed/source hashes 和 candidate-ID digest；
+2. bridge：同一 queries 真正读取 Ch1 clusters、Ch2 edges 和 Ch3 node attributes；
+3. predictive validity：必含 random、frequency、BART/text-only、SeDGPL/fine-tuned graph；强 graph arm
+   相对 BART/text-only 与 frequency 的 document-cluster paired 95% CI 下界均大于 0，frozen variant 仅作
+   消费者因子；
+4. graph dependence：至少一个消费者通过 gold/permuted 或 graph/no-graph 正控；
+5. factorial/inference：固定输入、候选集、序列化和 scorer，按 document cluster 报预注册主效应、交互、
+   Holm 校正、噪声地板与失败边界。
+
+Ch4 的 quality arms 只改变评测时输入图。同一 consumer/seed checkpoint 必须跨全部 quality arms 复用，
+不得为 gold/predicted/masked arm 分别重训；随机消费者使用 matched 13/17/42，并在每次 document-cluster
+bootstrap 内先重算各 seed effect 再取均值。frozen-vs-fine-tuned 除 encoder update 开关外，初始化、训练
+数据/训练图、scoring architecture 与预算必须一致。
+
+**立即停止或收缩**：
+
+- graph 正控在所有消费者上均失败且两次定向实现修补后仍失败：不作消费者依赖性独立贡献，收缩为
+  错误传播副章；
+- frozen 不敏感但 fine-tuned 通过正控：保留其为允许的 consumer×quality 零/差异结果，不判实现失败；
+- 只有不同 backbone 对照：不得使用“微调导致”措辞；
+- Ch1–Ch3 任一输出缺失或 ID 不对齐：禁止用 gold proxy 冒充真实端到端闭环。
+
+### G5：总体验收
+
+必须同时满足：三方法章各自有统一协议主表、超过多个 baseline、三种子和机制消融；Ch4 消费者可信、
+同实例 factorial 与统计完整；所有负结果和降级均保留；代码、配置、数据 manifest、命令、checkpoint
+位置和结果文档可从论文表格反查。
+
+若一个方法章 `failed|blocked`，可由作者/导师明确改纲为“两方法章 + 一系统评估章”；若两个方法章
+`failed|blocked`，v6 主线 NO-GO，必须另行重规划，不能在 H2 内把一个方法章包装成“两方法章”版本。任何阶段 pass/failed/blocked
+都必须交付 handoff；局部失败不会自动阻塞后续方法阶段或系统评估，但会降低对应产物的证据身份。
+
+`blocked` 阶段应记录最佳可用 historical/local `fallback_component_bundle_id`；若没有则显式为 `null`。
+这不阻塞后续方法章，但 E3 不得用 gold proxy 补 predicted arm；缺少任一可校验 component 时只阻塞 Ch4
+独立 factorial，不反向否定其他已成立方法章。
+
+## 6. 防止错误累计
+
+每个阶段必须交付一个不可变的 stage bundle：
+
+- `protocol.json`：数据/manifest/evaluator/config/代码 commit 的 hashes；调用方必须从 bundle 外传入可信
+  `protocol.json` SHA-256，reader 重新散列所有本地外部证据，不允许内部自证；
+- `predictions.*`：逐实例预测与稳定 ID；
+- `metrics.json`：scorer 原始输出，不由文档手抄重建；
+- `status.json`：`pass | conditional | failed | blocked`、`global_protocol_status`、本阶段/下一阶段入口状态、
+  `primary_anchor_selection_rule`、已解析时的 `primary_anchor`、`historical_final_access_disclosed`、
+  `final_valid_access_ledger`、`v6_confirmatory_eval_count`、`exploratory`、失败原因和可供下游使用的身份；
+- 对应 `docs/results/PHASE_*.md`：命令、机器、checkpoint 位置与诚实结论。
+
+下游读取 bundle 前必须验证 hashes、ID 集合、重复数、缺失数和 schema。校验失败就停止，不允许继续跑
+并在最后解释。修复后的 bundle 使用新版本号，不能覆盖产生论文结果的旧 bundle。
+
+工程修复轮定义为“一次有界诊断 → 补丁 → 同协议 smoke”，同一 baseline 最多两轮；失败只移除该候选，
+不否定任务。机制轮只在实现、单测与协议检查均通过后计数，每个**核心机制**最多两个设计周期；二级机制
+另有最多“一次实现 + 一次定向修订”的独立预算；失败时删除 claim，不消耗或重置核心机制预算，也不
+阻断核心 promotion。下列动作不计作新机制，也不能重置预算：
+
+- 环境、路径、checkpoint 载入和字段名修复；
+- 为忠实复现补齐论文明确给出的预处理；
+- 修复共享协议中会改变 candidate population、gold 标签或 scorer 定义的 bug：不计机制轮，但必须使全部
+  受影响 bundle 失效、升协议版本并退回 P1，不能伪装成普通 baseline 适配。
+
+两轮后仍失败时不得开始第三轮；将 baseline 降为背景并换一个已列候选。主方法失败时不换指标、
+不换 final split、不删难例、不扩大模型来绕过停止条件。
+
+## 7. 工程不变量
+
+- 代码按功能域命名，包/函数名不得含 `ch1/ch2/ch3`；新组件走 registry + lazy import；
+- `EventNode` 零新增字段；扩展只用 `metadata`；`tests/core/test_propagation.py` 是测试锁；
+- CPU core 不依赖 torch；GPU 组件必须支持 CPU 缓存回放；
+- 不添加掩盖错误的 fallback 或默认值，输入不完整时 fail-fast；
+- 现有结果数字下降就如实记录；ssh/工具失败不能写成远端进程或科研结论；
+- checkpoint 训在哪就留在哪，位置和 hash 写入结果文档；跨机搬运必须先问作者；
+- 提交和推送只在作者明确要求时执行。
+
+代码域：`ekg.nodes`（身份）、`ekg.relations`（关系）、`ekg.factuality`（事实性）、
+`ekg.succession`（CGEP 消费者），共享 `ekg.core.schema/io/eval/registry`。
+
+## 8. 资源与执行规则
+
+- 本地 WSL：文档、实现、lint、单测、CPU scorer、manifest/hash 和缓存回放；禁止本地 GPU 训练/推理；
+- `gpu-4090`：主 GPU，单卡训练与推理；正式运行前先展示准确命令、工作目录和预期产物；
+- `gpu-5090`：备用 GPU，每次使用均须作者明确授权；
+- 服务器只用 `.venv/bin/python`，禁止 `uv run`/`uv sync`；不挤占他人任务；
+- 规划总量为 95–180 单 GPU 小时，严格串行；任何超出预算的新增任务必须先替换而非叠加；
+- 远端长任务使用 `setsid nohup`、`python -u` 和独立日志；判活遵守三态 ALIVE/GONE/SSH 失败。
+
+主线所需监督全部来自公开 gold。LLM 可作不参与标注的推理 baseline，但主线不能依赖人工或闭源 API
+生成新 gold。人工阅读仅允许做不参与训练/选模/主指标的少量定性案例分析。
+
+## 9. 验证与文档优先级
+
+改代码后必须运行：
 
 ```bash
-uv sync --extra dev && uv run pytest && uv run ruff check src tests scripts   # 本地：契约/评测/冒烟全绿
-uv run python scripts/build_cgep.py --split train+valid --report-stats         # CGEP 重建验收
-# 服务器 CGEP 训练(screen/nohup; ⛔ 用 .venv/bin/python, 不要 uv run — 见 GPU_RUNBOOK §0):
-#   CUDA_VISIBLE_DEVICES=<空卡> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
-#   .venv/bin/python -u scripts/evaluate_cgep.py --dataset maven --predictor sedgpl \
-#     --model-path <roberta-base> --epochs 10 --output runs/cgep/maven_sedgpl.json
+uv run pytest
+uv run ruff check src tests scripts
+uv run ekg-smoke
 ```
+
+文档冲突优先级：
+
+1. `docs/results/PHASE_*.md`：已经发生的实验事实；
+2. 本 SPEC：当前研究和工程约束；
+3. 当前 active phase：本阶段操作步骤与停止条件；
+4. TODO：实时位置；
+5. EXPERIMENTS：候选 baseline 与实验矩阵；
+6. replan/旧 phase/归档：证据与历史，不得覆盖当前指令。
+
+任何新 phase 开始前必须先确认 SPEC、active phase 和结果单一事实源无冲突。若冲突，先修文档再开跑。

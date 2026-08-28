@@ -1,5 +1,8 @@
 # PHASE A2 — Ch2 按官方配方重训抽取器（关键路径）
 
+> **SUPERSEDED 2026-08-27：不得执行。** 历史结果仍有效；当前 Ch2 契约见
+> [`PHASE_A3_relation_balanced.md`](PHASE_A3_relation_balanced.md)。
+
 > 单会话自包含契约 + 交接。`/clear` 后只读**本文件 + 自动载入的 `CLAUDE.md` + [`../SPEC.md`](../SPEC.md)**
 > 即可执行。实测数字见 [`../results/`](../results/README.md)（单一事实源，本文件只引用不复制）。
 > 建于 2026-07-31，仓库 HEAD 见 `git log -1`。

@@ -23,16 +23,193 @@ pure Python and unit-tested on CPU; training needs the `llm` extra + a GPU:
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import math
 import random
+import sys
 from pathlib import Path
 
+from ekg.core.stage_bundle import StageBundleError, is_sha256, validate_stage_bundle
 from ekg.relations.data.maven_ere import load_maven_ere
 from ekg.relations.extractor.supervised import FAMILY_SUBTYPES
+from ekg.relations.maven_ere_official import candidate_protocol_summary, records_by_id
 from ekg.relations.pairs import PairExample, pair_examples
 
 
-def build_training_rows(docs, max_distance: int | None = None) -> list[PairExample]:
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _load_json(path: Path) -> dict:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path} must contain a JSON object")
+    return payload
+
+
+def validate_v6_protocol_inputs(
+    *,
+    repo_root: Path,
+    train_path: Path,
+    train_manifest: Path,
+    dev_manifest: Path,
+    protocol_root: Path,
+    expected_p1_protocol_sha256: str,
+) -> dict:
+    """Bind an A3 run to P1's source, two allowed splits, and label universe.
+
+    This intentionally runs before importing torch. A path with the right IDs but
+    drifted bytes, a swapped final-valid manifest, or a different event-to-mention
+    expansion must fail without spending GPU time.
+    """
+    repo_root = repo_root.resolve()
+    protocol_root = protocol_root.resolve()
+    train_path = train_path.resolve()
+    train_manifest = train_manifest.resolve()
+    dev_manifest = dev_manifest.resolve()
+    registry_path = protocol_root / "registry.json"
+    candidate_path = protocol_root / "ch2_candidate_protocol.json"
+    registry = _load_json(registry_path)
+    if registry.get("protocol") != "v6":
+        raise ValueError("protocol registry is not v6")
+    if registry.get("global_protocol_status") != "pass":
+        raise ValueError("P1 global protocol status is not pass")
+    if registry.get("a3_entry_status") != "pass":
+        raise ValueError("P1 A3 entry status is not pass")
+    if not registry.get("p1_bundle_id") or not registry.get("p1_bundle_protocol_sha256"):
+        raise ValueError("protocol registry does not identify a validated P1 bundle")
+    if not is_sha256(expected_p1_protocol_sha256):
+        raise ValueError("expected P1 protocol digest is not a SHA-256 hex string")
+    if registry["p1_bundle_protocol_sha256"] != expected_p1_protocol_sha256:
+        raise ValueError("registry P1 protocol digest differs from the command trust root")
+    p1_bundle = repo_root / "runs/stages/P1" / registry["p1_bundle_id"]
+    try:
+        validate_stage_bundle(
+            p1_bundle,
+            evidence_root=repo_root,
+            expected_protocol_sha256=expected_p1_protocol_sha256,
+            known_upstream_bundle_ids=set(),
+        )
+    except StageBundleError as exc:
+        raise ValueError(f"P1 stage bundle validation failed: {exc}") from exc
+
+    source_rel = "data/processed/maven_ere/train.jsonl"
+    expected_source = (repo_root / source_rel).resolve()
+    if train_path != expected_source:
+        raise ValueError(f"v6 --train must be the registered source {expected_source}")
+    source_hash = sha256_file(train_path)
+    if source_hash != registry.get("source_sha256", {}).get(source_rel):
+        raise ValueError("registered MAVEN-ERE train source hash mismatch")
+
+    expected_manifests = {
+        "train": (protocol_root / "manifests/maven_ere_train.json").resolve(),
+        "internal-dev": (
+            protocol_root / "manifests/maven_ere_internal-dev.json"
+        ).resolve(),
+    }
+    supplied = {"train": train_manifest, "internal-dev": dev_manifest}
+    manifest_hashes: dict[str, str] = {}
+    manifest_payloads: dict[str, dict] = {}
+    for role, path in supplied.items():
+        expected = expected_manifests[role]
+        if path != expected:
+            raise ValueError(f"v6 {role} manifest must be {expected}")
+        relative = path.relative_to(protocol_root).as_posix()
+        actual_hash = sha256_file(path)
+        if actual_hash != registry.get("manifest_sha256", {}).get(relative):
+            raise ValueError(f"registered {role} manifest hash mismatch")
+        payload = _load_json(path)
+        required = {
+            "dataset": "maven_ere",
+            "split_role": role,
+            "source_path": source_rel,
+            "source_sha256": source_hash,
+        }
+        for key, expected_value in required.items():
+            if payload.get(key) != expected_value:
+                raise ValueError(
+                    f"{role} manifest {key} mismatch: "
+                    f"expected {expected_value!r}, got {payload.get(key)!r}"
+                )
+        ids = load_manifest_ids(path)
+        if payload.get("doc_count") != len(ids):
+            raise ValueError(f"{role} manifest doc_count does not match doc_ids")
+        manifest_hashes[role] = actual_hash
+        manifest_payloads[role] = payload
+
+    candidate_hash = sha256_file(candidate_path)
+    if candidate_hash != registry.get("candidate_protocol_sha256"):
+        raise ValueError("registered Ch2 candidate protocol hash mismatch")
+    frozen_candidates = _load_json(candidate_path)
+    raw_records = [
+        json.loads(line)
+        for line in train_path.read_text(encoding="utf-8").splitlines()
+        if line
+    ]
+    raw_by_id = records_by_id(raw_records, source=str(train_path))
+    selected_ids: set[str] = set()
+    summaries: dict[str, dict] = {}
+    for role, payload in manifest_payloads.items():
+        ids = payload["doc_ids"]
+        missing = set(ids) - raw_by_id.keys()
+        if missing:
+            raise ValueError(f"{role} manifest has {len(missing)} IDs absent from source")
+        overlap = selected_ids & set(ids)
+        if overlap:
+            raise ValueError(f"v6 train/internal-dev overlap on {len(overlap)} documents")
+        selected_ids.update(ids)
+        summary = candidate_protocol_summary(raw_by_id[item] for item in ids)
+        if summary != frozen_candidates.get(role):
+            raise ValueError(f"{role} candidate or expanded-label population drift")
+        summaries[role] = summary
+    if selected_ids != set(raw_by_id):
+        raise ValueError(
+            "v6 train/internal-dev manifests do not exactly partition the registered source"
+        )
+
+    return {
+        "schema_version": "ekg.a3_protocol_binding.v1",
+        "p1_bundle_id": registry["p1_bundle_id"],
+        "p1_bundle_protocol_sha256": expected_p1_protocol_sha256,
+        "hashes": {
+            "registry": sha256_file(registry_path),
+            "candidate_protocol": candidate_hash,
+            "train_source": source_hash,
+            "train_manifest": manifest_hashes["train"],
+            "internal_dev_manifest": manifest_hashes["internal-dev"],
+            "trainer": sha256_file(Path(__file__).resolve()),
+        },
+        "candidate_summaries": summaries,
+        "split_counts": {
+            role: len(payload["doc_ids"]) for role, payload in manifest_payloads.items()
+        },
+        "final_valid_accessed": False,
+    }
+
+
+def _checkpoint_hashes(output: Path) -> dict[str, str]:
+    return {
+        path.relative_to(output).as_posix(): sha256_file(path)
+        for path in sorted(output.rglob("*"))
+        if path.is_file() and path.name != "run_metadata.json"
+    }
+
+
+def _write_run_metadata(output: Path, payload: dict) -> None:
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "run_metadata.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def build_training_rows(
+    docs,
+    max_distance: int | None = None,
+    *,
+    expand_event_relations: bool = False,
+) -> list[PairExample]:
     """Every document's labelled candidate universe, flattened.
 
     `pair_examples` already carries exactly what a pair classifier trains on
@@ -41,8 +218,47 @@ def build_training_rows(docs, max_distance: int | None = None) -> list[PairExamp
     """
     rows: list[PairExample] = []
     for doc in docs:
-        rows.extend(pair_examples(doc, max_distance))
+        rows.extend(
+            pair_examples(
+                doc,
+                max_distance,
+                expand_event_relations=expand_event_relations,
+            )
+        )
     return rows
+
+
+def load_manifest_ids(path: Path) -> list[str]:
+    """Load and validate the explicit document IDs frozen by P1."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    ids = payload.get("doc_ids")
+    if not isinstance(ids, list) or not ids or not all(isinstance(item, str) for item in ids):
+        raise ValueError(f"{path} must contain a non-empty string list at doc_ids")
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"{path} contains duplicate doc_ids")
+    return ids
+
+
+def split_docs_by_manifests(docs, train_manifest: Path, dev_manifest: Path):
+    """Split documents by explicit P1 manifests and reject omission or overlap."""
+    docs = list(docs)
+    docs_by_id = {doc.doc_id: doc for doc in docs}
+    if len(docs_by_id) != len(docs):
+        raise ValueError("training source contains duplicate document IDs")
+    train_ids = load_manifest_ids(train_manifest)
+    dev_ids = load_manifest_ids(dev_manifest)
+    overlap = set(train_ids) & set(dev_ids)
+    if overlap:
+        raise ValueError(f"train/dev manifests overlap on {len(overlap)} document IDs")
+    selected = set(train_ids) | set(dev_ids)
+    missing = selected - docs_by_id.keys()
+    omitted = docs_by_id.keys() - selected
+    if missing or omitted:
+        raise ValueError(
+            "manifest/source ID mismatch: "
+            f"missing_from_source={len(missing)} omitted_from_manifests={len(omitted)}"
+        )
+    return [docs_by_id[item] for item in train_ids], [docs_by_id[item] for item in dev_ids]
 
 
 def downsample_negatives(
@@ -125,6 +341,19 @@ def parse_weight_alpha(spec: str) -> float | dict[str, float]:
     return parsed
 
 
+def validate_confirmation_families(families: list[str]) -> tuple[str, ...]:
+    """A3's frozen public candidate protocol covers causal and subevent only."""
+    if len(families) != len(set(families)):
+        raise ValueError("--families contains duplicates")
+    selected = tuple(families)
+    if set(selected) != {"causal", "subevent"}:
+        raise ValueError(
+            "v6 confirmation requires exactly --families causal subevent; "
+            "temporal is outside the frozen A3 primary protocol"
+        )
+    return selected
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -183,7 +412,110 @@ def main() -> int:
              "Never carved from valid -- selecting and reporting on the same split "
              "would bias the reported number",
     )
+    parser.add_argument(
+        "--train-manifest",
+        type=Path,
+        help="P1 manifest for training doc IDs; must be paired with --dev-manifest",
+    )
+    parser.add_argument(
+        "--dev-manifest",
+        type=Path,
+        help="P1 manifest for internal-dev IDs; must be paired with --train-manifest",
+    )
+    parser.add_argument(
+        "--protocol-root",
+        type=Path,
+        help="P1 v6 protocol directory; required with explicit manifests",
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path.cwd(),
+        help="repository root used to resolve the P1-registered source path",
+    )
+    parser.add_argument(
+        "--p1-protocol-sha256",
+        help="external trust-root hash for the registry-selected P1 protocol.json",
+    )
+    parser.add_argument(
+        "--official-mention-expansion",
+        action="store_true",
+        help="expand event-level relations across all cluster mention pairs, matching "
+        "the official MAVEN-ERE causal/joint candidate labels; required for v6",
+    )
+    parser.add_argument(
+        "--families",
+        nargs="+",
+        choices=tuple(FAMILY_SUBTYPES),
+        default=list(FAMILY_SUBTYPES),
+        help="relation heads included in loss and checkpoint selection",
+    )
     args = parser.parse_args()
+
+    if bool(args.train_manifest) != bool(args.dev_manifest):
+        parser.error("--train-manifest and --dev-manifest must be provided together")
+    if args.train_manifest and args.dev_docs:
+        parser.error("--dev-docs cannot be combined with explicit manifests")
+    if bool(args.protocol_root) != bool(args.train_manifest):
+        parser.error("--protocol-root and both manifests must be provided together")
+    if bool(args.p1_protocol_sha256) != bool(args.train_manifest):
+        parser.error("--p1-protocol-sha256 and both manifests must be provided together")
+    if args.train_manifest and not args.official_mention_expansion:
+        parser.error("v6 manifest runs require --official-mention-expansion")
+
+    selected_families = tuple(args.families)
+    if args.train_manifest:
+        try:
+            selected_families = validate_confirmation_families(args.families)
+        except ValueError as exc:
+            parser.error(str(exc))
+
+    protocol_binding = None
+    if args.train_manifest:
+        try:
+            protocol_binding = validate_v6_protocol_inputs(
+                repo_root=args.repo_root,
+                train_path=args.train,
+                train_manifest=args.train_manifest,
+                dev_manifest=args.dev_manifest,
+                protocol_root=args.protocol_root,
+                expected_p1_protocol_sha256=args.p1_protocol_sha256,
+            )
+        except ValueError as exc:
+            parser.error(str(exc))
+        if args.output.exists() and any(args.output.iterdir()):
+            parser.error(
+                f"v6 confirmation output directory is not empty: {args.output}; "
+                "use a new immutable run directory"
+            )
+
+    run_metadata = {
+        "schema_version": "ekg.relation_training_run.v1",
+        "status": "incomplete",
+        "confirmation_eligible": protocol_binding is not None,
+        "command_argv": list(sys.argv),
+        "working_directory": str(Path.cwd().resolve()),
+        "protocol_binding": protocol_binding,
+        "final_valid_accessed": False,
+        "configuration": {
+            "train": str(args.train.resolve()),
+            "model": args.model,
+            "epochs": args.epochs,
+            "lr": args.lr,
+            "head_lr": args.head_lr,
+            "neg_ratio": "inf" if math.isinf(args.neg_ratio) else args.neg_ratio,
+            "weight_alpha": args.weight_alpha,
+            "max_distance": args.max_distance,
+            "max_length": args.max_length,
+            "warmup_steps": args.warmup_steps,
+            "dev_metric": args.dev_metric,
+            "accum_steps": args.accum_steps,
+            "seed": args.seed,
+            "official_mention_expansion": args.official_mention_expansion,
+            "families": list(selected_families),
+        },
+    }
+    _write_run_metadata(args.output, run_metadata)
 
     # torch-only imports stay inside main so the data helpers above import on CPU.
     import torch
@@ -198,14 +530,42 @@ def main() -> int:
     )
 
     docs = list(load_maven_ere(args.train))
+    if args.train_manifest:
+        train_docs, dev_docs = split_docs_by_manifests(
+            docs, args.train_manifest, args.dev_manifest
+        )
+    else:
+        legacy_docs = list(docs)
+        random.Random(args.seed).shuffle(legacy_docs)
+        dev_docs = legacy_docs[: args.dev_docs] if args.dev_docs else []
+        train_docs = legacy_docs[args.dev_docs :] if args.dev_docs else legacy_docs
+        if args.dev_docs:
+            print(
+                "[train] WARNING: runtime --dev-docs split is historical/exploratory; "
+                "v6 requires explicit manifests",
+                flush=True,
+            )
+
+    train_rows_full = build_training_rows(
+        train_docs,
+        args.max_distance,
+        expand_event_relations=args.official_mention_expansion,
+    )
     rows = downsample_negatives(
-        build_training_rows(docs, args.max_distance), args.neg_ratio, args.seed
+        train_rows_full, args.neg_ratio, args.seed
+    )
+    dev_rows = build_training_rows(
+        dev_docs,
+        args.max_distance,
+        expand_event_relations=args.official_mention_expansion,
     )
     alpha = parse_weight_alpha(args.weight_alpha)
     weights = None if alpha == 0.0 else class_weights(rows, alpha)
     docs_by_id = {d.doc_id: d for d in docs}
     rows_by_doc: dict[str, list[PairExample]] = {}
     for row in rows:
+        rows_by_doc.setdefault(row.doc_id, []).append(row)
+    for row in dev_rows:
         rows_by_doc.setdefault(row.doc_id, []).append(row)
     kept = "all (no downsampling)" if math.isinf(args.neg_ratio) else f"{args.neg_ratio}:1"
     print(
@@ -217,6 +577,8 @@ def main() -> int:
     )
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    run_metadata["device"] = device
+    _write_run_metadata(args.output, run_metadata)
     torch.manual_seed(args.seed)
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     encoder = AutoModel.from_pretrained(args.model).to(device)
@@ -244,10 +606,8 @@ def main() -> int:
     # valid and then reporting valid would bias the reported number. The official
     # baseline selects on dev and reports test; we have no test, so the split has to
     # come out of train instead.
-    all_ids = list(rows_by_doc)
-    random.Random(args.seed).shuffle(all_ids)
-    dev_ids = all_ids[: args.dev_docs] if args.dev_docs else []
-    train_ids = all_ids[args.dev_docs :] if args.dev_docs else all_ids
+    train_ids = [doc.doc_id for doc in train_docs]
+    dev_ids = [doc.doc_id for doc in dev_docs]
 
     scheduler = None
     if args.warmup_steps > 0:
@@ -261,7 +621,7 @@ def main() -> int:
         scheduler = get_linear_schedule_with_warmup(
             optimiser, args.warmup_steps, args.epochs * steps_per_epoch
         )
-    if args.dev_docs:
+    if dev_ids:
         print(
             f"[train] holdout dev: {len(dev_ids)} docs (from train), "
             f"training on {len(train_ids)}",
@@ -284,7 +644,7 @@ def main() -> int:
         """
         encoder.eval()
         heads.eval()
-        per_family = {fam: [0, 0, 0] for fam in FAMILY_SUBTYPES}  # tp, fp, fn
+        per_family = {fam: [0, 0, 0] for fam in selected_families}  # tp, fp, fn
         with torch.no_grad():
             for doc_id in dev_ids:
                 doc = docs_by_id[doc_id]
@@ -299,7 +659,7 @@ def main() -> int:
                     ),
                     torch.tensor([distance_bucket(r.distance) for r in doc_rows], device=device),
                 )
-                for family in FAMILY_SUBTYPES:
+                for family in selected_families:
                     gold = torch.tensor(
                         [label_index[family][r.labels.get(family, "NONE")] for r in doc_rows],
                         device=device,
@@ -325,6 +685,8 @@ def main() -> int:
         return f1_of(*pooled), by_family
 
     best_f1 = -1.0
+    best_epoch: int | None = None
+    best_by_family: dict[str, float] = {}
     encoder.train()
     heads.train()
     for epoch in range(args.epochs):
@@ -346,7 +708,7 @@ def main() -> int:
             )
             logits = heads(_pair_features(head_emb, tail_emb), dist_ids)
             loss = torch.zeros((), device=device)
-            for family in FAMILY_SUBTYPES:
+            for family in selected_families:
                 target = torch.tensor(
                     [label_index[family][r.labels.get(family, "NONE")] for r in doc_rows],
                     device=device,
@@ -382,6 +744,8 @@ def main() -> int:
             )
             if better:
                 best_f1 = f1
+                best_epoch = epoch
+                best_by_family = by_family
                 save_checkpoint()
 
     if not dev_ids:  # no selection signal: last epoch is all we have
@@ -389,6 +753,19 @@ def main() -> int:
         print(f"[train] saved last-epoch encoder + heads to {args.output}")
     else:
         print(f"[train] best dev {args.dev_metric}_f1={best_f1:.4f}; checkpoint at {args.output}")
+    run_metadata.update(
+        {
+            "status": "complete",
+            "selection": {
+                "metric": args.dev_metric if dev_ids else "last_epoch",
+                "best_epoch": best_epoch,
+                "best_f1": best_f1 if dev_ids else None,
+                "best_by_family": best_by_family,
+            },
+            "checkpoint_sha256": _checkpoint_hashes(args.output),
+        }
+    )
+    _write_run_metadata(args.output, run_metadata)
     return 0
 
 

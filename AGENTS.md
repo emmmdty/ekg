@@ -7,16 +7,18 @@
 baseline 与消融 `docs/EXPERIMENTS.md`｜工程坑 `docs/ENGINEERING_NOTES.md`｜
 服务器运维 `docs/GPU_RUNBOOK.md`｜三端流水线 `docs/PIPELINE.md`｜归档索引 `docs/ARCHIVE_INDEX.md`。
 
-**当前主线是 v5 四章**（2026-08-07 重设）：Ch1 事件身份消解 · Ch2 事件关系抽取 · Ch3 事件事实性检测 ·
-**Ch4 构建质量的下游代价与消费者依赖性（headline）**。活线 = `docs/phases/` 的 A2 / C3 / D2 / E2。
-> ⚠️ **这是学位论文的标尺**：每章都必须在**公开可比的主指标**上**超过多个（不是一个）**方法。
-> 「不用超 SOTA」**不等于**「不用超 baseline」。低于 baseline 时方法章的贡献为零。
-> ⇒ 章节按**「有公开对手的任务」**组织，**不按自造的辅助指标**（难例误合并率 / ECG 可重建率 /
-> 结构违反数都只有我们自己在测，撑不起对比）。v4「可信度四维」脊柱与六个自研机制的方法卖点
-> 均已作废，零效应结论**保留为 Ch4 的归因证据**。
+**当前主线是 v6 四章**（2026-08-28）：Ch1 事件身份消解 · Ch2 事件关系抽取 · Ch3 事件事实性检测 ·
+Ch4 构建错误的下游代价与消费者依赖性。结构 = **三个方法章 + 一个系统评估章**；唯一活线是
+`docs/phases/PHASE_A3_relation_balanced.md`；P1 已 PASS，后续严格串行 D3 → C4 → E3，旧 A2/C3/D2/E2 禁止执行。
+> P1 唯一可信根：`runs/stages/P1/p1-v6-20260828-r3/`，其 `protocol.json` SHA-256 为
+> `e449e7313c2b0b9235b413f3292877f1a842e4ed85be4d7ba020d28601c4f84f`；A3 命令必须显式传入。
+> ⚠️ **学位论文标尺**：Ch1–Ch3 必须在统一重跑的公开主指标上超过多个方法；低于 baseline 时方法章
+> 贡献为零。Ch4 使用公认 MRR/Hit@k 与配对统计，进入结论的消费者必须超过多个同协议对照，但
+> consumer×quality 效应允许为正、零或负。自造辅助指标只能诊断，不能代替主指标。
+> 所有 phase 先过 manifest/evaluator/baseline 闸门；单次高分、不同 split 论文数字或代码存在均不算过线。
 
 旧 TKG 线在 tag `frozen-tkg-line`；SARGE/金融层（2026-07-27）、生成式抽取+RL 线（2026-07-29）、
-v4 六份 phase 契约（2026-08-07）已移出仓库。冲突时以 `docs/SPEC.md` 为准。
+v4/v5 旧 phase 已归档或标 `SUPERSEDED`。冲突时以 `docs/SPEC.md` 为准。
 
 ## 校验命令（改代码后必跑）
 

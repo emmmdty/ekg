@@ -1,5 +1,8 @@
 # PHASE E2 — Ch4 构建质量的下游代价与消费者依赖性（headline）
 
+> **SUPERSEDED 2026-08-27：不得执行。** 不同语料/backbone 不能支持微调因果解释；当前契约见
+> [`PHASE_E3_factorial_consumers.md`](PHASE_E3_factorial_consumers.md)。
+
 > 单会话自包含契约。`/clear` 后只读**本文件 + 自动载入的 `CLAUDE.md` + [`../SPEC.md`](../SPEC.md)**
 > 即可执行。实测数字见 [`../results/`](../results/README.md)（单一事实源，本文件只引用不复制）。
 > 建于 2026-08-07。前身 `PHASE_E`（三图传播）已完成并归档，其结论是本 phase 的**输入**。

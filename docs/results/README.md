@@ -7,10 +7,11 @@
 
 | 档案 | 章 | 一句话结论 |
 |---|---|---|
-| [`PHASE_A.md`](PHASE_A.md) | Ch2 | 判别式解了召回（causal .4%→67.5%），但 F1 低于官方同底座基线 5.6 点 |
+| [`PHASE_P1.md`](PHASE_P1.md) | 协议 | P1 r3 trust root 与 A3 plan-bound CPU preflight PASS；GPU baseline 尚未启动 |
+| [`PHASE_A.md`](PHASE_A.md) | Ch2 | 长窗口与训练协议修正有效，但 causal 尚未超过统一 official anchor，subevent 仍回退 |
 | [`PHASE_B.md`](PHASE_B.md) | Ch2 | 结构违反清零 ✅，ECG 可重建率无增益 ❌；α=0.2 因召回上限不可达 |
-| [`PHASE_C.md`](PHASE_C.md) | Ch1 | 难例误合并 6.6× ✅；MUC 79.6 低于官方 81.4；换底座三次全败 |
-| [`PHASE_D.md`](PHASE_D.md) | Ch3 | 检测超同底座官方档 ✅；净化在结构与下游上双负 ❌ |
+| [`PHASE_C.md`](PHASE_C.md) | Ch1 | official-valid 错误以过并为主；换底座失败，旧非对称方向被推翻 |
+| [`PHASE_D.md`](PHASE_D.md) | Ch3 | valid 检测信号较强但尚无同 split 强基线胜出证明；净化结构/下游双负 |
 | [`PHASE_E.md`](PHASE_E.md) | Ch4 | 构建损失 −.0218 是唯一确凿效应；图侧干预全在噪声地板内 |
 
 ## 读之前要知道的三条

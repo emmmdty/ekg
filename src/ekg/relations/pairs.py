@@ -39,6 +39,7 @@ __all__ = [
     "mention_order",
     "candidate_pairs",
     "edges_to_pair_labels",
+    "gold_pair_labels",
     "pair_prf",
     "pair_examples",
     "window_recall_ceiling",
@@ -118,6 +119,47 @@ def edges_to_pair_labels(
     return {key: label for key, (_, label) in best.items()}
 
 
+def gold_pair_labels(
+    doc: RelationDocument,
+    *,
+    family: RelationType,
+    expand_event_relations: bool = False,
+) -> dict[PairKey, str]:
+    """Project gold edges, optionally using MAVEN-ERE's official mention expansion.
+
+    The normalized loader keeps non-coreference relations on each event cluster's
+    first mention for graph consumers. The official causal/joint baselines instead
+    label the Cartesian product of both event clusters. V6 pair-classification must
+    request that expansion explicitly so historical graph results are not silently
+    reinterpreted.
+    """
+    if not expand_event_relations or family is RelationType.COREFERENCE:
+        return edges_to_pair_labels(doc.gold_edges, family=family)
+
+    mention_cluster = {
+        mention_id: cluster
+        for cluster in doc.clusters.values()
+        for mention_id in cluster
+    }
+    labels: dict[PairKey, str] = {}
+    for edge in doc.gold_edges:
+        if edge.relation_type is not family:
+            continue
+        heads = mention_cluster.get(edge.head_id, (edge.head_id,))
+        tails = mention_cluster.get(edge.tail_id, (edge.tail_id,))
+        label = edge.subtype
+        for head in heads:
+            for tail in tails:
+                if head != tail:
+                    labels[(head, tail)] = label
+                    if family is RelationType.TEMPORAL and label in {
+                        "SIMULTANEOUS",
+                        "BEGINS-ON",
+                    }:
+                        labels[(tail, head)] = label
+    return labels
+
+
 def pair_prf(
     predicted: Iterable[RelationEdge],
     doc: RelationDocument,
@@ -167,11 +209,21 @@ def pair_prf(
     return results
 
 
-def pair_examples(doc: RelationDocument, max_distance: int | None = None) -> list[PairExample]:
+def pair_examples(
+    doc: RelationDocument,
+    max_distance: int | None = None,
+    *,
+    expand_event_relations: bool = False,
+) -> list[PairExample]:
     """The candidate universe with gold labels — pair-classifier training rows."""
     order = mention_order(doc)
     by_family = {
-        family: edges_to_pair_labels(doc.gold_edges, family=family) for family in _FAMILIES
+        family: gold_pair_labels(
+            doc,
+            family=family,
+            expand_event_relations=expand_event_relations,
+        )
+        for family in _FAMILIES
     }
     examples: list[PairExample] = []
     for head, tail in candidate_pairs(doc, max_distance):

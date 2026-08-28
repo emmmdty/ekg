@@ -20,6 +20,7 @@ wrong token (as in `succession/encode.py`).
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -56,6 +57,25 @@ FAMILY_SUBTYPES: dict[str, tuple[str, ...]] = {
     "causal": ("NONE", "CAUSE", "PRECONDITION"),
     "subevent": ("NONE", "SUBEVENT_OF"),
 }
+
+
+def checkpoint_active_families(checkpoint: Path) -> tuple[str, ...]:
+    """Read the heads that were actually optimized; legacy checkpoints use all."""
+    metadata_path = checkpoint / "run_metadata.json"
+    if not metadata_path.is_file():
+        return tuple(FAMILY_SUBTYPES)
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    configured = metadata.get("configuration", {}).get("families")
+    if configured is None:
+        return tuple(FAMILY_SUBTYPES)
+    if (
+        not isinstance(configured, list)
+        or not configured
+        or len(configured) != len(set(configured))
+        or set(configured) - set(FAMILY_SUBTYPES)
+    ):
+        raise ValueError("supervised checkpoint has invalid active families")
+    return tuple(configured)
 
 
 def locate_trigger_span(
@@ -287,6 +307,7 @@ class SupervisedRelationExtractor(RelationExtractor):
         self._encoder = None
         self._tokenizer = None
         self._device = "cpu"
+        self._active_families = tuple(FAMILY_SUBTYPES)
 
     def _candidate_pairs(self, nodes: list[EventNode]) -> list[tuple[str, str]]:
         if not nodes:
@@ -340,6 +361,7 @@ class SupervisedRelationExtractor(RelationExtractor):
         counts = {fam: len(subs) for fam, subs in FAMILY_SUBTYPES.items()}
         self._model = PairClassifier(self._encoder.config.hidden_size, counts)
         self._model.load_state_dict(torch.load(heads_file, map_location="cpu"))
+        self._active_families = checkpoint_active_families(ckpt)
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
         self._encoder.to(self._device).eval()
         self._model.to(self._device).eval()
@@ -376,7 +398,8 @@ class SupervisedRelationExtractor(RelationExtractor):
         with torch.no_grad():
             logits = self._model(_pair_features(head_emb, tail_emb), dist_ids)
         result: dict[tuple[str, str], dict[str, tuple[str, float]]] = {}
-        for family, subtypes in FAMILY_SUBTYPES.items():
+        for family in self._active_families:
+            subtypes = FAMILY_SUBTYPES[family]
             probs = torch.softmax(logits[family], dim=-1)
             conf, idx = probs.max(dim=-1)
             for pair, i, c in zip(pairs, idx.tolist(), conf.tolist(), strict=True):

@@ -8,6 +8,7 @@ and edge building from injected scores all run without torch. The model itself
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -39,6 +40,22 @@ def test_extractor_instantiates_torch_free():
     ex = relation_extractors.create("supervised", checkpoint_path=None)
     assert ex._model is None
     assert hasattr(sup, "TORCH_AVAILABLE")
+
+
+def test_checkpoint_active_families_filters_untrained_heads(tmp_path: Path) -> None:
+    assert sup.checkpoint_active_families(tmp_path) == tuple(sup.FAMILY_SUBTYPES)
+    (tmp_path / "run_metadata.json").write_text(
+        json.dumps({"configuration": {"families": ["causal", "subevent"]}}),
+        encoding="utf-8",
+    )
+    assert sup.checkpoint_active_families(tmp_path) == ("causal", "subevent")
+
+    (tmp_path / "run_metadata.json").write_text(
+        json.dumps({"configuration": {"families": ["causal", "bogus"]}}),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="invalid active families"):
+        sup.checkpoint_active_families(tmp_path)
 
 
 def test_ensure_model_fails_fast_without_torch_or_checkpoint():

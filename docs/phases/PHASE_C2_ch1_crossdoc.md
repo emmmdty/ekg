@@ -1,5 +1,8 @@
 # Phase C2 — Ch1 跨文档泛化（ECB+/CLES）
 
+> **SUPERSEDED 2026-08-27：不在关键路径，不得先于 C4 执行。** 当前 Ch1 契约见
+> [`PHASE_C4_context_identity.md`](PHASE_C4_context_identity.md)。
+
 > 骨架级契约（细节待 Phase C 完成后按真实节点模块补全）。硬约束见 `CLAUDE.md`；设计见 `docs/SPEC.md` §1（Ch1）。
 
 ## Goal（完成目标）

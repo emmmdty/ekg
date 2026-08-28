@@ -5,7 +5,8 @@ Normalizes the official MAVEN-ERE JSON-Lines format into our contracts:
 - nodes are event *mentions* (so coreference is a real clustering task);
 - coreference gold = all within-event mention pairs (each event is a cluster);
 - temporal / causal / subevent gold = relations between events, attached to each
-  event's representative (first) mention.
+  event's representative (first) mention; ``clusters`` preserves all mentions so
+  official pair-classification callers can expand the event relation explicitly.
 
 The loader is tolerant of missing keys so partial fixtures still parse. The
 official dataset is fetched by `scripts/download_datasets.py`.
@@ -32,6 +33,7 @@ class RelationDocument:
     gold_edges: list[RelationEdge]
     doc_text: str = ""
     representative: dict[str, str] = field(default_factory=dict)  # event_id -> mention_id
+    clusters: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
 
 def _mention_span(
@@ -99,6 +101,7 @@ def _parse_document(record: dict) -> RelationDocument:
     nodes: list[EventNode] = []
     gold: list[RelationEdge] = []
     representative: dict[str, str] = {}
+    clusters: dict[str, tuple[str, ...]] = {}
 
     # Canonical text first: mention spans are located inside it, so the char
     # offsets are valid for the same `doc_text` the document carries.
@@ -128,6 +131,7 @@ def _parse_document(record: dict) -> RelationDocument:
             )
         if mention_ids:
             representative[event_id] = mention_ids[0]
+            clusters[event_id] = tuple(mention_ids)
         # Coreference gold: every within-event mention pair.
         for a, b in combinations(mention_ids, 2):
             gold.append(
@@ -181,6 +185,7 @@ def _parse_document(record: dict) -> RelationDocument:
         gold_edges=gold,
         doc_text=doc_text,
         representative=representative,
+        clusters=clusters,
     )
 
 
@@ -229,6 +234,7 @@ def _parse_unlabeled(record: dict) -> tuple[RelationDocument, list[str]]:
         gold_edges=[],
         doc_text=doc_text,
         representative={n.event_id: n.event_id for n in nodes},
+        clusters={n.event_id: (n.event_id,) for n in nodes},
     )
     return document, [str(t.get("id")) for t in record.get("TIMEX", [])]
 

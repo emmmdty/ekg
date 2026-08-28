@@ -13,6 +13,7 @@ and micro pair P/R/F1, hallucination counts, the optional windowed setting
     uv run python scripts/evaluate_relation_pairs.py \
         --predictions runs/relations/valid_predictions.jsonl \
         --gold-path data/processed/maven_ere/valid.jsonl \
+        --candidate-digest <frozen-candidate-sha256> \
         --window-ceilings 8 16 24 \
         --output runs/relations/pair_eval.json
 """
@@ -20,12 +21,14 @@ and micro pair P/R/F1, hallucination counts, the optional windowed setting
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
 from ekg.core.eval.relation import PRF
 from ekg.core.schema import RelationEdge
 from ekg.relations.data.maven_ere import load_maven_ere
+from ekg.relations.maven_ere_official import candidate_population_digest, records_by_id
 from ekg.relations.pairs import pair_prf, window_recall_ceiling
 
 _FAMILY_KEYS = ("coreference", "temporal", "causal", "subevent", "micro")
@@ -51,8 +54,11 @@ def _load_predictions(path: Path, min_confidence: float = 0.0) -> dict[str, list
         if not line:
             continue
         record = json.loads(line)
+        doc_id = str(record["doc_id"])
+        if doc_id in pred_by_doc:
+            raise ValueError(f"duplicate prediction document ID: {doc_id}")
         edges = [RelationEdge.model_validate(e) for e in record.get("edges", [])]
-        pred_by_doc[str(record["doc_id"])] = [
+        pred_by_doc[doc_id] = [
             e for e in edges if e.confidence >= min_confidence
         ]
     return pred_by_doc
@@ -94,11 +100,35 @@ def main() -> int:
         default=0.0,
         help="drop predicted edges below this confidence (precision/recall dial)",
     )
+    parser.add_argument(
+        "--candidate-digest",
+        required=True,
+        help="expected frozen all-pairs candidate SHA-256",
+    )
     parser.add_argument("--output", type=Path, help="write the JSON report here")
     args = parser.parse_args()
 
+    raw_gold = [
+        json.loads(line)
+        for line in args.gold_path.read_text(encoding="utf-8").splitlines()
+        if line
+    ]
+    gold_by_id = records_by_id(raw_gold, source=str(args.gold_path))
+    candidate_digest, population = candidate_population_digest(gold_by_id)
+    if candidate_digest != args.candidate_digest:
+        raise SystemExit(
+            f"candidate digest mismatch: expected {args.candidate_digest}, got {candidate_digest}"
+        )
     docs = list(load_maven_ere(args.gold_path))
     pred_by_doc = _load_predictions(args.predictions, args.min_confidence)
+    gold_ids = {doc.doc_id for doc in docs}
+    prediction_ids = set(pred_by_doc)
+    if prediction_ids != gold_ids:
+        raise SystemExit(
+            "prediction document IDs differ from gold: "
+            f"missing={sorted(gold_ids - prediction_ids)} "
+            f"extra={sorted(prediction_ids - gold_ids)}"
+        )
     per_doc = [
         pair_prf(pred_by_doc.get(doc.doc_id, []), doc, max_distance=args.max_distance)
         for doc in docs
@@ -107,6 +137,12 @@ def main() -> int:
         "n_docs": len(docs),
         "max_distance": args.max_distance,
         "min_confidence": args.min_confidence,
+        "candidate_id_digest": candidate_digest,
+        "population_counts": population,
+        "hashes": {
+            "gold": hashlib.sha256(args.gold_path.read_bytes()).hexdigest(),
+            "predictions": hashlib.sha256(args.predictions.read_bytes()).hexdigest(),
+        },
         "pair": _aggregate(per_doc),
     }
     if args.window_ceilings:

@@ -11,6 +11,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 from ekg.core.schema import RelationEdge, RelationType
 
 _SPEC = importlib.util.spec_from_file_location(
@@ -24,6 +26,7 @@ CAUSAL_SUBTYPES = _MODULE.CAUSAL_SUBTYPES
 TEMPORAL_SUBTYPES = _MODULE.TEMPORAL_SUBTYPES
 relation_payload = _MODULE.relation_payload
 strip_to_test_shape = _MODULE.strip_to_test_shape
+enforce_no_skipped_relations = _MODULE.enforce_no_skipped_relations
 
 
 def _edge(head: str, tail: str, kind: RelationType, subtype: str, conf: float) -> RelationEdge:
@@ -129,3 +132,12 @@ def test_strip_to_test_shape_flattens_clusters_and_drops_labels() -> None:
     assert stripped["TIMEX"] == [{"id": "t1"}]
     assert "events" not in stripped
     assert not any(k.endswith("_relations") for k in stripped)
+
+
+def test_skipped_relations_are_exploratory_only() -> None:
+    failures = [("docA", "unlocatable trigger")]
+
+    with pytest.raises(SystemExit, match="confirmation output is invalid"):
+        enforce_no_skipped_relations(failures, allow_skipped=False)
+
+    enforce_no_skipped_relations(failures, allow_skipped=True)

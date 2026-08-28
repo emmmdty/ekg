@@ -1,5 +1,8 @@
 # PHASE D2 — Ch3 事实性检测的跨数据集泛化
 
+> **SUPERSEDED 2026-08-27：不得执行。** 跨 split 结果不能证明已过线；当前契约见
+> [`PHASE_D3_evidence_conditioned.md`](PHASE_D3_evidence_conditioned.md)。
+
 > 单会话自包含契约。`/clear` 后只读**本文件 + 自动载入的 `CLAUDE.md` + [`../SPEC.md`](../SPEC.md)**
 > 即可执行。实测数字见 [`../results/`](../results/README.md)（单一事实源，本文件只引用不复制）。
 > 建于 2026-08-07。前身 `PHASE_D`（含净化线）已归档；**净化已止损，不得复活**。

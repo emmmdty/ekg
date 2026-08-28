@@ -194,6 +194,17 @@ def _build_extractor(name: str, checkpoint: str | None):
     return SupervisedRelationExtractor(checkpoint_path=checkpoint, max_distance=None)
 
 
+def enforce_no_skipped_relations(
+    failed: list[tuple[str, str]], *, allow_skipped: bool
+) -> None:
+    """Make partial relation output unusable as confirmation evidence by default."""
+    if failed and not allow_skipped:
+        raise SystemExit(
+            "relation inference skipped documents; confirmation output is invalid "
+            "(use --allow-skipped-relations only for explicitly exploratory diagnostics)"
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -231,6 +242,11 @@ def main() -> int:
         help="process only documents with index %% N == K, so N processes can split the "
              "corpus across GPUs. Shards are merged by concatenation; document order "
              "within a shard is preserved and the scorer keys by id, so order is free",
+    )
+    parser.add_argument(
+        "--allow-skipped-relations",
+        action="store_true",
+        help="exploratory only: keep documents whose relation inference raised ValueError",
     )
     parser.add_argument("--output", type=Path,
                         default=Path("runs/submission/test_prediction.jsonl"))
@@ -301,6 +317,10 @@ def main() -> int:
     if failed:
         print(f"[submission] ⚠️ {len(failed)}/{len(records)} documents produced NO relations "
               f"(unlocatable trigger); first: {failed[0]}")
+        enforce_no_skipped_relations(
+            failed,
+            allow_skipped=args.allow_skipped_relations,
+        )
 
     if args.make_zip:
         archive = args.output.parent / "submission.zip"

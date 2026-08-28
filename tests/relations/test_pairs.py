@@ -15,6 +15,7 @@ from ekg.relations.data.maven_ere import RelationDocument
 from ekg.relations.pairs import (
     candidate_pairs,
     edges_to_pair_labels,
+    gold_pair_labels,
     mention_order,
     pair_examples,
     pair_prf,
@@ -131,3 +132,27 @@ def test_pair_examples_cover_universe_with_labels() -> None:
     assert by_pair[("m2", "m1")].labels == {"coreference": "COREF"}
     assert by_pair[("m3", "m4")].labels == {}
     assert by_pair[("m1", "m4")].distance == 3
+
+
+def test_official_event_relation_expansion_labels_all_cluster_mention_pairs() -> None:
+    doc = _doc()
+    doc.representative = {"e1": "m1", "e2": "m4"}
+    doc.clusters = {"e1": ("m1", "m2"), "e2": ("m3", "m4")}
+
+    historical = gold_pair_labels(doc, family=RelationType.CAUSAL)
+    official = gold_pair_labels(
+        doc,
+        family=RelationType.CAUSAL,
+        expand_event_relations=True,
+    )
+
+    assert historical == {("m1", "m4"): "CAUSE"}
+    assert official == {
+        ("m1", "m3"): "CAUSE",
+        ("m1", "m4"): "CAUSE",
+        ("m2", "m3"): "CAUSE",
+        ("m2", "m4"): "CAUSE",
+    }
+    rows = pair_examples(doc, expand_event_relations=True)
+    by_pair = {(row.head_id, row.tail_id): row for row in rows}
+    assert by_pair[("m2", "m3")].labels["causal"] == "CAUSE"
