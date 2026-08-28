@@ -140,7 +140,9 @@ clean commit CPU 已生成 `runs/stages/A3/a3-v6-baselines-r4/preflight/executio
 hash 与替换次数。plan SHA-256 为
 `4935bd2f72f7c83dd4b9e8694c06cbb9f06a50eb6ab037a8a5fcf2428f8f3444`；launcher 强制由调用方传入，
 并拒绝 source/data 文件集合的增删。local pair、official single、official joint 的 seed-13 launcher 均以 no-execute 模式通过，
-输出的 Python、cwd、run-dir 与预期产物全部位于 `/data/TJK/ekg`；尚未启动 A3 GPU 训练。
+输出的 Python、cwd、run-dir 与预期产物全部位于 `/data/TJK/ekg`。同一物化命令随后在 clean 远端
+`1d38dce` 重跑，得到相同 population、`final-valid not accessed` 与逐字相同 plan SHA-256；三路远端
+no-execute 也全部 PASS，检查后四张 4090 仍为 0% 利用率且无项目 Python 进程。尚未启动 A3 GPU 训练。
 
 ## 结论
 

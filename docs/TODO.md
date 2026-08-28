@@ -17,8 +17,8 @@
 - P1.6 的 4090 历史 checkpoint load、最长 internal-dev 与 frozen 10-doc 真实前向均通过，
   `a3_entry_status=PASS`；允许进入 A3.0 同协议 baseline 实验，但尚未放行 A3 主方法三种子。
 - 权威 P1 trust root 是 `p1-v6-20260828-r4` / `09e7e392...a85fc46`；r4 在 clean commit 上重跑
-  380 tests/ruff/smoke 并独立复验。A3 r4 CPU preflight 与三个 no-execute launcher 检查已通过，尚未在
-  远端物化或启动训练；r3 因 local gate 绑定 dirty-tree 文件数而 superseded。
+  380 tests/ruff/smoke 并独立复验。A3 r4 已在 4090 端 CPU 物化出相同 plan hash，三个 seed-13
+  no-execute launcher 检查通过；尚未启动 GPU baseline。r3 因 local gate 绑定 dirty-tree 文件数而 superseded。
 - P1 分开记录 `global_protocol_status` 与 `a3_entry_status`；只有全局协议失败阻塞全链，A3 baseline
   closure 失败只产生 A3 `blocked/executed=false` handoff，D3 仍可继续。
 
