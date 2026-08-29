@@ -614,7 +614,65 @@ train 2,622 篇训练、internal-dev 291 篇选模与报数｜**final-valid 未�
 - causal 是 **precision 短板**（P 16.83 vs R 60.20），与历史 local pair 的形态相反，
   待 official baseline 出来后再判断是配方差异还是 temporal 归队带来的族竞争。
 
-## official_joint / official_single
+## ★★ A3.0 baseline closure 完成 —— 三条 baseline 同协议主表
 
-official_joint seed-13 已启动（官方 README 配方：100 epochs / eval_steps 200 / lr 3e-4 /
-bert_lr 2e-5 / accum 4 / batch 8），约 60 秒/epoch。结果待补。
+官方两条用 `THU-KEG/MAVEN-ERE` **原版代码**（pinned commit，仅模型路径与 transformers 版本
+两处透明补丁，前后 hash 记在 plan 里），README 配方：single 50 epochs / batch 4；
+joint 100 epochs / eval_steps 200 / lr 3e-4 / bert_lr 2e-5 / accum 4 / batch 8。
+两者在 GPU0/GPU1 **并行**运行（不同卡、不同 run-dir、固定 seed、只读数据 ⇒ 并行不改变任何数字）。
+
+| baseline | causal P | causal R | **causal F1** | subevent F1 | temporal F1 |
+|---|---|---|---|---|---|
+| local_pair（本地成对分类器） | 16.83 | 60.20 | 26.31 | 27.68 | 49.29 |
+| official_single（causal-only） | 31.53 | 33.09 | **32.29** | 0.00 ¹ | 0.00 ¹ |
+| **official_joint** | **34.37** | 32.05 | **33.17** | **29.75** | **51.63** |
+
+¹ official_single 只训练 causal 头，其余两族按构造为空——**不是模型失败**，
+是该 baseline 的任务范围。因此它不能充当 subevent/temporal 的护栏锚。
+
+### 冻结的 primary anchor（`primary_anchor.json`，sha256 `894b9bd2…185b3c12`）
+
+按预注册规则「合格强 baseline 中 internal-dev causal micro-F1 mean 最高者」解析：
+
+| 项 | 值 |
+|---|---|
+| **primary anchor** | **maven_ere_official_joint** |
+| **causal 必须超过** | **33.17** |
+| subevent 非劣下界（锚 29.75 − margin 1.0） | **≥ 28.75** |
+| temporal 非劣下界（锚 51.63 − margin 1.0） | **≥ 50.63** |
+
+冻结时间点早于任何方法结果，记录内含三条 baseline 的 metrics/predictions/metadata 逐个
+sha256、预注册 hash、P1 r9 protocol hash 与 A3 plan hash，可独立复核。**final-valid 未访问。**
+
+### ★ 错误结构对比 —— 我们不是"样样更差"，是停在错误的工作点
+
+同一份 `report_relation_error_profile.py`（三族 P/R/F1 对不上官方评分器即 SystemExit）：
+
+| | local_pair | official_joint |
+|---|---|---|
+| causal FP 占错误 | **88.2%** | 47.4% |
+| subevent FP 占错误 | **91.5%** | 47.1% |
+| temporal FP 占错误 | 65.8% | 50.5% |
+
+**官方三个族都在均衡工作点（FP≈FN≈50%），我们 88–92% 的错误是误报**：精度约为它的一半、
+召回约为它的两倍。差距的形态是**工作点**，不是全面落后。
+
+⚠️ 但**不能就此认定只是阈值问题**：PHASE_A 历史上阈值扫描到过平台区（置信度分布不分离），
+说明至少有一部分是判别力而非决策规则。该结论产生于旧档旧口径，**必须在本档上重验**，
+不得外推。
+
+### 两条对手也没解决的（可作为方法着力点，也是难度警告）
+
+| 现象 | local_pair | official_joint |
+|---|---|---|
+| 跨句 causal 漏报 | 1,350 / 1,909（70.7%） | **2,288 / 3,259（70.2%）** |
+| temporal 方向判反 | 5,426 | **4,921** |
+
+跨句在**两个系统上都是主要漏报来源**，方向错误在官方主锚上同样有约 5 千次。
+这两条是任务本身的硬核 —— 攻下来是真贡献，但不要低估难度。
+
+### 与历史数字的关系
+
+历史最好档 causal 28.50 是在**完整 valid** 上选模、且 temporal 不含 TIMEX，
+与本表**不可直接相减**。本表是 v6 下唯一有效的对照基准。
+
