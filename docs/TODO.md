@@ -66,18 +66,33 @@ pass/failed/blocked 均可完成 handoff；局部失败不阻断后续方法章�
 - Ch3 强 baseline、Ch1 official baseline、Ch4 BART/consumer 尚未闭合，均为对应阶段前置；
 - Ch4 缺完整 query 文件、事实性节点属性和 frozen consumer，均不阻塞 A3。
 
-## 当前位置：A3.0 baseline 批次执行中
+## 当前位置：A3.0 完成，主锚已冻结；下一步 A3.1 复现底座
 
-**协议**：P1 r9 `440516dc…0a6d4fdc`｜A3 plan r10 `36a38e4f…085d4d15`｜seed 13（作者定：单种子）｜
-train 2,622 训练 + internal-dev 291 选模｜**final-valid 未访问**｜官方 `evaluate.py`｜三族全评。
+**协议**：P1 r9 `440516dc…0a6d4fdc`｜A3 plan r10 `36a38e4f…085d4d15`｜seed 13｜
+train 2,622 + internal-dev 291｜**final-valid 未访问**｜官方 `evaluate.py`｜三族全评。
 
-| baseline | 状态 | 备注 |
-|---|---|---|
-| local_pair | ✅ 完成 | 数字见 [`results/PHASE_A.md`](results/PHASE_A.md)；首跑因冻结配方 α=0.0 使稀有族坍塌而作废，α=0.5 重跑 |
-| official_joint | 🔄 运行中 | 官方 100 epochs，约 5.5 分钟/epoch，预计约 9 小时 |
-| official_single | ⏸ 排队 | 契约要求 4090 每次只跑一个实验任务，不并发 |
+三条 baseline 已闭合，数字见 [`results/PHASE_A.md`](results/PHASE_A.md)。
+**冻结的 primary anchor = official_joint**（`primary_anchor.json` sha256 `894b9bd2…185b3c12`）：
 
-主锚在三个 baseline 全部完成后、任何方法结果产生前解析并冻结。
+| 门 | 线 |
+|---|---|
+| causal 必须超过 | **33.17** |
+| subevent 非劣下界 | **≥ 28.75** |
+| temporal 非劣下界 | **≥ 50.63** |
+
+### ⚠️ A3.1 之前必须控住的混淆：训练预算不对等
+
+local_pair 只跑了 3 epochs 且 dev 曲线仍在上升，官方 single/joint 是 50/100 epochs。
+「我们停在误报主导的工作点」这个诊断**可能部分来自欠训**，不能直接归因于架构。
+A3.1 复现底座必须在**可比预算**下训练，先把这个混淆排掉，再谈机制。
+
+### A3.2 机制方向（待 A3.1 后定，不预先承诺）
+
+证据指向的是**工作点**：官方三族均在 FP≈FN≈50%，我们 88–92% 错误是误报。
+而我们的 α=0.5 逆频加权恰恰是把工作点推向高召回的原因——所以「关系族均衡」与
+「工作点」是同一个问题的两面，但需要比单一全局 α 更细的机制。
+两条对手也没解决的（跨句漏报约 70%、temporal 方向判反约 5 千次）是可选着力点，
+难度高，不要低估。
 
 ### 已补齐的下游前置（不阻塞 A3，趁 GPU 排队时在 CPU 完成）
 
