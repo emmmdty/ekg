@@ -31,6 +31,20 @@ import sys
 from pathlib import Path
 
 from ekg.core.stage_bundle import StageBundleError, is_sha256, validate_stage_bundle
+from ekg.relations.balance import (
+    ADAPTIVE_WORKPOINT,
+    NONE_INDEX,
+    NORMALIZED_RISK,
+    FamilyRiskNormalizer,
+    WorkPointController,
+)
+from ekg.relations.balance import (
+    ALL_COMPONENTS as BALANCE_COMPONENTS,
+)
+from ekg.relations.balance import (
+    CONFIG_FILE as BALANCE_CONFIG_FILE,
+)
+from ekg.relations.balance import validate_components as validate_balance_components
 from ekg.relations.data.maven_ere import load_maven_ere
 from ekg.relations.extractor.supervised import FAMILY_SUBTYPES
 from ekg.relations.maven_ere_official import frozen_candidate_protocol, records_by_id
@@ -464,7 +478,21 @@ def main() -> int:
         default=list(FAMILY_SUBTYPES),
         help="relation heads included in loss and checkpoint selection",
     )
+    parser.add_argument(
+        "--balance-components",
+        nargs="*",
+        default=[],
+        choices=list(BALANCE_COMPONENTS),
+        help=(
+            "adaptive relation-family balancing (A3.2); empty = the reproduction base's "
+            "plain sum of class-weighted family losses. "
+            "normalized_risk divides each family by an EMA of its own loss scale; "
+            "adaptive_workpoint feeds each family's measured F1-optimal NONE-logit "
+            "offset back into the training loss (inference stays a plain argmax)"
+        ),
+    )
     args = parser.parse_args()
+    balance_components = validate_balance_components(args.balance_components)
 
     if bool(args.train_manifest) != bool(args.dev_manifest):
         parser.error("--train-manifest and --dev-manifest must be provided together")
@@ -527,6 +555,7 @@ def main() -> int:
             "seed": args.seed,
             "official_mention_expansion": args.official_mention_expansion,
             "families": list(selected_families),
+            "balance_components": list(balance_components),
         },
     }
     _write_run_metadata(args.output, run_metadata)
@@ -603,6 +632,18 @@ def main() -> int:
     weight_tensors = (
         {f: torch.tensor(w, device=device) for f, w in weights.items()} if weights else {}
     )
+    risk_normalizer = (
+        FamilyRiskNormalizer(selected_families)
+        if NORMALIZED_RISK in balance_components
+        else None
+    )
+    work_point = (
+        WorkPointController(selected_families)
+        if ADAPTIVE_WORKPOINT in balance_components
+        else None
+    )
+    if balance_components:
+        print(f"[train] family balance: {list(balance_components)}", flush=True)
     label_index = {f: {s: i for i, s in enumerate(subs)} for f, subs in FAMILY_SUBTYPES.items()}
     # Two param groups rather than one rate: the official baseline trains the encoder
     # at 1e-5 and the scorer head at 1e-4, and gives the head plain Adam (no decoupled
@@ -649,6 +690,25 @@ def main() -> int:
         encoder.save_pretrained(args.output)
         tokenizer.save_pretrained(args.output)
         torch.save(heads.state_dict(), args.output / "heads.pt")
+        # The mechanism lives in the objective, so inference needs nothing from
+        # it -- but the checkpoint still has to say what it was trained under, or
+        # an arm can be mistaken for the control after the fact.
+        (args.output / BALANCE_CONFIG_FILE).write_text(
+            json.dumps(
+                {
+                    "components": list(balance_components),
+                    "families": list(selected_families),
+                    "applied_at_inference": False,
+                    "none_offsets": dict(work_point.offsets) if work_point else {},
+                    "risk_scales": dict(risk_normalizer.scales) if risk_normalizer else {},
+                    "trajectory": work_point.trajectory if work_point else [],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
 
     def dev_f1() -> tuple[float, dict[str, float]]:
         """Pair-level F1 over non-NONE classes; `--dev-metric` picks micro or macro.
@@ -661,6 +721,9 @@ def main() -> int:
         encoder.eval()
         heads.eval()
         per_family = {fam: [0, 0, 0] for fam in selected_families}  # tp, fp, fn
+        # Raw logits, unshifted: the controller has to measure where the boundary
+        # *is*, and the reported dev F1 is a plain argmax over these same numbers.
+        collected: dict[str, list] = {fam: [] for fam in selected_families} if work_point else {}
         with torch.no_grad():
             for doc_id in dev_ids:
                 doc = docs_by_id[doc_id]
@@ -685,6 +748,13 @@ def main() -> int:
                         ],
                         device=device,
                     )
+                    if work_point is not None:
+                        collected[family].append(
+                            (
+                                logits[family].detach().float().cpu().numpy(),
+                                gold.detach().cpu().numpy(),
+                            )
+                        )
                     scored = gold != _IGNORE_INDEX
                     pred = logits[family].argmax(dim=-1)
                     hit = (pred == gold) & scored
@@ -703,6 +773,13 @@ def main() -> int:
             return 2 * p * r / (p + r)
 
         by_family = {fam: f1_of(*counts) for fam, counts in per_family.items()}
+        if collected:
+            import numpy as np
+
+            for fam, parts in collected.items():
+                dev_logits = np.concatenate([p[0] for p in parts])
+                dev_targets = np.concatenate([p[1] for p in parts])
+                work_point.observe(epoch, fam, dev_logits, dev_targets)
         if args.dev_metric == "macro":
             return sum(by_family.values()) / len(by_family), by_family
         pooled = [sum(c[i] for c in per_family.values()) for i in range(3)]
@@ -711,6 +788,23 @@ def main() -> int:
     best_f1 = -1.0
     best_epoch: int | None = None
     best_by_family: dict[str, float] = {}
+    none_offsets: dict[str, torch.Tensor] = {}
+
+    def rebuild_offsets() -> None:
+        """One-hot NONE shift per family, from the controller's current offsets.
+
+        Epoch 0 runs with all-zero offsets, so the mechanism starts as an exact
+        no-op and has to earn every point it moves -- the same discipline the
+        distance embedding is zero-initialised under.
+        """
+        if work_point is None:
+            return
+        for fam in selected_families:
+            column = torch.zeros(len(FAMILY_SUBTYPES[fam]), device=device)
+            column[NONE_INDEX] = work_point.offsets[fam]
+            none_offsets[fam] = column
+
+    rebuild_offsets()
     encoder.train()
     heads.train()
     for epoch in range(args.epochs):
@@ -742,12 +836,25 @@ def main() -> int:
                     ],
                     device=device,
                 )
-                loss = loss + F.cross_entropy(
-                    logits[family],
+                family_logits = logits[family]
+                if none_offsets:
+                    # Train-time only. Adding the same shift at inference would
+                    # cancel: cross-entropy would just teach the model to
+                    # subtract it back out. Shifting only the objective makes the
+                    # boundary part of what the encoder learns, and leaves the
+                    # test-time rule a plain argmax.
+                    family_logits = family_logits + none_offsets[family]
+                family_loss = F.cross_entropy(
+                    family_logits,
                     target,
                     weight=weight_tensors.get(family),
                     ignore_index=_IGNORE_INDEX,
                 )
+                if risk_normalizer is not None:
+                    family_loss = family_loss / risk_normalizer.update(
+                        family, float(family_loss.detach())
+                    )
+                loss = loss + family_loss
             running += float(loss)
             # Scale so the accumulated gradient matches a true batch of that size,
             # and step the scheduler with the optimiser -- stepping it per document
@@ -779,6 +886,10 @@ def main() -> int:
                 best_epoch = epoch
                 best_by_family = by_family
                 save_checkpoint()
+            if work_point is not None:
+                rebuild_offsets()
+                shown = {f: round(v, 3) for f, v in work_point.offsets.items()}
+                print(f"[balance] epoch {epoch} none-offsets {shown}", flush=True)
 
     if not dev_ids:  # no selection signal: last epoch is all we have
         save_checkpoint()
