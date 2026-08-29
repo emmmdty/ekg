@@ -16,6 +16,13 @@ representation as a relation decision.
     uv run --extra llm python scripts/train_coref_scorer.py \
         --train data/processed/maven_arg/train.jsonl \
         --model roberta-base --output runs/nodes/coref_supervised
+
+``--save-every-epoch`` keeps `<output>/epochs/epoch-N` for every epoch. The in-loop dev
+score here is pair-level F1, which is **not** what the chapter reports: the
+first C4 run selected on it and the official MUC ranked the arms differently,
+with each arm stopping at a different epoch. Keeping the epochs lets the
+official evaluator do the selecting and lets the arms be read at matched
+epochs, which is the only way the epoch stops being a confound.
 """
 
 from __future__ import annotations
@@ -98,6 +105,7 @@ def train(
     components: tuple[str, ...] = (),
     dev_docs: Sequence[ArgumentDocument] = (),
     dev_pairs: dict[str, list[CorefPair]] | None = None,
+    save_every_epoch: bool = False,
 ) -> None:
     import torch
     from torch import nn
@@ -215,6 +223,17 @@ def train(
             f" (tp={tp} fp={fp} fn={fn})",
             flush=True,
         )
+        if save_every_epoch:
+            # Pair-level F1 is *not* the axis this chapter reports, and on the
+            # first C4 run the two disagreed in direction: pair-F1 ranked the
+            # mechanism below the control while official MUC ranked it 2.09
+            # above, and the four arms stopped at four different epochs
+            # (10/5/7/3), so the epoch itself was an uncontrolled confound.
+            # Keeping every epoch lets the official evaluator -- the scorer that
+            # produces the reported number -- pick the epoch afterwards, and
+            # lets the arms be compared at matched epochs.
+            _save(encoder, tokenizer, head, output / "epochs" / f"epoch-{epoch + 1}")
+            print(f"[dev] epoch {epoch + 1} checkpoint kept for official scoring", flush=True)
         if f1 > best_f1:
             best_f1, best_epoch = f1, epoch + 1
             _save(encoder, tokenizer, head, output)
@@ -251,6 +270,13 @@ def main() -> int:
     parser.add_argument(
         "--components", nargs="*", default=[], choices=list(ALL_COMPONENTS),
         help="mechanism components to enable; empty = trigger-only control",
+    )
+    parser.add_argument(
+        "--save-every-epoch", action="store_true",
+        help=(
+            "also keep every epoch under <output>/epochs/epoch-N, so the official evaluator can "
+            "select the epoch and the arms can be compared at matched epochs"
+        ),
     )
     parser.add_argument("--limit", type=int, default=None, help="first N documents (smoke)")
     parser.add_argument("--seed", type=int, default=13)
@@ -299,6 +325,7 @@ def main() -> int:
         components=validate_components(args.components),
         dev_docs=dev_docs,
         dev_pairs=build_eval_pairs(dev_docs) if dev_docs else None,
+        save_every_epoch=args.save_every_epoch,
     )
     return 0
 
