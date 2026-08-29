@@ -1,6 +1,6 @@
 # EKG 实时状态
 
-> 更新于 **2026-08-29**。本文件只记录当前位置、门状态、下一步和停止条件，不复制实验数字。
+> 更新于 **2026-08-30**。本文件只记录当前位置、门状态、下一步和停止条件，不复制实验数字。
 > **新会话先读 [`HANDOFF.md`](HANDOFF.md)**（状态快照 + 规矩 + 坑 + 下一步优先级）。
 > 总纲见 [`SPEC.md`](SPEC.md)，活动契约见 [`phases/`](phases/README.md)，实验事实只认
 > [`results/`](results/README.md)，G0 筛查见
@@ -110,35 +110,35 @@ TIMEX 端点已闭环，候选按族分离（causal/subevent 纯 event、tempora
 零定位失败；推理侧预测边含 TIMEX 由 0% 升到 37.6%（gold 39%）。九个会让正式跑报废的缺陷由
 一次 20 篇 pilot 抓出，逐条见 [`results/PHASE_P1.md`](results/PHASE_P1.md)。
 
-## 正在跑（2026-08-30 00:30 起，4090 四卡并行）
+## 2026-08-30 这一批的结果（数字在 `docs/results/`，此处只记状态）
 
-命令与产物位置在此；**数字出来后只写进 `docs/results/`，本文件不复制**。
+四卡跑完两批，**两个都是负结果**。四张卡现在全空。
 
-| 卡 | 任务 | run-dir | log |
+| 章 | 做了什么 | 结论 | 档案 |
 |---|---|---|---|
-| GPU0 | Ch3 D3.2 `none` 臂（平行双头 = 复现底座/对照） | `runs/stages/D3/pilot/none/seed-13` | `logs/d3_pilot_none_s13.log` |
-| GPU1 | Ch3 D3.2 `uniform` 臂（同宽度容量对照） | `runs/stages/D3/pilot/uniform/seed-13` | `logs/d3_pilot_uniform_s13.log` |
-| GPU2 | Ch3 D3.2 `evidence` 臂（机制） | `runs/stages/D3/pilot/evidence/seed-13` | `logs/d3_pilot_evidence_s13.log` |
-| GPU3 | Ch1 C4-r2 对照臂（逐 epoch 存档） | `runs/stages/C4/r2/control_trigger_only/seed-13` | `logs/c4r2_control_s13.log` |
+| **Ch3 D3.2** | 证据→标签软耦合 三臂（none / uniform / evidence），12 epoch 等预算 | 机制方向对（PS− +.15），**但主指标配对 CI 含 0 = 平局**，未过 promotion 门 | [`PHASE_D.md`](results/PHASE_D.md) 末节 |
+| **Ch1 C4-r2** | 四臂逐 epoch 存档 + 官方 evaluate.py 逐个打分（40 个 checkpoint） | **推翻 8-29 的机制增益**：那是 pair-F1 选模轴的伪影，机制不优于对照 | [`PHASE_C.md`](results/PHASE_C.md) 末节 |
 
-**Ch3 三臂**：P1 manifests（train 2,622 / internal-dev 291，final-valid 未访问）｜seed 13｜
-12 epochs（等预算）｜lr 2e-5｜α=0.5｜evidence-weight 1.0｜内容寻址 roberta-base。
-唯一变量是 `--evidence-pooling`。`uniform` 臂不是可选项：只比 `none` vs `evidence`，
-赢了也分不清是证据信号还是"标签头变宽且顺带看到了句子"。
+两个负结果都是被同一类方法学修正逼出来的（Ch3 加容量对照臂、Ch1 消 epoch 混淆），
+而且两次都是**原文档自己列出的"限制"变成了结论级问题**。
 
-**Ch1 C4-r2**：与首轮唯一变量是 `--save-every-epoch`（10 epochs / neg-ratio 10 /
-hard-fraction 0.5 不变）。目的是消掉首轮的两个缺陷之一——选模轴用 pair-F1、
-四臂停在不同 epoch。四臂跑完后由**官方 `evaluate.py`** 逐 epoch 打分，
-既能在同一 epoch 对比，又能让选模轴与报数轴由构造相同。
-其余三臂（`context_pooling` / `confusability` / 两者）等 Ch3 腾出卡后启动。
+### 两个待作者决定的问题
+
+1. **Ch3 的 promotion 门写在了没有功效的 split 上**：internal-dev 291 篇的配对 MDE 是
+   +.051，观测效应 +.027。选项：加种子做配对符号检验 / 换判定轴（证据轴支持数是标签轴的
+   18 倍）/ 承认 291 篇只能当工程闸门、统计判定放到 sealed final-valid。**不自行放松规则。**
+2. **Ch1 是否继续**：按契约这是一个已完成的核心设计周期、未过门。继续的话建议预算缩到
+   ep1–4（四臂都在 ep2 附近最好，10 epoch 是过训）、多种子（8.55 点的 epoch 噪声下单种子
+   无意义），并先弄清"为什么 ep2 之后一路掉"。止损的话 Ch1 降为系统组件。
 
 ### 尚未开工
 
-- **Ch2 A3.2 关系族均衡机制**：A3.1 复现底座已把欠训混淆排掉（causal 差主锚 1.75），
-  机制本身还没设计实现。固定权重/网格不算创新，见契约。
+- **Ch2 A3.2 关系族均衡机制**：A3.1 复现底座已把欠训混淆排掉（causal 差主锚 1.75，
+  三章里最接近过线），机制本身还没设计实现。固定权重/网格不算创新，见契约。
 - **Ch3 D3.0 强 baseline 闭合**（RoBERTa+CLS / DMRoBERTa 同 split 重跑）：
-  上面的 pilot 只回答"耦合有没有用"，对外差距结论仍缺这一步。
-- **Ch4 图依赖正控**：缺 query 文件、事实性节点属性与 frozen consumer，需要先补前置。
+  D3.2 pilot 只回答"耦合有没有用"，对外差距结论仍缺这一步。
+- **Ch1 official coref 对手**：仍未重跑，本章至今没有对外差距结论。
+- **Ch4 图依赖正控**：缺 query 文件、事实性节点属性与 frozen consumer，需先补前置。
 
 ## 全局停止条件
 

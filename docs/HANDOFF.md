@@ -1,6 +1,6 @@
 # 交接文档 · 新会话从这里开始
 
-> 生成于 **2026-08-29**。读完本文即可接手，不需要回溯对话。
+> 生成于 **2026-08-29**，**2026-08-30 更新**。读完本文即可接手，不需要回溯对话。
 > **冲突时的优先级**：`docs/results/PHASE_*.md`（已发生的事实）> `docs/SPEC.md`（研究约束）>
 > 当前 active phase > `docs/TODO.md` > 本文。本文只做导航与状态快照，**不复制实验数字**。
 
@@ -12,9 +12,11 @@
 - **最高优先级：2026-09-03（周四）交给导师的阶段性报告** → `docs/reports/2026-09-03_阶段性报告.md`
   （骨架已完成，数字随实验滚动填）。作者要求：重心是**方法设计 + 数字 + 时间表**，工程基建少写；
   **要让导师看到已经做出东西，不是刚开工**。
-- Ch2 的对手已**同协议实测闭合并冻结主锚**；Ch1 的机制已有首轮消融结果；
-  Ch3 的**指标判别力问题已解决**，可以动手实现机制；Ch4 主效应早已成立。
-- 本地 `main` = `08b3054`，工作树干净，**421 passed / 12 skipped**；远端已同步、四卡空闲、无进程。
+- Ch2 的对手已**同协议实测闭合并冻结主锚**；**Ch1 的首轮机制增益已于 2026-08-30 被推翻**
+  （pair-F1 选模轴伪影，见 `results/PHASE_C.md` 末节）；**Ch3 的耦合机制已实现并跑完 pilot，
+  主指标是平局**（`results/PHASE_D.md` 末节）；Ch4 主效应早已成立。
+- 本地 `main` = `2490ab0`，工作树干净，**424 passed / 15 skipped**；远端已同步、四卡空闲、无进程。
+- ⚠️ **两个待作者决定的问题见 `TODO.md`**：Ch3 promotion 门写在没有功效的 split 上；Ch1 是否继续。
 
 ---
 
@@ -55,26 +57,30 @@
 
 数字一律见 `docs/results/`，本节只说**状态与该做什么**。
 
-### ① Ch3 事实性 —— 方法问题已解决，**可以直接动手实现**（最高优先，报告缺口最大）
+### ① Ch3 事实性 —— 机制已实现，pilot 跑完，**主指标平局**（2026-08-30 更新）
 
-- 已完成：主指标判别力分析（`scripts/report_factuality_metric_power.py`）。结论见
-  `docs/results/PHASE_D.md` 末两节：**配对 bootstrap 的 MDE ≈ 5 个稀有类实例**，
-  机制头寸是 PS− 上「证据找得对、标签判得错」的落差。判定规则已预注册。
-- **下一步**：实现 evidence→label 软耦合——按预测 evidence 概率对 token 做软注意力池化，
-  得到 evidence 向量，与 mention 表示拼接后进 label 头；对照组是现有的平行双头。
-  代码在 `src/ekg/factuality/detection.py` 与 `scripts/train_factuality_detector.py`
-  （后者已支持 `--train-manifest/--dev-manifest`）。
-- ⚠️ **先冒烟再训练**；训练/推理口径必须成对（checkpoint 声明布局并在加载时校验，照 Ch1 的做法）。
+- 已完成：判别力分析 + **机制实现** + 三臂 pilot。`--evidence-pooling {none,uniform,evidence}`
+  选臂，`none` 是平行双头复现底座，`evidence` 是机制，**`uniform` 是同宽度容量对照**
+  （没有它就分不清「证据信号」和「标签头变宽」）。
+- **结果**：机制方向对（PS− +.15 正中量出的头寸，证据轴也跟着涨），
+  **但主指标配对 CI 含 0 = 平局**，且约一半原始增益是容量。未过 promotion 门，不进三种子。
+- **下一步取决于作者对「promotion 门无功效」的裁决**（见 `TODO.md`）。
+  与之独立、随时可做的是 **D3.0 两条强 baseline 同 split 闭合**——没有它，本章没有对外差距结论。
+- 工具：`report_factuality_metric_power.py --predicted-labels-b` 做两系统配对 bootstrap；
+  `evaluate_factuality.py --manifest/--evidence-pooling/--dump-gold-labels` 出逐 mention 标签。
 
-### ② Ch1 身份消解 —— 有结果但有两个已知缺陷要修
+### ② Ch1 身份消解 —— **首轮结论已被推翻**（2026-08-30 更新）
 
-- 已完成：`--components` 机制（`src/ekg/nodes/discriminative.py`）与 2×2 消融，MUC 见 `PHASE_C.md`。
-- **两个必须修的**：
-  1. **选模轴错了**：按 pair-level F1 选 epoch，而它与 MUC 方向不一致 ⇒ 四个臂停在不同 epoch，
-     epoch 差异是**未控制的混淆**。要么把选模换成 MUC/其代理，要么固定 epoch 预算重跑四臂。
-  2. **增益来自 recall 而非设计假设的 precision**；未验证的解释是「欠并里 92.8% 是跨句对」。
-     消融数据已在，可据此验证，但**不要把预测错的假设事后改写**。
-- Ch1 的同协议对手（official coref）**尚未重跑** ⇒ 目前只有内部对照，没有对外差距结论。
+- C4-r2 用 `--save-every-epoch` 留下四臂 × 10 epoch，再用**官方 `evaluate.py` 逐个打分**，
+  于是选模轴与报数轴变成同一个。首轮四个数在对应 epoch 上逐点复现（四个全中），
+  **但对照臂自身的 epoch 间波动就有 8.55 个 MUC 点**，而三臂对对照的均值差是
+  +0.07 / +0.35 / −1.44 —— 全在噪声里。首轮的 +3.98/+4.43/+2.09 是选模伪影，旧节已标 SUPERSEDED。
+- 「增益来自 recall」同样是伪影（epoch 均值上四臂 recall 持平）。
+- 实测附带两条：**10 epoch 是过训**（四臂都在 ep2 附近最好）；
+  **单 checkpoint 点估计在本任务上不可靠**，历史 MUC 77.47 也要按这个尺度重读。
+- **是否继续由作者定**（见 `TODO.md`）。继续的话：预算缩到 ep1–4、多种子、
+  先弄清「为什么 ep2 之后一路掉」。
+- 同协议对手（official coref）**仍未重跑** ⇒ 至今没有对外差距结论。
 
 ### ③ Ch2 关系抽取 —— 差最后一步
 
@@ -135,14 +141,16 @@ ssh ... 'cd /data/TJK/ekg && CUDA_VISIBLE_DEVICES=N setsid nohup .venv/bin/pytho
 | 阶段性报告骨架 | `docs/reports/2026-09-03_阶段性报告.md` |
 | Ch1 机制与消融组件 | `src/ekg/nodes/discriminative.py`、`scripts/train_coref_scorer.py --components` |
 | Ch2 关系错误剖析 | `scripts/report_relation_error_profile.py`（自带对官方评分器的强制交叉校验） |
-| Ch3 指标判别力/功效分析 | `scripts/report_factuality_metric_power.py` |
+| Ch3 指标判别力 + **两系统配对检验** | `scripts/report_factuality_metric_power.py`（`--predicted-labels-b`） |
+| Ch3 证据→标签耦合与容量对照 | `src/ekg/factuality/detection.py`、`train_factuality_detector.py --evidence-pooling` |
+| Ch1 逐 epoch 存档与官方逐档打分 | `train_coref_scorer.py --save-every-epoch`、`runs/stages/C4/r2/score_epochs.sh` |
 | 唯一的 manifest 划分实现 | `src/ekg/core/protocol.py` |
 | 主锚冻结记录 | `runs/stages/A3/a3-v6-baselines-r10/primary_anchor.json` |
 
 **验证命令**（改代码后必跑）：
 
 ```bash
-uv run pytest                          # 当前 421 passed / 12 skipped
+uv run pytest                          # 当前 424 passed / 15 skipped
 uv run ruff check src tests scripts
 uv run ekg-smoke
 ```
