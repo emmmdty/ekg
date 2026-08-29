@@ -25,6 +25,7 @@ import random
 from collections.abc import Sequence
 from pathlib import Path
 
+from ekg.core.protocol import split_docs_by_manifests
 from ekg.nodes.coref import (
     HEAD_FILE,
     CorefPair,
@@ -33,6 +34,21 @@ from ekg.nodes.coref import (
     sample_training_pairs,
 )
 from ekg.relations.data.maven_arg import ArgumentDocument, load_maven_arg
+
+
+def build_eval_pairs(docs: Sequence[ArgumentDocument]) -> dict[str, list[CorefPair]]:
+    """The *complete* labelled pair universe, for model selection only.
+
+    Selection must not run on the same downsampled distribution training saw:
+    a sampled negative set makes precision look better than it is on the real
+    candidate population, so the chosen epoch would be chosen on the wrong axis.
+    """
+    per_doc: dict[str, list[CorefPair]] = {}
+    for doc in docs:
+        pairs = labelled_coref_pairs(doc.nodes, cluster_of_nodes(doc.nodes))
+        if pairs:
+            per_doc[doc.doc_id] = pairs
+    return per_doc
 
 
 def build_training_pairs(
@@ -68,6 +84,8 @@ def train(
     max_length: int,
     stride: int,
     seed: int,
+    dev_docs: Sequence[ArgumentDocument] = (),
+    dev_pairs: dict[str, list[CorefPair]] | None = None,
 ) -> None:
     import torch
     from torch import nn
@@ -91,6 +109,14 @@ def train(
     loss_fn = nn.CrossEntropyLoss()
     by_id = {doc.doc_id: doc for doc in docs}
     doc_ids = list(per_doc)
+    best_f1 = -1.0
+    best_epoch: int | None = None
+
+    def _save(enc, tok, hd, out: Path) -> None:
+        out.mkdir(parents=True, exist_ok=True)
+        enc.save_pretrained(out)
+        tok.save_pretrained(out)
+        torch.save(hd.state_dict(), out / HEAD_FILE)
 
     for epoch in range(epochs):
         random.shuffle(doc_ids)
@@ -125,10 +151,51 @@ def train(
                 print(f"epoch {epoch + 1} step {step}/{len(doc_ids)} loss {total / seen:.4f}")
         print(f"epoch {epoch + 1} mean loss {total / max(seen, 1):.4f}", flush=True)
 
-    output.mkdir(parents=True, exist_ok=True)
-    encoder.save_pretrained(output)
-    tokenizer.save_pretrained(output)
-    torch.save(head.state_dict(), output / HEAD_FILE)
+        if not dev_pairs:
+            continue
+        encoder.eval()
+        head.eval()
+        tp = fp = fn = 0
+        by_dev = {doc.doc_id: doc for doc in dev_docs}
+        with torch.no_grad():
+            for dev_id, pairs in dev_pairs.items():
+                doc = by_dev[dev_id]
+                order = {node.event_id: i for i, node in enumerate(doc.nodes)}
+                embeddings = encode_spans(
+                    encoder,
+                    tokenizer,
+                    doc.doc_text,
+                    [n.trigger_evidence[0].char_start for n in doc.nodes],
+                    max_length=max_length,
+                    stride=stride,
+                    device=device,
+                )
+                h = torch.tensor([order[p.head_id] for p in pairs], device=device)
+                t = torch.tensor([order[p.tail_id] for p in pairs], device=device)
+                gold = torch.tensor([int(p.label) for p in pairs], device=device)
+                pred = head(pair_features(embeddings[h], embeddings[t])).argmax(dim=-1)
+                tp += int(((pred == 1) & (gold == 1)).sum())
+                fp += int(((pred == 1) & (gold == 0)).sum())
+                fn += int(((pred == 0) & (gold == 1)).sum())
+        precision = tp / (tp + fp) if tp + fp else 0.0
+        recall = tp / (tp + fn) if tp + fn else 0.0
+        f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+        print(
+            f"[dev] epoch {epoch + 1} pair P {precision:.4f} R {recall:.4f} F1 {f1:.4f}"
+            f" (tp={tp} fp={fp} fn={fn})",
+            flush=True,
+        )
+        if f1 > best_f1:
+            best_f1, best_epoch = f1, epoch + 1
+            _save(encoder, tokenizer, head, output)
+            print(f"[dev] epoch {epoch + 1} is best so far, saved", flush=True)
+
+    if dev_pairs:
+        if best_epoch is None:
+            raise SystemExit("no epoch produced a dev score; refusing to save a blind checkpoint")
+        print(f"best dev pair-F1 {best_f1:.4f} at epoch {best_epoch}; checkpoint at {output}")
+        return
+    _save(encoder, tokenizer, head, output)
     print(f"saved coreference scorer to {output}")
 
 
@@ -143,6 +210,14 @@ def main() -> int:
     parser.add_argument("--hard-fraction", type=float, default=0.5)
     parser.add_argument("--max-length", type=int, default=512)
     parser.add_argument("--stride", type=int, default=128)
+    parser.add_argument(
+        "--train-manifest", type=Path, default=None,
+        help="frozen P1 MAVEN-ERE train manifest; MAVEN-Arg shares MAVEN-ERE's document IDs",
+    )
+    parser.add_argument(
+        "--dev-manifest", type=Path, default=None,
+        help="frozen P1 internal-dev manifest, used for best-epoch selection",
+    )
     parser.add_argument("--limit", type=int, default=None, help="first N documents (smoke)")
     parser.add_argument("--seed", type=int, default=13)
     args = parser.parse_args()
@@ -150,6 +225,22 @@ def main() -> int:
     docs = list(load_maven_arg(args.train))
     if args.limit:
         docs = docs[: args.limit]
+    # MAVEN-Arg and MAVEN-ERE are the same documents with different annotation
+    # layers (train 2,913 / valid 710, identical IDs). Training on the full Arg
+    # train therefore includes every P1 internal-dev document, so selecting on
+    # internal-dev without this split would select on trained-on data.
+    if bool(args.train_manifest) != bool(args.dev_manifest):
+        raise SystemExit("--train-manifest and --dev-manifest must be given together")
+    dev_docs: list[ArgumentDocument] = []
+    if args.train_manifest:
+        docs, dev_docs = split_docs_by_manifests(docs, args.train_manifest, args.dev_manifest)
+        print(f"protocol split: train {len(docs)} docs / internal-dev {len(dev_docs)} docs")
+    else:
+        print(
+            "[train] WARNING: no manifests given; training on every document and "
+            "saving the last epoch blind (historical/exploratory only)",
+            flush=True,
+        )
     per_doc = build_training_pairs(
         docs, neg_ratio=args.neg_ratio, hard_fraction=args.hard_fraction, seed=args.seed
     )
@@ -171,6 +262,8 @@ def main() -> int:
         max_length=args.max_length,
         stride=args.stride,
         seed=args.seed,
+        dev_docs=dev_docs,
+        dev_pairs=build_eval_pairs(dev_docs) if dev_docs else None,
     )
     return 0
 

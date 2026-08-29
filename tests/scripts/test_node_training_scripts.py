@@ -131,3 +131,40 @@ def test_sweep_scores_each_document_once_across_cells(arg_docs) -> None:
         cached.score(doc.nodes, pairs, doc.doc_text)
     assert inner.calls == 1
     assert cached.misses == 1
+
+
+def test_coref_trainer_requires_both_manifests_together() -> None:
+    """A half-specified split would silently fall back to training on everything."""
+    import importlib.util
+
+    path = Path(__file__).resolve().parents[2] / "scripts/train_coref_scorer.py"
+    spec = importlib.util.spec_from_file_location("train_coref_scorer", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    assert hasattr(module, "build_eval_pairs")
+    source = path.read_text(encoding="utf-8")
+    # selection must run on the complete pair universe, not the sampled one
+    assert "dev_pairs=build_eval_pairs(dev_docs)" in source
+    assert "--train-manifest and --dev-manifest must be given together" in source
+
+
+def test_maven_arg_and_ere_share_document_ids() -> None:
+    """The two corpora are the same documents with different annotation layers.
+
+    This is why the coreference trainer must apply the P1 MAVEN-ERE manifests:
+    training on the full MAVEN-Arg train would otherwise include every one of the
+    291 internal-dev documents that model selection is supposed to be held out on.
+    """
+    import json
+
+    root = Path(__file__).resolve().parents[2]
+    manifests = root / "data/protocols/v6/manifests"
+    dev_ids = set(json.loads((manifests / "maven_ere_internal-dev.json").read_text())["doc_ids"])
+    arg_train = root / "data/processed/maven_arg/train.jsonl"
+    if not arg_train.exists():  # corpus not present in this checkout
+        pytest.skip("MAVEN-Arg train not available")
+    arg_ids = {json.loads(line)["id"] for line in arg_train.open(encoding="utf-8") if line.strip()}
+
+    assert dev_ids <= arg_ids
