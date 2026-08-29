@@ -32,8 +32,11 @@ import json
 from collections.abc import Sequence
 from pathlib import Path
 
+from ekg.core.protocol import load_manifest_ids
 from ekg.core.schema import EventGraph
 from ekg.factuality.detection import (
+    EVIDENCE_POOLING_MODES,
+    POOLING_NONE,
     LexiconFactualityDetector,
     SupervisedFactualityDetector,
 )
@@ -162,6 +165,18 @@ def main() -> int:
     parser.add_argument("--max-length", type=int, default=512)
     parser.add_argument("--stride", type=int, default=128)
     parser.add_argument("--no-structure", action="store_true")
+    parser.add_argument(
+        "--evidence-pooling",
+        default=POOLING_NONE,
+        choices=list(EVIDENCE_POOLING_MODES),
+        help="must match what the checkpoint declares in factuality_config.json",
+    )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        help="frozen manifest of document IDs to keep (e.g. P1 internal-dev); "
+             "every listed ID must be present in --valid",
+    )
     parser.add_argument("--limit", type=int, default=None, help="first N documents (smoke)")
     parser.add_argument(
         "--dump-predicted-edges",
@@ -179,10 +194,27 @@ def main() -> int:
         help="write {mention_id: factuality} for the predicted graph here (json); "
              "Phase E's purification arm reads it instead of re-running the detector",
     )
+    parser.add_argument(
+        "--dump-gold-labels",
+        type=Path,
+        help="write {mention_id: factuality} for the *gold*-graph condition here (json); "
+             "this is the component main table's condition and what a paired "
+             "system-vs-system comparison is run on",
+    )
     parser.add_argument("--output", type=Path, help="write the report JSON here")
     args = parser.parse_args()
 
     docs = list(load_maven_fact(args.valid))
+    if args.manifest:
+        wanted = load_manifest_ids(args.manifest)
+        by_id = {doc.doc_id: doc for doc in docs}
+        missing = [item for item in wanted if item not in by_id]
+        if missing:
+            raise SystemExit(
+                f"{args.manifest} lists {len(missing)} document IDs absent from {args.valid}"
+            )
+        docs = [by_id[item] for item in wanted]
+        print(f"manifest {args.manifest.name}: kept {len(docs)} documents")
     if args.limit:
         docs = docs[: args.limit]
     gold = {m.mention_id: m.factuality for doc in docs for m in doc.mentions}
@@ -221,8 +253,13 @@ def main() -> int:
         max_length=args.max_length,
         stride=args.stride,
         use_structure=not args.no_structure,
+        evidence_pooling=args.evidence_pooling,
     )
     gold_labels, gold_evidence = run_detector(detector, docs)
+    if args.dump_gold_labels:
+        args.dump_gold_labels.parent.mkdir(parents=True, exist_ok=True)
+        args.dump_gold_labels.write_text(json.dumps(gold_labels), encoding="utf-8")
+        print(f"wrote {len(gold_labels)} gold-graph labels to {args.dump_gold_labels}")
     result["gold_graph"] = score(gold_labels, gold_evidence, docs)
     print(
         f"gold-input: macro-F1 {result['gold_graph']['macro_f1']:.4f} "
