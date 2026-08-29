@@ -35,11 +35,14 @@ from ekg.nodes.coref import (
     sample_training_pairs,
 )
 from ekg.nodes.discriminative import (
+    ALL_COMPONENTS,
     CONFIG_FILE,
+    CONTEXT_POOLING,
     FEATURE_NAMES,
     context_ranges_for,
     head_input_dim,
     pair_head_inputs,
+    validate_components,
 )
 from ekg.relations.data.maven_arg import ArgumentDocument, load_maven_arg
 
@@ -92,7 +95,7 @@ def train(
     max_length: int,
     stride: int,
     seed: int,
-    context_discriminative: bool = False,
+    components: tuple[str, ...] = (),
     dev_docs: Sequence[ArgumentDocument] = (),
     dev_pairs: dict[str, list[CorefPair]] | None = None,
 ) -> None:
@@ -108,11 +111,9 @@ def train(
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     encoder = AutoModel.from_pretrained(model_name).to(device)
     encoder.gradient_checkpointing_enable()
+    context_discriminative = CONTEXT_POOLING in components
     head = nn.Linear(
-        head_input_dim(
-            encoder.config.hidden_size, context_discriminative=context_discriminative
-        ),
-        2,
+        head_input_dim(encoder.config.hidden_size, components), 2
     ).to(device)
 
     # One lr for encoder and head, as in `train_supervised_relations.py`. A
@@ -136,13 +137,11 @@ def train(
         (out / CONFIG_FILE).write_text(
             json.dumps(
                 {
+                    "components": list(components),
                     "context_discriminative": context_discriminative,
                     "feature_names": list(FEATURE_NAMES),
                     "hidden_size": enc.config.hidden_size,
-                    "head_input_dim": head_input_dim(
-                        enc.config.hidden_size,
-                        context_discriminative=context_discriminative,
-                    ),
+                    "head_input_dim": head_input_dim(enc.config.hidden_size, components),
                 },
                 indent=2,
                 sort_keys=True,
@@ -169,7 +168,7 @@ def train(
         nodes_by_id = {node.event_id: node for node in doc.nodes}
         inputs = pair_head_inputs(
             triggers, contexts, [(p.head_id, p.tail_id) for p in pairs],
-            nodes_by_id, order, context_discriminative=context_discriminative,
+            nodes_by_id, order, components=components,
         )
         return head(inputs)
 
@@ -250,8 +249,8 @@ def main() -> int:
         help="frozen P1 internal-dev manifest, used for best-epoch selection",
     )
     parser.add_argument(
-        "--context-discriminative", action="store_true",
-        help="add sentence-context pooling and confusability features to the pair head",
+        "--components", nargs="*", default=[], choices=list(ALL_COMPONENTS),
+        help="mechanism components to enable; empty = trigger-only control",
     )
     parser.add_argument("--limit", type=int, default=None, help="first N documents (smoke)")
     parser.add_argument("--seed", type=int, default=13)
@@ -297,7 +296,7 @@ def main() -> int:
         max_length=args.max_length,
         stride=args.stride,
         seed=args.seed,
-        context_discriminative=args.context_discriminative,
+        components=validate_components(args.components),
         dev_docs=dev_docs,
         dev_pairs=build_eval_pairs(dev_docs) if dev_docs else None,
     )

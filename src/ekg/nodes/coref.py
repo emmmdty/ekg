@@ -224,7 +224,13 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         head_file = ckpt / HEAD_FILE
         if not head_file.exists():
             raise FileNotFoundError(f"supervised coreference: head not found at {head_file}")
-        from ekg.nodes.discriminative import CONFIG_FILE, FEATURE_NAMES, head_input_dim
+        from ekg.nodes.discriminative import (
+            ALL_COMPONENTS,
+            CONFIG_FILE,
+            CONTEXT_POOLING,
+            FEATURE_NAMES,
+            head_input_dim,
+        )
 
         self._tokenizer = AutoTokenizer.from_pretrained(str(ckpt))
         self._encoder = AutoModel.from_pretrained(str(ckpt))
@@ -235,7 +241,13 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         config = (
             json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
         )
-        self._context_discriminative = bool(config.get("context_discriminative", False))
+        # Older checkpoints carry only the boolean; map it onto the component list
+        # so a checkpoint written before the ablation split still loads correctly.
+        if "components" in config:
+            self._components = tuple(config["components"])
+        else:
+            self._components = ALL_COMPONENTS if config.get("context_discriminative") else ()
+        self._context_discriminative = CONTEXT_POOLING in self._components
         # Feature layouts evolve. A checkpoint trained on a different feature list
         # must fail loudly here rather than let the head read numbers it never saw.
         recorded = config.get("feature_names")
@@ -245,11 +257,7 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
                 f"checkpoint={list(recorded)} current={list(FEATURE_NAMES)}"
             )
         self._head = nn.Linear(
-            head_input_dim(
-                self._encoder.config.hidden_size,
-                context_discriminative=self._context_discriminative,
-            ),
-            2,
+            head_input_dim(self._encoder.config.hidden_size, self._components), 2
         )
         self._head.load_state_dict(torch.load(head_file, map_location="cpu"))
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -302,7 +310,7 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
                     list(pairs),
                     nodes_by_id,
                     order,
-                    context_discriminative=self._context_discriminative,
+                    components=self._components,
                 )
             )
             probs = torch.softmax(logits, dim=-1)[:, 1]

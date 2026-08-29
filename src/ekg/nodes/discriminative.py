@@ -68,6 +68,24 @@ def batch_confusability_features(
 
 CONFIG_FILE = "coref_config.json"
 
+# The mechanism has two separable parts; ablations switch them independently, and
+# the checkpoint records which ones it was trained with. A single boolean would
+# have to be widened (and every old checkpoint silently reinterpreted) the first
+# time a third component appears.
+CONTEXT_POOLING = "context_pooling"
+CONFUSABILITY = "confusability"
+ALL_COMPONENTS = (CONTEXT_POOLING, CONFUSABILITY)
+
+
+def validate_components(components) -> tuple[str, ...]:
+    selected = tuple(components)
+    unknown = set(selected) - set(ALL_COMPONENTS)
+    if unknown:
+        raise ValueError(f"unknown coreference components: {sorted(unknown)}")
+    if len(set(selected)) != len(selected):
+        raise ValueError("duplicate coreference components")
+    return tuple(c for c in ALL_COMPONENTS if c in selected)
+
 
 def sentence_char_ranges(doc_text: str) -> list[tuple[int, int]]:
     """Char range of every line of the canonical doc text (one line = one sentence)."""
@@ -97,9 +115,14 @@ def context_ranges_for(nodes: Sequence[EventNode], doc_text: str) -> list[tuple[
     return out
 
 
-def head_input_dim(hidden_size: int, *, context_discriminative: bool) -> int:
-    base = hidden_size * 4
-    return base * 2 + len(FEATURE_NAMES) if context_discriminative else base
+def head_input_dim(hidden_size: int, components=()) -> int:
+    selected = validate_components(components)
+    dim = hidden_size * 4
+    if CONTEXT_POOLING in selected:
+        dim += hidden_size * 4
+    if CONFUSABILITY in selected:
+        dim += len(FEATURE_NAMES)
+    return dim
 
 
 def pair_head_inputs(
@@ -109,7 +132,7 @@ def pair_head_inputs(
     nodes_by_id: Mapping[str, EventNode],
     order: Mapping[str, int],
     *,
-    context_discriminative: bool,
+    components=(),
 ):
     """The single implementation of the head's input, shared by training and scoring.
 
@@ -120,16 +143,19 @@ def pair_head_inputs(
 
     from ekg.nodes.encoding import pair_features
 
+    selected = validate_components(components)
     device = triggers.device
     head_idx = torch.tensor([order[h] for h, _ in pairs], device=device)
     tail_idx = torch.tensor([order[t] for _, t in pairs], device=device)
-    features = pair_features(triggers[head_idx], triggers[tail_idx])
-    if not context_discriminative:
-        return features
-    context = pair_features(contexts[head_idx], contexts[tail_idx])
-    confusability = torch.tensor(
-        batch_confusability_features(pairs, nodes_by_id, order),
-        dtype=features.dtype,
-        device=device,
-    )
-    return torch.cat([features, context, confusability], dim=-1)
+    parts = [pair_features(triggers[head_idx], triggers[tail_idx])]
+    if CONTEXT_POOLING in selected:
+        parts.append(pair_features(contexts[head_idx], contexts[tail_idx]))
+    if CONFUSABILITY in selected:
+        parts.append(
+            torch.tensor(
+                batch_confusability_features(pairs, nodes_by_id, order),
+                dtype=parts[0].dtype,
+                device=device,
+            )
+        )
+    return parts[0] if len(parts) == 1 else torch.cat(parts, dim=-1)

@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
+import pytest
+
 from ekg.core.schema import EventNode, EvidenceSpan
 from ekg.nodes.discriminative import (
+    ALL_COMPONENTS,
+    CONFUSABILITY,
+    CONTEXT_POOLING,
     FEATURE_NAMES,
     confusability_features,
     context_ranges_for,
     head_input_dim,
     sentence_char_ranges,
+    validate_components,
 )
 
 
@@ -70,6 +76,18 @@ def test_context_range_falls_back_to_a_window_when_sent_id_is_missing() -> None:
     assert end > start  # never a zero-length range, which would pool nothing silently
 
 
-def test_head_input_dim_matches_the_declared_layout() -> None:
-    assert head_input_dim(768, context_discriminative=False) == 768 * 4
-    assert head_input_dim(768, context_discriminative=True) == 768 * 8 + len(FEATURE_NAMES)
+def test_head_input_dim_tracks_each_component_independently() -> None:
+    """Ablations switch the two parts separately, so the layout must too."""
+    assert head_input_dim(768, ()) == 768 * 4
+    assert head_input_dim(768, (CONTEXT_POOLING,)) == 768 * 8
+    assert head_input_dim(768, (CONFUSABILITY,)) == 768 * 4 + len(FEATURE_NAMES)
+    assert head_input_dim(768, ALL_COMPONENTS) == 768 * 8 + len(FEATURE_NAMES)
+
+
+def test_components_are_normalised_and_bad_ones_rejected() -> None:
+    # order is canonical, so two spellings of the same ablation hash identically
+    assert validate_components([CONFUSABILITY, CONTEXT_POOLING]) == ALL_COMPONENTS
+    with pytest.raises(ValueError, match="unknown"):
+        validate_components(["bogus"])
+    with pytest.raises(ValueError, match="duplicate"):
+        validate_components([CONTEXT_POOLING, CONTEXT_POOLING])
