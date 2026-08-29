@@ -110,6 +110,47 @@ TIMEX 端点已闭环，候选按族分离（causal/subevent 纯 event、tempora
 零定位失败；推理侧预测边含 TIMEX 由 0% 升到 37.6%（gold 39%）。九个会让正式跑报废的缺陷由
 一次 20 篇 pilot 抓出，逐条见 [`results/PHASE_P1.md`](results/PHASE_P1.md)。
 
+## 正在跑：A3.2 关系族均衡四臂（2026-08-30 起，四卡并行，约 3 小时）
+
+| 卡 | 臂 | `--balance-components` |
+|---|---|---|
+| GPU0 | control | （空，= 复现底座配方，验证代码改动是 no-op） |
+| GPU1 | normalized_risk | 归一化族风险 |
+| GPU2 | adaptive_workpoint | 工作点闭环 |
+| GPU3 | both | 两者 |
+
+run-dir `runs/stages/A3/a3-v6-balanced-r11/<臂>/seed-13/checkpoint`，
+日志 `logs/a32_*.log`，启动脚本 `runs/stages/A3/a3-v6-balanced-r11/launch_arm.sh`。
+四臂除组件外与 A3.1 复现底座配方逐位相同（50 epoch / lr 1e-5 / head-lr 1e-4 /
+accum 8 / neg-ratio inf / α=0.5 / macro 选模 / seed 13）。
+
+### 新信任根 P1 r10（改了 CODE_PATHS 里的 trainer，按文档流程重建）
+
+| 项 | 值 |
+|---|---|
+| trust root | `runs/stages/P1/p1-v6-20260830-r10/` |
+| `protocol.json` SHA-256 | `1cf68b2047c8867be7fc545767c6ec78c98650ddc76ed2bc24c2bd8e6f936893` |
+| A3 plan | `runs/stages/A3/a3-v6-balanced-r11/preflight/execution_plan.json` |
+| plan SHA-256 | `340efe776310726ac3c16897e52bdd8380fc5a7e68b28f6139e78313393c70c0` |
+
+**r10 与 r9 的差异面已逐项核对**：只有 `code/train_supervised_relations.py` 与
+`config/local_gate.json` 两项变化；data / manifests / candidate / evaluator / checkpoint
+全部 0 项变化，candidate digest、population、seed、prediction ids、access ledger 完全相同。
+⇒ 划分、候选全集、评分器逐位未动，**冻结主锚仍然可比**，baseline 不需要重跑。
+
+### 判定这一轮要过的三条线
+
+| 线 | 值 | 来源 |
+|---|---|---|
+| 冻结主锚 causal | **> 33.17** | `primary_anchor.json` |
+| **逐族事后校准的对照** | **> 33.15** | 工作点诊断给出的重切上限 |
+| subevent / temporal 护栏 | ≥ 28.75 / ≥ 50.63 | 预注册 |
+
+第二条是本轮特意立的**公平对照**：机制的工作点部件在 internal-dev 上量偏移，
+若只跟"未校准的复现底座 31.42"比，赢的可能只是校准本身。所以对照取
+"复现底座 + 逐族事后校准"，机制要赢的是**把校准放进目标函数**相对
+**事后再切一刀**的增量——这也正是诊断已经把上限钉在 33.15 的那个问题。
+
 ## 2026-08-30 这一批的结果（数字在 `docs/results/`，此处只记状态）
 
 四卡跑完两批，**两个都是负结果**。四张卡现在全空。
