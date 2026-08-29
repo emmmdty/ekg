@@ -16,6 +16,7 @@ encoder pair classifier, torch-lazy like the rest of the node stage.
 
 from __future__ import annotations
 
+import json
 import random
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping, Sequence
@@ -26,7 +27,7 @@ from pathlib import Path
 
 from ekg.core.registry import Registry
 from ekg.core.schema import EventNode
-from ekg.nodes.encoding import TORCH_AVAILABLE, encode_spans, pair_features
+from ekg.nodes.encoding import TORCH_AVAILABLE, encode_spans
 
 __all__ = [
     "HARD_SIMILARITY",
@@ -223,9 +224,28 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         head_file = ckpt / HEAD_FILE
         if not head_file.exists():
             raise FileNotFoundError(f"supervised coreference: head not found at {head_file}")
+        from ekg.nodes.discriminative import CONFIG_FILE, head_input_dim
+
         self._tokenizer = AutoTokenizer.from_pretrained(str(ckpt))
         self._encoder = AutoModel.from_pretrained(str(ckpt))
-        self._head = nn.Linear(self._encoder.config.hidden_size * 4, 2)
+        # The checkpoint declares its own feature layout: a head trained with the
+        # context-discriminative inputs and scored without them would still run and
+        # silently read different numbers than it was trained on.
+        config_file = ckpt / CONFIG_FILE
+        self._context_discriminative = (
+            json.loads(config_file.read_text(encoding="utf-8")).get(
+                "context_discriminative", False
+            )
+            if config_file.exists()
+            else False
+        )
+        self._head = nn.Linear(
+            head_input_dim(
+                self._encoder.config.hidden_size,
+                context_discriminative=self._context_discriminative,
+            ),
+            2,
+        )
         self._head.load_state_dict(torch.load(head_file, map_location="cpu"))
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
         self._encoder.to(self._device).eval()
@@ -241,20 +261,45 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         self._ensure_model()
         import torch
 
+        from ekg.nodes.discriminative import context_ranges_for, pair_head_inputs
+        from ekg.nodes.encoding import encode_spans_with_context
+
         order = {node.event_id: i for i, node in enumerate(nodes)}
+        nodes_by_id = {node.event_id: node for node in nodes}
+        starts = [n.trigger_evidence[0].char_start for n in nodes]
         with torch.no_grad():
-            embeddings = encode_spans(
-                self._encoder,
-                self._tokenizer,
-                doc_text,
-                [n.trigger_evidence[0].char_start for n in nodes],
-                max_length=self.max_length,
-                stride=self.stride,
-                device=self._device,
+            if self._context_discriminative:
+                triggers, contexts = encode_spans_with_context(
+                    self._encoder,
+                    self._tokenizer,
+                    doc_text,
+                    starts,
+                    context_ranges_for(nodes, doc_text),
+                    max_length=self.max_length,
+                    stride=self.stride,
+                    device=self._device,
+                )
+            else:
+                triggers = encode_spans(
+                    self._encoder,
+                    self._tokenizer,
+                    doc_text,
+                    starts,
+                    max_length=self.max_length,
+                    stride=self.stride,
+                    device=self._device,
+                )
+                contexts = triggers
+            logits = self._head(
+                pair_head_inputs(
+                    triggers,
+                    contexts,
+                    list(pairs),
+                    nodes_by_id,
+                    order,
+                    context_discriminative=self._context_discriminative,
+                )
             )
-            head_idx = torch.tensor([order[h] for h, _ in pairs], device=embeddings.device)
-            tail_idx = torch.tensor([order[t] for _, t in pairs], device=embeddings.device)
-            logits = self._head(pair_features(embeddings[head_idx], embeddings[tail_idx]))
             probs = torch.softmax(logits, dim=-1)[:, 1]
         return dict(zip(pairs, (float(p) for p in probs.tolist()), strict=True))
 

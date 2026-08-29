@@ -165,3 +165,71 @@ def encode_spans(
         )
     index = torch.tensor(located, device=hidden.device)
     return hidden[index[:, 0], index[:, 1]]
+
+
+def encode_spans_with_context(
+    encoder,
+    tokenizer,
+    doc_text: str,
+    char_starts: Sequence[int],
+    context_ranges: Sequence[tuple[int, int]],
+    *,
+    max_length: int = 512,
+    stride: int = 128,
+    device: str = "cpu",
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Trigger vectors plus a mean-pooled vector over each mention's context range.
+
+    Why a second vector at all: the trigger token is contextualised, but when two
+    mentions share the *same word form* their trigger vectors are the hardest case
+    for the pair head — and that is exactly where the errors are (51.8% of
+    over-merges on official-protocol valid are exact-trigger pairs, and 44.4% of
+    under-merges are too). Pooling the surrounding sentence gives the head a
+    signal that does not collapse when the trigger word is identical.
+
+    One forward pass is shared with the trigger encoding, so this costs pooling,
+    not a second encode. Returns `(triggers, contexts)`, both `(n, hidden)`.
+    """
+    import torch
+
+    encoded = tokenizer(
+        doc_text,
+        return_offsets_mapping=True,
+        return_overflowing_tokens=True,
+        truncation=True,
+        max_length=max_length,
+        stride=stride,
+        padding=True,
+        return_tensors="pt",
+    )
+    windows = [[tuple(o) for o in window] for window in encoded["offset_mapping"].tolist()]
+    located = [locate_span_token(windows, c) for c in char_starts]
+
+    inputs = {
+        k: v.to(device)
+        for k, v in encoded.items()
+        if k in ("input_ids", "attention_mask", "token_type_ids")
+    }
+    hidden = encoder(**inputs).last_hidden_state
+    if hidden.shape[1] != inputs["input_ids"].shape[1]:
+        raise RuntimeError(
+            f"encoder returned {hidden.shape[1]} positions for "
+            f"{inputs['input_ids'].shape[1]} input tokens -- span indices would misalign"
+        )
+    index = torch.tensor(located, device=hidden.device)
+    triggers = hidden[index[:, 0], index[:, 1]]
+
+    contexts = []
+    for (window, token), (start, end) in zip(located, context_ranges, strict=True):
+        offsets = windows[window]
+        positions = [
+            i
+            for i, (s0, e0) in enumerate(offsets)
+            if e0 > s0 and s0 >= start and e0 <= end
+        ]
+        if not positions:
+            # The sentence fell outside this window; fall back to the trigger's own
+            # position rather than a zero vector, which would be a silent signal.
+            positions = [token]
+        contexts.append(hidden[window, torch.tensor(positions, device=hidden.device)].mean(dim=0))
+    return triggers, torch.stack(contexts)

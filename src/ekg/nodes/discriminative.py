@@ -1,0 +1,135 @@
+"""Confusability features for context-discriminative event identity.
+
+The official-protocol error profile (`docs/results/PHASE_C.md`) says the gap is
+not recall in general: over-merges outnumber under-merges 1,391 to 801, and
+**51.8% of the over-merges are pairs whose triggers are byte-identical** (44.4%
+of the under-merges are too). On those pairs the trigger representations are
+nearly indistinguishable by construction, so a head that reads only trigger
+vectors has to guess.
+
+These features name that situation explicitly, so the head can learn a different
+decision function for it instead of relying on a similarity that has collapsed.
+They are cheap, deterministic, and derived only from the mention set the official
+protocol already gives us -- no gold arguments, no extra annotation.
+"""
+
+from __future__ import annotations
+
+import math
+from collections.abc import Mapping, Sequence
+
+from ekg.core.schema import EventNode
+from ekg.nodes.coref import trigger_similarity
+
+FEATURE_NAMES = (
+    "same_trigger_exact",
+    "trigger_similarity",
+    "same_event_type",
+    "same_sentence",
+    "log_sentence_distance",
+    "log_mention_distance",
+)
+
+
+def _sent_id(node: EventNode) -> int | None:
+    if not node.trigger_evidence:
+        return None
+    return node.trigger_evidence[0].sent_id
+
+
+def confusability_features(
+    head: EventNode, tail: EventNode, order: Mapping[str, int]
+) -> list[float]:
+    """One feature vector per candidate pair, in `FEATURE_NAMES` order."""
+    h_trigger = (head.trigger or "").strip().lower()
+    t_trigger = (tail.trigger or "").strip().lower()
+    exact = 1.0 if h_trigger and h_trigger == t_trigger else 0.0
+    similarity = trigger_similarity(head.trigger or "", tail.trigger or "")
+    same_type = 1.0 if head.event_type == tail.event_type else 0.0
+
+    h_sent, t_sent = _sent_id(head), _sent_id(tail)
+    if h_sent is None or t_sent is None:
+        same_sentence, sent_distance = 0.0, 0.0
+    else:
+        same_sentence = 1.0 if h_sent == t_sent else 0.0
+        sent_distance = math.log1p(abs(h_sent - t_sent))
+
+    mention_distance = math.log1p(abs(order[head.event_id] - order[tail.event_id]))
+    return [exact, similarity, same_type, same_sentence, sent_distance, mention_distance]
+
+
+def batch_confusability_features(
+    pairs: Sequence[tuple[str, str]],
+    nodes_by_id: Mapping[str, EventNode],
+    order: Mapping[str, int],
+) -> list[list[float]]:
+    return [confusability_features(nodes_by_id[h], nodes_by_id[t], order) for h, t in pairs]
+
+
+CONFIG_FILE = "coref_config.json"
+
+
+def sentence_char_ranges(doc_text: str) -> list[tuple[int, int]]:
+    """Char range of every line of the canonical doc text (one line = one sentence)."""
+    ranges: list[tuple[int, int]] = []
+    start = 0
+    for line in doc_text.split("\n"):
+        ranges.append((start, start + len(line)))
+        start += len(line) + 1
+    return ranges
+
+
+def context_ranges_for(nodes: Sequence[EventNode], doc_text: str) -> list[tuple[int, int]]:
+    """Each mention's own sentence range, falling back to a character window.
+
+    A mention whose `sent_id` is missing gets a symmetric character window instead
+    of a zero-length range, so pooling never degenerates silently.
+    """
+    sentences = sentence_char_ranges(doc_text)
+    out: list[tuple[int, int]] = []
+    for node in nodes:
+        sent = _sent_id(node)
+        if sent is not None and 0 <= sent < len(sentences):
+            out.append(sentences[sent])
+            continue
+        start = node.trigger_evidence[0].char_start if node.trigger_evidence else 0
+        out.append((max(0, start - 200), start + 200))
+    return out
+
+
+def head_input_dim(hidden_size: int, *, context_discriminative: bool) -> int:
+    base = hidden_size * 4
+    return base * 2 + len(FEATURE_NAMES) if context_discriminative else base
+
+
+def pair_head_inputs(
+    triggers,
+    contexts,
+    pairs: Sequence[tuple[str, str]],
+    nodes_by_id: Mapping[str, EventNode],
+    order: Mapping[str, int],
+    *,
+    context_discriminative: bool,
+):
+    """The single implementation of the head's input, shared by training and scoring.
+
+    Two implementations would drift, and a drifted feature layout is invisible: the
+    head still runs, it just reads different numbers than it was trained on.
+    """
+    import torch
+
+    from ekg.nodes.encoding import pair_features
+
+    device = triggers.device
+    head_idx = torch.tensor([order[h] for h, _ in pairs], device=device)
+    tail_idx = torch.tensor([order[t] for _, t in pairs], device=device)
+    features = pair_features(triggers[head_idx], triggers[tail_idx])
+    if not context_discriminative:
+        return features
+    context = pair_features(contexts[head_idx], contexts[tail_idx])
+    confusability = torch.tensor(
+        batch_confusability_features(pairs, nodes_by_id, order),
+        dtype=features.dtype,
+        device=device,
+    )
+    return torch.cat([features, context, confusability], dim=-1)

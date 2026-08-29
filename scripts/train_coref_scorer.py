@@ -21,6 +21,7 @@ representation as a relation decision.
 from __future__ import annotations
 
 import argparse
+import json
 import random
 from collections.abc import Sequence
 from pathlib import Path
@@ -32,6 +33,12 @@ from ekg.nodes.coref import (
     cluster_of_nodes,
     labelled_coref_pairs,
     sample_training_pairs,
+)
+from ekg.nodes.discriminative import (
+    CONFIG_FILE,
+    context_ranges_for,
+    head_input_dim,
+    pair_head_inputs,
 )
 from ekg.relations.data.maven_arg import ArgumentDocument, load_maven_arg
 
@@ -84,6 +91,7 @@ def train(
     max_length: int,
     stride: int,
     seed: int,
+    context_discriminative: bool = False,
     dev_docs: Sequence[ArgumentDocument] = (),
     dev_pairs: dict[str, list[CorefPair]] | None = None,
 ) -> None:
@@ -91,7 +99,7 @@ def train(
     from torch import nn
     from transformers import AutoModel, AutoTokenizer
 
-    from ekg.nodes.encoding import encode_spans, pair_features
+    from ekg.nodes.encoding import encode_spans, encode_spans_with_context
 
     torch.manual_seed(seed)
     random.seed(seed)
@@ -99,7 +107,12 @@ def train(
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     encoder = AutoModel.from_pretrained(model_name).to(device)
     encoder.gradient_checkpointing_enable()
-    head = nn.Linear(encoder.config.hidden_size * 4, 2).to(device)
+    head = nn.Linear(
+        head_input_dim(
+            encoder.config.hidden_size, context_discriminative=context_discriminative
+        ),
+        2,
+    ).to(device)
 
     # One lr for encoder and head, as in `train_supervised_relations.py`. A
     # separate high head lr (1e-3) was tried first and diverged: loss rose
@@ -117,6 +130,46 @@ def train(
         enc.save_pretrained(out)
         tok.save_pretrained(out)
         torch.save(hd.state_dict(), out / HEAD_FILE)
+        # The scorer rebuilds the head from this, so the feature layout can never
+        # silently diverge between training and inference.
+        (out / CONFIG_FILE).write_text(
+            json.dumps(
+                {
+                    "context_discriminative": context_discriminative,
+                    "hidden_size": enc.config.hidden_size,
+                    "head_input_dim": head_input_dim(
+                        enc.config.hidden_size,
+                        context_discriminative=context_discriminative,
+                    ),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    def _forward(doc, pairs):
+        starts = [n.trigger_evidence[0].char_start for n in doc.nodes]
+        if context_discriminative:
+            triggers, contexts = encode_spans_with_context(
+                encoder, tokenizer, doc.doc_text, starts,
+                context_ranges_for(doc.nodes, doc.doc_text),
+                max_length=max_length, stride=stride, device=device,
+            )
+        else:
+            triggers = encode_spans(
+                encoder, tokenizer, doc.doc_text, starts,
+                max_length=max_length, stride=stride, device=device,
+            )
+            contexts = triggers
+        order = {node.event_id: i for i, node in enumerate(doc.nodes)}
+        nodes_by_id = {node.event_id: node for node in doc.nodes}
+        inputs = pair_head_inputs(
+            triggers, contexts, [(p.head_id, p.tail_id) for p in pairs],
+            nodes_by_id, order, context_discriminative=context_discriminative,
+        )
+        return head(inputs)
 
     for epoch in range(epochs):
         random.shuffle(doc_ids)
@@ -127,20 +180,8 @@ def train(
         for step, doc_id in enumerate(doc_ids, 1):
             doc = by_id[doc_id]
             pairs = per_doc[doc_id]
-            order = {node.event_id: i for i, node in enumerate(doc.nodes)}
-            embeddings = encode_spans(
-                encoder,
-                tokenizer,
-                doc.doc_text,
-                [n.trigger_evidence[0].char_start for n in doc.nodes],
-                max_length=max_length,
-                stride=stride,
-                device=device,
-            )
-            head_idx = torch.tensor([order[p.head_id] for p in pairs], device=device)
-            tail_idx = torch.tensor([order[p.tail_id] for p in pairs], device=device)
             targets = torch.tensor([int(p.label) for p in pairs], device=device)
-            logits = head(pair_features(embeddings[head_idx], embeddings[tail_idx]))
+            logits = _forward(doc, pairs)
             loss = loss_fn(logits, targets)
             loss.backward()
             optimizer.step()
@@ -160,20 +201,8 @@ def train(
         with torch.no_grad():
             for dev_id, pairs in dev_pairs.items():
                 doc = by_dev[dev_id]
-                order = {node.event_id: i for i, node in enumerate(doc.nodes)}
-                embeddings = encode_spans(
-                    encoder,
-                    tokenizer,
-                    doc.doc_text,
-                    [n.trigger_evidence[0].char_start for n in doc.nodes],
-                    max_length=max_length,
-                    stride=stride,
-                    device=device,
-                )
-                h = torch.tensor([order[p.head_id] for p in pairs], device=device)
-                t = torch.tensor([order[p.tail_id] for p in pairs], device=device)
                 gold = torch.tensor([int(p.label) for p in pairs], device=device)
-                pred = head(pair_features(embeddings[h], embeddings[t])).argmax(dim=-1)
+                pred = _forward(doc, pairs).argmax(dim=-1)
                 tp += int(((pred == 1) & (gold == 1)).sum())
                 fp += int(((pred == 1) & (gold == 0)).sum())
                 fn += int(((pred == 0) & (gold == 1)).sum())
@@ -217,6 +246,10 @@ def main() -> int:
     parser.add_argument(
         "--dev-manifest", type=Path, default=None,
         help="frozen P1 internal-dev manifest, used for best-epoch selection",
+    )
+    parser.add_argument(
+        "--context-discriminative", action="store_true",
+        help="add sentence-context pooling and confusability features to the pair head",
     )
     parser.add_argument("--limit", type=int, default=None, help="first N documents (smoke)")
     parser.add_argument("--seed", type=int, default=13)
@@ -262,6 +295,7 @@ def main() -> int:
         max_length=args.max_length,
         stride=args.stride,
         seed=args.seed,
+        context_discriminative=args.context_discriminative,
         dev_docs=dev_docs,
         dev_pairs=build_eval_pairs(dev_docs) if dev_docs else None,
     )
