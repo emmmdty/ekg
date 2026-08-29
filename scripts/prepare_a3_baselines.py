@@ -251,7 +251,16 @@ def _commands(
         "--warmup-steps", "200",
         "--accum-steps", "8",
         "--neg-ratio", "inf",
-        "--weight-alpha", "0.0",
+        # 0.0 (no inverse-frequency correction) combined with no negative sampling
+        # collapses the rare families: measured on internal-dev seed 13, subevent
+        # went to exactly 0.000 for all three epochs and causal to 0.073, versus
+        # 0.277 / 0.263 at alpha 0.5. Both choices individually mirror the official
+        # recipe; together they are pathological for this architecture. 0.5 is the
+        # project's own PHASE_A-tuned value and reproduces the historical local-pair
+        # magnitude. Corrected before any method result existed and before the
+        # primary anchor was resolved; the change makes the baseline stronger, which
+        # is the direction that cannot bias the comparison in our favour.
+        "--weight-alpha", "0.5",
         "--dev-metric", "macro",
     ]
     commands: dict[str, dict[str, dict]] = {

@@ -241,3 +241,21 @@ def test_preregistration_covers_every_scored_relation_family() -> None:
     for family in ("subevent", "temporal"):
         assert preregistration[f"{family}_guardrail_anchor"] == "maven_ere_official_joint"
         assert preregistration[f"{family}_noninferiority_margin"]["value"] == 1.0
+
+
+def test_local_pair_recipe_keeps_inverse_frequency_correction() -> None:
+    """alpha 0.0 + no negative sampling collapses the rare relation families.
+
+    Measured on internal-dev seed 13: subevent 0.000 for all three epochs at
+    alpha 0.0 versus 0.277 at alpha 0.5. A baseline crippled that way would
+    flatter any method compared against it.
+    """
+    argv = prepare._commands(
+        remote_repo=Path("/repo"),
+        remote_preflight=Path("/repo/pre"),
+        python=Path("/repo/.venv/bin/python"),
+        model_path="/models/roberta-base",
+        p1_hash="a" * 64,
+    )["local_pair"]["13"]["argv"]
+
+    assert float(argv[argv.index("--weight-alpha") + 1]) > 0.0
