@@ -329,3 +329,52 @@ uv run python scripts/report_coref_error_profile.py \
 代码：`scripts/report_coref_error_profile.py` + `ekg.core.eval.muc_link_errors`（MUC 的原始链计数；
 既有 `muc()` 只返回比率）。测试 `tests/core/test_metrics.py` + `tests/scripts/test_coref_error_profile.py`。
 校验：**354 passed / 12 skipped**（基线 342/12）、ruff 0、`ekg-smoke` OK。
+
+---
+
+## v6 · C4 首次机制对照：上下文判别 vs 只读触发词（2026-08-29，4090 GPU1/GPU2）
+
+**协议**：P1 r9 manifests（train 2,622 / internal-dev 291）｜MAVEN-Arg 训练源（与 MAVEN-ERE
+同一批文档、不同标注层）｜gold mentions｜官方 `evaluate.py`｜seed 13｜**final-valid 未访问**。
+两组唯一变量是 `--context-discriminative` 开关，其余逐位相同（10 epochs / neg-ratio 10 /
+hard-fraction 0.5 / 同一内容寻址 roberta-base 快照）。
+
+### 主表（官方 evaluate.py @ internal-dev）
+
+| 组 | MUC P | MUC R | **MUC F1** | B³ F1 | CEAFe F1 | BLANC F1 |
+|---|---|---|---|---|---|---|
+| 对照（只读触发词向量） | 78.08 | 70.86 | 74.29 | 97.50 | 97.14 | 84.92 |
+| **机制（上下文判别）** | 76.86 | **75.92** | **76.38** | **97.68** | **97.27** | **87.57** |
+| Δ | −1.22 | **+5.06** | **+2.09** | +0.18 | +0.13 | **+2.65** |
+
+四项 coreference 指标三项改善、无一退化。**单种子，未做配对检验，不得写成已确认胜出。**
+
+### ⚠️ 两条必须如实记的
+
+**① 选模指标与报数指标不对齐，而且方向相反。** 两个 checkpoint 都按预注册规则选
+「internal-dev 完整候选对全集上的 pair-level F1 最好那轮」：
+
+| | 最好 pair-F1 | 轮次 | **MUC F1** |
+|---|---|---|---|
+| 机制 | 0.8012 | ep3 | **76.38** |
+| 对照 | **0.8046** | ep7 | 74.29 |
+
+**pair-F1 说机制略差（−0.0034），MUC 说机制好 2.09。** 两组用的是同一条选择规则，
+所以这个对照本身成立；但**规则选错了轴**——pair-level 决策与聚类后的链结构不是一回事。
+后续必须把选模指标换成 MUC 或与之更接近的代理，并重跑；本表在换轴前只能算探索性证据。
+
+**② 增益来自 recall，不是设计时假设的 precision。** 机制的动机是过并占 63.5%、
+其中 51.8% 同词形，预期收益在 precision。实测是 **recall +5.06 / precision −1.22**。
+
+合理解释（**尚未验证，不得当结论**）：欠并里 **92.8% 是跨句对**，句子级语境向量恰好给了
+跨句链接所需的信号，于是先兑现在 recall 上。**不把预测错了的机制事后改写成"本来就是要提召回"**
+——设计假设是 precision，实测是 recall，两者都记，验证留给下一轮定向实验。
+
+### 与历史数字的关系
+
+历史 MUC **77.47** 是在 **710 篇 final-valid** 上测的，本表是 **291 篇 internal-dev**，
+**不可直接相减**。Ch1 的同协议对手（official single/joint 的 coref 头）尚未重跑，
+因此本章目前只有「机制 vs 无机制」的内部对照，**还没有对外的差距结论**。
+
+产物：`runs/stages/C4/{ctx_discriminative,control_trigger_only}/seed-13/`
+（checkpoint、coref_prediction.jsonl、coref_metrics.json）。
