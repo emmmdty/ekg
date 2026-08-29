@@ -570,3 +570,51 @@ subevent：同句 27.07 / 跨句 20.34。
 **未解决**：① subevent 仍低于起点 2.98 点；② 跨句 25.00 vs 同句 38.18 仍是主瓶颈；
 ③ causal 距官方 2.87 点。**已实现未验证**：梯度累积（官方 batch 8 / 我们逐文档=batch 1，
 且这让 warmup 200 只等于 200 篇而非官方的 1600 篇）。
+
+---
+
+# v6 · A3.0 同协议 baseline 重跑（2026-08-29 起，4090 GPU0）
+
+**协议**：P1 r9 `440516dc…0a6d4fdc`｜A3 plan r10 `36a38e4f…085d4d15`｜gold mentions｜
+train 2,622 篇训练、internal-dev 291 篇选模与报数｜**final-valid 未访问**｜官方 `evaluate.py` 评分｜
+候选按族分离（causal/subevent 纯 event，temporal 含 TIMEX）｜seed 13。
+
+⚠️ 本节全部是 **internal-dev** 数字，用于冻结 primary anchor，**不是** final-valid 主表。
+与 v6 之前的历史数字不可直接相减：那些在完整 valid 上选模且不含 TIMEX。
+
+## local_pair（本地成对分类器，非 primary-eligible）
+
+### ❌ 首跑作废：冻结配方让稀有族完全坍塌
+
+初版 plan 把 `--neg-ratio inf`（不采样）与 `--weight-alpha 0.0`（不加权）组合在一起。
+两者各自都在模仿官方，**合在一起对本架构是病态的**。单变量对照（其余逐位相同，seed 13）：
+
+| 配方 | dev macro | causal | subevent | temporal | 官方口径 causal F1 |
+|---|---|---|---|---|---|
+| α=0.0（初版冻结） | 0.1808 | 0.073 | **0.000**（三个 epoch 全零） | 0.470 | **7.25** |
+| **α=0.5（修正后）** | **0.3449** | 0.263 | 0.277 | 0.495 | **26.31** |
+
+α=0.5 是本项目 PHASE_A 自己消融定下的值；26.31 与历史 local pair 的 23.91 量级吻合。
+修正在**任何方法结果产生之前、primary anchor 解析之前**完成，且方向是让对手**更强**——
+不可能对我们有利。残废的 baseline 会凭空抬高任何与之比较的方法。
+初版产物保留在 `runs/stages/A3/a3-v6-baselines-r9b/local_pair/seed-13/`，标记作废，不进主表。
+
+### ★ 采用档（`a3-v6-baselines-r10/local_pair/seed-13`）
+
+| 关系族 | P | R | **F1** |
+|---|---|---|---|
+| causal | 16.83 | 60.20 | **26.31** |
+| subevent | — | — | **27.68** |
+| temporal | — | — | **49.29** |
+
+- 训练读入 2,913 篇 → 2,622 训练 + 291 dev，**3,315,358 行候选**，与冻结协议的 train
+  temporal 有序对数 **逐位相同**（3,315,358）——候选全集未漂移的直接证据；
+- dev 曲线 0.3176 → 0.3405 → 0.3449 仍在上升，**3 epoch 属欠训**；这是冻结配方，不做加练；
+- 诊断跑与正式跑的 dev 曲线**逐点相同**，确定性复现；
+- causal 是 **precision 短板**（P 16.83 vs R 60.20），与历史 local pair 的形态相反，
+  待 official baseline 出来后再判断是配方差异还是 temporal 归队带来的族竞争。
+
+## official_joint / official_single
+
+official_joint seed-13 已启动（官方 README 配方：100 epochs / eval_steps 200 / lr 3e-4 /
+bert_lr 2e-5 / accum 4 / batch 8），约 60 秒/epoch。结果待补。
