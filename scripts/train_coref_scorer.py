@@ -36,6 +36,7 @@ from ekg.nodes.coref import (
 )
 from ekg.nodes.discriminative import (
     CONFIG_FILE,
+    FEATURE_NAMES,
     context_ranges_for,
     head_input_dim,
     pair_head_inputs,
@@ -136,6 +137,7 @@ def train(
             json.dumps(
                 {
                     "context_discriminative": context_discriminative,
+                    "feature_names": list(FEATURE_NAMES),
                     "hidden_size": enc.config.hidden_size,
                     "head_input_dim": head_input_dim(
                         enc.config.hidden_size,

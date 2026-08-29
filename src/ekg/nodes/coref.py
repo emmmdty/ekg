@@ -224,7 +224,7 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         head_file = ckpt / HEAD_FILE
         if not head_file.exists():
             raise FileNotFoundError(f"supervised coreference: head not found at {head_file}")
-        from ekg.nodes.discriminative import CONFIG_FILE, head_input_dim
+        from ekg.nodes.discriminative import CONFIG_FILE, FEATURE_NAMES, head_input_dim
 
         self._tokenizer = AutoTokenizer.from_pretrained(str(ckpt))
         self._encoder = AutoModel.from_pretrained(str(ckpt))
@@ -232,13 +232,18 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         # context-discriminative inputs and scored without them would still run and
         # silently read different numbers than it was trained on.
         config_file = ckpt / CONFIG_FILE
-        self._context_discriminative = (
-            json.loads(config_file.read_text(encoding="utf-8")).get(
-                "context_discriminative", False
-            )
-            if config_file.exists()
-            else False
+        config = (
+            json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
         )
+        self._context_discriminative = bool(config.get("context_discriminative", False))
+        # Feature layouts evolve. A checkpoint trained on a different feature list
+        # must fail loudly here rather than let the head read numbers it never saw.
+        recorded = config.get("feature_names")
+        if recorded is not None and list(recorded) != list(FEATURE_NAMES):
+            raise ValueError(
+                "coreference checkpoint was trained on a different feature layout: "
+                f"checkpoint={list(recorded)} current={list(FEATURE_NAMES)}"
+            )
         self._head = nn.Linear(
             head_input_dim(
                 self._encoder.config.hidden_size,
