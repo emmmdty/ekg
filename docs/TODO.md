@@ -1,6 +1,7 @@
 # EKG 实时状态
 
-> 更新于 **2026-08-28**。本文件只记录当前位置、门状态、下一步和停止条件，不复制实验数字。
+> 更新于 **2026-08-29**。本文件只记录当前位置、门状态、下一步和停止条件，不复制实验数字。
+> **新会话先读 [`HANDOFF.md`](HANDOFF.md)**（状态快照 + 规矩 + 坑 + 下一步优先级）。
 > 总纲见 [`SPEC.md`](SPEC.md)，活动契约见 [`phases/`](phases/README.md)，实验事实只认
 > [`results/`](results/README.md)，G0 筛查见
 > [`replan/G0_PROTOCOL_GATE_SCREENING.md`](replan/G0_PROTOCOL_GATE_SCREENING.md)。

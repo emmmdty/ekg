@@ -3,6 +3,8 @@
 > `CLAUDE.md` 与 `AGENTS.md` 内容一致（Claude Code 读前者，Codex 读后者）。**改一份必须同步另一份。**
 > 本文件每次会话都入上下文，**只放「删掉就会出错」的东西**；细节一律放下面的文档，按需读。
 
+**新会话先读 `docs/HANDOFF.md`**（状态快照 · 规矩 · 坑 · 下一步优先级）。
+
 设计总纲 `docs/SPEC.md`｜实时状态 `docs/TODO.md`｜**实测数字 `docs/results/`**｜
 baseline 与消融 `docs/EXPERIMENTS.md`｜工程坑 `docs/ENGINEERING_NOTES.md`｜
 服务器运维 `docs/GPU_RUNBOOK.md`｜三端流水线 `docs/PIPELINE.md`｜归档索引 `docs/ARCHIVE_INDEX.md`。
