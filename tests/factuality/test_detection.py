@@ -2,17 +2,28 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 from ekg.core.schema import RelationEdge, RelationType
 from ekg.factuality.detection import (
+    EVIDENCE_POOLING_MODES,
+    POOLING_EVIDENCE,
+    POOLING_NONE,
+    POOLING_UNIFORM,
     STRUCTURE_FEATURE_NAMES,
     FactualityPrediction,
     LexiconFactualityDetector,
     StructureContext,
     factuality_detectors,
+    label_head_input_dim,
+    label_head_inputs,
+    pooled_evidence,
+    split_candidate_features,
     structure_contexts,
+    validate_evidence_pooling,
 )
+from ekg.nodes.encoding import TORCH_AVAILABLE
 from ekg.relations.data.maven_fact import load_maven_fact
 
 
@@ -111,3 +122,100 @@ def test_detectors_are_registered(docs) -> None:
     assert "lexicon" in factuality_detectors
     assert "supervised" in factuality_detectors
     assert isinstance(factuality_detectors.create("lexicon"), LexiconFactualityDetector)
+
+
+# --- evidence -> label coupling (D3.2) ---------------------------------------
+
+
+def test_label_head_width_follows_the_switches() -> None:
+    hidden = 8
+    base = label_head_input_dim(hidden, use_structure=False, evidence_pooling=POOLING_NONE)
+    assert base == hidden
+    assert (
+        label_head_input_dim(hidden, use_structure=True, evidence_pooling=POOLING_NONE)
+        == hidden + len(STRUCTURE_FEATURE_NAMES)
+    )
+    # The mechanism and its capacity control must be the same width, or a win
+    # could be a wider head rather than the evidence signal.
+    assert label_head_input_dim(
+        hidden, use_structure=True, evidence_pooling=POOLING_EVIDENCE
+    ) == label_head_input_dim(hidden, use_structure=True, evidence_pooling=POOLING_UNIFORM)
+    assert (
+        label_head_input_dim(hidden, use_structure=True, evidence_pooling=POOLING_EVIDENCE)
+        == 2 * hidden + len(STRUCTURE_FEATURE_NAMES)
+    )
+
+
+def test_unknown_pooling_mode_is_rejected() -> None:
+    for mode in EVIDENCE_POOLING_MODES:
+        assert validate_evidence_pooling(mode) == mode
+    with pytest.raises(ValueError, match="unknown evidence pooling"):
+        validate_evidence_pooling("attention")
+    with pytest.raises(ValueError, match="unknown evidence pooling"):
+        label_head_input_dim(8, use_structure=True, evidence_pooling="attention")
+
+
+def test_candidate_split_rejects_counts_that_do_not_cover_the_encoding() -> None:
+    pooled = np.zeros((2 + 3 + 4, 5))
+    groups = split_candidate_features(pooled, 2, [3, 4])
+    assert [g.shape[0] for g in groups] == [3, 4]
+
+    # A drifted count would silently hand one mention another mention's
+    # sentence, so it raises instead.
+    with pytest.raises(ValueError, match="cover 6 of 9"):
+        split_candidate_features(pooled, 2, [3, 1])
+
+
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")
+def test_uniform_pooling_is_the_mean_and_evidence_pooling_weights_by_probability() -> None:
+    import torch
+
+    features = torch.tensor([[1.0, 0.0], [0.0, 2.0], [4.0, 4.0]])
+    logits = torch.tensor([10.0, -10.0, -10.0])
+
+    uniform = pooled_evidence(features, logits, POOLING_UNIFORM)
+    assert torch.allclose(uniform, features.mean(dim=0))
+
+    # Same normalizer (candidate count), so the two differ in exactly one
+    # thing: the weights. The near-certain candidate survives, the two the
+    # evidence head rejected are suppressed.
+    evidence = pooled_evidence(features, logits, POOLING_EVIDENCE)
+    expected = (torch.sigmoid(logits).unsqueeze(-1) * features).sum(dim=0) / 3
+    assert torch.allclose(evidence, expected)
+    assert evidence[0] > 0.3 and evidence[1] < 0.01
+
+
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")
+def test_evidence_pooling_carries_how_much_evidence_mass_was_found() -> None:
+    import torch
+
+    features = torch.ones(4, 3)
+    found = pooled_evidence(features, torch.full((4,), 10.0), POOLING_EVIDENCE)
+    none = pooled_evidence(features, torch.full((4,), -10.0), POOLING_EVIDENCE)
+    # "No supporting words at all" is what separates CT+ from the four classes
+    # evidence is annotated on, so it has to reach the label head as a
+    # near-zero vector rather than be normalized away.
+    assert found.norm() > 0.9 * features.mean(dim=0).norm()
+    assert none.norm() < 0.01
+
+
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")
+def test_label_head_inputs_concatenate_in_a_fixed_order() -> None:
+    import torch
+
+    triggers = torch.tensor([[1.0, 1.0], [2.0, 2.0]])
+    structure = torch.tensor([[0.5], [0.5]])
+    candidates = [torch.zeros(3, 2), torch.zeros(2, 2)]
+    logits = [torch.zeros(3), torch.zeros(2)]
+
+    plain = label_head_inputs(triggers, None, candidates, logits, evidence_pooling=POOLING_NONE)
+    assert plain.shape == (2, 2)
+    with_structure = label_head_inputs(
+        triggers, structure, candidates, logits, evidence_pooling=POOLING_NONE
+    )
+    assert with_structure.shape == (2, 3)
+    coupled = label_head_inputs(
+        triggers, structure, candidates, logits, evidence_pooling=POOLING_EVIDENCE
+    )
+    assert coupled.shape == (2, 5)
+    assert torch.allclose(coupled[:, :3], with_structure)

@@ -21,6 +21,16 @@ contract reserves valid for the final report), reported every epoch as macro-F1
 so an inverted-U alpha or an under-fit epoch count is visible rather than
 inferred.
 
+``--evidence-pooling`` selects the D3 arm, and the three share every other
+switch so that the contrast is the coupling alone:
+
+- ``none`` — parallel label/evidence heads. The reproduction base.
+- ``evidence`` — the label head also reads the mention's candidate spans pooled
+  by the evidence head's own probabilities. The mechanism.
+- ``uniform`` — the same pooled vector with all-ones weights: identical width
+  and parameter count, no evidence signal. Run it, or a win cannot be told
+  apart from a wider head that happens to see the sentence.
+
     .venv/bin/python -u scripts/train_factuality_detector.py \
         --train data/processed/maven_fact/train.jsonl \
         --detector supervised --model /data/TJK/models/roberta-base \
@@ -38,12 +48,19 @@ from pathlib import Path
 from ekg.core.eval.relation import PRF
 from ekg.core.protocol import split_docs_by_manifests
 from ekg.factuality.detection import (
+    CONFIG_FILE,
     EVIDENCE_HEAD_FILE,
+    EVIDENCE_POOLING_MODES,
     HEAD_FILE,
     LABELS_FILE,
-    STRUCTURE_FEATURE_NAMES,
+    POOLING_NONE,
     LexiconFactualityDetector,
+    evidence_logits_per_mention,
+    label_head_input_dim,
+    label_head_inputs,
+    split_candidate_features,
     structure_contexts,
+    validate_evidence_pooling,
 )
 from ekg.factuality.evidence import (
     SAME_SENTENCE_RECALL_CEILING,
@@ -119,6 +136,7 @@ def train_supervised(
     stride: int,
     use_structure: bool,
     evidence_weight: float,
+    evidence_pooling: str,
     seed: int,
 ) -> None:
     import torch
@@ -126,7 +144,7 @@ def train_supervised(
     from transformers import AutoModel, AutoTokenizer
 
     from ekg.factuality.detection import SupervisedFactualityDetector
-    from ekg.nodes.encoding import encode_spans, pair_features
+    from ekg.nodes.encoding import encode_spans
 
     torch.manual_seed(seed)
     random.seed(seed)
@@ -135,9 +153,17 @@ def train_supervised(
     encoder = AutoModel.from_pretrained(model_name).to(device)
     encoder.gradient_checkpointing_enable()
     hidden = encoder.config.hidden_size
-    width = hidden + (len(STRUCTURE_FEATURE_NAMES) if use_structure else 0)
+    width = label_head_input_dim(
+        hidden, use_structure=use_structure, evidence_pooling=evidence_pooling
+    )
     head = nn.Linear(width, len(FACTUALITY_LABELS)).to(device)
     evidence_head = nn.Linear(4 * hidden, 1).to(device) if evidence_weight else None
+    if evidence_pooling != POOLING_NONE and evidence_head is None:
+        raise SystemExit(
+            f"--evidence-pooling {evidence_pooling} conditions the label head on the evidence "
+            "head's own probabilities, so it needs --evidence-weight > 0"
+        )
+    print(f"label head input dim {width} (structure={use_structure} pooling={evidence_pooling})")
 
     label_index = {label: i for i, label in enumerate(FACTUALITY_LABELS)}
     weights = class_weights(train_docs, alpha)
@@ -175,26 +201,40 @@ def train_supervised(
             device=device,
         )
         triggers = pooled[: len(doc.mentions)]
-        features = triggers
+        candidate_features = split_candidate_features(
+            pooled, len(doc.mentions), [len(c) for c in candidates]
+        )
+        # Logits for *every* mention, not only the annotated ones: with the
+        # coupling on they are an input to the label head. The BCE below still
+        # scores only the annotated mentions, so the evidence head's own
+        # supervision is unchanged between the arms.
+        mention_logits = (
+            evidence_logits_per_mention(triggers, candidate_features, evidence_head)
+            if evidence_head is not None
+            else []
+        )
+        structure = None
         if use_structure:
             contexts = structure_contexts(doc.mentions, doc.gold_edges, nodes=doc.nodes)
             structure = torch.tensor(
                 [contexts[m.mention_id].as_vector() for m in doc.mentions],
-                dtype=features.dtype,
-                device=features.device,
+                dtype=triggers.dtype,
+                device=triggers.device,
             )
-            features = torch.cat([features, structure], dim=-1)
+        features = label_head_inputs(
+            triggers,
+            structure,
+            candidate_features,
+            mention_logits,
+            evidence_pooling=evidence_pooling,
+        )
 
         evidence_logits: list = []
         evidence_gold: list = []
-        cursor = len(doc.mentions)
         for i, (mention, per_mention) in enumerate(zip(doc.mentions, candidates, strict=True)):
-            span_features = pooled[cursor : cursor + len(per_mention)]
-            cursor += len(per_mention)
             if not mention.evidence:
                 continue
-            trigger = triggers[i].expand(len(per_mention), -1)
-            evidence_logits.append(evidence_head(pair_features(span_features, trigger)).squeeze(-1))
+            evidence_logits.append(mention_logits[i])
             evidence_gold.append(
                 torch.tensor(
                     evidence_targets(per_mention, mention),
@@ -259,12 +299,27 @@ def train_supervised(
         if evidence_head is not None:
             torch.save(evidence_head.state_dict(), output / EVIDENCE_HEAD_FILE)
         (output / LABELS_FILE).write_text(json.dumps(list(FACTUALITY_LABELS)))
+        # The checkpoint carries its own layout, so a later load with the wrong
+        # switches fails loudly instead of reading different features than it
+        # was trained on.
+        (output / CONFIG_FILE).write_text(
+            json.dumps(
+                {
+                    "use_structure": use_structure,
+                    "evidence_pooling": evidence_pooling,
+                    "label_head_input_dim": width,
+                    "labels": list(FACTUALITY_LABELS),
+                },
+                indent=2,
+            )
+        )
         if dev_docs:
             detector = SupervisedFactualityDetector(
                 checkpoint_path=str(output),
                 max_length=max_length,
                 stride=stride,
                 use_structure=use_structure,
+                evidence_pooling=evidence_pooling,
             )
             report, evidence_prf = evaluate(detector, dev_docs)
             per_class = {c: round(p["f1"], 4) for c, p in report["per_class"].items()}
@@ -353,6 +408,17 @@ def main() -> int:
         help="weight of the evidence-span loss; 0 trains the label head alone",
     )
     parser.add_argument(
+        "--evidence-pooling",
+        default=POOLING_NONE,
+        choices=list(EVIDENCE_POOLING_MODES),
+        help=(
+            "how the label head sees the mention's evidence candidates: "
+            "none = parallel dual heads (reproduction base), "
+            "evidence = pooled by the evidence head's probabilities (the mechanism), "
+            "uniform = same width pooled by all-ones weights (capacity control)"
+        ),
+    )
+    parser.add_argument(
         "--dev-ratio", type=float, default=0.1,
         help="historical/exploratory split; v6 requires --train-manifest/--dev-manifest",
     )
@@ -423,6 +489,7 @@ def main() -> int:
         stride=args.stride,
         use_structure=not args.no_structure,
         evidence_weight=args.evidence_weight,
+        evidence_pooling=validate_evidence_pooling(args.evidence_pooling),
         seed=args.seed,
     )
     return 0

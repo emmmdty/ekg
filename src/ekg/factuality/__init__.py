@@ -15,6 +15,10 @@ import torch lazily, so the package is importable without a GPU.
 """
 
 from ekg.factuality.detection import (
+    EVIDENCE_POOLING_MODES,
+    POOLING_EVIDENCE,
+    POOLING_NONE,
+    POOLING_UNIFORM,
     STRUCTURE_FEATURE_NAMES,
     FactualityDetector,
     FactualityPrediction,
@@ -22,8 +26,10 @@ from ekg.factuality.detection import (
     StructureContext,
     SupervisedFactualityDetector,
     factuality_detectors,
+    label_head_input_dim,
     predictions_to_labels,
     structure_contexts,
+    validate_evidence_pooling,
 )
 from ekg.factuality.metrics import (
     MAJORITY_LABEL,
@@ -37,6 +43,12 @@ __all__ = [
     "STRUCTURE_FEATURE_NAMES",
     "StructureContext",
     "structure_contexts",
+    "EVIDENCE_POOLING_MODES",
+    "POOLING_NONE",
+    "POOLING_UNIFORM",
+    "POOLING_EVIDENCE",
+    "validate_evidence_pooling",
+    "label_head_input_dim",
     "FactualityPrediction",
     "FactualityDetector",
     "factuality_detectors",
