@@ -66,24 +66,33 @@ pass/failed/blocked 均可完成 handoff；局部失败不阻断后续方法章�
 - Ch3 强 baseline、Ch1 official baseline、Ch4 BART/consumer 尚未闭合，均为对应阶段前置；
 - Ch4 缺完整 query 文件、事实性节点属性和 frozen consumer，均不阻塞 A3。
 
-## 当前唯一下一步：执行 A3.0 baseline 全协议重跑
+## 当前位置：A3.0 baseline 批次执行中
 
-P1.1–P1.6 已交付，见 [`results/PHASE_P1.md`](results/PHASE_P1.md) 和
-`runs/stages/P1/p1-v6-20260829-r9/`。A3.0 先在 4090 仓库物化
-`runs/stages/A3/a3-v6-baselines-r9b/preflight/`，记录并显式传入 materializer 打印的 plan SHA-256，再用
-train/internal-dev 在冻结 candidate/evaluator/schema 下重跑
-local pair、official single、official joint，方法结果产生前解析并冻结 primary anchor；不得提前查看新
-baseline 的 final-valid 分数。完整命令、产物和 promotion 规则见
-[`PHASE_A3`](phases/PHASE_A3_relation_balanced.md)。
+**协议**：P1 r9 `440516dc…0a6d4fdc`｜A3 plan r10 `36a38e4f…085d4d15`｜seed 13（作者定：单种子）｜
+train 2,622 训练 + internal-dev 291 选模｜**final-valid 未访问**｜官方 `evaluate.py`｜三族全评。
 
-A3 的 causal 主锚从 official single/joint 三种子 mean 选择，subevent 护栏锚固定为 official joint；模型
-资产统一置于 `/data/TJK/models/<repo>/<revision>/`。RoBERTa-base 用于忠实 official-recipe 与同 backbone
-主表；核心机制通过后再做 ModernBERT-base 的对称迁移，不以换 backbone 代替方法贡献。
+| baseline | 状态 | 备注 |
+|---|---|---|
+| local_pair | ✅ 完成 | 数字见 [`results/PHASE_A.md`](results/PHASE_A.md)；首跑因冻结配方 α=0.0 使稀有族坍塌而作废，α=0.5 重跑 |
+| official_joint | 🔄 运行中 | 官方 100 epochs，约 5.5 分钟/epoch，预计约 9 小时 |
+| official_single | ⏸ 排队 | 契约要求 4090 每次只跑一个实验任务，不并发 |
 
-P1 对 Ch4 只冻结 ID namespace、query 生成器版本/来源 hash 与 schema；完整 query/candidate manifest 在 E3.0
-冻结。P1 不要求 Ch1/Ch3 baseline 或 Ch4 consumer 实现。
+主锚在三个 baseline 全部完成后、任何方法结果产生前解析并冻结。
 
-A3.0 不开发主方法，不看 final valid 选择模型，不访问 5090；4090 命令仍须先展示准确工作目录和产物。
+### 已补齐的下游前置（不阻塞 A3，趁 GPU 排队时在 CPU 完成）
+
+- `ekg.core.protocol` 成为唯一的 manifest 划分实现；Ch3 训练脚本已接入显式 split；
+- Ch1 训练脚本接入 P1 manifest + best-epoch 选择，修掉一处**选模污染**：
+  MAVEN-Arg 与 MAVEN-ERE 是同一批文档，训全量 Arg train 会把 291 篇 internal-dev 全部纳入训练
+  （对 final-valid 无污染，历史 MUC 77.47 干净）；
+- Ch2 的 trainer 暂不改用共享划分实现——它是 P1 绑定文件，A3 批次跑完再统一。
+
+### temporal 已进入 Ch2 主贡献表（2026-08-29）
+
+TIMEX 端点已闭环，候选按族分离（causal/subevent 纯 event、temporal 含 TIMEX，对应官方
+`ignore_timex`）。三族各有预注册非劣护栏锚 = official joint。全语料 3,623 篇 / 20,827 个 TIMEX
+零定位失败；推理侧预测边含 TIMEX 由 0% 升到 37.6%（gold 39%）。九个会让正式跑报废的缺陷由
+一次 20 篇 pilot 抓出，逐条见 [`results/PHASE_P1.md`](results/PHASE_P1.md)。
 
 ## 全局停止条件
 
