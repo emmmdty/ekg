@@ -36,6 +36,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from ekg.core.eval.relation import PRF
+from ekg.core.protocol import split_docs_by_manifests
 from ekg.factuality.detection import (
     EVIDENCE_HEAD_FILE,
     HEAD_FILE,
@@ -352,7 +353,16 @@ def main() -> int:
         help="weight of the evidence-span loss; 0 trains the label head alone",
     )
     parser.add_argument(
-        "--dev-ratio", type=float, default=0.1, help="held-out share of train for model selection"
+        "--dev-ratio", type=float, default=0.1,
+        help="historical/exploratory split; v6 requires --train-manifest/--dev-manifest",
+    )
+    parser.add_argument(
+        "--train-manifest", type=Path, default=None,
+        help="frozen P1 MAVEN-FACT train manifest (doc IDs)",
+    )
+    parser.add_argument(
+        "--dev-manifest", type=Path, default=None,
+        help="frozen P1 MAVEN-FACT internal-dev manifest (doc IDs)",
     )
     parser.add_argument("--limit", type=int, default=None, help="first N documents (smoke)")
     parser.add_argument("--seed", type=int, default=13)
@@ -366,9 +376,21 @@ def main() -> int:
     print(f"label distribution: {distribution}")
 
     # Document-level split so no document's mentions straddle train and dev.
-    random.Random(args.seed).shuffle(docs)
-    n_dev = int(len(docs) * args.dev_ratio)
-    dev_docs, train_docs = docs[:n_dev], docs[n_dev:]
+    if bool(args.train_manifest) != bool(args.dev_manifest):
+        raise SystemExit("--train-manifest and --dev-manifest must be given together")
+    if args.train_manifest:
+        train_docs, dev_docs = split_docs_by_manifests(
+            docs, args.train_manifest, args.dev_manifest
+        )
+    else:
+        print(
+            "[train] WARNING: runtime --dev-ratio split is historical/exploratory; "
+            "v6 requires explicit manifests",
+            flush=True,
+        )
+        random.Random(args.seed).shuffle(docs)
+        n_dev = int(len(docs) * args.dev_ratio)
+        dev_docs, train_docs = docs[:n_dev], docs[n_dev:]
     print(f"train {len(train_docs)} docs / dev {len(dev_docs)} docs (valid split stays untouched)")
     if dev_docs:
         dev_gold = {m.mention_id: m.factuality for d in dev_docs for m in d.mentions}
