@@ -110,6 +110,36 @@ TIMEX 端点已闭环，候选按族分离（causal/subevent 纯 event、tempora
 零定位失败；推理侧预测边含 TIMEX 由 0% 升到 37.6%（gold 39%）。九个会让正式跑报废的缺陷由
 一次 20 篇 pilot 抓出，逐条见 [`results/PHASE_P1.md`](results/PHASE_P1.md)。
 
+## 正在跑（2026-08-30 00:30 起，4090 四卡并行）
+
+命令与产物位置在此；**数字出来后只写进 `docs/results/`，本文件不复制**。
+
+| 卡 | 任务 | run-dir | log |
+|---|---|---|---|
+| GPU0 | Ch3 D3.2 `none` 臂（平行双头 = 复现底座/对照） | `runs/stages/D3/pilot/none/seed-13` | `logs/d3_pilot_none_s13.log` |
+| GPU1 | Ch3 D3.2 `uniform` 臂（同宽度容量对照） | `runs/stages/D3/pilot/uniform/seed-13` | `logs/d3_pilot_uniform_s13.log` |
+| GPU2 | Ch3 D3.2 `evidence` 臂（机制） | `runs/stages/D3/pilot/evidence/seed-13` | `logs/d3_pilot_evidence_s13.log` |
+| GPU3 | Ch1 C4-r2 对照臂（逐 epoch 存档） | `runs/stages/C4/r2/control_trigger_only/seed-13` | `logs/c4r2_control_s13.log` |
+
+**Ch3 三臂**：P1 manifests（train 2,622 / internal-dev 291，final-valid 未访问）｜seed 13｜
+12 epochs（等预算）｜lr 2e-5｜α=0.5｜evidence-weight 1.0｜内容寻址 roberta-base。
+唯一变量是 `--evidence-pooling`。`uniform` 臂不是可选项：只比 `none` vs `evidence`，
+赢了也分不清是证据信号还是"标签头变宽且顺带看到了句子"。
+
+**Ch1 C4-r2**：与首轮唯一变量是 `--save-every-epoch`（10 epochs / neg-ratio 10 /
+hard-fraction 0.5 不变）。目的是消掉首轮的两个缺陷之一——选模轴用 pair-F1、
+四臂停在不同 epoch。四臂跑完后由**官方 `evaluate.py`** 逐 epoch 打分，
+既能在同一 epoch 对比，又能让选模轴与报数轴由构造相同。
+其余三臂（`context_pooling` / `confusability` / 两者）等 Ch3 腾出卡后启动。
+
+### 尚未开工
+
+- **Ch2 A3.2 关系族均衡机制**：A3.1 复现底座已把欠训混淆排掉（causal 差主锚 1.75），
+  机制本身还没设计实现。固定权重/网格不算创新，见契约。
+- **Ch3 D3.0 强 baseline 闭合**（RoBERTa+CLS / DMRoBERTa 同 split 重跑）：
+  上面的 pilot 只回答"耦合有没有用"，对外差距结论仍缺这一步。
+- **Ch4 图依赖正控**：缺 query 文件、事实性节点属性与 frozen consumer，需要先补前置。
+
 ## 全局停止条件
 
 - 数据/manifest/evaluator hash 漂移：所有下游结果停止使用，回 P1；
@@ -129,4 +159,4 @@ TIMEX 端点已闭环，候选按族分离（causal/subevent 纯 event、tempora
 - 本地：只做 CPU、文档、实现、测试、manifest/hash 与缓存回放；
 - 4090：主 GPU；cpolar 间歇性 banner timeout 后已用 ControlMaster 恢复，P1.6 在 GPU 0 完成；
 - 5090：本轮未访问，后续每次单独授权；
-- 不提交、不推送，除非作者明确要求。
+- 提交/推送已由作者授权（2026-08-29），条件是 git 整洁、分次提交、可回滚、不强推。
