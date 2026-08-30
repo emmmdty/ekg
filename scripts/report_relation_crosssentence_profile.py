@@ -75,6 +75,8 @@ def main() -> int:
 
     # cell -> [n_gold, n_recovered]
     cells: dict[tuple[str, str], list[int]] = {}
+    # position -> [n_predicted, n_correct]; the precision side of the same split.
+    emitted_by_position: dict[str, list[int]] = {}
     distance: dict[int, list[int]] = {}
     cue_counts: Counter[str] = Counter()
     n_pairs = 0
@@ -89,6 +91,19 @@ def main() -> int:
                 predictions[str(record["id"])].get("causal_relations") or {}
             ).items()
         }
+        gold_by_subtype = {subtype: {tuple(p) for p in pairs} for subtype, pairs in gold.items()}
+        for subtype, emitted in predicted_by_subtype.items():
+            correct = gold_by_subtype.get(subtype, set())
+            for pair in emitted:
+                head, tail = str(pair[0]), str(pair[1])
+                if head not in spans or tail not in spans:
+                    continue  # a TIMEX endpoint is not scoreable for causal
+                a, b = spans[head], spans[tail]
+                position = "same" if a.sent_id == b.sent_id else "cross"
+                row = emitted_by_position.setdefault(position, [0, 0])
+                row[0] += 1
+                row[1] += int(tuple(pair) in correct)
+
         for subtype, pairs in gold.items():
             emitted = predicted_by_subtype.get(subtype, set())
             for pair in pairs:
@@ -128,6 +143,19 @@ def main() -> int:
         if n:
             print(f"{position:<8}{'(全部)':<14}{n:>8}{hit:>8}{hit / n:>9.4f}")
 
+    print(f"\n{'位置':<8}{'预测数':>9}{'正确数':>8}{'precision':>11}{'recall':>9}{'F1':>8}")
+    print("-" * 44)
+    for position in ("same", "cross"):
+        emitted_n, emitted_hit = emitted_by_position.get(position, [0, 0])
+        gold_n = sum(cells.get((position, c), [0, 0])[0] for c in cue_names)
+        gold_hit = sum(cells.get((position, c), [0, 0])[1] for c in cue_names)
+        if emitted_n and gold_n:
+            precision = emitted_hit / emitted_n
+            recall = gold_hit / gold_n
+            f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+            print(f"{position:<8}{emitted_n:>9}{emitted_hit:>8}"
+                  f"{precision:>11.4f}{recall:>9.4f}{f1 * 100:>8.2f}")
+
     print(f"\n{'句距':>6}{'gold':>9}{'召回数':>8}{'recall':>9}")
     for bucket in sorted(distance):
         n, hit = distance[bucket]
@@ -146,6 +174,7 @@ def main() -> int:
                     "cells": {f"{p}|{c}": v for (p, c), v in cells.items()},
                     "distance": {str(k): v for k, v in distance.items()},
                     "cue_counts": dict(cue_counts),
+                    "emitted_by_position": emitted_by_position,
                 },
                 indent=2,
                 sort_keys=True,
