@@ -217,7 +217,7 @@ def _purification_arms(
 
 
 def _graph_dependence_arms(
-    gold: dict[str, list[RelationEdge]], seed: int
+    docs: list[RelationDocument], gold: dict[str, list[RelationEdge]], seed: int
 ) -> list[Arm]:
     """The positive control: does the consumer read the graph at all?
 
@@ -238,7 +238,10 @@ def _graph_dependence_arms(
     and the chapter's consumer-dependence claim has to be withdrawn rather than
     re-argued.
     """
-    nodes_by_doc = _topology_nodes(gold)
+    # Every event of the document, not just the ones carrying causal/subevent
+    # topology: a rewired edge may land anywhere, and `_topology_nodes` returns
+    # nothing at all for a document whose edges are purely temporal.
+    nodes_by_doc = {doc.doc_id: [node.event_id for node in doc.nodes] for doc in docs}
     empty = {doc_id: [] for doc_id in gold}
     rewired: dict[str, list[RelationEdge]] = {}
     for doc_id, edges in gold.items():
@@ -497,7 +500,7 @@ def main() -> int:
             }
             arms.extend(_purification_arms(docs, predicted, oracle, "_oracle", args.seed))
 
-    arms.extend(_graph_dependence_arms(gold_edges, args.seed))
+    arms.extend(_graph_dependence_arms(docs, gold_edges, args.seed))
     if not args.skip_perturbations:
         arms.extend(_perturbation_arms(gold_edges, args.seed))
 
