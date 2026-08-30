@@ -78,26 +78,54 @@ def test_a_trigger_span_covering_no_token_is_rejected(docs) -> None:
 
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")
 def test_dynamic_multi_pooling_separates_the_two_contexts() -> None:
+    """Hermetic: a word-level stub stands in for encoder and tokenizer.
+
+    Deliberately no `from_pretrained` -- the GPU box has no outbound network,
+    and a test that reaches for one hangs there instead of failing.
+    """
     import torch
 
     class FakeEncoder:
-        """Returns one row per token so pooling is checkable by hand."""
-
         def __call__(self, input_ids=None, attention_mask=None, **kwargs):
             n, length = input_ids.shape
             values = torch.arange(length, dtype=torch.float).view(1, length, 1)
             return type("Out", (), {"last_hidden_state": values.expand(n, length, 4).clone()})()
 
-    from transformers import AutoTokenizer
+    class FakeTokenizer:
+        """One token per whitespace word, plus a leading special token."""
 
-    tokenizer = AutoTokenizer.from_pretrained("hf-internal-testing/tiny-random-roberta")
-    text, start, end = "aa bb cc dd", 6, 8
+        def __call__(self, texts, **kwargs):
+            rows = []
+            for text in texts:
+                offsets, cursor = [(0, 0)], 0
+                for word in text.split(" "):
+                    offsets.append((cursor, cursor + len(word)))
+                    cursor += len(word) + 1
+                rows.append(offsets)
+            width = max(len(r) for r in rows)
+            padded = [r + [(0, 0)] * (width - len(r)) for r in rows]
+            mask = [[1] * len(r) + [0] * (width - len(r)) for r in rows]
+            return {
+                "input_ids": torch.zeros(len(rows), width, dtype=torch.long),
+                "attention_mask": torch.tensor(mask),
+                "offset_mapping": torch.tensor(padded),
+            }
+
+    text = "aa bb cc dd"
+    start, end = 6, 8  # "cc"
     features = pool_mentions(
-        FakeEncoder(), tokenizer, [text], [(start, end)],
+        FakeEncoder(), FakeTokenizer(), [text], [(start, end)],
         pooling=DYNAMIC_MULTI_POOLING, max_length=32,
     )
     assert features.shape == (1, 12)
     left, at, right = features[0, :4], features[0, 4:8], features[0, 8:]
-    # Positions increase left to right, so the three segment maxima must be
-    # ordered -- if the trigger split were ignored they would all be equal.
+    # Token rows increase left to right, so the three segment maxima must be
+    # strictly ordered -- were the trigger split ignored they would be equal.
     assert left.max() < at.max() < right.max()
+
+    cls = pool_mentions(
+        FakeEncoder(), FakeTokenizer(), [text], [(start, end)],
+        pooling=CLS_POOLING, max_length=32,
+    )
+    assert cls.shape == (1, 4)
+    assert torch.allclose(cls[0], torch.zeros(4))  # position 0 is the special token
