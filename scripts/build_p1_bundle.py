@@ -24,6 +24,10 @@ from ekg.relations.maven_ere_official import (
 
 CODE_PATHS = (
     "src/ekg/core/stage_bundle.py",
+    # The A3.2 mechanism lives here and decides what the trainer optimises, so a
+    # bundle that pinned the trainer but not this file would claim to fix the
+    # code behind a number it does not actually cover.
+    "src/ekg/relations/balance.py",
     "src/ekg/relations/data/maven_ere.py",
     "src/ekg/relations/extractor/supervised.py",
     "src/ekg/relations/maven_ere_official.py",
