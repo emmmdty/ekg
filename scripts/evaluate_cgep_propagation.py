@@ -216,6 +216,47 @@ def _purification_arms(
     ]
 
 
+def _graph_dependence_arms(
+    gold: dict[str, list[RelationEdge]], seed: int
+) -> list[Arm]:
+    """The positive control: does the consumer read the graph at all?
+
+    Ch4's claim is that construction errors carry a downstream cost. The claim is
+    empty if the consumer would score the same on a graph with no information in
+    it, and PHASE_E already found every graph-side intervention sitting inside
+    the +-.003 noise floor -- which has two very different explanations that the
+    existing table cannot tell apart: the interventions were too small, or the
+    consumer never used the graph.
+
+    Two arms separate them. `no_graph` removes every edge. `rewired` keeps the
+    exact edge count, type and subtype but re-attaches each edge to a random pair
+    of events in the same document, so the *amount* of structure is held fixed
+    and only its correctness is destroyed -- the sharper of the two, because a
+    consumer that merely counts edges cannot pass it.
+
+    If neither moves the metric, the downstream table is not measuring the graph,
+    and the chapter's consumer-dependence claim has to be withdrawn rather than
+    re-argued.
+    """
+    nodes_by_doc = _topology_nodes(gold)
+    empty = {doc_id: [] for doc_id in gold}
+    rewired: dict[str, list[RelationEdge]] = {}
+    for doc_id, edges in gold.items():
+        nodes = nodes_by_doc.get(doc_id, [])
+        if edges and len(nodes) < 2:
+            raise ValueError(f"{doc_id}: {len(edges)} edges over {len(nodes)} topology nodes")
+        rng = random.Random(f"{seed}:{doc_id}")
+        endpoints = [rng.sample(nodes, 2) for _ in edges]
+        rewired[doc_id] = [
+            edge.model_copy(update={"head_id": head, "tail_id": tail})
+            for edge, (head, tail) in zip(edges, endpoints, strict=True)
+        ]
+    return [
+        Arm("no_graph", "graph_dependence", empty, {"n_causal": 0.0}),
+        Arm("rewired", "graph_dependence", rewired, {"n_causal": float(_n_causal(rewired))}),
+    ]
+
+
 def _perturbation_arms(gold: dict[str, list[RelationEdge]], seed: int) -> list[Arm]:
     nodes = _topology_nodes(gold)
     arms: list[Arm] = []
@@ -456,6 +497,7 @@ def main() -> int:
             }
             arms.extend(_purification_arms(docs, predicted, oracle, "_oracle", args.seed))
 
+    arms.extend(_graph_dependence_arms(gold_edges, args.seed))
     if not args.skip_perturbations:
         arms.extend(_perturbation_arms(gold_edges, args.seed))
 
