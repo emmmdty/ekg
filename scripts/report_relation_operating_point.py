@@ -52,6 +52,15 @@ from ekg.relations.extractor.supervised import checkpoint_active_families  # noq
 FAMILIES = ("causal", "subevent", "temporal")
 DEFAULT_THRESHOLDS = (0.0, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.80, 0.90)
 
+# The cross-sentence profile (`report_relation_crosssentence_profile.py`) says
+# the same/cross F1 gap is a *precision* gap: 0.290 vs 0.200 at nearly equal
+# recall (0.584 vs 0.522), with cross-sentence emitting 2.6x its gold count
+# against same-sentence's 2.0x. A single global cut cannot serve two populations
+# that over-emit by different factors, so `--position-split` sweeps the two cuts
+# independently -- still scored end to end by the official evaluator, so the
+# answer carries no protocol risk of its own.
+POSITION_THRESHOLDS = (0.0, 0.45, 0.55, 0.65, 0.75)
+
 
 def read_jsonl(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as fh:
@@ -63,6 +72,48 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
     with path.open("w", encoding="utf-8") as fh:
         for row in rows:
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def sentence_of(records: list[dict]) -> dict[str, int]:
+    """Namespaced mention id -> sentence index, for the same/cross split.
+
+    The edge dump namespaces ids as ``<doc>::<mention>``; gold records key them
+    bare. Building the map from gold rather than from the dump means a mention
+    the dump invented would be absent and raise, instead of being silently
+    counted as same-sentence.
+    """
+    spans: dict[str, int] = {}
+    for record in records:
+        doc_id = str(record["id"])
+        for event in record.get("events", []):
+            for mention in event.get("mention", []):
+                spans[f"{doc_id}::{mention['id']}"] = int(mention["sent_id"])
+    return spans
+
+
+def filtered_edges_by_position(
+    rows: list[dict], same_tau: float, cross_tau: float, sent_of: dict[str, int]
+) -> tuple[list[dict], dict[str, int]]:
+    """Cut same-sentence and cross-sentence edges at their own thresholds."""
+    kept: list[dict] = []
+    counts = dict.fromkeys(FAMILIES, 0)
+    for row in rows:
+        edges = []
+        for edge in row.get("edges", []):
+            head, tail = edge["head_id"], edge["tail_id"]
+            if head not in sent_of or tail not in sent_of:
+                # A TIMEX endpoint: only temporal is scored on it, and the
+                # position split is a causal/subevent question, so keep it as is.
+                edges.append(edge)
+                continue
+            tau = same_tau if sent_of[head] == sent_of[tail] else cross_tau
+            if edge.get("confidence", 1.0) >= tau:
+                edges.append(edge)
+        for edge in edges:
+            if edge["relation_type"] in counts:
+                counts[edge["relation_type"]] += 1
+        kept.append({"doc_id": row["doc_id"], "edges": edges})
+    return kept, counts
 
 
 def filtered_edges(rows: list[dict], threshold: float) -> tuple[list[dict], dict[str, int]]:
@@ -97,6 +148,12 @@ def main() -> int:
         "--source-lock", type=Path, default=Path("data/protocols/v6/source_lock.json")
     )
     parser.add_argument("--thresholds", type=float, nargs="*", default=list(DEFAULT_THRESHOLDS))
+    parser.add_argument(
+        "--position-split",
+        action="store_true",
+        help="sweep same-sentence and cross-sentence cuts independently instead of one "
+             "global cut; requires --gold for the sentence map",
+    )
     parser.add_argument("--workdir", type=Path, default=Path("runs/stages/A3/operating_point"))
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -105,10 +162,22 @@ def main() -> int:
     active = checkpoint_active_families(args.checkpoint)
     print(f"{len(rows)} documents, active families {active}")
 
+    if args.position_split:
+        sent_of = sentence_of(read_jsonl(args.gold))
+        print(f"sentence map over {len(sent_of)} mentions")
+        grid = [(s, c) for s in POSITION_THRESHOLDS for c in POSITION_THRESHOLDS]
+    else:
+        sent_of, grid = {}, [(t, t) for t in args.thresholds]
+
     results: list[dict] = []
-    for threshold in args.thresholds:
-        kept, counts = filtered_edges(rows, threshold)
-        stem = f"tau_{threshold:.2f}".replace(".", "p")
+    for same_tau, cross_tau in grid:
+        if args.position_split:
+            kept, counts = filtered_edges_by_position(rows, same_tau, cross_tau, sent_of)
+            stem = f"same_{same_tau:.2f}_cross_{cross_tau:.2f}".replace(".", "p")
+        else:
+            kept, counts = filtered_edges(rows, same_tau)
+            stem = f"tau_{same_tau:.2f}".replace(".", "p")
+        threshold = same_tau
         raw_path = args.workdir / f"{stem}_edges.jsonl"
         official_path = args.workdir / f"{stem}_official.jsonl"
         metrics_path = args.workdir / f"{stem}_metrics.json"
@@ -142,6 +211,8 @@ def main() -> int:
         results.append(
             {
                 "threshold": threshold,
+                "same_tau": same_tau,
+                "cross_tau": cross_tau,
                 "edges_kept": counts,
                 **{
                     f"{fam}_{key}": scores[f"{fam}_{key}"]
@@ -151,7 +222,8 @@ def main() -> int:
             }
         )
         print(
-            f"tau={threshold:.2f}  "
+            (f"same={same_tau:.2f} cross={cross_tau:.2f}  " if args.position_split
+             else f"tau={threshold:.2f}  ")
             + "  ".join(
                 f"{fam[:4]} P{scores[f'{fam}_precision']:5.2f} R{scores[f'{fam}_recall']:5.2f} "
                 f"F{scores[f'{fam}_f1']:5.2f}"
@@ -164,9 +236,14 @@ def main() -> int:
     for fam in FAMILIES:
         best = max(results, key=lambda r: r[f"{fam}_f1"])
         base = results[0]
+        where = (
+            f"same {best['same_tau']:.2f} / cross {best['cross_tau']:.2f}"
+            if args.position_split
+            else f"tau {best['threshold']:.2f}"
+        )
         print(
-            f"{fam:<9} base F1 {base[f'{fam}_f1']:6.2f} (tau {base['threshold']:.2f})  ->  "
-            f"best F1 {best[f'{fam}_f1']:6.2f} at tau {best['threshold']:.2f}  "
+            f"{fam:<9} base F1 {base[f'{fam}_f1']:6.2f}  ->  "
+            f"best F1 {best[f'{fam}_f1']:6.2f} at {where}  "
             f"headroom {best[f'{fam}_f1'] - base[f'{fam}_f1']:+.2f}"
         )
 
