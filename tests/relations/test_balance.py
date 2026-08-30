@@ -99,19 +99,57 @@ def test_best_shift_refuses_a_family_with_nothing_to_measure() -> None:
         best_none_shift(np.zeros((3, 1)), np.zeros(3, dtype=int))
 
 
-def test_controller_accumulates_damped_offsets_and_records_the_trajectory() -> None:
+def test_controller_moves_against_the_measured_shift_and_records_the_trajectory() -> None:
     logits = np.array([[3.0, 0.0], [3.0, 0.0], [0.0, 3.0], [3.0, 0.0]])
     targets = np.array([1, 1, 1, 0])
     controller = WorkPointController(["causal"], damping=0.5)
 
     first = controller.observe(1, "causal", logits, targets)
-    # NONE dominates three of four rows, so the optimum shifts NONE *down*.
-    assert first < 0
+    measured = controller.trajectory[0]["measured_shift"]
+    # NONE dominates three of four rows, so the family is under-emitting and the
+    # measured shift is negative ("cut lower"). The offset must move the *other*
+    # way: it is added to NONE inside the loss, and cross-entropy answers by
+    # pushing the raw NONE logit in the opposite direction. Getting this sign
+    # backwards is a positive feedback loop, not a slow start.
+    assert measured < 0
+    assert first == pytest.approx(-0.5 * measured)
+    assert first > 0
+
     second = controller.observe(2, "causal", logits, targets)
-    assert second == pytest.approx(first + 0.5 * controller.trajectory[-1]["measured_shift"])
+    assert second == pytest.approx(first - 0.5 * controller.trajectory[-1]["measured_shift"])
 
     assert [row["epoch"] for row in controller.trajectory] == [1, 2]
     assert controller.trajectory[0]["offset_before"] == 0.0
     assert controller.trajectory[0]["dev_f1_at_shift"] > controller.trajectory[0]["dev_f1_at_zero"]
     with pytest.raises(KeyError):
         controller.observe(3, "temporal", logits, targets)
+
+
+def test_closed_loop_contracts_instead_of_running_away() -> None:
+    """The loop against a model that fully absorbs the offset it was trained under.
+
+    Training with `+b` on the NONE logit drives the *raw* NONE logit down by `b`,
+    so the raw margin a later epoch measures is `calibrated + b`. Iterating must
+    contract toward the offset that makes a plain argmax optimal. The first
+    version of this loop had the update sign inverted: each epoch multiplied the
+    offset by 1.5 instead of halving the error, and 50 epochs of that reached
+    1e7 and took the model with it (`logs/a32_workpoint.log`).
+    """
+    rng = np.random.default_rng(7)
+    n = 600
+    targets = rng.integers(0, 2, size=n)
+    calibrated = rng.normal(size=n) + 1.2 * targets - 0.9  # under-emitting model
+
+    controller = WorkPointController(["causal"], damping=0.5)
+    offset, measured = 0.0, []
+    for epoch in range(12):
+        logits = np.stack([np.zeros(n), calibrated + offset], axis=1)
+        offset = controller.observe(epoch, "causal", logits, targets)
+        measured.append(abs(controller.trajectory[-1]["measured_shift"]))
+
+    assert measured[-1] < measured[0] / 4, "the loop is not contracting"
+    assert abs(offset) < 5.0, "the offset ran away"
+    # Converged means the plain argmax is already at this family's optimum.
+    final = np.stack([np.zeros(n), calibrated + offset], axis=1)
+    _, best_f1, f1_at_zero = best_none_shift(final, targets)
+    assert f1_at_zero == pytest.approx(best_f1, abs=0.02)

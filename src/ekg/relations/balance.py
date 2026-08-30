@@ -201,7 +201,13 @@ class WorkPointController:
             raise KeyError(f"unknown family {family!r}")
         shift, f1_at_shift, f1_at_zero = best_none_shift(logits, targets)
         previous = self.offsets[family]
-        self.offsets[family] = previous + self.damping * shift
+        # Minus, not plus. The offset is added to the NONE logit *inside the
+        # loss*, and cross-entropy answers by pushing the raw NONE logit the
+        # other way -- so asking for "cut higher" (shift > 0) means subtracting.
+        # With the sign inverted the loop multiplies its own error by 1.5 an
+        # epoch: the first A3.2 run reached an offset of 1e7 by epoch 49 and
+        # collapsed temporal to 0.000 F1.
+        self.offsets[family] = previous - self.damping * shift
         self.trajectory.append(
             {
                 "epoch": epoch,
