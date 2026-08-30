@@ -102,6 +102,9 @@ def train(
     max_length: int,
     stride: int,
     seed: int,
+    head_lr: float | None = None,
+    warmup_steps: int = 0,
+    accum_steps: int = 1,
     components: tuple[str, ...] = (),
     dev_docs: Sequence[ArgumentDocument] = (),
     dev_pairs: dict[str, list[CorefPair]] | None = None,
@@ -128,7 +131,37 @@ def train(
     # separate high head lr (1e-3) was tried first and diverged: loss rose
     # 0.428 -> 0.646 within epoch 1 and plateaued above the constant-prior
     # optimum (~0.305 at 1:10), i.e. the 3072-dim head outran the encoder.
-    optimizer = torch.optim.AdamW([*encoder.parameters(), *head.parameters()], lr=lr)
+    # Mirrors `train_supervised_relations.py`, and for the same measured reason.
+    # This trainer had a single constant rate and no schedule at all, and its
+    # cost is visible in the C4-r2 curve: every arm peaks at epoch 2 and then
+    # loses 4-8 MUC points over the next eight. PHASE_A recorded warmup + linear
+    # decay as "the official ingredient we kept missing"; Ch2 recovered causal
+    # +5.11 from the recipe alone. Ch1 never had a reproduction base at all.
+    optimizer = torch.optim.AdamW(
+        [
+            {"params": list(encoder.parameters()), "lr": lr},
+            {
+                "params": list(head.parameters()),
+                "lr": lr if head_lr is None else head_lr,
+                "weight_decay": 0.0,
+            },
+        ],
+        lr=lr,
+    )
+    scheduler = None
+    if warmup_steps > 0:
+        import math
+
+        from transformers import get_linear_schedule_with_warmup
+
+        # Optimiser steps, not documents: with accumulation the schedule advances
+        # once per N docs. Counting documents stretches the decay past the end of
+        # training, so the rate never actually anneals -- the exact bug that would
+        # make this change look like a no-op.
+        steps_per_epoch = math.ceil(len(per_doc) / accum_steps)
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer, warmup_steps, epochs * steps_per_epoch
+        )
     loss_fn = nn.CrossEntropyLoss()
     by_id = {doc.doc_id: doc for doc in docs}
     doc_ids = list(per_doc)
@@ -147,6 +180,10 @@ def train(
                 {
                     "components": list(components),
                     "context_discriminative": context_discriminative,
+                    "lr": lr,
+                    "head_lr": lr if head_lr is None else head_lr,
+                    "warmup_steps": warmup_steps,
+                    "accum_steps": accum_steps,
                     "feature_names": list(FEATURE_NAMES),
                     "hidden_size": enc.config.hidden_size,
                     "head_input_dim": head_input_dim(enc.config.hidden_size, components),
@@ -192,9 +229,15 @@ def train(
             targets = torch.tensor([int(p.label) for p in pairs], device=device)
             logits = _forward(doc, pairs)
             loss = loss_fn(logits, targets)
-            loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
+            # Scale so the accumulated gradient matches a true batch of that size,
+            # and step the scheduler with the optimiser -- stepping it per document
+            # would race through the warmup N times too fast.
+            (loss / accum_steps).backward()
+            if step % accum_steps == 0 or step == len(doc_ids):
+                optimizer.step()
+                if scheduler is not None:
+                    scheduler.step()
+                optimizer.zero_grad()
             total += float(loss.detach())
             seen += 1
             if step % 200 == 0:
@@ -255,6 +298,21 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--lr", type=float, default=2e-5)
+    parser.add_argument(
+        "--head-lr", type=float, default=None,
+        help="separate rate for the pair head (the official baseline uses 1e-4); "
+             "default = same as --lr, which is what every run before 2026-08-30 used",
+    )
+    parser.add_argument(
+        "--warmup-steps", type=int, default=0,
+        help="linear warmup then linear decay (the official baseline uses 200); 0 = off, "
+             "i.e. the constant rate whose decay the C4-r2 curve exposed",
+    )
+    parser.add_argument(
+        "--accum-steps", type=int, default=1,
+        help="documents per optimiser step; >1 makes --warmup-steps count that many "
+             "fewer steps, as in the relation trainer",
+    )
     parser.add_argument("--neg-ratio", type=float, default=10.0)
     parser.add_argument("--hard-fraction", type=float, default=0.5)
     parser.add_argument("--max-length", type=int, default=512)
@@ -322,6 +380,9 @@ def main() -> int:
         max_length=args.max_length,
         stride=args.stride,
         seed=args.seed,
+        head_lr=args.head_lr,
+        warmup_steps=args.warmup_steps,
+        accum_steps=args.accum_steps,
         components=validate_components(args.components),
         dev_docs=dev_docs,
         dev_pairs=build_eval_pairs(dev_docs) if dev_docs else None,
