@@ -1,6 +1,6 @@
 # EKG 实时状态
 
-> 更新于 **2026-08-30**。本文件只记录当前位置、门状态、下一步和停止条件，不复制实验数字。
+> 更新于 **2026-08-30**（收盘）。本文件只记录当前位置、门状态、下一步和停止条件，不复制实验数字。
 > **新会话先读 [`HANDOFF.md`](HANDOFF.md)**（状态快照 + 规矩 + 坑 + 下一步优先级）。
 > 总纲见 [`SPEC.md`](SPEC.md)，活动契约见 [`phases/`](phases/README.md)，实验事实只认
 > [`results/`](results/README.md)，G0 筛查见
@@ -110,76 +110,40 @@ TIMEX 端点已闭环，候选按族分离（causal/subevent 纯 event、tempora
 零定位失败；推理侧预测边含 TIMEX 由 0% 升到 37.6%（gold 39%）。九个会让正式跑报废的缺陷由
 一次 20 篇 pilot 抓出，逐条见 [`results/PHASE_P1.md`](results/PHASE_P1.md)。
 
-## 正在跑：A3.2 关系族均衡四臂（2026-08-30 起，四卡并行，约 3 小时）
+## 状态（2026-08-30 收盘）
 
-| 卡 | 臂 | `--balance-components` |
-|---|---|---|
-| GPU0 | control | （空，= 复现底座配方，验证代码改动是 no-op） |
-| GPU1 | normalized_risk | 归一化族风险 |
-| GPU2 | adaptive_workpoint | 工作点闭环 |
-| GPU3 | both | 两者 |
+**四卡全空，无进程。** 本地 `main` = `3ec0464`，445 passed / 16 skipped，ruff 0，smoke OK。
+**新会话先读 [`HANDOFF.md`](HANDOFF.md)**——那里有完整的状态、下一步与执行流程。
 
-run-dir `runs/stages/A3/a3-v6-balanced-r11/<臂>/seed-13/checkpoint`，
-日志 `logs/a32_*.log`，启动脚本 `runs/stages/A3/a3-v6-balanced-r11/launch_arm.sh`。
-四臂除组件外与 A3.1 复现底座配方逐位相同（50 epoch / lr 1e-5 / head-lr 1e-4 /
-accum 8 / neg-ratio inf / α=0.5 / macro 选模 / seed 13）。
-
-### 新信任根 P1 r10（改了 CODE_PATHS 里的 trainer，按文档流程重建）
-
-| 项 | 值 |
-|---|---|
-| trust root | `runs/stages/P1/p1-v6-20260830-r10/` |
-| `protocol.json` SHA-256 | `1cf68b2047c8867be7fc545767c6ec78c98650ddc76ed2bc24c2bd8e6f936893` |
-| A3 plan | `runs/stages/A3/a3-v6-balanced-r11/preflight/execution_plan.json` |
-| plan SHA-256 | `340efe776310726ac3c16897e52bdd8380fc5a7e68b28f6139e78313393c70c0` |
-
-**r10 与 r9 的差异面已逐项核对**：只有 `code/train_supervised_relations.py` 与
-`config/local_gate.json` 两项变化；data / manifests / candidate / evaluator / checkpoint
-全部 0 项变化，candidate digest、population、seed、prediction ids、access ledger 完全相同。
-⇒ 划分、候选全集、评分器逐位未动，**冻结主锚仍然可比**，baseline 不需要重跑。
-
-### 判定这一轮要过的三条线
-
-| 线 | 值 | 来源 |
-|---|---|---|
-| 冻结主锚 causal | **> 33.17** | `primary_anchor.json` |
-| **逐族事后校准的对照** | **> 33.15** | 工作点诊断给出的重切上限 |
-| subevent / temporal 护栏 | ≥ 28.75 / ≥ 50.63 | 预注册 |
-
-第二条是本轮特意立的**公平对照**：机制的工作点部件在 internal-dev 上量偏移，
-若只跟"未校准的复现底座 31.42"比，赢的可能只是校准本身。所以对照取
-"复现底座 + 逐族事后校准"，机制要赢的是**把校准放进目标函数**相对
-**事后再切一刀**的增量——这也正是诊断已经把上限钉在 33.15 的那个问题。
-
-## 2026-08-30 这一批的结果（数字在 `docs/results/`，此处只记状态）
-
-四卡跑完两批，**两个都是负结果**。四张卡现在全空。
-
-| 章 | 做了什么 | 结论 | 档案 |
+| 章 | 同协议对手 | 我们 | 状态 |
 |---|---|---|---|
-| **Ch3 D3.2** | 证据→标签软耦合 三臂（none / uniform / evidence），12 epoch 等预算 | 机制方向对（PS− +.15），**但主指标配对 CI 含 0 = 平局**，未过 promotion 门 | [`PHASE_D.md`](results/PHASE_D.md) 末节 |
-| **Ch1 C4-r2** | 四臂逐 epoch 存档 + 官方 evaluate.py 逐个打分（40 个 checkpoint） | **推翻 8-29 的机制增益**：那是 pair-F1 选模轴的伪影，机制不优于对照 | [`PHASE_C.md`](results/PHASE_C.md) 末节 |
+| Ch1 | official joint 80.98 MUC | 79.14（底座终点 4 种子均值） | ❌ 机制两周期均无效，降为系统组件 |
+| **Ch2** | official joint 33.17 causal | 33.27（未过门） | 🔵 **止损被推翻，第二周期目标明确 ← 下一步** |
+| Ch3 | CLS .5458 / DMRoBERTa .5423 | .5554 | ⚠️ 配对 CI 含 0，不可区分 |
+| Ch4 | —（系统章） | 正控通过 | ✅ 成立 |
 
-两个负结果都是被同一类方法学修正逼出来的（Ch3 加容量对照臂、Ch1 消 epoch 混淆），
-而且两次都是**原文档自己列出的"限制"变成了结论级问题**。
+### 下一步：Ch2 A3.2 第二个核心设计周期
 
-### 两个待作者决定的问题
+把 `adaptive_workpoint` 控制器从「逐族」扩到「**逐族 × 逐位置**」。
+依据：跨句差在**精度**（.290 vs .200，召回只差 .062，过发 2.6× vs 2.0×），
+逐位置设阈的 causal 天花板 **33.80 > 主锚 33.17**——而第一轮止损时的全局上限 33.15
+**低于**主锚，机制当时按构造过不了门。推导见 [`results/PHASE_A.md`](results/PHASE_A.md) 末节。
 
-1. **Ch3 的 promotion 门写在了没有功效的 split 上**：internal-dev 291 篇的配对 MDE 是
-   +.051，观测效应 +.027。选项：加种子做配对符号检验 / 换判定轴（证据轴支持数是标签轴的
-   18 倍）/ 承认 291 篇只能当工程闸门、统计判定放到 sealed final-valid。**不自行放松规则。**
-2. **Ch1 是否继续**：按契约这是一个已完成的核心设计周期、未过门。继续的话建议预算缩到
-   ep1–4（四臂都在 ep2 附近最好，10 epoch 是过训）、多种子（8.55 点的 epoch 噪声下单种子
-   无意义），并先弄清"为什么 ep2 之后一路掉"。止损的话 Ch1 降为系统组件。
+⚠️ `balance.py` 与 `train_supervised_relations.py` 都在 `CODE_PATHS`，改后必须按
+HANDOFF §3 的流程重建 P1 bundle（当前信任根 r11 `22ddb933…`）。
 
-### 尚未开工
+### 已被实测证否、不要再试
 
-- **Ch2 A3.2 关系族均衡机制**：A3.1 复现底座已把欠训混淆排掉（causal 差主锚 1.75，
-  三章里最接近过线），机制本身还没设计实现。固定权重/网格不算创新，见契约。
-- **Ch3 D3.0 强 baseline 闭合**（RoBERTa+CLS / DMRoBERTa 同 split 重跑）：
-  D3.2 pilot 只回答"耦合有没有用"，对外差距结论仍缺这一步。
-- **Ch1 official coref 对手**：仍未重跑，本章至今没有对外差距结论。
-- **Ch4 图依赖正控**：缺 query 文件、事实性节点属性与 frozen consumer，需先补前置。
+重叠滑窗（causal 跨窗仅 3.3%）｜连接词感知的上下文表示（有/无线索召回差 .008）｜
+长距离专用建模（句距分层平坦）｜`normalized_risk` 单用（负作用）｜固定权重/网格｜
+Ch1 的语境池化与混淆度特征（两个周期、多种子均无效）。
+
+### 待作者决定
+
+1. **Ch3 是否改判定轴到证据侧**：标签轴由 72 个稀有类实例决定、五个系统全部不可区分；
+   证据轴有 1,276 个 gold span（支持数 18 倍）。或承认只能给描述性对比。
+2. **论文结构是否要改**：Ch1 已确定无方法贡献。若 Ch2 第二周期也未过门，
+   按停止条件应由作者/导师决定是否改为「两方法章 + 一系统评估章」。
 
 ## 全局停止条件
 
