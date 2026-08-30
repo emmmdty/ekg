@@ -753,3 +753,72 @@ causal 有 +1.73 的真实余量——但余量刚好不够。）
   **只在训练侧加、推理侧不加**（Menon et al., ICLR 2021）：两侧都加会相互抵消——交叉熵只会
   教模型把它减回去；只改目标函数，模型才会把移动后的边界学进表示里，而推理仍是朴素 argmax
   ⇒ 增益**无法被说成测试期调阈值**。epoch 0 全零，机制以精确 no-op 起步。
+
+## ★ A3.2 第一轮：control 逐位复现，`normalized_risk` 单用为负，工作点闭环**发散**（2026-08-30）
+
+四臂同批、四卡并行，除 `--balance-components` 外与 A3.1 复现底座配方逐位相同
+（50 epoch / lr 1e-5 / head-lr 1e-4 / accum 8 / neg-ratio inf / α=0.5 / macro 选模 / seed 13）。
+信任根 P1 **r10**（`1cf68b20…6f936893`）—— 因为 `train_supervised_relations.py` 在 `CODE_PATHS` 里，
+改它必须按流程重建 bundle。r10 与 r9 的差异面逐项核对过：只有该 trainer 与 `local_gate.json`
+两项变化，**data / manifests / candidate / evaluator / checkpoint 全部零变化**，
+candidate digest、population、seed、prediction ids、access ledger 完全相同 ⇒ **冻结主锚仍可比**。
+
+### ✅ 代码改动是 no-op：control 臂逐位复现 A3.1 复现底座
+
+| 系统 | causal P | causal R | causal F1 | subevent F1 | temporal F1 |
+|---|---|---|---|---|---|
+| A3.1 复现底座（8-29，r9） | 22.15 | 54.02 | 31.42 | 30.62 | 50.78 |
+| **A3.2 control 臂（8-30，r10）** | **22.15** | **54.02** | **31.42** | **30.62** | **50.78** |
+
+同 seed、不同日期、不同信任根版本，官方评分器下**三族六个数字全部一致**。
+本项目此前的 Ch1 复现是"best epoch 与 pair-F1 一致"，这里是**官方主指标逐位一致**，
+强度更高。它同时证明加进 trainer 的机制代码在关闭时确实是零影响。
+
+### ❌ `normalized_risk` 单用：把工作点推得更偏
+
+| 臂 | causal P | causal R | **causal F1** | subevent F1 | temporal F1 |
+|---|---|---|---|---|---|
+| control | 22.15 | 54.02 | **31.42** | 30.62 | 50.78 |
+| normalized_risk | 21.67 | **55.67** | **31.19** | 30.64 | **49.82** ⚠️ |
+
+causal −0.23、temporal −0.96（**跌破 50.63 护栏**）。方向是可解释的：归一化把梯度更多分给
+稀疏族，而 α=0.5 逆频加权还在，两者叠加 = 更狠的过发（subevent 召回 41.06→48.38，
+精度 24.42→22.41）。**⇒ 归一化族风险单独用是负面的；它必须配上工作点校正才有意义。**
+这也说明两个部件不是可加的，消融必须保留 `both` 臂。
+
+### ❌❌ `adaptive_workpoint` 与 `both`：闭环发散，是**实现 bug 不是方法失败**
+
+两臂的 dev macro 在 50 epoch 里从 0.35 塌到 **0.0165**（temporal F1 归零）。偏移轨迹是铁证：
+
+| epoch | causal 偏移 | subevent | temporal |
+|---|---|---|---|
+| 0 | 0.063 | −0.163 | −0.087 |
+| 3 | 1.895 | 1.025 | −0.568 |
+| 10 | 52.5 | 29.5 | −10.4 |
+| 20 | 3,702 | 2,012 | −623 |
+| **49** | **1.03e7** | 4.03e6 | −4.76e6 |
+
+**根因（已推导并验证）**：损失里用 `z + b·e_NONE`，CE 最优时 `softmax(z+b·e)=p(y|x)`，
+故**原始** `z_NONE = log p(NONE) − b`；推理对原始 logits 做 argmax，判正条件是
+`margin_calibrated > −b`。而测出的目标规则是 `margin_raw > s`，
+且 `margin_raw = margin_calibrated + b_t`。两边对齐得 **`b_{t+1} = b_t − s`**，
+代码写成了 `+` ⇒ `b ← 1.5b + 0.5·s_cal`，每轮放大 1.5 倍。1.5⁴⁹ ≈ 5e8，与实测量级吻合。
+
+修一行，并补了两个能钉住它的 CPU 测试（直接断言反号 + 闭环收缩，已验证旧符号下均为红）。
+按契约这是**一轮有界的"诊断→补丁→同协议 smoke"工程修复**，不消耗核心设计周期。
+
+### 第二轮（r11 / `a3-v6-balanced-r12`，2026-08-30 起）
+
+信任根 P1 **r11**（`22ddb933…e831a515`），把 `src/ekg/relations/balance.py` 也纳入 `CODE_PATHS`
+——机制在这个文件里、决定 trainer 优化什么，只钉 trainer 不钉它，等于声称锁住了一个
+其实没覆盖的数字。r11 vs r10 的差异面：仅 `build_p1_bundle.py`、新增的 `balance.py`、
+`local_gate.json`；**`train_supervised_relations.py` 未变**，故 control 与 `normalized_risk`
+两臂不需要重跑（`balance.py` 的改动是单个 hunk、只碰 `WorkPointController`，
+这两臂不实例化它）。
+
+跑：`adaptive_workpoint` seed 13、`both` seed 13/17/42（四卡并行）。
+
+> **预注册（在任何第二轮结果产生之前写下）**：`both` 的三个种子是**同时**起的，
+> 属于操作性的并行，不是"先看 seed 13 再决定跑不跑"。**三个种子无论结果如何全部报告**，
+> 判定仍按预注册规则以 seed-13 internal-dev 为准，17/42 作 matched-seed 证据。
+> 不得只报其中表现好的种子。
