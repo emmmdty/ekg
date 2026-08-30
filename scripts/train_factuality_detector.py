@@ -47,6 +47,16 @@ from pathlib import Path
 
 from ekg.core.eval.relation import PRF
 from ekg.core.protocol import split_docs_by_manifests
+from ekg.factuality.baselines import (
+    BASELINE_POOLINGS,
+    CLS_POOLING,
+    baseline_head_input_dim,
+    marked_sentence,
+    pool_mentions,
+    validate_pooling,
+)
+from ekg.factuality.baselines import CONFIG_FILE as BASELINE_CONFIG_FILE
+from ekg.factuality.baselines import HEAD_FILE as BASELINE_HEAD_FILE
 from ekg.factuality.detection import (
     CONFIG_FILE,
     EVIDENCE_HEAD_FILE,
@@ -384,10 +394,165 @@ def train_supervised(
     print(f"saved factuality detector to {output}")
 
 
+def train_baseline(
+    train_docs: Sequence[FactualityDocument],
+    dev_docs: Sequence[FactualityDocument],
+    *,
+    model_name: str,
+    output: Path,
+    epochs: int,
+    lr: float,
+    alpha: float,
+    pooling: str,
+    max_length: int,
+    batch_size: int,
+    seed: int,
+) -> None:
+    """Fine-tune a public-architecture baseline on the same split we train on.
+
+    Deliberately given the *same* imbalance treatment as our own detector
+    (`--alpha`), the same epochs, lr, seed and manifests. A baseline trained
+    under plain cross-entropy would collapse to the 94.9% CT+ majority and score
+    .1947 macro-F1, and reporting that as "the opponent" would be scoring
+    ourselves against a strawman.
+    """
+    import torch
+    from torch import nn
+    from transformers import AutoModel, AutoTokenizer
+
+    from ekg.factuality.baselines import BaselineFactualityDetector
+
+    torch.manual_seed(seed)
+    random.seed(seed)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    encoder = AutoModel.from_pretrained(model_name).to(device)
+    encoder.gradient_checkpointing_enable()
+    width = baseline_head_input_dim(encoder.config.hidden_size, pooling)
+    head = nn.Linear(width, len(FACTUALITY_LABELS)).to(device)
+    print(f"baseline pooling={pooling} head input dim {width}")
+
+    label_index = {label: i for i, label in enumerate(FACTUALITY_LABELS)}
+    weights = class_weights(train_docs, alpha)
+    print(f"class weights (alpha={alpha}): {dict(zip(FACTUALITY_LABELS, weights, strict=True))}")
+    optimizer = torch.optim.AdamW([*encoder.parameters(), *head.parameters()], lr=lr)
+    loss_fn = nn.CrossEntropyLoss(weight=torch.tensor(weights, dtype=torch.float, device=device))
+
+    # One flat mention stream: these architectures classify a sentence, not a
+    # document, so a document-sized step would leave the batch size at the mercy
+    # of how many triggers a document happens to carry.
+    examples = [(doc, mention) for doc in train_docs for mention in doc.mentions]
+    print(f"{len(examples)} training mentions")
+
+    curve: list[dict] = []
+    best: dict = {"macro_f1": -1.0, "epoch": 0}
+    best_state: dict = {}
+    for epoch in range(epochs):
+        random.shuffle(examples)
+        encoder.train()
+        head.train()
+        total, seen = 0.0, 0
+        for start in range(0, len(examples), batch_size):
+            batch = examples[start : start + batch_size]
+            marked = [marked_sentence(doc, mention) for doc, mention in batch]
+            features = pool_mentions(
+                encoder,
+                tokenizer,
+                [t for t, _, _ in marked],
+                [(s, e) for _, s, e in marked],
+                pooling=pooling,
+                max_length=max_length,
+                device=device,
+            )
+            targets = torch.tensor(
+                [label_index[mention.factuality] for _, mention in batch], device=device
+            )
+            loss = loss_fn(head(features), targets)
+            loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
+            total += float(loss.detach())
+            seen += 1
+            if seen % 200 == 0:
+                print(
+                    f"epoch {epoch + 1} step {seen}/{-(-len(examples) // batch_size)} "
+                    f"loss {total / seen:.4f}",
+                    flush=True,
+                )
+        print(f"epoch {epoch + 1} mean loss {total / max(seen, 1):.4f}", flush=True)
+
+        output.mkdir(parents=True, exist_ok=True)
+        encoder.save_pretrained(output)
+        tokenizer.save_pretrained(output)
+        torch.save(head.state_dict(), output / BASELINE_HEAD_FILE)
+        (output / BASELINE_CONFIG_FILE).write_text(
+            json.dumps(
+                {
+                    "pooling": pooling,
+                    "labels": list(FACTUALITY_LABELS),
+                    "head_input_dim": width,
+                    "max_length": max_length,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        if not dev_docs:
+            continue
+        detector = BaselineFactualityDetector(
+            checkpoint_path=str(output), pooling=pooling, max_length=max_length
+        )
+        report, _ = evaluate(detector, dev_docs)
+        per_class = {c: round(p["f1"], 4) for c, p in report["per_class"].items()}
+        print(
+            f"epoch {epoch + 1} dev macro-F1 {report['macro_f1']:.4f} "
+            f"accuracy {report['accuracy']:.4f} per-class-f1 {per_class}",
+            flush=True,
+        )
+        curve.append(
+            {
+                "epoch": epoch + 1,
+                "macro_f1": report["macro_f1"],
+                "accuracy": report["accuracy"],
+                "per_class_f1": {c: p["f1"] for c, p in report["per_class"].items()},
+            }
+        )
+        if report["macro_f1"] > best["macro_f1"]:
+            best = {"macro_f1": report["macro_f1"], "epoch": epoch + 1}
+            best_state = {
+                "encoder": {k: v.detach().cpu().clone() for k, v in encoder.state_dict().items()},
+                "head": {k: v.detach().cpu().clone() for k, v in head.state_dict().items()},
+            }
+        encoder.train()
+
+    if best_state and best["epoch"] != epochs:
+        print(f"restoring epoch {best['epoch']} (dev macro-F1 {best['macro_f1']:.4f})", flush=True)
+        encoder.load_state_dict(best_state["encoder"])
+        head.load_state_dict(best_state["head"])
+        encoder.save_pretrained(output)
+        torch.save(head.state_dict(), output / BASELINE_HEAD_FILE)
+    if curve:
+        (output / DEV_CURVE_FILE).write_text(
+            json.dumps({"selected_epoch": best["epoch"], "curve": curve}, indent=2)
+        )
+    print(f"saved {pooling} baseline to {output}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--train", required=True, type=Path, help="MAVEN-FACT train jsonl")
-    parser.add_argument("--detector", default="supervised", choices=("lexicon", "supervised"))
+    parser.add_argument(
+        "--detector", default="supervised", choices=("lexicon", "supervised", "baseline")
+    )
+    parser.add_argument(
+        "--pooling",
+        default=CLS_POOLING,
+        choices=list(BASELINE_POOLINGS),
+        help="baseline architecture: cls = RoBERTa+CLS, dynamic_multi = DMRoBERTa",
+    )
+    parser.add_argument("--batch-size", type=int, default=32, help="mentions per step (baseline)")
     parser.add_argument("--model", default="roberta-base", help="base encoder (supervised)")
     parser.add_argument("--output", required=True, type=Path, help="checkpoint dir (or json file)")
     parser.add_argument("--epochs", type=int, default=6)
@@ -475,6 +640,22 @@ def main() -> int:
                 f"lexicon dev macro-F1 {report['macro_f1']:.4f} accuracy {report['accuracy']:.4f}"
             )
         print(f"saved lexicon detector to {args.output}")
+        return 0
+
+    if args.detector == "baseline":
+        train_baseline(
+            train_docs,
+            dev_docs,
+            model_name=args.model,
+            output=args.output,
+            epochs=args.epochs,
+            lr=args.lr,
+            alpha=args.alpha,
+            pooling=validate_pooling(args.pooling),
+            max_length=args.max_length,
+            batch_size=args.batch_size,
+            seed=args.seed,
+        )
         return 0
 
     train_supervised(

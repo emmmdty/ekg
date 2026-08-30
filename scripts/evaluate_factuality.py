@@ -34,6 +34,10 @@ from pathlib import Path
 
 from ekg.core.protocol import load_manifest_ids
 from ekg.core.schema import EventGraph
+from ekg.factuality.baselines import (
+    BASELINE_POOLINGS,
+    BaselineFactualityDetector,
+)
 from ekg.factuality.detection import (
     EVIDENCE_POOLING_MODES,
     POOLING_NONE,
@@ -158,6 +162,11 @@ def main() -> int:
         "--lexicon", type=Path, help="lexicon checkpoint json (the memorization floor)"
     )
     parser.add_argument(
+        "--baseline-pooling",
+        choices=list(BASELINE_POOLINGS),
+        help="score --checkpoint as a public baseline (cls / dynamic_multi) instead of ours",
+    )
+    parser.add_argument(
         "--extractor-checkpoint",
         type=Path,
         help="Phase A relation extractor; enables the predicted-graph condition",
@@ -248,12 +257,20 @@ def main() -> int:
         _write(result, args.output)
         return 0
 
-    detector = SupervisedFactualityDetector(
-        checkpoint_path=str(args.checkpoint),
-        max_length=args.max_length,
-        stride=args.stride,
-        use_structure=not args.no_structure,
-        evidence_pooling=args.evidence_pooling,
+    detector = (
+        BaselineFactualityDetector(
+            checkpoint_path=str(args.checkpoint),
+            pooling=args.baseline_pooling,
+            max_length=args.max_length,
+        )
+        if args.baseline_pooling
+        else SupervisedFactualityDetector(
+            checkpoint_path=str(args.checkpoint),
+            max_length=args.max_length,
+            stride=args.stride,
+            use_structure=not args.no_structure,
+            evidence_pooling=args.evidence_pooling,
+        )
     )
     gold_labels, gold_evidence = run_detector(detector, docs)
     if args.dump_gold_labels:
