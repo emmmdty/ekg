@@ -25,6 +25,7 @@ from ekg.core.schema import RelationType  # noqa: E402
 from ekg.relations.data.maven_ere import load_maven_ere  # noqa: E402
 from ekg.relations.pairs import gold_pair_labels, mention_order  # noqa: E402
 from ekg.relations.retrieval import (  # noqa: E402
+    marked_token_sentence,
     retrieval_counts,
     sample_binary_pairs,
     top_k_pairs,
@@ -48,6 +49,33 @@ def causal_pairs(doc) -> set[tuple[str, str]]:
             expand_event_relations=True,
         )
     )
+
+
+def load_marker_sentences(path: Path) -> dict[str, str]:
+    """Build one unambiguous marked sentence per event mention from token offsets."""
+    contexts: dict[str, str] = {}
+    with path.open(encoding="utf-8") as source:
+        for line_number, line in enumerate(source, start=1):
+            record = json.loads(line)
+            doc_id = str(record.get("id", record.get("doc_id", "")))
+            tokens = record.get("tokens")
+            if not doc_id or not isinstance(tokens, list):
+                raise ValueError(f"{path}:{line_number} lacks document id or token sentences")
+            for event in record.get("events", []):
+                for mention in event.get("mention") or event.get("mentions") or []:
+                    sent_id = mention.get("sent_id")
+                    if not isinstance(sent_id, int) or not 0 <= sent_id < len(tokens):
+                        raise ValueError(
+                            f"{doc_id}/{mention.get('id')}: invalid marker sentence id"
+                        )
+                    mention_id = f"{doc_id}::{mention.get('id')}"
+                    if mention_id in contexts:
+                        raise ValueError(f"duplicate event mention id {mention_id}")
+                    contexts[mention_id] = marked_token_sentence(
+                        tokens[sent_id],
+                        mention.get("offset") or [],
+                    )
+    return contexts
 
 
 def sentence_ids(doc) -> dict[str, int]:
@@ -113,12 +141,23 @@ def main() -> int:
     parser.add_argument("--warmup-steps", type=int, default=100)
     parser.add_argument("--accum-steps", type=int, default=8)
     parser.add_argument("--max-length", type=int, default=512)
+    parser.add_argument(
+        "--representation",
+        choices=("trigger_mean", "marker_sentence"),
+        default="trigger_mean",
+    )
+    parser.add_argument("--marker-batch-size", type=int, default=16)
     parser.add_argument("--temperature", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=13)
     args = parser.parse_args()
 
-    if args.epochs <= 0 or args.top_k <= 0 or args.accum_steps <= 0:
-        parser.error("epochs, top-k and accum-steps must be positive")
+    if (
+        args.epochs <= 0
+        or args.top_k <= 0
+        or args.accum_steps <= 0
+        or args.marker_batch_size <= 0
+    ):
+        parser.error("epochs, top-k, accum-steps and marker-batch-size must be positive")
     if args.negative_ratio <= 0 or args.temperature <= 0:
         parser.error("negative-ratio and temperature must be positive")
     if args.output.exists() and any(args.output.iterdir()):
@@ -157,6 +196,8 @@ def main() -> int:
             "warmup_steps": args.warmup_steps,
             "accum_steps": args.accum_steps,
             "max_length": args.max_length,
+            "representation": args.representation,
+            "marker_batch_size": args.marker_batch_size,
             "temperature": args.temperature,
             "seed": args.seed,
         },
@@ -181,6 +222,22 @@ def main() -> int:
     )
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     encoder = AutoModel.from_pretrained(args.model).to(device)
+    marker_sentences = None
+    marker_token_ids = None
+    if args.representation == "marker_sentence":
+        marker_sentences = load_marker_sentences(args.train)
+        expected_mentions = {node.event_id for doc in docs for node in doc.nodes}
+        if set(marker_sentences) != expected_mentions:
+            raise ValueError(
+                "marker context/input mention mismatch: "
+                f"missing={len(expected_mentions - marker_sentences.keys())} "
+                f"extra={len(marker_sentences.keys() - expected_mentions)}"
+            )
+        tokenizer.add_special_tokens(
+            {"additional_special_tokens": ["<m>", "</m>"]}
+        )
+        encoder.resize_token_embeddings(len(tokenizer))
+        marker_token_ids = tuple(tokenizer.convert_tokens_to_ids(item) for item in ("<m>", "</m>"))
     hidden_size = encoder.config.hidden_size
     query = torch.nn.Linear(hidden_size, hidden_size, bias=False).to(device)
     key = torch.nn.Linear(hidden_size, hidden_size, bias=False).to(device)
@@ -202,15 +259,38 @@ def main() -> int:
 
     def encode(doc):
         ids = mention_ids(doc)
-        representations = encode_trigger_reps(
-            encoder,
-            tokenizer,
-            doc.nodes,
-            doc.doc_text,
-            args.max_length,
-            device,
-        )
-        return ids, torch.stack([representations[item] for item in ids])
+        if marker_sentences is None:
+            representations = encode_trigger_reps(
+                encoder,
+                tokenizer,
+                doc.nodes,
+                doc.doc_text,
+                args.max_length,
+                device,
+            )
+            return ids, torch.stack([representations[item] for item in ids])
+
+        encoded_batches = []
+        for start in range(0, len(ids), args.marker_batch_size):
+            batch_ids = ids[start : start + args.marker_batch_size]
+            encoded = tokenizer(
+                [marker_sentences[item] for item in batch_ids],
+                padding=True,
+                truncation=False,
+                return_tensors="pt",
+            )
+            if encoded["input_ids"].shape[1] > args.max_length:
+                raise ValueError(
+                    f"{doc.doc_id}: marked sentence exceeds {args.max_length} tokens"
+                )
+            if any(
+                int((encoded["input_ids"] == marker_id).sum()) != len(batch_ids)
+                for marker_id in marker_token_ids
+            ):
+                raise ValueError(f"{doc.doc_id}: marker token count drift")
+            encoded = {name: value.to(device) for name, value in encoded.items()}
+            encoded_batches.append(encoder(**encoded).last_hidden_state[:, 0])
+        return ids, torch.cat(encoded_batches)
 
     def evaluate() -> dict[str, float | int]:
         encoder.eval()

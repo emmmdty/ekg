@@ -958,3 +958,23 @@ causal −0.23、temporal −0.96（**跌破 50.63 护栏**）。方向是可解
 **判定：行为 smoke PASS，放行完整 seed-13；科研结论仍未产生。** 这个入口没有生成 predictions，
 也没有调用 official evaluator，表中的 .3328 不能与冻结主锚 33.17 直接比较。下一步必须运行完整
 50 epoch seed-13 流水线并报告 official causal/subevent/temporal；未过主锚或护栏就终止工作点线。
+
+## A3 检索式候选竖片 r1：Stage-1 未过门（2026-08-31）
+
+该实验是 Efficient DERE 启发的 exploratory diagnostic：对 causal mention pair 训练 bi-encoder，
+每个 head 保留 top-15；subevent/temporal 未裁剪。它只测候选召回和压缩，不产生关系类别预测，
+`confirmation_eligible=false`，因此下表**不是论文主指标**。GPU1、seed 13、3 epochs；P1 r12
+protocol SHA-256 `0bd33e87…58497`，代码 commit `c7c8e9f`，final-valid 未访问。
+
+| 最佳 epoch | recall@15 | 同句 recall@15 | 跨句 recall@15 | 候选压缩率 | 预设门槛 |
+|---:|---:|---:|---:|---:|---|
+| 2 | **.8691** (4,168/4,796) | .9713 (1,352/1,392) | **.8273** (2,816/3,404) | .5580 | overall≥.90 且 cross≥.85 ❌ |
+
+- oracle top-15 在相同冻结候选口径上可达 recall .9810，故失败不是 k 容量不足；主要损失来自跨句排序；
+- r1 为最小接线，复用了窗口内 trigger mean pooling，未实现论文原式 `<m>事件</m>` marker-sentence
+  表示，故只能称“论文启发竖片”，不能称论文复现；
+- **判定：Stage-1 FAIL，停止 r1，不接 Stage 2、不调 k、不换 seed。** 下一单种子机制若继续这条路线，
+  应测试 marker-sentence event representation；未经用户再次授权，仍禁止多种子。
+- 4090 产物：`runs/stages/A3/a3-v6-retriever-r1/stage1/seed-13/`；日志 SHA-256
+  `17bea4b5…2c75dd9`，`run_metadata.json` `db138e00…94556`，`retrieval_metrics.json`
+  `5dbb9c50…8728ff3`；metadata 内 checkpoint 文件哈希集合已逐项复核一致。

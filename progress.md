@@ -667,7 +667,7 @@
 - GPU0 训练第二次监测正常：epoch 0 已到 2,000/2,622 docs，约 6.3GB，无 NaN/异常退出；GPU1–3 仍空闲。
 - 两篇 PDF 与文本抽取现已完整落到 `/tmp/ekg-retriever-papers.iPhGNJ/`，下一步直接检索代码声明和方法参数，不重复下载。
 - PDF 核验完成：两篇均无官方实现链接。并行路线不重写 TacoERE 的摘要+RL 全栈，改为
-  Efficient DERE 文献忠实的最小 Stage-1 门：标记句子 bi-encoder、top-5/事件、评估 positive-pair
+  Efficient DERE 文献启发的最小 Stage-1 门：bi-encoder、top-k/事件、评估 positive-pair
   recall@5 和 candidate compression；通过才启动 GPU1 的 cross-encoder 方案。
 - 完成 retriever 接入面定位：仅过滤 causal 候选，subevent/temporal 不动；先做 gold oracle@5
   结构上限，通过后再新增 bi-encoder 训练/评测竖片。这保持与当前三族护栏的单变量边界。
@@ -680,3 +680,34 @@
   causal .328 / subevent .293 / temporal .510。这仍是 trainer 分不是 official 分；offset 有限，GPU0 约 6.7GB，无异常。
 - retriever 竖片完整本地门通过：451 passed / 16 expected torch skips，ruff 0，`ekg-smoke` OK。
   新文件仅是 exploratory Stage-1 诊断，不在 P1 `CODE_PATHS`，不改变正在运行的 r13 信任根或模型结论。
+- retriever 提交 `c7c8e9f` 已推送并安全同步到远端；同步前已确认 GPU0 所用 trainer/scorer/
+  config 在两提交间零差异。远端 4 tests 和 CLI help 通过，GPU0 进程未中断。
+- 已在 GPU1 启动不同方案的 Stage-1 top-15 retriever，冻结 seed 13，trainer PID 3920963，
+  日志 `logs/a3_retriever_r1_stage1_s13.log`。启动前 GPU1 18MiB/0%，未创建任何额外 seed run-dir。
+- 核对 D3 契约后决定不启动第三个正式 GPU 任务：D3 仍以 A3 immutable handoff 为有效性输入，当前并行
+  授权只用于彼此独立的方案，不足以让未绑定 A3 输出的 Ch3 数字进入结论。GPU2/3 保留空闲。
+- 最新健康检查：GPU0 workpoint 已完成 epoch 4、最佳 trainer macro=.3823；GPU1 retriever epoch 0
+  已过 2,000/2,622 文档。两边存活且无 NaN；未启动 seeds 17/42。
+- 完成 Stage-2 CPU 接线审计：候选全集和 scorer 可保持不变，潜在改动仅限 causal family 的训练 ignore
+  与推理 NONE gate；在 Stage-1 门未通过前不实现、不启动。
+- Retriever epoch 0 完整指标为 recall@15=.8455、跨句=.7947、压缩=.5580，暂未过 .90/.85 门；
+  冻结 3-epoch 任务继续到终点，不做运行中调参。GPU0 同时已进入 epoch 5。
+- epoch 0 明细已核：同句 1,350/1,392=.9698，跨句 2,705/3,404=.7947，确认短板是跨句排序；
+  epoch 1 已完成 2,500/2,622 文档，等待同一门槛复核。
+- epoch 1 完整指标为 recall@15=.8638、跨句=.8231，仍未过门。复核实现与论文后明确：r1 复用
+  窗口 trigger mean pooling，是论文启发的竖片而非 `<m>` marker-sentence 忠实表示；若最终失败，
+  下一机制优先修正表示层，不做 k/seed 追分。
+- 已从 PDF 方法段核实 Stage 2：全正例 + 检索 hard negatives，推理只分类检索 pair。项目适配时仍需
+  向原 official scorer 提交完整候选结构，未检出的 causal pair 只能显式 NONE，不能删分母。
+- GPU1 r1 已自然结束并完成三态/产物核验：best epoch 2 overall=.8691、cross=.8273、same=.9713、
+  compression=.5580，未过 .90/.85 门；metadata complete、final-valid=false、hashes match。
+  已将负结果写入 `docs/results/PHASE_A.md`，r1 不接 Stage 2、不追加 seed。
+- GPU0 workpoint 仍存活，epoch 5 trainer macro=.3825 创新高，epoch 6 已完成训练文档循环；仍等
+  50 epochs 后的 official evaluator，当前 trainer 数字不进入主表。
+- 开始 r2 的 CPU 实现审计：确认冻结 JSONL 提供 mention token offset；4,080/73,939 mentions 的句子
+  存在同形 trigger，多数不能靠当前 first-match span 区分。r2 将用 token offset 原位插 marker，
+  不触碰 `EventNode` schema/P1 loader；每篇最多 110 mentions，编码采用有界小批量。
+- r2 marker-sentence 竖片已实现：原 r1 表示仍为默认；新模式注册 marker special tokens、按原始 token
+  offset 构造句子、batch-size 16 编码并复用既有 top-15 loss/evaluator。新增 6 个 marker 回归用例。
+- r2 本地全门通过：457 passed / 16 expected torch skips、ruff 0、CPU smoke OK；73,939 个上下文
+  与 loader mention ID 集完全一致，每条恰有一对 marker。diff/AGENTS-CLAUDE 一致性检查通过。

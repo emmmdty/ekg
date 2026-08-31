@@ -10,10 +10,40 @@ PairKey = tuple[str, str]
 
 __all__ = [
     "PairKey",
+    "marked_token_sentence",
     "retrieval_counts",
     "sample_binary_pairs",
     "top_k_pairs",
 ]
+
+
+def marked_token_sentence(
+    tokens: Sequence[str],
+    offset: Sequence[int],
+    *,
+    open_marker: str = "<m>",
+    close_marker: str = "</m>",
+) -> str:
+    """Wrap one token-indexed mention without ambiguous surface re-matching."""
+    if len(offset) != 2:
+        raise ValueError("mention offset must contain exactly [start, end]")
+    start, end = offset
+    if not isinstance(start, int) or not isinstance(end, int):
+        raise ValueError("mention offset boundaries must be integers")
+    if not 0 <= start < end <= len(tokens):
+        raise ValueError(f"invalid mention offset [{start}, {end}] for {len(tokens)} tokens")
+    if not open_marker or not close_marker:
+        raise ValueError("mention markers must be non-empty")
+    if not all(isinstance(token, str) for token in tokens):
+        raise ValueError("sentence tokens must be strings")
+    pieces = [
+        *tokens[:start],
+        open_marker,
+        *tokens[start:end],
+        close_marker,
+        *tokens[end:],
+    ]
+    return " ".join(pieces)
 
 
 def top_k_pairs(

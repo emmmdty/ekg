@@ -2,7 +2,24 @@ import random
 
 import pytest
 
-from ekg.relations.retrieval import retrieval_counts, sample_binary_pairs, top_k_pairs
+from ekg.relations.retrieval import (
+    marked_token_sentence,
+    retrieval_counts,
+    sample_binary_pairs,
+    top_k_pairs,
+)
+
+
+def test_marked_token_sentence_uses_exact_token_offset() -> None:
+    tokens = ["it", "fell", "and", "fell", "again"]
+
+    assert marked_token_sentence(tokens, [3, 4]) == "it fell and <m> fell </m> again"
+
+
+@pytest.mark.parametrize("offset", [[1], [-1, 1], [1, 1], [1, 6], [1.0, 2]])
+def test_marked_token_sentence_rejects_invalid_offset(offset) -> None:
+    with pytest.raises(ValueError, match="offset"):
+        marked_token_sentence(["a", "b"], offset)
 
 
 def test_top_k_pairs_is_per_head_and_stable_on_ties() -> None:

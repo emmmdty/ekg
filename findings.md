@@ -1347,3 +1347,36 @@
 - oracle grid 收口：mention-level k=10 仅 .9393，k=15 达 **.9810** 且仍压缩 **55.8%** 候选；
   cluster-level k=10 达 .9502/压缩 67.1%，但它需要推理时 gold/predicted coreference chain，会引入 Ch1 混淆。
   因此首个竖片冻结为**mention-level top-15**：不使用 gold cluster，只裁 causal 候选，subevent/temporal 不变。
+- Ch3 的活动契约 `PHASE_D3_evidence_conditioned.md` 明确要求先取得 A3 immutable handoff；其输入、状态
+  和后续消费者均绑定 A3 bundle。用户允许不同任务并行不改变这一有效性依赖，因此现在启动正式 D3
+  会产生无法进入主表的结果。GPU2/3 暂时空闲是有意的；可以做 CPU 准备，但不能越过 A3 交接跑正式 Ch3。
+- 2026-08-31 运行监测：GPU0 workpoint 完成 epoch 4，当前最佳 trainer macro=.3823（epoch 3）；
+  GPU1 retriever epoch 0 已处理约 2,000/2,622 文档。两进程均存活、数值有限；这些都不是 official 主表指标。
+- Stage-2 接线审计表明无需改变 official candidate population：若 Stage-1 通过，可只把未入 top-15 的
+  causal rows 在训练时设为该 family 的 ignore、推理时强制 causal NONE；subevent/temporal 继续全量评分，
+  最终仍输出完整候选结构给原 scorer。这样检索器是 causal admission gate，而不是偷换 evaluator 分母。
+- Retriever epoch 0 实测 recall@15=.8455、cross-sentence=.7947、compression=.5580，低于预先冻结的
+  .90/.85 门槛；分解后同句为 1,350/1,392=.9698，跨句为 2,705/3,404=.7947，损失几乎全部来自
+  跨句排序而非 top-15 容量。按既定 3 epochs 继续，不能看到首轮低分后中途改 k、学习率或种子。
+- r1 与论文的边界需准确表述：它采用文献的 bi-encoder/top-k 思路，但为最小接线复用了本项目
+  `encode_trigger_reps` 的窗口内 trigger mean pooling；论文原式是把目标事件用 `<m>...</m>` 标记后编码
+  所在句。故 r1 是“论文启发的竖片”而非忠实复现。若冻结 3 epochs 失败，下一单种子机制应改变
+  event representation 为 marker-sentence，而不是调 k、重复 seed 或直接重写 TacoERE。
+- Retriever epoch 1 为 recall@15=.8638、cross-sentence=.8231，虽较 epoch 0 上升，仍低于 .90/.85 门。
+- 一手原文对 Stage 2 的最小要求已核：全部正例 + Stage-1 检出的 hard negatives 训练 pair classifier；
+  推理只对检出的 pair 做关系分类。当前项目的 trigger mean + pair MLP 可承担 discriminative Stage 2，
+  但必须在完整候选输出中把未检出的 causal pair 明确写为 NONE，不能从 scorer 输入中删除这些 pair。
+- r1 最终 best epoch 2：overall recall@15=.8691、same=.9713、cross=.8273、compression=.5580；
+  未过预设 .90/.85 门。进程已由成功 SSH 确认为 GONE，metadata status=complete、final-valid=false、
+  confirmation_eligible=false，checkpoint 哈希集合逐项一致。按门停止，不接 Stage 2。
+- marker-sentence r2 不能只靠当前 `EvidenceSpan` 重找 trigger：73,939 个 mentions 中 4,080 个所在句
+  含多个同形 trigger，而 loader 的字符定位会取第一个；原始 JSONL 保留每个 mention 的 token offset，
+  可无歧义插入 `<m>`/`</m>`。因此 r2 直接从冻结 input 的 `tokens + offset` 构造上下文，不改
+  `EventNode` schema，也不改正在运行的 P1 受控 loader。
+- r2 每篇最多 110 mentions（均值 25.38），marker sentence 编码需有界小批量，避免一次把全篇所有
+  标记句堆进 GPU；这只是内存操作参数，不改变 top-15、数据、seed 或判定门。
+- r2 实现保持单变量：新增 `representation=marker_sentence` 和 batch-size=16；tokenizer 注册 `<m>`/
+  `</m>` special tokens，encoder resize 后以标记句的首 token 表示做既有 query/key 检索。原 r1
+  `trigger_mean` 仍是默认值，旧命令语义未改变。
+- 冻结 JSONL 的 73,939 个 event mentions 已全量对齐：ID 集合相同且每个上下文恰有一对 marker。
+  本地门为 457 passed / 16 expected skips、ruff clean、`ekg-smoke` OK。

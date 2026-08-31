@@ -241,7 +241,7 @@ Phase 19（单种子优先的 GPU 并行推进）进行中。用户已授权 GPU
 - [x] 将“单种子全部过 baseline 且获得用户明确授权前，禁止多种子”写入根指令和活动契约
 - [x] 核对 Ch2 r13 完整 seed-13 正式流水线、空闲 GPU、输出目录与 official evaluator 边界
 - [ ] 在 GPU0 启动 Ch2 r13 完整 seed-13，持续监测并生成 official 三族指标（运行中，trainer PID 3907812）
-- [ ] 只为不同方案/任务使用其他空闲 GPU，禁止 seeds 17/42 或任何其他多种子运行（Stage-1 retriever 本地门已过，待远端 torch smoke/GPU1）
+- [ ] 只为不同方案/任务使用其他空闲 GPU，禁止 seeds 17/42 或任何其他多种子运行（Stage-1 retriever 已在 GPU1 运行，PID 3920963）
 - [ ] 按单种子主指标与护栏判定：过线则保留，未过则封存并转 retriever→cross-encoder
 - [ ] 更新结果、交接、进度与服务器产物身份
 - Error log：两篇 ACL PDF 串行下载/抽取首次超过 30 秒工具返回窗口；原进程仍 ALIVE，Efficient DERE 已完整，TacoERE 正在下载。不重启重复下载，只监测原进程后续完成。
@@ -417,3 +417,8 @@ Phase 19（单种子优先的 GPU 并行推进）进行中。用户已授权 GPU
 - [x] 按审查结论修订主方案的实施顺序、章节定位和阶段停止条件
 
 **当前阶段：Phase 19 进行中 — 单种子优先、不同任务 GPU 并行；禁止未授权多种子。**
+
+- [ ] GPU0：等待 r13 seed-13 完成，并以 official evaluator 核验三族主指标与护栏。
+- [x] GPU1：Stage-1 retriever seed-13 完成，recall@15=.8691、跨句=.8273，未过门；停止 r1，不接 Stage 2。
+- [x] 核对 Ch3 并行边界：D3 受 A3 immutable handoff 约束，当前不启动无法进入结论的正式 GPU 任务。
+- [ ] 仅在两个单种子结果均核验后决定下一方案；未经用户再次授权，不运行任何多种子。
