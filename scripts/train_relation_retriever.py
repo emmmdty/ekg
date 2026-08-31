@@ -51,6 +51,17 @@ def causal_pairs(doc) -> set[tuple[str, str]]:
     )
 
 
+def has_ranking_signal(doc) -> bool:
+    """Whether at least one head has both positive and negative candidate tails."""
+    ids = mention_ids(doc)
+    gold = causal_pairs(doc)
+    for head in ids:
+        positives = {tail for source, tail in gold if source == head}
+        if positives and any(tail != head and tail not in positives for tail in ids):
+            return True
+    return False
+
+
 def load_marker_sentences(path: Path) -> dict[str, str]:
     """Build one unambiguous marked sentence per event mention from token offsets."""
     contexts: dict[str, str] = {}
@@ -136,6 +147,11 @@ def main() -> int:
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--top-k", type=int, default=15)
     parser.add_argument("--negative-ratio", type=int, default=5)
+    parser.add_argument(
+        "--objective",
+        choices=("sampled_bce", "topk_pairwise"),
+        default="sampled_bce",
+    )
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--head-lr", type=float, default=1e-4)
     parser.add_argument("--warmup-steps", type=int, default=100)
@@ -191,6 +207,7 @@ def main() -> int:
             "epochs": args.epochs,
             "top_k": args.top_k,
             "negative_ratio": args.negative_ratio,
+            "objective": args.objective,
             "lr": args.lr,
             "head_lr": args.head_lr,
             "warmup_steps": args.warmup_steps,
@@ -249,7 +266,24 @@ def main() -> int:
             {"params": list(query.parameters()) + list(key.parameters()), "lr": args.head_lr},
         ]
     )
-    steps_per_epoch = math.ceil(len(train_docs) / args.accum_steps)
+    objective_docs = (
+        [doc for doc in train_docs if has_ranking_signal(doc)]
+        if args.objective == "topk_pairwise"
+        else train_docs
+    )
+    metadata["data_counts"] = {
+        "train_documents": len(train_docs),
+        "dev_documents": len(dev_docs),
+        "objective_train_documents": len(objective_docs),
+        "objective_train_positive_pairs": sum(len(causal_pairs(doc)) for doc in objective_docs),
+    }
+    write_json(args.output / "run_metadata.json", metadata)
+    print(
+        f"[retriever] representation={args.representation} objective={args.objective} "
+        f"train_docs={len(objective_docs)} dev_docs={len(dev_docs)}",
+        flush=True,
+    )
+    steps_per_epoch = math.ceil(len(objective_docs) / args.accum_steps)
     scheduler = get_linear_schedule_with_warmup(
         optimiser,
         args.warmup_steps,
@@ -322,6 +356,39 @@ def main() -> int:
                 )
         return aggregate_counts(counts)
 
+    def topk_pairwise_loss(score_matrix, ids, gold_pairs):
+        """Push every positive above the hardest negatives competing for top-k."""
+        positions = {item: index for index, item in enumerate(ids)}
+        positive_by_head = {
+            head: sorted(tail for source, tail in gold_pairs if source == head)
+            for head in ids
+        }
+        losses = []
+        for head, positive_tails in positive_by_head.items():
+            if not positive_tails:
+                continue
+            negative_tails = [
+                tail for tail in ids if tail != head and tail not in positive_tails
+            ]
+            if not negative_tails:
+                continue
+            head_index = positions[head]
+            positive_scores = score_matrix[
+                head_index,
+                torch.tensor([positions[tail] for tail in positive_tails], device=device),
+            ]
+            negative_scores = score_matrix[
+                head_index,
+                torch.tensor([positions[tail] for tail in negative_tails], device=device),
+            ]
+            hardest = negative_scores.topk(min(args.top_k, len(negative_tails))).values
+            losses.append(
+                functional.softplus(hardest[:, None] - positive_scores[None, :]).mean()
+            )
+        if not losses:
+            raise ValueError("topk_pairwise objective received a document without usable pairs")
+        return torch.stack(losses).mean()
+
     best_recall = -1.0
     best_epoch = None
     best_metrics = None
@@ -330,7 +397,7 @@ def main() -> int:
         encoder.train()
         query.train()
         key.train()
-        ordered_docs = list(train_docs)
+        ordered_docs = list(objective_docs)
         random.Random(args.seed + epoch).shuffle(ordered_docs)
         running_loss = 0.0
         used_docs = 0
@@ -338,24 +405,39 @@ def main() -> int:
             ids, representations = encode(doc)
             if len(ids) < 2:
                 continue
-            pairs, labels = sample_binary_pairs(
-                ids,
-                causal_pairs(doc),
-                negative_ratio=args.negative_ratio,
-                rng=random.Random(args.seed * 1_000_003 + epoch * 10_007 + index),
-            )
-            positions = {item: i for i, item in enumerate(ids)}
-            head_index = torch.tensor([positions[head] for head, _ in pairs], device=device)
-            tail_index = torch.tensor([positions[tail] for _, tail in pairs], device=device)
-            query_vectors = functional.normalize(query(representations[head_index]), dim=-1)
-            key_vectors = functional.normalize(key(representations[tail_index]), dim=-1)
-            logits = (query_vectors * key_vectors).sum(dim=-1) / args.temperature
-            targets = torch.tensor(labels, dtype=torch.float32, device=device)
-            loss = functional.binary_cross_entropy_with_logits(
-                logits,
-                targets,
-                pos_weight=positive_weight,
-            )
+            gold_pairs = causal_pairs(doc)
+            if args.objective == "sampled_bce":
+                pairs, labels = sample_binary_pairs(
+                    ids,
+                    gold_pairs,
+                    negative_ratio=args.negative_ratio,
+                    rng=random.Random(args.seed * 1_000_003 + epoch * 10_007 + index),
+                )
+                positions = {item: i for i, item in enumerate(ids)}
+                head_index = torch.tensor(
+                    [positions[head] for head, _ in pairs], device=device
+                )
+                tail_index = torch.tensor(
+                    [positions[tail] for _, tail in pairs], device=device
+                )
+                query_vectors = functional.normalize(
+                    query(representations[head_index]), dim=-1
+                )
+                key_vectors = functional.normalize(
+                    key(representations[tail_index]), dim=-1
+                )
+                logits = (query_vectors * key_vectors).sum(dim=-1) / args.temperature
+                targets = torch.tensor(labels, dtype=torch.float32, device=device)
+                loss = functional.binary_cross_entropy_with_logits(
+                    logits,
+                    targets,
+                    pos_weight=positive_weight,
+                )
+            else:
+                query_vectors = functional.normalize(query(representations), dim=-1)
+                key_vectors = functional.normalize(key(representations), dim=-1)
+                score_matrix = (query_vectors @ key_vectors.T) / args.temperature
+                loss = topk_pairwise_loss(score_matrix, ids, gold_pairs)
             (loss / args.accum_steps).backward()
             running_loss += float(loss.detach())
             used_docs += 1

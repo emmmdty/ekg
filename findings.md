@@ -1380,3 +1380,18 @@
   `trigger_mean` 仍是默认值，旧命令语义未改变。
 - 冻结 JSONL 的 73,939 个 event mentions 已全量对齐：ID 集合相同且每个上下文恰有一对 marker。
   本地门为 457 passed / 16 expected skips、ruff clean、`ekg-smoke` OK。
+- r2 epoch 0 为 overall=.8159、same=.9720、cross=.7521、compression=.5580；同句与 r1 几乎相同，
+  跨句比 r1 epoch 0 的 .7947 更差，表明 marker 位置本身不是短板，单句编码丢失文档语境反而伤害
+  跨句检索。冻结 3 epochs 仍需跑完，但后续不应再堆 marker 变体。
+- 若 r2 最终失败，下一高价值单种子机制是保持 r1 的窗口 trigger representation、把 sampled BCE
+  换成与 top-k 直接对齐的全候选 hard-negative/ranking objective；这比改 k 或重复 seed 更直接针对
+  “跨句正例排不进 top-15”的实测错误。
+- r3 候选的最小目标已本地实现但未运行：每个有 causal gold 的 head，把所有正例分数与当前最难的
+  top-15 negatives 做 pairwise softplus 排序；无 causal positive 的文档不提供虚假 ranking 信号，
+  scheduler/accumulation 以实际有信号文档计数。r1 的 `sampled_bce` 仍为默认，旧行为不变。
+- 启动前全数据审计进一步发现 9 个文档虽有 causal 正例，但所有相关 head 均没有可对比的负 tail；
+  原 r3 会在首个此类文档 fail-fast。这类文档对 top-k 排序确实没有梯度定义，故 objective/scheduler
+  训练集显式收紧为 2,537 个同时具正/负 tail 的文档，而不是用零损失或 fallback 掩盖。
+- r2 最终 best epoch 2：overall=.8543、same=.9784、cross=.8035、compression=.5580；未过 .90/.85
+  且 overall/cross 均低于 r1。成功 SSH 已确认 retriever 进程 GONE、GPU1 回到 18MiB；metadata
+  complete/final-valid=false/confirmation=false，checkpoint 哈希集合一致。r2 判负，不接 Stage 2。

@@ -711,3 +711,40 @@
   offset 构造句子、batch-size 16 编码并复用既有 top-15 loss/evaluator。新增 6 个 marker 回归用例。
 - r2 本地全门通过：457 passed / 16 expected torch skips、ruff 0、CPU smoke OK；73,939 个上下文
   与 loader mention ID 集完全一致，每条恰有一对 marker。diff/AGENTS-CLAUDE 一致性检查通过。
+- r1 负结果+r2 实现已提交并推送为 `0842304`；远端 fetch 前无法解析新 revision 的只读 diff
+  返回 128，fetch 后核实正式 workpoint 的 trainer/scorer/config 四路径零差异，再安全 reset 到新 HEAD；
+  远端 10 个 retriever tests 通过，GPU0 trainer 全程存活。
+- GPU1 r2 marker-sentence seed-13 已启动：wrapper PID 3927850、trainer PID 3927858，输出
+  `runs/stages/A3/a3-v6-retriever-r2/stage1/seed-13/`，日志
+  `logs/a3_retriever_r2_stage1_s13.log`。启动前目标不存在、GPU1 18MiB/0%，未新增其他 seed。
+- r2 首个 500-doc checkpoint loss=5.9421，GPU1 约 6.25GiB/23%，进程存活、尚无 NaN/OOM。
+  周四报告中“50ep 尚未启动/四卡空闲”和“9/2 并行正式 Ch3”已按实际状态修正：D3 必须等待
+  A3 immutable handoff，当前只准备输入清单。
+- r2 epoch 0 已过 1,000/2,622 文档，running loss 降至 3.5997，GPU1 约 7.1GiB；GPU0/GPU1
+  两进程均存活。报告更新通过 whitespace gate，当前 dirty 仅报告与 planning 文件。
+- r2 epoch 0 已过 2,000/2,622，loss=2.3188，GPU1 约 8.1GiB；一次远端 50 秒 grep 等待在
+  工具 30 秒窗口返回空输出，随后成功 SSH 明确读到 PID ALIVE 和新增日志，未误判完成/失败。
+- GPU0 workpoint 当前 best trainer macro=.3876（epoch 7：causal .328 / subevent .310 /
+  temporal .524），epoch 10 运行中。该值仍是 checkpoint selection signal，不是 official 主表分。
+- r2 epoch 0 完整结果：overall=.8159、same=.9720、cross=.7521、compression=.5580，低于 r1 同轮，
+  暂未过门。主要退化仍在跨句，证明 marker 单句表示未解决文档级语义；继续冻结后两轮，不中途改参。
+- 在本地新增但未启动 `topk_pairwise` objective：全正例对抗每个 head 的 top-15 hardest negatives，
+  保留 trigger-mean 表示和默认 sampled BCE 兼容路径。定向 10 tests、ruff、CLI help、whitespace PASS；
+  仅当 r2 最终失败才考虑远端单种子 r3。
+- r3 候选的完整本地门也通过：457 passed / 16 expected skips、ruff 0、CPU smoke OK；尚未提交/
+  同步远端，所以正在运行的 r2 继续使用冻结 `0842304`。当前 dirty 仅报告、planning 与该候选脚本。
+- r2 epoch 1 已过 2,000/2,622 文档，loss=.8667，进程存活；尚未产生第二个 recall 点。
+- r3 ranking objective 的训练覆盖已核：2,546/2,622 个 train docs 有 causal signal，共 48,562 个
+  mention-expanded positive pairs，最大单文档 250；只跳过 76 个无正例文档，不是小样本技巧。
+- r2 epoch 1 训练循环已到 2,500/2,622，loss=.8572；等待评估。GPU0 epoch 11 同时运行中，
+  当前 best checkpoint 仍为 epoch 7 trainer macro=.3876。
+- r2 epoch 1 评估为 overall=.8451、cross=.7911，仍未过门且未追平 r1。r3 数据审计发现 9 个
+  有正例但无可比负 tail 的文档，已把 ranking objective/scheduler 的有效训练集合改为 2,537 篇，
+  避免远端运行中才 crash。
+- r3 metadata 增加 train/dev/objective-doc/positive-pair 计数并在启动时打印 representation/objective，
+  便于失败时也能追溯实际信号集合；定向 ruff/CLI/whitespace 通过。r2 epoch 2 已过 1,000 文档。
+- 上述 r3 最终形态重新通过完整本地门：457 passed / 16 expected skips、ruff 0、CPU smoke OK。
+  r2 epoch 2 已过 2,000/2,622 文档，loss=.7651，仍存活。
+- r2 已自然结束并封存：best epoch 2 overall=.8543、same=.9784、cross=.8035、compression=.5580，
+  未过门且低于 r1；metadata complete/final-valid=false、hashes match，成功 SSH 确认进程 GONE、
+  GPU1 18MiB。负结果已写入 `docs/results/PHASE_A.md`，周四报告同步为 r1/r2 均判负。

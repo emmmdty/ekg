@@ -420,5 +420,7 @@ Phase 19（单种子优先的 GPU 并行推进）进行中。用户已授权 GPU
 
 - [ ] GPU0：等待 r13 seed-13 完成，并以 official evaluator 核验三族主指标与护栏。
 - [x] GPU1：Stage-1 retriever seed-13 完成，recall@15=.8691、跨句=.8273，未过门；停止 r1，不接 Stage 2。
+- [x] GPU1：r2 marker-sentence seed-13 完成，recall@15=.8543、跨句=.8035，未过门；停止 r2。
+- [ ] GPU1：仅在 runtime smoke 通过后运行 r3 top-k hard-negative ranking seed-13；仍禁止额外 seed。
 - [x] 核对 Ch3 并行边界：D3 受 A3 immutable handoff 约束，当前不启动无法进入结论的正式 GPU 任务。
 - [ ] 仅在两个单种子结果均核验后决定下一方案；未经用户再次授权，不运行任何多种子。

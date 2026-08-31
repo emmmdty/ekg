@@ -978,3 +978,22 @@ protocol SHA-256 `0bd33e87…58497`，代码 commit `c7c8e9f`，final-valid 未�
 - 4090 产物：`runs/stages/A3/a3-v6-retriever-r1/stage1/seed-13/`；日志 SHA-256
   `17bea4b5…2c75dd9`，`run_metadata.json` `db138e00…94556`，`retrieval_metrics.json`
   `5dbb9c50…8728ff3`；metadata 内 checkpoint 文件哈希集合已逐项复核一致。
+
+## A3 marker-sentence 检索竖片 r2：Stage-1 未过门（2026-08-31）
+
+r2 只把 r1 的 event representation 改成论文原式启发的 `<m>事件</m>` 标记句首 token 表示；
+top-15、训练数据、sampled BCE、seed 13、3 epochs 与验收门均不变。原始 token offset 用于无歧义插入
+marker；73,939 个 mention ID 全量对齐。它同样只测候选召回，不产生关系 F1，
+`confirmation_eligible=false`，final-valid 未访问；代码 commit `0842304`。
+
+| 最佳 epoch | recall@15 | 同句 recall@15 | 跨句 recall@15 | 候选压缩率 | 预设门槛 |
+|---:|---:|---:|---:|---:|---|
+| 2 | **.8543** (4,097/4,796) | .9784 (1,362/1,392) | **.8035** (2,735/3,404) | .5580 | overall≥.90 且 cross≥.85 ❌ |
+
+- r2 同句略高于 r1（.9784 vs .9713），但跨句明显更低（.8035 vs .8273），说明 marker 能突出
+  句内事件，却因单句编码丢失文档语境而进一步损伤跨句排序；
+- **判定：Stage-1 FAIL，停止 r2，不接 Stage 2、不调 k、不换 seed。** 下一方案保留 r1 的文档窗口
+  表示，改为与 top-15 直接对齐的 hard-negative ranking objective；
+- 4090 产物：`runs/stages/A3/a3-v6-retriever-r2/stage1/seed-13/`；日志 SHA-256
+  `d4b1fff7…373749`，`run_metadata.json` `67b6a55b…8d5990`，`retrieval_metrics.json`
+  `72bb1379…5e63d2`；metadata `status=complete` 且 checkpoint 文件哈希集合逐项一致。
