@@ -655,3 +655,28 @@
 - 已起草同步根指令、HANDOFF、TODO、A3 契约和周四报告的新多种子授权门；历史三种子数字保留为已发生事实。
 - 核对 r13 plan 与正式 scorer：本轮不使用 preflight 中的 3-epoch baseline launcher；将按已过 smoke 的
   50-epoch trainer 参数运行 seed-13，随后用 `score_a3_arm.py` 生成 official 三族指标。
+- 新多种子规则已以提交 `84ffac0` 推送，远端同步到该 HEAD。准入核对确认 plan SHA
+  `b587b21d…1eda`、目标 run-dir 不存在、4 卡空闲、无项目 Python 训练进程。
+- 已在 GPU0 启动 r13 `adaptive_workpoint` 完整 seed-13：50 epoch trainer 成功后将自动串行
+  `score_a3_arm.py` official 评分。外层 PID 3907809，trainer PID 3907812；日志
+  `logs/a3_position_workpoint_r13_full_s13.log`。未启动任何其他 seed。
+- 首次运行监测正常：GPU0 约 3.9GB/24%，trainer 存活且已完成 2,913 文档/3,315,358 rows 数据物化；GPU1–3 继续空闲。
+- 开始为不同方案的 GPU1 并行任务做可运行性门：ACL 官方页面已确认两阶段 retriever→cross-encoder
+  的直接适配性，但搜索尚未发现 Efficient DERE/TacoERE 官方代码；先查 PDF 中的 code URL，不盲目占卡。
+- `pdf` skill 指导的 ACL PDF 抽取正在进行；首次批处理超过工具 30 秒返回窗口，但原下载进程仍活着，故不重复启动。
+- GPU0 训练第二次监测正常：epoch 0 已到 2,000/2,622 docs，约 6.3GB，无 NaN/异常退出；GPU1–3 仍空闲。
+- 两篇 PDF 与文本抽取现已完整落到 `/tmp/ekg-retriever-papers.iPhGNJ/`，下一步直接检索代码声明和方法参数，不重复下载。
+- PDF 核验完成：两篇均无官方实现链接。并行路线不重写 TacoERE 的摘要+RL 全栈，改为
+  Efficient DERE 文献忠实的最小 Stage-1 门：标记句子 bi-encoder、top-5/事件、评估 positive-pair
+  recall@5 和 candidate compression；通过才启动 GPU1 的 cross-encoder 方案。
+- 完成 retriever 接入面定位：仅过滤 causal 候选，subevent/temporal 不动；先做 gold oracle@5
+  结构上限，通过后再新增 bi-encoder 训练/评测竖片。这保持与当前三族护栏的单变量边界。
+- oracle@5 实测不足：mention-level dev recall .7832/压缩 84.7%；cluster-first 展开后 recall .8032/压缩约 83.4%。不启动 GPU1 top-5 训练；先找到在冻结候选口径下能达 oracle recall .95 的最小 k。
+- oracle grid 确定 mention-level k=15：dev 上限 recall .9810，candidate compression 55.8%。选它而不是 cluster k=10，避免把 gold/predicted coreference 质量混入 Ch2 Stage-1 诊断。
+- 已新增纯 CPU retrieval 工具与 4 个单测，以及协议绑定的 Stage-1 训练/评测 CLI；定向测试和 ruff 通过。
+  首次 CLI help 暴露 CPU 顶层 torch-only 符号导入，已改为与现有 trainer 一致的 lazy import，未污染本地依赖。
+- lazy-import 修正后 CLI `--help`、4 个定向测试、新文件 ruff 和 whitespace gate 全部通过。
+- GPU0 r13 训练已到 epoch 3 中段；trainer macro 依次 .3170→.3495→.3773，epoch 2 三族为
+  causal .328 / subevent .293 / temporal .510。这仍是 trainer 分不是 official 分；offset 有限，GPU0 约 6.7GB，无异常。
+- retriever 竖片完整本地门通过：451 passed / 16 expected torch skips，ruff 0，`ekg-smoke` OK。
+  新文件仅是 exploratory Stage-1 诊断，不在 P1 `CODE_PATHS`，不改变正在运行的 r13 信任根或模型结论。

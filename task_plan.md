@@ -238,12 +238,14 @@ Phase 19（单种子优先的 GPU 并行推进）进行中。用户已授权 GPU
 
 ### Phase 19: 单种子优先的 GPU 并行推进
 
-- [ ] 将“单种子全部过 baseline 且获得用户明确授权前，禁止多种子”写入根指令和活动契约
-- [ ] 核对 Ch2 r13 完整 seed-13 正式流水线、空闲 GPU、输出目录与 official evaluator 边界
-- [ ] 在 GPU0 启动 Ch2 r13 完整 seed-13，持续监测并生成 official 三族指标
-- [ ] 只为不同方案/任务使用其他空闲 GPU，禁止 seeds 17/42 或任何其他多种子运行
+- [x] 将“单种子全部过 baseline 且获得用户明确授权前，禁止多种子”写入根指令和活动契约
+- [x] 核对 Ch2 r13 完整 seed-13 正式流水线、空闲 GPU、输出目录与 official evaluator 边界
+- [ ] 在 GPU0 启动 Ch2 r13 完整 seed-13，持续监测并生成 official 三族指标（运行中，trainer PID 3907812）
+- [ ] 只为不同方案/任务使用其他空闲 GPU，禁止 seeds 17/42 或任何其他多种子运行（Stage-1 retriever 本地门已过，待远端 torch smoke/GPU1）
 - [ ] 按单种子主指标与护栏判定：过线则保留，未过则封存并转 retriever→cross-encoder
 - [ ] 更新结果、交接、进度与服务器产物身份
+- Error log：两篇 ACL PDF 串行下载/抽取首次超过 30 秒工具返回窗口；原进程仍 ALIVE，Efficient DERE 已完整，TacoERE 正在下载。不重启重复下载，只监测原进程后续完成。
+- Error log：新 retriever CLI 首次本地 `--help` 因 CPU 环境无 torch，顶层导入了只在 torch guard 下定义的 `encode_trigger_reps` 而失败。按现有 trainer 模式把该导入移入 `main()` 的 torch imports 之后；不安装本地 torch。
 - **Status:** in_progress
 
 ## Key Questions

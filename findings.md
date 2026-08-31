@@ -1321,3 +1321,29 @@
   smoke 的 trainer 参数，仅把 epochs 改为 50 并写入新的 immutable run-dir；训练完成后使用
   `score_a3_arm.py` 串行执行 native dump→冻结 candidate 归一化→official evaluator，candidate digest 为
   `15a3b1a5…dac10910`。
+- 针对并行第二方案的一手搜索：RepL4NLP 2025 论文官方 ACL 页面确认方法是
+  retriever→cross-encoder，直接解决 O(n²) 和 unrelated-pair 偏斜；论文检索片段还指出 k=5 是评估的候选设置。
+  定向搜索没有找到作者官方代码仓库；TacoERE 的官方代码也未在本轮结果中出现。因此在启动 GPU1 前，
+  必须先核论文 PDF 是否给出 code URL；若无，只实现项目内的最小 retriever 竖片，不重写整篇论文。
+- PDF 一手核验确认两篇都**没有提供作者代码仓库**；TacoERE 只脚注 HuggingFace 库。Efficient DERE
+  的可实现最小机制很明确：以 `<m>trigger</m>` 标记所在句做 bi-encoder 输入，点积做 related/
+  unrelated 二分类，每个 event 取 top-5；Stage 2 用全部正例+检索出的 hard negatives 训 cross-encoder。
+  论文 Table 4 在 ESC 上显示 k=5 优于 3/7/10；这不能当作 MAVEN-ERE 已调好的 k，但可作冻结的首个
+  诊断点。论文 MAVEN-ERE 用 sampled subset，S-BERT+T5 的 non-negative F1 32.8，不可与当前 291-doc
+  official 指标直接相减。
+- TacoERE 完整方法需 K=3 句簇、生成式摘要预训练、事件链中介和 REINFORCE 联训，论文运行于
+  2×RTX3090。在无官方代码情况下重写这套不是三日内高价值路线；只保留“句簇/上下文选择”作为
+  retriever 通过后的后续可选机制。
+- 代码库中无现成 relation retriever，但有足够的可复用基础：`load_maven_ere`、
+  `gold_pair_labels(..., expand_event_relations=True)`、冻结 manifests、`encode_trigger_reps`。最小竖片应只针对
+  **causal candidate retrieval**；subevent/temporal 继续保留全候选，否则 temporal 每个 mention 的稠密正例会让
+  top-5 在结构上无法维持 50.63 护栏。实现前先用 gold causal 统计 oracle recall@5 和压缩率；
+  若 oracle 本身不足，不写模型。
+- gold oracle 已证明论文的 **k=5 不能直接照搬**：在本项目 official mention-expanded causal 口径上，
+  internal-dev mention-level oracle recall@5 仅 .7832（候选压缩 84.7%）；即使先在 gold coreference cluster 级检索再
+  展开 mentions，oracle 也只 .8032（压缩约 83.4%）。原因是 official Cartesian expansion 与高 causal out-degree：
+  dev 有 224 个 mention heads / 128 个 cluster heads 拥有 >5 个正例 tail。下一步先扫结构上限的
+  k={5,10,15,20}（不是模型调参），选择 oracle recall≥.95 且仍有实质压缩的最小 k。
+- oracle grid 收口：mention-level k=10 仅 .9393，k=15 达 **.9810** 且仍压缩 **55.8%** 候选；
+  cluster-level k=10 达 .9502/压缩 67.1%，但它需要推理时 gold/predicted coreference chain，会引入 Ch1 混淆。
+  因此首个竖片冻结为**mention-level top-15**：不使用 gold cluster，只裁 causal 候选，subevent/temporal 不变。
