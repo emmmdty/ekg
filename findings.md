@@ -1395,3 +1395,12 @@
 - r2 最终 best epoch 2：overall=.8543、same=.9784、cross=.8035、compression=.5580；未过 .90/.85
   且 overall/cross 均低于 r1。成功 SSH 已确认 retriever 进程 GONE、GPU1 回到 18MiB；metadata
   complete/final-valid=false/confirmation=false，checkpoint 哈希集合一致。r2 判负，不接 Stage 2。
+- r3 epoch 0 为 overall=.8595、same=.9828、cross=.8090、compression=.5580；相对 r1 epoch 0
+  overall/cross 各约 +.014，证明 top-k hard-negative objective 方向有效，但首轮仍低于 .90/.85 门。
+- r3 epoch 1 为 overall=.8703、cross=.8237：overall 仅比 r1 最终 .8691 高 .0012，而 cross 仍低于
+  r1 最终 .8273，也明显低于 .85 门。若 epoch 2 仍失败，retriever 单种子线止损，不再增加第四个
+  近似变体；保留这些负结果解释“跨句候选排序是实质瓶颈”。
+- r3 最终日志为 overall=.8749、cross=.8299、compression=.5580，未过 .90/.85；同一条成功 SSH
+  随后 `ps -p 3936542` 无输出，已确认 trainer GONE。r3 判负，retriever 近似变体线止损，不跑 r4。
+  后续 checkpoint/metadata 哈希复核遇到既有 ControlMaster reset，新 ControlMaster 又在 banner
+  exchange 超时；远端审计命令未执行，故完整计数/哈希暂不写进结果权威档。

@@ -748,3 +748,26 @@
 - r2 已自然结束并封存：best epoch 2 overall=.8543、same=.9784、cross=.8035、compression=.5580，
   未过门且低于 r1；metadata complete/final-valid=false、hashes match，成功 SSH 确认进程 GONE、
   GPU1 18MiB。负结果已写入 `docs/results/PHASE_A.md`，周四报告同步为 r1/r2 均判负。
+- r3 排序目标与 r2 结果提交 `e0ef69d` 已推送；远端 fetch 后核实正式 workpoint 四个活动路径零差异，
+  安全同步并通过 10 retriever tests/CLI，GPU0 trainer 全程存活。
+- GPU1 真实 CUDA smoke PASS：28 mentions/36 positives，loss=1.0007、finite=true、encoder grad
+  norm=.4067；未写实验产物。随后启动 r3 `topk_pairwise` seed-13，wrapper PID 3936535、trainer
+  PID 3936542，目标 `runs/stages/A3/a3-v6-retriever-r3/stage1/seed-13/`，没有其他 seed。
+- r3 启动日志确认 trigger_mean/topk_pairwise、2,537 objective train docs + 291 dev；首个
+  500-doc loss=.6660，GPU1 约 4.2GiB/34%，数值有限。GPU0 r13 同时存活。
+- r3 epoch 0 已过 1,000/2,537，loss=.5757。GPU0 workpoint trainer best 更新为 epoch 12
+  macro=.3891（causal .332 / subevent .327 / temporal .508），当前 epoch 14；仍非 official 分。
+- r3 epoch 0 已过 2,000/2,537，ranking loss=.4718，进程存活、数值继续下降；等待首个 recall。
+- r3 epoch 0 完整评估：overall=.8595、same=.9828、cross=.8090、compression=.5580；比 r1 同轮
+  overall/cross 各高约 .014，但仍未过门。后两轮按冻结配置继续，不改 k/损失/seed。
+- r3 epoch 1 首个 500-doc loss=.2505。GPU0 workpoint 当前 epoch 15，best 仍为 epoch 12
+  trainer macro=.3891；两进程均存活。
+- r3 epoch 1 已过 1,500/2,537，running ranking loss=.2580；无发散或异常退出。
+- r3 epoch 1 完整评估：overall=.8703、cross=.8237、compression=.5580，仍未过门；overall 仅略高于
+  r1 final，cross 反而略低。冻结 epoch 2 继续；若仍失败，停止 retriever 近似变体而非继续占卡。
+- r3 最终日志：overall=.8749、cross=.8299、compression=.5580，未过门；成功 SSH 已读到 final log
+  且 PID 3936542 GONE，因此停止检索线、不跑 r4。随后的 metadata/hash 复核因旧 control socket reset、
+  新连接 banner timeout 未执行；不据 SSH 失败推断 GPU0 状态，待低频重连后补齐权威结果档。
+- 后续两个不同 ControlPath 的低频新连接仍在 banner exchange 超时，远端命令均未执行；停止继续
+  轰击入口。HANDOFF/TODO/A3 契约已把过时的“四卡空闲/50ep 未启动”改为实际状态，并明确 GPU0
+  最后成功确认到 epoch 15、之后状态未知，r1–r3 检索线止损。

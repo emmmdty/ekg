@@ -9,8 +9,12 @@
 ## 0. 三十秒摘要
 
 - 课题：**occurrence-level 事件图谱构建 + 构建误差的下游代价**，三个方法章 + 一个系统评估章。
-- 本地/远端训练代码提交 = **`91d32d8`**；位置化机制已通过 **447 passed / 16 skipped**、ruff 0、CPU smoke。
-  4090 上 2 epoch 行为 smoke 也已 PASS，四卡现已恢复空闲；尚未启动 50 epoch 正式训练。
+- 本地/远端 HEAD = **`e0ef69d`**；位置化机制生产提交仍为 `91d32d8`，新增代码只服务 exploratory
+  retriever。完整本地门为 **457 passed / 16 skipped**、ruff 0、CPU smoke。
+  4090 上 2 epoch 行为 smoke 已 PASS；50 epoch seed-13 已在 GPU0 启动，最后成功确认到 epoch 15。
+  此后 SSH 在 banner 前失败，**不得据此推断远端进程死亡**。
+- GPU1 的三个不同单种子 Stage-1 retriever 诊断均未过召回门，已停止该近似变体线；没有 seeds
+  17/42，也未启动 Stage 2。r1/r2 已入 `results/PHASE_A.md`，r3 等 SSH 恢复后补 hash。
 - **四章的对手线现已全部同协议实测闭合**，没有一栏引用论文原报数字。这是本阶段最大的进展；
   代价是其中两章的结论是「没有超过」。
 
@@ -43,7 +47,8 @@
 - P1 r12 与 A3 r13 preflight 已重建并通过；4090 上 **2 epoch 行为 smoke 已 PASS**：训练器 macro
   .3178 → .3328，六个最终 offset 均在 [−.536, +.328]，12 条轨迹完整、final-valid 未访问。
   causal 跨句桶连续两轮测得正的最优 NONE shift（需要更高正例门槛），符合“跨句过发”诊断。
-  该分数不是 official evaluator 结果；下一步是 seed-13 50 epoch 正式流水线。
+  该分数不是 official evaluator 结果；seed-13 50 epoch 正式流水线已启动，下一步是等它完成后核
+  official evaluator 产物，而不是再开新 seed 或 retriever 变体。
 
 **已被证否、不要再试的方向**（都已实测，见 `PHASE_A.md`）：
 重叠滑窗（causal 跨窗仅 3.3%）｜连接词感知的上下文表示（有/无线索召回只差 .008）｜

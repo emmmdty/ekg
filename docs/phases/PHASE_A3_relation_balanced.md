@@ -93,6 +93,10 @@ same/cross 分层、六组 offset 和选择 epoch。不得因中途分数调整 
 - 提升不只是 test-time 阈值或 candidate population 改变；
 - 跨句 precision 的改善方向与设计一致。
 
+**2026-08-31 运行状态：进行中。** GPU0、seed 13 的 50-epoch trainer 已启动，完成后由同一外层
+流水线自动调用 official scorer。最后一次成功 SSH 监测到 epoch 15；其后 cpolar 入口在 banner 前
+超时，因此当前只能写“远端状态待恢复核验”，不能把 SSH 失败写成任务结束。trainer dev curve 不进入主表。
+
 ### A3.2-r13.3：单种子封存与多种子授权门
 
 seed-13 通过后只封存为“单种子过线候选”，**不自动补 seeds 17/42**。只有本轮所有待比
@@ -111,6 +115,11 @@ seed-13 通过后只封存为“单种子过线候选”，**不自动补 seeds 
 3. 用 recall@k、候选压缩率和 official relation F1 同时验收。
 
 该路线必须另建协议与核心周期，不能事后并入 r13 冒充同一机制。
+
+**并行 exploratory 诊断（不构成 A3.3 正式启动）：** 在用户允许不同方案 GPU 并行后，已用同一个
+seed 13 依次测试 trigger-mean sampled BCE、marker-sentence、top-k hard-negative ranking 三个
+Stage-1 竖片；三者均未达到事先冻结的 overall≥.90 / cross≥.85 召回门，故均未接 Stage 2，且不再
+增加第四个近似变体。具体数字与 artifact 见 `../results/PHASE_A.md`；r3 hash 待 SSH 恢复补齐。
 
 ## Done when
 

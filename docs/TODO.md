@@ -25,7 +25,10 @@
 - 推理仍为朴素 argmax，candidate/evaluator/final-valid 规则不变；
 - 本地 447 passed / 16 expected skips、ruff 0、CPU smoke 与 P1 local gate 全绿；
 - 代码提交 `91d32d8` 已推送；4090 clean 同步；
-- P1 r12 与 A3 r13 preflight 均 PASS；4090 两 epoch 行为 smoke 已 PASS，尚未启动 50 epoch 正式训练。
+- P1 r12 与 A3 r13 preflight 均 PASS；4090 两 epoch行为 smoke 已 PASS；50 epoch seed-13 正式
+  流水线已在 GPU0 启动，最后一次成功 SSH 确认到 epoch 15，official scorer 尚未产生结果。
+- GPU1 已完成三个不同的单种子 Stage-1 检索诊断；r1/r2/r3 均未过预设 recall 门，检索近似变体线
+  止损，不跑 r4、不接 Stage 2。r1/r2 见权威结果档，r3 待 SSH 恢复后补 artifact hash 再入档。
 
 ### 当前可信身份
 
@@ -47,9 +50,11 @@
 - causal 跨句桶需要提高正例门槛，方向符合跨句 2.6× 过发的诊断；final-valid 未访问；
 - 这是训练器行为证据，不含 official predictions/evaluator，不能与 33.17 主锚直接比较。
 
-1. 下一任务为 seed-13 50 epoch 正式流水线，必须生成 official 三族指标与 same/cross 错误表；
+1. 当前唯一远端主任务是等待/监测 seed-13 50 epoch 流水线，结束后核 official 三族指标与
+   same/cross 错误表；SSH 失败不得推断进程死亡；
 2. seed-13 同时满足 causal >33.17、subevent ≥28.75、temporal ≥50.63，才把该方案标记为单种子过线；
-3. seed-13 未过门则封存工作点线，转两阶段 retriever→cross-encoder；
+3. seed-13 未过门则封存工作点线；并行完成的 r1–r3 retriever Stage-1 均未达到放行门，不能直接
+   接 cross-encoder，也不再堆第四个近似变体；
 4. 在所有待比方案的单种子都过 baseline/护栏且用户再次明确允许前，**禁止**
    seeds 17/42 或任何多种子；空闲 GPU 只并行不同方案/任务。
 
