@@ -1315,3 +1315,9 @@
   [−.536,+.328]，12 条轨迹均有限，status complete、final-valid untouched。causal cross-sentence
   的最优 NONE shift 为 +.259/+.814（两轮均要求提高正例门槛），与跨句 2.6× 过发的独立诊断一致。
   该 trainer 入口不产生 official predictions，所以只放行 50-epoch seed-13，不能把 .3328 写进论文主表。
+- 2026-08-31 用户新的操作约束高于旧 promotion 调度：单种子用于方案筛选；在所有待比方案的单种子均超 baseline/护栏且用户再次明确授权前，禁止任何多种子。GPU 并行只在不同方案/任务之间使用。
+- r13 preflight 的 `local_pair` 命令仍是 baseline 默认 3 epoch，不是本轮 50-epoch
+  `adaptive_workpoint` 方法流水线；不能误用 `run_a3_baseline.py --execute`。正式单种子应复用已通过
+  smoke 的 trainer 参数，仅把 epochs 改为 50 并写入新的 immutable run-dir；训练完成后使用
+  `score_a3_arm.py` 串行执行 native dump→冻结 candidate 归一化→official evaluator，candidate digest 为
+  `15a3b1a5…dac10910`。

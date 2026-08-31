@@ -85,7 +85,7 @@ offset 范围 [−.536, +.328]，12 条 trajectory 完整且全部有限，`run_
 只在 smoke PASS 后，以完全相同的输入、机制和 seed 运行 50 epoch。报告每个 epoch 的三族 P/R/F1、
 same/cross 分层、六组 offset 和选择 epoch。不得因中途分数调整 damping、loss、候选或 epoch 预算。
 
-Promotion 到 seeds 17/42 必须同时满足：
+单种子方案保留必须同时满足：
 
 - seed-13 causal > 33.17；
 - subevent ≥28.75，temporal ≥50.63；
@@ -93,11 +93,11 @@ Promotion 到 seeds 17/42 必须同时满足：
 - 提升不只是 test-time 阈值或 candidate population 改变；
 - 跨句 precision 的改善方向与设计一致。
 
-### A3.2-r13.3：matched seeds 与封存
+### A3.2-r13.3：单种子封存与多种子授权门
 
-promotion 通过后补 seeds 17/42。三条单卡任务可在空闲 4090 上以独立 run-dir 并行；每次先核
-`nvidia-smi`，不占用他人任务。最终要求 causal 相对主锚至少 2/3 seeds 为正，并报告均值、sd、
-配对 CI 和三族护栏。
+seed-13 通过后只封存为“单种子过线候选”，**不自动补 seeds 17/42**。只有本轮所有待比
+方案的单种子均超过各自 baseline 和护栏，且用户再次明确允许后，才可建立额外 seed run-dir。
+在此之前，空闲 4090 只可并行不同方案/任务，不得并行同一方案的不同 seeds。
 
 只有代码/配置/threshold identity 全部冻结后，才在 sealed batch 中评 final-valid；final-valid 不反馈到
 模型、epoch、offset 或结构选择。基础设施失败只有在没有返回指标且 hashes 完全一致时才能原样重试。
@@ -114,17 +114,17 @@ promotion 通过后补 seeds 17/42。三条单卡任务可在空闲 4090 上以�
 
 ## Done when
 
-- r13 smoke 和 seed-13 promotion 判定有不可变产物；
-- promotion 通过时，13/17/42 三种子 causal 均值超过主锚和另一强方法族，至少 2/3 delta 为正，
-  paired-bootstrap CI 下界 >0，subevent/temporal 护栏通过；
-- promotion 失败时，明确封存 `failed` handoff，不补跑选择性种子；
+- r13 smoke 和 seed-13 单种子判定有不可变产物；
+- seed-13 过线时封存为候选；失败时明确封存 `failed` handoff 并转两阶段方案；
+- 未获得用户新的明确授权时，无任何额外 seed 产物或运行目录；
 - `docs/results/PHASE_A.md` 追加本周期真实结果和产物位置；
 - 本地 pytest、ruff、`ekg-smoke` 全绿，远端 checkpoint/log 可追溯。
 
 ## Stop conditions
 
 - smoke 中任一 offset/logit/loss 非有限、位置桶错映射或明显指数发散：立刻停止；
-- seed-13 causal 不超过主锚或任一护栏失败：不补 seeds 17/42；
+- seed-13 causal 不超过主锚或任一护栏失败：封存工作点线并转两阶段方案；
+- 无论 seed-13 是否过线，未经用户明确允许不得启动 seeds 17/42；
 - 两个有效工作点核心周期仍未通过：工作点方法线结束，不开第三轮；
 - manifest/evaluator/candidate hash 漂移：停止并回 P1；
 - final-valid 用于选模：结果标 exploratory，不得进入最终主表；

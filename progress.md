@@ -645,3 +645,13 @@
   未启动 50 epoch 长训练。
 - 完成交付前校验：所有改动 Markdown 相对链接有效，`git diff --check` 通过，
   `AGENTS.md`/`CLAUDE.md` 仍逐字节一致。Phase 18 收口，下一科研执行点是 A3 完整 seed-13。
+
+## 2026-08-31 · Phase 19 单种子优先的 GPU 并行推进
+
+- **Status:** in_progress
+- 用户明确改规则：探索阶段不需多种子；所有待比方案的单种子都超过各自 baseline/护栏之后，仍必须再获得用户明确允许才能跑多种子。
+- 用户已授权继续 GPU 执行和并行任务；并行只用于不同方案/任务，不得用 seeds 17/42 占用其他卡。
+- 重读 `planning-with-files` 并执行 session catch-up；工作树从上一提交干净继续。
+- 已起草同步根指令、HANDOFF、TODO、A3 契约和周四报告的新多种子授权门；历史三种子数字保留为已发生事实。
+- 核对 r13 plan 与正式 scorer：本轮不使用 preflight 中的 3-epoch baseline launcher；将按已过 smoke 的
+  50-epoch trainer 参数运行 seed-13，随后用 `score_a3_arm.py` 生成 official 三族指标。

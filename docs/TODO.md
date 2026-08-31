@@ -48,9 +48,10 @@
 - 这是训练器行为证据，不含 official predictions/evaluator，不能与 33.17 主锚直接比较。
 
 1. 下一任务为 seed-13 50 epoch 正式流水线，必须生成 official 三族指标与 same/cross 错误表；
-2. seed-13 同时满足 causal >33.17、subevent ≥28.75、temporal ≥50.63，才补 seeds 17/42；
+2. seed-13 同时满足 causal >33.17、subevent ≥28.75、temporal ≥50.63，才把该方案标记为单种子过线；
 3. seed-13 未过门则封存工作点线，转两阶段 retriever→cross-encoder；
-4. 完整三种子仍须相对强对手有一致方向和配对 CI，单次高分不算通过。
+4. 在所有待比方案的单种子都过 baseline/护栏且用户再次明确允许前，**禁止**
+   seeds 17/42 或任何多种子；空闲 GPU 只并行不同方案/任务。
 
 ## 周四前并行交付
 
@@ -64,7 +65,7 @@
 ## 停止条件
 
 - offset 出现 NaN/Inf、2 epoch 即数量级爆炸或位置映射错：立刻停止，不启动 50 epoch；
-- Ch2 seed-13 主指标或任一护栏失败：不补跑 seeds 17/42；
+- 无论 seed-13 是否过线，没有用户新的明确授权都不得补跑 seeds 17/42；
 - 两个有效核心设计周期仍未过 promotion：该章方法止损，保留负结果与系统组件身份；
 - final-valid 被用于选模型、阈值或结构：该结果只能标 exploratory；
 - manifest/candidate/evaluator/hash 漂移：停止实验并回 P1；
