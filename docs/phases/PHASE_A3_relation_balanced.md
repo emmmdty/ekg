@@ -1,144 +1,137 @@
-# PHASE A3 — 关系族均衡的长上下文事件关系抽取
+# PHASE A3 — 关系族×位置自适应的事件关系抽取
 
-> **ACTIVE / ENTRY PASS。** P1 `global_protocol_status=pass` 且 `a3_entry_status=pass` 已满足。历史 A/A2 数字只见
-> [`../results/PHASE_A.md`](../results/PHASE_A.md)，旧 A2 契约不得继续执行。
+> **ACTIVE / P1 r12 ENTRY PASS / A3 r13 PREFLIGHT PASS。** A3.0 baseline、A3.1 复现底座和
+> A3.2 第一核心周期均已完成；当前只执行第二核心周期。历史数字见
+> [`../results/PHASE_A.md`](../results/PHASE_A.md)。
 
 ## Goal
 
-在冻结 MAVEN-ERE gold-mention 协议上回答：区别于固定任务权重的自适应关系族平衡，能否在不牺牲
-subevent 的前提下提高 causal，并稳定超过预注册主锚。类型/方向约束是可删除的二级假设。
+在冻结的 MAVEN-ERE gold-mention 协议上验证：为 causal/subevent/temporal 的同句与跨句候选分别学习
+训练侧 NONE-logit 工作点，能否改变模型的原始 argmax 边界，并在不牺牲 subevent/temporal 的前提下
+稳定超过 causal 主锚。
+
+该周期是对第一周期“逐族一个工作点”的单变量扩展。若仍失败，不进行第三轮工作点调参；下一方法方向
+改为文献支持的 retriever→cross-encoder，工作点线结束。
 
 ## Inputs
 
-- P1 r9 trust root：`runs/stages/P1/p1-v6-20260829-r9/`，其 `protocol.json` SHA-256 固定为
-  `440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc`；任何 A3 命令都必须显式传入，
-  不能从待验证 bundle 自取 hash；
-- P1 冻结的 train/internal-dev/final-valid manifests、official evaluator 与 stage schema v2；
-- P1 通过同 schema smoke 的 local pair、official single、official joint；
-- CPU 预检计划 `runs/stages/A3/a3-v6-baselines-r9b/preflight/execution_plan.json`；远端须从当前 P1
-  trust root 重新物化，不直接复制本地绝对路径；
-- 当前长窗口 relation extractor 与历史 checkpoint，仅作初始化/对照；
-- gold mentions。predicted mentions 只进入端到端副表，不进入组件主表。
+| 输入 | 冻结身份 |
+|---|---|
+| P1 trust root | `runs/stages/P1/p1-v6-20260831-r12/` |
+| P1 protocol SHA-256 | `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497` |
+| A3 preflight | `runs/stages/A3/a3-v6-position-workpoint-r13/preflight/` |
+| A3 plan SHA-256 | `b587b21d7aa74437d7144ecad76d87f4fe2253f39966d48bb23108e914ec1eda` |
+| 主锚 | `a3-v6-baselines-r10/primary_anchor.json`，causal 33.17 |
+| 护栏 | subevent ≥28.75；temporal ≥50.63 |
+| 数据 | train 2,622；internal-dev 291；final-valid 710 封存 |
+| backbone | 内容寻址 roberta-base `71be7419…c961ea9` |
 
-**temporal 已进入主贡献表**（2026-08-29）：TIMEX 端点已闭环，官方 `joint`/`temporal` 都评它，候选按族分离（causal/subevent 纯 event，temporal 含 TIMEX）。三族各有预注册护栏锚 = official joint。
+禁止改变 manifest、候选全集、official evaluator、训练/推理 TIMEX 对称性或 final-valid 访问规则。
+诊断阈值只用于提出机制，不能作为测试期后处理进入方法分数。
 
-禁止：用 valid 选 epoch/阈值；把 warmup/epoch/梯度累积或换 backbone 写成创新。
+## 已完成事实
+
+### Baseline closure
+
+- official single、official joint、local pair 已在同协议闭合；主锚在方法结果前冻结；
+- 50 epoch 复现底座 causal 31.42，subevent 30.62，temporal 50.78；
+- 第一周期 `both` 三种子 causal 均值 33.27，但 temporal 50.61 低于护栏且仅 1/3 causal 为正；
+- 第一周期相对事后逐族校准只有 +.12，低于 seed sd .82，判定未通过。
+
+### 第二周期设计依据
+
+- causal 同句 precision .2904 / recall .5841；跨句 precision .1998 / recall .5223；
+- 跨句预测数是 gold 的 2.6×，同句为 2.0×；
+- 逐位置诊断上限 causal 33.80 > 33.17，且三族各自位置阈值可同时满足护栏；
+- 连接词、句距和跨窗口覆盖已被实测否定为当前主因。
+
+### 实现与本地 gate
+
+- pair row 显式携带 `same_sentence|cross_sentence`；缺少 `sent_id` 时 fail-fast；
+- controller 维护 3 family × 2 position 的六个独立 offset；
+- 训练按 row 只移动对应 NONE logit，推理不读取 offset、仍为原始 argmax；
+- 位置映射、相反控制方向、闭环收敛和 no-op 行为已有测试；
+- 447 passed / 16 expected skips、ruff 0、CPU smoke 与 P1 local gate 全绿；提交 `91d32d8` 已推送。
 
 ## Tasks
 
-### A3.0 baseline 全协议重跑
+### A3.2-r13.1：2 epoch 行为 smoke
 
-- 先在 `/data/TJK/ekg` 执行 CPU 物化（不加载模型、不使用 GPU）：
+在 `/data/TJK/ekg`、GPU0、seed 13 运行训练器级 2 epoch 行为 smoke。必须保存：
 
-  ```bash
-  .venv/bin/python scripts/prepare_a3_baselines.py \
-    --output runs/stages/A3/a3-v6-baselines-r9b/preflight \
-    --p1-protocol-sha256 440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc
-  ```
+- `family_balance.json` 中六组 offset 与逐 epoch trajectory；
+- checkpoint、训练配置与训练器 internal-dev dev curve；
+- 完整 argv、commit、P1/plan hash、日志和 return code。
 
-  物化器必须重新验证 P1 v2 bundle、source/manifests/candidate/label digests，只写 P1 train 与 internal-dev；
-  official `test.jsonl` 是同一 internal-dev ID 的无标签形状，不得读取/复制 final-valid。记录 materializer
-  打印的 `plan_sha256`；launcher 必须显式接收该外部可信值并拒绝任何未计划 source/data 文件。
-- 每个 baseline/seed 先运行不带 `--execute` 的 launcher，向作者展示其打印的**完整** argv、cwd、预期产物；
-  确认 4090 空闲后才在相同命令末尾加 `--execute`。示例：
+Smoke PASS 条件：
 
-  ```bash
-  .venv/bin/python scripts/run_a3_baseline.py \
-    --preflight runs/stages/A3/a3-v6-baselines-r9b/preflight \
-    --p1-protocol-sha256 440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc \
-    --plan-sha256 0694c2b5ec13afe6b0a2a4c927e003c99f62a93948f48331c063abc9ab11fb1f \
-    --baseline local_pair --seed 13
-  ```
+1. 六组均有观测，不缺桶、不串桶；
+2. loss、logits、measured shift 和 offset 全部有限；
+3. offset 不出现第一周期错误符号造成的指数发散；
+4. 关闭机制的已有 control 身份不被覆盖，candidate/doc IDs 与 preflight 一致；
+5. final-valid 未访问。
 
-  launcher 每次只运行一个 job，拒绝覆盖既有 run-dir；正式运行保存实际训练/推理/scorer argv、cwd、GPU
-  preflight、return codes、checkpoint/prediction/metric hashes。任一 skipped document、缺失输出、candidate
-  drift 或 partial official payload 未能严格归一化都使该 run `failed`，不得进入 baseline 表。
-- 使用相同 manifests、candidate population、输入字段、evaluator 和输出 schema；
-- 必含本地 pair、official single、official joint；RESIJ 仅在公开实现或忠实复现闭环时可选纳入；
-- local pair 的 v6 loss/选模只包含 causal+subevent；未训练 temporal head 不得进入推理。official single/joint
-  保持官方 README recipe，透明 model-path 适配只改隔离副本中的模型路径并保存前后 hash；模型必须位于
-  `/data/TJK/models/` 下按 Hugging Face repo ID/revision 固定的目录，不再使用上游机器私有 `/data/MODELS`；
-- 先只用 train/internal-dev 完成训练、选模和主锚选择；不得提前查看新 baseline 的 final-valid 分数；
-- 在任何方法结果产生前冻结 internal-dev `primary anchor`；随机主锚必须跑 matched seeds 13/17/42；
-- 保存 candidate-ID digest/population counts，并预注册 subevent 非劣 margin 与 document-cluster CI；causal
-  主锚按 official single/joint mean 选择，subevent 护栏锚固定为 official joint matched-seed mean；
-- 完成后冻结 baseline table，不因主方法结果不好临时换弱对手。
+该命令不单独调用 inference/official evaluator。2 epoch 的训练器 dev 分只用于行为检查，
+不作为方法结论；正式 seed-13 流水线再产生 predictions 与 official metrics。
 
-### A3.1 复现底座冻结
+**2026-08-31 状态：PASS。** GPU0 seed 13 正常结束，训练器 macro .3178 → .3328；六桶最终
+offset 范围 [−.536, +.328]，12 条 trajectory 完整且全部有限，`run_metadata.status=complete`，
+`final_valid_accessed=false`。产物见
+`runs/stages/A3/a3-v6-position-workpoint-r13/smoke/seed-13/checkpoint/`；日志见
+`logs/a3_position_workpoint_r13_smoke_s13.log`。该 PASS 只放行 r13.2，不构成指标提升结论。
 
-把共享长窗口、官方优化器/调度、梯度累积和 train-internal-dev best checkpoint 固定成 reproduction base。
-该底座只证明输入/训练协议正确，不作为方法贡献。输出 causal/subevent 的 dev P/R/F1 与跨句分层。
+### A3.2-r13.2：seed-13 完整训练
 
-### A3.2 Mechanism 1：关系族均衡联合目标
+只在 smoke PASS 后，以完全相同的输入、机制和 seed 运行 50 epoch。报告每个 epoch 的三族 P/R/F1、
+same/cross 分层、六组 offset 和选择 epoch。不得因中途分数调整 damping、loss、候选或 epoch 预算。
 
-只改变关系族优化：采用归一化 family risk、自适应梯度平衡或等价非固定机制，避免 candidate 数量多的
-族主导选模和梯度。MAVEN-ERE official joint 已有固定任务 loss factors，固定权重/网格/只改 best-checkpoint
-选择不算新方法。设计必须同时给出 causal、subevent 的梯度/损失贡献和 P/R/F1。
+Promotion 到 seeds 17/42 必须同时满足：
 
-seed 13 做 internal-dev pilot。只有实现、测试和协议 smoke 均通过才计一个核心设计周期；若 causal 不升
-或 subevent 越过非劣界，允许第二个核心设计周期，第二次仍失败即停止，不扫连续权重网格。
+- seed-13 causal > 33.17；
+- subevent ≥28.75，temporal ≥50.63；
+- 对复现底座 causal 的 document-cluster paired-bootstrap 95% CI 下界 >0；
+- 提升不只是 test-time 阈值或 candidate population 改变；
+- 跨句 precision 的改善方向与设计一致。
 
-### A3.3 Mechanism 2：类型/方向约束
+### A3.2-r13.3：matched seeds 与封存
 
-只在 A3.2 冻结结果上加入事件类型表示与关系方向约束。类型词表必须随 checkpoint/bundle 保存；约束的
-候选全集与 gold population 不得变化。它们是二级机制：失败时删除对应 claim，不消耗/重置核心预算，
-也不阻断 A3.2 promotion；各自最多一次实现 + 一次定向修订。
+promotion 通过后补 seeds 17/42。三条单卡任务可在空闲 4090 上以独立 run-dir 并行；每次先核
+`nvidia-smi`，不占用他人任务。最终要求 causal 相对主锚至少 2/3 seeds 为正，并报告均值、sd、
+配对 CI 和三族护栏。
 
-### A3.4 Promotion 与三种子
+只有代码/配置/threshold identity 全部冻结后，才在 sealed batch 中评 final-valid；final-valid 不反馈到
+模型、epoch、offset 或结构选择。基础设施失败只有在没有返回指标且 hashes 完全一致时才能原样重试。
 
-只有 internal-dev pilot 同时满足以下条件才进入 13/17/42 完整训练：
+### A3.3：若位置工作点失败
 
-- causal 高于 seed-13 primary anchor；
-- subevent 通过预注册非劣 margin；
-- 增益不是 candidate/阈值交换，跨句分层完整报告；
-- A3.2 相对 reproduction base 的 causal document-cluster 95% CI 下界大于 0。
+不再增加第三个工作点或扫连续阈值。保留 r13 负结果，转做新的核心方法候选：
 
-配置、代码、checkpoint、阈值 hashes 与 final-valid access ledger 冻结后，baseline/主锚/方法三种子在
-同一个 sealed batch 中运行 final valid；final valid 不反馈到结构、阈值、epoch 或候选选择。只有未返回
-指标且 hashes 完全一致的基础设施失败可原样重试；否则相关运行标 `exploratory`。
+1. bi-encoder/S-BERT 高召回检索相关事件对；
+2. cross-encoder 只在检索候选和 hard negatives 上精分类；
+3. 用 recall@k、候选压缩率和 official relation F1 同时验收。
 
-RoBERTa-base 主表完成且核心机制通过 seed-13 promotion 后，使用固定 revision 的 ModernBERT-base 对
-reproduction base 与 A3.2 做对称迁移。首轮保持相同 512-token window、candidate/evaluator/seed；8k context
-另作长度消融。该迁移只检验机制是否依赖旧 backbone，不改变 promotion，也不把 backbone 增益算作创新。
-
-### A3.5 导出与端到端副表
-
-无论最终 pass/failed，都导出冻结的 710-doc gold-mention 逐 pair probabilities/labels，并投影到 Ch4 所需
-graph edges；failed 产物保留身份。predicted-mention 端到端副表依赖后续 C4 bundle，推迟到 E3，不在 A3
-用历史/代理 Ch1 产物提前闭环。
+该路线必须另建协议与核心周期，不能事后并入 r13 冒充同一机制。
 
 ## Done when
 
-- 至少三个 baseline 同协议主表完整；
-- 我们三种子 causal 均值高于 primary anchor 和另一不同方法族强 baseline，且相对主锚的 document-cluster
-  paired-bootstrap 95% CI 下界大于 0，至少 2/3 matched-seed delta 为正；
-- subevent 通过预注册非劣界，逐族 P/R/F1 和跨句分层完整；
-- adaptive family-balance 核心消融齐全；实际保留的 type/direction claim 才要求对应消融；
-- ModernBERT-base 对称迁移至少完成 seed-13；若方向与 RoBERTa 主表相反，必须报告并删除跨-backbone
-  泛化主张，但不据此改选主表；
-- stage bundle hashes/IDs/schema 校验 PASS；
-- `docs/results/PHASE_A.md` 追加 v6 小节，本文件不复制数字；
-- 本地三件套全绿，4090 checkpoint/log 位置可追溯。
+- r13 smoke 和 seed-13 promotion 判定有不可变产物；
+- promotion 通过时，13/17/42 三种子 causal 均值超过主锚和另一强方法族，至少 2/3 delta 为正，
+  paired-bootstrap CI 下界 >0，subevent/temporal 护栏通过；
+- promotion 失败时，明确封存 `failed` handoff，不补跑选择性种子；
+- `docs/results/PHASE_A.md` 追加本周期真实结果和产物位置；
+- 本地 pytest、ruff、`ekg-smoke` 全绿，远端 checkpoint/log 可追溯。
 
 ## Stop conditions
 
-- 两个有效核心设计周期后 causal 仍不超过同 split primary anchor，或 subevent 越过非劣界：停止主方法；
-- 任何增益只来自 valid 选模、candidate population 改变或 evaluator 差异：结果作废并退回 P1；
-- 类型/方向二级机制无效：删除其方法主张，不增加核心周期，不用 temporal/TIMEX 或更大 backbone 补洞；
-- 全局 manifest/evaluator 漂移：停止全链并回到 P1；仅某 baseline checkout 漂移：冻结当前 A3 为 failed/
-  blocked handoff，不污染 D3；
-- 方法失败时输出 `status=failed`，保留长上下文复现与关系族冲突诊断，作为系统组件交给 D3/E3；
-- 不进行第三轮超参/结构搜索，不转 MATRES，不增加外部语料。
-
-## Handoff
-
-无论 pass/failed/blocked，都交付可校验 bundle 和明确 evidence identity。D3 可以继续，但 E3 引用 A3 预测时必须
-保留其 status，不能把 failed bundle 写成“改进后的关系图”。
+- smoke 中任一 offset/logit/loss 非有限、位置桶错映射或明显指数发散：立刻停止；
+- seed-13 causal 不超过主锚或任一护栏失败：不补 seeds 17/42；
+- 两个有效工作点核心周期仍未通过：工作点方法线结束，不开第三轮；
+- manifest/evaluator/candidate hash 漂移：停止并回 P1；
+- final-valid 用于选模：结果标 exploratory，不得进入最终主表；
+- 不用更大 backbone、额外语料或换数据集补洞。
 
 ## GPU
 
-4090 上每次只运行一个实验任务。official single/joint 只有在相同 workload 的单卡/多卡短时 smoke 证明
-多卡更快时才使用同任务 DataParallel；global batch、LR、累积步数保持官方 recipe。local pair 因单文档
-encoder batch=1 保持单卡，不把不同 baseline/seed 分摊并发。先展示命令、`/data/TJK/ekg` 工作目录和
-预期 `runs/stages/A3/...`、checkpoint、log。5090 仅在作者逐次授权后作备用，不跨机搬 checkpoint，除非
-作者另行决定。
+4090 项目目录 `/data/TJK/ekg`，服务器只用 `.venv/bin/python`。启动前向作者展示准确命令、cwd 与
+预期输出，先用 `nvidia-smi` 选空卡。长任务使用 `setsid nohup` 与独立日志；一条 SSH 只发一个后台任务。
+5090 仍需逐次授权，不跨机搬 checkpoint，除非作者另行决定。

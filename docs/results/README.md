@@ -7,12 +7,12 @@
 
 | 档案 | 章 | 一句话结论 |
 |---|---|---|
-| [`PHASE_P1.md`](PHASE_P1.md) | 协议 | P1 r4 clean-commit trust root 与 A3 plan-bound CPU preflight PASS；GPU baseline 尚未启动 |
-| [`PHASE_A.md`](PHASE_A.md) | Ch2 | 长窗口与训练协议修正有效，但 causal 尚未超过统一 official anchor，subevent 仍回退 |
+| [`PHASE_P1.md`](PHASE_P1.md) | 协议 | P1 r12 与 A3 r13 preflight PASS；final-valid 封存 |
+| [`PHASE_A.md`](PHASE_A.md) | Ch2 | causal 三种子点值逼近主锚但未过门；逐族×位置 2ep 行为 smoke PASS，待正式 seed-13 |
 | [`PHASE_B.md`](PHASE_B.md) | Ch2 | 结构违反清零 ✅，ECG 可重建率无增益 ❌；α=0.2 因召回上限不可达 |
-| [`PHASE_C.md`](PHASE_C.md) | Ch1 | official-valid 错误以过并为主；换底座失败，旧非对称方向被推翻 |
-| [`PHASE_D.md`](PHASE_D.md) | Ch3 | valid 检测信号较强但尚无同 split 强基线胜出证明；净化结构/下游双负 |
-| [`PHASE_E.md`](PHASE_E.md) | Ch4 | 构建损失 −.0218 是唯一确凿效应；图侧干预全在噪声地板内 |
+| [`PHASE_C.md`](PHASE_C.md) | Ch1 | 调度修复稳定底座，但两个机制周期均未超过种子噪声，当前方法贡献为零 |
+| [`PHASE_D.md`](PHASE_D.md) | Ch3 | evidence 点估计最高但与两条同协议强线不可区分；证据轴信号更强 |
+| [`PHASE_E.md`](PHASE_E.md) | Ch4 | 图依赖正控通过；构建损失为整张图价值的 22%，图侧修复仍在噪声内 |
 
 ## 读之前要知道的三条
 

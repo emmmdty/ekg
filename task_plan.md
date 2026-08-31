@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-Phase 17（A3 路径、backbone 与放行术语纠偏）进行中；重新核对 `/data/TJK/` 远端实际布局、官方 RoBERTa-base 的复现角色、现代 backbone 验证位置，以及“NO-GO/暂缓启动”的适用边界。
+Phase 18（周四总体计划、进展汇报与三日执行编排）已完成；周四报告、逐章指标/归因/文献路线、文档分类和 4090 行为 smoke 均已收口。下一科研执行点是获得长任务授权后运行 Ch2 完整 seed-13。
 
 ## Phases
 
@@ -215,12 +215,26 @@ Phase 17（A3 路径、backbone 与放行术语纠偏）进行中；重新核对
 
 ### Phase 17: A3 路径、backbone 与放行术语纠偏
 
-- [ ] 通过作者可用的同一 `ssh gpu-4090` alias 只读核对 `/data/TJK/` 下项目、模型缓存与实际用户环境
-- [ ] 核对官方 baseline 绑定 RoBERTa-base 的一手代码/论文依据，区分忠实复现与主方法 backbone
-- [ ] 判断 v6 主实验是否需要现代 backbone 主表或迁移验证，避免以换大模型冒充方法增益
-- [ ] 重新裁定模型路径与 subevent guardrail 是否属于 NO-GO、启动 HOLD 还是可并行修复
-- [ ] 修订所有受影响的活动计划/契约文本并做一致性校验；不启动长 GPU 任务
-- **Status:** in_progress
+- [x] 通过作者可用的同一 `ssh gpu-4090` alias 只读核对 `/data/TJK/` 下项目、模型缓存与实际用户环境
+- [x] 核对官方 baseline 绑定 RoBERTa-base 的一手代码/论文依据，区分忠实复现与主方法 backbone
+- [x] 判断 v6 主实验是否需要现代 backbone 主表或迁移验证，避免以换大模型冒充方法增益
+- [x] 重新裁定模型路径与 subevent guardrail 是否属于 NO-GO、启动 HOLD 还是可并行修复
+- [x] 修订所有受影响的活动计划/契约文本并做一致性校验；不启动长 GPU 任务
+- **Status:** complete（后续已推进到 P1 r11 / A3 r12，四章同协议对手线闭合）
+
+### Phase 18: 周四总体计划、进展汇报与三日执行编排
+
+- [x] 以 `docs/results/` 为唯一数字源，逐章核对 Ch1–Ch4 当前成立与不成立的结论
+- [x] 核 ACL 一手论文主表，整理同数据集公开方法的大致指标与不可比边界
+- [x] 修订 `docs/reports/2026-09-03_阶段性报告.md`，给每章补齐问题、方法、实证、缺口、周四预期
+- [x] 形成 2026-08-31 至 2026-09-03 的日程、验收物、止损条件与汇报口径
+- [x] 设计并落实最小文档索引与分类规则，保证历史证据不被误当活动指令；不做大规模搬家
+- [x] 按先验证后训练的流程实现/核验 Ch2 逐族×逐位置控制器，并完成本地三件套
+- [x] 只读审计 4090，重建 P1 r12 并物化 A3 r13 preflight
+- [x] 展示准确命令后完成 Ch2 两 epoch行为 smoke：12 条轨迹完整、offset 有界、方向合理，放行完整 seed-13
+- [x] 将 Ch2 两阶段检索器、Ch3 证据条件化+稀有类目标、Ch1 关系感知度量列为后续方法优先级，并给出实现/止损边界
+- [x] 核对 Git、链接、权威来源和报告内数字，完成可回滚提交与交接
+- **Status:** complete
 
 ## Key Questions
 
@@ -373,6 +387,8 @@ Phase 17（A3 路径、backbone 与放行术语纠偏）进行中；重新核对
 | Phase 17 使用真实 TTY 的 `/data/TJK` 只读 SSH 仍在 kex 前 reset | resumed-1 | 精确 alias/user/port/key 已核对，远端命令未执行；不原样重试。检查本机现有 SSH process/socket，未发现可复用连接，故保留“隧道拒绝本执行环境新连接”基础设施状态，不将其升级为实验 NO-GO |
 | clean r5 worktree 首次 `uv run pytest` 因新建最小 venv 缺 `networkx` 在 collection 失败 | 1 | 代码尚未进入测试，失败是 clean worktree 首次 uv 环境未同步项目所需 extra，不是实现回归；先读取 `pyproject.toml`/`uv.lock` 的既有依赖组，再用仓库约定的 uv 同步方式补齐，不用 pip |
 | r5 跨文档身份更新补丁因 TODO 现有换行与预期不一致而原子失败 | 1 | 无文件产生部分修改；先读取六个目标文件的精确段落，再拆成小补丁，避免大补丁任一锚点失败影响全部同步 |
+| Phase 18 首次同时更新三份 planning 文件时误用模板尾行作为 `findings.md` 锚点 | 1 | `apply_patch` 原子失败、三文件均未改变；改为先读取真实尾部，再拆分精确补丁。 |
+| 4090 `hold-4090.sh` 首次握手未连上，工具在 30 秒先返回但脚本仍在后台重试 | 1 | 远端审计命令未执行；核对脚本与本地进程，确认它按 40 秒间隔有界重试且 TCP 可达。保留进程等待复用 socket，同时继续本地实现。 |
 
 ## Authoritative Context
 
@@ -388,4 +404,4 @@ Phase 17（A3 路径、backbone 与放行术语纠偏）进行中；重新核对
 - [x] 主代理用 `docs/results/` 对关键实测数字交叉核验
 - [x] 按审查结论修订主方案的实施顺序、章节定位和阶段停止条件
 
-**当前阶段：Phase 17 进行中 — 纠正远端路径、backbone 角色与放行术语；未执行 `--execute`。**
+**当前阶段：Phase 18 已完成；次一执行点为 A3 r13 完整 seed-13。**

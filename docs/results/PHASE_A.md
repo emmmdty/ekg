@@ -934,3 +934,27 @@ causal −0.23、temporal −0.96（**跌破 50.63 护栏**）。方向是可解
 把已有的 `adaptive_workpoint` 控制器从「逐族」扩到「**逐族 × 逐位置**」：
 同句候选与跨句候选各自维护 NONE-logit 偏移，仍只加在**训练**损失上、推理保持朴素 argmax。
 控制器的符号已在上一轮修正并有收敛测试钉住。
+
+## ★★ A3.2-r13 逐族×位置工作点：2 epoch 行为 smoke PASS（2026-08-31）
+
+远端 `/data/TJK/ekg`、GPU0、seed 13；P1 r12 protocol SHA-256
+`0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497`。输出：
+`runs/stages/A3/a3-v6-position-workpoint-r13/smoke/seed-13/checkpoint/`；日志：
+`logs/a3_position_workpoint_r13_smoke_s13.log`。
+
+| epoch | trainer macro | causal | subevent | temporal | 六桶 offset 范围 |
+|---:|---:|---:|---:|---:|---:|
+| 0 | .3178 | .245 | .236 | .473 | [−.130, +.345] |
+| 1 | .3328 | .254 | .263 | .481 | [−.536, +.328] |
+
+- `family_balance.json` 保存 3 family × 2 position × 2 epoch = 12 条完整轨迹；measured shift、offset
+  与 loss 全部有限，无第一周期错误符号造成的指数发散；
+- causal 跨句桶两轮测得的最优 NONE shift 均为正（+.259、+.814），即应提高正例门槛，符合
+  “跨句预测是 gold 的 2.6×、precision 仅 .1998”的独立诊断；
+- `run_metadata.status=complete`、`final_valid_accessed=false`，train/internal-dev 为 2,622/291；
+- 日志、`family_balance.json`、`run_metadata.json` SHA-256 分别为 `2cf3e65f…477f0`、
+  `5371b48d…bebeb`、`7162f3b1…cbd1`。
+
+**判定：行为 smoke PASS，放行完整 seed-13；科研结论仍未产生。** 这个入口没有生成 predictions，
+也没有调用 official evaluator，表中的 .3328 不能与冻结主锚 33.17 直接比较。下一步必须运行完整
+50 epoch seed-13 流水线并报告 official causal/subevent/temporal；未过主锚或护栏就终止工作点线。

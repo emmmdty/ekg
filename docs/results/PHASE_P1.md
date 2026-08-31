@@ -1,6 +1,6 @@
 # Phase P1 实测档案：v6 协议冻结与 Ch2 准入
 
-> 执行日期：2026-08-27—2026-08-28。P1 不产出科研 baseline 分数；本文件记录协议 gate 的真实结果。
+> 执行日期：2026-08-27—2026-08-31。P1 不产出科研 baseline 分数；本文件记录协议 gate 的真实结果。
 
 ## 当前裁决
 
@@ -9,12 +9,13 @@
 - P1 phase/status 为 `pass`，P1.1–P1.6 全部闭合；
 - 允许进入 A3.0 baseline 解析与同协议 GPU 实验；D3/C4/E3 的章节本地前置仍按各自契约后置。
 
-权威 bundle：`runs/stages/P1/p1-v6-20260829-r9/`；可信 `protocol.json` SHA-256 为
-`440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc`。其四件套已由
+当前权威 bundle：`runs/stages/P1/p1-v6-20260831-r12/`；可信 `protocol.json` SHA-256 为
+`0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497`。其四件套已由
 `ekg.core.stage_bundle.validate_stage_bundle` 使用该外部可信根重读通过。先建的 r1 因 A3 precheck 发现
 本地/远端 run-dir 混用而失效；r2 因缺少 execution-plan 外部 hash 而失效；r3 在 clean 远端复验时暴露
 local gate 绑定了本地 dirty-tree Python 文件数，不能代表已推送提交。r4 在 detached clean `53ce6f1` 上
-重跑门禁后生成。r1–r3 均保留作审计，未被覆盖或继续选用。
+重跑门禁后生成。r9–r12 依次绑定 temporal、trainer、balance controller 与逐位置实现；旧 bundle 均保留
+作审计，未被覆盖或继续选用。
 
 ## P1.1/P1.2：manifest 与 source
 
@@ -251,3 +252,28 @@ r6 是同一修复的中间版本（`--bundle` 默认值尚未修），保留不
 
 ⚠️ **模型路径修复没有作废 r9**——`prepare_a3_baselines.py` 已移出 `CODE_PATHS`，只产生了新的 plan
 hash。这是本轮解耦的直接回报：过去这类修复要重建整个信任根。
+
+## r12 · Ch2 逐族×位置控制器准入（2026-08-31）
+
+**为什么重冻**：第二核心周期把 pair row、工作点控制器和 trainer 从逐族扩展到逐族×同/跨句位置。
+这三个文件均在 P1 受控代码面；数据、manifest、candidate、evaluator 和冻结主锚没有改变。
+
+本地在提交 `91d32d8` 上通过：447 passed / 16 expected skips、ruff 0、`ekg-smoke` OK，
+`scripts/run_p1_local_gate.py` PASS。上传的 `local_gate.json` SHA-256 为
+`5531149eb611f9ee6e379a07f27bffb7cedadaa68ceb52254bda6ba96393ac24`。
+
+4090 端 clean `91d32d8` 上重建并独立读取：
+
+| 项 | 值 |
+|---|---|
+| P1 bundle | `runs/stages/P1/p1-v6-20260831-r12/` |
+| `global_protocol_status` / `a3_entry_status` | `pass` / `pass` |
+| `protocol.json` SHA-256 | `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497` |
+| A3 preflight | `runs/stages/A3/a3-v6-position-workpoint-r13/preflight/` |
+| A3 plan SHA-256 | `b587b21d7aa74437d7144ecad76d87f4fe2253f39966d48bb23108e914ec1eda` |
+| 物化计数 | 2,622 train + 291 internal-dev |
+| final-valid | 未访问 |
+| GPU 状态 | 审计时 4×RTX 4090 空闲，无项目训练进程 |
+
+P1 r12 构建本身只完成协议与 CPU preflight，没有产生科研分数。随后的 r13 2 epoch GPU
+行为 smoke 见 [`PHASE_A.md`](PHASE_A.md)；它同样未调用 official evaluator，不改变 P1 的结论边界。

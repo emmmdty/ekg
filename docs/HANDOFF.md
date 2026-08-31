@@ -1,6 +1,6 @@
 # 交接文档 · 新会话从这里开始
 
-> 生成于 **2026-08-30**（取代 08-29 版）。读完本文即可接手，不需要回溯对话。
+> 更新于 **2026-08-31**（取代 08-30 状态快照）。读完本文即可接手，不需要回溯对话。
 > **冲突时的优先级**：`docs/results/PHASE_*.md`（已发生的事实）> `docs/SPEC.md`（研究约束）>
 > 当前 active phase > `docs/TODO.md` > 本文。本文只做导航与状态快照，**不复制实验数字**。
 
@@ -9,8 +9,8 @@
 ## 0. 三十秒摘要
 
 - 课题：**occurrence-level 事件图谱构建 + 构建误差的下游代价**，三个方法章 + 一个系统评估章。
-- 本地 `main` = **`3ec0464`**，工作树干净，**445 passed / 16 skipped**，ruff 0，smoke OK；
-  远端已同步，**四卡全空**，无进程。
+- 本地/远端训练代码提交 = **`91d32d8`**；位置化机制已通过 **447 passed / 16 skipped**、ruff 0、CPU smoke。
+  4090 上 2 epoch 行为 smoke 也已 PASS，四卡现已恢复空闲；尚未启动 50 epoch 正式训练。
 - **四章的对手线现已全部同协议实测闭合**，没有一栏引用论文原报数字。这是本阶段最大的进展；
   代价是其中两章的结论是「没有超过」。
 
@@ -23,7 +23,7 @@
 
 ---
 
-## 1. 下一步：Ch2 A3.2 第二个核心设计周期（证据已备齐）
+## 1. 下一步：Ch2 A3.2 第二个核心设计周期（实现与准入已完成）
 
 **为什么第一轮注定失败，以及为什么第二轮不是重复劳动**：
 
@@ -34,14 +34,16 @@
 - 按位置分别设阈后，**causal 天花板 33.80 > 主锚 33.17**，且三族护栏可同时满足。
   ⇒ 前提条件反转了。全部推导见 `results/PHASE_A.md` 末节。
 
-**要做的**：把已有的 `adaptive_workpoint` 控制器（`src/ekg/relations/balance.py`）
-从「逐族」扩到「**逐族 × 逐位置**」——同句候选与跨句候选各自维护 NONE-logit 偏移。
+**已完成**：`adaptive_workpoint` 控制器已从「逐族」扩到「**逐族 × 逐位置**」；同句候选与跨句候选
+各自维护 NONE-logit 偏移。生产改动为 `pairs.py`、`balance.py` 和 relation trainer，提交 `91d32d8`。
 
 - 控制器的**符号已在 08-30 修正**并有收敛测试钉住（`tests/relations/test_balance.py`）；
 - 仍只加在**训练**损失、推理保持朴素 argmax（Menon et al. ICLR 2021），
   这样增益不可能被说成测试期调阈值；
-- ⚠️ `balance.py` 与 `train_supervised_relations.py` **都在 `CODE_PATHS` 里**，改动后
-  必须按 §3 的流程重建 P1 bundle。
+- P1 r12 与 A3 r13 preflight 已重建并通过；4090 上 **2 epoch 行为 smoke 已 PASS**：训练器 macro
+  .3178 → .3328，六个最终 offset 均在 [−.536, +.328]，12 条轨迹完整、final-valid 未访问。
+  causal 跨句桶连续两轮测得正的最优 NONE shift（需要更高正例门槛），符合“跨句过发”诊断。
+  该分数不是 official evaluator 结果；下一步是 seed-13 50 epoch 正式流水线。
 
 **已被证否、不要再试的方向**（都已实测，见 `PHASE_A.md`）：
 重叠滑窗（causal 跨窗仅 3.3%）｜连接词感知的上下文表示（有/无线索召回只差 .008）｜
@@ -69,18 +71,18 @@
 
 | 项 | 值 |
 |---|---|
-| **当前 P1 trust root** | `runs/stages/P1/p1-v6-20260830-r11/` |
-| `protocol.json` SHA-256 | `22ddb9339f22dab4e16a40397a9ed2ee55e3036e01660e4ebb2b7792e831a515` |
-| 当前 A3 plan | `runs/stages/A3/a3-v6-balanced-r12/preflight/execution_plan.json` |
-| plan SHA-256 | `ba52708ab037d54aa1b1a9a46fe68a8827cd0da92a82387aaee5eab696f6df0b` |
+| **当前 P1 trust root** | `runs/stages/P1/p1-v6-20260831-r12/` |
+| `protocol.json` SHA-256 | `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497` |
+| 当前 A3 plan | `runs/stages/A3/a3-v6-position-workpoint-r13/preflight/execution_plan.json` |
+| plan SHA-256 | `b587b21d7aa74437d7144ecad76d87f4fe2253f39966d48bb23108e914ec1eda` |
 | **冻结主锚（权威，勿动）** | `runs/stages/A3/a3-v6-baselines-r10/primary_anchor.json`（sha256 `894b9bd2…185b3c12`） |
 | 门 | causal **> 33.17**｜subevent **≥ 28.75**｜temporal **≥ 50.63** |
 | 模型（内容寻址） | `/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9` |
 | 划分 | train 2,622 / internal-dev 291 / final-valid 710 |
 
-**信任根谱系**：r9（`440516dc…`，08-29）→ r10（`1cf68b20…`，改了 trainer）→
-r11（`22ddb933…`，把 `balance.py` 纳入 `CODE_PATHS`）。
-**三者的 data / manifests / candidate / evaluator / checkpoint 逐项零差异**，已核对，
+**信任根谱系**：r9（`440516dc…`，08-29）→ r10（`1cf68b20…`，改 trainer）→
+r11（`22ddb933…`，纳入 `balance.py`）→ r12（`0bd33e87…`，逐位置 pair/controller/trainer）。
+**这些版本的 data / manifests / candidate / evaluator / checkpoint 逐项零差异**，已核对，
 所以**主锚跨版本仍可比、baseline 不需要重跑**。
 
 **改 `CODE_PATHS` 里的文件后必须走的流程**（已跑通两次，机械但不可跳）：

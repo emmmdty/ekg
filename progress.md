@@ -620,3 +620,28 @@
 - `scripts/run_p1_local_gate.py` 在同一 clean tree 再次完整通过并写出新 local gate SHA `563558e6...b89f`，tested tree 不含主工作树的 Ch1 改动。
 - clean tree 已构建并独立 validate P1 r5：`global_protocol_status=pass, a3_entry_status=pass`，protocol SHA `03df9c16...a71c`。r4 不被覆盖；r5 只重绑本轮 prereg/code/local gate，复用且重哈希不变的 data/evaluator/remote smoke。
 - A3 r5 CPU materializer PASS：2,622 train + 291 internal-dev、final-valid untouched，plan SHA `f7010432...b681b`；三路 seed-13 no-execute 均打印 `/data/TJK/ekg` repo/run 与 pinned `/data/TJK/models/.../e2da8e2...` model path 并 PASS。生成的 r5 protocol/bundle/preflight 已按 hash 复制回主工作区。
+
+## 2026-08-31 · Phase 18 周四汇报与三日执行编排
+
+- **Status:** in_progress
+- 读取并遵循 `planning-with-files`；恢复既有三份 planning 文件，未覆盖历史工作记忆。
+- 阅读 `docs/HANDOFF.md` 与 `docs/reports/2026-09-03_阶段性报告.md`；确认报告存在早期叙述与 08-30 最新实证并存的内部漂移。
+- 将 Phase 17 按后续事实关闭，新增 Phase 18；后续以 `docs/results/`、`docs/SPEC.md`、active phase、`docs/TODO.md` 的优先级继续核验。
+- 当前交付目标：周四总体计划/逐章进展/三日任务表、文档分类规则与最小目录整理、4090 A3.2 安排及完整验证记录。
+- 已读 `SPEC`、`TODO` 与 A3/D3/C4/E3 契约；识别到 A3 契约的 r9 身份和 TODO 前半状态均落后于 08-30 handoff，需要在实验前修正活动文档，而不能靠读者自行选择后半段。
+- 已回查四份结果权威档和 Ch2 控制器/训练数据流；确认第二周期可用 3×2 位置化 offset 做单变量实现，且不改变推理规则、候选全集或评分器。
+- 已展示并尝试 4090 只读审计命令；ControlMaster 尚未建立，远端审计尚未执行。本地连接脚本仍在有界重试，TCP 端口可达。
+- ControlMaster 后续成功，4090 只读审计确认 r11/r12 身份、无项目任务且四卡空闲。
+- 完成 Ch2 第二周期实现：pair row 显式同/跨句位置，controller 维护 family×position 六个独立 offset，训练按 row 移动 NONE logit，推理仍为朴素 argmax；定向 34 tests 与关系域测试通过。
+- 完整本地门与 `run_p1_local_gate.py` 通过：447 passed / 16 expected skips、ruff 0、CPU smoke OK；代码/测试提交 `91d32d8` 已推送，planning 与报告未混入该提交。
+- 远端 clean `91d32d8` 上完成新信任根和执行计划：P1 r12 PASS（protocol `0bd33e87…58497`），A3 r13 preflight PASS（plan `b587b21d…1eda`）；未启动 GPU 训练。
+- 按用户最新优先级完成第一轮论文主表核验：MAVEN-ERE 原论文、TacoERE、LLMERE、Efficient DERE、MAVEN-FACT 与 event-aware coreference 的 ACL 官方页面/PDF已核；已形成 Ch1 关系感知度量、Ch2 检索器+精判别器、Ch3 证据条件化+稀有类目标三条方法映射。
+- 重写周四汇报为 248 行的答案优先版本：公开背景表与本地同协议表分开，每章包含当前指标、低分原因、文献方法和止损条件；旧的“训练中”与已被推翻的结论已移除。
+- 新增 `docs/README.md` 项目结构/文档分类规则和 `docs/reports/README.md`；不移动历史文件。同步精简 `TODO`、更新 HANDOFF、active A3 契约、P1/results 索引和 AGENTS/CLAUDE 到 r12/r13 身份。
+- 按远端规则展示完整命令后，在 4090 GPU0 启动 r13 seed-13 两 epoch 行为 smoke；启动时 commit/registry/output absence/GPU 空闲检查均通过，PID 3893093，未升级长训练。
+- r13 两 epoch 行为 smoke 已正常结束：trainer macro .3178→.3328，六桶最终 offset 位于
+  [−.536,+.328]，12 条 trajectory 完整，run status complete、final-valid 未访问。causal 跨句桶的
+  最优 shift 连续为正，符合跨句过发诊断。该入口未运行 official evaluator，因此仅判行为 PASS，
+  未启动 50 epoch 长训练。
+- 完成交付前校验：所有改动 Markdown 相对链接有效，`git diff --check` 通过，
+  `AGENTS.md`/`CLAUDE.md` 仍逐字节一致。Phase 18 收口，下一科研执行点是 A3 完整 seed-13。

@@ -1,167 +1,77 @@
 # EKG 实时状态
 
-> 更新于 **2026-08-30**（收盘）。本文件只记录当前位置、门状态、下一步和停止条件，不复制实验数字。
-> **新会话先读 [`HANDOFF.md`](HANDOFF.md)**（状态快照 + 规矩 + 坑 + 下一步优先级）。
-> 总纲见 [`SPEC.md`](SPEC.md)，活动契约见 [`phases/`](phases/README.md)，实验事实只认
-> [`results/`](results/README.md)，G0 筛查见
-> [`replan/G0_PROTOCOL_GATE_SCREENING.md`](replan/G0_PROTOCOL_GATE_SCREENING.md)。
+> 更新于 **2026-08-31**。只记录当前事实、唯一活动任务和停止条件；实验数字以
+> [`results/`](results/README.md) 为准，新会话先读 [`HANDOFF.md`](HANDOFF.md)。
 
 ## 当前结论
 
-- 论文结构固定为 **三个方法章 + 一个系统评估章**：身份、关系、事实性、下游误差代价；
-- 当前没有方法章完成“同协议多个 baseline + 三种子超过多个 + 机制消融”的最终验收；
-- Ch3 历史 valid 分数不能与论文 hidden-test 分数直接相减，旧“已过线”判断作废；
-- Ch4 的消费者依赖性仍是假设，只有同 query、同 serialization、同 backbone frozen-vs-finetuned 才能
-  支持微调相关解释；
-- P1 的 manifests、official evaluator、adversarial fixtures、stage bundle 和三个 Ch2 schema smoke 已闭合，
-  `global_protocol_status=PASS`；没有发现课题级硬阻塞；
-- P1.6 的 4090 历史 checkpoint load、最长 internal-dev 与 frozen 10-doc 真实前向均通过，
-  `a3_entry_status=PASS`；允许进入 A3.0 同协议 baseline 实验，但尚未放行 A3 主方法三种子。
-- 权威 P1 trust root 是 `p1-v6-20260829-r9` / `440516dc...a6d4fdc`；399 tests/ruff/smoke 全绿并独立复验。
-  r7 解开了信任根与执行面的耦合：A3 materializer/launcher 已移出 `CODE_PATHS`，local gate 改为逐文件
-  记录、只校验 P1 代码路径。**r7 因此是在当前脏工作树里直接建成并复验的，不再需要 detached clean
-  worktree**；r1–r6 保留为不可变审计物。A3 plan 已按 r7 重新物化，三路 seed-13 no-execute 通过；
-  尚未启动 GPU baseline（远端需用同一命令重新物化 plan）。
-- P1 分开记录 `global_protocol_status` 与 `a3_entry_status`；只有全局协议失败阻塞全链，A3 baseline
-  closure 失败只产生 A3 `blocked/executed=false` handoff，D3 仍可继续。
-
-## 唯一执行顺序
-
-> **P1 协议冻结 → A3 Ch2 → D3 Ch3 → C4 Ch1 → E3 Ch4 → H2 总体验收**
-
-任一时刻只执行一条 phase。下一 phase 只能在收到前一 phase immutable bundle/status 后开始；前一阶段
-pass/failed/blocked 均可完成 handoff；局部失败不阻断后续方法章或系统评估，但其产物必须保留原身份。
-
-## 阶段状态
-
-| Phase | 状态 | 当前含义 | 契约 |
+| 章 | 同协议对手 | 我们当前结果 | 结论 |
 |---|---|---|---|
-| **P1** | **COMPLETED / PASS** | P1.1–P1.6、bundle reader 与本地 gate 全部闭合 | [`PHASE_P1`](phases/PHASE_P1_protocol_freeze.md) |
-| **A3** | **ACTIVE / ENTRY PASS** | 先执行 A3.0 同协议 baseline，方法三种子仍受 promotion gate 约束 | [`PHASE_A3`](phases/PHASE_A3_relation_balanced.md) |
-| **D3** | BLOCKED BY A3 HANDOFF | Ch3 evidence-conditioned 方法；不做跨数据集救火 | [`PHASE_D3`](phases/PHASE_D3_evidence_conditioned.md) |
-| **C4** | BLOCKED BY D3 HANDOFF | Ch1 context-discriminative identity；不再跑非对称旧线 | [`PHASE_C4`](phases/PHASE_C4_context_identity.md) |
-| **E3** | BLOCKED BY C4 HANDOFF | Ch4 本地重建 CGEP-MAVEN 协议的真实 factorial | [`PHASE_E3`](phases/PHASE_E3_factorial_consumers.md) |
-| **H2** | BLOCKED BY E3 | 汇总三种子、消融、复现与论文表格反查 | [`PHASE_H2`](phases/PHASE_H2_thesis_acceptance.md) |
+| Ch1 身份消解 | official joint 80.98 MUC | 底座四种子 79.14；机制三种子 79.47 | 两个机制周期均未成立 |
+| **Ch2 关系抽取** | official joint 33.17 causal | 第一周期三种子 33.27，护栏未过 | **第二周期 active** |
+| Ch3 事实性 | CLS .5458 / DMRoBERTa .5423 | evidence .5554 | 点值最高，配对 CI 含 0 |
+| Ch4 下游代价 | gold/rewired/no-graph | .1802/.1185/.0811 MRR | 图依赖正控与构建损失成立 |
 
-旧 A2/C2/C3/D2/E2/H 契约均已标 `SUPERSEDED`，只可阅读历史推导，不得执行。
+论文结构仍是三个方法章 + 一个系统评估章。公开论文数字可进入背景表看量级，但不能替代最终的
+同协议比较。周四汇报稿见 [`reports/2026-09-03_阶段性报告.md`](reports/2026-09-03_阶段性报告.md)。
 
-## G0 已筛查事实
+## 唯一活动任务：A3 Ch2 逐族×位置工作点
 
-### PASS（P1 实测更新）
+### 已完成
 
-- MAVEN-ERE / MAVEN-FACT 主文件、hash、ID 唯一性与 train/valid 跨数据集集合对齐；
-- 三份历史 710-doc prediction/dump 对 valid 零缺失、零重复；
-- official evaluator 固定恢复路径/hash、710-doc gold-self、四类手算 adversarial fixtures 与严格拒绝路径；
-- 显式 ERE/FACT train/internal-dev/final-valid manifests、supports、candidate/label digests 与 portable manifests；
-- local pair、official single、official joint 的同一 10-doc official-schema smoke；
-- stage bundle 四件套及坏 hash/重复/缺失 ID/未知 upstream 测试；
-- 4090 上 Ch1/Ch2/Ch3/Ch4 历史 checkpoint/heads 在位；
-- P1.6 4090 当前结构兼容 checkpoint 的 longest internal-dev/10-doc 真实前向、回传 hash 与 strict schema；
-- 七个关键 CLI 的本地 CPU import/help smoke；
-- 零新增人工标注与单卡 RoBERTa/SeDGPL 基础可行性。
+- 跨句错误剖析：主要差在 precision（.1998 vs .2904），跨句过发 2.6×、同句 2.0×；
+- 逐位置诊断上限 causal 33.80，高于 33.17 主锚，三族护栏可同时满足；
+- `PairExample.position`、六桶 `WorkPointController` 和训练侧逐 row NONE offset 已实现；
+- 推理仍为朴素 argmax，candidate/evaluator/final-valid 规则不变；
+- 本地 447 passed / 16 expected skips、ruff 0、CPU smoke 与 P1 local gate 全绿；
+- 代码提交 `91d32d8` 已推送；4090 clean 同步；
+- P1 r12 与 A3 r13 preflight 均 PASS；4090 两 epoch 行为 smoke 已 PASS，尚未启动 50 epoch 正式训练。
 
-### CONDITIONAL / PHASE-LOCAL
+### 当前可信身份
 
-- Ch1 训练脚本缺 internal-dev 与 best checkpoint（C4-local，不阻塞 A3）；
-- Ch3 训练脚本显式 manifest 适配留在 D3 前；Ch2 已支持显式 manifest；
-- Ch3 强 baseline、Ch1 official baseline、Ch4 BART/consumer 尚未闭合，均为对应阶段前置；
-- Ch4 缺完整 query 文件、事实性节点属性和 frozen consumer，均不阻塞 A3。
-
-## 当前位置：A3.0 完成，主锚已冻结；下一步 A3.1 复现底座
-
-**协议**：P1 r9 `440516dc…0a6d4fdc`｜A3 plan r10 `36a38e4f…085d4d15`｜seed 13｜
-train 2,622 + internal-dev 291｜**final-valid 未访问**｜官方 `evaluate.py`｜三族全评。
-
-三条 baseline 已闭合，数字见 [`results/PHASE_A.md`](results/PHASE_A.md)。
-**冻结的 primary anchor = official_joint**（`primary_anchor.json` sha256 `894b9bd2…185b3c12`）：
-
-| 门 | 线 |
+| 项 | 值 |
 |---|---|
-| causal 必须超过 | **33.17** |
-| subevent 非劣下界 | **≥ 28.75** |
-| temporal 非劣下界 | **≥ 50.63** |
+| P1 bundle | `runs/stages/P1/p1-v6-20260831-r12/` |
+| P1 protocol SHA-256 | `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497` |
+| A3 preflight | `runs/stages/A3/a3-v6-position-workpoint-r13/preflight/` |
+| A3 plan SHA-256 | `b587b21d7aa74437d7144ecad76d87f4fe2253f39966d48bb23108e914ec1eda` |
+| 主锚 | official joint causal 33.17 |
+| 护栏 | subevent ≥28.75；temporal ≥50.63 |
+| 模型 | `/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9` |
+| 划分 | train 2,622 / internal-dev 291 / final-valid 710（本轮未访问） |
 
-### ⚠️ A3.1 之前必须控住的混淆：训练预算不对等
+### 行为 smoke 结果与下一步
 
-local_pair 只跑了 3 epochs 且 dev 曲线仍在上升，官方 single/joint 是 50/100 epochs。
-「我们停在误报主导的工作点」这个诊断**可能部分来自欠训**，不能直接归因于架构。
-A3.1 复现底座必须在**可比预算**下训练，先把这个混淆排掉，再谈机制。
+- 4090 GPU0、seed 13、2 epoch 正常完成；训练器 macro .3178 → .3328；
+- 六桶最终 offset 范围 [−.536, +.328]，12 条轨迹均有限、无串桶或指数发散；
+- causal 跨句桶需要提高正例门槛，方向符合跨句 2.6× 过发的诊断；final-valid 未访问；
+- 这是训练器行为证据，不含 official predictions/evaluator，不能与 33.17 主锚直接比较。
 
-### A3.2 机制方向（待 A3.1 后定，不预先承诺）
+1. 下一任务为 seed-13 50 epoch 正式流水线，必须生成 official 三族指标与 same/cross 错误表；
+2. seed-13 同时满足 causal >33.17、subevent ≥28.75、temporal ≥50.63，才补 seeds 17/42；
+3. seed-13 未过门则封存工作点线，转两阶段 retriever→cross-encoder；
+4. 完整三种子仍须相对强对手有一致方向和配对 CI，单次高分不算通过。
 
-证据指向的是**工作点**：官方三族均在 FP≈FN≈50%，我们 88–92% 错误是误报。
-而我们的 α=0.5 逆频加权恰恰是把工作点推向高召回的原因——所以「关系族均衡」与
-「工作点」是同一个问题的两面，但需要比单一全局 α 更细的机制。
-两条对手也没解决的（跨句漏报约 70%、temporal 方向判反约 5 千次）是可选着力点，
-难度高，不要低估。
+## 周四前并行交付
 
-### 已补齐的下游前置（不阻塞 A3，趁 GPU 排队时在 CPU 完成）
+- 汇报：逐章公开背景表、本地同协议表、低分归因、未来三天任务；
+- Ch2：至少取得六桶 controller 的有效/无效结论；
+- Ch3：冻结下一周期为 evidence-conditioned + 标签原型/分层判别，不盲跑大模型；
+- Ch1：冻结下一周期为 event-aware metric + 相同触发词 hard-negative 对比学习；
+- Ch4：只整理已有图依赖正控、构建损失和误差类型代价，不新增长训练；
+- 文档：以 [`README.md`](README.md) 为唯一导航，不做历史文件搬家。
 
-- `ekg.core.protocol` 成为唯一的 manifest 划分实现；Ch3 训练脚本已接入显式 split；
-- Ch1 训练脚本接入 P1 manifest + best-epoch 选择，修掉一处**选模污染**：
-  MAVEN-Arg 与 MAVEN-ERE 是同一批文档，训全量 Arg train 会把 291 篇 internal-dev 全部纳入训练
-  （对 final-valid 无污染，历史 MUC 77.47 干净）；
-- Ch2 的 trainer 暂不改用共享划分实现——它是 P1 绑定文件，A3 批次跑完再统一。
+## 停止条件
 
-### temporal 已进入 Ch2 主贡献表（2026-08-29）
+- offset 出现 NaN/Inf、2 epoch 即数量级爆炸或位置映射错：立刻停止，不启动 50 epoch；
+- Ch2 seed-13 主指标或任一护栏失败：不补跑 seeds 17/42；
+- 两个有效核心设计周期仍未过 promotion：该章方法止损，保留负结果与系统组件身份；
+- final-valid 被用于选模型、阈值或结构：该结果只能标 exploratory；
+- manifest/candidate/evaluator/hash 漂移：停止实验并回 P1；
+- SSH 失败只表示连接失败，不推断远端任务死亡。
 
-TIMEX 端点已闭环，候选按族分离（causal/subevent 纯 event、temporal 含 TIMEX，对应官方
-`ignore_timex`）。三族各有预注册非劣护栏锚 = official joint。全语料 3,623 篇 / 20,827 个 TIMEX
-零定位失败；推理侧预测边含 TIMEX 由 0% 升到 37.6%（gold 39%）。九个会让正式跑报废的缺陷由
-一次 20 篇 pilot 抓出，逐条见 [`results/PHASE_P1.md`](results/PHASE_P1.md)。
+## 后续阶段
 
-## 状态（2026-08-30 收盘）
-
-**四卡全空，无进程。** 本地 `main` = `3ec0464`，445 passed / 16 skipped，ruff 0，smoke OK。
-**新会话先读 [`HANDOFF.md`](HANDOFF.md)**——那里有完整的状态、下一步与执行流程。
-
-| 章 | 同协议对手 | 我们 | 状态 |
-|---|---|---|---|
-| Ch1 | official joint 80.98 MUC | 79.14（底座终点 4 种子均值） | ❌ 机制两周期均无效，降为系统组件 |
-| **Ch2** | official joint 33.17 causal | 33.27（未过门） | 🔵 **止损被推翻，第二周期目标明确 ← 下一步** |
-| Ch3 | CLS .5458 / DMRoBERTa .5423 | .5554 | ⚠️ 配对 CI 含 0，不可区分 |
-| Ch4 | —（系统章） | 正控通过 | ✅ 成立 |
-
-### 下一步：Ch2 A3.2 第二个核心设计周期
-
-把 `adaptive_workpoint` 控制器从「逐族」扩到「**逐族 × 逐位置**」。
-依据：跨句差在**精度**（.290 vs .200，召回只差 .062，过发 2.6× vs 2.0×），
-逐位置设阈的 causal 天花板 **33.80 > 主锚 33.17**——而第一轮止损时的全局上限 33.15
-**低于**主锚，机制当时按构造过不了门。推导见 [`results/PHASE_A.md`](results/PHASE_A.md) 末节。
-
-⚠️ `balance.py` 与 `train_supervised_relations.py` 都在 `CODE_PATHS`，改后必须按
-HANDOFF §3 的流程重建 P1 bundle（当前信任根 r11 `22ddb933…`）。
-
-### 已被实测证否、不要再试
-
-重叠滑窗（causal 跨窗仅 3.3%）｜连接词感知的上下文表示（有/无线索召回差 .008）｜
-长距离专用建模（句距分层平坦）｜`normalized_risk` 单用（负作用）｜固定权重/网格｜
-Ch1 的语境池化与混淆度特征（两个周期、多种子均无效）。
-
-### 待作者决定
-
-1. **Ch3 是否改判定轴到证据侧**：标签轴由 72 个稀有类实例决定、五个系统全部不可区分；
-   证据轴有 1,276 个 gold span（支持数 18 倍）。或承认只能给描述性对比。
-2. **论文结构是否要改**：Ch1 已确定无方法贡献。若 Ch2 第二周期也未过门，
-   按停止条件应由作者/导师决定是否改为「两方法章 + 一系统评估章」。
-
-## 全局停止条件
-
-- 数据/manifest/evaluator hash 漂移：所有下游结果停止使用，回 P1；
-- 同一 baseline 两个“诊断→补丁→同协议 smoke”工程轮仍不闭环：降背景并换预列候选；候选失败不等于
-  任务或全篇 NO-GO；
-- 核心方法两个完成实现/测试/协议 smoke 的设计周期仍未超过 gate：该章降为系统组件；二级机制失败只
-  删除 claim，不触发整章止损；
-- valid 被用于本轮选模：结果标 exploratory，不得进最终主表；
-- 任何跨章 ID 缺失、重复或 schema 不一致：下游立即停止，不填默认值继续；
-- 一个方法章 failed/blocked：由作者/导师决定是否正式改纲为“两方法章 + 一系统评估章”；
-- 两个方法章 failed/blocked：v6 主线 NO-GO，另行重规划，不能包装成“两方法章”版本；
-- Ch4 两类消费者都未通过图依赖正控：撤回独立消费者依赖性贡献，收缩为误差传播副章；
-- 只有不同 backbone/数据的消费者可比：只报告描述性差异，不使用“微调导致”措辞。
-
-## 资源状态
-
-- 本地：只做 CPU、文档、实现、测试、manifest/hash 与缓存回放；
-- 4090：主 GPU；cpolar 间歇性 banner timeout 后已用 ControlMaster 恢复，P1.6 在 GPU 0 完成；
-- 5090：本轮未访问，后续每次单独授权；
-- 提交/推送已由作者授权（2026-08-29），条件是 git 整洁、分次提交、可回滚、不强推。
+活动链仍为 `A3 → D3 → C4 → E3 → H2`。严格串行约束的是不可变 handoff；在不改变科研口径且
+GPU 空闲时，可并行同阶段独立 seeds/arms。D3/C4/E3 的现有科学结果可用于汇报，但正式 phase bundle
+仍需在各自阶段完成。

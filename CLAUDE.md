@@ -9,11 +9,11 @@
 baseline 与消融 `docs/EXPERIMENTS.md`｜工程坑 `docs/ENGINEERING_NOTES.md`｜
 服务器运维 `docs/GPU_RUNBOOK.md`｜三端流水线 `docs/PIPELINE.md`｜归档索引 `docs/ARCHIVE_INDEX.md`。
 
-**当前主线是 v6 四章**（2026-08-28）：Ch1 事件身份消解 · Ch2 事件关系抽取 · Ch3 事件事实性检测 ·
+**当前主线是 v6 四章**（2026-08-31）：Ch1 事件身份消解 · Ch2 事件关系抽取 · Ch3 事件事实性检测 ·
 Ch4 构建错误的下游代价与消费者依赖性。结构 = **三个方法章 + 一个系统评估章**；唯一活线是
 `docs/phases/PHASE_A3_relation_balanced.md`；P1 已 PASS，后续严格串行 D3 → C4 → E3，旧 A2/C3/D2/E2 禁止执行。
-> P1 唯一可信根：`runs/stages/P1/p1-v6-20260829-r9/`，其 `protocol.json` SHA-256 为
-> `440516dcbe038c4b6f924db756fb8d0529e1139bb0a263cc720b6d0f0a6d4fdc`；A3 命令必须显式传入。
+> P1 唯一可信根：`runs/stages/P1/p1-v6-20260831-r12/`，其 `protocol.json` SHA-256 为
+> `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497`；A3 命令必须显式传入。
 > ⚠️ **学位论文标尺**：Ch1–Ch3 必须在统一重跑的公开主指标上超过多个方法；低于 baseline 时方法章
 > 贡献为零。Ch4 使用公认 MRR/Hit@k 与配对统计，进入结论的消费者必须超过多个同协议对照，但
 > consumer×quality 效应允许为正、零或负。自造辅助指标只能诊断，不能代替主指标。
