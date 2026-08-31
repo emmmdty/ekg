@@ -15,7 +15,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from ekg.relations.pairs import PairExample
+from ekg.relations.pairs import SAME_SENTENCE, PairExample
 
 _REPO = Path(__file__).resolve().parents[2]
 _PROTOCOL = _REPO / "data" / "protocols" / "v6"
@@ -35,7 +35,12 @@ tr = _load_script()
 
 def _example(index: int, labels: dict[str, str]) -> PairExample:
     return PairExample(
-        doc_id="d1", head_id=f"h{index}", tail_id=f"t{index}", distance=1, labels=labels
+        doc_id="d1",
+        head_id=f"h{index}",
+        tail_id=f"t{index}",
+        distance=1,
+        position=SAME_SENTENCE,
+        labels=labels,
     )
 
 

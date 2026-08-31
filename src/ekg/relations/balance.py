@@ -2,17 +2,17 @@
 
 Two measured facts, from `docs/results/PHASE_A.md`, decide this module's shape.
 
-**The families do not share a working point.** Re-cutting the reproduction base's
-own emitted edges at a grid of confidence thresholds moves causal F1 31.42 ->
-33.15 (best at 0.65), leaves subevent monotonically *worse* than its uncut 30.62,
-and drives temporal below its pre-registered 50.63 guardrail past 0.60. One
-global dial -- which is what a single class-weight exponent is -- cannot put
-three families in three different places.
+**Neither families nor sentence positions share a working point.** Re-cutting the
+reproduction base's emitted edges shows that causal, subevent and temporal need
+different boundaries. A later same/cross-sentence split raises causal's diagnostic
+ceiling from 33.15 to 33.80 because cross-sentence predictions over-emit 2.6x
+against 2.0x in-sentence. One global dial cannot put all six family/position
+groups where their measured precision/recall trade-offs require.
 
-**Re-cutting alone is not enough anyway.** Its causal ceiling, 33.15, sits 0.02
-*below* the frozen primary anchor. So a mechanism that only slides along the
-existing precision/recall curve cannot clear the gate; it has to change the
-curve, which means changing what the encoder learns.
+**Re-cutting remains a diagnostic, not the method.** The selected cut is measured
+on internal-dev, and the phase contract excludes a test-time threshold gain.
+The controller therefore feeds each measured family/position offset into the
+training loss so the encoder must change its raw argmax boundary.
 
 Hence two components, switchable independently so the ablation can say which one
 does the work:
@@ -27,10 +27,10 @@ does the work:
     working-point argument is even well posed.
 
 ``adaptive_workpoint``
-    Each epoch, measure on internal-dev where each family's F1-optimal decision
-    boundary actually is -- exactly, by sweeping the sorted NONE-vs-best-positive
-    margins, not over a grid -- and feed that offset back into the *training*
-    loss as an additive shift on the NONE logit.
+    Each epoch, measure on internal-dev where each family × same/cross-sentence
+    F1-optimal decision boundary actually is -- exactly, by sweeping the sorted
+    NONE-vs-best-positive margins, not over a grid -- and feed that offset back
+    into the *training* loss as an additive shift on the NONE logit.
 
     Applying the shift during training and leaving inference untouched is
     deliberate and is the whole point (cf. Menon et al., *Long-tail learning via
@@ -53,6 +53,8 @@ from collections.abc import Iterable, Sequence
 
 import numpy as np
 
+from ekg.relations.pairs import POSITION_BUCKETS
+
 __all__ = [
     "ALL_COMPONENTS",
     "NORMALIZED_RISK",
@@ -65,6 +67,8 @@ __all__ = [
     "FamilyRiskNormalizer",
     "WorkPointController",
     "best_none_shift",
+    "workpoint_key",
+    "position_none_offsets",
 ]
 
 CONFIG_FILE = "family_balance.json"
@@ -84,6 +88,27 @@ NONE_INDEX = 0
 # Targets the official protocol does not score for a family (a TIMEX endpoint
 # under causal/subevent); torch's cross-entropy default, kept identical here.
 IGNORE_INDEX = -100
+
+
+def workpoint_key(family: str, position: str) -> str:
+    """Stable key for one relation-family × sentence-position control loop."""
+    if position not in POSITION_BUCKETS:
+        raise ValueError(f"unknown relation position {position!r}")
+    if not family:
+        raise ValueError("relation family must be non-empty")
+    return f"{family}/{position}"
+
+
+def position_none_offsets(
+    family: str,
+    positions: Sequence[str],
+    offsets: dict[str, float],
+) -> np.ndarray:
+    """Map pair positions to their independent train-time NONE-logit offsets."""
+    return np.asarray(
+        [offsets[workpoint_key(family, position)] for position in positions],
+        dtype=np.float64,
+    )
 
 
 def validate_components(components: Iterable[str]) -> tuple[str, ...]:
@@ -182,41 +207,42 @@ def best_none_shift(
 
 
 class WorkPointController:
-    """Per-family NONE-logit offsets, accumulated from what internal-dev measures.
+    """Per-control-group NONE-logit offsets accumulated from internal-dev.
 
     The offsets are applied to the *training* loss only; `trajectory` keeps every
-    epoch's measurement so a flat tail (the loop having converged) or a family
-    still drifting is visible in the record instead of inferred.
+    epoch's measurement so a flat tail (the loop having converged) or a group
+    still drifting is visible in the record instead of inferred. A group is a
+    family for the original mechanism and family/position for the second cycle.
     """
 
-    def __init__(self, families: Sequence[str], damping: float = LOOP_DAMPING) -> None:
+    def __init__(self, groups: Sequence[str], damping: float = LOOP_DAMPING) -> None:
         if not 0.0 < damping <= 1.0:
             raise ValueError(f"damping must be in (0, 1], got {damping}")
         self.damping = damping
-        self.offsets: dict[str, float] = dict.fromkeys(families, 0.0)
+        self.offsets: dict[str, float] = dict.fromkeys(groups, 0.0)
         self.trajectory: list[dict] = []
 
-    def observe(self, epoch: int, family: str, logits: np.ndarray, targets: np.ndarray) -> float:
-        if family not in self.offsets:
-            raise KeyError(f"unknown family {family!r}")
+    def observe(self, epoch: int, group: str, logits: np.ndarray, targets: np.ndarray) -> float:
+        if group not in self.offsets:
+            raise KeyError(f"unknown work-point group {group!r}")
         shift, f1_at_shift, f1_at_zero = best_none_shift(logits, targets)
-        previous = self.offsets[family]
+        previous = self.offsets[group]
         # Minus, not plus. The offset is added to the NONE logit *inside the
         # loss*, and cross-entropy answers by pushing the raw NONE logit the
         # other way -- so asking for "cut higher" (shift > 0) means subtracting.
         # With the sign inverted the loop multiplies its own error by 1.5 an
         # epoch: the first A3.2 run reached an offset of 1e7 by epoch 49 and
         # collapsed temporal to 0.000 F1.
-        self.offsets[family] = previous - self.damping * shift
+        self.offsets[group] = previous - self.damping * shift
         self.trajectory.append(
             {
                 "epoch": epoch,
-                "family": family,
+                "group": group,
                 "measured_shift": shift,
                 "offset_before": previous,
-                "offset_after": self.offsets[family],
+                "offset_after": self.offsets[group],
                 "dev_f1_at_shift": f1_at_shift,
                 "dev_f1_at_zero": f1_at_zero,
             }
         )
-        return self.offsets[family]
+        return self.offsets[group]

@@ -35,6 +35,9 @@ from ekg.core.schema import RelationEdge, RelationType
 from ekg.relations.data.maven_ere import TIMEX_EVENT_TYPE, RelationDocument
 
 __all__ = [
+    "SAME_SENTENCE",
+    "CROSS_SENTENCE",
+    "POSITION_BUCKETS",
     "PairExample",
     "mention_order",
     "candidate_pairs",
@@ -53,6 +56,10 @@ _FAMILIES = (
 )
 _COREF_LABEL = "COREF"
 
+SAME_SENTENCE = "same_sentence"
+CROSS_SENTENCE = "cross_sentence"
+POSITION_BUCKETS = (SAME_SENTENCE, CROSS_SENTENCE)
+
 PairKey = tuple[str, str]
 
 
@@ -64,6 +71,7 @@ class PairExample:
     head_id: str
     tail_id: str
     distance: int
+    position: str
     labels: dict[str, str]
     # Families this pair is not scoreable for. Official MAVEN-ERE emits -100 for
     # causal/subevent on any pair touching a TIMEX (`ignore_timex=True`); treating
@@ -235,6 +243,13 @@ def pair_examples(
     timex_ignored = frozenset(
         family.value for family in _FAMILIES if family is not RelationType.TEMPORAL
     )
+    sentence_by_id: dict[str, int] = {}
+    for node in doc.nodes:
+        if not node.trigger_evidence or node.trigger_evidence[0].sent_id is None:
+            raise ValueError(
+                f"{doc.doc_id}/{node.event_id}: pair position requires a trigger sentence"
+            )
+        sentence_by_id[node.event_id] = node.trigger_evidence[0].sent_id
     examples: list[PairExample] = []
     for head, tail in candidate_pairs(doc, max_distance):
         labels = {
@@ -249,6 +264,11 @@ def pair_examples(
                 head_id=head,
                 tail_id=tail,
                 distance=abs(order[head] - order[tail]),
+                position=(
+                    SAME_SENTENCE
+                    if sentence_by_id[head] == sentence_by_id[tail]
+                    else CROSS_SENTENCE
+                ),
                 labels=labels,
                 ignored_families=timex_ignored if touches_timex else frozenset(),
             )

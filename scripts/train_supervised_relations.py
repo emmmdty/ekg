@@ -37,6 +37,8 @@ from ekg.relations.balance import (
     NORMALIZED_RISK,
     FamilyRiskNormalizer,
     WorkPointController,
+    position_none_offsets,
+    workpoint_key,
 )
 from ekg.relations.balance import (
     ALL_COMPONENTS as BALANCE_COMPONENTS,
@@ -48,7 +50,7 @@ from ekg.relations.balance import validate_components as validate_balance_compon
 from ekg.relations.data.maven_ere import load_maven_ere
 from ekg.relations.extractor.supervised import FAMILY_SUBTYPES
 from ekg.relations.maven_ere_official import frozen_candidate_protocol, records_by_id
-from ekg.relations.pairs import PairExample, pair_examples
+from ekg.relations.pairs import POSITION_BUCKETS, PairExample, pair_examples
 
 # Official MAVEN-ERE marks unscoreable family/pair combinations with -100
 # (`joint/src/data.py::get_relation_labels`), which is also torch's default.
@@ -487,8 +489,9 @@ def main() -> int:
             "adaptive relation-family balancing (A3.2); empty = the reproduction base's "
             "plain sum of class-weighted family losses. "
             "normalized_risk divides each family by an EMA of its own loss scale; "
-            "adaptive_workpoint feeds each family's measured F1-optimal NONE-logit "
-            "offset back into the training loss (inference stays a plain argmax)"
+            "adaptive_workpoint feeds each family x same/cross-sentence group's measured "
+            "F1-optimal NONE-logit offset back into the training loss "
+            "(inference stays a plain argmax)"
         ),
     )
     args = parser.parse_args()
@@ -638,9 +641,27 @@ def main() -> int:
         else None
     )
     work_point = (
-        WorkPointController(selected_families)
+        WorkPointController(
+            [
+                workpoint_key(family, position)
+                for family in selected_families
+                for position in POSITION_BUCKETS
+            ]
+        )
         if ADAPTIVE_WORKPOINT in balance_components
         else None
+    )
+    position_index = {position: index for index, position in enumerate(POSITION_BUCKETS)}
+    position_ids_by_doc = (
+        {
+            doc_id: torch.tensor(
+                [position_index[row.position] for row in doc_rows],
+                device=device,
+            )
+            for doc_id, doc_rows in rows_by_doc.items()
+        }
+        if work_point
+        else {}
     )
     if balance_components:
         print(f"[train] family balance: {list(balance_components)}", flush=True)
@@ -698,6 +719,7 @@ def main() -> int:
                 {
                     "components": list(balance_components),
                     "families": list(selected_families),
+                    "position_buckets": list(POSITION_BUCKETS) if work_point else [],
                     "applied_at_inference": False,
                     "none_offsets": dict(work_point.offsets) if work_point else {},
                     "risk_scales": dict(risk_normalizer.scales) if risk_normalizer else {},
@@ -723,7 +745,15 @@ def main() -> int:
         per_family = {fam: [0, 0, 0] for fam in selected_families}  # tp, fp, fn
         # Raw logits, unshifted: the controller has to measure where the boundary
         # *is*, and the reported dev F1 is a plain argmax over these same numbers.
-        collected: dict[str, list] = {fam: [] for fam in selected_families} if work_point else {}
+        collected: dict[str, list] = (
+            {
+                workpoint_key(family, position): []
+                for family in selected_families
+                for position in POSITION_BUCKETS
+            }
+            if work_point
+            else {}
+        )
         with torch.no_grad():
             for doc_id in dev_ids:
                 doc = docs_by_id[doc_id]
@@ -749,12 +779,15 @@ def main() -> int:
                         device=device,
                     )
                     if work_point is not None:
-                        collected[family].append(
-                            (
-                                logits[family].detach().float().cpu().numpy(),
-                                gold.detach().cpu().numpy(),
-                            )
-                        )
+                        dev_logits = logits[family].detach().float().cpu().numpy()
+                        dev_targets = gold.detach().cpu().numpy()
+                        row_positions = [row.position for row in doc_rows]
+                        for position in POSITION_BUCKETS:
+                            mask = [item == position for item in row_positions]
+                            if any(mask):
+                                collected[workpoint_key(family, position)].append(
+                                    (dev_logits[mask], dev_targets[mask])
+                                )
                     scored = gold != _IGNORE_INDEX
                     pred = logits[family].argmax(dim=-1)
                     hit = (pred == gold) & scored
@@ -776,10 +809,12 @@ def main() -> int:
         if collected:
             import numpy as np
 
-            for fam, parts in collected.items():
+            for group, parts in collected.items():
+                if not parts:
+                    raise ValueError(f"no internal-dev pairs for work-point group {group}")
                 dev_logits = np.concatenate([p[0] for p in parts])
                 dev_targets = np.concatenate([p[1] for p in parts])
-                work_point.observe(epoch, fam, dev_logits, dev_targets)
+                work_point.observe(epoch, group, dev_logits, dev_targets)
         if args.dev_metric == "macro":
             return sum(by_family.values()) / len(by_family), by_family
         pooled = [sum(c[i] for c in per_family.values()) for i in range(3)]
@@ -791,18 +826,23 @@ def main() -> int:
     none_offsets: dict[str, torch.Tensor] = {}
 
     def rebuild_offsets() -> None:
-        """One-hot NONE shift per family, from the controller's current offsets.
+        """Two train-time NONE shifts per family: same sentence and cross sentence.
 
-        Epoch 0 runs with all-zero offsets, so the mechanism starts as an exact
-        no-op and has to earn every point it moves -- the same discipline the
-        distance embedding is zero-initialised under.
+        Epoch 0 starts with six exact zeros. Internal-dev then updates each
+        family/position loop independently; inference never reads these tensors.
         """
         if work_point is None:
             return
-        for fam in selected_families:
-            column = torch.zeros(len(FAMILY_SUBTYPES[fam]), device=device)
-            column[NONE_INDEX] = work_point.offsets[fam]
-            none_offsets[fam] = column
+        for family in selected_families:
+            none_offsets[family] = torch.as_tensor(
+                position_none_offsets(
+                    family,
+                    POSITION_BUCKETS,
+                    work_point.offsets,
+                ),
+                dtype=torch.float32,
+                device=device,
+            )
 
     rebuild_offsets()
     encoder.train()
@@ -843,7 +883,10 @@ def main() -> int:
                     # subtract it back out. Shifting only the objective makes the
                     # boundary part of what the encoder learns, and leaves the
                     # test-time rule a plain argmax.
-                    family_logits = family_logits + none_offsets[family]
+                    family_logits = family_logits.clone()
+                    family_logits[:, NONE_INDEX] += none_offsets[family][
+                        position_ids_by_doc[doc_id]
+                    ]
                 family_loss = F.cross_entropy(
                     family_logits,
                     target,

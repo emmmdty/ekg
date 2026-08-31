@@ -13,6 +13,8 @@ import pytest
 from ekg.core.schema import EventNode, EvidenceSpan, RelationEdge, RelationType
 from ekg.relations.data.maven_ere import RelationDocument, _parse_document
 from ekg.relations.pairs import (
+    CROSS_SENTENCE,
+    SAME_SENTENCE,
     candidate_pairs,
     edges_to_pair_labels,
     gold_pair_labels,
@@ -132,6 +134,8 @@ def test_pair_examples_cover_universe_with_labels() -> None:
     assert by_pair[("m2", "m1")].labels == {"coreference": "COREF"}
     assert by_pair[("m3", "m4")].labels == {}
     assert by_pair[("m1", "m4")].distance == 3
+    assert by_pair[("m1", "m2")].position == SAME_SENTENCE
+    assert by_pair[("m1", "m3")].position == CROSS_SENTENCE
 
 
 def test_official_event_relation_expansion_labels_all_cluster_mention_pairs() -> None:

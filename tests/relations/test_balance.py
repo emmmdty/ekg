@@ -13,8 +13,11 @@ from ekg.relations.balance import (
     FamilyRiskNormalizer,
     WorkPointController,
     best_none_shift,
+    position_none_offsets,
     validate_components,
+    workpoint_key,
 )
+from ekg.relations.pairs import CROSS_SENTENCE, SAME_SENTENCE
 
 
 def f1_at_shift(logits: np.ndarray, targets: np.ndarray, shift: float) -> float:
@@ -153,3 +156,44 @@ def test_closed_loop_contracts_instead_of_running_away() -> None:
     final = np.stack([np.zeros(n), calibrated + offset], axis=1)
     _, best_f1, f1_at_zero = best_none_shift(final, targets)
     assert f1_at_zero == pytest.approx(best_f1, abs=0.02)
+
+
+def test_position_workpoints_are_measured_and_applied_independently() -> None:
+    same_key = workpoint_key("causal", SAME_SENTENCE)
+    cross_key = workpoint_key("causal", CROSS_SENTENCE)
+    controller = WorkPointController([same_key, cross_key], damping=0.5)
+
+    # Same-sentence pairs under-emit: the optimal cut is lower, so the train-time
+    # NONE offset must move positive (the existing sign regression).
+    same_logits = np.array([[3.0, 0.0], [3.0, 0.0], [0.0, 3.0], [3.0, 0.0]])
+    same_targets = np.array([1, 1, 1, 0])
+    same_offset = controller.observe(1, same_key, same_logits, same_targets)
+
+    # Cross-sentence pairs over-emit: only the highest-margin row is truly positive,
+    # so the optimal cut is higher and its train-time offset moves negative.
+    cross_logits = np.stack([np.zeros(4), np.array([0.5, 0.4, 3.0, 0.3])], axis=1)
+    cross_targets = np.array([0, 0, 1, 0])
+    cross_offset = controller.observe(1, cross_key, cross_logits, cross_targets)
+
+    assert same_offset > 0
+    assert cross_offset < 0
+    mapped = position_none_offsets(
+        "causal",
+        [SAME_SENTENCE, CROSS_SENTENCE, SAME_SENTENCE],
+        controller.offsets,
+    )
+    assert mapped.tolist() == pytest.approx([same_offset, cross_offset, same_offset])
+    # A mutation that collapses both position buckets to one family offset would
+    # make these equal and is therefore caught by this fixture.
+    assert mapped[0] != mapped[1]
+
+
+def test_position_workpoint_rejects_unknown_or_missing_buckets() -> None:
+    with pytest.raises(ValueError, match="unknown relation position"):
+        workpoint_key("causal", "adjacent")
+    with pytest.raises(KeyError):
+        position_none_offsets(
+            "causal",
+            [SAME_SENTENCE],
+            {workpoint_key("causal", CROSS_SENTENCE): 0.0},
+        )
