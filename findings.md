@@ -1580,3 +1580,51 @@
 - 失败模式不是全面退化：原型依赖头把 subevent 提到护栏以上、temporal 提到 51.81，但 causal 的
   precision/recall=20.25/56.42，仍是明显过发。故不扫 support 数、温度或图权重；下一机制若继续原型线，
   必须补论文的 `None` 文本原型与 event-agnostic context，或改做能直接约束 causal 误报的结构目标。
+- 下一轮诊断的控制源已冻结为本次 291 篇 `official_predictions.jsonl` + `official_metrics.json`；既有
+  `report_relation_error_profile.py` 会先逐族复现官方 P/R/F1，否则 fail-fast，再分解同句/跨句、距离、
+  方向反转与 FP/FN。先运行该低成本诊断，避免仅凭总分选择下一 GPU 方法。
+- 新 error profile 已逐族通过 official P/R/F1 自校验。causal TP/FP/FN=2,706/10,659/2,090，FP 占
+  83.6%；跨句 FP=8,354，占 FP 78.4%，方向反转漏报只有 29。主矛盾是跨句负候选被大量误判为 causal，
+  不是方向约束或 recall 不足。
+- 跨句 FP 的文本秩距离桶 `<=16`/`<=32`/`>32` 分别 1,880/2,062/1,017，合计占跨句 FP 59.4%；
+  下一方法应直接做长距离跨句证据/上下文选择或高分负例对比训练。全局阈值、方向正则和 prototype
+  support/temperature 扫描与主误差不匹配。
+- 一手检索候选中，ATLOP（AAAI 2021）最贴合当前误差：作者论文与官方代码同时存在；localized
+  context pooling 直接用 PLM 末层注意力为每个实体对选择共同相关 token，adaptive thresholding 以
+  pair-dependent NONE 边界训练。它作用于跨句 pair 表示与正/负分离，不是事后阈值扫描。
+- 2026 ACL 的 ATGL 有作者代码，进一步把正类、负类和阈值放入统一 logit 空间并处理类别不平衡；
+  但它仍源自 DocRE 多标签设定，能否无歧义适配当前每族单标签 NONE 分类需先核公式/代码。若只移植
+  loss 而不引入 pair-specific context，可能仍解释不了长距离跨句 FP。
+- 文档因果 ILP/超图方法与跨句问题相关，但公开结果主要在 EventStoryLine/MECI，且完整图结构/solver
+  适配工程面明显大于两天预算；作为本轮第二选择，不先占 5090。
+- ATLOP 官方 `model.py` 的 localized context 依赖同一长文序列的末层 token attention：两事件 attention
+  逐元素乘、跨 head 平均、归一化，再加权 token hidden。当前 EKG encoder 把文档切成多个独立 512-token
+  windows，函数只返回 trigger embedding，不保留 token hidden/attention；跨 window pair 没有共同
+  attention 图。直接声称“移植 ATLOP context”会不忠实，且需要改长文编码主路径，不能作为本轮最小竖片。
+- ATLOP 官方 `ATLoss` 则可无歧义适配：NONE/TH 都是 index0；对正行要求 gold > NONE，并要求 NONE >
+  其他错误 subtype；对负行要求 NONE > 全部正 subtype。当前每族单标签只是其多标签情形的特例，推理
+  仍为原始 argmax，不引入 dev 阈值。它是训练目标变更，可作为低风险独立方案，但需先与更新的 ATGL
+  官方公式比较，再决定用哪一个，不能两者叠加后无法归因。
+- ATGL 官方代码与 ACL 2026 公式已逐行对应：单一 softmax 中 positive 权重大于1、TH=1、negative=0。
+  论文 Limitations 明确写总体改善主要降低 FN、代价是 FP 上升；这与本项目 causal 83.6% 错误为 FP 的
+  主矛盾相反，故尽管方法更新且代码可用，也不进入 5090 竖片。
+- ATLOP ATLoss 仍保留候选；同时应核本地逐文档 loss 是否能做 online hard-negative selection。后者若
+  能对每族保留全部正例、只选当前最高损失的跨句 NONE，直接训练已有 8,354 类 FP 的模式，比一个不分
+  同/跨句的通用 threshold loss 更匹配诊断。两者只选一项，避免组合后无法归因。
+- 本地 trainer 每个文档已一次构造全候选 logits，技术上可做 OHEM；但它必须新增难负例比例/数量，且
+  当前已有 `neg_ratio` 随机采样历史，容易把方法贡献混成采样超参。为保持单变量与两天可复现性，首个
+  新方案选官方 ATLOP ATLoss，不做 OHEM。
+- ATLoss 方案冻结：现有 linear head、全候选、三族、lr/head-lr/warmup/accum/50ep/seed13 全不变；
+  `weight_alpha=0.0` 是官方目标兼容要求（不叠外部 class weight）；推理仍原始 argmax。实现必须通过
+  registry lazy selection、公式等价、IGNORE、梯度、正/负排序及反号变异测试，先 2ep CUDA smoke。
+- 接线点已核：trainer 每文档/每族统一在一处调用 `F.cross_entropy`，可替换为注册 objective 而不改
+  data/head/inference；run metadata 需新增 objective identity。新 registry/implementation 与测试必须纳入
+  P1 `CODE_PATHS`，否则旧 bundle 不覆盖新结论，GPU 前需重建新的 P1 trust root。
+- ATLoss 本地实现完成：默认 CE 由等价测试锁定；新目标有官方公式等价、IGNORE、有限梯度、正/负排序
+  和反向符号负控。完整本地门 461 passed / 22 expected skips、ruff 0、CPU smoke OK；Torch 四测因本地
+  无 torch 按预期 skip，必须在 5090 执行后才允许 CUDA smoke。
+- `run_p1_local_gate.py` 已重跑 PASS 并刷新 `data/protocols/v6/local_gate.json`；objective registry 与实现
+  已加入 P1 CODE_PATHS，旧 r13 因代码哈希面变化不再覆盖 ATLoss，下一步生成新 bundle。
+- 新 P1 bundle `p1-v6-20260901-r14` 已本地构建并 validate-only PASS；protocol SHA-256 为
+  `a2b83f66c05ae36bb772fa845ad455bb96b7426cf18149669157cffa200a6974`。r13→r14 顶层差异仅 bundle ID、
+  code-state digest 与受控 hashes；需在提交后同步完整 protocol tree/bundle 到 5090 并远端复验。

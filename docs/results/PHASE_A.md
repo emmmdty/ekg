@@ -1057,3 +1057,50 @@ dev macro 选模；随后对同一冻结 internal-dev 291 篇执行 GPU inferenc
   SHA-256 `32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598`；final-valid 未访问；
 - 5090 backbone 内容身份仍未闭合正式 4090 pin，所以即使其中两族过护栏，本节也只能标
   **exploratory**，不得进入论文正式同协议主表。
+
+### causal 误差结构：下一方法必须直接处理跨句误报
+
+同一份 `report_relation_error_profile.py` 已逐族复现上述 official P/R/F1 后才输出剖析：
+
+| 项 | 数量 / 比例 |
+|---|---:|
+| causal TP / FP / FN | 2,706 / **10,659** / 2,090 |
+| FP 占全部 causal 错误 | **83.6%** |
+| 跨句 FP | **8,354 / 10,659（78.4%）** |
+| 同句 FP | 2,305 / 10,659（21.6%） |
+| 方向反转漏报 | 29 / 2,090（1.4%） |
+
+这把低分原因进一步收窄：不是 causal 方向判断为主，也不是整体 recall 不足，而是大量跨句负候选被
+判成 causal。跨句 FP 在文本秩距离 `<=16`、`<=32`、`>32` 三桶合计 4,959，占全部跨句 FP 59.4%；
+下一机制应直接提高长距离跨句“是否有因果边”的分离度，例如 evidence/context 选择或针对高分跨句
+负例的对比训练。全局阈值、方向一致性和当前 prototype 超参扫描均不匹配主误差，不应占 GPU。
+
+`error_profile.json` 留在同一 5090 seed13 目录，SHA-256
+`f4ea4ec111a269b1fd127d124e0713e1d1bee3031e32a183378d815516685c1f`。
+
+## A3 ATLOP adaptive-threshold objective：单种子预注册（2026-09-01）
+
+一手来源为 [ATLOP 论文](https://ojs.aaai.org/index.php/AAAI/article/view/17717)与
+[作者官方代码](https://github.com/wzhouad/ATLOP)。只移植其 official `ATLoss`，不声称复现完整
+ATLOP：本项目的多窗口 encoder 不保留同一长序列 token attention，无法忠实实现 localized context
+pooling。2026 年 [ATGL](https://aclanthology.org/2026.acl-long.1603/) 虽有官方代码，但论文限制明确
+指出主要降低 FN、代价是增加 FP，与本档 causal 83.6% 错误为 FP 的方向相反，故不运行。
+
+代码提交 `d4bee5c`；新 P1 `p1-v6-20260901-r14`，protocol SHA-256
+`a2b83f66c05ae36bb772fa845ad455bb96b7426cf18149669157cffa200a6974`。唯一变量是训练 objective：
+
+| 配置项 | 冻结值 |
+|---|---|
+| pair head / objective | `linear` / `adaptive_threshold` |
+| NONE 身份 / 推理 | 每族 index 0 作为 pair-dependent threshold / 原始 argmax |
+| 候选 / relation families | 全量 `neg_ratio=inf` / causal+subevent+temporal |
+| 外部 class weight / balance | `weight_alpha=0.0` / 无 |
+| lr / head lr / warmup / accum | 1e-5 / 1e-4 / 200 / 8 |
+| epoch / selection / seed | smoke 2、full 50 / internal-dev macro / **13 only** |
+
+ATLoss 对正行训练 `gold > NONE > 其他 subtype`，对负行训练 `NONE > 全部正 subtype`；没有 dev 阈值、
+难例比例或新增语料。先过 5090 Torch 公式/负控、显式 CUDA backward 和 P1 r14 validate-only，再跑 2ep：
+三族 epoch1 F1 均须非零、macro 须高于 epoch0 且不低于 .10，loss/logit/gradient 全有限，才允许同配置
+50ep。完整单种子仍须同时满足 causal >33.17、subevent ≥28.75、temporal ≥50.63；任一未过即停止，
+不扫损失权重、不加第二目标、不换 seed。final-valid 不访问；5090 backbone pin 未闭合，结果仍先标
+exploratory，只有在 4090 同 pin 重跑后才有资格进正式表。

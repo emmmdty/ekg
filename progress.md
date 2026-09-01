@@ -875,3 +875,23 @@
   prototype，不追加 seed、不扫 support/temperature/dependency 权重。
 - 权威结果档、A3 phase、HANDOFF、TODO 和周四汇报稿已同步为失败封存状态；checkpoint 留在 5090，
   产物路径与哈希已记录，未跨机搬运。
+- 提交 `3070617` 已推送。开始 Phase 21：用新 official predictions 做 causal 误报结构诊断，再决定
+  是否启动一个完全不同的单 seed13 方法；不延伸简化 prototype 超参。
+- 5090 CPU error profile 已完成并通过官方分数自校验：causal FP 占错误 83.6%，其中 78.4% 为跨句；
+  方向反转仅 29。下一步只筛能直接降低跨句高分负例的方法。
+- 一手论文初筛把 ATLOP localized context + adaptive threshold 列为首选，ATGL loss 为可选增强；先核
+  官方实现和本地 encoder 接线成本，不直接启动训练。
+- 本地接线审计后，faithful localized context 被窗口边界阻断，短期不做伪适配；ATLOP ATLoss 能以
+  NONE=index0 的单标签特例透明接入且不改推理。下一步核 ATGL 官方 loss 后二选一。
+- ATGL 因论文明确警告会提高 FP 而淘汰。继续比较 ATLOP ATLoss 与本地可实现的跨句 online hard
+  negative loss；选择标准是能否直接降低 causal FP 且保持同协议三族护栏。
+- OHEM 因需要新增采样比例而暂缓；冻结 ATLOP ATLoss 单变量方案并开始本地实现。未经 smoke 不启动
+  50ep，未经用户新授权不增加种子。
+- 已定位 trainer 单一 loss 接线点和 P1 CODE_PATHS；开始实现 objective registry、ATLoss、CLI 身份和
+  CPU/Torch 变异测试。
+- ATLoss 实现与本地 gate 完成：461 passed / 22 skips、ruff 0、CPU smoke OK；P1 local gate PASS。
+  准备新建 P1 bundle，再提交代码并同步 5090 跑 Torch/CUDA gate。
+- P1 r14 已构建并 validate-only PASS，protocol SHA `a2b83f66…0a6974`。下一步审阅差异、提交推送，
+  然后同步 5090 跑 4 项 Torch 公式测试与显式 CUDA backward。
+- ATLoss 代码提交 `d4bee5c` 已推送；权威结果档与 A3 phase 已在看结果前冻结 objective、2ep 行为门、
+  50ep official 门和 seed13-only 约束。

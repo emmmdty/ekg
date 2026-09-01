@@ -19,6 +19,9 @@
   两臂已闭合：plain smoke 止损，dependency 完整单 seed13 只过两个族的门，因 causal 未过主锚而
   整案封存；未启动额外种子或超参扫描。具体数字只见 `results/PHASE_A.md`；5090 模型身份未闭合
   正式 pin，结果均标 exploratory。
+- prototype error profile 显示 causal 主因是跨句 FP。不同机制 ATLOP `ATLoss` 已在提交 `d4bee5c`
+  实现并以 P1 r14 预注册；当前只允许 seed13 的 Torch/CUDA gate 和 2ep smoke。配置与门槛见
+  `results/PHASE_A.md`，不得加 seed 或扫 loss 权重。
 - **四章的对手线现已全部同协议实测闭合**，没有一栏引用论文原报数字。这是本阶段最大的进展；
   代价是其中两章的结论是「没有超过」。
 
