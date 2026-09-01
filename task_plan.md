@@ -8,7 +8,7 @@
 
 Phase 20（5090 临时单种子探索）已完成。4090 当前不可达；ProtoEM-inspired dependency 头的 seed-13 official internal-dev 为 causal/subevent/temporal=29.80/32.64/51.81，只过两条护栏，整案 FAIL。禁止追加 seeds；若继续，下一方案只能是不同机制，不能扫本方案超参。
 
-Phase 21（causal 误报诊断与下一机制选型）进行中。以本轮 291 篇 official predictions 为唯一分析源，先用仓库既有错误剖析器分解 same/cross、方向与 FP/FN；只有诊断指向明确、论文机制能直接作用于主误差且两天内可形成单种子闭环，才进入新的 5090 方案。
+Phase 21（causal 误报诊断与下一机制选型）已完成。误差主因锁定为跨句 FP；ATLoss smoke 因 causal/subevent 全零止损，AFL/ATGL/NCRL 与 FP 方向不匹配而排除。周四前不再运行第三个通用 loss；后续方法周期冻结为 pair-specific evidence/长文共同上下文重构。
 
 ## Phases
 
@@ -452,6 +452,7 @@ Phase 21（causal 误报诊断与下一机制选型）进行中。以本轮 291 
 - [x] 量化 causal FP/FN 在同句、跨句、距离和方向上的集中度；主因锁定为长距离跨句 FP。
 - [x] 只用一手论文/官方代码筛选能直接改善主误差的不同机制；ATGL/OHEM/context 伪适配已排除。
 - [x] 冻结 ATLOP ATLoss 单变量方案与 P1 r14；只准 seed13，先 Torch/CUDA gate 和 2ep smoke。
-- [ ] 在 5090 完成 Torch/公式负控、显式 CUDA backward 与 P1 r14 validate-only。
-- [ ] 运行 seed13 2ep smoke；若不坍塌再决定是否投 50ep，未过 official 三条线则停止。
-- **Status:** in_progress
+- [x] 在 5090 完成 Torch/公式负控、显式 CUDA backward 与 P1 r14 validate-only。
+- [x] seed13 2ep smoke 的 causal/subevent 均为 0，按预注册行为门止损；full/official/额外 seed 未启动。
+- [x] 复核 AFL/ATGL/NCRL 后停止通用 loss 线；后续表示方法留待独立周期，不在周四前伪适配。
+- **Status:** complete

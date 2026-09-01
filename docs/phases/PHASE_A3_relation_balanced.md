@@ -153,7 +153,7 @@ official internal-dev 评分，只通过两个族的门，causal 未超过主锚
 `../results/PHASE_A.md`。plain full、额外 seeds 和超参扫描均未启动，final-valid 未访问。5090 模型
 cache 尚无法闭合正式内容 pin，本轮结果保持 exploratory；失败方案无需在 4090 重跑。
 
-### A3.5：ATLOP adaptive-threshold objective（2026-09-01，预注册）
+### A3.5：ATLOP adaptive-threshold objective（2026-09-01，smoke FAIL）
 
 prototype 失败后的 error profile 将主因锁定为跨句 causal FP，而非方向反转。下一不同机制只采用
 ATLOP 官方 `ATLoss`：每族 NONE=index0 是 pair-dependent threshold；正行排序
@@ -164,6 +164,10 @@ ATLOP 官方 `ATLoss`：每族 NONE=index0 是 pair-dependent threshold；正行
 validate-only，再跑 seed13 2ep smoke；行为门与完整 official promotion 门只见
 `../results/PHASE_A.md`。本方案不实现 ATLOP localized context pooling，也不运行会增加 FP 的 ATGL；
 未经作者新授权禁止额外种子。
+
+**封存状态**：远端 Torch/P1/CUDA gate 全 PASS，但 seed13 2ep 的 causal/subevent 两轮均为 0，只有
+temporal 非零，未过看结果前冻结的行为门。故不启动 50ep、不跑 official scorer、不增加 class weight、
+ATGL 或额外 seed。具体曲线与 artifact hash 只见 `../results/PHASE_A.md`。
 
 ## Done when
 

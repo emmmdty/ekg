@@ -1104,3 +1104,26 @@ ATLoss 对正行训练 `gold > NONE > 其他 subtype`，对负行训练 `NONE > 
 50ep。完整单种子仍须同时满足 causal >33.17、subevent ≥28.75、temporal ≥50.63；任一未过即停止，
 不扫损失权重、不加第二目标、不换 seed。final-valid 不访问；5090 backbone pin 未闭合，结果仍先标
 exploratory，只有在 4090 同 pin 重跑后才有资格进正式表。
+
+### 2 epoch smoke 结果：FAIL，停止 full（2026-09-01，5090）
+
+远端 4 项 Torch 公式/负控、P1 r14 validate-only 和显式 CUDA backward 均 PASS；CUDA probe loss
+.6104、grad norm .3191，IGNORE 行梯度为零。随后严格按上表运行 seed13：
+
+| epoch | mean loss | trainer macro | causal | subevent | temporal | 判定 |
+|---:|---:|---:|---:|---:|---:|---|
+| 0 | 1.4319 | .1179 | **.000** | **.000** | .354 | 两个稀疏族全 NONE |
+| 1 | .7719 | .1472 | **.000** | **.000** | .442 | 未过预注册行为门 |
+
+ATLoss 在当前三族单标签、全候选设置中复现了“无外部 class weight 时稀疏族被 NONE 淹没”的历史
+失败形态。它没有产生 causal/subevent 非零判别力，故按预注册条件 **smoke FAIL**：不运行 50ep、
+不调用 official scorer、不加正类权重、不切 ATGL、不换 seed。该结果不否定 ATLOP 在 DocRED 的
+多标签设定，只说明直接把官方 loss 移植到 MAVEN-ERE 三族不成立。
+
+远端 checkpoint 留在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/A3/`
+`a3-v6-atloss-r15-exploratory/smoke/seed-13/checkpoint/`；`status=complete`、
+`final_valid_accessed=false`。日志 SHA-256
+`f088898c8f0d59e2914643c3af531ff8a3fe3b112359bcfae63d47b83ab9c3a2`，metadata
+`d43b2e6f0cd5c642f49e37fd1b07e9976dad3a2ea88171a620df880d3fe14e03`，`heads.pt`
+`071bd369139ec8937733ea16d9196b7ad3e19d4513b1f5b8ba1a823b78140445`。未访问 final-valid，
+未启动 full 或额外 seed。

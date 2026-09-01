@@ -895,3 +895,9 @@
   然后同步 5090 跑 4 项 Torch 公式测试与显式 CUDA backward。
 - ATLoss 代码提交 `d4bee5c` 已推送；权威结果档与 A3 phase 已在看结果前冻结 objective、2ep 行为门、
   50ep official 门和 seed13-only 约束。
+- 5090 同步与 gate 完成：4/4 Torch、P1 r14、CUDA backward 均 PASS。2ep smoke Python PID 967723
+  ALIVE，epoch0 已到 500/2622；等待两轮 dev，不改配置。
+- ATLoss 2ep 已 complete，但 causal/subevent 两轮均为 0，未过行为门；停止 full/official/额外 seed。
+  远端日志、metadata、heads hash 已固定并写入 PHASE_A。
+- AFL/ATGL/NCRL 一手机制复核后均与当前 FP 主因不匹配，不再开第三个 loss GPU 任务。Phase 21 转入
+  结果封存与周四汇报；后续技术路线冻结为 pair-specific evidence/长文共同上下文重构。

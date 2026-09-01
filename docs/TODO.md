@@ -15,15 +15,19 @@
 论文结构仍是三个方法章 + 一个系统评估章。公开论文数字可进入背景表看量级，但不能替代最终的
 同协议比较。周四汇报稿见 [`reports/2026-09-03_阶段性报告.md`](reports/2026-09-03_阶段性报告.md)。
 
-## 唯一活动阶段：A3 Ch2（4090 工作点待核；5090 ATLoss 待 gate）
+## 唯一活动阶段：A3 Ch2（4090 工作点待核；5090 两条探索线已封存）
 
 4090 当前不可达；作者已授权的 5090 临时单种子探索已完成。plain 在 smoke 后止损，dependency 完整
 训练后只通过两个族的门、未过 causal 主锚，整案已封存。5090 模型 cache 也未闭合正式内容 pin，
 结果只作 exploratory；不得追加 seed、扫描本方案超参或写入正式主表。具体数字只见权威结果档。
 
-prototype 封存后的 error profile 已把主因锁定为跨句 causal FP。不同机制 ATLOP `ATLoss` 已用提交
-`d4bee5c` 与 P1 r14 预注册；下一步只做 5090 Torch/CUDA/P1 gate 和 seed13 2ep smoke，未过行为门
-不投 50ep。该方案也禁止额外 seed 与 loss 权重扫描。
+prototype 封存后的 error profile 已把主因锁定为跨句 causal FP。不同机制 ATLOP `ATLoss` 的远端
+Torch/CUDA/P1 gate 通过，但 seed13 2ep 中 causal/subevent 均坍塌为 0，已按行为门止损；不投 50ep、
+不跑 official scorer、不加 class weight 或额外 seed。具体数字只见权威结果档。
+
+后续 loss（AFL/ATGL/NCRL）因优化方向偏向降低 FN 或引入新的 margin 超参，不匹配跨句 FP 主因，
+周四前不再开第三个 loss 任务。下一真实方法周期是 pair-specific evidence / 跨窗口共同上下文表示；
+它需要独立设计与协议，不作为当前两天内的伪适配。
 
 ### 已完成
 

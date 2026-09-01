@@ -1628,3 +1628,20 @@
 - 新 P1 bundle `p1-v6-20260901-r14` 已本地构建并 validate-only PASS；protocol SHA-256 为
   `a2b83f66c05ae36bb772fa845ad455bb96b7426cf18149669157cffa200a6974`。r13→r14 顶层差异仅 bundle ID、
   code-state digest 与受控 hashes；需在提交后同步完整 protocol tree/bundle 到 5090 并远端复验。
+- 5090 已同步提交 `48f8ce7` 与 P1 r14；远端 ATLoss Torch 测试 4/4、P1 validate-only、protocol hash
+  均 PASS。显式 CUDA forward/backward loss=.6104、grad norm=.3191，valid 行梯度非零、IGNORE 行为零。
+- ATLoss seed13 2ep smoke 已启动，真实 Python PID 967723；配置严格为 linear/ATLoss/alpha0/all candidates/
+  三族/lr1e-5/head1e-4/warmup200/accum8。epoch0 已到 500/2622，loss 有限，额外显存约 4.39 GiB；
+  final-valid 未访问，其他 seed/方案未启动。
+- ATLoss smoke 完成：epoch0→1 mean loss 1.4319→.7719，macro .1179→.1472，但 causal/subevent 两轮
+  均为 0，temporal .354→.442。run complete、final-valid=false。未过预注册的“三族非零”行为门，
+  因此不运行 50ep/official、不加 class weight/ATGL、不换 seed。
+- 该负结果与历史 alpha0 全候选塌 NONE 一致：ATLoss 的 pair-dependent threshold 没解决跨 family 稀疏度；
+  下一方法若继续，必须在不回到全局 class-weight 过发的前提下直接聚焦已验证的跨句 hard negatives，
+  或改变 pair evidence 表示，不能再换一个通用 loss。
+- 后续一手筛选未发现值得继续 GPU 的 loss：Adaptive Focal/ATGL 重点降低 FN、提高正类，ATGL 还明确
+  报告 FP 上升；NCRL 与 ATLoss 同属 NONE 排序，额外 margin shifting 会减弱难负例惩罚并引入 γ。
+  它们都不匹配当前 83.6% 错误为 FP 的主因，停止第三个通用 loss 竖片。
+- 真正匹配下一周期的是 pair-specific evidence / 共同长文上下文：让跨句 pair 基于相关证据而非两个
+  独立 trigger embedding 判边。但当前 encoder 独立切 512-token windows，faithful ATLOP localized
+  context 需要重构长序列 attention 与跨 window pair 表示；周四前不做伪适配，列入后续方法周期。
