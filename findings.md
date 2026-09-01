@@ -1570,3 +1570,13 @@
 - internal-dev valid 已同步到本轮 5090 preflight，远端 SHA 精确为 `bb8c6b48…ce7e3`。官方评分链已
   复核：`evaluate_relations.py` 产边级 JSONL，`normalize_predictions(local_pair)` 按 checkpoint active
   families 转官方形状并校验候选 digest，最后调用封存 evaluator；不需要 final-valid 或 train preflight。
+- 50ep dependency 前四轮持续改善：epoch0/1/2/3 macro=.0479/.2469/.2953/.3198；epoch3 三族
+  causal=.255、subevent=.253、temporal=.451，已从全 NONE 恢复到可训练区间但仍低于三条正式门。
+  当前 epoch4 ALIVE，不改冻结超参。
+- 50ep dependency 已完整结束，训练器最佳 epoch30 macro=.3812（causal=.298、subevent=.326、
+  temporal=.519）。冻结 internal-dev 经候选摘要 `15a3b1a5…dac10910` 与官方 evaluator 计分为
+  causal/subevent/temporal=29.80/32.64/51.81；相对 33.17/28.75/50.63 只过 subevent/temporal，
+  causal 差 3.37 点，整案 FAIL。final-valid 未访问，plain full 与额外 seeds 均未启动。
+- 失败模式不是全面退化：原型依赖头把 subevent 提到护栏以上、temporal 提到 51.81，但 causal 的
+  precision/recall=20.25/56.42，仍是明显过发。故不扫 support 数、温度或图权重；下一机制若继续原型线，
+  必须补论文的 `None` 文本原型与 event-agnostic context，或改做能直接约束 causal 误报的结构目标。

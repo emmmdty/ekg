@@ -123,7 +123,7 @@ seed 13 依次测试 trigger-mean sampled BCE、marker-sentence、top-k hard-neg
 Stage-1 竖片；三者均未达到事先冻结的 overall≥.90 / cross≥.85 召回门，故均未接 Stage 2，且不再
 增加第四个近似变体。具体数字与 artifact 见 `../results/PHASE_A.md`；r3 hash 待 SSH 恢复补齐。
 
-### A3.4：ProtoEM-inspired 原型匹配探索（2026-09-01，dependency 50ep 运行中）
+### A3.4：ProtoEM-inspired 原型匹配探索（2026-09-01，单种子 FAIL，已封存）
 
 4090 不可达期间，作者逐次授权使用 5090 做提高最终指标的方法探索。检索线已止损，不跑 r4；新路线
 改动 pair-scoring geometry，而不是继续调阈值、句距或候选近似。
@@ -147,11 +147,11 @@ loss/logits/prototype/gradient 全部有限，关闭新 head 时旧 linear check
 official evaluator。任一臂未过则如实封存；两臂都未过则停止 prototype 线，不扫 support 数、embedding
 宽度、距离温度或 dependency 权重。final-valid 不参与 support、选模或判定。
 
-**现场状态**：`cpolar-ssh-update` 已恢复 5090；P1 r13（`00e0943d…b3447a`）远端 validate-only
-PASS。两臂 2ep smoke 均数值/覆盖合格，但 plain prototype 三族判别力接近坍塌，已止损；dependency
-明显恢复且曲线仍上升，因此仅它晋级冻结 50ep seed13。具体 trainer-dev 数字只见
-`../results/PHASE_A.md`，不得在此复制或当 official 分。5090 模型 cache 尚无法闭合正式内容 pin，
-所以本轮全量结果仍为 exploratory；4090 恢复后必须同 pin 重跑才能进正式表。
+**封存状态**：`cpolar-ssh-update` 已恢复 5090；P1 r13（`00e0943d…b3447a`）远端 validate-only
+PASS。两臂 2ep smoke 均数值/覆盖合格，plain prototype 止损；dependency 完成冻结 50ep seed13 和
+official internal-dev 评分，只通过两个族的门，causal 未超过主锚，故整案 FAIL。具体数字只见
+`../results/PHASE_A.md`。plain full、额外 seeds 和超参扫描均未启动，final-valid 未访问。5090 模型
+cache 尚无法闭合正式内容 pin，本轮结果保持 exploratory；失败方案无需在 4090 重跑。
 
 ## Done when
 
@@ -176,5 +176,5 @@ PASS。两臂 2ep smoke 均数值/覆盖合格，但 plain prototype 三族判�
 4090 项目目录 `/data/TJK/ekg`，服务器只用 `.venv/bin/python`。启动前向作者展示准确命令、cwd 与
 预期输出，先用 `nvidia-smi` 选空卡。长任务使用 `setsid nohup` 与独立日志；一条 SSH 只发一个后台任务。
 5090 仍需逐次授权；作者已对 2026-09-01 这轮临时探索明确授权。入口不可达时先运行
-`cpolar-ssh-update` 再重试；当前 dependency 50ep 仅 seed13 在 GPU0 运行。不跨机搬 checkpoint，
-除非作者另行决定。
+`cpolar-ssh-update` 再重试；本轮 dependency seed13 已结束，当前不应再启动本方案任务。不跨机搬
+checkpoint，除非作者另行决定。

@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-Phase 20（5090 临时单种子探索）进行中。4090 当前不可达，用户已明确授权使用 gpu-5090；优先探索能提高 Ch2 最终 official 三族指标的不同方案。禁止追加 seeds，只有单种子方案全部超过 baseline 与护栏且用户再次授权后才允许多种子。
+Phase 20（5090 临时单种子探索）已完成。4090 当前不可达；ProtoEM-inspired dependency 头的 seed-13 official internal-dev 为 causal/subevent/temporal=29.80/32.64/51.81，只过两条护栏，整案 FAIL。禁止追加 seeds；若继续，下一方案只能是不同机制，不能扫本方案超参。
 
 ## Phases
 
@@ -438,8 +438,8 @@ Phase 20（5090 临时单种子探索）进行中。4090 当前不可达，用�
 - [x] 结合 Ch2 已测错误结构与一手论文，筛出最多两个互补方案；排除已证否方向和重复造轮子。
 - [x] 远端 22 项 Torch 测试、显式 CUDA forward/backward、距离反号负向控制和两臂 2ep smoke 完成；
   plain 止损，dependency 晋级 50ep。
-- [x] 全程只运行冻结 seed 13；plain full 和额外 seeds 均未启动。dependency 50ep 当前 ALIVE。
-- [ ] 使用 official evaluator 报 causal/subevent/temporal，并与 33.17 / 28.75 / 50.63 门逐项核验。
-- [ ] 将最终 official 数字、命令、commit、checkpoint 所在服务器与负结果写入
-  `docs/results/PHASE_A.md`。（smoke 与运行态已写，等待 50ep/official scorer。）
-- **Status:** in_progress
+- [x] 全程只运行冻结 seed 13；plain full 和额外 seeds 均未启动。dependency 50ep 完整结束。
+- [x] official evaluator 得到 causal/subevent/temporal=29.80/32.64/51.81；causal 未超过 33.17，整案 FAIL。
+- [x] 将最终 official 数字、命令、commit、checkpoint 所在服务器与负结果写入
+  `docs/results/PHASE_A.md`，并同步 HANDOFF/TODO/phase 状态。
+- **Status:** complete

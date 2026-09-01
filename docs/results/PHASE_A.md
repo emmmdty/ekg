@@ -998,7 +998,7 @@ marker；73,939 个 mention ID 全量对齐。它同样只测候选召回，不�
   `d4b1fff7…373749`，`run_metadata.json` `67b6a55b…8d5990`，`retrieval_metrics.json`
   `72bb1379…5e63d2`；metadata `status=complete` 且 checkpoint 文件哈希集合逐项一致。
 
-## A3 ProtoEM-inspired 原型头：2 epoch exploratory smoke（2026-09-01，5090）
+## A3 ProtoEM-inspired 原型头：单种子 exploratory 结论（2026-09-01，5090）
 
 4090 不可达后，作者授权本轮临时使用 5090。代码提交 `7128151`；新 P1 bundle
 `p1-v6-20260901-r13`，protocol SHA-256
@@ -1022,6 +1022,38 @@ evaluator 分数，也不得进入论文主表**。
 - plain loss 3.1315→2.7239，dependency loss 2.7504→1.9843，均无 NaN/OOM；
 - 一手论文复核显示，本地最小适配省略了 ProtoEM 的 `None` 文本原型和 event-agnostic context
   connotation，因此 plain 的全 NONE 只否定这版简化头，不能否定论文方法；
-- `prototype_dependency` 的 50epoch、单 seed13 exploratory 全量已在 5090 启动；远端路径
-  `runs/stages/A3/a3-v6-prototype-r14-exploratory/full/prototype_dependency/seed-13/`。完成前没有
-  official 分数；plain full、seeds 17/42 均未启动。
+- `prototype_dependency` 的 50epoch、单 seed13 exploratory 全量已在 5090 完成；plain full、
+  seeds 17/42 均未启动。
+
+### 50 epoch 与 official internal-dev 结果
+
+训练器最佳点为 epoch 30，macro-F1 .3812（causal .298、subevent .326、temporal .519）。该点由训练器
+dev macro 选模；随后对同一冻结 internal-dev 291 篇执行 GPU inference → candidate normalization →
+封存官方 evaluator，候选摘要为 `15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910`。
+
+| 方法 / 门 | causal P / R / F1 | subevent P / R / F1 | temporal P / R / F1 | 总判定 |
+|---|---:|---:|---:|---|
+| promotion 门 | — / — / **>33.17** | — / — / **≥28.75** | — / — / **≥50.63** | 三项必须同时过 |
+| `prototype_dependency` seed13 | 20.25 / 56.42 / **29.80** | 24.16 / 50.31 / **32.64** | 43.57 / 63.89 / **51.81** | **FAIL：causal −3.37** |
+
+结论：dependency 传播能把 subevent 与 temporal 提到护栏以上，但 causal 仍以低 precision、高 recall
+过发，且比 33.17 主锚低 3.37 点。按预注册门槛，**整套简化 prototype 线失败并停止**；不扫描 support
+数、距离温度、embedding 宽度或 dependency 权重，也不补额外种子。该结果只否定当前简化适配，
+不能否定 ProtoEM 原方法；若另开不同机制，必须补齐论文的 `None` 文本原型与 event-agnostic context，
+或直接引入针对 causal 误报的结构训练目标。
+
+可追溯信息：
+
+- 远端执行 commit `5fbf2d6`（含生产代码提交 `7128151`）；checkpoint 留在 `gpu-5090`，路径
+  `/mnt/aidata/tongjiakai/ekg/runs/stages/A3/a3-v6-prototype-r14-exploratory/full/`
+  `prototype_dependency/seed-13/checkpoint/`，未跨机搬运；
+- `run_metadata.json`：`status=complete`、`device=cuda`、`final_valid_accessed=false`；训练日志 SHA-256
+  `c2e8086452fc3b21254d825e51cc3bb2d17a0e1907d79ff908362ad76255c6e2`；`heads.pt`
+  `1971cb74f007a455622c68da9c2101a534cc544c7630e516e02cff9398adcca6`；
+- `official_predictions.jsonl` 291 行，SHA-256
+  `96864abf0aa3bce5b2e96fe66d297f8a5e432fa7eb4bb3572de91e819de45b25`；`official_metrics.json`
+  SHA-256 `02dbf4c4ded6db99f57b21ec00e37a510c3331acd4acd18b32f76b002bbafb59`；
+- gold SHA-256 `bb8c6b486196c97560cba49516324b3f69541023bfbe5cc09590d2bb265ce7e3`，evaluator
+  SHA-256 `32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598`；final-valid 未访问；
+- 5090 backbone 内容身份仍未闭合正式 4090 pin，所以即使其中两族过护栏，本节也只能标
+  **exploratory**，不得进入论文正式同协议主表。

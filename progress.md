@@ -866,3 +866,12 @@
   需要补到 5090 的 9.8 MiB internal-dev valid 文件，准备按哈希同步。
 - valid 文件同步及哈希完成，official postprocess 命令面已核清。下一步更新规划文件、验证文档 diff并
   提交；训练继续后台运行。
+- 状态文档提交 `52c6721` 已推送。50ep epoch3 macro=.3198，Python PID 964175 继续 epoch4；等待更
+  后段曲线并准备完成后立即跑三步 official 后处理。
+- dependency 50ep 已完成 50/50 epoch，最佳 epoch30 trainer macro=.3812；run metadata 为
+  `status=complete`、`device=cuda`、`final_valid_accessed=false`。
+- internal-dev GPU inference、候选归一化和封存 official evaluator 均成功；official
+  causal/subevent/temporal=29.80/32.64/51.81。因 causal <33.17，方案未过整体验收，停止本版本
+  prototype，不追加 seed、不扫 support/temperature/dependency 权重。
+- 权威结果档、A3 phase、HANDOFF、TODO 和周四汇报稿已同步为失败封存状态；checkpoint 留在 5090，
+  产物路径与哈希已记录，未跨机搬运。

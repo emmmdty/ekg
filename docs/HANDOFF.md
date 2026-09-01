@@ -9,15 +9,16 @@
 ## 0. 三十秒摘要
 
 - 课题：**occurrence-level 事件图谱构建 + 构建误差的下游代价**，三个方法章 + 一个系统评估章。
-- 本地/5090 已同步提交 = **`5fbf2d6`**；prototype pair-head 生产提交为 `7128151`。完整本地门为
+- 5090 执行提交为 **`5fbf2d6`**；prototype pair-head 生产提交为 `7128151`。完整本地门为
   **461 passed / 18 skipped**、ruff 0、CPU smoke；P1 r13 local/remote validate 均 PASS。
   4090 上 2 epoch 行为 smoke 已 PASS；50 epoch seed-13 已在 GPU0 启动，最后成功确认到 epoch 15。
   此后 SSH 在 banner 前失败，**不得据此推断远端进程死亡**。
 - GPU1 的三个不同单种子 Stage-1 retriever 诊断均未过召回门，已停止该近似变体线；没有 seeds
   17/42，也未启动 Stage 2。r1/r2 已入 `results/PHASE_A.md`，r3 等 SSH 恢复后补 hash。
 - 4090 不可达后，作者已授权本轮临时使用 5090 探索；`cpolar-ssh-update` 已恢复入口。ProtoEM-inspired
-  两臂的 Torch/CUDA 与 2ep smoke 已完成：plain 止损，仅 dependency 晋级 50ep seed13，正在运行。
-  具体数字只见 `results/PHASE_A.md`；5090 模型身份未闭合正式 pin，结果均标 exploratory。
+  两臂已闭合：plain smoke 止损，dependency 完整单 seed13 只过两个族的门，因 causal 未过主锚而
+  整案封存；未启动额外种子或超参扫描。具体数字只见 `results/PHASE_A.md`；5090 模型身份未闭合
+  正式 pin，结果均标 exploratory。
 - **四章的对手线现已全部同协议实测闭合**，没有一栏引用论文原报数字。这是本阶段最大的进展；
   代价是其中两章的结论是「没有超过」。
 

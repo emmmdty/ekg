@@ -15,11 +15,11 @@
 论文结构仍是三个方法章 + 一个系统评估章。公开论文数字可进入背景表看量级，但不能替代最终的
 同协议比较。周四汇报稿见 [`reports/2026-09-03_阶段性报告.md`](reports/2026-09-03_阶段性报告.md)。
 
-## 唯一活动阶段：A3 Ch2（4090 工作点待核 + 5090 prototype 探索）
+## 唯一活动阶段：A3 Ch2（4090 工作点待核；5090 prototype 已封存）
 
-4090 当前不可达；作者已授权本轮临时使用 5090 探索不同单种子方案。`cpolar-ssh-update` 已恢复入口；
-prototype 两臂 Torch/CUDA 和 2ep smoke 已完成，plain 止损，仅 dependency 的 50ep seed13 正在运行。
-5090 模型 cache 未闭合正式内容 pin，因此结果为 exploratory；不得追加 seed或写入正式主表。
+4090 当前不可达；作者已授权的 5090 临时单种子探索已完成。plain 在 smoke 后止损，dependency 完整
+训练后只通过两个族的门、未过 causal 主锚，整案已封存。5090 模型 cache 也未闭合正式内容 pin，
+结果只作 exploratory；不得追加 seed、扫描本方案超参或写入正式主表。具体数字只见权威结果档。
 
 ### 已完成
 
@@ -61,8 +61,8 @@ prototype 两臂 Torch/CUDA 和 2ep smoke 已完成，plain 止损，仅 depende
    接 cross-encoder，也不再堆第四个近似变体；
 4. 在所有待比方案的单种子都过 baseline/护栏且用户再次明确允许前，**禁止**
    seeds 17/42 或任何多种子；空闲 GPU 只并行不同方案/任务。
-5. 5090 上只继续 dependency 50ep seed13；plain 已止损。完成后先跑 official internal-dev scorer；
-   未过三条线则停止这版 prototype，不扫 support 数、温度或 dependency 权重。
+5. 5090 dependency seed13 已完成 official internal-dev 评分并未过三条线；这版 prototype 已停止，
+   不扫 support 数、温度或 dependency 权重。下一候选必须是不同机制，并先冻结可证伪验收门。
 
 ## 周四前并行交付
 
