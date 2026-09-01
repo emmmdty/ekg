@@ -431,11 +431,15 @@ Phase 20（5090 临时单种子探索）进行中。4090 当前不可达，用�
 
 ### Phase 20: 5090 临时单种子方法探索
 
-- [ ] 只读核验 `/mnt/aidata/tongjiakai/ekg` 的 commit、工作树、GPU、磁盘、模型和数据资产。
-- [ ] 对齐本地 P1 r12、A3 r13、冻结主锚与 5090 可复用资产；任何漂移先修复，不直接开跑。
+- [x] 只读核验 `/mnt/aidata/tongjiakai/ekg` 的 commit、工作树、GPU、磁盘、模型和数据资产；
+  `cpolar-ssh-update` 恢复入口，常驻 embedding 服务保留不动。
+- [x] 重建/同步 P1 r13（`00e0943d…b3447a`），补齐四个 data trust-root 源并在 5090
+  validate-only PASS；正式模型 pin 未闭合，所有 5090 分数明确标 exploratory。
 - [x] 结合 Ch2 已测错误结构与一手论文，筛出最多两个互补方案；排除已证否方向和重复造轮子。
-- [ ] 每个方案先写已知答案测试、变异/符号断言与 2 epoch CUDA smoke，验证机制确实按设计工作。（本地测试已完成；远端 mutation/CUDA smoke 待入口恢复。）
-- [ ] 只运行冻结 seed 13；若 GPU 允许，可并行不同方案，但不得并行额外 seeds。
+- [x] 远端 22 项 Torch 测试、显式 CUDA forward/backward、距离反号负向控制和两臂 2ep smoke 完成；
+  plain 止损，dependency 晋级 50ep。
+- [x] 全程只运行冻结 seed 13；plain full 和额外 seeds 均未启动。dependency 50ep 当前 ALIVE。
 - [ ] 使用 official evaluator 报 causal/subevent/temporal，并与 33.17 / 28.75 / 50.63 门逐项核验。
-- [ ] 将实测数字、命令、commit、checkpoint 所在服务器与负结果写入 `docs/results/PHASE_A.md`。
+- [ ] 将最终 official 数字、命令、commit、checkpoint 所在服务器与负结果写入
+  `docs/results/PHASE_A.md`。（smoke 与运行态已写，等待 50ep/official scorer。）
 - **Status:** in_progress

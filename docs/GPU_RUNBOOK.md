@@ -112,9 +112,10 @@ ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
   </details>
 - ⚠️ **5090 是 cpolar 免费动态地址，host:port 会变**（症状：`Connection refused` /
   `Host key verification failed` / `kex_exchange_identification: Connection reset`）。
-  **本地有 `cpolar-ssh-update` 命令可更新 `~/.ssh/config` 里的 5090 隧道地址**（作者 2026-07-28 提供）；
-  换址后**先核对连上的是不是同一台机器**再操作：`whoami`（应为 `tongjiakai`）+ `nvidia-smi` 名称 +
-  项目目录存在 + `git log -1`。4090 是 vip 固定域名，但同样会间歇性 reset ——
+  **固定恢复顺序是先执行 `cpolar-ssh-update`，再重试 `ssh -o ConnectTimeout=15 gpu-5090 ...`**；
+  不要对旧端口原样重连。换址后**先核对连上的是不是同一台机器**再操作：`whoami`（应为
+  `tongjiakai`）+ `nvidia-smi` 名称 + 项目目录存在 + `git log -1`。4090 是 vip 固定域名，但同样会
+  间歇性 reset ——
   **ssh 失败是工具失败，不得当成卡况或任务结论**。
 - ⚠️ **5090 连不上 `huggingface.co`（超时），但 `hf-mirror.com` 可达（200）、pypi 可达**。
   拉底座模型必须带 `HF_ENDPOINT=https://hf-mirror.com`（2026-07-28 实测 roberta-base 走镜像成功）。

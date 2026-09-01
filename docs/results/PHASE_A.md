@@ -997,3 +997,31 @@ marker；73,939 个 mention ID 全量对齐。它同样只测候选召回，不�
 - 4090 产物：`runs/stages/A3/a3-v6-retriever-r2/stage1/seed-13/`；日志 SHA-256
   `d4b1fff7…373749`，`run_metadata.json` `67b6a55b…8d5990`，`retrieval_metrics.json`
   `72bb1379…5e63d2`；metadata `status=complete` 且 checkpoint 文件哈希集合逐项一致。
+
+## A3 ProtoEM-inspired 原型头：2 epoch exploratory smoke（2026-09-01，5090）
+
+4090 不可达后，作者授权本轮临时使用 5090。代码提交 `7128151`；新 P1 bundle
+`p1-v6-20260901-r13`，protocol SHA-256
+`00e0943d32db9b5a2453c25c6d8adf8c33e456f9bff042bd134c23ae20b3447a`。5090 已通过 P1
+validate-only、22 项 Torch 定向测试、显式 CUDA forward/backward 和距离反号负向控制。
+
+本轮只能标 **exploratory**：5090 的 Hugging Face cache 无法闭合 4090 内容寻址目录
+`71be7419…c961ea9` 的 canonical digest；训练源、manifest、candidate、evaluator 和 P1 均已逐哈希一致，
+但 backbone 文件身份仍须在 4090 恢复后统一重跑。下表是训练器 internal-dev 曲线，**不是 official
+evaluator 分数，也不得进入论文主表**。
+
+| head | epoch | macro | causal | subevent | temporal | 判定 |
+|---|---:|---:|---:|---:|---:|---|
+| `prototype` | 0 | .0000 | .000 | .000 | .000 | 数值有限但全判 NONE |
+| `prototype` | 1 | .0242 | .000 | .000 | .072 | 止损，不跑 50ep |
+| `prototype_dependency` | 0 | .0391 | .000 | .000 | .117 | 继续冻结 smoke |
+| `prototype_dependency` | 1 | **.1656** | .075 | .167 | .255 | 仅该臂晋级 50ep |
+
+- 两臂均为 seed 13、train 2,622 / internal-dev 291、每类 32 个 train-only support、全量候选、
+  `50ep` 公平配方中的相同 lr/head-lr/accum/alpha；final-valid 未访问；
+- plain loss 3.1315→2.7239，dependency loss 2.7504→1.9843，均无 NaN/OOM；
+- 一手论文复核显示，本地最小适配省略了 ProtoEM 的 `None` 文本原型和 event-agnostic context
+  connotation，因此 plain 的全 NONE 只否定这版简化头，不能否定论文方法；
+- `prototype_dependency` 的 50epoch、单 seed13 exploratory 全量已在 5090 启动；远端路径
+  `runs/stages/A3/a3-v6-prototype-r14-exploratory/full/prototype_dependency/seed-13/`。完成前没有
+  official 分数；plain full、seeds 17/42 均未启动。

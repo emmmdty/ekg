@@ -1,6 +1,7 @@
 # PHASE A3 — 关系族×位置自适应的事件关系抽取
 
-> **ACTIVE / P1 r12 ENTRY PASS / A3 r13 PREFLIGHT PASS。** A3.0 baseline、A3.1 复现底座和
+> **ACTIVE。** 位置工作点沿用启动时冻结的 P1 r12 / A3 r13 plan；prototype 新代码使用 P1 r13。
+> A3.0 baseline、A3.1 复现底座和
 > A3.2 第一核心周期均已完成；当前只执行第二核心周期。历史数字见
 > [`../results/PHASE_A.md`](../results/PHASE_A.md)。
 
@@ -17,8 +18,9 @@
 
 | 输入 | 冻结身份 |
 |---|---|
-| P1 trust root | `runs/stages/P1/p1-v6-20260831-r12/` |
-| P1 protocol SHA-256 | `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497` |
+| P1 trust root（位置工作点） | `runs/stages/P1/p1-v6-20260831-r12/` |
+| P1 protocol SHA-256（位置工作点） | `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497` |
+| P1 trust root（prototype） | `runs/stages/P1/p1-v6-20260901-r13/`，`00e0943d…b3447a` |
 | A3 preflight | `runs/stages/A3/a3-v6-position-workpoint-r13/preflight/` |
 | A3 plan SHA-256 | `b587b21d7aa74437d7144ecad76d87f4fe2253f39966d48bb23108e914ec1eda` |
 | 主锚 | `a3-v6-baselines-r10/primary_anchor.json`，causal 33.17 |
@@ -121,7 +123,7 @@ seed 13 依次测试 trigger-mean sampled BCE、marker-sentence、top-k hard-neg
 Stage-1 竖片；三者均未达到事先冻结的 overall≥.90 / cross≥.85 召回门，故均未接 Stage 2，且不再
 增加第四个近似变体。具体数字与 artifact 见 `../results/PHASE_A.md`；r3 hash 待 SSH 恢复补齐。
 
-### A3.4：ProtoEM-inspired 原型匹配探索（2026-09-01 预注册，尚未运行）
+### A3.4：ProtoEM-inspired 原型匹配探索（2026-09-01，dependency 50ep 运行中）
 
 4090 不可达期间，作者逐次授权使用 5090 做提高最终指标的方法探索。检索线已止损，不跑 r4；新路线
 改动 pair-scoring geometry，而不是继续调阈值、句距或候选近似。
@@ -145,6 +147,12 @@ loss/logits/prototype/gradient 全部有限，关闭新 head 时旧 linear check
 official evaluator。任一臂未过则如实封存；两臂都未过则停止 prototype 线，不扫 support 数、embedding
 宽度、距离温度或 dependency 权重。final-valid 不参与 support、选模或判定。
 
+**现场状态**：`cpolar-ssh-update` 已恢复 5090；P1 r13（`00e0943d…b3447a`）远端 validate-only
+PASS。两臂 2ep smoke 均数值/覆盖合格，但 plain prototype 三族判别力接近坍塌，已止损；dependency
+明显恢复且曲线仍上升，因此仅它晋级冻结 50ep seed13。具体 trainer-dev 数字只见
+`../results/PHASE_A.md`，不得在此复制或当 official 分。5090 模型 cache 尚无法闭合正式内容 pin，
+所以本轮全量结果仍为 exploratory；4090 恢复后必须同 pin 重跑才能进正式表。
+
 ## Done when
 
 - r13 smoke 和 seed-13 单种子判定有不可变产物；
@@ -167,5 +175,6 @@ official evaluator。任一臂未过则如实封存；两臂都未过则停止 p
 
 4090 项目目录 `/data/TJK/ekg`，服务器只用 `.venv/bin/python`。启动前向作者展示准确命令、cwd 与
 预期输出，先用 `nvidia-smi` 选空卡。长任务使用 `setsid nohup` 与独立日志；一条 SSH 只发一个后台任务。
-5090 仍需逐次授权；作者已对 2026-09-01 这轮临时探索明确授权，但当前静态 cpolar 入口返回
-`Connection refused`，远端尚无命令执行。不跨机搬 checkpoint，除非作者另行决定。
+5090 仍需逐次授权；作者已对 2026-09-01 这轮临时探索明确授权。入口不可达时先运行
+`cpolar-ssh-update` 再重试；当前 dependency 50ep 仅 seed13 在 GPU0 运行。不跨机搬 checkpoint，
+除非作者另行决定。

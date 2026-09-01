@@ -805,3 +805,64 @@
 - P1 local gate PASS。检查确认无 5090 备用入口脚本；当前只缺远端入口恢复、CUDA gate 和新 P1/A3
   信任根。准备在 active A3 phase 中预注册 prototype 两臂与停止条件，再提交代码供远端同步。
 - active A3 phase 已预注册两臂、单种子 promotion 与停止条件；实现提交为 `7128151`。
+- 已按用户给定的 `cpolar-ssh-update` 恢复 5090 SSH 入口，端口为 10201；恢复后只读探测成功。
+  远端尚未同步本地新提交，也尚未启动任何 GPU 任务；先核查 6.5 GiB 显存占用归属。
+- 已确认 6.5 GiB 是长期运行的 Qwen embedding 服务，不做干预；5090 剩余显存足以进行单臂
+  RoBERTa-base 训练，先同步代码并跑远端测试/CUDA smoke，再决定是否并行两个不同方案。
+- 远端代码已同步至 `5fbf2d67`，prototype/supervised 定向测试全过；下一步做显式 CUDA forward /
+  backward smoke 和反号负向控制，再重建 P1 远端证据。
+- 显式 5090 CUDA forward/backward smoke 已通过；下一步只做一个错误距离符号的负向控制，随后
+  进入 P1 remote smoke/信任根重建。
+- 距离反号负向控制 PASS。P1 remote evidence 验证器发现硬编码 4090 身份，需先做小范围白名单改动并
+  补测试，保持原 4090 规则兼容，再在 5090 生成真实 remote smoke。
+- 复核后确认无需改 P1 验证器：复用原 4090 interface smoke，新 prototype 的实际执行资格由本轮 5090
+  测试补足。准备按既有机械流程生成新的 P1 bundle 和 A3 plan。
+- 新 P1 目标确认空闲；远端缺少 gitignored 的 remote-smoke evidence，当前构建尚未执行。下一步核清
+  remote-smoke 引用的 fixture/prediction/log 缺件，按最小集合传输并校验哈希。
+- 5090 的 protocol/P1 目录为空；本地 protocol 根仅 20 MiB。改为先本地构建 r13，再同步 protocol +
+  r13 bundle 到 5090并做双端哈希，减少远端缺件导致的反复失败。
+- 本地 P1 r13 构建及二次验证 PASS，新 trust-root hash 为 `00e0943d…b3447a`。下一步同步完整 protocol
+  根和 r13 bundle 到 5090并核哈希，再物化 prototype 两臂 execution plan。
+- P1 证据同步和双端哈希已完成。现有 baseline materializer 不适合 prototype 探索（固定三种 seeds /
+  3 epochs），下一步从既有 A3 50ep 单种子计划提取准确超参，生成只含两个 prototype 臂的计划。
+- 本地未持有 4090 上的位置工作点 r13 计划；active phase 已给出冻结预算与门。继续核对 PHASE_A 的
+  50ep 配方、现存 run metadata 和 5090 的模型/数据资产，随后生成独立、只 seed13 的 prototype plan。
+- 冻结配方和 5090 训练源均已确认；当前只缺定位内容寻址 RoBERTa-base 快照。找到并核哈希后即可
+  生成/同步单种子 prototype plan，先每臂 2ep smoke。
+- 已找到 5090 的 roberta-base HF cache；正在按 P1 的五文件 canonical-map 定义复算内容摘要，核准后
+  将以实际 snapshot 路径写入新 plan。
+- 唯一 snapshot 已定位，正在复算“排除 tokenizer.json 的五文件”与“全部六文件”两种 canonical digest；
+  仅当其中之一精确等于冻结摘要才放行。
+- 两种紧凑 JSON 摘要均不匹配；Git 历史未记录具体序列化命令。下一步枚举常见稳定编码并查是否存有
+  原始五文件哈希表，避免因 canonical 编码差异误判模型内容。
+- 常见编码枚举仍不匹配；当前不能证明 5090 cache 与正式内容 pin 逐字节相同。遵循用户“先探索再补
+  严格可比”的优先级，可继续 exploratory smoke，但所有分数必须明确排除出正式主表，待 4090 恢复复跑。
+- 首个 `prototype` 2ep smoke 已在 5090 启动（PID 962618）；先确认初始化、support、显存和早期 loss
+  正常，再等待完成。dependency 臂严格等首臂 smoke 结束/释放显存后再启动。
+- 首臂在 P1 预检时提前退出，GPU 训练零执行；缺件为 Maven-Fact train 源。下一步枚举 P1 data 清单，
+  仅同步 5090 缺失且本地哈希匹配的文件，然后改用新的 retry-1 目录，保留这次失败证据。
+- P1 源清单已缩小到四个 JSONL；准备远端逐项 SHA 检查并同步缺件，避免搬运无关数据。
+- 远端仅缺 164 MiB 的 MAVEN-Fact 两文件；准备 rsync（无 `--delete`）并做双端哈希，之后以 retry-1
+  新目录重启 prototype smoke。
+- MAVEN-Fact 同步与双端哈希完成，5090 P1 validate-only PASS。现在可在 retry-1 新目录重启同一
+  prototype seed13 smoke；上次失败目录和日志原样保留。
+- retry-1 prototype smoke 已 ALIVE（Python PID 963306），support 覆盖和早期 loss 正常，GPU 增量显存
+  约 4.3 GiB。继续监测至 epoch0/epoch1 dev 完成；dependency 臂尚未启动。
+- prototype epoch0 数值稳定但三族 dev F1=0，早期效果异常低。继续等冻结的第 2 epoch，不中途改参数；
+  若仍为零则不启动 prototype 50ep，转跑同预算 dependency smoke。
+- 一手论文复核确认简化实现缺少 NONE 文本原型与 event-agnostic context connotation；若两臂 smoke 均
+  全零，将按契约停止这版 prototype，后续方案必须按论文机制重设计，不能靠扫温度/support 数补洞。
+- plain prototype smoke 已以 macro=.0242 失败止损，不投 50ep；dependency smoke 已启动（wrapper
+  PID 963770），等待确认真实 Python PID和早期曲线。
+- dependency 已 ALIVE（Python PID 963774）。同时准备在本机 3ep baseline predictions 上做 causal→
+  temporal 一致性诊断；仅用于选择下一机制，不写入正式主表。
+- 结构诊断因本机没有任何 Ch2 prediction artifact 而停止；未生成派生分数。优先等 dependency smoke，
+  不重跑旧 baseline 占用 5090。
+- dependency smoke 完成（macro=.1656，三族 .075/.167/.255），较 plain 显著恢复且仍上升。按资源优先级
+  只晋级 dependency 到单 seed13 50ep；plain 不跑 full，额外 seeds 仍禁止。
+- dependency 50ep 已 ALIVE（Python PID 964175）；下一步在训练期间回填 PHASE_A/HANDOFF/TODO，并
+  定期记录 dev 曲线。训练结束后先做 official internal-dev scorer，再判断是否达到三条门。
+- 文档已回填 P1 r13、smoke 与 50ep 运行态；50ep epoch1 macro 已到 .2469。已定位官方评分链和唯一
+  需要补到 5090 的 9.8 MiB internal-dev valid 文件，准备按哈希同步。
+- valid 文件同步及哈希完成，official postprocess 命令面已核清。下一步更新规划文件、验证文档 diff并
+  提交；训练继续后台运行。

@@ -1,6 +1,6 @@
 # 交接文档 · 新会话从这里开始
 
-> 更新于 **2026-08-31**（取代 08-30 状态快照）。读完本文即可接手，不需要回溯对话。
+> 更新于 **2026-09-01**（取代 08-31 状态快照）。读完本文即可接手，不需要回溯对话。
 > **冲突时的优先级**：`docs/results/PHASE_*.md`（已发生的事实）> `docs/SPEC.md`（研究约束）>
 > 当前 active phase > `docs/TODO.md` > 本文。本文只做导航与状态快照，**不复制实验数字**。
 
@@ -9,16 +9,15 @@
 ## 0. 三十秒摘要
 
 - 课题：**occurrence-level 事件图谱构建 + 构建误差的下游代价**，三个方法章 + 一个系统评估章。
-- 本地/远端 HEAD = **`e0ef69d`**；位置化机制生产提交仍为 `91d32d8`，新增代码只服务 exploratory
-  retriever。完整本地门为 **457 passed / 16 skipped**、ruff 0、CPU smoke。
+- 本地/5090 已同步提交 = **`5fbf2d6`**；prototype pair-head 生产提交为 `7128151`。完整本地门为
+  **461 passed / 18 skipped**、ruff 0、CPU smoke；P1 r13 local/remote validate 均 PASS。
   4090 上 2 epoch 行为 smoke 已 PASS；50 epoch seed-13 已在 GPU0 启动，最后成功确认到 epoch 15。
   此后 SSH 在 banner 前失败，**不得据此推断远端进程死亡**。
 - GPU1 的三个不同单种子 Stage-1 retriever 诊断均未过召回门，已停止该近似变体线；没有 seeds
   17/42，也未启动 Stage 2。r1/r2 已入 `results/PHASE_A.md`，r3 等 SSH 恢复后补 hash。
-- 4090 不可达后，作者已授权本轮临时使用 5090 探索；本地已预注册并实现 ProtoEM-inspired 的
-  `prototype` / `prototype_dependency` 两个不同 seed-13 臂，完整 CPU 门与 P1 local gate 通过。
-  5090 当前静态 cpolar 入口 `Connection refused`，远端尚未执行命令；恢复后必须先跑 torch/CUDA smoke
-  和重建 P1/A3 信任根，不能直接拿旧 r12 开正式训练。
+- 4090 不可达后，作者已授权本轮临时使用 5090 探索；`cpolar-ssh-update` 已恢复入口。ProtoEM-inspired
+  两臂的 Torch/CUDA 与 2ep smoke 已完成：plain 止损，仅 dependency 晋级 50ep seed13，正在运行。
+  具体数字只见 `results/PHASE_A.md`；5090 模型身份未闭合正式 pin，结果均标 exploratory。
 - **四章的对手线现已全部同协议实测闭合**，没有一栏引用论文原报数字。这是本阶段最大的进展；
   代价是其中两章的结论是「没有超过」。
 
@@ -81,9 +80,9 @@
 
 | 项 | 值 |
 |---|---|
-| **当前 P1 trust root** | `runs/stages/P1/p1-v6-20260831-r12/` |
-| `protocol.json` SHA-256 | `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497` |
-| 当前 A3 plan | `runs/stages/A3/a3-v6-position-workpoint-r13/preflight/execution_plan.json` |
+| **当前 P1 trust root** | `runs/stages/P1/p1-v6-20260901-r13/` |
+| `protocol.json` SHA-256 | `00e0943d32db9b5a2453c25c6d8adf8c33e456f9bff042bd134c23ae20b3447a` |
+| 位置工作点 A3 plan（绑定 P1 r12） | `runs/stages/A3/a3-v6-position-workpoint-r13/preflight/execution_plan.json` |
 | plan SHA-256 | `b587b21d7aa74437d7144ecad76d87f4fe2253f39966d48bb23108e914ec1eda` |
 | **冻结主锚（权威，勿动）** | `runs/stages/A3/a3-v6-baselines-r10/primary_anchor.json`（sha256 `894b9bd2…185b3c12`） |
 | 门 | causal **> 33.17**｜subevent **≥ 28.75**｜temporal **≥ 50.63** |
@@ -91,7 +90,8 @@
 | 划分 | train 2,622 / internal-dev 291 / final-valid 710 |
 
 **信任根谱系**：r9（`440516dc…`，08-29）→ r10（`1cf68b20…`，改 trainer）→
-r11（`22ddb933…`，纳入 `balance.py`）→ r12（`0bd33e87…`，逐位置 pair/controller/trainer）。
+r11（`22ddb933…`，纳入 `balance.py`）→ r12（`0bd33e87…`，逐位置）→ r13
+（`00e0943d…`，纳入 prototype pair-head）。
 **这些版本的 data / manifests / candidate / evaluator / checkpoint 逐项零差异**，已核对，
 所以**主锚跨版本仍可比、baseline 不需要重跑**。
 
@@ -110,7 +110,7 @@ scp data/protocols/v6/local_gate.json gpu-4090:/data/TJK/ekg/data/protocols/v6/
 # 4) 逐项核对新旧 bundle 的差异面，确认只有你改的那几个文件变了
 ```
 
-`CODE_PATHS` 定义在 `scripts/build_p1_bundle.py`，现含 16 个文件，
+`CODE_PATHS` 定义在 `scripts/build_p1_bundle.py`，现含 18 个文件，
 其中与方法相关的是 `train_supervised_relations.py`、`src/ekg/relations/balance.py`、
 `extractor/supervised.py`、`pairs.py`、`maven_ere_official.py`。
 Ch1/Ch3/Ch4 的训练脚本**不在**其中，改它们不触发重建。

@@ -1,6 +1,6 @@
 # EKG 实时状态
 
-> 更新于 **2026-08-31**。只记录当前事实、唯一活动任务和停止条件；实验数字以
+> 更新于 **2026-09-01**。只记录当前事实、唯一活动任务和停止条件；实验数字以
 > [`results/`](results/README.md) 为准，新会话先读 [`HANDOFF.md`](HANDOFF.md)。
 
 ## 当前结论
@@ -15,12 +15,11 @@
 论文结构仍是三个方法章 + 一个系统评估章。公开论文数字可进入背景表看量级，但不能替代最终的
 同协议比较。周四汇报稿见 [`reports/2026-09-03_阶段性报告.md`](reports/2026-09-03_阶段性报告.md)。
 
-## 唯一活动任务：A3 Ch2 逐族×位置工作点
+## 唯一活动阶段：A3 Ch2（4090 工作点待核 + 5090 prototype 探索）
 
-4090 当前不可达；作者已授权本轮临时使用 5090 探索不同单种子方案。5090 静态 cpolar 入口首次只读
-核验返回 `Connection refused`，远端零执行。已在本地预注册并实现 `prototype` /
-`prototype_dependency` 两臂，完整 CPU 门与 P1 local gate 通过；待入口恢复后先做 torch/CUDA smoke，
-不得直接开长跑，也不得追加 seed。
+4090 当前不可达；作者已授权本轮临时使用 5090 探索不同单种子方案。`cpolar-ssh-update` 已恢复入口；
+prototype 两臂 Torch/CUDA 和 2ep smoke 已完成，plain 止损，仅 dependency 的 50ep seed13 正在运行。
+5090 模型 cache 未闭合正式内容 pin，因此结果为 exploratory；不得追加 seed或写入正式主表。
 
 ### 已完成
 
@@ -30,7 +29,7 @@
 - 推理仍为朴素 argmax，candidate/evaluator/final-valid 规则不变；
 - 本地 447 passed / 16 expected skips、ruff 0、CPU smoke 与 P1 local gate 全绿；
 - 代码提交 `91d32d8` 已推送；4090 clean 同步；
-- P1 r12 与 A3 r13 preflight 均 PASS；4090 两 epoch行为 smoke 已 PASS；50 epoch seed-13 正式
+- 位置工作点使用的 P1 r12 与 A3 r13 preflight 均 PASS；4090 两 epoch行为 smoke 已 PASS；50 epoch seed-13 正式
   流水线已在 GPU0 启动，最后一次成功 SSH 确认到 epoch 15，official scorer 尚未产生结果。
 - GPU1 已完成三个不同的单种子 Stage-1 检索诊断；r1/r2/r3 均未过预设 recall 门，检索近似变体线
   止损，不跑 r4、不接 Stage 2。r1/r2 见权威结果档，r3 待 SSH 恢复后补 artifact hash 再入档。
@@ -39,8 +38,8 @@
 
 | 项 | 值 |
 |---|---|
-| P1 bundle | `runs/stages/P1/p1-v6-20260831-r12/` |
-| P1 protocol SHA-256 | `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497` |
+| P1 bundle | `runs/stages/P1/p1-v6-20260901-r13/` |
+| P1 protocol SHA-256 | `00e0943d32db9b5a2453c25c6d8adf8c33e456f9bff042bd134c23ae20b3447a` |
 | A3 preflight | `runs/stages/A3/a3-v6-position-workpoint-r13/preflight/` |
 | A3 plan SHA-256 | `b587b21d7aa74437d7144ecad76d87f4fe2253f39966d48bb23108e914ec1eda` |
 | 主锚 | official joint causal 33.17 |
@@ -62,7 +61,8 @@
    接 cross-encoder，也不再堆第四个近似变体；
 4. 在所有待比方案的单种子都过 baseline/护栏且用户再次明确允许前，**禁止**
    seeds 17/42 或任何多种子；空闲 GPU 只并行不同方案/任务。
-5. 5090 恢复后只跑 prototype 两臂的 seed 13；若两臂均未过线，停止 prototype 线，不扫结构超参数。
+5. 5090 上只继续 dependency 50ep seed13；plain 已止损。完成后先跑 official internal-dev scorer；
+   未过三条线则停止这版 prototype，不扫 support 数、温度或 dependency 权重。
 
 ## 周四前并行交付
 

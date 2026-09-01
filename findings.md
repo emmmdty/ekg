@@ -1475,3 +1475,98 @@
   恢复或端口更新解决。代码可以先提交以备服务器 fetch，但不能伪造远端准入。
 - prototype pair-head 代码、train-only support、dependency 图、checkpoint loader/config、P1 CODE_PATHS 与
   测试已作为提交 `7128151` 落在 main；完整本地门和 P1 local gate 均在该代码内容上通过。
+- `cpolar-ssh-update` 是 5090 入口不可达时的固定恢复命令；2026-09-01 09:32 执行成功，确认
+  `gpu-5090` 当前映射为 `29.tcp.cpolar.top:10201`。恢复后的只读 SSH 已成功进入服务器。
+- 5090 只读现场：远端仓库 commit `c642bb88`、worktree clean；GPU 0 为 RTX 5090 32,607 MiB，
+  当前 0% util、占用 6,659 MiB；数据盘余 1.1 TiB。需先核占用 PID，再同步 `origin/main`。
+- 6,450 MiB 显存属于用户既有的 Qwen3-Embedding-0.6B 服务（PID 420925，已运行 3 天，端口
+  11436），不可终止；当前仍约有 26 GiB 可用。项目 `.venv` 为 torch 2.8.0+cu128，CUDA 可用且
+  正确识别 RTX 5090。
+- 5090 仓库已从 `c642bb88` 同步至 `5fbf2d67`；远端 prototype/supervised Torch 定向测试 22/22
+  PASS，证明本地因无 torch 而跳过的已知答案、梯度和零初始化测试在实际 torch 环境成立。
+- 5090 显式 CUDA forward/backward PASS：dependency head 三族输出分别为 7×4、7×3、7×2，
+  loss 有限且输入梯度全 finite；没有启动训练或写入 checkpoint。
+- 错误地使用正欧氏距离的负向控制按预期触发断言，说明“近 prototype 必须得高分”的测试能捕获
+  关键符号突变。P1 构建器目前把 remote evidence 硬编码为 `gpu-4090`、`/data/TJK/ekg` 和 RTX 4090；
+  这属于可追溯格式而非科学口径，临时 5090 合法执行前需最小泛化为明确的 alias→目录→GPU 白名单。
+- 复核 P1 职责后撤销上述“必须泛化”判断：封存的 4090 remote smoke 只证明历史 checkpoint 接口和
+  单卡可行性，当前代码一致性由新 local gate 覆盖；prototype 新路径另有本轮 5090 Torch/CUDA 证据。
+  因此直接复用哈希封存的 remote smoke 构建新 P1，避免为服务器迁移改 schema。
+- 新 P1 目标 `p1-v6-20260901-r13` 在本地和 5090 均不存在；但 5090 因 `data/` 不走 Git，缺少
+  `data/protocols/v6/remote_smoke.json`。不能假设服务器拥有 P1 evidence，需列出缺件并只传必需文件，
+  双端 SHA-256 后再构建。
+- 5090 实际上没有任何 `data/protocols/v6` 或 `runs/stages/P1` 文件；本地 protocol 树约 20 MiB，
+  但本地同样没有 HANDOFF 所指的 r12 bundle。最稳路径是本地生成新 r13 bundle，再把完整 protocol
+  根和新 bundle 按哈希同步到 5090，而不是在缺证据的远端现场拼装。
+- 新 P1 `p1-v6-20260901-r13` 已在本地构建并 validate-only 复验 PASS；protocol SHA-256 为
+  `00e0943d32db9b5a2453c25c6d8adf8c33e456f9bff042bd134c23ae20b3447a`。它只更新当前代码/本地 gate
+  身份，继续复用封存 remote interface smoke，未产生科学分数或访问 final-valid。
+- P1 protocol、本地 gate 与 remote-smoke 已同步至 5090，三项远端 SHA-256 与本地逐位一致。
+- 现有 `prepare_a3_baselines.py` 只物化三种基线，并固定 seeds 13/17/42、local-pair 3 epochs；不能把它
+  直接当 prototype 50-epoch 计划，否则会预注册未经授权的额外 seeds 且训练预算错误。需复用既有
+  50-epoch A3 方法计划的冻结超参，仅新增两臂、只 seed 13。
+- active A3 契约冻结的公平底座为 50 epochs、seed 13、全候选、alpha=.5、macro-dev、工作点关闭；
+  当前本地只有 baseline r10 execution plan 和 run metadata，位置工作点 r13 的 50ep plan/产物留在
+  不可达的 4090。需从权威结果档和 trainer CLI 还原已冻结参数，并在 5090 先核模型/数据路径。
+- 权威 PHASE_A 明确冻结完整配方：50 epochs / lr 1e-5 / head-lr 1e-4 / accum 8 / neg-ratio inf /
+  alpha=.5 / macro / seed13。5090 已有正确的 MAVEN-ERE train 源（2913 docs，SHA-256
+  `6a5519fe…eb638b7`），但未在预期深度找到内容摘要命名的 RoBERTa 目录，需定位已有快照并核内容哈希。
+- 5090 本机 Hugging Face cache 有 `/home/tongjiakai/.cache/huggingface/hub/models--roberta-base`；项目
+  没有现成模型摘要校验脚本，冻结摘要定义在 P1 结果档为五个文件 SHA-256 的 canonical map。下一步
+  定位 snapshot 和五文件清单，复算 `71be7419…c961ea9`，一致则直接引用现有快照，不下载/复制。
+- 5090 cache 只有一个 snapshot `e2da8e2f…`，含 config、merges、model.safetensors、tokenizer.json、
+  tokenizer_config 和 vocab 六个链接。P1 当时的内容寻址目录写“五个文件”，很可能排除了后加入的
+  tokenizer.json；仓库未保存逐文件 map，需同时复算五文件和六文件 canonical digest，以目标值判定。
+- 五文件紧凑 JSON 摘要为 `aeeb9aa7…a0cb53d`，六文件为 `732bfab4…3f649`，均非冻结目录名；逐文件
+  SHA 与官方 cache 正常。Git 历史只保存了“canonical map”描述，没有原始命令/序列化细节，因此先
+  枚举常见 canonical 表示；若仍不匹配，不能把格式歧义当模型漂移，需用冻结五文件逐项哈希核身份。
+- 已枚举五/六文件所有常见 JSON、行表、键值拼接与换行形式，均无法生成 `71be7419…c961ea9`；因此
+  更可能是 4090 内容目录的文件集合/版本与 5090 cache 有细微差异，或当时摘要命令包含额外信息。
+  在 4090 不可达时无法逐文件闭合，5090 运行只能先标 exploratory，不能冒充统一 backbone 正式表。
+- 5090 prototype 2-epoch smoke 已以 PID 962618 启动：seed13、P1 r13、三族全候选、冻结公平配方，
+  仅把 head 改为 `prototype`；输出路径显式含 `exploratory`，未启动 dependency 臂或任何额外 seed。
+- PID 962618 已通过成功 SSH 确认为 GONE；训练在参数/P1 预检阶段 fail-fast，未加载模型、未占 GPU。
+  原因是 5090 缺 P1 全局哈希要求的 `data/processed/maven_fact/train.jsonl`，不是方法/数值失败。常驻
+  embedding 服务仍是唯一 CUDA 进程。需按 r13 `hashes.data` 清单同步缺失源文件后用新不可变目录重试。
+- r13 data trust root 仅含 4 个源文件：MAVEN-ERE train/valid 与 MAVEN-Fact train/valid；hashes 嵌在
+  `protocol.json`（不是单独 `hashes.json`）。5090 已有 ERE train，下一步逐项核远端后仅补缺失文件。
+- 5090 的 ERE train/valid 两项哈希已匹配；只缺 MAVEN-Fact train/valid，共 164 MiB。本地两项哈希与
+  P1 分别为 `190522b4…86bab7`、`396fcf07…c7cff`，可只同步该目录，不碰其它数据。
+- MAVEN-Fact 两文件已无删除地同步至 5090，远端 SHA-256 与 P1 精确一致；随后 5090 上完整执行 P1
+  r13 `--validate-only` PASS，证明数据/manifest/candidate/evaluator/code/bundle 缺件已全部闭合。
+- retry-1 已真正进入 GPU 训练：wrapper PID 963302、Python PID 963306，显存约 4.3 GiB（常驻服务外），
+  prototype 12 类均为 32 support；训练集 2,622 / internal-dev 291、全量 3,315,358 rows。epoch0 已到
+  1000/2622，running loss 3.4572→3.3383，未见 OOM/NaN。RoBERTa pooler 随机初始化警告与该 loader
+  的未使用 pooler 一致，不是方法失败。
+- prototype epoch0 已完成：mean loss 3.1315、数值有限，但 trainer dev 三族 F1 全为 0，说明当前
+  负欧氏原型在第一轮全部判 NONE，判别力明显弱于线性底座。进程继续 epoch1；若仍全零，虽行为 gate
+  的 finite/support 条件成立，也不值得直接投 50ep，先跑预注册 dependency 臂验证结构传播能否破局。
+- 回核 ProtoEM 一手公式发现当前“最小适配”省掉了两个关键机制：论文的 NONE prototype 不从负例均值
+  构造，而直接编码文本 `None`；prototype connotation 同时编码 event pair 与 event-agnostic context，
+  再经独立 FNN 融合。论文也使用含 NONE 的加权完全图，不是本地的 positive-only 图。当前全 NONE
+  因而不能否定 ProtoEM，只能否定这版简化头；预注册两臂跑完后不应直接投入 50ep。
+- plain prototype 2ep 完成：mean loss 3.1315→2.7239；epoch1 trainer macro=.0242（causal=0、
+  subevent=0、temporal=.072），status=complete、final-valid=false。远低于复现底座的早期量级，已决定
+  不跑 50ep。dependency 2ep 臂随后已启动，wrapper PID 963770，仍只 seed13。
+- dependency 真正 Python PID 为 963774，support 覆盖/显存/epoch0 早期 loss 正常。
+- 本地可用的 r10 local-pair 是 3ep baseline，official causal/subevent/temporal = 26.31/27.68/49.29；
+  50ep 复现底座 31.42/30.62/50.78 的边预测不在本机。仍可对 r10 做只读后验结构诊断：要求 causal
+  预测同时有同向 BEFORE/CONTAINS 支持，观察 precision-recall 变化；该诊断不能直接当方法分数。
+- 结构诊断未执行：r10 metadata 声称过 `official_predictions.jsonl`，但本机未保存该文件，且整个
+  `runs/` 找不到任何 Ch2 official/edge prediction artifact；只有聚合 metrics。没有边集合就不能重构
+  约束结果，停止该支线，不为诊断重跑旧 baseline。
+- prototype_dependency 2ep 完成：mean loss 2.7504→1.9843；trainer macro .0391→.1656，epoch1
+  causal=.075、subevent=.167、temporal=.255，status=complete、final-valid=false。虽远低于 3ep linear
+  baseline，但比 plain prototype 的 .0242 明显强且学习曲线仍陡升；有依据只晋级 dependency 臂到冻结
+  50ep，plain 臂止损。仍为 5090 exploratory，不能进正式主表。
+- dependency 50ep 单种子全量已启动：wrapper PID 964171、Python PID 964175，support/配方/P1 与 smoke
+  一致，epoch0 已到 1000/2622，额外显存约 4.3 GiB；plain full 未启动，额外 seeds 未启动。
+- 50ep run 的 scheduler 总步数不同于 2ep smoke，因此同一 epoch1 已明显更强：macro=.2469、
+  causal=.131、subevent=.211、temporal=.399（epoch0 .0479）。这解释了不能拿 2ep 绝对值外推 50ep，
+  也支持继续冻结全程；数值仍是 trainer dev，非 official。
+- official 后处理所需的 r10 internal-dev `valid.jsonl` 本地存在（9.8 MiB，SHA `bb8c6b48…ce7e3`），
+  5090 尚无该 A3 preflight。训练期间可只同步 valid 文件，结束后复用 launcher 的 infer→normalize→
+  official-score 三步，不需重跑 baseline 或复制 91 MiB train preflight。
+- internal-dev valid 已同步到本轮 5090 preflight，远端 SHA 精确为 `bb8c6b48…ce7e3`。官方评分链已
+  复核：`evaluate_relations.py` 产边级 JSONL，`normalize_predictions(local_pair)` 按 checkpoint active
+  families 转官方形状并校验候选 digest，最后调用封存 evaluator；不需要 final-valid 或 train preflight。
