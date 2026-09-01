@@ -15,6 +15,10 @@
   此后 SSH 在 banner 前失败，**不得据此推断远端进程死亡**。
 - GPU1 的三个不同单种子 Stage-1 retriever 诊断均未过召回门，已停止该近似变体线；没有 seeds
   17/42，也未启动 Stage 2。r1/r2 已入 `results/PHASE_A.md`，r3 等 SSH 恢复后补 hash。
+- 4090 不可达后，作者已授权本轮临时使用 5090 探索；本地已预注册并实现 ProtoEM-inspired 的
+  `prototype` / `prototype_dependency` 两个不同 seed-13 臂，完整 CPU 门与 P1 local gate 通过。
+  5090 当前静态 cpolar 入口 `Connection refused`，远端尚未执行命令；恢复后必须先跑 torch/CUDA smoke
+  和重建 P1/A3 信任根，不能直接拿旧 r12 开正式训练。
 - **四章的对手线现已全部同协议实测闭合**，没有一栏引用论文原报数字。这是本阶段最大的进展；
   代价是其中两章的结论是「没有超过」。
 

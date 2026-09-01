@@ -17,6 +17,11 @@
 
 ## 唯一活动任务：A3 Ch2 逐族×位置工作点
 
+4090 当前不可达；作者已授权本轮临时使用 5090 探索不同单种子方案。5090 静态 cpolar 入口首次只读
+核验返回 `Connection refused`，远端零执行。已在本地预注册并实现 `prototype` /
+`prototype_dependency` 两臂，完整 CPU 门与 P1 local gate 通过；待入口恢复后先做 torch/CUDA smoke，
+不得直接开长跑，也不得追加 seed。
+
 ### 已完成
 
 - 跨句错误剖析：主要差在 precision（.1998 vs .2904），跨句过发 2.6×、同句 2.0×；
@@ -57,6 +62,7 @@
    接 cross-encoder，也不再堆第四个近似变体；
 4. 在所有待比方案的单种子都过 baseline/护栏且用户再次明确允许前，**禁止**
    seeds 17/42 或任何多种子；空闲 GPU 只并行不同方案/任务。
+5. 5090 恢复后只跑 prototype 两臂的 seed 13；若两臂均未过线，停止 prototype 线，不扫结构超参数。
 
 ## 周四前并行交付
 

@@ -1404,3 +1404,74 @@
   随后 `ps -p 3936542` 无输出，已确认 trainer GONE。r3 判负，retriever 近似变体线止损，不跑 r4。
   后续 checkpoint/metadata 哈希复核遇到既有 ControlMaster reset，新 ControlMaster 又在 banner
   exchange 超时；远端审计命令未执行，故完整计数/哈希暂不写进结果权威档。
+- 2026-09-01 用户明确授权把 `gpu-5090` 作为 4090 不可达期间的临时探索服务器。授权范围是提高最终
+  成绩的方法探索，不改变 final-valid、候选全集、official evaluator、冻结主锚或多种子门；仍只允许
+  每个不同方案的冻结 seed 13。checkpoint 训在 5090 就留在 5090，跨机搬运仍需另行询问。
+- `gpu-5090` 当前唯一配置解析为 `tongjiakai@29.tcp.cpolar.top:12337`；2026-09-01 首次只读核验在 TCP
+  层立即 `Connection refused`，不是认证失败或 SSH banner 超时。本机没有备用 5090 alias、ProxyJump
+  或可复用 ControlMaster，因此远端未执行任何命令，不能判断代码、GPU 或任务状态。
+- Ch2 当前 pair classifier 已包含 4-way pair feature、两层 MLP、文档窗口 trigger 编码、距离 embedding、
+  全候选训练和逐族×位置训练侧工作点。继续加阈值、句距、窗口或普通 hard-negative retriever 都与已测
+  方向重复；新的候选必须改变判别表示或加入结构化训练信号，而不是再调工作点。
+- 有效性边界不变：A3 active 契约规定 final-valid 封存、official candidate/evaluator 不变，r13 若失败
+  工作点线结束。三种 Stage-1 retriever 竖片已被 overall/cross recall 门否决，因此 5090 不应跑 r4。
+- 文献初筛：SPEECH 有官方代码且建模结构/原型，但其论文在 MAVEN-ERE causal 上仅约 16 F1，明显低于
+  当前 33.17 主锚；不值得占 5090。ProtoRE 官方代码是通用关系预训练、依赖老版本且单 P100 需数日，
+  不是本任务可直接 baseline。ProtoEM 的原型匹配思想与当前“判别力不足”匹配，但尚未找到官方代码，
+  只能把最小原型/对比损失作为候选，不能声称忠实复现。
+- JointConstrainedLearning 与 CE2ERE 均有公开实现，提供反对称/传递等结构约束证据；前者覆盖 temporal+
+  subevent，后者用 box 表示保证 coherence。它们不是 MAVEN-ERE 同协议即插即用，但结构约束比继续调
+  NONE 阈值更有新信息，值得核其损失公式与因果方向可适配性。
+- ProtoEM 一手 HTML 已核：它与本项目输入面高度一致——文档窗口编码、trigger mean pooling、
+  event-pair FNN，然后用欧氏距离匹配关系原型，并用训练集共现加权的 prototype dependency GCN。
+  论文 MAVEN-ERE valid 报 RoBERTa 版 temporal/causal/subevent = 54.17/33.93/30.55，三项都高于本项目
+  冻结主锚/护栏 51.63/33.17/28.75；test 也报 56.80/34.55/32.11。虽然 split 不同不能直接相减，
+  但这是目前唯一同时覆盖三族且方向吻合的高价值候选。
+- ProtoEM 未发现公开官方代码，论文标注为 work in progress；因此只能做透明的“ProtoEM-inspired
+  原型匹配 + 关系依赖”本地适配，不能称官方复现。相比之下，SPEECH 一手表确认 causal 16.28，淘汰。
+- CE2ERE/JointConstrainedLearning 的公开实现基于 MATRES/HiEve、旧 PyTorch/长训练，不能直接替代
+  MAVEN-ERE 主表；其结构一致性思想可作为第二周期辅助损失，但优先级低于 ProtoEM-inspired 主候选。
+- 当前 `PairClassifier` 的最后层是每族独立线性分类，三族只通过 encoder 参数间接共享，完全没有显式
+  label prototype 或跨族关系依赖；这正是 ProtoEM 可以引入新信息的位置。其输入 pair feature 已比论文
+  多了 `|h_i-h_j|` 与距离 embedding，可直接复用，无需改 candidate/evaluator/encoder 窗口。
+- 最小可验证竖片应把“head geometry”设为唯一变量：baseline MLP 保留，新增共同 pair projection +
+  每族 prototype distance logits；第二臂再在 prototypes 上加入训练集 label co-occurrence propagation。
+  推理仍输出每族原始 argmax，工作点组件关闭，避免把两种机制混在一起。
+- 最新方法补筛：SEAG 在 MAVEN-ERE 把 CAUSE/PRECONDITION 合并且只做无向 causal identification，
+  不符合当前两 subtype 的 official 指标；MMD-ERE/KnowQA 依赖多代理或大模型推理，当前无已核离线模型
+  与同协议完整三族实现，不适合三天内 5090 竖片。GraphERE 值得继续查官方代码，但引入 AMR/argument
+  管线的依赖面大，若无即用实现则不应挤掉 ProtoEM-inspired 主候选。
+- GraphERE 定向检索未找到作者官方代码；方法还要求 AMR、argument IE、静态/动态事件图和 Node
+  Transformer，多出一整条不可控前处理管线。按“不重复造轮子/三天内看 official 分”原则淘汰。
+- 本仓库已有通用 `Registry` 且所有关系 extractor 走注册机制；若新增 prototype head，应把 head 工厂
+  做成小型 registry，并在训练/推理处按 checkpoint config lazy 选择，不能把 prototype 条件硬编码进
+  `PairClassifier` 或让旧 checkpoint 加载语义改变。
+- 兼容接入面已钉死：旧 checkpoint 只有 `heads.pt` 和 balance config，故新 `pair_head.json` 缺失时必须
+  解析为 `linear`；训练保存 head config，推理先读 config 再从 registry 构建。prototype 源文件必须
+  加入 P1 `CODE_PATHS`，否则新分数无法追溯到实现。
+- prototype 支持集只能来自冻结 train manifest。初始化可确定性抽取每族每类少量 PairExample，编码
+  当前文档窗口后求 pair embedding 均值；internal-dev/final-valid 均不能参与 prototype 构造。
+- 竖片实现采用每类 32 个冻结 train support、共享 pair projector、负欧氏距离 logits；dependency 臂
+  使用 train label 共现的对称归一化矩阵，并以零初始化 residual neighbor 层起步，保证它在初始化时
+  与普通 prototype 臂逐位相同，后续依赖传播必须靠训练“赚到”贡献。
+- 支持初始化必须在 optimizer 构造前完成且 encoder/head 临时 eval+no_grad；它只设置 prototype 参数，
+  不把 support 编码图留入训练。保存时 head 类型进入独立 config，dependency 矩阵随 state_dict 封存。
+- 首轮本地 gate：prototype/supervised/trainer 定向测试全部通过，torch-only 3 项按本地环境预期 skip；
+  新增/修改文件 ruff 0。CLI help 的唯一失败来自三个 `uv run` 并行争用默认 cache lock，尚未进入脚本。
+- CLI help 用独立 `/tmp` uv cache 重跑 PASS；`--pair-head` 三个 registry 选项可见，CPU import 未引入 torch。
+- 冻结 train manifest 数据审计：2,622 docs、3,315,358 rows；12 个 label prototype 均取得恰好 32 个
+  support，共 315 个唯一 pair；dependency 矩阵 12×12、finite、symmetric。CAUSE 的最强正向 temporal
+  邻居是 BEFORE，但 PRECONDITION 当前被大量 other-family NONE 共现主导，需在定稿前检查是否应只让
+  positive-positive 边进入 dependency propagation，避免稀疏标签的 NONE 结构淹没语义依赖。
+- raw train 共现核验：CAUSE 13,174 条中 BEFORE 6,424、CONTAINS 4,087；PRECONDITION 35,388 条中
+  BEFORE 28,102。两类 causal 都有明确正 temporal 依赖，而与 subevent 的共现几乎全是 NONE。因此
+  dependency 图冻结为 positive-positive edges + self loops，避免把标签稀疏性误当语义依赖。
+- 完整本地三件套 PASS：461 passed / 18 expected skips、ruff 0、`ekg-smoke` OK。新增的两个 torch
+  测试在本地按环境预期 skip，仍需 5090 CUDA smoke 才能放行训练。
+- P1 local gate 重跑 PASS，并写入新的 `data/protocols/v6/local_gate.json`；由于 prototype 两个源文件已
+  纳入 CODE_PATHS，旧 P1 r12 不再覆盖新实现。正式 GPU 分数前必须在 5090 做 torch tests/remote smoke
+  并重建新 P1 trust root 与 A3 execution plan。
+- 本机没有 `hold-5090` 或动态端口脚本，只有静态 alias；当前 Connection refused 只能由 cpolar 隧道
+  恢复或端口更新解决。代码可以先提交以备服务器 fetch，但不能伪造远端准入。
+- prototype pair-head 代码、train-only support、dependency 图、checkpoint loader/config、P1 CODE_PATHS 与
+  测试已作为提交 `7128151` 落在 main；完整本地门和 P1 local gate 均在该代码内容上通过。

@@ -771,3 +771,37 @@
 - 后续两个不同 ControlPath 的低频新连接仍在 banner exchange 超时，远端命令均未执行；停止继续
   轰击入口。HANDOFF/TODO/A3 契约已把过时的“四卡空闲/50ep 未启动”改为实际状态，并明确 GPU0
   最后成功确认到 epoch 15、之后状态未知，r1–r3 检索线止损。
+
+## 2026-09-01 · Phase 20：5090 临时单种子探索
+
+- 用户明确授权使用 `gpu-5090`，用于 4090 不可达期间探索提高最终指标的方法。
+- 冻结边界：优先 Ch2；不同方案可并行；只跑 seed 13；不启动任何额外 seeds；不访问 final-valid。
+- 首步为只读核验远端代码、GPU、磁盘与资产，不在核验完成前启动训练。
+- 首个只读 SSH 返回 `Connection refused`；远端零执行。已核实本机只有
+  `29.tcp.cpolar.top:12337` 这一入口，无备用 alias/会话；不原样重试，转入本地方案筛选。
+- 完成 Ch2 接入面复核：距离、文档窗口、全候选、位置工作点和三种 retriever 近似都已覆盖；下一方案
+  必须针对表示判别力或结构约束，不再重复阈值/句距/检索近似。
+- 完成首轮论文/官方仓库筛选：淘汰 MAVEN-ERE causal 明显偏低的 SPEECH 和代价过高的通用 ProtoRE；
+  保留“最小原型对比”与“可微结构一致性”两类候选，继续核一手公式、代码与本任务适配面。
+- 一手核验确定主候选为 ProtoEM-inspired：其论文 valid 三族 54.17/33.93/30.55，唯一同时越过当前
+  三条线的方向；无官方代码，后续以透明最小适配实现，不冒充官方复现。结构约束降为第二优先级。
+- 代码接入审计完成：当前三族头彼此独立，适合用“prototype distance head”作单变量替换；第二臂仅增加
+  prototype dependency，保留同一 encoder、pair feature、训练预算、candidate 和 official scorer。
+- 排除 SEAG（无向/合并 subtype）及当前不可闭环的多代理/LLM 方法；继续对 GraphERE 做一次官方代码门，
+  无即用实现则停止扩散，进入 ProtoEM-inspired 竖片实现。
+- GraphERE 官方代码门未过且依赖面过大，已停止扩散。进入 prototype head 的 registry/config 设计与
+  已知答案测试；旧线性 head 和旧 checkpoint 必须逐位保持兼容。
+- 已定位训练保存、推理加载、P1 hash 与现有测试接入点；准备先写纯 Python 的 config/依赖矩阵测试，
+  再写 torch 形状/梯度/零漂移测试，最后改训练循环。
+- 已新增 pair-head registry/config 与 prototype 模块骨架，并把两个新源文件纳入 P1 code hash；下一步接
+  trainer 的 train-only support 初始化和 checkpoint 保存，再补测试。
+- prototype trainer、train-only support 初始化和 checkpoint identity 已接通；定向测试与 ruff PASS。
+  CLI help 因并行 uv cache lock 未运行，改用独立 `/tmp` cache 只重跑这一项。
+- CLI help PASS；冻结 train 全量 support/adjacency 审计 PASS。发现 dependency 图的 NONE 共现可能淹没
+  PRECONDITION 语义邻居，先量化 raw positive co-occurrence，再冻结图构造，不直接烧 GPU。
+- raw 共现确认 causal 正类主要连 BEFORE/CONTAINS，已将 dependency 图收紧为正类共现；定向门复跑 PASS。
+- 项目完整门 PASS：461 passed / 18 skips、ruff clean、CPU smoke OK。下一步重建 P1 local gate；远端
+  仍必须先跑 torch 测试和 2 epoch CUDA smoke。
+- P1 local gate PASS。检查确认无 5090 备用入口脚本；当前只缺远端入口恢复、CUDA gate 和新 P1/A3
+  信任根。准备在 active A3 phase 中预注册 prototype 两臂与停止条件，再提交代码供远端同步。
+- active A3 phase 已预注册两臂、单种子 promotion 与停止条件；实现提交为 `7128151`。

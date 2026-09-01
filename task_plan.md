@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-Phase 19（单种子优先的 GPU 并行推进）进行中。用户已授权 GPU 长任务与不同任务并行；当前先运行 Ch2 r13 完整 seed-13，其他卡只安排不同方案/任务。多种子必须等所有待比方案的单种子均超过各自 baseline/护栏，且用户再次明确授权后才可执行。
+Phase 20（5090 临时单种子探索）进行中。4090 当前不可达，用户已明确授权使用 gpu-5090；优先探索能提高 Ch2 最终 official 三族指标的不同方案。禁止追加 seeds，只有单种子方案全部超过 baseline 与护栏且用户再次授权后才允许多种子。
 
 ## Phases
 
@@ -401,6 +401,9 @@ Phase 19（单种子优先的 GPU 并行推进）进行中。用户已授权 GPU
 | r5 跨文档身份更新补丁因 TODO 现有换行与预期不一致而原子失败 | 1 | 无文件产生部分修改；先读取六个目标文件的精确段落，再拆成小补丁，避免大补丁任一锚点失败影响全部同步 |
 | Phase 18 首次同时更新三份 planning 文件时误用模板尾行作为 `findings.md` 锚点 | 1 | `apply_patch` 原子失败、三文件均未改变；改为先读取真实尾部，再拆分精确补丁。 |
 | 4090 `hold-4090.sh` 首次握手未连上，工具在 30 秒先返回但脚本仍在后台重试 | 1 | 远端审计命令未执行；核对脚本与本地进程，确认它按 40 秒间隔有界重试且 TCP 可达。保留进程等待复用 socket，同时继续本地实现。 |
+| Phase 20 首次同时更新三份 planning 文件时误用 `findings.md` 尾部锚点 | 1 | `apply_patch` 原子失败、三份文件均未变化；读取各文件真实尾部后拆分为精确补丁。 |
+| Phase 20 首次 `gpu-5090` 只读核验被 `29.tcp.cpolar.top:12337` 拒绝 | 1 | SSH 明确返回 `Connection refused`，远端命令未执行；本机配置只有这一入口且无可复用会话。停止原样重试，继续本地方法筛选，等待入口恢复或用户提供新端口。 |
+| prototype 定向 gate 并行运行时 CLI help 无法获取 uv cache lock | 1 | 测试与 ruff 已通过；失败是并行 uv 争用只读默认 cache，不是代码错误。仅用独立 `UV_CACHE_DIR=/tmp/ekg-prototype-uv` 重跑未完成的 CLI help。 |
 
 ## Authoritative Context
 
@@ -425,3 +428,14 @@ Phase 19（单种子优先的 GPU 并行推进）进行中。用户已授权 GPU
 - [ ] 低频恢复 4090 SSH 后补核 r3 metadata/checkpoint hashes，并继续监测 GPU0 official 流水线。
 - [x] 核对 Ch3 并行边界：D3 受 A3 immutable handoff 约束，当前不启动无法进入结论的正式 GPU 任务。
 - [ ] 仅在两个单种子结果均核验后决定下一方案；未经用户再次授权，不运行任何多种子。
+
+### Phase 20: 5090 临时单种子方法探索
+
+- [ ] 只读核验 `/mnt/aidata/tongjiakai/ekg` 的 commit、工作树、GPU、磁盘、模型和数据资产。
+- [ ] 对齐本地 P1 r12、A3 r13、冻结主锚与 5090 可复用资产；任何漂移先修复，不直接开跑。
+- [x] 结合 Ch2 已测错误结构与一手论文，筛出最多两个互补方案；排除已证否方向和重复造轮子。
+- [ ] 每个方案先写已知答案测试、变异/符号断言与 2 epoch CUDA smoke，验证机制确实按设计工作。（本地测试已完成；远端 mutation/CUDA smoke 待入口恢复。）
+- [ ] 只运行冻结 seed 13；若 GPU 允许，可并行不同方案，但不得并行额外 seeds。
+- [ ] 使用 official evaluator 报 causal/subevent/temporal，并与 33.17 / 28.75 / 50.63 门逐项核验。
+- [ ] 将实测数字、命令、commit、checkpoint 所在服务器与负结果写入 `docs/results/PHASE_A.md`。
+- **Status:** in_progress

@@ -121,6 +121,30 @@ seed 13 依次测试 trigger-mean sampled BCE、marker-sentence、top-k hard-neg
 Stage-1 竖片；三者均未达到事先冻结的 overall≥.90 / cross≥.85 召回门，故均未接 Stage 2，且不再
 增加第四个近似变体。具体数字与 artifact 见 `../results/PHASE_A.md`；r3 hash 待 SSH 恢复补齐。
 
+### A3.4：ProtoEM-inspired 原型匹配探索（2026-09-01 预注册，尚未运行）
+
+4090 不可达期间，作者逐次授权使用 5090 做提高最终指标的方法探索。检索线已止损，不跑 r4；新路线
+改动 pair-scoring geometry，而不是继续调阈值、句距或候选近似。
+
+一手依据是 [ProtoEM](https://arxiv.org/html/2309.12892)：它同样使用文档窗口、trigger pooling、
+event-pair FNN，再以关系原型匹配和训练集标签依赖建模三族关系。论文公开 valid 值只说明方向，因 split
+与本项目不同，**不得直接作为胜出证据**。未找到作者官方代码，因此以下是透明的本地适配，不称复现：
+
+1. `prototype`：冻结 train manifest 每类确定性取 32 个 support，初始化共享 pair projection 后的关系
+   原型；输出为实例到各原型的负欧氏距离，仍按每族原始 argmax 推理；
+2. `prototype_dependency`：在相同原型头上增加由 train 正关系共现构造的残差传播；NONE 只保留自环，
+   因全量审计显示 causal 正类与 subevent-NONE 的稀疏性共现会淹没真实的 causal→temporal 依赖；
+3. 两臂唯一差异是 dependency residual；其 neighbor 权重零初始化，故两臂初始 prototype logits 必须
+   逐位相同。工作点组件关闭，candidate、TIMEX、evaluator、manifest 和训练预算全部不变。
+
+执行门：先在 5090 跑 torch 单测与每臂 2 epoch CUDA smoke；support 必须全部来自 train，12 类均非空，
+loss/logits/prototype/gradient 全部有限，关闭新 head 时旧 linear checkpoint 严格加载。通过后每臂只跑
+冻结 seed 13，可在不同空闲 GPU 并行。未经作者新的明确授权，禁止任何额外 seed。
+
+单种子 promotion 仍使用本文件既有门：causal > 33.17、subevent ≥ 28.75、temporal ≥ 50.63，并用
+official evaluator。任一臂未过则如实封存；两臂都未过则停止 prototype 线，不扫 support 数、embedding
+宽度、距离温度或 dependency 权重。final-valid 不参与 support、选模或判定。
+
 ## Done when
 
 - r13 smoke 和 seed-13 单种子判定有不可变产物；
@@ -143,4 +167,5 @@ Stage-1 竖片；三者均未达到事先冻结的 overall≥.90 / cross≥.85 �
 
 4090 项目目录 `/data/TJK/ekg`，服务器只用 `.venv/bin/python`。启动前向作者展示准确命令、cwd 与
 预期输出，先用 `nvidia-smi` 选空卡。长任务使用 `setsid nohup` 与独立日志；一条 SSH 只发一个后台任务。
-5090 仍需逐次授权，不跨机搬 checkpoint，除非作者另行决定。
+5090 仍需逐次授权；作者已对 2026-09-01 这轮临时探索明确授权，但当前静态 cpolar 入口返回
+`Connection refused`，远端尚无命令执行。不跨机搬 checkpoint，除非作者另行决定。
