@@ -31,6 +31,8 @@ CODE_PATHS = (
     "src/ekg/relations/data/maven_ere.py",
     "src/ekg/relations/extractor/supervised.py",
     "src/ekg/relations/maven_ere_official.py",
+    "src/ekg/relations/objective_registry.py",
+    "src/ekg/relations/objectives.py",
     "src/ekg/relations/pair_heads.py",
     "src/ekg/relations/pairs.py",
     "src/ekg/relations/prototype.py",

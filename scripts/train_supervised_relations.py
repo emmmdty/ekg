@@ -3,8 +3,8 @@
 
 Builds pair-classification rows from gold mentions (`relations.pairs.pair_examples`),
 downsamples the dominant NONE class, and trains a RoBERTa encoder plus a registered
-pair head with class-weighted cross-entropy. Saves encoder, tokenizer and head to
-`--output`, which `configs/relations/supervised.yaml` then loads.
+pair head with a registered relation objective. Saves encoder, tokenizer and head
+to `--output`, which `configs/relations/supervised.yaml` then loads.
 
 This is the *discriminative* trainer — not `train_relation_extractor.py`, which is
 the retained generative LoRA baseline.
@@ -50,6 +50,11 @@ from ekg.relations.balance import validate_components as validate_balance_compon
 from ekg.relations.data.maven_ere import load_maven_ere
 from ekg.relations.extractor.supervised import FAMILY_SUBTYPES
 from ekg.relations.maven_ere_official import frozen_candidate_protocol, records_by_id
+from ekg.relations.objective_registry import (
+    ADAPTIVE_THRESHOLD_OBJECTIVE,
+    CROSS_ENTROPY_OBJECTIVE,
+    RELATION_OBJECTIVE_NAMES,
+)
 from ekg.relations.pair_heads import (
     LINEAR_HEAD,
     PAIR_HEAD_CONFIG_FILE,
@@ -417,6 +422,14 @@ def main() -> int:
         "A bare float applies to all families (1.0 = plain inverse, 0.0 = off, 0.5 = middle), "
         "or per-family e.g. 'causal=0.7,temporal=0.25,subevent=0.5'.",
     )
+    parser.add_argument(
+        "--relation-objective",
+        choices=RELATION_OBJECTIVE_NAMES,
+        default=CROSS_ENTROPY_OBJECTIVE,
+        help="registered training objective. adaptive_threshold is the official "
+        "ATLOP loss with NONE as the pair-dependent threshold and requires "
+        "--weight-alpha 0.0",
+    )
     parser.add_argument("--max-distance", type=int, default=None, help="None = document-level")
     parser.add_argument(
         "--max-length", type=int, default=512, help="512 covers the longest sentence (322 tokens)"
@@ -514,6 +527,15 @@ def main() -> int:
     args = parser.parse_args()
     balance_components = validate_balance_components(args.balance_components)
 
+    objective_alpha = parse_weight_alpha(args.weight_alpha)
+    if args.relation_objective == ADAPTIVE_THRESHOLD_OBJECTIVE:
+        if objective_alpha != 0.0:
+            parser.error("adaptive_threshold requires --weight-alpha 0.0")
+        if args.pair_head != LINEAR_HEAD:
+            parser.error("adaptive_threshold requires the linear pair head")
+        if balance_components:
+            parser.error("adaptive_threshold cannot be mixed with balance components")
+
     if args.pair_head != LINEAR_HEAD and balance_components:
         parser.error("prototype pair heads cannot be mixed with work-point components")
 
@@ -570,6 +592,7 @@ def main() -> int:
             "head_lr": args.head_lr,
             "neg_ratio": "inf" if math.isinf(args.neg_ratio) else args.neg_ratio,
             "weight_alpha": args.weight_alpha,
+            "relation_objective": args.relation_objective,
             "max_distance": args.max_distance,
             "max_length": args.max_length,
             "warmup_steps": args.warmup_steps,
@@ -586,7 +609,6 @@ def main() -> int:
 
     # torch-only imports stay inside main so the data helpers above import on CPU.
     import torch
-    import torch.nn.functional as F
     from transformers import AutoModel, AutoTokenizer
 
     from ekg.relations.extractor.supervised import (
@@ -594,6 +616,7 @@ def main() -> int:
         distance_bucket,
         encode_trigger_reps,
     )
+    from ekg.relations.objective_registry import build_relation_objective
     from ekg.relations.pair_heads import build_pair_head
 
     # TIMEX nodes are required whenever temporal is scored: 39% of gold temporal
@@ -628,7 +651,7 @@ def main() -> int:
         args.max_distance,
         expand_event_relations=args.official_mention_expansion,
     )
-    alpha = parse_weight_alpha(args.weight_alpha)
+    alpha = objective_alpha
     weights = None if alpha == 0.0 else class_weights(rows, alpha)
     docs_by_id = {d.doc_id: d for d in docs}
     rows_by_doc: dict[str, list[PairExample]] = {}
@@ -721,6 +744,7 @@ def main() -> int:
     weight_tensors = (
         {f: torch.tensor(w, device=device) for f, w in weights.items()} if weights else {}
     )
+    relation_objective = build_relation_objective(args.relation_objective)
     risk_normalizer = (
         FamilyRiskNormalizer(selected_families)
         if NORMALIZED_RISK in balance_components
@@ -985,7 +1009,7 @@ def main() -> int:
                     family_logits[:, NONE_INDEX] += none_offsets[family][
                         position_ids_by_doc[doc_id]
                     ]
-                family_loss = F.cross_entropy(
+                family_loss = relation_objective(
                     family_logits,
                     target,
                     weight=weight_tensors.get(family),
