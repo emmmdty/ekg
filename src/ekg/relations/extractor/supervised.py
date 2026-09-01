@@ -31,6 +31,12 @@ from ekg.relations.extractor.base import (
     RelationExtractor,
     relation_extractors,
 )
+from ekg.relations.pair_heads import (
+    LINEAR_HEAD,
+    build_pair_head,
+    load_pair_head_config,
+    pair_head_factories,
+)
 from ekg.relations.pairs import candidate_pairs, mention_order
 
 __all__ = [
@@ -146,6 +152,7 @@ except ImportError:  # pragma: no cover - the local CPU path
 
 if TORCH_AVAILABLE:
 
+    @pair_head_factories.register(LINEAR_HEAD)
     class PairClassifier(nn.Module):
         """Per-family MLP head over the 4-way pair feature plus a distance embedding.
 
@@ -359,7 +366,12 @@ class SupervisedRelationExtractor(RelationExtractor):
         self._tokenizer = AutoTokenizer.from_pretrained(str(ckpt))
         self._encoder = AutoModel.from_pretrained(str(ckpt))
         counts = {fam: len(subs) for fam, subs in FAMILY_SUBTYPES.items()}
-        self._model = PairClassifier(self._encoder.config.hidden_size, counts)
+        head_config = load_pair_head_config(ckpt)
+        self._model = build_pair_head(
+            head_config["name"],
+            hidden_size=self._encoder.config.hidden_size,
+            subtype_counts=counts,
+        )
         self._model.load_state_dict(torch.load(heads_file, map_location="cpu"))
         self._active_families = checkpoint_active_families(ckpt)
         self._device = "cuda" if torch.cuda.is_available() else "cpu"

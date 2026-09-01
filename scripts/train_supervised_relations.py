@@ -2,8 +2,8 @@
 """Train the discriminative supervised relation extractor on MAVEN-ERE (server / CUDA).
 
 Builds pair-classification rows from gold mentions (`relations.pairs.pair_examples`),
-downsamples the dominant NONE class, and trains a RoBERTa encoder + per-family linear
-heads with class-weighted cross-entropy. Saves encoder, tokenizer and heads to
+downsamples the dominant NONE class, and trains a RoBERTa encoder plus a registered
+pair head with class-weighted cross-entropy. Saves encoder, tokenizer and head to
 `--output`, which `configs/relations/supervised.yaml` then loads.
 
 This is the *discriminative* trainer — not `train_relation_extractor.py`, which is
@@ -50,7 +50,18 @@ from ekg.relations.balance import validate_components as validate_balance_compon
 from ekg.relations.data.maven_ere import load_maven_ere
 from ekg.relations.extractor.supervised import FAMILY_SUBTYPES
 from ekg.relations.maven_ere_official import frozen_candidate_protocol, records_by_id
+from ekg.relations.pair_heads import (
+    LINEAR_HEAD,
+    PAIR_HEAD_CONFIG_FILE,
+    PAIR_HEAD_NAMES,
+    PROTOTYPE_DEPENDENCY_HEAD,
+    PROTOTYPE_HEAD,
+)
 from ekg.relations.pairs import POSITION_BUCKETS, PairExample, pair_examples
+from ekg.relations.prototype import (
+    prototype_dependency_matrix,
+    select_prototype_support,
+)
 
 # Official MAVEN-ERE marks unscoreable family/pair combinations with -100
 # (`joint/src/data.py::get_relation_labels`), which is also torch's default.
@@ -481,6 +492,12 @@ def main() -> int:
         help="relation heads included in loss and checkpoint selection",
     )
     parser.add_argument(
+        "--pair-head",
+        choices=PAIR_HEAD_NAMES,
+        default=LINEAR_HEAD,
+        help="registered pair-scoring geometry; prototype arms use train-only support",
+    )
+    parser.add_argument(
         "--balance-components",
         nargs="*",
         default=[],
@@ -496,6 +513,9 @@ def main() -> int:
     )
     args = parser.parse_args()
     balance_components = validate_balance_components(args.balance_components)
+
+    if args.pair_head != LINEAR_HEAD and balance_components:
+        parser.error("prototype pair heads cannot be mixed with work-point components")
 
     if bool(args.train_manifest) != bool(args.dev_manifest):
         parser.error("--train-manifest and --dev-manifest must be provided together")
@@ -558,6 +578,7 @@ def main() -> int:
             "seed": args.seed,
             "official_mention_expansion": args.official_mention_expansion,
             "families": list(selected_families),
+            "pair_head": args.pair_head,
             "balance_components": list(balance_components),
         },
     }
@@ -569,11 +590,11 @@ def main() -> int:
     from transformers import AutoModel, AutoTokenizer
 
     from ekg.relations.extractor.supervised import (
-        PairClassifier,
         _pair_features,
         distance_bucket,
         encode_trigger_reps,
     )
+    from ekg.relations.pair_heads import build_pair_head
 
     # TIMEX nodes are required whenever temporal is scored: 39% of gold temporal
     # relations have a TIMEX endpoint and are otherwise unrepresentable.
@@ -631,7 +652,72 @@ def main() -> int:
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     encoder = AutoModel.from_pretrained(args.model).to(device)
     counts = {fam: len(subs) for fam, subs in FAMILY_SUBTYPES.items()}
-    heads = PairClassifier(encoder.config.hidden_size, counts).to(device)
+    heads = build_pair_head(
+        args.pair_head,
+        hidden_size=encoder.config.hidden_size,
+        subtype_counts=counts,
+    ).to(device)
+    prototype_families = tuple(counts)
+    if args.pair_head == PROTOTYPE_DEPENDENCY_HEAD:
+        heads.set_dependency(
+            prototype_dependency_matrix(
+                train_rows_full,
+                FAMILY_SUBTYPES,
+                prototype_families,
+            )
+        )
+
+    if args.pair_head in {PROTOTYPE_HEAD, PROTOTYPE_DEPENDENCY_HEAD}:
+        assignments = select_prototype_support(
+            train_rows_full,
+            FAMILY_SUBTYPES,
+            prototype_families,
+            seed=args.seed,
+        )
+        row_by_key = {
+            (row.doc_id, row.head_id, row.tail_id): row for row in train_rows_full
+        }
+        selected_by_doc: dict[str, list[PairExample]] = {}
+        for key in assignments:
+            selected_by_doc.setdefault(key[0], []).append(row_by_key[key])
+        support: dict[str, list[list[torch.Tensor]]] = {
+            family: [[] for _ in FAMILY_SUBTYPES[family]]
+            for family in prototype_families
+        }
+        encoder.eval()
+        heads.eval()
+        with torch.no_grad():
+            for doc_id, doc_rows in selected_by_doc.items():
+                doc = docs_by_id[doc_id]
+                embs = encode_trigger_reps(
+                    encoder, tokenizer, doc.nodes, doc.doc_text, args.max_length, device
+                )
+                pair_features = _pair_features(
+                    torch.stack([embs[row.head_id] for row in doc_rows]),
+                    torch.stack([embs[row.tail_id] for row in doc_rows]),
+                )
+                dist_ids = torch.tensor(
+                    [distance_bucket(row.distance) for row in doc_rows], device=device
+                )
+                projected = heads.project(pair_features, dist_ids)
+                for row, embedding in zip(doc_rows, projected, strict=True):
+                    key = (row.doc_id, row.head_id, row.tail_id)
+                    for family, label in assignments[key]:
+                        support[family][label].append(embedding)
+        initializers = {
+            family: torch.stack(
+                [torch.stack(items).mean(dim=0) for items in support[family]]
+            )
+            for family in prototype_families
+        }
+        heads.set_prototypes(initializers)
+        encoder.train()
+        heads.train()
+        shown = {
+            family: [len(items) for items in support[family]]
+            for family in prototype_families
+        }
+        print(f"[train] prototype support per class: {shown}", flush=True)
     weight_tensors = (
         {f: torch.tensor(w, device=device) for f, w in weights.items()} if weights else {}
     )
@@ -711,6 +797,18 @@ def main() -> int:
         encoder.save_pretrained(args.output)
         tokenizer.save_pretrained(args.output)
         torch.save(heads.state_dict(), args.output / "heads.pt")
+        (args.output / PAIR_HEAD_CONFIG_FILE).write_text(
+            json.dumps(
+                {
+                    "schema_version": "ekg.relation_pair_head.v1",
+                    "name": args.pair_head,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
         # The mechanism lives in the objective, so inference needs nothing from
         # it -- but the checkpoint still has to say what it was trained under, or
         # an arm can be mistaken for the control after the fact.
