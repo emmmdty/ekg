@@ -1,7 +1,7 @@
-# EKG v4 · GPU 服务器运行手册
+# EKG v6 · GPU 服务器运行手册
 
 > 适用于 `gpu-4090:/data/TJK/ekg`（主）与 `gpu-5090:/mnt/aidata/tongjiakai/ekg`（备，**每次使用须用户
-> 许可**）。只覆盖 v4 主线与仍在主干的 Ch4 可靠性模块。旧 temporal GNN、RE-GCN、Path-RL、hybrid
+> 许可**）。只覆盖 v6 主线与仍需复现的 Ch4 基线。旧 temporal GNN、RE-GCN、Path-RL、hybrid
 > 命令已失效；复现需从 tag `frozen-tkg-line` 单独建工作区，**不得在当前主干照抄旧命令**。
 > 代码/数据同步的权威是 [`PIPELINE.md`](PIPELINE.md)（代码走 git、产物走 scp）。
 
@@ -82,17 +82,16 @@ ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
 - ⛔ 仍然**不许 `uv sync`**（见 §0）；升级只用 `uv pip install <包>`（只加不减）+ 显式 `uninstall`。
 - **vllm 必须卸**：它硬 pin 精确 torch，0.10.2 起还要 `transformers>=4.55.2`，**没有任何版本能与
   torch 2.8.0 + transformers 4.53.3 共存**（4.53.3 正是写出 Phase A checkpoint 的版本）。
-  `pyproject.toml` 的 `serve` extra 已随之移除；v4 四章无一依赖 vLLM。
+  `pyproject.toml` 的 `serve` extra 已随之移除；v6 四章无一依赖 vLLM。
 - ⚠️ **torchvision/torchaudio 的 ABI 坑（实际踩过）**：只换 torch 会留下为旧 torch 编译的
   `torchvision 0.21.0` / `torchaudio 2.6.0`，导入即报 `operator torchvision::nms does not exist` /
   `undefined symbol: _ZNK5torch8autograd4Node4nameEv`。**要命的是它不会直接报错退出**——`peft`
   在 `constants.py` 里 `from transformers import BloomPreTrainedModel`，transformers 的 lazy
   `__getattr__` 因 torchvision 崩溃而把它报成 `ModuleNotFoundError`，最终表现为
   **10 个测试静默降级成 `SKIPPED: needs torch`**（252 passed → 242 passed，而 `import torch` 和
-  GPU 实算都正常）。v4 不用视觉/音频栈，直接卸掉即可，5090 本来就没装。
-- **验证必须看 pytest 计数，不能只看 `import torch` 成功**：升级后 4090 = `254 passed / 1 skipped`、
-  ruff 0、`ekg-smoke` OK，`cap (8,9)` 上真实 matmul 通过。5090 = `252 passed / 3 skipped`
-  （多出的 2 个 skip 是 `ESCSubWoRe.npy` 未传，非回归；两端 total 都是 255）。
+  GPU 实算都正常）。v6 不用视觉/音频栈，直接卸掉即可，5090 本来就没装。
+- **验证必须运行完整 pytest、ruff、`ekg-smoke` 和真实 CUDA probe，不能只看 `import torch` 成功**。
+  测试数量会随代码变化；回归判断比较同一端改动前后的结果，不使用历史固定计数。
 - 回滚：`uv pip install --python .venv/bin/python torch==2.6.0`（cu124 index），vllm 0.8.5 另装。
 
 ## 2. 环境
@@ -167,65 +166,19 @@ ssh gpu-5090 'bash -lc "cd /mnt/aidata/tongjiakai/ekg && git fetch origin && git
 - 长任务用 `nohup` / `screen -dmS` + `python -u`，日志重定向 `logs/`，**不得用前台 SSH 承载长任务**。
 - 报数如实：升降都报；ssh/工具失败不得伪装成被观察对象的结论。
 
-## 5. v4 GPU 路线
+## 5. v6 当前任务入口
 
-| Phase | GPU | 当前可运行性 | 远端产物 |
-|---|---|---|---|
-| A 判别式关系抽取 | 重 | ✅ 已达标，checkpoint 在位 | `runs/relations/supervised_maven` + `pair_eval_FINAL.json` |
-| B 一致性/修复/风控 | 轻 | ✅ 只差产 dump（见 §6）；修复/CRC 全在本地 CPU | `runs/relations/supervised_dump.jsonl` |
-| C 规范节点 | 轻 | ⬜ 依赖 MAVEN-Arg loader/模型实现 | `runs/nodes/*.json` |
-| D 事实性/净化 | 轻 | ⬜ MAVEN-FACT 数据就位，代码未实现 | `runs/factuality/*.json` |
-| E 闭环/三图传播 | 重 | 🟡 SeDGPL 可复用；真实闭环依赖 A/B/C/D | `runs/cgep/*closedloop*.json` |
-| H 多种子 | 重 | ⬜ 只在 A–F 主结果稳定后执行 | 各主表 seed 13/17/42 |
+本手册不再复制“当前队首命令”。唯一活动阶段及其准确命令只从
+[`phases/README.md`](phases/README.md)、[`HANDOFF.md`](HANDOFF.md) 和对应 phase 契约读取，避免旧命令在
+阶段切换后继续被执行。开始 GPU 任务前必须依次确认：
 
-新 phase 的命令必须从实际 CLI `--help` 与配置生成，不能照抄旧命令。
+1. 本地三件套全绿；
+2. 当前 phase、P1 可信根、manifest、候选全集和 evaluator identity 一致；
+3. 展示准确命令、远端工作目录和预期产物；
+4. 4090 原子核卡，或取得本次 5090 授权；
+5. 使用 `.venv/bin/python -u` 启动并把日志写入 `logs/`。
 
-## 6. 当前队首命令：Phase B 真实图 dump
-
-卡空闲时——**4090**（`<card>` 优先 1、跳 3）：
-
-```bash
-cd /data/TJK/ekg
-CUDA_VISIBLE_DEVICES=<card> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
-  .venv/bin/python -u scripts/evaluate_relations.py \
-  --config configs/relations/supervised_dump.yaml \
-  --dump-predictions runs/relations/supervised_dump.jsonl \
-  --output runs/relations/supervised_dump_metrics.json \
-  > logs/phaseB_dump.log 2>&1
-```
-
-**5090**（单卡，须用户许可后再跑）——只有根路径和卡号不同：
-
-```bash
-cd /mnt/aidata/tongjiakai/ekg
-CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
-  .venv/bin/python -u scripts/evaluate_relations.py \
-  --config configs/relations/supervised_dump.yaml \
-  --dump-predictions runs/relations/supervised_dump.jsonl \
-  --output runs/relations/supervised_dump_metrics.json \
-  > logs/phaseB_dump.log 2>&1
-```
-
-两端跑前都要确认 `runs/relations/supervised_maven`（checkpoint，481M）与
-`data/processed/maven_ere/valid.jsonl`（710 篇）在位——它们不在 git 里，换机器必须 scp/rsync 过去
-（**两台服务器之间不能直连，经本地中转**）。
-
-卡忙时可用服务器端待机脚本（等空卡**自动开跑**，288×5min≈24h 窗口）——
-**当前状态：已修好并验证可用，但按作者指示处于停止态**（`status` 末行 `STOPPED-BY-USER`）。
-它会在无人值守时启动 GPU 任务，**只在你确实想要无人值守跑的时候才起**：
-
-```bash
-ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && nohup bash runs/phaseB_dump_wait.sh >/dev/null 2>&1 &"'
-ssh gpu-4090 'tail -3 /data/TJK/ekg/runs/relations/phaseB_dump.status'   # 轮询进度
-```
-
-`status` 末行读法：`DONE rc=0 dump_lines=NNN` = 成功；`DONE rc≠0` = 读 `logs/phaseB_dump.log`；
-`TIMEOUT` / `STOPPED-BY-USER` / 进程已死 = 没抢到卡，按需重起。
-
-⚠️ **停它要按三态判活**：脚本卡在 `sleep 300`，SIGTERM 被 bash 挂起到 sleep 返回才生效，kill 后仍会
-再写 1–2 条 `WAIT`。判死的决定性依据是 **`status` 文件是否还在按 5min 增长**，不是单次 `pgrep`。
-
-## 7. 仍可复现的 Ch4 基线
+## 6. 仍可复现的 Ch4 历史基线
 
 ```bash
 cd /data/TJK/ekg
@@ -237,7 +190,7 @@ CUDA_VISIBLE_DEVICES=<空卡> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
 
 单折 10ep ≈ 2.5h。仅复现既有 Ch4 基线，**不代表 Phase E 闭环完成**。
 
-## 8. 监控与结束判定
+## 7. 监控与结束判定
 
 - 进程：用不会匹配探针自身的模式，如 `pgrep -af '[e]valuate_relations'`。
 - 显存：`nvidia-smi`；**进程与显存同时符合预期**才判 ALIVE。
@@ -245,7 +198,10 @@ CUDA_VISIBLE_DEVICES=<空卡> HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
 - 结束：成功 SSH 确认进程 GONE → 查退出码与产物完整性；**文件存在不等于训练成功**。
 - 回传：指标 JSON、必要日志、manifest 定向 scp；checkpoint 只在明确需要时传。
 
-## checkpoint 留存策略（2026-08-06 作者改）
+## 历史 checkpoint 留存记录（不得作为当前选模入口）
+
+下表只回答旧档存放位置。当前 phase 使用哪些 checkpoint，必须以 phase 契约、HANDOFF 和 stage bundle
+身份为准，不能根据“曾经最好”或“曾经现役”的措辞选择模型。
 
 **训在哪就留在哪，不强制回传；要跨机搬运先问用户。**
 原策略是「4090 是主力，所有 checkpoint 必须回传 4090」（2026-07-30 定）。2026-08-06 4090 的
@@ -261,7 +217,7 @@ CodaLab 提交先跑了一版词形兜底档。所以放弃回传不等于放弃
 
 | checkpoint | 在哪 | 说明 |
 |---|---|---|
-| `runs/relations/supervised_maven`（Phase A 系统档） | 4090 + 5090 | 现役对照档 |
+| `runs/relations/supervised_maven`（Phase A 系统档） | 4090 + 5090 | v4/v5 历史对照档 |
 | `runs/factuality/struct_best`·`supervised_6ep`（Phase D） | 4090 | 4090 恢复前取不到 |
 | `runs/cgep/ch4_sedgpl.pt`（Phase E，1.5G） | 4090 | 同上 |
 | `runs/nodes/coref_supervised_6ep`（Phase C 系统档） | 4090 + 5090 | 2026-07-30 已回传，sha256 三端一致 |
@@ -270,7 +226,7 @@ CodaLab 提交先跑了一版词形兜底档。所以放弃回传不等于放弃
 | `runs/relations/neg30_arch_6ep`（A2 新架构·现役配方） | 5090 | 2026-08-06 训；架构证伪的对照档，causal 24.06 |
 | `runs/relations/neg30_window_6ep`（**文档窗口编码**） | 5090 | 2026-08-07 训；causal 26.95 / temporal 28.40 |
 | `runs/relations/neg30_window_dist_6ep`（窗口+距离流） | 5090 | 2026-08-07 训；causal **27.60** / temporal 28.59；subevent −0.71 |
-| `runs/relations/window_dist_20ep_macro`（**当前最好**） | 5090 | 2026-08-07；+macro 选择信号 ⇒ causal **28.50** / temporal 31.55 / subevent 21.05 |
+| `runs/relations/window_dist_20ep_macro`（v5 当时最好） | 5090 | 2026-08-07；+macro 选择信号 ⇒ causal **28.50** / temporal 31.55 / subevent 21.05 |
 | `runs/relations/window_dist_20ep_officiallr` | 5090 | 2026-08-07；micro 选择 ⇒ causal 28.20 / temporal 32.43；subevent 19.65（被 temporal 主导） |
 | `runs/relations/ABORTED_20ep_nowarmup` | 5090 | ⚠️ 漏配 warmup 的作废跑，**别用**（恒定 lr，峰值卡在 epoch 0） |
 | `coref_large`·`coref_longformer`·`coref_*_diverged_*`（换底座失败档 / 发散档） | 5090 | **不搬**：数字已在 `docs/results/PHASE_C.md`，权重无复现价值 |

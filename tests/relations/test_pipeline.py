@@ -7,7 +7,7 @@ import pytest
 from ekg.core.eval import consistency_report
 from ekg.core.io import load_event_nodes
 from ekg.core.schema import EventGraph, EventNode, RelationEdge, RelationType
-from ekg.relations import RelationPipeline
+from ekg.relations import RelationPipeline, RelationPipelineConfig
 from ekg.relations.consistency import GreedyConsistencySolver, consistency_solvers
 from ekg.relations.extractor.heuristic import HeuristicRelationExtractor
 
@@ -74,6 +74,11 @@ def test_heuristic_pipeline_builds_consistent_graph(fixtures_dir) -> None:
     # The greedy solver must leave no causal/temporal cycles.
     assert report["causal_cyclic_scc"] == 0.0
     assert report["temporal_cyclic_scc"] == 0.0
+
+
+def test_single_pipeline_rejects_multiagent_config() -> None:
+    with pytest.raises(ValueError, match="does not support relations.mode='multi_agent'"):
+        RelationPipelineConfig.from_dict({"relations": {"mode": "multi_agent"}})
 
 
 def test_greedy_solver_breaks_injected_causal_cycle() -> None:

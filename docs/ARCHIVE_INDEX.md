@@ -8,7 +8,7 @@ git 历史中最后一次含正文的提交是 `3390363`，可用 `git show 3390
 
 | 备份子目录 | 内容 |
 |---|---|
-| `phase_contracts_20260807/` | **v4 时代的六份 phase 契约**（A/B/C/D/E/F）；2026-08-07 v5 章节重设时归档 —— 已完成或已止损，**实测数字全部留在 `docs/results/`**，契约本身只是当时的一次性执行材料。新契约见 `docs/phases/`（A2 / C3 / D2 / E2） |
+| `phase_contracts_20260807/` | **v4 时代的六份 phase 契约**（A/B/C/D/E/F）；已完成或止损，实测数字仍在 `docs/results/`。 |
 | `rl_line_20260729/` | **生成式抽取 + RL 线整条**（见下） |
 | `phase_handoffs_20260729/` | Phase B/C/D/E 的四份交接稿（682 行）；实测数字已进 `docs/results/`，交接稿只是当时的一次性冷启动材料 |
 | `docs_archive/` | 下表全部 `.md` + `specs/`（三份历史设计稿） |
@@ -28,6 +28,10 @@ git 历史中最后一次含正文的提交是 `3390363`，可用 `git show 3390
 | `SARGE_RESULTS_SNAPSHOT.md` | SARGE 主结果数字快照 + 源仓与取回路径；2026-07-27 从主干移除时留档。 |
 | `PHASE_G_financial_layer.md` | 旧 Phase G（金融应用验证层）契约。四章无一依赖，题目本无「金融」→ 整体移除。 |
 | `phase_contracts_20260807/PHASE_{A,B,C,D,E,F}_*.md` | **v4 六份 phase 契约**，2026-08-07 v5 重设时归档。A/C/E 已完成；**B/D 的机制线止损**（一致解码修复、事实性净化在下游均为构造性零，含 oracle 档）；F 并入 E2。后续动作分别并入 **A2 / C3 / D2 / E2**。⚠️ 取回前先读 `TODO.md`——这六份里的对标口径部分已过时。 |
+| `docs/phases/PHASE_{A2,C2,C3,D2,E2,H}_*.md` | v5 契约，已被 v6 的 A3/D3/C4/E3/H2 取代并从活动目录移除。清理前精确快照为 Git commit `f8f1c9ee99eee8951c99d01a3b3b32fea615c2d2`；历史结果仍以 `docs/results/` 为准。 |
+| `docs/CODALAB.md` | MAVEN-ERE CodaLab 通道关闭后的提交手册；从 commit `f8f1c9ee99eee8951c99d01a3b3b32fea615c2d2` 取回，不再作为活动操作入口。 |
+| `docs/replan/HANDOFF.md`、`DEEP_RESEARCH_PROMPTS.md`、`DR_*_PROMPT.md` | v6 重审过程的一次性交接和网页研究提示词；从 commit `f8f1c9ee99eee8951c99d01a3b3b32fea615c2d2` 取回。审计结论已保留在 `docs/replan/*_audit.md`、`SYNTHESIS_DECISION.md` 与当前 `SPEC/HANDOFF`。 |
+| `scripts/evaluate_cgep_{cross_stage,selective}.py`、`profile_cgep_step.py`、`recompute_relation_metrics.py`、`convert_ccks_tianchi.py` | 无活动文档或调用方的一次性 v4 入口；其中关系重算脚本不是 v6 官方 evaluator，CCKS 转换又与统一预处理器重复。从 commit `f8f1c9ee99eee8951c99d01a3b3b32fea615c2d2` 取回。底层受测统计原语和历史结果未删除。 |
 | `specs/` | 三份历史设计稿（2026-06-16 评测口径 · 2026-07-17 结构感知编码 · 2026-07-20 四章重设）。 |
 
 ## 生成式抽取 + RL 线（2026-07-29 移出，`rl_line_20260729/`）
@@ -43,8 +47,9 @@ git 历史中最后一次含正文的提交是 `3390363`，可用 `git show 3390
 
 **为何移出**：四章无一依赖。Phase A 的判别式抽取器已取代生成式那条线（生成式探针 causal 召回
 **0.4%**、subevent **0%**，判别式做到 67.5%/88.1%），SPEC §5 又表明「结构作 RLVR 奖励」是红海。
-留在仓内只增加检索面与上下文污染。**`relations/extractor/llm.py` 保留**（仍在 registry 里、被
-`llm_*` 配置与多智能体档使用）。
+留在仓内只增加检索面与上下文污染。**`relations/extractor/llm.py` 保留**（仍在 registry 里并被
+`llm_*` 历史兼容配置使用）。旧 multi-agent YAML 因未接入正式评测入口而移除；多智能体实现只保留
+直接 API、测试和 smoke，不得冒充 v6 实验方法。
 
 ## 时间线
 

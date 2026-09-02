@@ -20,6 +20,11 @@ DATA_ROOT = REPO_ROOT / "data"
 RAW_ROOT = DATA_ROOT / "raw"
 PROCESSED_ROOT = DATA_ROOT / "processed"
 
+CURRENT_DATASETS = frozenset({"maven_ere", "maven_arg", "maven_fact"})
+LEGACY_DATASETS = frozenset(
+    {"modafact", "it_happened", "docee", "ccks_fin_causal", "icews14", "findkg"}
+)
+
 RAW_ALIASES = {
     "maven_ere": ("maven_ere", "MAVEN_ERE"),
     "ccks_fin_causal": ("ccks_fin_causal", "tianchi_event_relaiton_train_eval"),
@@ -582,14 +587,20 @@ def main() -> int:
     parser.add_argument(
         "--only",
         nargs="*",
-        help="run only these dataset preparers (default: all), e.g. --only maven_arg maven_fact",
+        help=(
+            "run only these preparers; default: the current v6 MAVEN suite. "
+            "Legacy datasets must be named explicitly"
+        ),
     )
     args = parser.parse_args()
 
-    only = set(args.only or [])
+    selected = set(args.only) if args.only else set(CURRENT_DATASETS)
+    unknown = selected - CURRENT_DATASETS - LEGACY_DATASETS
+    if unknown:
+        parser.error(f"unknown datasets: {', '.join(sorted(unknown))}")
 
     def want(name: str) -> bool:
-        return not only or name in only
+        return name in selected
 
     print("── MAVEN suite (node / relation / factuality, same 4480 docs) ─")
     if want("maven_ere"):

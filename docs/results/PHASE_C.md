@@ -219,7 +219,8 @@ coref loss .2036→**.1056**、detector loss .2369→**.1507**（均未平台，
 - **应以 77.47 为准**：全量、官方评测器、无自定校正，口径最干净；79.6 是子集 + 人群校正的内部数。
 - 与官方基线的差距 **−3.9 MUC**（对 test 数），B³/CEAFe **几乎持平**（−0.6）。
 - 缺口仍全在 **MUC recall**（82.56 vs 84.0），与此前结论一致。
-- ⚠️ 我们 valid、官方 test，仍非同 split；CodaLab 已关，见 [`PHASE_A2`](../phases/PHASE_A2_ch2_official_recipe.md)。
+- ⚠️ 我们 valid、官方 test，仍非同 split；CodaLab 已关闭，历史协议说明见
+  [`ARCHIVE_INDEX`](../ARCHIVE_INDEX.md)。
 - 📌 **checkpoint 已于 2026-07-30 回传 4090**（`runs/nodes/coref_supervised_6ep`，sha256 `3cf5b7c4…`），
   三端字节数与 sha256 一致。
 

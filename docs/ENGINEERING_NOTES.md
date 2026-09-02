@@ -6,21 +6,24 @@
 ## GPU / 服务器运维
 
 - **card 3 故障**，需 NVML shim：`CUDA_DEVICE_ORDER=PCI_BUS_ID LD_LIBRARY_PATH=/data/TJK/ekg/nvmlshim:$LD_LIBRARY_PATH`。card 0/2 常被用户 `Zhyw` 抢，**优先 card 1**。
-- **tmux/screen 不在非交互 ssh 的 PATH**。起任务用 `bash -lc` + 绝对 uv 路径 `/home/TJK/.local/bin/uv` + `nohup` 或 `screen -dmS`。screen v4.09 可用。
-- **`uv run` 约 1 分钟才真正占显存**。发射后轮询 VRAM 爬升（>1GiB）再判「真在训」，别立刻判死。
-- **起长训练前原子 `nvidia-smi` 核卡，且检查结果不能隔着一次启动复用**（检查后卡可能被别人占，探针必 OOM）。**GPU 使用无需逐次点头**（作者授权），但不挤占他人正在跑的卡。
+- **tmux/screen 不在非交互 ssh 的 PATH**。起任务用 `bash -lc` + 项目 `.venv/bin/python -u` +
+  `setsid nohup` 或 `screen -dmS`；服务器禁止 `uv run`/`uv sync`。
+- **发射后不要立刻判死**。轮询进程与 VRAM 爬升（>1GiB），两者同时符合预期才判 ALIVE。
+- **起长训练前原子 `nvidia-smi` 核卡，且检查结果不能隔着一次启动复用**。4090 有空可用，5090
+  每次必须取得作者许可；两端都不得挤占他人任务。
 - **ssh 间歇性掉线**：`kex_exchange_identification: Connection reset`（gateway 限速，重试可过）/ cpolar 隧道 `Connection refused`（服务器侧隧道后端没起，客户端无解）。→ **三态判活**（ALIVE / GONE / ssh 失败），**只有成功 ssh 读到进程 GONE 才算训练结束**；ssh/工具失败**绝不**当作被观察对象（训练）的结论。
 - **`pgrep -af <pat>` 会匹配探针自身命令行**（命令里含该字符串）。用 `[e]valuate_cgep` 括号技巧或核对 PID。
-- **服务器不是 git 仓库**（本地是）。同步用 `scp`/`rsync` **指定文件** + `sha256sum` 双端核。**别跑 `rsync --delete`**（会删 remote-only 的 `runs/`、`nvmlshim/`、`scripts/nvml_hide_faulted_gpu.so`）。远端产物在 `/data/TJK/ekg/runs`。
+- **代码走 Git，数据和产物走 `scp`/`rsync` + `sha256sum` 双端核**。禁止 `rsync --delete` 和
+  远端 `git clean -fdx`，它们会删除 remote-only 的 `runs/`、`data/`、`nvmlshim/` 等产物。
 
 ## 数据
 
-- **v4 主数据状态以 `DATASET_SURVEY.md` + `data/raw/DATA_PROVENANCE.md` 为准**。MAVEN-FACT
-  train/valid 已就位；MATRES/RAMS/WikiEvents/ECB+ 目前只有 raw，未生成项目 processed 输出。
+- **v6 主数据与切分以 `DATASETS.md`、`SPEC.md` 和当前 phase 为准**。`DATASET_SURVEY.md` 只是 v4
+  资产快照，不能据此启动扩展数据实验。
 - **MAVEN 版 SeDGPL 数据未发布**（只发 `ESCSubWoRe.npy`）→ 论文 CGEP-MAVEN **27.9 不可比**；主表以自跑 SeDGPL 为准。
 - **ESC 必须 topic 交叉验证**；文档级切分泄漏同 topic 故事（SeDGPL 公开 19.6 就是泄漏值）。
 - **ICEWS/FinDKG 只属冻结 TKG 线**；从 tag 复现时保持 release split，ICEWS 用 timestamps
-  **计数切分**，结果不得混入 v4 主表。
+  **计数切分**，结果不得混入 v6 主表。
 - **CGEP 词表须 transductive**（覆盖 train+test 的 `<a_i>` token；否则测试全编码失败）。只 token 清单跨切分，无标签/图/梯度泄漏。
 - **MAVEN 触发词粘标点（`died.`）/ 大小写不一（`revolution`）** → `token_span` 加「标点+大小写」两级兜底；ESC 有不连续 mention（`keep a hold on`）→ 复刻 `doCorrect` 加宽为连续 span。
 - **外部 pickle `ESCSubWoRe.npy` 必须用 `succession.data.esc.load_npy_object` 白名单加载**（安全）。
@@ -51,7 +54,7 @@
   transformers 的 lazy `__getattr__` 把下游崩溃统一报成 `ModuleNotFoundError`，最终表现是
   **10 个测试静默降级成 `SKIPPED: needs torch`**（252→242 passed），而 `import torch`、
   `torch.cuda.is_available()`、GPU 实算**全部正常**——只看 import 会漏判。
-  **判据永远是 pytest 计数**，不是 `import torch` 成功。v4 不用视觉/音频栈，直接卸。
+  **判据永远是 pytest 结果**，不是 `import torch` 成功。当前主线不用视觉/音频栈，直接卸。
 - **一致性诊断枚举简单环 = 稠密图上炸内存**（2026-07-28，Phase B 首跑真实 dump 时暴露）：
   `find_cycles` 用 `nx.simple_cycles` 把**所有**简单环物化成 list，而两个调用方
   （`temporal/causal cycle count`）只用了 `len()`。简单环数随密度**超指数**增长——完全有向图
@@ -141,10 +144,9 @@
 
 ## 纪律（硬约束）
 
-- 主干验证：本地 `uv run pytest` = **354 passed / 12 skipped**（2026-08-07；skip 均为本地
-  无 torch 的神经门控测试）；`uv run ruff check src tests scripts` **0 error（≤100 列）**；
-  `ekg-smoke` 通过。测试计数随旧线移出主干与新测试加入而变化，**不得拿旧计数
-  （239/11、241/12、269/12、342/12）判断当前回归**——比的是「改动前后」，不是某个固定数。
+- 主干验证以当前分支改动前后的结果对比为准：`uv run pytest`、
+  `uv run ruff check src tests scripts`、`uv run ekg-smoke` 必须全绿。测试数量会变化，不能拿历史固定
+  计数判断当前回归。
 - 包/函数名**不得含 `ch1/ch2/ch3`**；新组件走 registry + lazy import；GPU 组件配 CPU 缓存回放。
 - **`EventNode` schema 零新增字段**（扩展用 `metadata`）；`CgepNode` 可加字段。
 - 不可改的测试锁：`tests/core/test_propagation.py`。

@@ -51,7 +51,7 @@ llm = [
     "bitsandbytes>=0.43",
     "datasets>=2.19,<4",
 ]
-# gnn = compatibility/future graph-model stack (server only). No current v4
+# gnn = compatibility/future graph-model stack (server only). No current v6
 # headline experiment should require it unless its phase contract says so.
 gnn = [
     "torch==2.8.0",
@@ -59,7 +59,7 @@ gnn = [
 ]
 # NOTE: the `serve` (vllm) and `rl` (trl/GRPO) extras were removed -- vllm on
 # 2026-07-27 with the move to the cu128 stack, trl on 2026-07-29 when the whole
-# generative extraction line was archived (docs/ARCHIVE_INDEX.md). No v4 chapter
+# generative extraction line was archived (docs/ARCHIVE_INDEX.md). No v6 chapter
 # needs either. If one is ever needed again, build a separate venv rather than
 # bending this stack: vllm hard-pins an exact torch and wants transformers>=4.55,
 # which cannot coexist with the 4.53.3 that wrote the Phase A checkpoint.
@@ -76,8 +76,8 @@ ekg-smoke = "ekg.cli:run_smoke"
 # uv configuration
 # ---------------------------------------------------------------------------
 [tool.uv]
-# Local dev installs only `core + dev` (no torch). On the server run:
-#   uv sync --extra llm --extra gnn --extra serve
+# Local development installs only `core + dev` (no torch). Server environments are
+# pre-provisioned; do not run `uv sync` or `uv run` there (see docs/GPU_RUNBOOK.md).
 default-groups = []
 
 # Default index = Tsinghua TUNA mirror (fast/reliable in CN). Override per-machine

@@ -96,15 +96,8 @@ uv run ekg-smoke
 启动任何远端 GPU 命令前，必须先向作者展示命令、工作目录和预期产物；4090 空闲可用，5090 每次单独
 授权。服务器使用 `.venv/bin/python`，不得运行 `uv run`/`uv sync`。
 
-## 被取代的 v5 契约
+## 被取代的契约
 
-下列文件保留历史推导，但文件头必须标记 `SUPERSEDED`，不得执行：
-
-- `PHASE_A2_ch2_official_recipe.md`：复现修正与方法贡献混在一起；
-- `PHASE_C3_ch1_asymmetric_cost.md`：非对称方向已被错误剖析推翻；
-- `PHASE_D2_ch3_cross_dataset.md`：把跨 split 分数误写成已过线；
-- `PHASE_E2_ch4_consumer_dependence.md`：不同语料/backbone 不能支持微调因果解释；
-- `PHASE_C2_ch1_crossdoc.md`：可选泛化，不在关键路径；
-- `PHASE_H_robustness_novelty.md`：由 H2 在主线稳定后重建。
-
-历史实测不因契约被取代而作废，仍以 [`../results/`](../results/README.md) 为准。
+v5 的 A2/C2/C3/D2/E2/H 契约已从活动目录移除，避免文件名被误认为待执行任务。移除清单和精确 Git
+取回点见 [`../ARCHIVE_INDEX.md`](../ARCHIVE_INDEX.md)。历史实测不因契约归档而作废，仍只以
+[`../results/`](../results/README.md) 为准。

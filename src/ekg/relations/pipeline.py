@@ -49,6 +49,12 @@ class RelationPipelineConfig:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> RelationPipelineConfig:
         section = data.get("relations", data)
+        mode = section.get("mode")
+        if mode not in (None, "single"):
+            raise ValueError(
+                f"RelationPipeline does not support relations.mode={mode!r}; "
+                "construct the matching pipeline explicitly"
+            )
         return cls(
             extractor=section.get("extractor", "heuristic"),
             extractor_kwargs=section.get("extractor_kwargs", {}),
