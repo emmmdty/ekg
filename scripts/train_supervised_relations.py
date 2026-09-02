@@ -382,6 +382,27 @@ def parse_weight_alpha(spec: str) -> float | dict[str, float]:
     return parsed
 
 
+def parse_family_loss_rates(spec: str) -> dict[str, float]:
+    """Parse one positive loss multiplier for every relation family."""
+    items = [item.split("=", 1) for item in spec.split(",")]
+    if any(len(item) != 2 for item in items):
+        raise ValueError("--family-loss-rates entries must use family=value")
+    per = dict(items)
+    if len(per) != len(items):
+        raise ValueError("--family-loss-rates contains a duplicate family")
+    missing = set(FAMILY_SUBTYPES) - per.keys()
+    extra = set(per) - set(FAMILY_SUBTYPES)
+    if missing or extra:
+        raise ValueError(
+            f"--family-loss-rates must name exactly {sorted(FAMILY_SUBTYPES)}; "
+            f"missing={sorted(missing)} unknown={sorted(extra)}"
+        )
+    rates = {family: float(per[family]) for family in FAMILY_SUBTYPES}
+    if any(rate <= 0.0 for rate in rates.values()):
+        raise ValueError("--family-loss-rates values must all be positive")
+    return rates
+
+
 def validate_confirmation_families(families: list[str]) -> tuple[str, ...]:
     """A3's frozen candidate protocol covers all three relation families.
 
@@ -505,6 +526,23 @@ def main() -> int:
         help="relation heads included in loss and checkpoint selection",
     )
     parser.add_argument(
+        "--family-loss-rates",
+        default="temporal=1,causal=1,subevent=1",
+        help="positive per-family loss multipliers; official joint recipe uses "
+             "temporal=2,causal=4,subevent=4",
+    )
+    parser.add_argument(
+        "--save-best-by-family",
+        action="store_true",
+        help="also retain the encoder+heads snapshot that maximizes each family's dev F1",
+    )
+    parser.add_argument(
+        "--coref-aux-rate",
+        type=float,
+        default=0.0,
+        help="auxiliary coreference loss multiplier; official joint recipe uses 0.4",
+    )
+    parser.add_argument(
         "--pair-head",
         choices=PAIR_HEAD_NAMES,
         default=LINEAR_HEAD,
@@ -526,6 +564,14 @@ def main() -> int:
     )
     args = parser.parse_args()
     balance_components = validate_balance_components(args.balance_components)
+    try:
+        family_loss_rates = parse_family_loss_rates(args.family_loss_rates)
+    except (TypeError, ValueError) as exc:
+        parser.error(str(exc))
+    if args.coref_aux_rate < 0.0:
+        parser.error("--coref-aux-rate must be non-negative")
+    if args.coref_aux_rate and args.pair_head != LINEAR_HEAD:
+        parser.error("--coref-aux-rate currently requires the linear pair head")
 
     objective_alpha = parse_weight_alpha(args.weight_alpha)
     if args.relation_objective == ADAPTIVE_THRESHOLD_OBJECTIVE:
@@ -601,6 +647,9 @@ def main() -> int:
             "seed": args.seed,
             "official_mention_expansion": args.official_mention_expansion,
             "families": list(selected_families),
+            "family_loss_rates": family_loss_rates,
+            "save_best_by_family": args.save_best_by_family,
+            "coref_aux_rate": args.coref_aux_rate,
             "pair_head": args.pair_head,
             "balance_components": list(balance_components),
         },
@@ -680,6 +729,15 @@ def main() -> int:
         hidden_size=encoder.config.hidden_size,
         subtype_counts=counts,
     ).to(device)
+    coref_aux_head = (
+        build_pair_head(
+            LINEAR_HEAD,
+            hidden_size=encoder.config.hidden_size,
+            subtype_counts={"coreference": 2},
+        ).to(device)
+        if args.coref_aux_rate
+        else None
+    )
     prototype_families = tuple(counts)
     if args.pair_head == PROTOTYPE_DEPENDENCY_HEAD:
         heads.set_dependency(
@@ -779,11 +837,14 @@ def main() -> int:
     # Two param groups rather than one rate: the official baseline trains the encoder
     # at 1e-5 and the scorer head at 1e-4, and gives the head plain Adam (no decoupled
     # weight decay), which `weight_decay=0.0` reproduces inside AdamW.
+    head_parameters = list(heads.parameters())
+    if coref_aux_head is not None:
+        head_parameters += list(coref_aux_head.parameters())
     optimiser = torch.optim.AdamW(
         [
             {"params": list(encoder.parameters()), "lr": args.lr},
             {
-                "params": list(heads.parameters()),
+                "params": head_parameters,
                 "lr": args.head_lr if args.head_lr is not None else args.lr,
                 "weight_decay": 0.0,
             },
@@ -816,12 +877,15 @@ def main() -> int:
             flush=True,
         )
 
-    def save_checkpoint() -> None:
-        args.output.mkdir(parents=True, exist_ok=True)
-        encoder.save_pretrained(args.output)
-        tokenizer.save_pretrained(args.output)
-        torch.save(heads.state_dict(), args.output / "heads.pt")
-        (args.output / PAIR_HEAD_CONFIG_FILE).write_text(
+    def save_checkpoint(destination: Path | None = None) -> None:
+        destination = destination or args.output
+        destination.mkdir(parents=True, exist_ok=True)
+        encoder.save_pretrained(destination)
+        tokenizer.save_pretrained(destination)
+        torch.save(heads.state_dict(), destination / "heads.pt")
+        if coref_aux_head is not None:
+            torch.save(coref_aux_head.state_dict(), destination / "coref_aux_head.pt")
+        (destination / PAIR_HEAD_CONFIG_FILE).write_text(
             json.dumps(
                 {
                     "schema_version": "ekg.relation_pair_head.v1",
@@ -836,7 +900,7 @@ def main() -> int:
         # The mechanism lives in the objective, so inference needs nothing from
         # it -- but the checkpoint still has to say what it was trained under, or
         # an arm can be mistaken for the control after the fact.
-        (args.output / BALANCE_CONFIG_FILE).write_text(
+        (destination / BALANCE_CONFIG_FILE).write_text(
             json.dumps(
                 {
                     "components": list(balance_components),
@@ -945,6 +1009,10 @@ def main() -> int:
     best_f1 = -1.0
     best_epoch: int | None = None
     best_by_family: dict[str, float] = {}
+    family_selection = {
+        family: {"best_f1": -1.0, "best_epoch": None}
+        for family in selected_families
+    }
     none_offsets: dict[str, torch.Tensor] = {}
 
     def rebuild_offsets() -> None:
@@ -986,7 +1054,8 @@ def main() -> int:
             dist_ids = torch.tensor(
                 [distance_bucket(r.distance) for r in doc_rows], device=device
             )
-            logits = heads(_pair_features(head_emb, tail_emb), dist_ids)
+            pair_features = _pair_features(head_emb, tail_emb)
+            logits = heads(pair_features, dist_ids)
             loss = torch.zeros((), device=device)
             for family in selected_families:
                 target = torch.tensor(
@@ -1019,7 +1088,24 @@ def main() -> int:
                     family_loss = family_loss / risk_normalizer.update(
                         family, float(family_loss.detach())
                     )
-                loss = loss + family_loss
+                loss = loss + family_loss_rates[family] * family_loss
+            if coref_aux_head is not None:
+                coref_target = torch.tensor(
+                    [
+                        _IGNORE_INDEX
+                        if "coreference" in row.ignored_families
+                        else int("coreference" in row.labels)
+                        for row in doc_rows
+                    ],
+                    device=device,
+                )
+                coref_logits = coref_aux_head(pair_features, dist_ids)["coreference"]
+                coref_loss = torch.nn.functional.cross_entropy(
+                    coref_logits,
+                    coref_target,
+                    ignore_index=_IGNORE_INDEX,
+                )
+                loss = loss + args.coref_aux_rate * coref_loss
             running += float(loss)
             # Scale so the accumulated gradient matches a true batch of that size,
             # and step the scheduler with the optimiser -- stepping it per document
@@ -1051,6 +1137,23 @@ def main() -> int:
                 best_epoch = epoch
                 best_by_family = by_family
                 save_checkpoint()
+            if args.save_best_by_family:
+                for family, family_f1 in by_family.items():
+                    selected = family_selection[family]
+                    if family_f1 <= selected["best_f1"]:
+                        continue
+                    selected.update(best_f1=family_f1, best_epoch=epoch)
+                    family_output = args.output / "by_family" / family
+                    save_checkpoint(family_output)
+                    (family_output / "selection.json").write_text(
+                        json.dumps(
+                            {"family": family, "epoch": epoch, "dev_f1": family_f1},
+                            indent=2,
+                            sort_keys=True,
+                        )
+                        + "\n",
+                        encoding="utf-8",
+                    )
             if work_point is not None:
                 rebuild_offsets()
                 shown = {f: round(v, 3) for f, v in work_point.offsets.items()}
@@ -1069,6 +1172,7 @@ def main() -> int:
                 "best_epoch": best_epoch,
                 "best_f1": best_f1 if dev_ids else None,
                 "best_by_family": best_by_family,
+                "family_checkpoints": family_selection if args.save_best_by_family else {},
             },
             "checkpoint_sha256": _checkpoint_hashes(args.output),
         }

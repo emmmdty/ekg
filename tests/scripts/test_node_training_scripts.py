@@ -210,6 +210,24 @@ def test_coref_trainer_requires_both_manifests_together() -> None:
     assert "--train-manifest and --dev-manifest must be given together" in source
 
 
+def test_relation_family_loss_rates_are_explicit_and_complete() -> None:
+    module = _load("train_supervised_relations")
+
+    assert module.parse_family_loss_rates("temporal=2,causal=4,subevent=4") == {
+        "temporal": 2.0,
+        "causal": 4.0,
+        "subevent": 4.0,
+    }
+    with pytest.raises(ValueError, match="name exactly"):
+        module.parse_family_loss_rates("temporal=2,causal=4")
+    with pytest.raises(ValueError, match="positive"):
+        module.parse_family_loss_rates("temporal=2,causal=4,subevent=0")
+
+    source = (SCRIPTS / "train_supervised_relations.py").read_text(encoding="utf-8")
+    assert "family_loss_rates[family] * family_loss" in source
+    assert "args.coref_aux_rate * coref_loss" in source
+
+
 def test_maven_arg_and_ere_share_document_ids() -> None:
     """The two corpora are the same documents with different annotation layers.
 
