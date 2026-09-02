@@ -142,6 +142,28 @@ def test_ere_population_perfect_when_fully_covered() -> None:
     assert report["mention_coverage"] == 1.0
 
 
+def test_ere_population_official_predictions_omit_singletons() -> None:
+    module = _load("build_canonical_nodes")
+
+    class FakeNode:
+        def __init__(self, event_id):
+            self.event_id = event_id
+
+    class FakeDoc:
+        doc_id = "d"
+        nodes = [FakeNode("d::m1"), FakeNode("d::m2"), FakeNode("d::m3")]
+
+    class FakeCanonical:
+        mention_cluster = ["d::m1", "d::m2"]
+
+    prediction = module.ere_population_official_predictions(
+        [FakeDoc()], {"d": [FakeCanonical()]}
+    )[0]
+
+    assert prediction["coreference"] == [["m1", "m2"]]
+    assert prediction["causal_relations"] == {"CAUSE": [], "PRECONDITION": []}
+
+
 def test_manifest_selection_aligns_both_annotation_views(tmp_path) -> None:
     module = _load("build_canonical_nodes")
 

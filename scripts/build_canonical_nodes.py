@@ -54,6 +54,7 @@ from ekg.nodes.metrics import mis_merge_report
 from ekg.relations.admission import stratified_admission_report
 from ekg.relations.data import load_maven_arg, load_maven_ere
 from ekg.relations.data.maven_arg import ArgumentDocument
+from ekg.relations.maven_ere_official import empty_official_prediction
 
 
 def split_index(n: int, cal_ratio: float) -> int:
@@ -157,6 +158,31 @@ def ere_population_coreference(
     report["n_ere_mentions"] = total
     report["n_covered"] = covered
     return report
+
+
+def ere_population_official_predictions(
+    ere_docs: Sequence, by_doc_nodes: dict[str, list[CanonicalNode]]
+) -> list[dict]:
+    """Project canonical clusters into MAVEN-ERE's official prediction shape."""
+    predictions: list[dict] = []
+    for doc in ere_docs:
+        ere_ids = {node.event_id for node in doc.nodes}
+        claimed: set[str] = set()
+        clusters: list[list[str]] = []
+        for node in by_doc_nodes.get(doc.doc_id, []):
+            cluster = sorted(set(node.mention_cluster) & ere_ids)
+            overlap = claimed & set(cluster)
+            if overlap:
+                raise ValueError(
+                    f"{doc.doc_id}: canonical clusters repeat mention {sorted(overlap)[0]}"
+                )
+            claimed.update(cluster)
+            if len(cluster) > 1:
+                clusters.append([mention.split("::", 1)[-1] for mention in cluster])
+        prediction = empty_official_prediction({"id": doc.doc_id})
+        prediction["coreference"] = clusters
+        predictions.append(prediction)
+    return predictions
 
 
 def coref_edges(nodes: Sequence[CanonicalNode]) -> list[RelationEdge]:
@@ -360,6 +386,12 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=None, help="first N documents (smoke)")
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--nodes-out", type=Path, default=None, help="canonical nodes jsonl")
+    parser.add_argument(
+        "--coref-predictions-out",
+        type=Path,
+        default=None,
+        help="official-shape coreference predictions on the scored ERE population",
+    )
     args = parser.parse_args()
 
     arg_docs = list(load_maven_arg(args.arg))
@@ -392,6 +424,17 @@ def main() -> int:
         args.nodes_out.parent.mkdir(parents=True, exist_ok=True)
         args.nodes_out.write_text(
             "\n".join(node.to_event_node().model_dump_json() for node in nodes) + "\n"
+        )
+    if args.coref_predictions_out:
+        by_doc_nodes: dict[str, list[CanonicalNode]] = {}
+        for node in nodes:
+            by_doc_nodes.setdefault(node.doc_id, []).append(node)
+        ere_test = ere_docs[split_index(len(ere_docs), args.cal_ratio) :]
+        predictions = ere_population_official_predictions(ere_test, by_doc_nodes)
+        args.coref_predictions_out.parent.mkdir(parents=True, exist_ok=True)
+        args.coref_predictions_out.write_text(
+            "\n".join(json.dumps(record) for record in predictions) + "\n",
+            encoding="utf-8",
         )
     print(json.dumps(report, indent=2, default=float)[:4000])
     return 0
