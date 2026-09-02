@@ -1,8 +1,8 @@
 # PHASE A3 — 关系族×位置自适应的事件关系抽取
 
 > **ACTIVE。** 位置工作点沿用启动时冻结的 P1 r12 / A3 r13 plan；prototype 新代码使用 P1 r13。
-> A3.0 baseline、A3.1 复现底座和
-> A3.2 第一核心周期均已完成；当前只执行第二核心周期。历史数字见
+> A3.0 baseline、A3.1 复现底座和 A3.2 第一核心周期均已完成；工作点第二周期的 4090 最终状态
+> 待恢复连接核验，5090 prototype/ATLoss 已封存。当前下一正式动作是 A3.6 官方训练配方分账。历史数字见
 > [`../results/PHASE_A.md`](../results/PHASE_A.md)。
 
 ## Goal
@@ -168,6 +168,18 @@ validate-only，再跑 seed13 2ep smoke；行为门与完整 official promotion 
 **封存状态**：远端 Torch/P1/CUDA gate 全 PASS，但 seed13 2ep 的 causal/subevent 两轮均为 0，只有
 temporal 非零，未过看结果前冻结的行为门。故不启动 50ep、不跑 official scorer、不增加 class weight、
 ATGL 或额外 seed。具体曲线与 artifact hash 只见 `../results/PHASE_A.md`。
+
+### A3.6：官方训练配方分账（2026-09-02，接线 smoke PASS，正式实验待执行）
+
+代码提交 `7840b5f` 将剩余 official gap 的三个协议变量拆成独立开关：family loss rates 2/4/4、
+coreference auxiliary rate .4、per-family checkpoint selection；`b2ab8a7` 记录 5090 CUDA smoke。
+30-doc / 1-epoch smoke 已验证 encoder/head 反传以及主 checkpoint、coref auxiliary head、三族独立
+checkpoint 落盘。该分数不进入主表。
+
+因为 `train_supervised_relations.py` 属于 P1 `CODE_PATHS`，正式分账前必须从当前 HEAD 重建 trust root。
+随后只用冻结 seed 13，在相同 manifest/candidate/evaluator/backbone/预算下依次运行 local recipe、
+rates-only、+coref auxiliary、+per-family selection。只有完成分账后，剩余差距才可归因于表示。
+三项均是官方协议复现，不是方法创新；未经作者新授权不增加 seed，final-valid 不参与判定。
 
 ## Done when
 
