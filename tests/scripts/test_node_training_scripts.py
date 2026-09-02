@@ -89,6 +89,28 @@ def test_coref_training_refuses_a_split_without_any_positive(arg_docs) -> None:
         module.build_training_pairs(arg_docs[1:], neg_ratio=10.0, hard_fraction=0.5, seed=0)
 
 
+def test_argument_locality_reconstructs_sentence_ranges() -> None:
+    module = _load("report_coref_argument_locality")
+    record = {"id": "d", "tokens": [["one", "."], ["two", "words", "."]]}
+
+    assert module.sentence_ranges(record, "one . two words .") == [(0, 5), (6, 17)]
+    with pytest.raises(ValueError, match="do not reconstruct"):
+        module.sentence_ranges(record, "one. two words.")
+
+
+def test_argument_locality_removes_other_sentence_fillers(arg_docs) -> None:
+    module = _load("report_coref_argument_locality")
+    node = arg_docs[0].nodes[0]
+
+    event_level, mention_local = module.argument_signatures(node, (0, 36))
+
+    assert ("Agent", "rebels") in event_level
+    assert ("Location", "outpost") in event_level
+    assert mention_local == event_level
+    _, second_sentence = module.argument_signatures(node, (37, len(arg_docs[0].doc_text)))
+    assert second_sentence == ()
+
+
 def test_ere_population_counts_unseen_mentions_as_singletons() -> None:
     """The pipeline's population is smaller than ERE's; the gap must not vanish."""
     module = _load("build_canonical_nodes")

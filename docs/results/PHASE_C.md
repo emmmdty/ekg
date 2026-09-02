@@ -614,3 +614,55 @@ n=2 的一致是运气。**终点比训练中期稳（中期极差 6.9 → 终�
 ⇒ **Ch1 到此结束两个核心设计周期，机制无效。** 按契约本章降为系统组件，
 方法贡献为零；可写的是配方修复（+1.78 均值、消除过训衰减）与两条方法学结论
 （选模轴伪影、种子噪声的 epoch 结构）。
+
+## C4-r4 根因复核：历史机制漏掉论元，gold event-level 只作上限（2026-09-02）
+
+本节是 **gpu-5090 / seed 13 / internal-dev 291 篇的 exploratory 诊断**；final-valid 未访问，
+不改变上一节的正式 phase 状态。训练提交 `7ac24a3`，官方预测导出/评估提交 `5e40b62`；
+候选 digest `15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910`。
+四臂共同使用 warmup 200、线性衰减、10 epochs、lr 2e-5 和同一 P1 manifests。
+
+### 2×2：负文档采样 × event-level argument oracle
+
+`argument_pooling_oracle` 明确读取 MAVEN-Arg 的 event-level gold arguments。该标注按 event 存储并
+复制给簇内每个 mention，属于信息上限，**不得作为可部署方法分**。根 checkpoint 按完整 dev
+pair-F1 选 epoch；下表固定官方阈值 0.7，用官方 `evaluate.py` 评同一 ERE mention population：
+
+| 采样 | 论元 | pair-best epoch | pair-best MUC P/R/F1 | epoch-10 MUC P/R/F1 |
+|---|---|---:|---|---|
+| 历史采样 | 无 | 9 | 77.27 / 84.82 / **80.87** | 77.08 / 83.94 / **80.37** |
+| 补全 all-negative docs | 无 | 2 | 83.99 / 74.17 / **78.78** | 78.23 / 80.28 / **79.24** |
+| 历史采样 | gold event-level | 5 | 85.08 / 90.58 / **87.74** | 82.85 / 90.23 / **86.38** |
+| 补全 all-negative docs | gold event-level | 2 | 89.56 / 82.37 / **85.82** | 42.39 / 89.01 / **57.43** |
+
+事实边界：
+
+1. event-level argument oracle 的提升在 pair-best（+6.87 MUC）和固定 epoch-10（+6.01）两种读法下
+   都成立，证明历史 `context_pooling + confusability` 负结果**没有测试冻结设计所要求的论元输入**。
+2. 补全负文档把无论元模型推向更高 precision / 更低 recall，但没有稳定提高 MUC；不能把“恢复
+   singleton-only 文档”本身写成提分机制。
+3. 补全后每 epoch 的文档更新数从 1,555 增到 2,508（+61%）。与 event-level oracle 联用时 epoch 2
+   pair-F1=.8721，此后塌成近全正预测，epoch-10 MUC=.5743。权重全为有限值，但 head 范数从
+   1.06 持续增到 2.56；这是捷径过拟合与 compute budget 混杂，不是 NaN，也不能反推负文档有害。
+   下一次采样消融必须按 optimizer steps/tokens 对齐，并保存 representation/head norm。
+
+### 去掉 event-level 复制泄漏后的局部信号
+
+脚本 `scripts/report_coref_argument_locality.py` 用 MAVEN-ERE `tokens` 恢复句边界；2,913/2,913 篇的
+展平 token 文本与 MAVEN-Arg `document` 字符级完全一致。涉及 Arg-only mention 的 pair 显式排除：
+internal-dev 对齐 6,859/6,875 mentions，排除 14 个 exact-trigger pairs。
+
+| internal-dev exact-trigger same-type pair | 正 pair（n=828）不同率 | 负 pair（n=1,220）不同率 |
+|---|---:|---:|
+| event-level signature | **0.00%** | **80.98%** |
+| mention 同句 local signature | **63.77%** | **84.18%** |
+
+因此“正 pair 签名 100% 相同”是 event-level 复制的构造结果；裁成 mention-local 后仍保留
+**20.41 点**区分差，但强度远小于 gold oracle。可部署方法必须预测/抽取 mention-local arguments，
+并学习角色对齐与缺失鲁棒性，不能把 event-level gold pooling 改名后当作完整方法。
+
+本地报告：`runs/stages/C4/c4-v6-rootcause-r4/exploratory/argument_locality_{train,internal_dev}.json`，
+SHA-256 分别为 `e66b14eb…3cb4` / `23fe74e9…3b3e`。远端四份训练日志 SHA-256 前缀：
+`fb0d9396` / `ac0c7330` / `8ce6343c` / `924f85aa`；完整 checkpoint、逐 epoch 权重、阈值曲线和
+official metrics 留在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/C4/`
+`c4-v6-rootcause-r4/exploratory/2x2/`。
