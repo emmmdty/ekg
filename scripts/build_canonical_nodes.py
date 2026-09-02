@@ -58,7 +58,36 @@ from ekg.relations.data.maven_arg import ArgumentDocument
 
 def split_index(n: int, cal_ratio: float) -> int:
     """Phase-B's calibration split, replicated so document sets line up exactly."""
+    if not 0.0 <= cal_ratio < 1.0:
+        raise ValueError(f"cal_ratio must be in [0, 1), got {cal_ratio}")
+    if cal_ratio == 0.0:
+        return 0
     return min(n - 1, max(1, int(n * cal_ratio))) if n > 1 else 0
+
+
+def select_manifest_documents(
+    arg_docs: list[ArgumentDocument], ere_docs: list, manifest_path: Path
+) -> tuple[list[ArgumentDocument], list]:
+    """Select one frozen document population and align both annotation views."""
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    doc_ids = [str(doc_id) for doc_id in manifest.get("doc_ids", [])]
+    if len(doc_ids) != len(set(doc_ids)):
+        raise ValueError(f"{manifest_path}: duplicate doc_ids")
+    if manifest.get("doc_count") != len(doc_ids):
+        raise ValueError(f"{manifest_path}: doc_count does not match doc_ids")
+
+    def index(docs, name: str):
+        result = {doc.doc_id: doc for doc in docs}
+        if len(result) != len(docs):
+            raise ValueError(f"{name}: duplicate document ids")
+        missing = [doc_id for doc_id in doc_ids if doc_id not in result]
+        if missing:
+            raise ValueError(f"{name}: manifest documents missing; first={missing[0]}")
+        return result
+
+    arg_by_id = index(arg_docs, "MAVEN-Arg")
+    ere_by_id = index(ere_docs, "MAVEN-ERE")
+    return [arg_by_id[doc_id] for doc_id in doc_ids], [ere_by_id[doc_id] for doc_id in doc_ids]
 
 
 def score_document(scorer, doc: ArgumentDocument) -> dict[tuple[str, str], float]:
@@ -180,8 +209,12 @@ def run(
             doc.nodes, score_document(scorer, doc), threshold=threshold, band=band
         )
         cal_rows.extend(cluster_correctness(result.nodes, cluster_of_nodes(doc.nodes)))
-    calibrator = IsotonicProbabilityCalibrator().fit(
-        [s for s, _ in cal_rows], [c for _, c in cal_rows]
+    calibrator = (
+        IsotonicProbabilityCalibrator().fit(
+            [s for s, _ in cal_rows], [c for _, c in cal_rows]
+        )
+        if cal_rows
+        else None
     )
 
     # --- run the test split -------------------------------------------------- #
@@ -314,6 +347,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arg", required=True, type=Path, help="MAVEN-Arg jsonl")
     parser.add_argument("--ere", required=True, type=Path, help="MAVEN-ERE jsonl (same split)")
+    parser.add_argument(
+        "--manifest", type=Path, help="frozen manifest selecting and ordering both views"
+    )
     parser.add_argument("--scorer", default="lexical", help="coreference scorer name")
     parser.add_argument("--scorer-path", default=None, help="scorer checkpoint (supervised)")
     parser.add_argument("--detector", default=None, help="event detector name (optional)")
@@ -328,6 +364,8 @@ def main() -> int:
 
     arg_docs = list(load_maven_arg(args.arg))
     ere_docs = list(load_maven_ere(args.ere))
+    if args.manifest:
+        arg_docs, ere_docs = select_manifest_documents(arg_docs, ere_docs, args.manifest)
     if args.limit:
         arg_docs = arg_docs[: args.limit]
         keep = {d.doc_id for d in arg_docs}

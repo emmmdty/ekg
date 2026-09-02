@@ -25,7 +25,7 @@ import argparse
 import json
 from pathlib import Path
 
-from build_canonical_nodes import run
+from build_canonical_nodes import run, select_manifest_documents
 
 from ekg.nodes.coref import coreference_scorers
 from ekg.relations.data import load_maven_arg, load_maven_ere
@@ -55,6 +55,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arg", required=True, type=Path)
     parser.add_argument("--ere", required=True, type=Path)
+    parser.add_argument("--manifest", type=Path)
     parser.add_argument("--scorer", default="lexical")
     parser.add_argument("--scorer-path", default=None)
     parser.add_argument("--cal-ratio", type=float, default=0.3)
@@ -65,6 +66,8 @@ def main() -> int:
 
     arg_docs = list(load_maven_arg(args.arg))
     ere_docs = list(load_maven_ere(args.ere))
+    if args.manifest:
+        arg_docs, ere_docs = select_manifest_documents(arg_docs, ere_docs, args.manifest)
     scorer = CachingScorer(
         coreference_scorers.create(
             args.scorer, **({"checkpoint_path": args.scorer_path} if args.scorer_path else {})

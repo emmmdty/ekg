@@ -142,6 +142,35 @@ def test_ere_population_perfect_when_fully_covered() -> None:
     assert report["mention_coverage"] == 1.0
 
 
+def test_manifest_selection_aligns_both_annotation_views(tmp_path) -> None:
+    module = _load("build_canonical_nodes")
+
+    class FakeDoc:
+        def __init__(self, doc_id):
+            self.doc_id = doc_id
+
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        '{"doc_count": 2, "doc_ids": ["b", "a"]}', encoding="utf-8"
+    )
+    arg, ere = module.select_manifest_documents(
+        [FakeDoc("a"), FakeDoc("b")],
+        [FakeDoc("b"), FakeDoc("a")],
+        manifest,
+    )
+
+    assert [doc.doc_id for doc in arg] == ["b", "a"]
+    assert [doc.doc_id for doc in ere] == ["b", "a"]
+
+
+def test_zero_calibration_ratio_keeps_the_complete_population() -> None:
+    module = _load("build_canonical_nodes")
+
+    assert module.split_index(291, 0.0) == 0
+    with pytest.raises(ValueError, match="cal_ratio"):
+        module.split_index(291, 1.0)
+
+
 def test_sweep_scores_each_document_once_across_cells(arg_docs) -> None:
     """The sweep varies threshold/band, which never change the pair scores."""
     module = _load("sweep_canonical_nodes")
