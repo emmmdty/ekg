@@ -429,3 +429,47 @@ macro-F1 全部落在 .528–.555 的区间内，而配对 MDE 是 ±.05** —�
 `dev_curve.json`、`internal_dev_labels.json`、`internal_dev_report.json`；
 配对检验 `runs/stages/D3/paired_*.json`；日志 `logs/d30_*.log`。
 两条对手**不预测证据**（公开设定里那是另一个任务），故其 evidence 栏为 0，不参与证据轴对比。
+
+---
+
+## D3 gold-evidence 上限：证据定位不是剩余主瓶颈（2026-09-02，5090 exploratory）
+
+为区分“证据头没找准”与“找到证据后仍被表示/决策压扁”，提交 `a1d4ae6` 增加
+`gold_evidence_oracle`：标签头直接使用标注 supporting-word mask 做 pooling。它读取 gold evidence，
+属于**不可部署的信息上限**，不能作为方法分或与公开系统公平比较。训练在远端提交 `5e40b62` 上执行；
+P1 train/internal-dev manifests、seed 13、12 epochs、lr 2e-5、alpha=.5、evidence-weight=1.0，
+final-valid 未传入也未访问。
+
+先以 5 篇文档、1 epoch、evidence-weight=0 完成 CUDA 接线 smoke，确认 oracle 在不训练 evidence head
+时仍可独立工作，且 `label_head_input_dim=1544`。随后才运行完整单种子上限实验。
+
+### internal-dev 结果（291 篇 / 7,195 mentions，按 macro-F1 选 epoch）
+
+| 系统 | 选中 epoch | **macro-F1** | CT+ | PS+ | CT− | PS− | Uu |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 现有 `evidence` 机制 | 9 | **.5554** | .9811 | .5749 | .7209 | **.5000** | .0000 |
+| **gold evidence oracle** | 10 | **.5717** | .9868 | **.7506** | .7059 | .3529 | .0625 |
+
+oracle 名义上仅提高 **+.0163 macro-F1**，低于本 split 已测得约 **+.051** 的配对 MDE；本机没有
+旧 `evidence` 臂的逐 mention labels，故本节不能补做配对 CI，**不得把 +.0163 宣称为显著提升**。
+12 个 epoch 的 macro-F1 范围为 .4643–.5717，epoch 10→11 又从 .5717 跌到 .5363，进一步说明
+稀有类驱动的 checkpoint 抖动很大。
+
+oracle 的分类结构比总分更有信息量：PS− 从 .5000 **降到 .3529**，CT− 从 .7209 略降到 .7059；
+主要名义收益来自 PS+（.5749→.7506），Uu 仍只命中 **1/14**（P=.0556、R=.0714、F1=.0625）。
+因此“当前低分主要因为 evidence head P/R=.230/.734”被这个上限实验**证伪**：即使把证据定位变成
+完美输入，现有单向量 pooling + 五类 head 仍没有解决 PS−/Uu。下一步应改为保留否定、模态、条件、
+来源承诺与作用域的 typed cue 表示，并为 Uu 建模 evidence sufficiency / unknown gate，而不是继续单独
+堆 evidence extractor。
+
+评估报告中的 evidence F1=1.0 是因为**预测端直接回放 gold mask**（514/514 spans），只验证 oracle
+接线，不是模型学出的证据分数。正式结果仍以本文件上一节的可部署 `evidence` 臂为准。
+
+### 产物与校验
+
+完整产物留在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/D3/`
+`d3-v6-evidence-oracle-r1-exploratory/full/seed-13/`；smoke 在同级 `smoke/seed-13/`。
+完整训练/评估日志 SHA-256 分别为 `81b48d1f…f5976` / `5d39999d…e4387`；
+`dev_curve.json` 为 `b1de149c…2711f`，`internal_dev_report.json` 为 `e08dfbe3…0ed3`，
+`internal_dev_labels.json` 为 `9a73514a…839b`，标签头为 `f514606f…ad50`。
+smoke 日志为 `f2bf5cdc…5162f`。训练退出码为 0，checkpoint 明确恢复 epoch 10。
