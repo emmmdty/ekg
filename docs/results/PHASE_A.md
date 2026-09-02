@@ -1127,3 +1127,22 @@ ATLoss 在当前三族单标签、全候选设置中复现了“无外部 class 
 `d43b2e6f0cd5c642f49e37fd1b07e9976dad3a2ea88171a620df880d3fe14e03`，`heads.pt`
 `071bd369139ec8937733ea16d9196b7ad3e19d4513b1f5b8ba1a823b78140445`。未访问 final-valid，
 未启动 full 或额外 seed。
+
+## Ch2 official recipe 分账实现 smoke（2026-09-02，5090）
+
+提交 `7840b5f` 将剩余 official gap 中三个训练协议变量拆成独立开关：
+`--family-loss-rates`（官方 2/4/4）、`--coref-aux-rate`（官方 .4）和
+`--save-best-by-family`。这些是复现修正，**不是论文创新**；正式分账仍须在重建后的 P1 trust root 上
+分别做 rates-only → +coref aux → +per-family selection，不能用本 smoke 的分数。
+
+定向 Torch/CLI 测试 69 项全通过。随后在 5090 对 `train_smoke.jsonl` 做 1 epoch、seed 13、
+30 docs / 48,136 个全候选 rows 的 CUDA 行为测试：三项同时启用，encoder/head 完成反传，主 checkpoint、
+`coref_aux_head.pt` 和 `by_family/{temporal,causal,subevent}` 三套 encoder+heads 均落盘；
+`run_metadata.status=complete`、`device=cuda`、`final_valid_accessed=false`，配置中 rates 明确为
+temporal=2、causal=4、subevent=4，coref aux=.4。1 epoch 三族 F1=0 属于 smoke 欠训状态，
+不进入任何主表或方法判断。
+
+产物留在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/A3/`
+`a3-v6-recipe-accounting-r1-exploratory/smoke/seed-13/`；日志
+`logs/a3_recipe_accounting_r1_smoke_s13.log`。运行时发现日志累计使用 `float(loss)` 会触发 PyTorch
+requires-grad 警告，已改为 `float(loss.detach())`；只消除同步警告，不改变训练目标或梯度。

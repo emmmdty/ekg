@@ -1106,7 +1106,7 @@ def main() -> int:
                     ignore_index=_IGNORE_INDEX,
                 )
                 loss = loss + args.coref_aux_rate * coref_loss
-            running += float(loss)
+            running += float(loss.detach())
             # Scale so the accumulated gradient matches a true batch of that size,
             # and step the scheduler with the optimiser -- stepping it per document
             # would race through the warmup N times too fast.
