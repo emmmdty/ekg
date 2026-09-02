@@ -159,6 +159,8 @@ f75c711  Ch3 gold-evidence upper-bound record
 
 - 路径：`/data/TJK/ekg`。
 - 2026-09-02 检查在 SSH banner 阶段超时；HEAD/worktree/进程/产物状态全部 UNKNOWN。
+- `cpolar-ssh-update` 当前只发现 5090/A6000 tunnel，不管理 `gpu-4090`；随后
+  `~/.ssh/hold-4090.sh` 也在连接重试中超时。新窗口需要新的 4090 入口或等待该静态入口恢复。
 - 上次已知有 A3 position-workpoint seed-13 50-epoch 流水线，但当前不能声称仍在跑或已经结束。
 - 恢复连接后先只读核验；若发现 remote-only 产物或 tracked 修改，先记录再决定同步。
 
