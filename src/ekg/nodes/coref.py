@@ -225,8 +225,9 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         if not head_file.exists():
             raise FileNotFoundError(f"supervised coreference: head not found at {head_file}")
         from ekg.nodes.discriminative import (
-            ALL_COMPONENTS,
+            ARGUMENT_POOLING_ORACLE,
             CONFIG_FILE,
+            CONFUSABILITY,
             CONTEXT_POOLING,
             FEATURE_NAMES,
             head_input_dim,
@@ -246,8 +247,22 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         if "components" in config:
             self._components = tuple(config["components"])
         else:
-            self._components = ALL_COMPONENTS if config.get("context_discriminative") else ()
+            self._components = (
+                (CONTEXT_POOLING, CONFUSABILITY)
+                if config.get("context_discriminative")
+                else ()
+            )
         self._context_discriminative = CONTEXT_POOLING in self._components
+        self._argument_oracle = ARGUMENT_POOLING_ORACLE in self._components
+        declared_argument_source = config.get("argument_source", "none")
+        expected_argument_source = (
+            "gold_event_level_oracle" if self._argument_oracle else "none"
+        )
+        if declared_argument_source != expected_argument_source:
+            raise ValueError(
+                "coreference checkpoint argument source mismatch: "
+                f"checkpoint={declared_argument_source!r} expected={expected_argument_source!r}"
+            )
         # Feature layouts evolve. A checkpoint trained on a different feature list
         # must fail loudly here rather than let the head read numbers it never saw.
         recorded = config.get("feature_names")
@@ -274,23 +289,58 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         self._ensure_model()
         import torch
 
-        from ekg.nodes.discriminative import context_ranges_for, pair_head_inputs
+        from ekg.nodes.discriminative import (
+            argument_spans_and_counts,
+            context_ranges_for,
+            pair_head_inputs,
+            pool_argument_features,
+        )
         from ekg.nodes.encoding import encode_spans_with_context
 
         order = {node.event_id: i for i, node in enumerate(nodes)}
         nodes_by_id = {node.event_id: node for node in nodes}
         starts = [n.trigger_evidence[0].char_start for n in nodes]
+        argument_spans, argument_counts = argument_spans_and_counts(nodes)
+        arguments = None
         with torch.no_grad():
             if self._context_discriminative:
-                triggers, contexts = encode_spans_with_context(
+                oracle_starts = (
+                    [start for start, _ in argument_spans] if self._argument_oracle else []
+                )
+                combined_starts = starts + oracle_starts
+                combined_ranges = context_ranges_for(nodes, doc_text)
+                if self._argument_oracle:
+                    combined_ranges += argument_spans
+                encoded_spans, encoded_contexts = encode_spans_with_context(
                     self._encoder,
                     self._tokenizer,
                     doc_text,
-                    starts,
-                    context_ranges_for(nodes, doc_text),
+                    combined_starts,
+                    combined_ranges,
                     max_length=self.max_length,
                     stride=self.stride,
                     device=self._device,
+                )
+                triggers = encoded_spans[: len(starts)]
+                contexts = encoded_contexts[: len(starts)]
+                if self._argument_oracle:
+                    arguments = pool_argument_features(
+                        encoded_spans[len(starts) :], argument_counts
+                    )
+            elif self._argument_oracle:
+                combined = encode_spans(
+                    self._encoder,
+                    self._tokenizer,
+                    doc_text,
+                    starts + [start for start, _ in argument_spans],
+                    max_length=self.max_length,
+                    stride=self.stride,
+                    device=self._device,
+                )
+                triggers = combined[: len(starts)]
+                contexts = triggers
+                arguments = pool_argument_features(
+                    combined[len(starts) :], argument_counts
                 )
             else:
                 triggers = encode_spans(
@@ -311,6 +361,7 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
                     nodes_by_id,
                     order,
                     components=self._components,
+                    arguments=arguments,
                 )
             )
             probs = torch.softmax(logits, dim=-1)[:, 1]

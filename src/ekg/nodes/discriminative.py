@@ -9,8 +9,10 @@ vectors has to guess.
 
 These features name that situation explicitly, so the head can learn a different
 decision function for it instead of relying on a similarity that has collapsed.
-They are cheap, deterministic, and derived only from the mention set the official
-protocol already gives us -- no gold arguments, no extra annotation.
+The context/confusability components are derived only from the mention set the
+official protocol already gives us.  The separate ``argument_pooling_oracle``
+component deliberately reads MAVEN-Arg's event-level gold arguments and must only
+be used as an information upper bound, never as a deployable method score.
 """
 
 from __future__ import annotations
@@ -74,7 +76,8 @@ CONFIG_FILE = "coref_config.json"
 # time a third component appears.
 CONTEXT_POOLING = "context_pooling"
 CONFUSABILITY = "confusability"
-ALL_COMPONENTS = (CONTEXT_POOLING, CONFUSABILITY)
+ARGUMENT_POOLING_ORACLE = "argument_pooling_oracle"
+ALL_COMPONENTS = (CONTEXT_POOLING, CONFUSABILITY, ARGUMENT_POOLING_ORACLE)
 
 
 def validate_components(components) -> tuple[str, ...]:
@@ -122,7 +125,53 @@ def head_input_dim(hidden_size: int, components=()) -> int:
         dim += hidden_size * 4
     if CONFUSABILITY in selected:
         dim += len(FEATURE_NAMES)
+    if ARGUMENT_POOLING_ORACLE in selected:
+        dim += hidden_size * 4
     return dim
+
+
+def argument_spans_and_counts(
+    nodes: Sequence[EventNode],
+) -> tuple[list[tuple[int, int]], list[int]]:
+    """Deterministic gold argument spans and per-mention counts for the oracle.
+
+    MAVEN-Arg annotates arguments at event level and copies them to every mention
+    of that event.  Consequently this is intentionally named an oracle: using it
+    at inference exposes cluster-level annotation.  Sorting roles and spans keeps
+    the tensor layout stable across training and scoring.
+    """
+    spans: list[tuple[int, int]] = []
+    counts: list[int] = []
+    for node in nodes:
+        selected = sorted(
+            (span.char_start, span.char_end)
+            for role in sorted(node.argument_evidence)
+            for span in node.argument_evidence[role]
+        )
+        spans.extend(selected)
+        counts.append(len(selected))
+    return spans, counts
+
+
+def pool_argument_features(features, counts: Sequence[int]):
+    """Mean-pool flattened argument-span features, using zero for no arguments."""
+    import torch
+
+    pooled = []
+    cursor = 0
+    for count in counts:
+        group = features[cursor : cursor + count]
+        pooled.append(
+            group.mean(dim=0) if count else features.new_zeros(features.shape[-1])
+        )
+        cursor += count
+    if cursor != features.shape[0]:
+        raise ValueError(
+            f"argument counts cover {cursor} of {features.shape[0]} encoded spans"
+        )
+    if not pooled:
+        return features.new_zeros((0, features.shape[-1]))
+    return torch.stack(pooled)
 
 
 def pair_head_inputs(
@@ -133,6 +182,7 @@ def pair_head_inputs(
     order: Mapping[str, int],
     *,
     components=(),
+    arguments=None,
 ):
     """The single implementation of the head's input, shared by training and scoring.
 
@@ -158,4 +208,13 @@ def pair_head_inputs(
                 device=device,
             )
         )
+    if ARGUMENT_POOLING_ORACLE in selected:
+        if arguments is None:
+            raise ValueError("argument_pooling_oracle requires argument features")
+        if arguments.shape != triggers.shape:
+            raise ValueError(
+                "argument features must align with trigger features: "
+                f"arguments={tuple(arguments.shape)} triggers={tuple(triggers.shape)}"
+            )
+        parts.append(pair_features(arguments[head_idx], arguments[tail_idx]))
     return parts[0] if len(parts) == 1 else torch.cat(parts, dim=-1)

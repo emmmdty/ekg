@@ -7,12 +7,16 @@ import pytest
 from ekg.core.schema import EventNode, EvidenceSpan
 from ekg.nodes.discriminative import (
     ALL_COMPONENTS,
+    ARGUMENT_POOLING_ORACLE,
     CONFUSABILITY,
     CONTEXT_POOLING,
     FEATURE_NAMES,
+    argument_spans_and_counts,
     confusability_features,
     context_ranges_for,
     head_input_dim,
+    pair_head_inputs,
+    pool_argument_features,
     sentence_char_ranges,
     validate_components,
 )
@@ -77,16 +81,54 @@ def test_context_range_falls_back_to_a_window_when_sent_id_is_missing() -> None:
 
 
 def test_head_input_dim_tracks_each_component_independently() -> None:
-    """Ablations switch the two parts separately, so the layout must too."""
+    """Ablations switch the components separately, so the layout must too."""
     assert head_input_dim(768, ()) == 768 * 4
     assert head_input_dim(768, (CONTEXT_POOLING,)) == 768 * 8
     assert head_input_dim(768, (CONFUSABILITY,)) == 768 * 4 + len(FEATURE_NAMES)
-    assert head_input_dim(768, ALL_COMPONENTS) == 768 * 8 + len(FEATURE_NAMES)
+    assert head_input_dim(768, (ARGUMENT_POOLING_ORACLE,)) == 768 * 8
+    assert head_input_dim(768, ALL_COMPONENTS) == 768 * 12 + len(FEATURE_NAMES)
+
+
+def test_argument_oracle_spans_are_deterministic_and_counted_per_mention() -> None:
+    left = _node("a", "attack", 0, 10)
+    right = _node("b", "attack", 1, 40)
+    left.argument_evidence = {
+        "Location": [EvidenceSpan(doc_id="d", char_start=30, char_end=35)],
+        "Agent": [EvidenceSpan(doc_id="d", char_start=0, char_end=6)],
+    }
+
+    spans, counts = argument_spans_and_counts([left, right])
+
+    assert spans == [(0, 6), (30, 35)]
+    assert counts == [2, 0]
+
+
+def test_argument_oracle_pooling_and_pair_layout_with_torch() -> None:
+    torch = pytest.importorskip("torch")
+    encoded = torch.tensor([[1.0, 3.0], [3.0, 5.0], [8.0, 10.0]])
+    arguments = pool_argument_features(encoded, [2, 0, 1])
+    assert arguments.tolist() == [[2.0, 4.0], [0.0, 0.0], [8.0, 10.0]]
+
+    nodes = [_node("a", "attack", 0, 0), _node("b", "attack", 1, 20)]
+    triggers = torch.ones((2, 2))
+    inputs = pair_head_inputs(
+        triggers,
+        triggers,
+        [("a", "b")],
+        {node.event_id: node for node in nodes},
+        {"a": 0, "b": 1},
+        components=(ARGUMENT_POOLING_ORACLE,),
+        arguments=arguments[:2],
+    )
+    assert inputs.shape == (1, head_input_dim(2, (ARGUMENT_POOLING_ORACLE,)))
 
 
 def test_components_are_normalised_and_bad_ones_rejected() -> None:
     # order is canonical, so two spellings of the same ablation hash identically
-    assert validate_components([CONFUSABILITY, CONTEXT_POOLING]) == ALL_COMPONENTS
+    assert validate_components([CONFUSABILITY, CONTEXT_POOLING]) == (
+        CONTEXT_POOLING,
+        CONFUSABILITY,
+    )
     with pytest.raises(ValueError, match="unknown"):
         validate_components(["bogus"])
     with pytest.raises(ValueError, match="duplicate"):

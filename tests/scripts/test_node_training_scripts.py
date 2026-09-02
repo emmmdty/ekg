@@ -52,6 +52,37 @@ def test_coref_training_pairs_keep_only_documents_with_a_positive(arg_docs) -> N
     assert sum(1 for p in per_doc["adoc1"] if p.label) == 1
 
 
+def test_coref_training_can_retain_all_negative_documents(arg_docs) -> None:
+    module = _load("train_coref_scorer")
+    per_doc = module.build_training_pairs(
+        arg_docs,
+        neg_ratio=10.0,
+        hard_fraction=0.5,
+        seed=0,
+        include_negative_only_docs=True,
+    )
+
+    assert set(per_doc) == {"adoc1"}  # adoc2 has one mention and therefore no candidate pair
+
+    # Add a second same-type singleton so the all-negative document contributes.
+    clone = arg_docs[1].nodes[0].model_copy(deep=True)
+    clone.event_id = "adoc2::m5"
+    clone.metadata["event"] = "EV4"
+    clone.trigger_evidence[0].char_start = 19
+    clone.trigger_evidence[0].char_end = 27
+    arg_docs[1].nodes.append(clone)
+    per_doc = module.build_training_pairs(
+        arg_docs,
+        neg_ratio=10.0,
+        hard_fraction=0.5,
+        seed=0,
+        include_negative_only_docs=True,
+    )
+    assert set(per_doc) == {"adoc1", "adoc2"}
+    assert len(per_doc["adoc2"]) == 1
+    assert not per_doc["adoc2"][0].label
+
+
 def test_coref_training_refuses_a_split_without_any_positive(arg_docs) -> None:
     module = _load("train_coref_scorer")
     with pytest.raises(ValueError, match="refusing to train"):

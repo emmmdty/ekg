@@ -43,12 +43,15 @@ from ekg.nodes.coref import (
 )
 from ekg.nodes.discriminative import (
     ALL_COMPONENTS,
+    ARGUMENT_POOLING_ORACLE,
     CONFIG_FILE,
     CONTEXT_POOLING,
     FEATURE_NAMES,
+    argument_spans_and_counts,
     context_ranges_for,
     head_input_dim,
     pair_head_inputs,
+    pool_argument_features,
     validate_components,
 )
 from ekg.relations.data.maven_arg import ArgumentDocument, load_maven_arg
@@ -70,23 +73,35 @@ def build_eval_pairs(docs: Sequence[ArgumentDocument]) -> dict[str, list[CorefPa
 
 
 def build_training_pairs(
-    docs: Sequence[ArgumentDocument], *, neg_ratio: float, hard_fraction: float, seed: int
+    docs: Sequence[ArgumentDocument],
+    *,
+    neg_ratio: float,
+    hard_fraction: float,
+    seed: int,
+    include_negative_only_docs: bool = False,
 ) -> dict[str, list[CorefPair]]:
-    """Per-document sampled pairs; documents without a positive are dropped.
+    """Per-document sampled pairs, optionally retaining all-negative documents.
 
     Sampling per document (not corpus-wide) keeps every document's negatives
     proportional to its own positives, so a long document cannot dominate the
-    negative budget.
+    negative budget.  ``include_negative_only_docs`` retains every candidate
+    from documents whose gold clustering is all singleton; there are only 11,465
+    such pairs in MAVEN-Arg train, and dropping them causes a measured train/test
+    prior mismatch in exactly the false-merge direction.
     """
     per_doc: dict[str, list[CorefPair]] = {}
+    has_positive = False
     for doc in docs:
         pairs = labelled_coref_pairs(doc.nodes, cluster_of_nodes(doc.nodes))
         if not any(p.label for p in pairs):
+            if include_negative_only_docs and pairs:
+                per_doc[doc.doc_id] = pairs
             continue
+        has_positive = True
         per_doc[doc.doc_id] = sample_training_pairs(
             pairs, neg_ratio=neg_ratio, hard_fraction=hard_fraction, seed=seed
         )
-    if not per_doc:
+    if not has_positive:
         raise ValueError("no coreferent pair in the training split -- refusing to train")
     return per_doc
 
@@ -123,6 +138,7 @@ def train(
     encoder = AutoModel.from_pretrained(model_name).to(device)
     encoder.gradient_checkpointing_enable()
     context_discriminative = CONTEXT_POOLING in components
+    argument_oracle = ARGUMENT_POOLING_ORACLE in components
     head = nn.Linear(
         head_input_dim(encoder.config.hidden_size, components), 2
     ).to(device)
@@ -180,6 +196,9 @@ def train(
                 {
                     "components": list(components),
                     "context_discriminative": context_discriminative,
+                    "argument_source": (
+                        "gold_event_level_oracle" if argument_oracle else "none"
+                    ),
                     "lr": lr,
                     "head_lr": lr if head_lr is None else head_lr,
                     "warmup_steps": warmup_steps,
@@ -197,12 +216,38 @@ def train(
 
     def _forward(doc, pairs):
         starts = [n.trigger_evidence[0].char_start for n in doc.nodes]
+        argument_spans, argument_counts = argument_spans_and_counts(doc.nodes)
+        arguments = None
         if context_discriminative:
-            triggers, contexts = encode_spans_with_context(
-                encoder, tokenizer, doc.doc_text, starts,
-                context_ranges_for(doc.nodes, doc.doc_text),
+            oracle_starts = [start for start, _ in argument_spans] if argument_oracle else []
+            combined_starts = starts + oracle_starts
+            combined_ranges = context_ranges_for(doc.nodes, doc.doc_text)
+            if argument_oracle:
+                combined_ranges += argument_spans
+            encoded_spans, encoded_contexts = encode_spans_with_context(
+                encoder, tokenizer, doc.doc_text, combined_starts,
+                combined_ranges,
                 max_length=max_length, stride=stride, device=device,
             )
+            triggers = encoded_spans[: len(starts)]
+            contexts = encoded_contexts[: len(starts)]
+            if argument_oracle:
+                arguments = pool_argument_features(
+                    encoded_spans[len(starts) :], argument_counts
+                )
+        elif argument_oracle:
+            combined = encode_spans(
+                encoder,
+                tokenizer,
+                doc.doc_text,
+                starts + [start for start, _ in argument_spans],
+                max_length=max_length,
+                stride=stride,
+                device=device,
+            )
+            triggers = combined[: len(starts)]
+            contexts = triggers
+            arguments = pool_argument_features(combined[len(starts) :], argument_counts)
         else:
             triggers = encode_spans(
                 encoder, tokenizer, doc.doc_text, starts,
@@ -214,6 +259,7 @@ def train(
         inputs = pair_head_inputs(
             triggers, contexts, [(p.head_id, p.tail_id) for p in pairs],
             nodes_by_id, order, components=components,
+            arguments=arguments,
         )
         return head(inputs)
 
@@ -315,6 +361,14 @@ def main() -> int:
     )
     parser.add_argument("--neg-ratio", type=float, default=10.0)
     parser.add_argument("--hard-fraction", type=float, default=0.5)
+    parser.add_argument(
+        "--include-negative-only-docs",
+        action="store_true",
+        help=(
+            "retain every same-type negative pair from documents with no positive coreference "
+            "pair; this restores all-singleton documents omitted by the historical sampler"
+        ),
+    )
     parser.add_argument("--max-length", type=int, default=512)
     parser.add_argument("--stride", type=int, default=128)
     parser.add_argument(
@@ -360,7 +414,11 @@ def main() -> int:
             flush=True,
         )
     per_doc = build_training_pairs(
-        docs, neg_ratio=args.neg_ratio, hard_fraction=args.hard_fraction, seed=args.seed
+        docs,
+        neg_ratio=args.neg_ratio,
+        hard_fraction=args.hard_fraction,
+        seed=args.seed,
+        include_negative_only_docs=args.include_negative_only_docs,
     )
     n_pairs = sum(len(p) for p in per_doc.values())
     n_pos = sum(1 for pairs in per_doc.values() for p in pairs if p.label)
