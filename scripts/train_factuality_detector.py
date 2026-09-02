@@ -63,6 +63,7 @@ from ekg.factuality.detection import (
     EVIDENCE_POOLING_MODES,
     HEAD_FILE,
     LABELS_FILE,
+    POOLING_GOLD_ORACLE,
     POOLING_NONE,
     LexiconFactualityDetector,
     evidence_logits_per_mention,
@@ -168,7 +169,7 @@ def train_supervised(
     )
     head = nn.Linear(width, len(FACTUALITY_LABELS)).to(device)
     evidence_head = nn.Linear(4 * hidden, 1).to(device) if evidence_weight else None
-    if evidence_pooling != POOLING_NONE and evidence_head is None:
+    if evidence_pooling not in {POOLING_NONE, POOLING_GOLD_ORACLE} and evidence_head is None:
         raise SystemExit(
             f"--evidence-pooling {evidence_pooling} conditions the label head on the evidence "
             "head's own probabilities, so it needs --evidence-weight > 0"
@@ -196,7 +197,7 @@ def train_supervised(
         """Joint forward: one encoding, label logits and evidence logits."""
         candidates = (
             [evidence_candidates(doc, m) for m in doc.mentions]
-            if evidence_head is not None
+            if evidence_head is not None or evidence_pooling == POOLING_GOLD_ORACLE
             else [[] for _ in doc.mentions]
         )
         char_starts = [m.span.char_start for m in doc.mentions]
@@ -221,7 +222,19 @@ def train_supervised(
         mention_logits = (
             evidence_logits_per_mention(triggers, candidate_features, evidence_head)
             if evidence_head is not None
-            else []
+            else [features.new_zeros(features.shape[0]) for features in candidate_features]
+        )
+        gold_evidence_weights = (
+            [
+                torch.tensor(
+                    evidence_targets(per_mention, mention),
+                    dtype=triggers.dtype,
+                    device=triggers.device,
+                )
+                for mention, per_mention in zip(doc.mentions, candidates, strict=True)
+            ]
+            if evidence_pooling == POOLING_GOLD_ORACLE
+            else None
         )
         structure = None
         if use_structure:
@@ -237,6 +250,7 @@ def train_supervised(
             candidate_features,
             mention_logits,
             evidence_pooling=evidence_pooling,
+            gold_evidence_weights=gold_evidence_weights,
         )
 
         evidence_logits: list = []
@@ -581,6 +595,7 @@ def main() -> int:
             "none = parallel dual heads (reproduction base), "
             "evidence = pooled by the evidence head's probabilities (the mechanism), "
             "uniform = same width pooled by all-ones weights (capacity control)"
+            ", gold_evidence_oracle = gold supporting-word upper bound (not deployable)"
         ),
     )
     parser.add_argument(

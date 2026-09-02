@@ -1,9 +1,9 @@
 """Supporting-evidence extraction: which words license the factuality label.
 
-MAVEN-FACT annotates, for most non-CT+ mentions, the words that make the event
-non-factual — the modal, the negation, the reporting verb ("was powerless to",
-"may", "whether"). Predicting them turns the label into something inspectable,
-which is what the evidence-grounding requirement asks of every stage here.
+MAVEN-FACT annotates supporting words for CT-/PS+/PS-, not CT+ or Uu: the modal,
+the negation, or the reporting verb ("was powerless to", "may", "whether").
+Predicting them turns those labels into something inspectable, which is what the
+evidence-grounding requirement asks of every stage here.
 
 Two measured facts shape the design:
 

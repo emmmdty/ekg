@@ -192,11 +192,27 @@ def test_evidence_pooling_carries_how_much_evidence_mass_was_found() -> None:
     features = torch.ones(4, 3)
     found = pooled_evidence(features, torch.full((4,), 10.0), POOLING_EVIDENCE)
     none = pooled_evidence(features, torch.full((4,), -10.0), POOLING_EVIDENCE)
-    # "No supporting words at all" is what separates CT+ from the four classes
-    # evidence is annotated on, so it has to reach the label head as a
-    # near-zero vector rather than be normalized away.
+    # Evidence mass must not be normalized away. It is informative for the three
+    # annotated non-factual classes, though CT+ and Uu both lack gold evidence.
     assert found.norm() > 0.9 * features.mean(dim=0).norm()
     assert none.norm() < 0.01
+
+
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")
+def test_gold_evidence_oracle_uses_only_annotated_candidates() -> None:
+    import torch
+
+    from ekg.factuality.detection import POOLING_GOLD_ORACLE
+
+    features = torch.tensor([[1.0, 0.0], [0.0, 2.0], [9.0, 9.0]])
+    pooled = pooled_evidence(
+        features,
+        torch.zeros(3),
+        POOLING_GOLD_ORACLE,
+        gold_weights=torch.tensor([1.0, 1.0, 0.0]),
+    )
+
+    assert torch.allclose(pooled, torch.tensor([1.0 / 3.0, 2.0 / 3.0]))
 
 
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")

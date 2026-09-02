@@ -36,7 +36,7 @@ from pathlib import Path
 
 from ekg.core.registry import Registry
 from ekg.core.schema import EventNode, EvidenceSpan, RelationEdge, RelationType
-from ekg.factuality.evidence import evidence_candidates
+from ekg.factuality.evidence import evidence_candidates, evidence_targets
 from ekg.nodes.encoding import TORCH_AVAILABLE, encode_spans
 from ekg.relations.data.maven_fact import (
     FACTUALITY_LABELS,
@@ -50,6 +50,7 @@ __all__ = [
     "structure_contexts",
     "EVIDENCE_POOLING_MODES",
     "POOLING_EVIDENCE",
+    "POOLING_GOLD_ORACLE",
     "POOLING_NONE",
     "POOLING_UNIFORM",
     "validate_evidence_pooling",
@@ -94,10 +95,19 @@ CONFIG_FILE = "factuality_config.json"
 # also sees the sentence helped" -- a bare none-vs-evidence contrast cannot tell
 # those apart, and the capacity confound is the first thing a reader would ask
 # about.
+#
+# `gold_evidence_oracle` uses the annotated supporting-word mask. It is an upper
+# bound for diagnosis, not a deployable mode or a score eligible for promotion.
 POOLING_NONE = "none"
 POOLING_UNIFORM = "uniform"
 POOLING_EVIDENCE = "evidence"
-EVIDENCE_POOLING_MODES = (POOLING_NONE, POOLING_UNIFORM, POOLING_EVIDENCE)
+POOLING_GOLD_ORACLE = "gold_evidence_oracle"
+EVIDENCE_POOLING_MODES = (
+    POOLING_NONE,
+    POOLING_UNIFORM,
+    POOLING_EVIDENCE,
+    POOLING_GOLD_ORACLE,
+)
 
 # The class an unseen trigger backs off to, and what a trivial system collapses
 # to (94.4% of train).
@@ -246,15 +256,16 @@ def evidence_logits_per_mention(triggers, candidate_features: Sequence, evidence
     return logits
 
 
-def pooled_evidence(span_features, evidence_logits, mode: str):
+def pooled_evidence(span_features, evidence_logits, mode: str, *, gold_weights=None):
     """One vector summarising a mention's evidence candidates, `(hidden,)`.
 
     Both modes divide by the **candidate count**, never by the weight mass, so
     they differ in exactly one thing: whether the weights are the evidence
     head's probabilities or all ones. Normalising by the mass would also make
     the two vectors differ in scale-invariance, and worse, it would throw away
-    how much evidence mass the head found -- and "no supporting words at all" is
-    precisely what separates CT+ from the four classes evidence is annotated on.
+    how much evidence mass the head found. Gold supporting words exist only for
+    CT-/PS+/PS-; CT+ and Uu both have none, so absence cannot distinguish those
+    two labels.
 
     Gradient from the label loss reaches the evidence head through the weights.
     That is the coupling, and it is also why the phase contract guards evidence
@@ -269,11 +280,14 @@ def pooled_evidence(span_features, evidence_logits, mode: str):
     count = span_features.shape[0]
     if count == 0:
         return span_features.new_zeros(span_features.shape[-1])
-    weights = (
-        span_features.new_ones(count)
-        if mode == POOLING_UNIFORM
-        else torch.sigmoid(evidence_logits)
-    )
+    if mode == POOLING_UNIFORM:
+        weights = span_features.new_ones(count)
+    elif mode == POOLING_GOLD_ORACLE:
+        if gold_weights is None:
+            raise ValueError("gold_evidence_oracle pooling needs gold weights")
+        weights = gold_weights.to(dtype=span_features.dtype, device=span_features.device)
+    else:
+        weights = torch.sigmoid(evidence_logits)
     return (weights.unsqueeze(-1) * span_features).sum(dim=0) / count
 
 
@@ -284,6 +298,7 @@ def label_head_inputs(
     evidence_logits: Sequence,
     *,
     evidence_pooling: str,
+    gold_evidence_weights: Sequence | None = None,
 ):
     """The label head's input, `(n_mentions, label_head_input_dim(...))`.
 
@@ -297,11 +312,24 @@ def label_head_inputs(
     if structure is not None:
         parts.append(structure)
     if evidence_pooling != POOLING_NONE:
+        if evidence_pooling == POOLING_GOLD_ORACLE and gold_evidence_weights is None:
+            raise ValueError("gold_evidence_oracle pooling needs per-mention gold weights")
         parts.append(
             torch.stack(
                 [
-                    pooled_evidence(features, logits, evidence_pooling)
-                    for features, logits in zip(candidate_features, evidence_logits, strict=True)
+                    pooled_evidence(
+                        features,
+                        logits,
+                        evidence_pooling,
+                        gold_weights=(
+                            gold_evidence_weights[index]
+                            if gold_evidence_weights is not None
+                            else None
+                        ),
+                    )
+                    for index, (features, logits) in enumerate(
+                        zip(candidate_features, evidence_logits, strict=True)
+                    )
                 ]
             )
         )
@@ -478,7 +506,7 @@ class SupervisedFactualityDetector(FactualityDetector):
             self._evidence_head = nn.Linear(4 * hidden, 1)
             self._evidence_head.load_state_dict(torch.load(evidence_file, map_location="cpu"))
             self._evidence_head.to(self._device).eval()
-        elif self.evidence_pooling != POOLING_NONE:
+        elif self.evidence_pooling not in {POOLING_NONE, POOLING_GOLD_ORACLE}:
             raise FileNotFoundError(
                 f"evidence_pooling={self.evidence_pooling!r} needs the evidence head at "
                 f"{evidence_file}"
@@ -494,11 +522,9 @@ class SupervisedFactualityDetector(FactualityDetector):
         Pass the predicted graph here to run the robustness protocol — it is the
         only input that changes between the two conditions.
 
-        Evidence spans come back only when the checkpoint carries an evidence
-        head, and only for mentions predicted non-CT+: evidence is annotated on
-        0.1% of CT+ mentions against 88–99% of the other classes, so predicting
-        it for an event asserted to have happened would be inventing support for
-        a label that rests on none.
+        Evidence spans normally come back only when the checkpoint carries an
+        evidence head, and only for mentions predicted non-CT+. The explicitly
+        non-deployable gold oracle instead returns the supplied gold spans.
         """
         if not doc.mentions:
             return {}
@@ -510,7 +536,7 @@ class SupervisedFactualityDetector(FactualityDetector):
         )
         candidates = (
             [evidence_candidates(doc, m) for m in doc.mentions]
-            if self._evidence_head is not None
+            if self._evidence_head is not None or self.evidence_pooling == POOLING_GOLD_ORACLE
             else [[] for _ in doc.mentions]
         )
         char_starts = [m.span.char_start for m in doc.mentions]
@@ -538,7 +564,19 @@ class SupervisedFactualityDetector(FactualityDetector):
             evidence_logits = (
                 evidence_logits_per_mention(triggers, candidate_features, self._evidence_head)
                 if self._evidence_head is not None
-                else []
+                else [features.new_zeros(features.shape[0]) for features in candidate_features]
+            )
+            gold_evidence_weights = (
+                [
+                    torch.tensor(
+                        evidence_targets(per_mention, mention),
+                        dtype=triggers.dtype,
+                        device=triggers.device,
+                    )
+                    for mention, per_mention in zip(doc.mentions, candidates, strict=True)
+                ]
+                if self.evidence_pooling == POOLING_GOLD_ORACLE
+                else None
             )
             structure = (
                 torch.tensor(
@@ -555,12 +593,15 @@ class SupervisedFactualityDetector(FactualityDetector):
                 candidate_features,
                 evidence_logits,
                 evidence_pooling=self.evidence_pooling,
+                gold_evidence_weights=gold_evidence_weights,
             )
             probs = torch.softmax(self._head(features), dim=-1)
             confidence, index = probs.max(dim=-1)
 
             evidence: list[tuple[EvidenceSpan, ...]] = [() for _ in doc.mentions]
-            if self._evidence_head is not None:
+            if self.evidence_pooling == POOLING_GOLD_ORACLE:
+                evidence = [tuple(mention.evidence) for mention in doc.mentions]
+            elif self._evidence_head is not None:
                 for i, per_mention in enumerate(candidates):
                     if not per_mention or self._labels[index[i]] == BACKOFF_LABEL:
                         continue
