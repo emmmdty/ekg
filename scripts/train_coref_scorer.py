@@ -423,8 +423,10 @@ def main() -> int:
     n_pairs = sum(len(p) for p in per_doc.values())
     n_pos = sum(1 for pairs in per_doc.values() for p in pairs if p.label)
     n_hard = sum(1 for pairs in per_doc.values() for p in pairs if p.hard)
+    n_positive_docs = sum(any(p.label for p in pairs) for pairs in per_doc.values())
     print(
-        f"{len(per_doc)}/{len(docs)} documents carry a positive; "
+        f"{len(per_doc)}/{len(docs)} documents contribute pairs "
+        f"({n_positive_docs} contain positives); "
         f"{n_pairs} training pairs ({n_pos} positive, {n_hard} hard negative)"
     )
 
