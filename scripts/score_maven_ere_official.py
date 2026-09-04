@@ -31,12 +31,12 @@ runs a model and is not a gold converter.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import importlib.util
 import json
 import sys
 from pathlib import Path
 
+from ekg.core.stage_bundle import sha256_file as _sha256
 from ekg.relations.maven_ere_official import (
     OfficialProtocolError,
     records_by_id,
@@ -61,10 +61,6 @@ def _by_id(path: Path) -> dict[str, dict]:
         return records_by_id(records, source=str(path))
     except OfficialProtocolError as exc:
         raise SystemExit(str(exc)) from exc
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def main() -> int:

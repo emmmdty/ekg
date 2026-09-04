@@ -10,16 +10,13 @@ import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from ekg.core.stage_bundle import sha256_file as _sha256
 from ekg.relations.maven_ere_official import frozen_candidate_protocol
 
 DEV_DOCS = 291
 SPLIT_PREFIX = "ekg-v6:"
 EXPECTED_FACT_DEV = {"CT+": 6835, "CT-": 129, "PS+": 198, "PS-": 19, "Uu": 14}
 EXPECTED_RARE_DOCS = {"PS-": 13, "Uu": 12}
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _read_jsonl(path: Path) -> list[dict]:

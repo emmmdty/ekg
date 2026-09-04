@@ -29,11 +29,15 @@ def load_manifest_ids(path: Path) -> list[str]:
     """Read a frozen manifest's document IDs, rejecting duplicates and emptiness."""
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     ids = payload.get("doc_ids")
-    if not isinstance(ids, list) or not ids:
+    if (
+        not isinstance(ids, list)
+        or not ids
+        or not all(isinstance(item, str) for item in ids)
+    ):
         raise ValueError(f"{path} has no non-empty doc_ids list")
     if len(set(ids)) != len(ids):
         raise ValueError(f"{path} contains duplicate document IDs")
-    return [str(item) for item in ids]
+    return ids
 
 
 def split_docs_by_manifests(

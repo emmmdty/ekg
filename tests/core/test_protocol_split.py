@@ -60,6 +60,8 @@ def test_duplicate_and_empty_manifests_are_rejected(tmp_path: Path) -> None:
         load_manifest_ids(_manifest(tmp_path / "d.json", ["d1", "d1"]))
     with pytest.raises(ValueError, match="non-empty"):
         load_manifest_ids(_manifest(tmp_path / "e.json", []))
+    with pytest.raises(ValueError, match="non-empty"):
+        load_manifest_ids(_manifest(tmp_path / "n.json", [1]))
 
 
 def test_frozen_fact_manifests_split_the_registered_corpus(tmp_path: Path) -> None:

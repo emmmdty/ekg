@@ -23,14 +23,19 @@ pure Python and unit-tested on CPU; training needs the `llm` extra + a GPU:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import math
 import random
 import sys
 from pathlib import Path
 
-from ekg.core.stage_bundle import StageBundleError, is_sha256, validate_stage_bundle
+from ekg.core.protocol import load_manifest_ids, split_docs_by_manifests
+from ekg.core.stage_bundle import (
+    StageBundleError,
+    is_sha256,
+    sha256_file,
+    validate_stage_bundle,
+)
 from ekg.relations.balance import (
     ADAPTIVE_WORKPOINT,
     NONE_INDEX,
@@ -71,10 +76,6 @@ from ekg.relations.prototype import (
 # Official MAVEN-ERE marks unscoreable family/pair combinations with -100
 # (`joint/src/data.py::get_relation_labels`), which is also torch's default.
 _IGNORE_INDEX = -100
-
-
-def sha256_file(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _load_json(path: Path) -> dict:
@@ -262,39 +263,6 @@ def build_training_rows(
             )
         )
     return rows
-
-
-def load_manifest_ids(path: Path) -> list[str]:
-    """Load and validate the explicit document IDs frozen by P1."""
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    ids = payload.get("doc_ids")
-    if not isinstance(ids, list) or not ids or not all(isinstance(item, str) for item in ids):
-        raise ValueError(f"{path} must contain a non-empty string list at doc_ids")
-    if len(ids) != len(set(ids)):
-        raise ValueError(f"{path} contains duplicate doc_ids")
-    return ids
-
-
-def split_docs_by_manifests(docs, train_manifest: Path, dev_manifest: Path):
-    """Split documents by explicit P1 manifests and reject omission or overlap."""
-    docs = list(docs)
-    docs_by_id = {doc.doc_id: doc for doc in docs}
-    if len(docs_by_id) != len(docs):
-        raise ValueError("training source contains duplicate document IDs")
-    train_ids = load_manifest_ids(train_manifest)
-    dev_ids = load_manifest_ids(dev_manifest)
-    overlap = set(train_ids) & set(dev_ids)
-    if overlap:
-        raise ValueError(f"train/dev manifests overlap on {len(overlap)} document IDs")
-    selected = set(train_ids) | set(dev_ids)
-    missing = selected - docs_by_id.keys()
-    omitted = docs_by_id.keys() - selected
-    if missing or omitted:
-        raise ValueError(
-            "manifest/source ID mismatch: "
-            f"missing_from_source={len(missing)} omitted_from_manifests={len(omitted)}"
-        )
-    return [docs_by_id[item] for item in train_ids], [docs_by_id[item] for item in dev_ids]
 
 
 def downsample_negatives(

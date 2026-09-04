@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import subprocess
 import urllib.request
 from pathlib import Path
+
+from ekg.core.stage_bundle import sha256_file as _sha256
 
 REPOSITORY = "https://github.com/THU-KEG/MAVEN-ERE.git"
 COMMIT = "ac81a9711a69f43f55bfbc50b3bb573fd11c64b0"
@@ -28,10 +29,6 @@ def _run(*args: str, cwd: Path | None = None) -> str:
         capture_output=True,
     )
     return completed.stdout.strip()
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _restore_repository(path: Path) -> None:

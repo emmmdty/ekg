@@ -10,13 +10,13 @@ P1.6 separately performs a real checkpoint/model forward smoke on the 4090.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import importlib.util
 import json
 import py_compile
 import subprocess
 from pathlib import Path
 
+from ekg.core.stage_bundle import sha256_file as _sha256
 from ekg.relations.data.maven_ere import load_maven_ere
 from ekg.relations.maven_ere_official import (
     candidate_population_digest,
@@ -25,10 +25,6 @@ from ekg.relations.maven_ere_official import (
     validate_official_predictions,
 )
 from ekg.relations.pairs import pair_examples
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _load_jsonl(path: Path) -> list[dict]:

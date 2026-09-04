@@ -9,12 +9,12 @@ count in the v6 ledger.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import importlib.util
 import json
 import math
 from pathlib import Path
 
+from ekg.core.stage_bundle import sha256_file as _sha256
 from ekg.relations.maven_ere_official import (
     gold_to_official_prediction,
     records_by_id,
@@ -62,10 +62,6 @@ EXPECTED_ADVERSARIAL_F1 = {
         "blanc_f1": 40.0,
     },
 }
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _load_records(path: Path) -> dict[str, dict]:
