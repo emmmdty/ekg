@@ -1158,7 +1158,9 @@ causal/subevent/temporal 各自从头训练所选 epoch 的共享 encoder + head
 | shared protocol | seed 13、50 epochs、完整候选、official evaluator、内容寻址 roberta-base |
 
 四臂仅依次改变 loss rates 1/1/1→2/4/4、coref auxiliary 0→.4、macro checkpoint→per-family
-checkpoint；formal run 尚未启动，故本节没有科研数字，final-valid 未访问。
+checkpoint。2026-09-04 18:03（Asia/Taipei）在 gpu-4090 的 GPU0–3 以 `setsid nohup` 后台并行启动；
+首轮只读观测四臂均为 ALIVE、显存 4.38–4.54 GiB、日志到 epoch 0 / 500 docs，run/checkpoint metadata
+均为 `status=incomplete`、`device=cuda`、`final_valid_accessed=false`。训练尚未完成，故本节仍无科研数字。
 
 产物留在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/A3/`
 `a3-v6-recipe-accounting-r1-exploratory/smoke/seed-13/`；日志

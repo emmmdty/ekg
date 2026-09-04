@@ -40,7 +40,7 @@ Proposed-method implementation tasks are intentionally not generated until R1 ap
   externally and the old P1 remains immutable.
 - [x] **T008 [RS-002]** Freeze the A3.6 four-arm command/config matrix using one seed and identical data/candidates/
   evaluator/backbone/budget → matrix review shows only the intended recipe variables differ.
-- [ ] **T009 [RS-002]** Present exact 4090 command, cwd, GPU selection check and expected artifacts to the user before
+- [x] **T009 [RS-002]** Present exact 4090 command, cwd, GPU selection check and expected artifacts to the user before
   launch → pre-run record exists; no long job starts implicitly.
 - [ ] **T010 [RS-002]** Run and score local recipe, rates-only, rates+coref-aux and rates+coref-aux+per-family-selection →
   four immutable outputs use the official evaluator; no old curve is recycled.

@@ -11,10 +11,10 @@
 
 ## 下一步
 
-1. P1 r15 已在本地重建并外部复验；A3.6 r16 四臂 plan 已冻结。下一步提交/推送执行面，检查 4090
-   worktree/GPU，同步 `origin/main`，并传输 r15 与 r16 preflight（双端 SHA-256）；
-2. 用冻结 seed 13 分账 official recipe：local → rates-only → +coref aux → +per-family selection；四卡空闲时
-   可各占一张卡并行，逐族臂必须用三套从头训练的 family checkpoint 分别推理后合并；
+1. P1 r15、A3.6 r16 preflight 已双端 SHA-256 一致，4090 P1 `validate-only` PASS；
+2. A3.6 四臂已于 2026-09-04 18:03（Asia/Taipei）用 GPU0–3 后台并行启动：local → rates-only →
+   +coref aux → +per-family selection。任务使用 `setsid nohup`、独立 SID/run-dir/log，SSH 仅作观测；
+   下一步按 ALIVE/GONE/SSH-failed 三态监控，成功观测 GONE 后校验并评分；
    ⚠️ 第 4 臂必须从头重跑，**不得回收 r13 的 `best_by_family` 曲线**；
 3. A3 写入真实结果并导出 `status=failed` handoff；旧机制判定不因 v6.1 改写；
 4. 并行开展 R1 中不读取 A3 待出结果的论文/代码矩阵、MAVEN-ARG 跨数据 ID 审计和 Ch1/Ch3
@@ -28,8 +28,9 @@
 
 - local：`main`；P1 r15 为当前可信根（`1e31a9ac…f9655`），A3.6 r16 recipe plan 为
   `3f2f385d…c50be`；执行面提交 `96e2d64`，473 passed / 24 skipped、ruff 0、smoke OK；
-- 4090：**已恢复**，四卡全空、无进程、worktree clean、HEAD 为 `origin/main` 祖先；正式 backbone pin
-  `71be7419…c961ea9` 在此，只有绑定它的结果能进正式主表；
+- 4090：**已恢复**，启动前四卡全空、无进程、worktree clean，随后同步到 `ebb57da`；正式 backbone pin
+  `71be7419…c961ea9` 在此；当前四张卡分别运行 A3.6 r16 的四个冻结臂，首轮观测显存
+  4.38–4.54 GiB、训练日志均已到 epoch 0 / 500 docs，`final_valid_accessed=false`；
 - 5090：`Connection refused`，需 `cpolar-ssh-update`；大产物（21 GB / 961 MB / 2.0 GB）原地保留。
 
 ## 禁止

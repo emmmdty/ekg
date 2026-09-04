@@ -156,7 +156,7 @@ python3 -c "import json; p=json.load(open('data/protocols/v6/registry.json')); p
 [`PHASE_R1_method_design_freeze.md`](phases/PHASE_R1_method_design_freeze.md) 为准。R1 准备可以部分完成，
 但不能在 A3 handoff 和跨产物一致性审计前标 PASS。
 
-### 任务 C：同步 4090 并执行已冻结 A3.6 四臂（当前下一项）
+### 任务 C：同步 4090 并执行已冻结 A3.6 四臂（运行中）
 
 上次观测 4090 可连、worktree clean、四卡空闲，但这是历史快照，开跑前必须重新检查：
 
@@ -178,6 +178,11 @@ T008 已物化四臂 execution plan：
 - P1 binding：r15 / `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`。
 - execution-surface commit：`96e2d64`；完整本地门 473 passed / 24 expected skips、ruff 0、smoke OK。
 
+2026-09-04 18:03（Asia/Taipei）已在 GPU0–3 分别启动四臂。启动前四卡均 0%，P1 远端
+`validate-only` PASS，r15/r16 传输前目标不存在且双端逐文件树 hash 一致。四任务均使用独立
+`setsid nohup`、SID、run-dir 与日志，已与 SSH 会话解耦；首轮观测四个 trainer 均 ALIVE，日志均到
+epoch 0 / 500 docs，`device=cuda`、`final_valid_accessed=false`。
+
 四臂固定：
 
 1. local recipe；
@@ -188,7 +193,7 @@ T008 已物化四臂 execution plan：
 四臂必须显式绑定任务 A 产生的新 P1 bundle ID 和 protocol SHA-256，并保持 seed 13、manifest、候选全集、
 official evaluator、backbone pin、训练预算及除目标开关外的所有配置一致。第 4 臂必须从头训练。
 
-在真正启动前，向作者展示：
+启动前已向作者展示并核对：
 
 - 每一臂的完整 `.venv/bin/python ...` 命令；
 - cwd `/data/TJK/ekg`；
