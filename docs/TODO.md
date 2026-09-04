@@ -18,7 +18,9 @@
    ⚠️ 第 4 臂必须从头重跑，**不得回收 r13 的 `best_by_family` 曲线**；
 3. A3 写入真实结果并导出 `status=failed` handoff；旧机制判定不因 v6.1 改写；
 4. 并行开展 R1 中不读取 A3 待出结果的论文/代码矩阵、MAVEN-ARG 跨数据 ID 审计和 Ch1/Ch3
-   MDE/power；A3 handoff 后完成 Ch2 因果链与整体准入。未通过对应 R1 门不启动 proposed GPU 实验；
+   MDE/power；T012–T017、T019 已完成并记入 [`results/PHASE_R1.md`](results/PHASE_R1.md)：Ch1 功效
+   通过但 baseline/input closure blocked，Ch3 当前 291-document 设计 underpowered，MAVEN-ARG cluster
+   arguments 禁止复制到 ERE mentions。A3 handoff 后完成 Ch2 power 与整体准入；
 5. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
    sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
    这是可修订 plan，不是 SPEC；
@@ -27,11 +29,12 @@
 ## 当前三端
 
 - local：`main`；P1 r15 为当前可信根（`1e31a9ac…f9655`），A3.6 r16 recipe plan 为
-  `3f2f385d…c50be`；执行面提交 `96e2d64`，473 passed / 24 skipped、ruff 0、smoke OK；
+  `3f2f385d…c50be`；R1 审计提交 `8e3eb7a`，481 passed / 24 skipped、ruff 0、smoke OK；
 - 4090：**已恢复**，启动前四卡全空、无进程、worktree clean，随后同步到 `ebb57da`；正式 backbone pin
-  `71be7419…c961ea9` 在此；当前四张卡分别运行 A3.6 r16 的四个冻结臂，首轮观测显存
-  4.38–4.54 GiB、训练日志均已到 epoch 0 / 500 docs，`final_valid_accessed=false`；
-- 5090：`Connection refused`，需 `cpolar-ssh-update`；大产物（21 GB / 961 MB / 2.0 GB）原地保留。
+  `71be7419…c961ea9` 在此；当前四张卡分别运行 A3.6 r16 的四个冻结臂，最近观测全部 ALIVE、显存
+  6.8–7.5 GiB、训练在 epoch 7–8，`final_valid_accessed=false`；
+- 5090：可连接，HEAD `f8f1c9e`；32,607 MiB 中约 12,222 MiB 被既有 Qwen rerank/embed 服务占用，服务
+  不动、checkpoint 不搬。R1 尚未放行 proposed pilot，因此本轮没有为占卡而启动无效训练。
 
 ## 禁止
 

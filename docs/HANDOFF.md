@@ -56,10 +56,11 @@ SPEC。只有研究问题、范围或质量标准改变时才修订 SPEC。
 - 协议代码整改：`23b4fad fix(protocol): centralize P1 manifest and hashing logic`；
 - SDD/方法论整改：`c870ed7 docs(research): separate stable spec from adaptive methodology`；
 - 两个提交均已推送 `origin/main`；本文提交后以新的 `origin/main` HEAD 为准；
-- 本地验证：470 passed / 24 expected skips，ruff 0，`ekg-smoke` OK，P1 local gate PASS；
+- 最新本地验证：481 passed / 24 expected skips，ruff 0，`ekg-smoke` OK，P1 local gate PASS；
 - local gate 的 `tested_tree_sha256`：
   `3bff2ac2b5366ed06ebe81c9b2e549f0949216c832ad8e6098a6782e0c701d3c`；
-- 没有新增 seed，没有访问 final-valid，没有启动 GPU，没有搬运 checkpoint/数据。
+- A3.6 仍只运行已授权 seed 13；R1 功效只读 train-derived internal-dev。跨数据 ID 审计按合同读取了
+  public-valid 结构字段但未计算关系/事实性指标，访问已在 ledger 披露；没有搬运 checkpoint。
 
 ## 2. 已经成立和不得改写的事实
 
@@ -143,6 +144,18 @@ python3 -c "import json; p=json.load(open('data/protocols/v6/registry.json')); p
 本次未发生旧 remote smoke 或 hash 漂移失败，也未重跑 4090 smoke。
 
 ### 任务 B：R1 准备工作（可与任务 A/A3.6 并行，默认 CPU）
+
+T012–T017、T019 已于 2026-09-04 完成，精确数字、hash 和裁决见
+[`results/PHASE_R1.md`](results/PHASE_R1.md)，产物根为 `runs/stages/R1/r1-v61-20260904/`，代码提交
+`8e3eb7a`。当前硬结论：ERE↔FACT 身份闭环；ERE↔ARG mention 仅约 95.4% 覆盖且共享 mention 有父簇
+冲突，故 event-level arguments→mention 的 deployable 路线 blocked；Ch1 prospective power PASS，但缺
+argument-aware 同协议 runnable baseline；Ch3 的 291-document 五类 macro-F1 设计 underpowered，必须先
+冻结 repeated-split/cross-validation 补强；Ch2 T018 等 A3 handoff。
+
+学位类型、入学年份、学科与专业未知项均保持 `null`；同济校级标准来源/date/hash 已冻结，未知项不影响
+项目自定的更高科研硬门。文献矩阵已只读冻结 CorefPrompt、MAVEN-FACT、ModaFact 三个官方仓库 HEAD，
+但没有把不同数据/split/evaluator 的代码误记为同协议 baseline。三个 design brief 均为 blocked/draft，
+**未放行 proposed GPU 训练**。
 
 按 [`TASKS.md`](TASKS.md) 的 T012–T019 执行，但只做不读取 A3 待出结果的部分：
 

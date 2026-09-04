@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Plan Version | `0.1.0` |
+| Plan Version | `0.2.0` |
 | Date | `2026-09-04` |
 | Spec | [`SPEC.md`](SPEC.md) |
 | Status | Working design; method hypotheses remain revisable until their phase protocol is frozen. |
@@ -37,10 +37,10 @@ Detailed evidence and primary-source links are in
 |---|---|---|
 | Research validity | One manifest/candidate/evaluator per comparison; final-valid excluded from selection | PASS |
 | Adaptable design | Candidate mechanisms live here, not in the specification | PASS |
-| Reproducibility | P1 trust root and immutable stage bundles required | CONDITIONAL: current code identity requires P1 rebuild |
+| Reproducibility | P1 trust root and immutable stage bundles required | PASS: P1 r15 and R1 audit hashes frozen |
 | Honest evidence | Existing A3/D3/C4 failures retain identity; oracle inputs remain oracle | PASS |
-| Testable simplicity | Each candidate must define treatment, mediator, outcome, ablation and negative control | CONDITIONAL: R1 briefs pending |
-| Reuse first | Official implementations preferred; fidelity matrix required | CONDITIONAL: R1 code audit pending |
+| Testable simplicity | Each candidate must define treatment, mediator, outcome, ablation and negative control | CONDITIONAL: briefs exist; baseline/power gates remain blocked |
+| Reuse first | Official implementations preferred; fidelity matrix required | BLOCKED for Ch1/Ch2: no second recent same-protocol runnable method |
 
 No proposed-method GPU work is allowed until the conditional items pass.
 
@@ -49,8 +49,8 @@ No proposed-method GPU work is allowed until the conditional items pass.
 The plan is grounded in these primary-source observations:
 
 - MAVEN-ERE treats event identity and multiple relation types as interacting structure rather than independent labels.
-- MAVEN-ARG makes document-level argument supervision available in the MAVEN family, but cross-version ID coverage must
-  be measured before use.
+- MAVEN-ARG makes event-cluster argument supervision available, but the R1 full audit found incomplete ERE mention
+  coverage and conflicting parent clusters. It cannot be copied into a deployable mention-local identity input.
 - CorefPrompt supports event-type and argument compatibility as useful identity signals.
 - RESIJ uses rich event structures and cross-relation constraints; the method frontier is beyond fixed family weights.
 - TacoERE, KnowQA and 2025 two-stage ERE motivate pair-specific compression, evidence or retrieval, but their split and
@@ -72,7 +72,9 @@ event-level gold-argument oracle has signal but leaks cluster identity when copi
 **Candidate hypothesis**: A mention-local argument-role posterior, aligned across mention pairs and weighted by predictive
 uncertainty, reduces false merges among lexically similar occurrences.
 
-**Candidate treatment**: predicted argument distributions + role alignment + uncertainty-aware pair/clustering risk.
+**Candidate treatment**: role posteriors from a frozen mention-local semantic-role extractor that is independent of
+MAVEN-ARG cluster gold, followed by role alignment and uncertainty-aware pair/clustering risk. Missing extraction is an
+explicit state, never a fallback to event-level arguments.
 
 **Required mediator**: pre-registered false-merge and calibration behavior on ambiguous/cross-sentence slices.
 
@@ -99,18 +101,19 @@ random/window evidence; no structural constraint.
 ### Factuality study
 
 **Observed problem**: Existing evidence-conditioned systems are not statistically separated from strong baselines, and a
-gold-evidence oracle does not reveal a sufficiently large remaining evidence-location ceiling.
+gold-evidence oracle does not reveal a sufficiently large remaining evidence-location ceiling. R1 prospective simulation
+also finds the current 291-document five-class design underpowered for the registered minimum meaningful effect.
 
 **Candidate hypothesis**: Separating evidence sufficiency/unknown, modality and polarity decisions with typed cue spans
 reduces structured confusions that a pooled five-class head cannot express.
 
-**Candidate treatment**: typed cue extraction + `known/unknown → modality → polarity` factorization with a consistent
-five-class output distribution.
+**Candidate treatment**: certainty/polarity factorization plus a cue-conditioned residual and consistent five-class
+output distribution. Better evidence location alone is explicitly not the treatment.
 
 **Required mediator**: pre-registered changes in unknown, modality-only and polarity-only confusion categories.
 
-**Minimum causal matrix**: primary anchor; official evidence pipeline; proposed; flat five-class head; parallel dual head;
-no typed cues; no sufficiency gate.
+**Minimum causal matrix**: primary anchor; official evidence pipeline; proposed; flat five-class head; cue-permutation
+negative control. This matrix cannot run until stratified repeated-split or cross-validation manifests are frozen.
 
 ### System evaluation
 
@@ -196,7 +199,7 @@ Any such specification amendment requires the constitution governance process an
 ## Open Design Questions for R1
 
 - Which degree-type/admission-year standard applies administratively?
-- Does the current MAVEN-ARG version align losslessly with the frozen ERE/FACT assets?
+- Which frozen mention-local semantic-role extractor can cover MAVEN-ERE without MAVEN-ARG cluster supervision?
 - Which recent strong methods have accessible official code/checkpoints and compatible licenses?
 - Is a hidden official evaluation route available? If not, which external or repeated-split validation offers adequate
   power without contaminating final-valid?

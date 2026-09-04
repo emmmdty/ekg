@@ -53,20 +53,20 @@ Proposed-method implementation tasks are intentionally not generated until R1 ap
 
 **Purpose**: Produce evidence-backed plans without locking the specification to a solution.
 
-- [ ] **T012 [P]** Record degree type, admission year and the applicable university/discipline standard in the R1
+- [x] **T012 [P]** Record degree type, admission year and the applicable university/discipline standard in the R1
   provenance artifact → official source/version/applicability are explicit; unknown values remain `null`.
-- [ ] **T013 [P] [RS-001]** Build the identity-study primary-paper and official-code matrix → at least three direct strong
+- [x] **T013 [P] [RS-001]** Build the identity-study primary-paper and official-code matrix → at least three direct strong
   method families have split/input/scorer/code-fidelity fields.
-- [ ] **T014 [P] [RS-002]** Build the relation-study primary-paper and official-code matrix → official joint, 2025
+- [x] **T014 [P] [RS-002]** Build the relation-study primary-paper and official-code matrix → official joint, 2025
   two-stage ERE, RESIJ and TacoERE/KnowQA coverage or documented replacement.
-- [ ] **T015 [P] [RS-003]** Build the factuality-study primary-paper and official-code matrix → official MAVEN-FACT,
+- [x] **T015 [P] [RS-003]** Build the factuality-study primary-paper and official-code matrix → official MAVEN-FACT,
   DMRoBERTa and structured modality/factuality coverage or documented replacement.
-- [ ] **T016 [RS-001]** Audit MAVEN-ERE/ARG/FACT document, event, mention, offset and role identities with fail-fast
+- [x] **T016 [RS-001]** Audit MAVEN-ERE/ARG/FACT document, event, mention, offset and role identities with fail-fast
   fixtures → full coverage/ambiguity report and version hashes; no silent mapping.
-- [ ] **T017 [P] [RS-001]** Generate prospective identity power/MDE analysis from frozen per-document anchor outputs →
+- [x] **T017 [P] [RS-001]** Generate prospective identity power/MDE analysis from frozen per-document anchor outputs →
   fixed RNG, raw power table, 80% target and minimum meaningful effect.
 - [ ] **T018 [P] [RS-002]** Generate prospective relation power/MDE analysis → same evidence requirements as T017.
-- [ ] **T019 [P] [RS-003]** Generate prospective factuality power/MDE analysis including rare-class limitations → same
+- [x] **T019 [P] [RS-003]** Generate prospective factuality power/MDE analysis including rare-class limitations → same
   evidence requirements as T017 plus a legal evidence-strengthening path.
 - [ ] **T020 [RS-001]** Write the identity causal design brief (treatment, mediator, outcome, negative control, ablations,
   guardrails, stop) → constitution/spec traceability review passes.

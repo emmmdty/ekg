@@ -13,6 +13,7 @@
 | [`PHASE_C.md`](PHASE_C.md) | Ch1 | 调度修复稳定底座，但两个机制周期均未超过种子噪声，当前方法贡献为零 |
 | [`PHASE_D.md`](PHASE_D.md) | Ch3 | evidence 点估计最高但与两条同协议强线不可区分；证据轴信号更强 |
 | [`PHASE_E.md`](PHASE_E.md) | Ch4 | 图依赖正控通过；构建损失为整张图价值的 22%，图侧修复仍在噪声内 |
+| [`PHASE_R1.md`](PHASE_R1.md) | 方法准入 | Ch1 功效通过但 baseline/input blocked；Ch3 当前设计 underpowered；Ch2 等 A3 handoff |
 
 ## 读之前要知道的三条
 
