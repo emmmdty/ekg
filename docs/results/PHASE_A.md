@@ -1142,6 +1142,24 @@ ATLoss 在当前三族单标签、全候选设置中复现了“无外部 class 
 temporal=2、causal=4、subevent=4，coref aux=.4。1 epoch 三族 F1=0 属于 smoke 欠训状态，
 不进入任何主表或方法判断。
 
+### A3.6 正式四臂冻结（2026-09-04，尚未产生指标）
+
+执行面提交 `96e2d64` 增加不可变四臂 launcher，并补齐逐族 checkpoint 的正确评分路径：第 4 臂分别用
+causal/subevent/temporal 各自从头训练所选 epoch 的共享 encoder + heads 推理，只合并对应族的边；不得把
+任一单 checkpoint 的三族预测冒充逐族选模。CPU 回归 473 passed / 24 expected skips、ruff 0、
+`ekg-smoke` OK。
+
+| 项 | 冻结身份 |
+|---|---|
+| P1 | `p1-v6-20260904-r15` / `1e31a9ac…f9655` |
+| preflight | `runs/stages/A3/a3-v6-recipe-accounting-r16/preflight/` |
+| base plan SHA-256 | `ea377af87afa37fac86d267501c0c8c6a9bb97cd7b8614d4fb875a0e8fce5a82` |
+| recipe plan SHA-256 | `3f2f385dbf010e33ad67c9c24ba8aafaadce01000108655f53258b971e3c50be` |
+| shared protocol | seed 13、50 epochs、完整候选、official evaluator、内容寻址 roberta-base |
+
+四臂仅依次改变 loss rates 1/1/1→2/4/4、coref auxiliary 0→.4、macro checkpoint→per-family
+checkpoint；formal run 尚未启动，故本节没有科研数字，final-valid 未访问。
+
 产物留在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/A3/`
 `a3-v6-recipe-accounting-r1-exploratory/smoke/seed-13/`；日志
 `logs/a3_recipe_accounting_r1_smoke_s13.log`。运行时发现日志累计使用 `float(loss)` 会触发 PyTorch

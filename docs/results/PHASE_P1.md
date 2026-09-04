@@ -9,13 +9,31 @@
 - P1 phase/status 为 `pass`，P1.1–P1.6 全部闭合；
 - 允许进入 A3.0 baseline 解析与同协议 GPU 实验；D3/C4/E3 的章节本地前置仍按各自契约后置。
 
-当前权威 bundle：`runs/stages/P1/p1-v6-20260831-r12/`；可信 `protocol.json` SHA-256 为
-`0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497`。其四件套已由
+当前权威 bundle：`runs/stages/P1/p1-v6-20260904-r15/`；可信 `protocol.json` SHA-256 为
+`1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`。其四件套已由
 `ekg.core.stage_bundle.validate_stage_bundle` 使用该外部可信根重读通过。先建的 r1 因 A3 precheck 发现
 本地/远端 run-dir 混用而失效；r2 因缺少 execution-plan 外部 hash 而失效；r3 在 clean 远端复验时暴露
 local gate 绑定了本地 dirty-tree Python 文件数，不能代表已推送提交。r4 在 detached clean `53ce6f1` 上
 重跑门禁后生成。r9–r12 依次绑定 temporal、trainer、balance controller 与逐位置实现；旧 bundle 均保留
 作审计，未被覆盖或继续选用。
+
+## r15 · A3.6 官方训练配方分账准入（2026-09-04）
+
+`455c9a2` 时的 P1 受控面在本地重新执行完整门禁：470 passed / 24 expected skips、
+ruff 0、`ekg-smoke` OK，`scripts/run_p1_local_gate.py` PASS。随后新建 r15（未覆盖 r12/r14）并以
+外部 SHA-256 再次 `--validate-only`，结果为 `global_protocol_status=pass`、
+`a3_entry_status=pass`。
+
+| 项 | 值 |
+|---|---|
+| P1 bundle | `runs/stages/P1/p1-v6-20260904-r15/` |
+| `protocol.json` SHA-256 | `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655` |
+| local gate | 470 passed / 24 skipped；ruff 0；smoke OK |
+| code hash 覆盖 | `src/ekg/core/protocol.py`、`scripts/train_supervised_relations.py` 均在集合中 |
+| final-valid | 未访问 |
+
+r15 只更新当前 P1 受控代码身份；后续 `96e2d64` 只增加 A3.6 执行面与评分接线，不改变 P1 `CODE_PATHS`。
+r12 仍是历史 A3.2 正式结果的不可变可信根，旧结果不重绑到 r15。
 
 ## P1.1/P1.2：manifest 与 source
 

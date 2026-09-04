@@ -11,8 +11,10 @@
 
 ## 下一步
 
-1. 在 4090 同步已验证的 `origin/main`，并基于最终 HEAD **重建 P1 trust root**（trainer 属 `CODE_PATHS`）；
-2. 用冻结 seed 13 分账 official recipe：local → rates-only → +coref aux → +per-family selection；
+1. P1 r15 已在本地重建并外部复验；A3.6 r16 四臂 plan 已冻结。下一步提交/推送执行面，检查 4090
+   worktree/GPU，同步 `origin/main`，并传输 r15 与 r16 preflight（双端 SHA-256）；
+2. 用冻结 seed 13 分账 official recipe：local → rates-only → +coref aux → +per-family selection；四卡空闲时
+   可各占一张卡并行，逐族臂必须用三套从头训练的 family checkpoint 分别推理后合并；
    ⚠️ 第 4 臂必须从头重跑，**不得回收 r13 的 `best_by_family` 曲线**；
 3. A3 写入真实结果并导出 `status=failed` handoff；旧机制判定不因 v6.1 改写；
 4. 并行开展 R1 中不读取 A3 待出结果的论文/代码矩阵、MAVEN-ARG 跨数据 ID 审计和 Ch1/Ch3
@@ -24,8 +26,8 @@
 
 ## 当前三端
 
-- local：`main`；470 passed / 24 skipped、ruff 0、smoke OK，P1 local gate PASS；本轮 SDD/方法论审计与
-  P1 单一事实源整改已按逻辑单元提交并推送；
+- local：`main`；P1 r15 为当前可信根（`1e31a9ac…f9655`），A3.6 r16 recipe plan 为
+  `3f2f385d…c50be`；执行面提交 `96e2d64`，473 passed / 24 skipped、ruff 0、smoke OK；
 - 4090：**已恢复**，四卡全空、无进程、worktree clean、HEAD 为 `origin/main` 祖先；正式 backbone pin
   `71be7419…c961ea9` 在此，只有绑定它的结果能进正式主表；
 - 5090：`Connection refused`，需 `cpolar-ssh-update`；大产物（21 GB / 961 MB / 2.0 GB）原地保留。

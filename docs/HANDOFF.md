@@ -95,33 +95,34 @@ R1 无依赖准备任务 ──────────────────�
 C5/A4/D4 之间没有被 SPEC 固定顺序。R1 未发现真实数据/模型依赖时，可以重排或占不同 GPU 并行；E3
 必须等待三类所需上游 handoff。多种子始终需作者再次明确授权。
 
-### 任务 A：本地重建 P1 trust root（下一项，可直接执行）
+### 任务 A：本地重建 P1 trust root（已完成）
 
-本地 `data/protocols/v6/registry.json` 目前可能指向历史 r14；正式 A3 历史结果引用 r12。**两者都不能
-自动当作本轮最终可信根。** 新窗口必须创建新 bundle，不覆盖旧目录。
+本轮已创建新 bundle，未覆盖旧目录：`runs/stages/P1/p1-v6-20260904-r15/`；其
+`protocol.json` SHA-256 为 `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`。
+外部重哈希、`--validate-only` 与 registry 三方一致，状态 `pass/pass`；精确记录见
+[`results/PHASE_P1.md`](results/PHASE_P1.md)。历史 A3 结果仍引用 r12，不重绑。
 
-先重新生成当前代码身份的 local gate：
+本轮实际执行命令如下，保留作复现记录：
 
 ```bash
 cd /home/tjk/myProjects/masterProjects/ekg
 uv run python scripts/run_p1_local_gate.py
 ```
 
-预期：三件套均通过，更新 `data/protocols/v6/local_gate.json`；docs 改动不会改变被测代码集合。然后确认
-目标目录不存在：
+三件套均通过，`data/protocols/v6/local_gate.json` 无身份漂移；随后确认目标目录不存在：
 
 ```bash
 test ! -e runs/stages/P1/p1-v6-20260904-r15
 ```
 
-再创建并内部验证新 bundle：
+创建并内部验证新 bundle：
 
 ```bash
 uv run python scripts/build_p1_bundle.py \
   --bundle runs/stages/P1/p1-v6-20260904-r15
 ```
 
-完成后独立查看并验证身份：
+最后独立查看并验证身份：
 
 ```bash
 sha256sum runs/stages/P1/p1-v6-20260904-r15/protocol.json
@@ -139,8 +140,7 @@ python3 -c "import json; p=json.load(open('data/protocols/v6/registry.json')); p
 - 新 bundle 与 r12/r14 并存，旧结果身份不被覆盖；
 - 新根及其 hash 写入 [`results/PHASE_P1.md`](results/PHASE_P1.md)，其他文档只引用。
 
-如果构建因旧 remote smoke 或任一 hash 漂移失败，诚实标记失败并核对依赖；不能删校验或手改 hash 让它
-通过。需要重新跑 4090 smoke 时，先展示确切命令、cwd 与预期产物。
+本次未发生旧 remote smoke 或 hash 漂移失败，也未重跑 4090 smoke。
 
 ### 任务 B：R1 准备工作（可与任务 A/A3.6 并行，默认 CPU）
 
@@ -156,7 +156,7 @@ python3 -c "import json; p=json.load(open('data/protocols/v6/registry.json')); p
 [`PHASE_R1_method_design_freeze.md`](phases/PHASE_R1_method_design_freeze.md) 为准。R1 准备可以部分完成，
 但不能在 A3 handoff 和跨产物一致性审计前标 PASS。
 
-### 任务 C：同步 4090 并冻结 A3.6 四臂（需先完成任务 A）
+### 任务 C：同步 4090 并执行已冻结 A3.6 四臂（当前下一项）
 
 上次观测 4090 可连、worktree clean、四卡空闲，但这是历史快照，开跑前必须重新检查：
 
@@ -170,7 +170,15 @@ ssh gpu-4090 'cd /data/TJK/ekg && git status --short && git branch --show-curren
 ssh gpu-4090 'cd /data/TJK/ekg && git fetch origin main && git reset --hard origin/main'
 ```
 
-随后按 T008 先物化四臂 execution plan，四臂固定：
+T008 已物化四臂 execution plan：
+
+- preflight：`runs/stages/A3/a3-v6-recipe-accounting-r16/preflight/`；
+- base plan SHA-256：`ea377af87afa37fac86d267501c0c8c6a9bb97cd7b8614d4fb875a0e8fce5a82`；
+- recipe plan SHA-256：`3f2f385dbf010e33ad67c9c24ba8aafaadce01000108655f53258b971e3c50be`；
+- P1 binding：r15 / `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`。
+- execution-surface commit：`96e2d64`；完整本地门 473 passed / 24 expected skips、ruff 0、smoke OK。
+
+四臂固定：
 
 1. local recipe；
 2. rates-only：temporal/causal/subevent = 2/4/4；

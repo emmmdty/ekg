@@ -36,9 +36,9 @@ Proposed-method implementation tasks are intentionally not generated until R1 ap
 
 - [x] **T006 [RS-002]** Commit and push the validated code/docs as logical units → local/remote commit identities are
   recorded and worktree has no unintended changes.
-- [ ] **T007 [RS-002]** Rebuild the P1 trust root from the final commit and independently rehash it → new bundle validates
+- [x] **T007 [RS-002]** Rebuild the P1 trust root from the final commit and independently rehash it → new bundle validates
   externally and the old P1 remains immutable.
-- [ ] **T008 [RS-002]** Freeze the A3.6 four-arm command/config matrix using one seed and identical data/candidates/
+- [x] **T008 [RS-002]** Freeze the A3.6 four-arm command/config matrix using one seed and identical data/candidates/
   evaluator/backbone/budget → matrix review shows only the intended recipe variables differ.
 - [ ] **T009 [RS-002]** Present exact 4090 command, cwd, GPU selection check and expected artifacts to the user before
   launch → pre-run record exists; no long job starts implicitly.
