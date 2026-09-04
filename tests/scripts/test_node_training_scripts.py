@@ -272,6 +272,36 @@ def test_relation_family_loss_rates_are_explicit_and_complete() -> None:
     assert "args.coref_aux_rate * coref_loss" in source
 
 
+def test_a3_recipe_matrix_changes_only_preregistered_training_axes() -> None:
+    module = _load("freeze_a3_recipe_accounting")
+    differences = {
+        arm: {
+            "family_loss_rates": spec["family_loss_rates"],
+            "coref_aux_rate": spec["coref_aux_rate"],
+            "save_best_by_family": spec["save_best_by_family"],
+        }
+        for arm, spec in module.ARMS.items()
+    }
+
+    assert list(differences) == [
+        "local_recipe",
+        "rates_only",
+        "rates_coref",
+        "rates_coref_family_selection",
+    ]
+    assert differences["local_recipe"] == {
+        "family_loss_rates": "temporal=1,causal=1,subevent=1",
+        "coref_aux_rate": 0.0,
+        "save_best_by_family": False,
+    }
+    assert differences["rates_only"]["family_loss_rates"] == (
+        "temporal=2,causal=4,subevent=4"
+    )
+    assert differences["rates_only"]["coref_aux_rate"] == 0.0
+    assert differences["rates_coref"]["coref_aux_rate"] == 0.4
+    assert differences["rates_coref_family_selection"]["save_best_by_family"] is True
+
+
 def test_maven_arg_and_ere_share_document_ids() -> None:
     """The two corpora are the same documents with different annotation layers.
 

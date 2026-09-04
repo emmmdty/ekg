@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from run_a3_baseline import normalize_predictions  # noqa: E402
 
+from ekg.core.schema import RelationEdge  # noqa: E402
 from ekg.relations.extractor.supervised import checkpoint_active_families  # noqa: E402
 
 FAMILIES = ("causal", "subevent", "temporal")
@@ -36,6 +37,56 @@ def run(argv: list[str], log: Path) -> None:
         completed = subprocess.run(argv, stdout=fh, stderr=subprocess.STDOUT, text=True)
     if completed.returncode != 0:
         raise SystemExit(f"{argv[1]} returned {completed.returncode}; see {log}")
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    return [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line
+    ]
+
+
+def merge_family_predictions(family_paths: dict[str, Path], output: Path) -> None:
+    """Combine only the selected family from each family-specific checkpoint.
+
+    Each checkpoint contains all three heads and a shared encoder snapshot from
+    the epoch selected for one family.  Taking every edge from any one snapshot
+    would therefore not implement per-family checkpoint selection.
+    """
+    if set(family_paths) != set(FAMILIES):
+        raise ValueError(f"family prediction set must be exactly {sorted(FAMILIES)}")
+    records = {family: _read_jsonl(path) for family, path in family_paths.items()}
+    reference_ids: list[str] | None = None
+    by_family: dict[str, dict[str, dict]] = {}
+    for family in FAMILIES:
+        indexed: dict[str, dict] = {}
+        ordered_ids: list[str] = []
+        for row in records[family]:
+            doc_id = row.get("doc_id")
+            if not isinstance(doc_id, str) or doc_id in indexed:
+                raise ValueError(f"invalid/duplicate {family} prediction document: {doc_id}")
+            indexed[doc_id] = row
+            ordered_ids.append(doc_id)
+        if reference_ids is None:
+            reference_ids = ordered_ids
+        elif ordered_ids != reference_ids:
+            raise ValueError(f"{family} prediction document order/set differs")
+        by_family[family] = indexed
+
+    merged: list[dict] = []
+    for doc_id in reference_ids or []:
+        selected_edges: list[dict] = []
+        for family in FAMILIES:
+            for item in by_family[family][doc_id].get("edges", []):
+                edge = RelationEdge.model_validate(item)
+                if edge.relation_type.value == family:
+                    selected_edges.append(item)
+        merged.append({"doc_id": doc_id, "edges": selected_edges})
+    output.write_text(
+        "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in merged),
+        encoding="utf-8",
+    )
 
 
 def main() -> int:
@@ -52,6 +103,11 @@ def main() -> int:
     parser.add_argument(
         "--source-lock", type=Path, default=Path("data/protocols/v6/source_lock.json")
     )
+    parser.add_argument(
+        "--per-family-checkpoints",
+        action="store_true",
+        help="score checkpoint/by_family/<family> and combine only that family's edges",
+    )
     args = parser.parse_args()
 
     checkpoint = args.run_dir / "checkpoint"
@@ -62,24 +118,53 @@ def main() -> int:
     official = args.run_dir / "official_predictions.jsonl"
     metrics = args.run_dir / "official_metrics.json"
 
-    run(
-        [
+    def inference_argv(selected_checkpoint: Path, raw: Path, metrics: Path) -> list[str]:
+        return [
             sys.executable, "-u", "scripts/evaluate_relations.py",
             "--config", str(args.config),
             "--path", str(args.gold),
-            "--checkpoint-path", str(checkpoint),
-            "--dump-predictions", str(edges),
-            "--output", str(args.run_dir / "native_metrics.json"),
-        ],
-        log,
-    )
+            "--checkpoint-path", str(selected_checkpoint),
+            "--dump-predictions", str(raw),
+            "--output", str(metrics),
+        ]
+
+    if args.per_family_checkpoints:
+        family_paths: dict[str, Path] = {}
+        for family in FAMILIES:
+            selected = checkpoint / "by_family" / family
+            selection = selected / "selection.json"
+            if not (selected / "heads.pt").is_file() or not selection.is_file():
+                raise SystemExit(f"missing selected {family} checkpoint under {selected}")
+            selection_payload = json.loads(selection.read_text(encoding="utf-8"))
+            if selection_payload.get("family") != family:
+                raise SystemExit(f"selection metadata mismatch under {selected}")
+            raw = args.run_dir / f"edge_predictions.{family}.jsonl"
+            run(
+                inference_argv(
+                    selected,
+                    raw,
+                    args.run_dir / f"native_metrics.{family}.json",
+                ),
+                log,
+            )
+            family_paths[family] = raw
+        merge_family_predictions(family_paths, edges)
+    else:
+        run(
+            inference_argv(checkpoint, edges, args.run_dir / "native_metrics.json"),
+            log,
+        )
     normalize_predictions(
         baseline="local_pair",
         raw_path=edges,
         gold_path=args.gold,
         output=official,
         candidate_digest=args.candidate_digest,
-        active_families=checkpoint_active_families(checkpoint),
+        active_families=(
+            FAMILIES
+            if args.per_family_checkpoints
+            else checkpoint_active_families(checkpoint)
+        ),
     )
     run(
         [

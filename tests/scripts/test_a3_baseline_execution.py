@@ -26,6 +26,7 @@ def _load_script(name: str):
 
 prepare = _load_script("prepare_a3_baselines")
 launcher = _load_script("run_a3_baseline")
+scorer = _load_script("score_a3_arm")
 
 
 def _records(path: Path) -> list[dict]:
@@ -110,6 +111,57 @@ def test_local_normalizer_gates_on_the_checkpoint_declared_families() -> None:
     )
     assert payload["temporal_relations"]["BEFORE"] == [["m1", "m2"]]
     assert payload["causal_relations"]["CAUSE"] == []
+
+
+def test_per_family_checkpoint_predictions_keep_only_selected_family(
+    tmp_path: Path,
+) -> None:
+    paths = {}
+    doc_ids = [row["id"] for row in _records(_GOLD)]
+    for selected_family in scorer.FAMILIES:
+        path = tmp_path / f"{selected_family}.jsonl"
+        with path.open("w", encoding="utf-8") as fh:
+            for doc_id in doc_ids:
+                edges = [
+                    {
+                        "head_id": f"{doc_id}::m1",
+                        "tail_id": f"{doc_id}::m2",
+                        "relation_type": family,
+                        "subtype": {
+                            "causal": "CAUSE",
+                            "subevent": "SUBEVENT_OF",
+                            "temporal": "BEFORE",
+                        }[family],
+                        "directed": True,
+                        "confidence": 0.9,
+                    }
+                    for family in scorer.FAMILIES
+                ]
+                fh.write(json.dumps({"doc_id": doc_id, "edges": edges}) + "\n")
+        paths[selected_family] = path
+
+    output = tmp_path / "merged.jsonl"
+    scorer.merge_family_predictions(paths, output)
+
+    for row in _records(output):
+        assert [edge["relation_type"] for edge in row["edges"]] == list(scorer.FAMILIES)
+
+
+def test_per_family_checkpoint_predictions_require_identical_document_order(
+    tmp_path: Path,
+) -> None:
+    paths = {}
+    for family in scorer.FAMILIES:
+        path = tmp_path / f"{family}.jsonl"
+        doc_ids = ["d1", "d2"] if family != "subevent" else ["d2", "d1"]
+        path.write_text(
+            "".join(json.dumps({"doc_id": doc_id, "edges": []}) + "\n" for doc_id in doc_ids),
+            encoding="utf-8",
+        )
+        paths[family] = path
+
+    with pytest.raises(ValueError, match="document order/set differs"):
+        scorer.merge_family_predictions(paths, tmp_path / "merged.jsonl")
 
 
 def test_model_path_adaptation_is_exact_and_traceable(tmp_path: Path) -> None:
