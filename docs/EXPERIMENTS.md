@@ -1,5 +1,8 @@
 # EKG v6 实验协议
 
+> 本文是可修订的实验设计层，不是稳定 SPEC，也不是结果单一事实源。表中的候选方法与 baseline roster
+> 必须经 R1 文献/代码/协议审查后才能冻结；历史分数与 PASS/FAIL 只认 [`results/`](results/README.md)。
+
 > 本文件只定义 baseline、消融、统计和结果 schema。研究约束以 [`SPEC.md`](SPEC.md) 为准，活动顺序以
 > [`phases/`](phases/README.md) 为准，实验数字只写入 [`results/`](results/README.md)。
 
@@ -65,46 +68,39 @@ baseline 纳入数量与必须胜过数量分别报告。
 ### 3.1 主指标
 
 - headline：causal positive-class micro P/R/F1；
-- mandatory guardrail：subevent P/R/F1；
+- mandatory guardrail：subevent 与 temporal P/R/F1；
 - diagnostics：同句/跨句分层、方向/类型违反；
-- temporal：TIMEX 输入闭环前只作诊断，不进入贡献主表。
+- candidate universe：三族输入口径和 TIMEX 开关成对冻结，任何方法不得在评测时裁掉候选。
 
 ### 3.2 Baseline 矩阵
 
-| 方法 | 角色 | 输入要求 | v6 状态 |
+| 候选方法族 | 角色 | R1 必核条件 |
 |---|---|---|---|
-| 本地 sentence/pair classifier | 经典可执行底座 | gold mentions、触发词/句子 | 已有代码；P1 重跑 |
-| MAVEN-ERE official single | 原文强锚 | gold mentions、官方 pair/scorer | checkout/patch/schema smoke 已闭合；A3 GPU 待跑 |
-| official joint | 联合学习必含对照 | 同四任务输入 | checkout/路径适配/schema smoke 已闭合；A3 GPU 待跑 |
-| RESIJ | 结构/图传播可选对照 | 仅在公开实现或忠实复现闭环时纳入 | 论文存在；公开代码 UNVERIFIED |
+| 本地 sentence/pair classifier | 经典可执行底座 | gold mentions、全候选、三族训练/推理开关一致 |
+| MAVEN-ERE official single | 原文单任务复现 | 官方输入、checkpoint、pair 与 scorer 忠实度 |
+| MAVEN-ERE official joint | 联合结构强锚候选 | 四任务输入、官方配方和 scorer 忠实度 |
+| 2025 two-stage document ERE | 近期 evidence/retrieval 强方法族 | 采样子集与本项目完整候选协议的差异；需统一重跑 |
+| RESIJ | rich structure / graph propagation | 官方实现可得性；无法忠实复现时不可伪装成已运行对照 |
+| TacoERE / KnowQA | compression / structure QA 对照候选 | 输入前提、关系覆盖和 scorer 可比性 |
 
-P1 必须闭合本地 pair、official single、official joint；主表至少三个代表方法。A3 的 primary-eligible 强
-roster 是 official single/joint，本地 pair 只作代表底座。RESIJ 是可选多样性对照，不阻塞 A3。
-causal `primary anchor` 仍按 official single/joint 的三种子 internal-dev mean 选择；subevent 护栏不得引用
-可能没有 subevent 输出的 official single，固定以 official joint 的 matched-seed mean 为参照，非劣 margin
-为 1.0 F1 point。
-official joint 已使用手调固定任务 loss factors，因此 fixed-weight/grid search 不能作为 family balance 创新。
-本地 pair 的 v6 确认性 loss 与 checkpoint selection 只覆盖 causal/subevent；generic extractor 必须读取
-checkpoint `run_metadata.json` 的 active families，禁止未训练 temporal head 产生预测。三个 baseline 都须经
-完整推理→official schema 归一化→固定 evaluator；只有 checkpoint 或 upstream raw output 不算闭环。
+R1 冻结至少多个可运行、机制不同的强方法族以及 primary-anchor selection rule。论文不同 split 分数只进
+背景表；所有主表方法必须完成推理→official schema→固定 evaluator。official recipe 修正、fixed family
+weights 或 checkpoint 选族只算 reproduction，不算本项目方法贡献。
 
 ### 3.3 我们的方法与消融
 
-| 变体 | 目的 | 单变量要求 |
+| 候选变体 | 目的 | 单变量要求 |
 |---|---|---|
-| reproduction base | 共享长窗口 + 正确训练协议 | 不算创新 |
-| `+ adaptive family balance` | 归一化族风险、自适应梯度或等价非固定机制 | 核心；其余配置冻结 |
-| `+ type representation` | 使用事件类型信息 | 二级；类型词表随 checkpoint |
-| `+ direction constraint` | 抑制不合法方向 | 二级；candidate population 不变 |
-| 句级替代窗口 | 证明长上下文必要性 | 同训练预算 |
-| ModernBERT-base transfer | 检查方法是否只对旧 backbone 有效 | reproduction/proposed 对称替换、同 512 window；不计核心创新 |
+| protocol-aligned base | 全候选、正确 official recipe | reproduction，不算创新 |
+| `+ pair evidence` | 为每个 pair 选择可核证 evidence | 不能移除评测候选 |
+| `+ sufficiency/abstention risk` | 对证据不足和跨句误报显式建模 | 核心候选；evidence 表示冻结 |
+| random/window evidence | 检验是否只是增加 token/窗口 | mediator negative control |
+| `- relation-aware constraint` | 检验结构约束的独立作用 | 二级单变量消融 |
+| backbone/context transfer | 检验机制迁移性 | base/proposed 对称；不计核心创新 |
 
-两个有效核心设计周期只计已经过实现/测试/协议 smoke 的 family-balance 设计。type/direction 失败时删除
-对应 claim，不阻断核心 promotion。promotion 同时看 causal 与 subevent 的预注册非劣界；只提升 causal、
-持续牺牲 subevent 不算通过。
-RoBERTa-base 保留为 MAVEN-ERE official recipe 与主因果识别表的共同 backbone。核心机制 seed-13 通过后，
-用固定 revision 的 ModernBERT-base 对 reproduction/proposed 做对称迁移；先保持 512 window，8k context
-只作为独立长度消融，不能把 backbone 或 context 增益计入 family-balance 贡献。
+该矩阵只是 R1 的起点。A3 已失败的 family workpoint、近似 retriever、prototype 与 ATLoss 不得换名复活；
+检索/hard negatives 可作为训练或 evidence 实现，但单独不构成新方法。R1 必须证明新 treatment 能改变
+预注册的跨句 causal FP/sufficiency 中介，同时保持 recall、subevent 与 temporal 护栏。
 
 ## 4. Ch3：事实性与证据
 
@@ -117,30 +113,31 @@ RoBERTa-base 保留为 MAVEN-ERE official recipe 与主因果识别表的共同 
 
 ### 4.2 Baseline 矩阵
 
-| 方法 | 角色 | v6 状态 |
+| 候选方法族 | 角色 | R1 必核条件 |
 |---|---|---|
-| majority / lexicon | 下界 | 已有代码/结果；不计强对手 |
-| RoBERTa+CLS | 必选同底座强 baseline | 待 internal-dev 闭合；sealed final 后跑 |
-| DMRoBERTa | 动态多池化必含强 baseline | 待忠实复现并先闭合 internal-dev |
-| DMBERT | 预登记替代 | 仅在 DMRoBERTa 两轮工程修复失败时启用 |
-| GenEFD | 生成式架构可选对照 | 非主表闭合前置 |
+| majority / lexicon | 解释性下界 | 不计强对手 |
+| RoBERTa+CLS | 同底座强 baseline | 五类同 split 主指标和选模忠实度 |
+| DMRoBERTa / 合法预登记替代 | 表示学习强方法族 | 官方实现、输入与 scorer 忠实度 |
+| MAVEN-FACT official pipeline | label→evidence 公开对照 | 五类与 evidence 两轴完整复现 |
+| ModaFact / 结构化模态方法 | modality/factuality 结构对照候选 | 数据标签映射、代码和同协议可运行性 |
 
-主表必含 RoBERTa+CLS 与 DMRoBERTa 两个强机制对照；DMRoBERTa 不能闭环时才按预登记规则替换为
-DMBERT。最终须按主锚规则胜出；majority/lexicon 不计强对手，隐藏-test 论文数字不参与胜负判断。
+最终 roster 由 R1 依据公开实现和协议忠实度冻结。majority/lexicon 不计强对手，隐藏-test 论文数字不参与
+胜负判断；无法运行的方法必须注明 fidelity 边界并由另一强方法替代，不能降为只胜简单下界。
 
 ### 4.3 我们的方法与消融
 
-| 变体 | 条件路径 | 用途 |
+| 候选变体 | 条件路径 | 用途 |
 |---|---|---|
-| parallel heads | 无相互条件 | reproduction/消融 base |
-| evidence → label | evidence 条件化五类预测 | Mechanism 1 |
-| label → evidence | label posterior 条件化 span | 公开 pipeline reproduction/二级机制 |
-| bidirectional | 双向条件耦合 | 可选扩展，不是章节成立前提 |
-| no structure | 去关系/论元输入 | 结构副消融 |
+| flat five-class head | pooled 表示直接分类 | 同底座 base |
+| `+ typed cue spans` | 显式否定、模态、条件、来源与作用域 | 证据表示候选 |
+| `+ known/unknown sufficiency` | 先判断是否有足够证据 | Uu/证据中介候选 |
+| modality→polarity factorization | 分解结构化标签决策 | 核心候选；输出仍映射公共五类 |
+| no/random cues | 移除语义或保持 token 数 | mediator negative control |
+| parallel evidence/label heads | 无结构耦合 | strongest local alternative |
 
-核心 full method 是 evidence→label 或联合软耦合；label→evidence/bidirectional 失败时删除对应 claim，
-不得否定已过线的核心。跨数据集与事实性净化均不在主表关键路径。PS-/Uu 支持数必须随 manifest 报告；
-稀有类护栏采用“anchor 非零时不得崩为零”与合并稀有类的 document-cluster 非劣 CI，不按单点 F1 阻断。
+gold-evidence oracle 已表明单纯换 evidence locator 不是充分解释，旧 pooled evidence 双头仅保留为对照。
+R1 可替换上述候选，但必须保留五类 macro-F1 主门、完整 evidence 轴、稀有类支持数与前瞻性功效设计；
+任何中介指标都不能替代主结果。
 
 ## 5. Ch1：事件身份消解
 
@@ -153,36 +150,37 @@ DMBERT。最终须按主锚规则胜出；majority/lexicon 不计强对手，隐
 
 ### 5.2 Baseline 矩阵
 
-| 方法 | 角色 | v6 状态 |
+| 候选方法族 | 角色 | R1 必核条件 |
 |---|---|---|
-| lexical/lemma | 可解释下界 | 已有代码/结果 |
-| 本地 RoBERTa pair | 同底座底座 | 已有 checkpoint；需修 dev 选模重跑 |
-| MAVEN-ERE official single | 必含原文单任务锚 | 共享 checkout/patch 已由 P1 固定；C4 全协议重跑待执行 |
-| MAVEN-ERE official joint | 必含原文联合锚 | 共享 checkout/patch 已由 P1 固定；C4 全协议重跑待执行 |
-| RESIJ | 结构可选对照 | 仅在公开实现或忠实复现闭环时纳入；代码 UNVERIFIED |
+| lexical/lemma | 可解释下界 | 不计强对手 |
+| 本地 pair classifier | 同底座复现 | gold mentions、同 split/scorer、选模规则 |
+| MAVEN-ERE official single/joint | 原文强锚候选 | 官方输入、coreference scorer 与 checkpoint 忠实度 |
+| CorefPrompt | argument/type-aware 强方法族 | 数据/输入映射、官方代码和同协议可运行性 |
+| RESIJ | rich event structure 对照候选 | 公开实现可得性和同协议 fidelity |
 
-最终主表纳入 lexical/lemma、local pair、official single、official joint 四个必含 baseline；其中
-primary-eligible 强 roster 是 official single/joint，简单 lexical 与 local pair 不因可执行而自动算强锚。
-RESIJ 不阻塞 C4。主锚在同 split baseline 完成后、方法结果产生前冻结。
+R1 冻结多个机制不同且可运行的强方法族与主锚；简单 lexical 不因可执行而计作强对手。论文数字只作
+背景，所有胜负来自统一重跑。
 
 ### 5.3 我们的方法与消融
 
-| 变体 | 目的 | 通过护栏 |
+| 候选变体 | 目的 | 单变量要求 |
 |---|---|---|
 | pair base | trigger/type/pair 表示 | reproduction |
-| `+ local arguments` | 区分同 trigger occurrence | same-trigger 过并方向只作 claim 诊断 |
-| `+ cross-sentence context` | 增强跨句判别 | cross-sentence recall 不退 |
-| `+ calibrated clustering` | 把 pair 分数转稳定簇 | 二级；多指标不作阈值交换 |
+| `+ mention-local predicted arguments` | 提供不泄漏 occurrence 的局部语义 | gold event-level arguments 仅 oracle |
+| `+ role-aligned posteriors` | 比较 pair/cluster 的论元角色兼容性 | 相对 hard labels 单变量 |
+| `+ uncertainty-gated clustering` | 阻止低可信局部预测污染整簇 | 核心候选；阈值/聚类规则冻结 |
+| shuffled/posterior-confidence control | 检验是否只是额外特征或置信度 | mediator negative control |
 
-核心是 local arguments + cross-sentence context 的上下文判别表示。校准失败时保留预注册全局阈值并删除
-校准 claim，不阻断核心 promotion。非对称 loss/阈值只可作为历史诊断，不再是 full method。
+旧 context pooling/confusability 结果保留为失败证据，不作为当前 full method。R1 必须先证明 MAVEN-ARG
+与 ERE mention IDs/offsets 可无歧义对齐；否则停止这条输入线并重做候选设计。主门仍是 MUC，B³、CEAFe、
+BLANC 与跨句行为只作 mandatory guardrail/机制诊断。
 
 ## 6. Ch4：同实例系统评估
 
 ### 6.1 主指标与评价单元
 
-- E3 冻结完整 queries、candidate IDs、labels、事件文本、生成器/seed/source hashes 与 canonical graph
-  serialization；当前 1,908 是本地重建规模，若重建校验改变数量须在看 consumer 结果前冻结并披露；
+- E3 在看 consumer 结果前冻结完整 queries、candidate IDs、labels、事件文本、生成器/seed/source hashes
+  与 canonical graph serialization；实际 population count 只在结果与 manifest 中记录；
 - 公开 headline：MRR、Hit@1/3/10/20/50；strict MRR、strict correctness、unscorable 与 factorial effect/CI
   是本项目副指标/诊断，不冒充 CGEP 官方 headline；
 - 每个 condition 保存同 query ranks，严禁按 arm 丢题。
@@ -251,7 +249,7 @@ SHA-256，并重新散列其声明的外部证据；不能用 bundle 自报 hash
 
 ## 8. 资源与停止规则
 
-- 严格串行 P1→A3→D3→C4→E3；
+- 当前证据依赖为 P1→A3→R1→{C5,A4,D4}→E3；花括号内无真实依赖时可重排或并行，操作顺序不属于 SPEC；
 - baseline 两个“诊断→补丁→同协议 smoke”工程轮失败即换预列候选；候选失败不等于任务失败；
 - 核心方法最多两个完成实现/测试/协议检查的设计周期；二级机制失败不重置或消耗核心预算；
 - 每个二级机制另限一次实现 + 一次定向修订；失败即删对应 claim，不继续扩展；

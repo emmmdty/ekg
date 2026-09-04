@@ -1,7 +1,8 @@
 # PHASE C4 — 语境判别的事件身份消解
 
-> **BLOCKED BY D3 HANDOFF。** 历史错误事实见 [`../results/PHASE_C.md`](../results/PHASE_C.md)。
-> 旧 C3 非对称代价契约不得继续执行；其错误剖析保留为本 phase 的诊断输入。
+> **SUPERSEDED FOR FUTURE EXECUTION（2026-09-04）。** 本契约的历史结果仍有效，但未实现
+> mention-local predicted arguments，不能继续冒充完整方法；v6.1 在 R1 后生成 C5 契约。历史错误事实见
+> [`../results/PHASE_C.md`](../results/PHASE_C.md)；旧 C3 同样不得执行。
 
 ## Goal
 

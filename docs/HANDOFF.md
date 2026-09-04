@@ -1,21 +1,27 @@
 # 交接文档 · 新会话从这里开始
 
 > 更新于 **2026-09-04**。读完本文即可接手，不需要回溯对话。
-> 冲突优先级：`docs/results/PHASE_*.md`（事实）> `docs/SPEC.md`（约束）>
-> active phase > `docs/TODO.md` > 本文。本文只给状态、证据入口和下一步，**不另造结果口径、不复制数字**。
+> 文档分工：`.specify/memory/constitution.md` 管不可妥协原则，`docs/SPEC.md` 管 WHAT/WHY，
+> `docs/RESEARCH_PLAN.md` 管可迭代 HOW，`docs/TASKS.md`/active phase 管执行；实验事实只认
+> `docs/results/PHASE_*.md`。下层文档不得改写上层含义。本文只给状态与入口，**不复制数字**。
 
 ---
 
 ## 0. 三十秒摘要
 
 - 课题仍是 occurrence-level 事件图谱：Ch1 身份消解、Ch2 关系抽取、Ch3 事实性、Ch4 下游代价。
-- 唯一正式 active phase 仍是 `docs/phases/PHASE_A3_relation_balanced.md`。
+- 唯一在跑确认性实验的 phase 仍是 `docs/phases/PHASE_A3_relation_balanced.md`，但已进入**终局分账与
+  失败交接**，不再设计 Ch2 新方法；R1 中不读取 A3 待出结果的准备性任务可并行。
 - **2026-09-04 关键变更**：4090 入口恢复，上一轮「状态 UNKNOWN」的两个远端结果已只读核验并入档：
   - **A3.2-r13 逐族×位置工作点 50ep = FAIL**（temporal 跌破护栏；且相对 r12 几乎无增量）
     ⇒ **工作点线两个核心设计周期用完，按契约封存，不开第三轮**；
   - **A3 检索竖片 r3 = Stage-1 FAIL**（此前从未入档）⇒ 近似 retriever 三连未过门，**不做第四个**。
 - 因此 **A3 的下一正式动作不是新方法，而是 A3.6 官方配方分账**（rates / coref-aux / per-family selection）。
   剩余 official gap 里仍混着三个未拆开的训练协议变量；分账前上新机制会把协议差异记成方法功劳。
+- A3.6 无论分数高低都只回答复现差距来自哪里，不恢复已耗尽的旧机制预算；完成后 A3 以
+  `status=failed` 交给 R1 完成方法准入。原计划中的 pair-conditioned evidence 不在 A3 内继续执行。
+- **质量目标不降**：稳定 SPEC 保留“三方法章 + 一系统评估章”和原主指标/强基线/三种子/CI 硬门；
+  具体方法已移到可迭代的 `docs/RESEARCH_PLAN.md`，不再由 SPEC 框死。失败的是旧机制，不是方法章。
 - **执行顺序有个硬依赖**：分账前必须基于当前 HEAD 重建 P1 trust root；而下面 §2 的两处代码整改
   会改动 `CODE_PATHS` 里的文件 —— **先整改、后重建、再跑分账**，否则要重建两次。
 - 代码验证（本地，2026-09-04）：**470 passed / 24 expected skips**、ruff 0、CPU smoke OK。
@@ -29,9 +35,8 @@
 
 1. **【已完成 2026-09-04】** r13 与 retriever r3 的真实数字、判定与 artifact hash 已写入
    `docs/results/PHASE_A.md` 末两节；`PHASE_A3` 契约的 A3.2-r13.2 / A3.3 已改为 FAIL 封存状态。
-2. 提交当前工作树。脏文件为上一轮的 planning-file 清理（`task_plan.md`、`findings.md`、
-   `progress.md`、`.claude-session-handoff.txt` 删除）＋ `AGENTS.md`/`CLAUDE.md`/本文同步
-   ＋ `docs/reports/` 两份阶段性报告。按逻辑单元分次提交，不强推。
+2. **【已完成 2026-09-04】** 上一轮 planning-file 清理、上下文同步与两份阶段报告以 `574f51d` 收口；
+   本轮目标/SDD 审计与 P1 可追溯性整改随后按逻辑单元提交并推送，确切身份以当前 `git log` 为准。
 3. 4090 代码同步（**已确认安全**：worktree clean，HEAD `e0ef69d` 是 `origin/main` 的祖先）：
 
    ```bash
@@ -43,22 +48,17 @@
    **5090 每次使用仍须逐次向作者取得授权**。它上面的大产物原地保留：
    C4 2×2 约 21 GB、D3 oracle 约 961 MB、A3 recipe smoke 约 2.0 GB。
 
-### P1：代码整改（无需 GPU，**必须在重建 P1 trust root 之前完成**）
+### P1：代码整改（无需 GPU，**已实现且全量 gate PASS**）
 
 两处都属 B 类可追溯性，不改结论但会让「别人能复现这张表」更硬。详见 §4。
 
-1. `scripts/train_supervised_relations.py:267,278` 有 `load_manifest_ids` /
-   `split_docs_by_manifests` 的**逐字影子拷贝**，没有 import `src/ekg/core/protocol.py`；
-   而 coref / factuality / retriever 三个训练器都是正经导入的。改为导入权威实现。
-   **⚠️ 连带动作**：改完必须把 `src/ekg/core/protocol.py` 加进
-   `scripts/build_p1_bundle.py:25` 的 `CODE_PATHS`，否则 bundle 钉住了 trainer 却没钉住它
-   依赖的切分逻辑 —— 正是该常量上方注释警告的失败形态。
-2. `sha256_file` / `_sha256` 在 scripts 下重复定义 **12 次**，而
-   `src/ekg/core/stage_bundle.py:27` 已有权威实现（`train_supervised_relations.py:33` 甚至
-   已从 `stage_bundle` 导入别的符号）。至少把 `CODE_PATHS` 覆盖到的文件收敛到一份实现。
+1. trainer 已改为导入 `ekg.core.protocol` 的权威 manifest/split 实现；权威 helper 同时保留原 trainer
+   对非字符串 ID 的 fail-fast 行为，并增加回归测试。
+2. `src/ekg/core/protocol.py` 已加入 P1 `CODE_PATHS`；P1 受控 scripts 中的重复文件哈希 helper 已统一
+   导入 `ekg.core.stage_bundle.sha256_file`。
 
-验证：`uv run pytest`（≥470 passed）、`uv run ruff check src tests scripts`、`uv run ekg-smoke` 全绿。
-行为必须逐位不变：整改只允许删重复，不允许改语义。
+验证：`uv run pytest` = 470 passed / 24 skipped，ruff 0，`uv run ekg-smoke` OK；P1 local gate PASS，
+`tested_tree_sha256=3bff2ac2b5366ed06ebe81c9b2e549f0949216c832ad8e6098a6782e0c701d3c`。整改未改实验口径。
 
 ### P2：重建 P1 trust root，再做 Ch2 官方配方分账（需 GPU）
 
@@ -77,27 +77,17 @@ trainer macro、smoke 分数和不同 split 的论文数字都不能代替。
 > ≥ 护栏，但那是 macro 选模之外的另一根轴；看到某个选模规则能救分再改规则＝Phase C 已经
 > 付过学费的「选模轴伪影」。第 4 臂必须从头完整重跑，其正当性来自 THU-KEG 官方配方本身。
 
-### P3：分账清零后，Ch2 才进入最后一个核心周期
+### P3：完成 A3 失败交接，解除 R1 最终准入阻塞
 
-现有诊断把 causal 剩余错误锁定为跨句 false positives（FP 占全部 causal 错误 83.6%，其中
-78.4% 跨句；方向反转只占漏报 1.4%）。下一候选是
-**pair-conditioned evidence sentence selection + family×position hard-negative balance**，要求：
+A3.6 四臂完成后只做三件事：把真实结果写入 `docs/results/PHASE_A.md`；导出带
+`status=failed`、可供 E3 消费的 relation bundle；允许 R1 完成 Ch2 brief 与跨产物准入。不得因任何一臂名义
+超过主锚而把官方配方修正写成方法贡献，也不得继续 pair-conditioned evidence、第三个工作点或第四个
+retriever。R1 按 `docs/replan/METHODOLOGY_REDESIGN_20260904.md` 冻结三章最近方法矩阵、ID 对齐、误差
+因果图、MDE/power、最小有意义效应、消融和 protocol hash；缺任何一项都不进入 GPU 实现。
 
-- official candidate universe 保持完整，selection 不能偷偷改评估候选；
-- 同时报告 evidence recall@k、候选压缩率、same/cross precision/recall 和 official 三族 F1；
-- 先用手造样例验证 pair-specific 选择与位置桶，再 2–3 epoch 行为 smoke；
-- **不再复活**：连接词、句距、窗口覆盖、第四个近似 retriever、prototype、ATLoss 调参、
-  第三个工作点。
+### P4：Ch1 / C5 当前候选方法
 
-retriever→cross-encoder 已有文献，不能单独当创新。可争取的新颖点是：在**完整候选口径**下
-联合约束 pair-specific evidence sufficiency、跨句误报风险与 relation-family balance。
-⚠️ 难度警告：跨句 causal 漏报在冻结主锚上同样是 70.2%，KnowQA 的跨句 F1 也只有 12.5–40%
-（见 `docs/results/PHASE_A.md` 与 `docs/replan/G_maven_causal_protocol_audit.md`）——
-这是任务硬核，攻下来是真贡献，但不要低估。
-
-### P4：Ch1 做真正可部署的完整版本
-
-历史负结果只否定“context pooling + confusability”，没有测试冻结设计要求的论元输入。5090 的
+历史负结果只否定“context pooling + confusability”，没有测试方法所需的论元输入。5090 的
 event-level gold argument oracle 证明有上限，但该标注复制给同 event 的每个 mention，泄漏 cluster
 身份，**绝不能进入方法表**。下一实现必须使用 **mention-local predicted arguments**：
 
@@ -110,22 +100,28 @@ event-level gold argument oracle 证明有上限，但该标注复制给同 even
 “加入论元”“pair joint encoding”“cluster regularization”都已有先例。论文新颖点应落在
 **不可靠 mention-local arguments 如何传播成 cluster-level 连边风险，以及怎样用不确定性抑制污染**。
 
-### P5：Ch3 不再单独堆 evidence extractor
+### P5：Ch2 / A4 当前候选方法
 
-gold-evidence oracle 的名义提升小于 internal-dev 的可检测差，PS−/CT− 没有同步改善，Uu 仍近零。
-瓶颈已从“找不到 evidence”定位到“证据被压成一个向量后标签头无法表达语义结构”。下一候选是
-typed cue + sufficiency：分开表示否定 / 可能性 / 条件 / 来源承诺 / 作用域；用
-evidence-sufficiency / unknown gate 单独判 Uu，再在信息充分条件下判 polarity×modality；
-arguments/relations 只作内容输入与对照。internal-dev 稀有类功效不足，必须保留 document-cluster
-paired CI，并同时报告样本更多的 evidence 轴。
+A3 已否定 family workpoint 和三个近似 retriever，不得复活。A4 保持 official 全候选全集，为每个 pair
+学习 evidence spans 与 sufficiency/abstention risk；检索和 hard negatives 只改变训练/evidence，不在推理
+时裁掉候选。核心中介是跨句 causal FP 下降且 recall 非劣；2025 two-stage ERE、RESIJ/KnowQA/TacoERE
+须按代码可得性和协议忠实度进入 baseline 矩阵，不能把不同 split 的论文数字直接当对手。
 
-### P6：并行是允许的，别把三张空卡晾着
+### P6：Ch3 / D4 当前候选方法与 E3 依赖
 
-4090 四张卡当前全空。`CLAUDE.md` 的 C 类条款明确：**卡空着就并行**，「每次只跑一个实验任务」
-保护的是资源不打架，不是结论正确性。P2 的四臂是串行分账（占一张卡），
-P4 / P5 是不同方案，可在其余空卡并行。
-⛔ **但 GPU 并行只用于不同方案/任务，不得用于未授权的多种子**；启动任何远端 GPU 命令前，
-必须先向作者展示确切命令、cwd 与预期产物。
+gold-evidence oracle 没有显示足以解释主指标差距的上限，下一方法不再单独堆 evidence extractor，而是
+typed cue spans + `known/unknown → modality → polarity` 结构化分解。五类 macro-F1 仍是硬门，evidence、
+校准和稀有类只作机制/护栏；internal-dev 功效不足先用预冻结 repeated split 或外部公开数据补强，不降 CI。
+
+随后才进入 E3。历史 SeDGPL 正控证明“至少一个消费者确实读图”，但 E3 仍缺：冻结的本地重建 manifest、
+三类真实 upstream bundle 接口、BART/text-only 与 frequency 的预测有效性门、同 backbone
+frozen/fine-tuned 对照和完整 24 条件 factorial。因此 Ch4 当前是**部分证据成立，正式 phase 未开始**。
+
+当前依赖计划为 `{A3 closure, R1 preparation} → R1 promotion → {C5, A4, D4} → E3`。花括号内按真实
+数据依赖和资源动态排程，不属于 SPEC；不读取 A3 待出结果的文献/ID/功效审计、互不冲突的四臂或
+工程 smoke 可以并行。不能绕过真实证据依赖提前产生
+确认性结果；多种子仍须逐次授权。启动任何远端 GPU 命令前，必须先向作者
+展示确切命令、cwd 与预期产物。
 
 ---
 
@@ -197,10 +193,11 @@ P4 / P5 是不同方案，可在其余空卡并行。
 except；RNG 全部显式播种；无死模块；`EventNode` schema 未增字段；`tests/core/test_propagation.py`
 测试锁在；`src/` 覆盖率 79%。已知问题按严重度：
 
-1. **单一事实源被破坏（P1 已排期）**：`scripts/train_supervised_relations.py` 影子实现了
-   `src/ekg/core/protocol.py` 的切分逻辑。今天两份行为等价（影子版多一个 isinstance 检查），
-   **未污染已有数字**，但该模块 docstring 写明「三份同样的实现正是 split drift 的起点」。
-2. **`sha256_file` 12 份重复定义（P1 已排期）**：哈希是 B 类可追溯的地基。
+1. **【本轮已整改】manifest split 单一事实源**：relation trainer 已删除影子实现并导入
+   `src/ekg/core/protocol.py`；该依赖已加入 P1 `CODE_PATHS`，且非字符串 ID 继续 fail-fast。
+2. **【本轮已整改受控面】文件哈希单一事实源**：P1 `CODE_PATHS` 覆盖到的 scripts 已统一导入
+   `src/ekg/core/stage_bundle.py`。执行面和非 P1 报告脚本中的剩余重复不影响本次 trust root，后续只在
+   修改对应脚本时顺手收敛，不为此扩大改动。
 3. **出数字的脚本最没测试**：`scripts/` 覆盖率仅 **23%**，且这些是 0%：
    `report_relation_error_profile.py`、`report_ch4_budget.py`、`report_ch4_contrasts.py`、
    `evaluate_cgep_propagation.py`、`report_factuality_metric_power.py`、`evaluate_factuality.py`、
@@ -244,13 +241,21 @@ uv run ekg-smoke
 retriever→cross-encoder、普通 arguments/relations factuality augmentation、modality/factuality 联合建模。
 因此不要把组件名当创新。
 
-当前较连贯的论文主线是：
+v6.1 的研究主线是：
 
 > **Evidence adequacy and risk-aware event graph construction**：Ch1 处理 argument uncertainty→cluster
-> risk，Ch2 处理 pair-specific evidence→cross-sentence FP，Ch3 处理 typed cues→unknown sufficiency，
-> Ch4 量化这些构建错误对消费者的代价。
+> risk，Ch2 处理 pair evidence→relation sufficiency，Ch3 处理 typed cues→unknown/modality/polarity，
+> Ch4 量化三种风险对消费者的边际与交互代价。
 
-现状是**四章无一在主指标上超过多个同协议公开方法**，Ch4 的图依赖正控结论最硬。
-时间纪律：先在 2026 年内分别用一个冻结 seed 证伪/保留 Ch1–Ch3 三个机制；没有清晰主指标增益
-就及时降级，不要继续扩 backbone、数据集或无穷消融。正式锁定 novelty claim 前必须再做一次
-2026–2027 一手论文检索（§2 已有的审计可复用，不必从零重做）。
+### 目标一致性裁决
+
+- **理想目标与 v6.1 交付目标一致**：均为三个高质量方法章 + 一个系统评估章，不预设降为两方法章。
+- **不一致发生在旧机制层**：Ch2 的 workpoint/retriever、Ch1 未实现的本地论元、Ch3 pooled evidence
+  表示没有覆盖中心假设；继续原路线才会在有时间的情况下主动降低论文质量。
+- **解决方式**是保留硬门并重开方法论设计：A3 失败身份不变；R1 冻结真正不同的新方法家族。一个新
+  家族两周期失败仍要止损，但先回 R1 寻找有文献和错误证据支撑的替代机制；只有证明合理范围内不可实现
+  时，才由作者和导师决定是否改纲，执行代理不得自动降标。
+
+时间纪律：时间用于文献忠实复现、功效设计、可证伪方法和必要消融，不用于更大 backbone 掩盖机制或
+无穷扫参。联网与学校标准审计已写入 `docs/replan/METHODOLOGY_REDESIGN_20260904.md`；R1 继续维护到
+2026–2027 的一手论文增量。

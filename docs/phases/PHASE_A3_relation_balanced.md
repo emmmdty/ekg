@@ -1,8 +1,8 @@
 # PHASE A3 — 关系族×位置自适应的事件关系抽取
 
-> **ACTIVE。** 位置工作点沿用启动时冻结的 P1 r12 / A3 r13 plan；prototype 新代码使用 P1 r13。
-> A3.0 baseline、A3.1 复现底座和 A3.2 第一核心周期均已完成；工作点第二周期的 4090 最终状态
-> 待恢复连接核验，5090 prototype/ATLoss 已封存。当前下一正式动作是 A3.6 官方训练配方分账。历史数字见
+> **ACTIVE，终局分账中。** 位置工作点沿用启动时冻结的 P1 r12 / A3 r13 plan；prototype 新代码使用
+> P1 r13。A3.0 baseline、A3.1 复现底座、A3.2 两个工作点周期和三条替代探索均已完成并封存；当前唯一
+> 正式动作是 A3.6 官方训练配方分账，随后交付 `status=failed` handoff 并进入 R1。历史数字见
 > [`../results/PHASE_A.md`](../results/PHASE_A.md)。
 
 ## Goal
@@ -130,8 +130,8 @@ r3（topk_pairwise，2026-09-04 补录）的 Stage-1 recall@15 分别为 .8691/.
 
 ⇒ 因此 A3 的下一正式动作不是新方法，而是 **A3.6 官方配方分账**：剩余 official gap 里仍混着
 三个未拆开的训练协议变量，在分账前上任何新机制都会把协议差异算成方法功劳（本项目已犯四次）。
-分账完成后若 causal 仍不过主锚，最后一个核心周期候选见 `../HANDOFF.md` 的
-pair-conditioned evidence selection + 跨句 hard-negative balance。
+分账完成后不在 A3 开启新核心周期。A3 的旧机制身份保持 failed；v6.1 的 pair-evidence sufficiency
+属于通过 R1 文献/因果链/功效审查后才能新建的 A4 方法家族，不能事后并入 A3。
 
 **并行 exploratory 诊断（不构成 A3.3 正式启动）：** 在用户允许不同方案 GPU 并行后，已用同一个
 seed 13 依次测试 trigger-mean sampled BCE、marker-sentence、top-k hard-negative ranking 三个
@@ -202,6 +202,7 @@ rates-only、+coref auxiliary、+per-family selection。只有完成分账后，
 - seed-13 过线时封存为候选；失败时明确封存 `failed` handoff 并转两阶段方案；
 - 未获得用户新的明确授权时，无任何额外 seed 产物或运行目录；
 - `docs/results/PHASE_A.md` 追加本周期真实结果和产物位置；
+- 导出 `status=failed` relation fallback bundle，并将下一阶段指向 R1 而非旧 D3；
 - 本地 pytest、ruff、`ekg-smoke` 全绿，远端 checkpoint/log 可追溯。
 
 ## Stop conditions

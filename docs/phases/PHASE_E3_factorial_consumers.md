@@ -1,6 +1,7 @@
 # PHASE E3 — 同实例构建误差与消费者 factorial
 
-> **BLOCKED BY C4 HANDOFF。** 必须同时读取 A3/D3/C4 的 immutable bundle/status。
+> **BLOCKED BY C5/A4/D4 HANDOFFS。** 必须同时读取三者的 immutable bundle/status，并保留 A3/D3/C4
+> 历史失败身份。
 > 历史三图事实见 [`../results/PHASE_E.md`](../results/PHASE_E.md)；旧 E2 不同语料消费者契约不得执行。
 
 ## Goal
@@ -12,7 +13,7 @@
 ## Inputs
 
 - P1 冻结的 ID namespace、query 生成器版本/来源 hash 和目标 schema；
-- A3 relation、D3 factuality/evidence、C4 cluster bundles 及各自 status；若阶段 blocked，则只可读取其显式
+- A4 relation、D4 factuality/evidence、C5 cluster bundles 及各自 status；若阶段 blocked，则只可读取其显式
   `fallback_component_bundle_id`；
 - 4090 SeDGPL 权重、random/frequency、历史 paired-rank caches；
 - MAVEN valid gold 仅作 factorial reference，不得冒充 predicted arm。
@@ -101,7 +102,7 @@ smoke；两个消费者均在各自两轮后仍无正控信号，则收缩 Ch4�
 ## Done when
 
 - 冻结的本地重建 manifest 与 24 条基础条件 ID 集逐位一致；
-- identity/relation/factuality 都读取真实 A3/D3/C4 bundles，未用 proxy 替代；
+- identity/relation/factuality 都读取真实 C5/A4/D4 bundles，旧 A3/D3/C4 只作失败对照，未用 proxy 替代；
 - fine-tuned graph arm 通过预测有效性门，至少一个消费者通过图依赖正控；
 - factorial、逐 query ranks、document-cluster paired CI、Holm 校正、噪声地板和交互分析完整；
 - 结论按证据选择成立/撤回/无法判断，不预设正结果；

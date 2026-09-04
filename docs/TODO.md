@@ -11,20 +11,21 @@
 
 ## 下一步
 
-1. 提交当前脏树；4090 `git fetch && git reset --hard origin/main`（已确认 clean 且 HEAD 为祖先）；
-2. **先做代码整改**：trainer 改用 `ekg.core.protocol` 的权威切分实现（并把该文件加进
-   `build_p1_bundle.py` 的 `CODE_PATHS`）、收敛重复的 `sha256_file`；
-3. 再基于当前 HEAD **重建 P1 trust root**（trainer 属 `CODE_PATHS`，顺序反了要重建两次）；
-4. 用冻结 seed 13 分账 official recipe：local → rates-only → +coref aux → +per-family selection；
+1. 在 4090 同步已验证的 `origin/main`，并基于最终 HEAD **重建 P1 trust root**（trainer 属 `CODE_PATHS`）；
+2. 用冻结 seed 13 分账 official recipe：local → rates-only → +coref aux → +per-family selection；
    ⚠️ 第 4 臂必须从头重跑，**不得回收 r13 的 `best_by_family` 曲线**；
-5. 分账清零后，Ch2 最后一个核心周期候选 = pair-conditioned evidence + 跨句 hard-negative balance；
-6. Ch1 只做 mention-local predicted arguments + uncertainty/cluster-risk；
-7. Ch3 只做 typed cue + evidence-sufficiency/unknown gate；
-8. 4090 四卡全空 —— 不同方案/任务可并行（C 类），多种子仍须逐次授权。
+3. A3 写入真实结果并导出 `status=failed` handoff；旧机制判定不因 v6.1 改写；
+4. 并行开展 R1 中不读取 A3 待出结果的论文/代码矩阵、MAVEN-ARG 跨数据 ID 审计和 Ch1/Ch3
+   MDE/power；A3 handoff 后完成 Ch2 因果链与整体准入。未通过对应 R1 门不启动 proposed GPU 实验；
+5. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
+   sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
+   这是可修订 plan，不是 SPEC；
+6. 4090 空卡可用于互不冲突的不同方案/任务并行；多种子仍须逐次授权。
 
 ## 当前三端
 
-- local：`main`；470 passed / 24 skipped、ruff 0、smoke OK；planning-file 清理与两份报告待提交；
+- local：`main`；470 passed / 24 skipped、ruff 0、smoke OK，P1 local gate PASS；本轮 SDD/方法论审计与
+  P1 单一事实源整改已按逻辑单元提交并推送；
 - 4090：**已恢复**，四卡全空、无进程、worktree clean、HEAD 为 `origin/main` 祖先；正式 backbone pin
   `71be7419…c961ea9` 在此，只有绑定它的结果能进正式主表；
 - 5090：`Connection refused`，需 `cpolar-ssh-update`；大产物（21 GB / 961 MB / 2.0 GB）原地保留。
@@ -41,4 +42,6 @@
 ## 成功条件
 
 Ch1–Ch3 必须在统一公开主指标上超过多个同协议方法；否则只能作为系统组件。所有结论必须可从
-结果表追溯到 commit、manifest、candidate、evaluator、命令、checkpoint 和 hash。
+结果表追溯到 commit、manifest、candidate、evaluator、命令、checkpoint 和 hash。三方法章 + 一系统章
+不预设降标；旧机制失败后只有通过 R1 的实质不同方法家族才能重开，不能以换名、扫参或更大 backbone
+绕过止损。

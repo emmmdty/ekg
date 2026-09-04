@@ -1,7 +1,8 @@
 # PHASE D3 — 证据条件化的事件事实性检测
 
-> **BLOCKED BY A3 HANDOFF。** 不要求 A3 必须成功，但必须先收到不可变 bundle/status，保持严格串行。
-> 历史事实见 [`../results/PHASE_D.md`](../results/PHASE_D.md)；旧 D2 跨数据集契约不得执行。
+> **SUPERSEDED FOR FUTURE EXECUTION（2026-09-04）。** 本契约的历史结果仍有效，但 pooled
+> evidence→label 路线不再执行；v6.1 在 R1 后生成 D4 结构化事实性契约。历史事实见
+> [`../results/PHASE_D.md`](../results/PHASE_D.md)；旧 D2 同样不得执行。
 
 ## Goal
 

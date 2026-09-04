@@ -4,13 +4,13 @@
 
 ## Goal
 
-证明 A3/D3/C4/E3 的表格、逐实例产物、三种子、消融和跨章接口可从冻结 bundle 独立反查，并形成
+证明 C5/A4/D4/E3 的表格、逐实例产物、三种子、消融和跨章接口可从冻结 bundle 独立反查，并形成
 明确的 pass/failed/blocked 章节清单。
 
 ## Inputs
 
 - P1 manifests/evaluator/stage bundle schema；
-- A3/D3/C4/E3 immutable bundles 与 `docs/results/PHASE_*.md`；
+- C5/A4/D4/E3 immutable bundles、旧 A3/D3/C4 failed evidence 与 `docs/results/PHASE_*.md`；
 - 当前代码 commit、环境锁和远端 checkpoint 位置。
 
 ## Tasks
@@ -22,7 +22,8 @@
    paired CI 齐全；Ch4 主 contrasts/Holm 校正齐全；
 4. **Ablation audit**：每个 claim 有单变量消融，负/零结果未删除；
 5. **Reproduction audit**：随机选一个 baseline 与一个 full method，用缓存或允许的单卡命令重放 scorer；
-6. **Cross-stage audit**：E3 引用的 A3/D3/C4 bundle IDs/status 与真实文件一致，无 gold proxy 冒名；
+6. **Cross-stage audit**：E3 引用的 C5/A4/D4 bundle IDs/status 与真实文件一致，旧 A3/D3/C4 身份未被
+   覆盖，无 gold proxy 冒名；
 7. **Access/claim audit**：核 final-valid config/code/checkpoint/threshold hashes、
    `historical_final_access_disclosed`、`final_valid_access_ledger` 与 `v6_confirmatory_eval_count`；删除所有跨
    split 胜出、解封后回调、
@@ -44,8 +45,8 @@
 - 缺 seed/消融/强 baseline：退回对应 phase 补既定矩阵，不在 H2 发明新机制；
 - bundle hash/ID 不一致：相关章节立即失效，先修复来源，不允许只改文档；
 - 复现分数超出已记录噪声且无法解释：相关结果标 stale，重新跑 scorer/必要最小训练；
-- 一个方法章 failed/blocked：由作者/导师决定是否正式改纲为“两方法章 + 系统评估章”；
-- 两个方法章 failed/blocked：v6 主线 NO-GO，必须另行重规划；不得在 H2 内声称可收缩成两方法章版本；
+- 任一方法章 failed/blocked：不得在 H2 自动降为两方法章；退回 R1 做实质不同的方法家族重规划；
+- 只有文献、数据、功效或资源证据证明合理范围内不可实现时，才由作者与导师共同决定是否改纲；
 - E3 假设被证伪：保留零结果与边界，不替换消费者/任务追正结果；
 - 超出已批准 GPU 预算：删除非必要加分项，不能叠加预算。
 

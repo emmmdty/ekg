@@ -7,22 +7,30 @@
 根目录不再维护 `task_plan.md`、`findings.md`、`progress.md`；阶段完成、出现新证据或关键决策时直接
 写回 `docs/HANDOFF.md`，不要恢复 planning-with-files 工作流。
 
-设计总纲 `docs/SPEC.md`｜实时状态 `docs/TODO.md`｜**实测数字 `docs/results/`**｜
+研究宪章 `.specify/memory/constitution.md`｜稳定需求 `docs/SPEC.md`｜可迭代设计 `docs/RESEARCH_PLAN.md`｜
+可执行任务 `docs/TASKS.md`｜实时状态 `docs/TODO.md`｜**实测数字 `docs/results/`**｜
 baseline 与消融 `docs/EXPERIMENTS.md`｜工程坑 `docs/ENGINEERING_NOTES.md`｜
 服务器运维 `docs/GPU_RUNBOOK.md`｜三端流水线 `docs/PIPELINE.md`｜归档索引 `docs/ARCHIVE_INDEX.md`。
 
-**当前主线是 v6 四章**（2026-08-31）：Ch1 事件身份消解 · Ch2 事件关系抽取 · Ch3 事件事实性检测 ·
-Ch4 构建错误的下游代价与消费者依赖性。结构 = **三个方法章 + 一个系统评估章**；唯一活线是
-`docs/phases/PHASE_A3_relation_balanced.md`；P1 已 PASS，后续严格串行 D3 → C4 → E3，旧 A2/C3/D2/E2 禁止执行。
+**当前研究计划是 v6.1 四章**（2026-09-04）：Ch1 事件身份消解 · Ch2 事件关系抽取 · Ch3 事件事实性检测 ·
+Ch4 构建错误的下游代价与消费者依赖性。结构继续是**三个高质量方法章 + 一个系统评估章，不降标**；
+当前实验 phase 是 `docs/phases/PHASE_A3_relation_balanced.md` 的复现分账与失败交接；R1 中不读取 A3
+待出结果的文献/ID/功效准备任务可并行。当前依赖计划为 R1 → {C5, A4, D4} → E3，其中三个方法章按
+真实数据依赖与资源动态排程，不把计划顺序写成 SPEC。R1 冻结文献/代码矩阵、跨数据 ID、power、
+因果 design brief 和新 protocol；
+旧 D3/C4 以及 A2/C3/D2/E2 禁止继续执行。
 > P1 唯一可信根：`runs/stages/P1/p1-v6-20260831-r12/`，其 `protocol.json` SHA-256 为
 > `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497`；A3 命令必须显式传入。
 > ⚠️ **学位论文标尺**：Ch1–Ch3 必须在统一重跑的公开主指标上超过多个方法；低于 baseline 时方法章
 > 贡献为零。Ch4 使用公认 MRR/Hit@k 与配对统计，进入结论的消费者必须超过多个同协议对照，但
 > consumer×quality 效应允许为正、零或负。自造辅助指标只能诊断，不能代替主指标。
 > 所有 phase 先过 manifest/evaluator/baseline 闸门；单次高分、不同 split 论文数字或代码存在均不算过线。
+> 旧机制两个周期失败只封存该机制家族，不自动取消方法章；新家族必须回 R1 证明文献差异、因果链、
+> ≥80% 目标 power 与单变量消融，禁止换名、扫参或更大 backbone 绕过止损。
 
 旧 TKG 线在 tag `frozen-tkg-line`；SARGE/金融层（2026-07-27）、生成式抽取+RL 线（2026-07-29）、
-v4/v5 旧 phase 已归档或标 `SUPERSEDED`。冲突时以 `docs/SPEC.md` 为准。
+v4/v5 旧 phase 已归档或标 `SUPERSEDED`。治理冲突认 constitution，需求冲突认 SPEC，技术方案认
+RESEARCH_PLAN，运行事实认 `docs/results/`；不得用下层文档改写上层含义。
 
 ## 校验命令（改代码后必跑）
 
