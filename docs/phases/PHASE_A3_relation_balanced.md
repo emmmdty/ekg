@@ -95,9 +95,14 @@ same/cross 分层、六组 offset 和选择 epoch。不得因中途分数调整 
 - 提升不只是 test-time 阈值或 candidate population 改变；
 - 跨句 precision 的改善方向与设计一致。
 
-**2026-08-31 运行状态：进行中。** GPU0、seed 13 的 50-epoch trainer 已启动，完成后由同一外层
-流水线自动调用 official scorer。最后一次成功 SSH 监测到 epoch 15；其后 cpolar 入口在 banner 前
-超时，因此当前只能写“远端状态待恢复核验”，不能把 SSH 失败写成任务结束。trainer dev curve 不进入主表。
+**封存状态（2026-09-04 核验，运行日期 2026-08-31）：FAIL。** 4090 入口恢复后只读核验：
+训练进程 GONE、产物齐全、`status=complete`、`final_valid_accessed=false`、`confirmation_eligible=true`，
+且绑定 4090 正式 backbone pin 与 P1 r12，**非 exploratory**。官方 evaluator @ internal-dev 三族
+只过两个门，**temporal 跌破 50.63 护栏**，按本文件 Stop condition 整案 FAIL；同时相对 r12 的
+`adaptive_workpoint` s13 三族仅各动 +0.06/+0.01/+0.10，逐位置诊断上限未兑现。
+⇒ **工作点线两个核心设计周期全部用完，按契约不开第三个工作点、不扫连续阈值，转 A3.3。**
+具体数字、`best_by_family` 的「不得事后改判」警告与 artifact hash 只见 `../results/PHASE_A.md`。
+未启动额外 seed，final-valid 未访问。
 
 ### A3.2-r13.3：单种子封存与多种子授权门
 
@@ -108,7 +113,7 @@ seed-13 通过后只封存为“单种子过线候选”，**不自动补 seeds 
 只有代码/配置/threshold identity 全部冻结后，才在 sealed batch 中评 final-valid；final-valid 不反馈到
 模型、epoch、offset 或结构选择。基础设施失败只有在没有返回指标且 hashes 完全一致时才能原样重试。
 
-### A3.3：若位置工作点失败
+### A3.3：若位置工作点失败（**已触发，2026-09-04**）
 
 不再增加第三个工作点或扫连续阈值。保留 r13 负结果，转做新的核心方法候选：
 
@@ -117,6 +122,16 @@ seed-13 通过后只封存为“单种子过线候选”，**不自动补 seeds 
 3. 用 recall@k、候选压缩率和 official relation F1 同时验收。
 
 该路线必须另建协议与核心周期，不能事后并入 r13 冒充同一机制。
+
+**⛔ 第 1 步已三连失败，本路线的近似检索变体到此封存。** r1（sampled BCE）、r2（marker-sentence）、
+r3（topk_pairwise，2026-09-04 补录）的 Stage-1 recall@15 分别为 .8691/.8543/.8749，跨句
+.8273/.8035/.8299，门槛 overall≥.90 且 cross≥.85 —— 三片全部未过，且 oracle top-15 = .9810 说明
+瓶颈是跨句排序而非 k 容量。**不做第四个近似 retriever。**
+
+⇒ 因此 A3 的下一正式动作不是新方法，而是 **A3.6 官方配方分账**：剩余 official gap 里仍混着
+三个未拆开的训练协议变量，在分账前上任何新机制都会把协议差异算成方法功劳（本项目已犯四次）。
+分账完成后若 causal 仍不过主锚，最后一个核心周期候选见 `../HANDOFF.md` 的
+pair-conditioned evidence selection + 跨句 hard-negative balance。
 
 **并行 exploratory 诊断（不构成 A3.3 正式启动）：** 在用户允许不同方案 GPU 并行后，已用同一个
 seed 13 依次测试 trigger-mean sampled BCE、marker-sentence、top-k hard-negative ranking 三个

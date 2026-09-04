@@ -8,7 +8,7 @@
 | 档案 | 章 | 一句话结论 |
 |---|---|---|
 | [`PHASE_P1.md`](PHASE_P1.md) | 协议 | P1 r12 与 A3 r13 preflight PASS；final-valid 封存 |
-| [`PHASE_A.md`](PHASE_A.md) | Ch2 | causal 三种子点值逼近主锚但未过门；逐族×位置 2ep 行为 smoke PASS，待正式 seed-13 |
+| [`PHASE_A.md`](PHASE_A.md) | Ch2 | 工作点线 50ep 正式跑完 = FAIL（temporal 破护栏、相对上轮几无增量）；检索竖片 r1/r2/r3 Stage-1 三连未过门 |
 | [`PHASE_B.md`](PHASE_B.md) | Ch2 | 结构违反清零 ✅，ECG 可重建率无增益 ❌；α=0.2 因召回上限不可达 |
 | [`PHASE_C.md`](PHASE_C.md) | Ch1 | 调度修复稳定底座，但两个机制周期均未超过种子噪声，当前方法贡献为零 |
 | [`PHASE_D.md`](PHASE_D.md) | Ch3 | evidence 点估计最高但与两条同协议强线不可区分；证据轴信号更强 |

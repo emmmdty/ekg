@@ -1146,3 +1146,97 @@ temporal=2、causal=4、subevent=4，coref aux=.4。1 epoch 三族 F1=0 属于 s
 `a3-v6-recipe-accounting-r1-exploratory/smoke/seed-13/`；日志
 `logs/a3_recipe_accounting_r1_smoke_s13.log`。运行时发现日志累计使用 `float(loss)` 会触发 PyTorch
 requires-grad 警告，已改为 `float(loss.detach())`；只消除同步警告，不改变训练目标或梯度。
+
+## ★★ A3.2-r13.2 逐族×位置工作点完整 50 epoch：**官方口径 FAIL**（2026-08-31 运行 / 2026-09-04 核验）
+
+契约 `PHASE_A3` 的 A3.2-r13.2 在 2026-08-31 于 **gpu-4090** 跑完，但当时 cpolar 入口在 banner 前超时，
+结果一直只能写「待恢复核验」。2026-09-04 重新连上后**只读**核验：EKG 训练进程已 GONE（四卡 0% util），
+产物齐全，`run_metadata.status=complete`、`device=cuda`、`final_valid_accessed=false`、
+`confirmation_eligible=true`。backbone 是 4090 内容寻址 pin `71be7419…c961ea9`，
+`p1_bundle_id=p1-v6-20260831-r12`、`p1_bundle_protocol_sha256=0bd33e87…58497`
+⇒ **本节不是 exploratory**（与 2026-09-01 那两轮 5090 结果不同），有资格进正式同协议对照。
+
+冻结配方（`command_argv` 逐位记录）：seed 13、50 epochs、lr 1e-5、head-lr 1e-4、warmup 200、accum 8、
+`--neg-ratio inf`、`--weight-alpha 0.5`、`--dev-metric macro`、`--balance-components adaptive_workpoint`、
+`--official-mention-expansion`，families = causal/subevent/temporal；split_counts = train 2,622 / internal-dev 291。
+
+### 官方 evaluator 主表（internal-dev 291 篇 / 7,195 mentions / 234,870 pairs，候选 digest `15a3b1a5…dac10910`）
+
+trainer 按 dev macro 选出 **epoch 18**（best macro .3897），随后对同一冻结 internal-dev 做 GPU 推理 →
+候选归一化 → 封存官方 `evaluate.py`：
+
+| 方法 / 门 | causal P / R / F1 | subevent P / R / F1 | temporal P / R / F1 | 判定 |
+|---|---:|---:|---:|---|
+| promotion 门 | — / — / **>33.17** | — / — / **≥28.75** | — / — / **≥50.63** | 三项须同时过 |
+| **r13 `adaptive_workpoint` seed13** | 27.15 / 42.89 / **33.25** | 26.94 / 42.68 / **33.03** | 42.27 / 62.64 / **50.48** | **FAIL：temporal −0.15** |
+| （参照）r12 `adaptive_workpoint` s13 | 27.03 / 42.99 / 33.19 | — / — / 33.02 | — / — / 50.38 | 同样未过 |
+| 冻结主锚 official_joint | 34.37 / 32.05 / **33.17** | — / — / 29.75 | — / — / 51.63 | — |
+
+（同次评分的共指栏 B³ 95.85 / CEAFe 94.21 / BLANC 49.69 / MUC 0.00 —— 本臂不训练 coref 头，
+`n_pred=0` 按构造必然，**不得作为 Ch1 数字引用**。trainer 原生口径另见
+`native_metrics.json`：causal .2703 / subevent .1638 / temporal .4871 / micro .4662，与官方口径不可互换。）
+
+⇒ 按 `PHASE_A3` Stop condition「seed-13 任一护栏失败 → 封存工作点线并转两阶段方案」，**整案 FAIL**。
+
+### 这一轮真正说清楚的事
+
+**逐位置细化没有兑现诊断给出的余量。** 相对 r12 的 `adaptive_workpoint` s13，三族分别只动了
+**+0.06 / +0.01 / +0.10**。A3.2 之后曾以「逐位置上限 33.80 > 全局重切上限 33.15」为由推翻止损、
+开第二个核心周期；实际训练拿到的是 33.25 —— **上限抬高了，可达点没有跟着抬高**。
+工作点线的两个核心设计周期到此全部用完，按契约不开第三个工作点、不扫连续阈值。
+
+**工作点形态仍与主锚相反。** 我们用 P 27.15 / R 42.89 打平主锚的 P 34.37 / R 32.05：F1 相当，
+错误结构不同。A3.0 剖析的「我们 88–92% 的错误是误报」没有被本机制改掉，只是被搬了位置。
+
+### ⚠️ 一条**不得事后使用**的观察
+
+`run_metadata.selection.best_by_family` 记录的逐族最佳为
+causal **.33250** / subevent **.33032** / temporal **.50634**；其中 temporal 的 .50634 **≥ 护栏 50.63**，
+而主表的 50.48 是 macro 选出的 epoch 18 上的值。
+
+**不得据此把 r13 改判为 PASS。** 看到某个选模规则能救分再改选模规则，正是 Phase C 已经付过学费的
+「选模轴伪影」，等价于拿 dev 调参。逐族 checkpoint 选择只能作为 **official recipe 变量**
+（`--save-best-by-family`，THU-KEG 原版配方，提交 `7840b5f`）在分账协议里**从头完整重跑**后使用，
+其正当性来自官方代码而非「它能救分」；r13 的既有曲线不能被回收利用。
+
+### 产物与校验（全部留在 gpu-4090，未跨机搬运，约 1.1 GB）
+
+`gpu-4090:/data/TJK/ekg/runs/stages/A3/a3-v6-position-workpoint-r13/adaptive_workpoint/seed-13/`
+
+| 文件 | SHA-256 |
+|---|---|
+| `official_metrics.json` | `fac6a8f9dce3decd0d43599bd43827c381e30336723dd618307d17a76c2a0c27` |
+| `official_predictions.jsonl` | `1a3dea2bd533f0544608ddbc00e34c7561640ac4f66e845271e4c26146bdd130` |
+| `checkpoint/heads.pt` | `92b07f5058d1ecd71ae7bf300a6d5185b9924841f0efcd6e36aa5e9c95ff31a5` |
+| `logs/a3_position_workpoint_r13_full_s13.log` | `734744b4402c4404b9bcf96a0554fb717f59234727d5c0abc9497eb79b55ba3b` |
+
+evaluator `32919e86…c359598`、gold `bb8c6b48…265ce7e3`、source_lock `d0d7d848…4589231`；
+manifest hashes 见 `run_metadata.protocol_binding.hashes`（train `47d19cc9…`、internal-dev `f5457b30…`、
+candidate_protocol `cd2c339d…`、registry `51dfcf3f…`）。**final-valid 未访问。**
+
+## A3 top-k 对齐检索竖片 r3：Stage-1 未过门（2026-08-31 运行 / 2026-09-04 补录）
+
+r3 保留 r1 的文档窗口 `trigger_mean` 表示，只把训练目标换成与 top-15 直接对齐的
+`topk_pairwise` ranking loss（代码提交 `e0ef69d`）—— 即 r2 结论里点名的下一步。它同样只测候选召回，
+不产生关系类别预测，`confirmation_eligible=false`，`claim_boundary` 明确写为
+"Stage-1 causal candidate recall only; no relation F1"。gpu-4090、seed 13、3 epochs、
+P1 r12 protocol `0bd33e87…58497`、final-valid 未访问。
+
+> 该结果 2026-08-31 就已跑出，但因 cpolar 断线一直未入档；2026-09-04 补录，**r1/r2/r3 三片至此齐全**。
+
+| 竖片 | 最佳 epoch | recall@15 | 同句 | 跨句 | 候选压缩率 | 预设门槛 |
+|---|---:|---:|---:|---:|---:|---|
+| r1 `trigger_mean` + sampled BCE | 2 | .8691 | .9713 | .8273 | .5580 | overall≥.90 且 cross≥.85 ❌ |
+| r2 marker-sentence | 2 | .8543 | **.9784** | .8035 | .5580 | ❌ |
+| **r3 `trigger_mean` + topk_pairwise** | **2** | **.8749** | **.9849** | **.8299** | .5580 | ❌ |
+
+- r3 是三片中最好的（overall +.0058 vs r1、cross +.0026 vs r1），**方向对但幅度远不够**：
+  overall 差门槛 .0251、cross 差 .0201，同一冻结候选口径下 oracle top-15 可达 .9810，
+  因此失败仍不是 k 容量不足，而是**跨句排序**本身；
+- 训练侧 2,537 篇有 ranking 信号、48,520 个正 pair，loss .666→.188 单调下降，
+  recall@15 逐 epoch .8595→.8703→.8749 仍在上升但增量递减；
+- **判定：Stage-1 FAIL，停止 r3，不接 Stage 2、不调 k、不换 seed、不做第四个近似 retriever。**
+  近似检索这条竖片三连未过门，作为背景证据封存。
+- 产物 `gpu-4090:/data/TJK/ekg/runs/stages/A3/a3-v6-retriever-r3/stage1/seed-13/`：
+  `retrieval_metrics.json` `86d37238…67ed8`、`run_metadata.json` `bcb5366f…dab08b`、
+  `retriever_heads.pt` `53c9a931…4bdd69d`；日志 `f68894a9…434b60c`。

@@ -23,7 +23,7 @@ P1 协议冻结
 | Phase | 作用 | 当前状态 | GPU | 契约 |
 |---|---|---|---|---|
 | **P1** | 冻结 manifests、scorer、baseline smoke 与 stage bundle | **COMPLETED / PASS；r12；global=PASS，A3 entry=PASS** | 4090 协议前向已完成 | [`PHASE_P1_protocol_freeze.md`](PHASE_P1_protocol_freeze.md) |
-| **A3** | Ch2 关系族×位置工作点及后续判别机制 | **ACTIVE；r13 2ep smoke PASS，待完整 seed-13** | 4090 | [`PHASE_A3_relation_balanced.md`](PHASE_A3_relation_balanced.md) |
+| **A3** | Ch2 关系族×位置工作点及后续判别机制 | **ACTIVE；工作点线与近似 retriever 均已 FAILED 封存，下一步是 A3.6 官方配方分账** | 4090 | [`PHASE_A3_relation_balanced.md`](PHASE_A3_relation_balanced.md) |
 | **D3** | Ch3 evidence-conditioned 事实性 | BLOCKED BY A3 handoff | 4090 | [`PHASE_D3_evidence_conditioned.md`](PHASE_D3_evidence_conditioned.md) |
 | **C4** | Ch1 语境判别身份消解 | BLOCKED BY D3 handoff | 4090 | [`PHASE_C4_context_identity.md`](PHASE_C4_context_identity.md) |
 | **E3** | Ch4 本地重建 query 协议的消费者 factorial | BLOCKED BY C4 handoff | 4090；5090 逐次授权 | [`PHASE_E3_factorial_consumers.md`](PHASE_E3_factorial_consumers.md) |
