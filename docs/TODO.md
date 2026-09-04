@@ -33,8 +33,9 @@
 - 4090：**已恢复**，启动前四卡全空、无进程、worktree clean，随后同步到 `ebb57da`；正式 backbone pin
   `71be7419…c961ea9` 在此；当前四张卡分别运行 A3.6 r16 的四个冻结臂，最近观测全部 ALIVE、显存
   6.8–7.5 GiB、训练在 epoch 7–8，`final_valid_accessed=false`；
-- 5090：可连接，HEAD `f8f1c9e`；32,607 MiB 中约 12,222 MiB 被既有 Qwen rerank/embed 服务占用，服务
-  不动、checkpoint 不搬。R1 尚未放行 proposed pilot，因此本轮没有为占卡而启动无效训练。
+- 5090：可连接，HEAD `4e893c1`；R1 JSON/逐实例 anchor 双端 SHA-256 一致。32,607 MiB 中约
+  12,222 MiB 被既有 Qwen rerank/embed 服务占用，服务不动、checkpoint 不搬。R1 尚未放行 proposed
+  pilot，因此本轮没有为占卡而启动无效训练。
 
 ## 禁止
 

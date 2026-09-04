@@ -55,6 +55,8 @@ SPEC。只有研究问题、范围或质量标准改变时才修订 SPEC。
 
 - 协议代码整改：`23b4fad fix(protocol): centralize P1 manifest and hashing logic`；
 - SDD/方法论整改：`c870ed7 docs(research): separate stable spec from adaptive methodology`；
+- R1 审计代码/结果：`8e3eb7a feat(r1): add dataset and prospective power audits`、
+  `4e893c1 docs(r1): record method design gate evidence`；
 - 两个提交均已推送 `origin/main`；本文提交后以新的 `origin/main` HEAD 为准；
 - 最新本地验证：481 passed / 24 expected skips，ruff 0，`ekg-smoke` OK，P1 local gate PASS；
 - local gate 的 `tested_tree_sha256`：
@@ -156,6 +158,9 @@ argument-aware 同协议 runnable baseline；Ch3 的 291-document 五类 macro-F
 项目自定的更高科研硬门。文献矩阵已只读冻结 CorefPrompt、MAVEN-FACT、ModaFact 三个官方仓库 HEAD，
 但没有把不同数据/split/evaluator 的代码误记为同协议 baseline。三个 design brief 均为 blocked/draft，
 **未放行 proposed GPU 训练**。
+
+5090 已同步到 `4e893c1`，上述 R1 JSON 与小型逐实例 anchor 已用不带 `--delete` 的 rsync 复制，双端逐文件
+SHA-256 完全一致；既有 Qwen rerank/embed 服务保持运行，未启动 GPU 任务。
 
 按 [`TASKS.md`](TASKS.md) 的 T012–T019 执行，但只做不读取 A3 待出结果的部分：
 
