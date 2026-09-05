@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from pathlib import Path
 
 from ekg.core.stage_bundle import sha256_file
@@ -20,6 +21,24 @@ def _load(path: Path) -> dict:
 def _write(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def wait_for_runs(run_root: Path, seconds: int) -> None:
+    while True:
+        states: list[str] = []
+        for pooling in BASELINE_POOLINGS:
+            for fold in range(1, 6):
+                path = run_root / pooling / f"fold-{fold}/run_metadata.json"
+                states.append(_load(path).get("status", "invalid") if path.is_file() else "pending")
+        if any(state == "failed" for state in states):
+            raise ValueError("an OOF run failed while the collector was waiting")
+        if states == ["complete"] * 10:
+            return
+        print(
+            f"[r1-factuality-oof] waiting: complete={states.count('complete')}/10",
+            flush=True,
+        )
+        time.sleep(seconds)
 
 
 def collect(run_root: Path, cv_path: Path, source: Path, output: Path) -> dict:
@@ -104,7 +123,10 @@ def main() -> int:
     parser.add_argument("--cv", required=True, type=Path)
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--wait-seconds", type=int, default=0)
     args = parser.parse_args()
+    if args.wait_seconds:
+        wait_for_runs(args.run_root, args.wait_seconds)
     summary = collect(args.run_root, args.cv, args.source, args.output)
     scores = {
         name: baseline["report"]["macro_f1"]
