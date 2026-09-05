@@ -1,0 +1,30 @@
+[features]
+plugins = false
+plugin_hooks = false
+
+[mcp_servers.playwright]
+enabled = false
+
+[skills]
+# Compatibility for openai/codex#20210; keeps the catalog through pptx on Codex 0.153.2.
+max_context_tokens = 140
+
+[[skills.config]]
+name = "humanizer:humanizer"
+enabled = true
+
+[[skills.config]]
+name = "pptx"
+enabled = true
+
+[[skills.config]]
+name = "slides"
+enabled = false
+
+[[skills.config]]
+name = "xlsx"
+enabled = false
+
+[[skills.config]]
+name = "spreadsheet"
+enabled = false
