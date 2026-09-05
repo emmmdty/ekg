@@ -130,6 +130,29 @@ def test_predicted_argument_response_uses_nearest_verbatim_occurrence() -> None:
     assert roles["place"][0]["char_start"] == 48
 
 
+def test_nuextract_generation_uses_remote_code_continuations() -> None:
+    module = _load("predict_mention_arguments")
+
+    class Tokenizer:
+        def convert_tokens_to_ids(self, token):
+            return {"<IMG_CONTEXT>": 17, "<|im_end|>": 23}[token]
+
+        def batch_decode(self, values, *, skip_special_tokens):
+            assert values == [[1, 2, 3]]
+            assert skip_special_tokens is True
+            return ["answer"]
+
+    model = type("Model", (), {})()
+    tokenizer = Tokenizer()
+
+    eos = module.prepare_nuextract_model(model, tokenizer)
+    decoded = module.decode_nuextract_responses(tokenizer, [[1, 2, 3]])
+
+    assert model.img_context_token_id == 17
+    assert eos == 23
+    assert decoded == ["answer"]
+
+
 def test_ere_population_counts_unseen_mentions_as_singletons() -> None:
     """The pipeline's population is smaller than ERE's; the gap must not vanish."""
     module = _load("build_canonical_nodes")

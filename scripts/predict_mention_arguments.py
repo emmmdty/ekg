@@ -21,6 +21,17 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def prepare_nuextract_model(model, tokenizer) -> int:
+    """Apply NuExtract remote-code token IDs for text-only generation."""
+    model.img_context_token_id = tokenizer.convert_tokens_to_ids("<IMG_CONTEXT>")
+    return tokenizer.convert_tokens_to_ids("<|im_end|>")
+
+
+def decode_nuextract_responses(tokenizer, generated) -> list[str]:
+    """Decode NuExtract continuations; its inputs-embeds path omits prompt IDs."""
+    return tokenizer.batch_decode(generated, skip_special_tokens=True)
+
+
 def parse_roles(
     response: str,
     sentence: str,
@@ -135,6 +146,7 @@ def main() -> int:
         trust_remote_code=True,
         torch_dtype=torch.bfloat16,
     ).to("cuda").eval()
+    eos_token_id = prepare_nuextract_model(model, tokenizer)
     args.output.mkdir(parents=True)
     output = args.output / "predictions.jsonl"
     with output.open("w", encoding="utf-8") as handle, torch.no_grad():
@@ -152,10 +164,9 @@ def main() -> int:
                 do_sample=False,
                 num_beams=1,
                 max_new_tokens=128,
+                eos_token_id=eos_token_id,
             )
-            responses = tokenizer.batch_decode(
-                generated[:, encoded["input_ids"].shape[1] :], skip_special_tokens=True
-            )
+            responses = decode_nuextract_responses(tokenizer, generated)
             for row, response in zip(batch, responses, strict=True):
                 roles = parse_roles(
                     response,
