@@ -27,6 +27,36 @@ def test_macro_f1_perfect_confusion() -> None:
     assert power._macro_f1(confusion.ravel())[0] == 1.0
 
 
+def test_micro_f1_from_counts() -> None:
+    counts = np.array([4.0, 2.0, 2.0])
+
+    assert power._micro_f1(counts)[0] == pytest.approx(2 * 4 / (2 * 4 + 2 + 2))
+
+
+def test_relation_inputs_collect_cross_sentence_false_positives(tmp_path: Path) -> None:
+    gold = tmp_path / "gold.jsonl"
+    prediction = tmp_path / "prediction.jsonl"
+    gold.write_text(
+        '{"id":"d1","events":['
+        '{"id":"e1","mention":[{"id":"m1","sent_id":0,"offset":[0,1]}]},'
+        '{"id":"e2","mention":[{"id":"m2","sent_id":1,"offset":[0,1]}]}],'
+        '"causal_relations":{"CAUSE":[],"PRECONDITION":[]}}\n',
+        encoding="utf-8",
+    )
+    prediction.write_text(
+        '{"id":"d1","causal_relations":{"CAUSE":[["m1","m2"]],'
+        '"PRECONDITION":[]}}\n',
+        encoding="utf-8",
+    )
+
+    by_doc, docs, deltas, false_positives = power._relation_inputs(gold, prediction)
+
+    assert by_doc.tolist() == [[0.0, 1.0, 0.0]]
+    assert docs.tolist() == [0]
+    assert deltas.tolist() == [[0.0, -1.0, 0.0]]
+    assert false_positives == 1
+
+
 def test_power_curve_is_deterministic_and_detects_large_correction() -> None:
     base = np.array([[0.0, 1.0, 0.0, 1.0]] * 8)
     correction_docs = np.arange(8)

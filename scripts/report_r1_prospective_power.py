@@ -18,6 +18,7 @@ import numpy as np
 
 from ekg.core.stage_bundle import sha256_file
 from ekg.relations.data.maven_fact import load_maven_fact
+from ekg.relations.maven_ere_official import gold_to_official_prediction
 
 FACT_CLASSES = ("CT+", "PS+", "CT-", "PS-", "Uu")
 ScoreFunction = Callable[[np.ndarray], np.ndarray]
@@ -119,6 +120,18 @@ def _macro_f1(confusions: np.ndarray) -> np.ndarray:
         where=(precision + recall) != 0,
     )
     return f1.mean(axis=1)
+
+
+def _micro_f1(counts: np.ndarray) -> np.ndarray:
+    counts = np.atleast_2d(counts)
+    true_positive, false_positive, false_negative = counts.T
+    denominator = 2 * true_positive + false_positive + false_negative
+    return np.divide(
+        2 * true_positive,
+        denominator,
+        out=np.zeros(len(counts)),
+        where=denominator != 0,
+    )
 
 
 def _bootstrap_document_counts(
@@ -243,6 +256,110 @@ def analyze_identity(
     }
 
 
+def _causal_edges(record: dict) -> set[tuple[str, str, str]]:
+    return {
+        (str(subtype), str(head), str(tail))
+        for subtype, pairs in record.get("causal_relations", {}).items()
+        for head, tail in pairs
+    }
+
+
+def _relation_inputs(
+    gold_path: Path, prediction_path: Path
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, int]:
+    gold_records = _load_jsonl_by_id(gold_path)
+    predictions = _load_jsonl_by_id(prediction_path)
+    if set(gold_records) != set(predictions):
+        raise ValueError("relation gold/prediction document sets differ")
+
+    base_by_doc: list[np.ndarray] = []
+    correction_docs: list[int] = []
+    correction_deltas: list[np.ndarray] = []
+    cross_sentence_false_positives = 0
+    for doc_index, doc_id in enumerate(sorted(gold_records)):
+        raw_gold = gold_records[doc_id]
+        gold = gold_to_official_prediction(raw_gold)
+        prediction = predictions[doc_id]
+        gold_edges = _causal_edges(gold)
+        predicted_edges = _causal_edges(prediction)
+        true_positive = len(gold_edges & predicted_edges)
+        false_positive_edges = predicted_edges - gold_edges
+        false_negative = len(gold_edges - predicted_edges)
+        base_by_doc.append(
+            np.array([true_positive, len(false_positive_edges), false_negative], dtype=float)
+        )
+
+        mention_sentences = {
+            str(mention["id"]): int(mention["sent_id"])
+            for event in raw_gold.get("events", [])
+            for mention in event.get("mention", [])
+        }
+        cross_sentence = sum(
+            mention_sentences[head] != mention_sentences[tail]
+            for _, head, tail in false_positive_edges
+        )
+        if cross_sentence:
+            correction_docs.append(doc_index)
+            correction_deltas.append(np.array([0.0, -cross_sentence, 0.0]))
+            cross_sentence_false_positives += cross_sentence
+
+    return (
+        np.stack(base_by_doc),
+        np.asarray(correction_docs, dtype=int),
+        np.stack(correction_deltas),
+        cross_sentence_false_positives,
+    )
+
+
+def analyze_relation(
+    gold_path: Path,
+    prediction_path: Path,
+    *,
+    bootstrap_counts: np.ndarray,
+    trials: int,
+    rng: np.random.Generator,
+) -> dict:
+    base_by_doc, correction_docs, correction_deltas, false_positives = _relation_inputs(
+        gold_path, prediction_path
+    )
+    steps = tuple(
+        step
+        for step in (1, 2, 3, 5, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256)
+        if step <= len(correction_docs)
+    )
+    curve = _power_curve(
+        base_by_doc,
+        correction_docs,
+        correction_deltas,
+        steps=steps,
+        score=_micro_f1,
+        bootstrap_counts=bootstrap_counts,
+        trials=trials,
+        rng=rng,
+    )
+    mde = _first_powered_row(curve)
+    return {
+        "status": "pass" if mde and mde["effect_median"] <= 0.01 else "underpowered",
+        "evaluation_unit": "document cluster",
+        "primary_metric": "official causal micro-F1",
+        "minimum_meaningful_effect": 0.01,
+        "anchor_point": float(_micro_f1(base_by_doc.sum(axis=0))[0]),
+        "documents": len(base_by_doc),
+        "correctable_documents": len(correction_docs),
+        "correctable_cross_sentence_false_positives": false_positives,
+        "injected_treatment": (
+            "remove every cross-sentence causal false positive in a sampled anchor-error "
+            "document; do not alter true positives, false negatives, candidates, or labels"
+        ),
+        "power_curve": curve,
+        "mde_at_80_percent_power": mde,
+        "legal_strengthening": (
+            "Pre-freeze repeated train/internal-dev document splits and aggregate matched-seed "
+            "paired estimates; keep final-valid sealed."
+        ),
+    }
+
+
 def _factuality_inputs(
     gold_path: Path, manifest_path: Path, prediction_path: Path
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, int]]:
@@ -345,6 +462,9 @@ def main() -> int:
     parser.add_argument("--identity-gold", required=True, type=Path)
     parser.add_argument("--identity-predictions", required=True, type=Path)
     parser.add_argument("--identity-metrics", required=True, type=Path)
+    parser.add_argument("--relation-gold", required=True, type=Path)
+    parser.add_argument("--relation-predictions", required=True, type=Path)
+    parser.add_argument("--relation-metrics", required=True, type=Path)
     parser.add_argument("--factuality-gold", required=True, type=Path)
     parser.add_argument("--factuality-manifest", required=True, type=Path)
     parser.add_argument("--factuality-predictions", required=True, type=Path)
@@ -359,9 +479,11 @@ def main() -> int:
     identity_docs = len(_load_jsonl_by_id(args.identity_gold))
     factuality_manifest = json.loads(args.factuality_manifest.read_text(encoding="utf-8"))
     factuality_docs = factuality_manifest.get("doc_count")
-    if identity_docs != factuality_docs:
+    relation_docs = len(_load_jsonl_by_id(args.relation_gold))
+    if identity_docs != factuality_docs or identity_docs != relation_docs:
         raise SystemExit(
-            f"identity/factuality document counts differ: {identity_docs}/{factuality_docs}"
+            "identity/relation/factuality document counts differ: "
+            f"{identity_docs}/{relation_docs}/{factuality_docs}"
         )
     bootstrap_counts = _bootstrap_document_counts(
         identity_docs, resamples=args.resamples, rng=rng
@@ -390,6 +512,18 @@ def main() -> int:
                 "path": str(args.identity_metrics),
                 "sha256": sha256_file(args.identity_metrics),
             },
+            "relation_gold": {
+                "path": str(args.relation_gold),
+                "sha256": sha256_file(args.relation_gold),
+            },
+            "relation_predictions": {
+                "path": str(args.relation_predictions),
+                "sha256": sha256_file(args.relation_predictions),
+            },
+            "relation_metrics": {
+                "path": str(args.relation_metrics),
+                "sha256": sha256_file(args.relation_metrics),
+            },
             "factuality_gold": {
                 "path": str(args.factuality_gold),
                 "sha256": sha256_file(args.factuality_gold),
@@ -414,13 +548,13 @@ def main() -> int:
             trials=args.trials,
             rng=rng,
         ),
-        "relation": {
-            "status": "blocked",
-            "reason": (
-                "The prospective anchor is the pending A3.6 handoff; aggregate or "
-                "partial training curves are not a substitute."
-            ),
-        },
+        "relation": analyze_relation(
+            args.relation_gold,
+            args.relation_predictions,
+            bootstrap_counts=bootstrap_counts,
+            trials=args.trials,
+            rng=rng,
+        ),
         "factuality": analyze_factuality(
             args.factuality_gold,
             args.factuality_manifest,
@@ -430,8 +564,8 @@ def main() -> int:
             rng=rng,
         ),
     }
-    if report["identity"]["status"] == report["factuality"]["status"] == "pass":
-        report["status"] = "partial_pass_pending_relation"
+    statuses = [report[name]["status"] for name in ("identity", "relation", "factuality")]
+    report["status"] = "pass" if statuses == ["pass", "pass", "pass"] else "blocked"
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"[r1-power] {report['status']}: wrote {args.output}")
