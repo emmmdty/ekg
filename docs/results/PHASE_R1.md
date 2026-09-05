@@ -11,15 +11,15 @@
 - `id_coverage.json`：`ca481ecf3b899cacf553f258992f6603f8fa417a97cd25ee94176e3f313bb2e6`；
 - `power_analysis.json`：`0e137ae52d06c03a2bd5f1bcf0c8ed55b36e2218fdb70c6318b3cf2ee99ab3df`；
 - `literature_matrix.json`：`64874f4c07a3d057240f2716f33eea018e4cf49bdebf0bf2aa5369d3bf442476`；
-- `design_briefs.json`：`4af96d1f7206ace60baa403df23dcbad31e10bcc68169056b4edad71856e0bd1`；
+- `design_briefs.json`：`3dfbb8810fa041983f246d7aac1a251b0fc240583582a48fd03027228c570731`；
 - `factuality_cv/factuality_cv.json`：
   `3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4`；
 - `protocol/degree_requirements.json`：
   `ceeb581bc1ff2c22ea0dd94811c892d0c91a4e4bca8c3c7aedfd4c5f6f2da47e`；
-- `protocol.json`：`19fbc7ed4d6332931fd42781f9f7114496cb479e054b698a157c728ed011db82`；
-- `status.json`：`609aefbfe5db7b9c471299299f5be95232280a18093e4909c8483d50ad0edff4`。
+- `protocol.json`：`cc80e066deb6b5ff735e15defe54ddb9c68384a626685cc516897440543575dc`；
+- `status.json`：`24c2aac4ff31bba5997461b24e7a70c223d101c2369514b9c3b25963e887af07`。
 
-代码门：488 passed / 24 expected skips，ruff 0，`ekg-smoke` OK。
+代码门：489 passed / 24 expected skips，ruff 0，`ekg-smoke` OK。
 
 ## 2. 跨数据身份审计
 
@@ -145,8 +145,26 @@ Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
   MAVEN-ARG cluster gold。功效通过，但 baseline/input closure 未过。
 - Ch2 草案避开已失败的 retriever/weighting 家族，改查 **full-candidate counterfactual evidence
   sufficiency/necessity**；A3 error profile 与功效门已支持该中介，但仍缺第二个独立同协议强 baseline。
-- Ch3 草案改为 **certainty/polarity factorization + cue-conditioned residual**；它不把“找准 evidence span”
-  当主要贡献。五折 OOF baseline 与 pooled power 已验收 PASS；下一门是 T022 因果 brief、T023 跨产物审计
-  和 T024 phase contract，未完成前不启动 proposed GPU pilot。
+- Ch3 已冻结 **typed cues + known/unknown→modality→polarity factorization + cue-conditioned residual** 因果
+  brief；它不把“找准 evidence span”当主要贡献。五折 OOF baseline、pooled power 与 T022 均 PASS；T023
+  跨产物审计和 T024 phase contract 未完成前不启动 proposed GPU pilot。
 
 三者均未获 promotion；5090/4090 的空闲本身不能替代 R1 准入证据。
+
+## 6. T022 事实性因果 design brief
+
+T022 的 constitution/spec traceability review 为 **PASS**，但这只是设计准入，不是方法 promotion。冻结链为：
+
+`typed cues + known/unknown→modality→polarity factorization`
+→ `unknown / modality-only / polarity-only confusion`
+→ `pooled five-class macro-F1`。
+
+主结果始终是五类 macro-F1。三类 confusion、evidence、calibration、accuracy 与逐类指标只能作为中介诊断
+或护栏，不能替代主结果。full、同输入同预算 flat-head remove-core、DMRoBERTa strongest-alternative 与
+document-internal cue permutation negative-control 已写入 `design_briefs.json`；若 full 不改善注册中介、
+cue permutation 保留同样中介改善，或主指标未胜出，机制 claim 即失败。
+
+seed-13 pilot 仍须等待 T023 与 T024，并先通过本地门和 CPU/CUDA smoke。额外 seeds 未授权；确认性门保留
+matched seeds 13/17/42、相对主锚均值至少 +.030、至少 2/3 delta 为正、document-cluster paired-bootstrap
+95% CI 下界大于 0、超过 DMRoBERTa，以及 evidence/稀有类护栏。T023 仍受未完成 T020/T021 阻塞，故
+R1 总状态保持 `preparation_partial_blocked`。

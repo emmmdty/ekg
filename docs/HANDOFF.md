@@ -60,7 +60,7 @@ SPEC。只有研究问题、范围或质量标准改变时才修订 SPEC。
   cross-validation folds`、`32cfd46 feat(r1): close relation handoff and power gate`、
   `277b36f fix(r1): isolate factuality OOF training source`；
 - 本文提交后以新的 `origin/main` HEAD 为准；
-- 最新本地验证：488 passed / 24 expected skips，ruff 0，`ekg-smoke` OK，P1 local gate PASS；
+- 最新本地验证：489 passed / 24 expected skips，ruff 0，`ekg-smoke` OK，P1 local gate PASS；
 - local gate 的 `tested_tree_sha256`：
   `3bff2ac2b5366ed06ebe81c9b2e549f0949216c832ad8e6098a6782e0c701d3c`；
 - A3.6 只运行了已授权 seed 13；R1 功效只读 train-derived internal-dev。跨数据 ID 审计按合同读取了
@@ -149,7 +149,7 @@ python3 -c "import json; p=json.load(open('data/protocols/v6/registry.json')); p
 
 ### 任务 B：R1 准入闭环（当前活动阶段）
 
-T012–T019 已完成（T018 已在 A3 handoff 后补齐），精确数字、hash 和裁决见
+T012–T019 与 T022 已完成（T018 已在 A3 handoff 后补齐），精确数字、hash 和裁决见
 [`results/PHASE_R1.md`](results/PHASE_R1.md)，产物根为 `runs/stages/R1/r1-v61-20260904/`，代码提交
 `277b36f`。当前硬结论：ERE↔FACT 身份闭环；ERE↔ARG mention 仅约 95.4% 覆盖且共享 mention 有父簇
 冲突，故 event-level arguments→mention 的 deployable 路线 blocked；Ch1 prospective power PASS，但缺
@@ -159,21 +159,20 @@ baseline；Ch3 的 291-document 设计 underpowered，但预冻结五折 OOF 已
 
 学位类型、入学年份、学科与专业未知项均保持 `null`；同济校级标准来源/date/hash 已冻结，未知项不影响
 项目自定的更高科研硬门。文献矩阵已只读冻结 CorefPrompt、MAVEN-FACT、ModaFact、TextEE、OmniEvent
-五个官方仓库 HEAD，
-但没有把不同数据/split/evaluator 的代码误记为同协议 baseline。三个 design brief 均为 blocked/draft，
-**未放行 proposed GPU 训练**。
+五个官方仓库 HEAD，但没有把不同数据/split/evaluator 的代码误记为同协议 baseline。Ch3 因果 brief 已
+通过 T022 并绑定已验收 OOF/power；Ch1/Ch2 brief 仍为 blocked/draft，**未放行 proposed GPU 训练**。
 
 两台服务器都没有可恢复的 OmniEvent/TextEE EAE checkpoint；OmniEvent 官方 checkpoint URL 已失效，
 因此不得把随机初始化或跨 ontology 重训冒充官方 baseline。5090 的既有 Qwen 服务保持运行。
 
 后续按 [`TASKS.md`](TASKS.md) 的 T020–T024 继续，但各章仍先补齐自身 blocker：
 
-1. Ch3：执行 T022 因果 design brief，再与已验收 OOF/power 产物进入 T023 一致性审计；通过后才能生成
-   T024 phase contract，未冻结前不启动 proposed GPU pilot；
+1. Ch3：T022 因果 brief 已通过；T023 是全局跨产物审计，仍等待 T020/T021 随各自 blocker 关闭，之后
+   才能生成 T024 D4 phase contract；未冻结前不启动 proposed GPU pilot；
 2. Ch1：继续寻找可忠实运行的 mention-local argument-aware baseline/checkpoint；没有 checkpoint 时只做
    adapter 与 fixture，不把跨 ontology 重训冒充官方复现；
 3. Ch2：取得或透明适配第二个独立近期同协议 baseline，保持完整候选全集；
-4. 对满足 blocker 的 brief 做 T020–T022 审查，再做 T023 跨产物一致性审计；只有通过者才能生成 T024
+4. 对满足 blocker 的剩余 brief 做 T020/T021 审查，再做 T023 跨产物一致性审计；只有通过者才能生成 T024
    phase contract。继续不看 final-valid、不写 proposed 训练代码。
 
 产物进入 `runs/stages/R1/r1-v61-20260904/`，结构与完成门以

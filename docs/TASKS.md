@@ -73,7 +73,7 @@ Proposed-method implementation tasks are intentionally not generated until R1 ap
   guardrails, stop) → constitution/spec traceability review passes.
 - [ ] **T021 [RS-002]** Write the relation causal design brief → same review, and inference preserves the full candidate
   universe.
-- [ ] **T022 [RS-003]** Write the factuality causal design brief → same review, and diagnostics cannot replace macro-F1.
+- [x] **T022 [RS-003]** Write the factuality causal design brief → same review, and diagnostics cannot replace macro-F1.
 - [ ] **T023** Run the cross-artifact consistency audit across constitution, SPEC, plan, tasks, phase contracts and result
   identities → every requirement maps to a task/test; no task adds an undeclared outcome.
 - [ ] **T024** Freeze each approved method phase contract only after its R1 prerequisites and T023 pass → exact inputs,

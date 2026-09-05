@@ -102,8 +102,9 @@ random/window evidence; no structural constraint.
 ### Factuality study
 
 **Observed problem**: Existing evidence-conditioned systems are not statistically separated from strong baselines, and a
-gold-evidence oracle does not reveal a sufficiently large remaining evidence-location ceiling. R1 prospective simulation
-also finds the current 291-document five-class design underpowered for the registered minimum meaningful effect.
+gold-evidence oracle does not reveal a sufficiently large remaining evidence-location ceiling. The original 291-document
+design is underpowered, but the pre-frozen 2,913-document five-fold OOF design has accepted RoBERTa+CLS/DMRoBERTa
+anchors and passes prospective power for the registered minimum meaningful effect.
 
 **Candidate hypothesis**: Separating evidence sufficiency/unknown, modality and polarity decisions with typed cue spans
 reduces structured confusions that a pooled five-class head cannot express.
@@ -111,11 +112,12 @@ reduces structured confusions that a pooled five-class head cannot express.
 **Candidate treatment**: certainty/polarity factorization plus a cue-conditioned residual and consistent five-class
 output distribution. Better evidence location alone is explicitly not the treatment.
 
-**Required mediator**: pre-registered changes in unknown, modality-only and polarity-only confusion categories.
+**Required mediator**: a document-cluster paired reduction in the pre-registered unknown, modality-only and polarity-only
+confusion rate for full versus flat-head remove-core; cue permutation must remove that reduction.
 
 **Minimum causal matrix**: primary anchor; official evidence pipeline; proposed; flat five-class head; cue-permutation
-negative control. The five-fold train/selection/evaluation manifests are frozen, but this matrix cannot run until
-leakage-free baseline OOF predictions establish pooled prospective power.
+negative control. T022 freezes this causal brief; T023 consistency audit and T024 executable contract remain mandatory
+before a seed-13 pilot, and extra seeds still require separate authorization.
 
 ### System evaluation
 
