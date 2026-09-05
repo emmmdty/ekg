@@ -16,6 +16,7 @@ htmlcov/
 .agents/
 .codex/
 .serena/
+.worktrees/
 
 # Data & models (kept out of git; fixtures/ are the exception below)
 data/*
