@@ -111,6 +111,25 @@ def test_argument_locality_removes_other_sentence_fillers(arg_docs) -> None:
     assert second_sentence == ()
 
 
+def test_predicted_argument_response_uses_nearest_verbatim_occurrence() -> None:
+    module = _load("predict_mention_arguments")
+    sentence = "Alice called Bob after Alice attacked Rome."
+
+    roles = module.parse_roles(
+        '{"participant": ["Alice", "Bob"], "place": ["Rome"]}',
+        sentence,
+        sentence_start=10,
+        trigger_start=33,
+    )
+
+    assert roles["participant"][0] == {
+        "text": "Alice",
+        "char_start": 33,
+        "char_end": 38,
+    }
+    assert roles["place"][0]["char_start"] == 48
+
+
 def test_ere_population_counts_unseen_mentions_as_singletons() -> None:
     """The pipeline's population is smaller than ERE's; the gap must not vanish."""
     module = _load("build_canonical_nodes")
@@ -205,6 +224,30 @@ def test_manifest_selection_aligns_both_annotation_views(tmp_path) -> None:
 
     assert [doc.doc_id for doc in arg] == ["b", "a"]
     assert [doc.doc_id for doc in ere] == ["b", "a"]
+
+
+def test_ere_argument_view_preserves_every_mention() -> None:
+    module = _load("build_canonical_nodes")
+
+    class FakeNode:
+        def __init__(self, mention_id, event):
+            self.event_id = mention_id
+            self.metadata = {"event": event}
+
+    source = type(
+        "Doc",
+        (),
+        {
+            "doc_id": "d",
+            "doc_text": "text",
+            "nodes": [FakeNode("d::m1", "e1"), FakeNode("d::m2", "e1")],
+        },
+    )()
+
+    converted = module.ere_argument_view([source])[0]
+
+    assert converted.nodes == source.nodes
+    assert converted.clusters == {"e1": ["d::m1", "d::m2"]}
 
 
 def test_zero_calibration_ratio_keeps_the_complete_population() -> None:

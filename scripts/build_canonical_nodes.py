@@ -51,10 +51,29 @@ from ekg.nodes.coref import (
 )
 from ekg.nodes.detection import detection_prf, event_detectors
 from ekg.nodes.metrics import mis_merge_report
+from ekg.nodes.predicted_arguments import apply_predicted_arguments
 from ekg.relations.admission import stratified_admission_report
 from ekg.relations.data import load_maven_arg, load_maven_ere
 from ekg.relations.data.maven_arg import ArgumentDocument
 from ekg.relations.maven_ere_official import empty_official_prediction
+
+
+def ere_argument_view(ere_docs: list) -> list[ArgumentDocument]:
+    """Use the complete ERE mention population as the coreference input view."""
+    converted = []
+    for doc in ere_docs:
+        clusters: dict[str, list[str]] = {}
+        for node in doc.nodes:
+            clusters.setdefault(str(node.metadata["event"]), []).append(node.event_id)
+        converted.append(
+            ArgumentDocument(
+                doc_id=doc.doc_id,
+                doc_text=doc.doc_text,
+                nodes=doc.nodes,
+                clusters=clusters,
+            )
+        )
+    return converted
 
 
 def split_index(n: int, cal_ratio: float) -> int:
@@ -371,13 +390,18 @@ def evaluate_detection(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--arg", required=True, type=Path, help="MAVEN-Arg jsonl")
+    parser.add_argument("--arg", type=Path, help="MAVEN-Arg jsonl")
     parser.add_argument("--ere", required=True, type=Path, help="MAVEN-ERE jsonl (same split)")
     parser.add_argument(
         "--manifest", type=Path, help="frozen manifest selecting and ordering both views"
     )
     parser.add_argument("--scorer", default="lexical", help="coreference scorer name")
     parser.add_argument("--scorer-path", default=None, help="scorer checkpoint (supervised)")
+    parser.add_argument(
+        "--argument-predictions",
+        type=Path,
+        help="complete predicted mention-local argument JSONL for the ERE population",
+    )
     parser.add_argument("--detector", default=None, help="event detector name (optional)")
     parser.add_argument("--detector-path", default=None, help="detector checkpoint")
     parser.add_argument("--threshold", type=float, default=0.7)
@@ -394,8 +418,16 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    arg_docs = list(load_maven_arg(args.arg))
     ere_docs = list(load_maven_ere(args.ere))
+    if args.argument_predictions:
+        if args.arg:
+            parser.error("--arg and --argument-predictions are mutually exclusive")
+        apply_predicted_arguments(ere_docs, args.argument_predictions)
+        arg_docs = ere_argument_view(ere_docs)
+    else:
+        if not args.arg:
+            parser.error("--arg is required without --argument-predictions")
+        arg_docs = list(load_maven_arg(args.arg))
     if args.manifest:
         arg_docs, ere_docs = select_manifest_documents(arg_docs, ere_docs, args.manifest)
     if args.limit:
@@ -413,6 +445,8 @@ def main() -> int:
         cal_ratio=args.cal_ratio,
     )
     if args.detector:
+        if args.argument_predictions:
+            parser.error("detection evaluation requires the MAVEN-Arg candidate view")
         cut = split_index(len(arg_docs), args.cal_ratio)
         report["detection"] = evaluate_detection(
             arg_docs[cut:], args.detector, args.detector_path

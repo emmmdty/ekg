@@ -44,10 +44,55 @@ __all__ = [
     "FAMILY_SUBTYPES",
     "DISTANCE_BUCKETS",
     "SupervisedRelationExtractor",
+    "cluster_pair_groups",
+    "cluster_sentence_ids",
     "distance_bucket",
     "encode_trigger_reps",
     "locate_trigger_span",
 ]
+
+
+def cluster_sentence_ids(
+    sentences: list[str],
+    triggers: dict[int, list[str]],
+    *,
+    n_clusters: int = 3,
+    seed: int = 13,
+) -> tuple[int, ...]:
+    """TacoERE-style deterministic sentence clusters from text and event triggers."""
+    if not sentences:
+        return ()
+    from sklearn.cluster import KMeans
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    k = min(n_clusters, len(sentences))
+    enriched = [
+        f"{sentence} {' '.join(triggers.get(index, []))}"
+        for index, sentence in enumerate(sentences)
+    ]
+    matrix = TfidfVectorizer(stop_words="english").fit_transform(enriched)
+    labels = KMeans(n_clusters=k, random_state=seed, n_init=10).fit_predict(matrix)
+    # KMeans label numbers are arbitrary. Canonicalize by each cluster's first sentence.
+    order = {
+        label: rank
+        for rank, label in enumerate(sorted(set(labels), key=lambda item: list(labels).index(item)))
+    }
+    return tuple(order[int(label)] for label in labels)
+
+
+def cluster_pair_groups(nodes, pairs, sentence_clusters) -> dict[tuple[int, int], list[int]]:
+    """Group every candidate pair by its intra/inter sentence-cluster context."""
+    cluster_by_node = {}
+    for node in nodes:
+        span = node.trigger_evidence[0] if node.trigger_evidence else None
+        if span is None or span.sent_id is None or span.sent_id >= len(sentence_clusters):
+            raise ValueError(f"{node.event_id}: no sentence cluster for trigger")
+        cluster_by_node[node.event_id] = sentence_clusters[span.sent_id]
+    groups: dict[tuple[int, int], list[int]] = {}
+    for index, (head, tail) in enumerate(pairs):
+        key = tuple(sorted((cluster_by_node[head], cluster_by_node[tail])))
+        groups.setdefault(key, []).append(index)
+    return groups
 
 # family value (RelationType.value) -> contract RelationType
 _FAMILY_TYPE = {
@@ -210,7 +255,15 @@ if TORCH_AVAILABLE:
             [head_emb, tail_emb, head_emb * tail_emb, (head_emb - tail_emb).abs()], dim=-1
         )
 
-    def encode_trigger_reps(encoder, tokenizer, nodes, doc_text, max_length, device="cpu"):
+    def encode_trigger_reps(
+        encoder,
+        tokenizer,
+        nodes,
+        doc_text,
+        max_length,
+        device="cpu",
+        sentence_ids=None,
+    ):
         """Per-node trigger representation, mean-pooled from **document windows**.
 
         Consecutive sentences are packed into one `<= max_length` window (CLS in
@@ -237,6 +290,7 @@ if TORCH_AVAILABLE:
         if not nodes:
             return {}
         lines = doc_text.split("\n")
+        selected = set(range(len(lines))) if sentence_ids is None else set(sentence_ids)
         doc_id = nodes[0].doc_id
         by_sent: dict[int, list] = {}
         for node in nodes:
@@ -265,6 +319,8 @@ if TORCH_AVAILABLE:
                 embs[node.event_id] = hidden[start:end].mean(dim=0)
 
         for sent_id, sentence in enumerate(lines):
+            if sent_id not in selected:
+                continue
             enc = tokenizer(sentence, add_special_tokens=False, return_offsets_mapping=True)
             sent_ids, offsets = enc["input_ids"], enc["offset_mapping"]
             if len(sent_ids) + 2 > max_length:  # CLS + sentence + SEP
@@ -287,6 +343,62 @@ if TORCH_AVAILABLE:
             pending.extend((node, base + s, base + e) for node, s, e in located)
         flush()
         return embs
+
+    def pair_trigger_embeddings(
+        encoder,
+        tokenizer,
+        nodes,
+        doc_text,
+        pairs,
+        max_length,
+        device="cpu",
+        *,
+        context_mode="document",
+        cluster_seed=13,
+    ):
+        """Endpoint embeddings under the document or TacoERE cluster context."""
+        if context_mode == "document":
+            embs = encode_trigger_reps(
+                encoder, tokenizer, nodes, doc_text, max_length, device
+            )
+            return (
+                torch.stack([embs[head] for head, _ in pairs]),
+                torch.stack([embs[tail] for _, tail in pairs]),
+            )
+        if context_mode != "taco":
+            raise ValueError(f"unknown relation context mode: {context_mode}")
+
+        lines = doc_text.split("\n")
+        triggers: dict[int, list[str]] = {}
+        for node in nodes:
+            span = node.trigger_evidence[0]
+            triggers.setdefault(span.sent_id, []).append(node.trigger)
+        clusters = cluster_sentence_ids(lines, triggers, seed=cluster_seed)
+        groups = cluster_pair_groups(nodes, pairs, clusters)
+        head_reps = [None] * len(pairs)
+        tail_reps = [None] * len(pairs)
+        for key, indices in groups.items():
+            sentence_ids = [index for index, cluster in enumerate(clusters) if cluster in key]
+            active = [
+                node
+                for node in nodes
+                if node.trigger_evidence[0].sent_id in sentence_ids
+            ]
+            embs = encode_trigger_reps(
+                encoder,
+                tokenizer,
+                active,
+                doc_text,
+                max_length,
+                device,
+                sentence_ids=sentence_ids,
+            )
+            for index in indices:
+                head, tail = pairs[index]
+                if head not in embs or tail not in embs:
+                    raise ValueError("candidate pair references an unknown node")
+                head_reps[index], tail_reps[index] = embs[head], embs[tail]
+        return torch.stack(head_reps), torch.stack(tail_reps)
 
 
 @relation_extractors.register("supervised")
@@ -315,6 +427,8 @@ class SupervisedRelationExtractor(RelationExtractor):
         self._tokenizer = None
         self._device = "cpu"
         self._active_families = tuple(FAMILY_SUBTYPES)
+        self._context_mode = "document"
+        self._cluster_seed = 13
 
     def _candidate_pairs(self, nodes: list[EventNode]) -> list[tuple[str, str]]:
         if not nodes:
@@ -374,16 +488,16 @@ class SupervisedRelationExtractor(RelationExtractor):
         )
         self._model.load_state_dict(torch.load(heads_file, map_location="cpu"))
         self._active_families = checkpoint_active_families(ckpt)
+        metadata_path = ckpt / "run_metadata.json"
+        if metadata_path.is_file():
+            configuration = json.loads(metadata_path.read_text(encoding="utf-8")).get(
+                "configuration", {}
+            )
+            self._context_mode = configuration.get("context_mode", "document")
+            self._cluster_seed = int(configuration.get("cluster_seed", 13))
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
         self._encoder.to(self._device).eval()
         self._model.to(self._device).eval()
-
-    def _encode_mentions(self, nodes: list[EventNode], doc_text: str) -> dict[str, torch.Tensor]:
-        """Trigger reps for inference: the shared encoder pooling under `no_grad`."""
-        with torch.no_grad():
-            return encode_trigger_reps(
-                self._encoder, self._tokenizer, nodes, doc_text, self.max_length, self._device
-            )
 
     def _score_pairs(
         self,
@@ -396,11 +510,18 @@ class SupervisedRelationExtractor(RelationExtractor):
         doc_text = context.doc_text.get(nodes[0].doc_id, "") if context and nodes else ""
         if not doc_text:
             raise ValueError("supervised: extract needs context.doc_text for the document")
-        embs = self._encode_mentions(nodes, doc_text)
-        # Build the pair feature for the whole candidate set at once: doing it per
-        # pair launches a kernel per candidate (thousands in a single document).
-        head_emb = torch.stack([embs[h] for h, _ in pairs])
-        tail_emb = torch.stack([embs[t] for _, t in pairs])
+        with torch.no_grad():
+            head_emb, tail_emb = pair_trigger_embeddings(
+                self._encoder,
+                self._tokenizer,
+                nodes,
+                doc_text,
+                pairs,
+                self.max_length,
+                self._device,
+                context_mode=self._context_mode,
+                cluster_seed=self._cluster_seed,
+            )
         # Same mention_order the training rows were bucketed from, so a bucket id
         # means the same thing on both sides.
         order = mention_order(RelationDocument(doc_id=nodes[0].doc_id, nodes=nodes, gold_edges=[]))

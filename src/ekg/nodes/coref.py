@@ -225,7 +225,9 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
         if not head_file.exists():
             raise FileNotFoundError(f"supervised coreference: head not found at {head_file}")
         from ekg.nodes.discriminative import (
+            ARGUMENT_COMPONENTS,
             ARGUMENT_POOLING_ORACLE,
+            ARGUMENT_POOLING_PREDICTED,
             CONFIG_FILE,
             CONFUSABILITY,
             CONTEXT_POOLING,
@@ -253,15 +255,19 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
                 else ()
             )
         self._context_discriminative = CONTEXT_POOLING in self._components
-        self._argument_oracle = ARGUMENT_POOLING_ORACLE in self._components
-        declared_argument_source = config.get("argument_source", "none")
-        expected_argument_source = (
-            "gold_event_level_oracle" if self._argument_oracle else "none"
+        self._argument_pooling = bool(set(self._components) & ARGUMENT_COMPONENTS)
+        self._argument_source = (
+            "gold_event_level_oracle"
+            if ARGUMENT_POOLING_ORACLE in self._components
+            else "predicted_mention_local"
+            if ARGUMENT_POOLING_PREDICTED in self._components
+            else "none"
         )
-        if declared_argument_source != expected_argument_source:
+        declared_argument_source = config.get("argument_source", "none")
+        if declared_argument_source != self._argument_source:
             raise ValueError(
                 "coreference checkpoint argument source mismatch: "
-                f"checkpoint={declared_argument_source!r} expected={expected_argument_source!r}"
+                f"checkpoint={declared_argument_source!r} expected={self._argument_source!r}"
             )
         # Feature layouts evolve. A checkpoint trained on a different feature list
         # must fail loudly here rather than let the head read numbers it never saw.
@@ -299,17 +305,21 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
 
         order = {node.event_id: i for i, node in enumerate(nodes)}
         nodes_by_id = {node.event_id: node for node in nodes}
+        if self._argument_source == "predicted_mention_local" and any(
+            node.metadata.get("argument_source") != self._argument_source for node in nodes
+        ):
+            raise ValueError("predicted-argument checkpoint requires predicted mention-local input")
         starts = [n.trigger_evidence[0].char_start for n in nodes]
         argument_spans, argument_counts = argument_spans_and_counts(nodes)
         arguments = None
         with torch.no_grad():
             if self._context_discriminative:
                 oracle_starts = (
-                    [start for start, _ in argument_spans] if self._argument_oracle else []
+                    [start for start, _ in argument_spans] if self._argument_pooling else []
                 )
                 combined_starts = starts + oracle_starts
                 combined_ranges = context_ranges_for(nodes, doc_text)
-                if self._argument_oracle:
+                if self._argument_pooling:
                     combined_ranges += argument_spans
                 encoded_spans, encoded_contexts = encode_spans_with_context(
                     self._encoder,
@@ -323,11 +333,11 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
                 )
                 triggers = encoded_spans[: len(starts)]
                 contexts = encoded_contexts[: len(starts)]
-                if self._argument_oracle:
+                if self._argument_pooling:
                     arguments = pool_argument_features(
                         encoded_spans[len(starts) :], argument_counts
                     )
-            elif self._argument_oracle:
+            elif self._argument_pooling:
                 combined = encode_spans(
                     self._encoder,
                     self._tokenizer,

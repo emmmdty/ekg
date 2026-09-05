@@ -214,3 +214,34 @@ def test_distance_bucket_separates_same_sentence_from_far_pairs() -> None:
 
     assert distance_bucket(0) != distance_bucket(1)
     assert distance_bucket(1) != distance_bucket(50)
+
+
+def test_taco_sentence_clusters_are_deterministic_and_cover_every_sentence() -> None:
+    from ekg.relations.extractor.supervised import cluster_sentence_ids
+
+    sentences = [
+        "The army attacked the city.",
+        "Soldiers occupied the capital.",
+        "The company reported quarterly earnings.",
+        "Shares rose after the profit announcement.",
+        "A hurricane formed over the ocean.",
+        "The storm destroyed several homes.",
+    ]
+    triggers = {0: ["attacked"], 2: ["reported"], 4: ["formed"]}
+
+    first = cluster_sentence_ids(sentences, triggers, n_clusters=3, seed=13)
+    second = cluster_sentence_ids(sentences, triggers, n_clusters=3, seed=13)
+
+    assert first == second
+    assert len(first) == len(sentences)
+    assert set(first) == {0, 1, 2}
+
+
+def test_taco_pair_groups_keep_the_full_candidate_universe() -> None:
+    nodes = [_node("a", 0, 0), _node("b", 1, 0), _node("c", 2, 0)]
+    pairs = [("a", "b"), ("b", "a"), ("a", "c"), ("c", "b")]
+
+    groups = sup.cluster_pair_groups(nodes, pairs, (0, 0, 1))
+
+    assert groups == {(0, 0): [0, 1], (0, 1): [2, 3]}
+    assert sum(map(len, groups.values())) == len(pairs)

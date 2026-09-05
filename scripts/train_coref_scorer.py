@@ -43,7 +43,9 @@ from ekg.nodes.coref import (
 )
 from ekg.nodes.discriminative import (
     ALL_COMPONENTS,
+    ARGUMENT_COMPONENTS,
     ARGUMENT_POOLING_ORACLE,
+    ARGUMENT_POOLING_PREDICTED,
     CONFIG_FILE,
     CONTEXT_POOLING,
     FEATURE_NAMES,
@@ -55,6 +57,7 @@ from ekg.nodes.discriminative import (
     validate_components,
 )
 from ekg.relations.data.maven_arg import ArgumentDocument, load_maven_arg
+from ekg.relations.data.maven_ere import load_maven_ere
 
 
 def build_eval_pairs(docs: Sequence[ArgumentDocument]) -> dict[str, list[CorefPair]]:
@@ -138,7 +141,7 @@ def train(
     encoder = AutoModel.from_pretrained(model_name).to(device)
     encoder.gradient_checkpointing_enable()
     context_discriminative = CONTEXT_POOLING in components
-    argument_oracle = ARGUMENT_POOLING_ORACLE in components
+    argument_pooling = bool(set(components) & ARGUMENT_COMPONENTS)
     head = nn.Linear(
         head_input_dim(encoder.config.hidden_size, components), 2
     ).to(device)
@@ -197,7 +200,11 @@ def train(
                     "components": list(components),
                     "context_discriminative": context_discriminative,
                     "argument_source": (
-                        "gold_event_level_oracle" if argument_oracle else "none"
+                        "gold_event_level_oracle"
+                        if ARGUMENT_POOLING_ORACLE in components
+                        else "predicted_mention_local"
+                        if ARGUMENT_POOLING_PREDICTED in components
+                        else "none"
                     ),
                     "lr": lr,
                     "head_lr": lr if head_lr is None else head_lr,
@@ -219,10 +226,10 @@ def train(
         argument_spans, argument_counts = argument_spans_and_counts(doc.nodes)
         arguments = None
         if context_discriminative:
-            oracle_starts = [start for start, _ in argument_spans] if argument_oracle else []
+            oracle_starts = [start for start, _ in argument_spans] if argument_pooling else []
             combined_starts = starts + oracle_starts
             combined_ranges = context_ranges_for(doc.nodes, doc.doc_text)
-            if argument_oracle:
+            if argument_pooling:
                 combined_ranges += argument_spans
             encoded_spans, encoded_contexts = encode_spans_with_context(
                 encoder, tokenizer, doc.doc_text, combined_starts,
@@ -231,11 +238,11 @@ def train(
             )
             triggers = encoded_spans[: len(starts)]
             contexts = encoded_contexts[: len(starts)]
-            if argument_oracle:
+            if argument_pooling:
                 arguments = pool_argument_features(
                     encoded_spans[len(starts) :], argument_counts
                 )
-        elif argument_oracle:
+        elif argument_pooling:
             combined = encode_spans(
                 encoder,
                 tokenizer,
@@ -384,6 +391,11 @@ def main() -> int:
         help="mechanism components to enable; empty = trigger-only control",
     )
     parser.add_argument(
+        "--argument-predictions",
+        type=Path,
+        help="complete mention-local prediction JSONL; switches --train to MAVEN-ERE",
+    )
+    parser.add_argument(
         "--save-every-epoch", action="store_true",
         help=(
             "also keep every epoch under <output>/epochs/epoch-N, so the official evaluator can "
@@ -394,7 +406,18 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=13)
     args = parser.parse_args()
 
-    docs = list(load_maven_arg(args.train))
+    components = validate_components(args.components)
+    if args.argument_predictions:
+        if ARGUMENT_POOLING_PREDICTED not in components:
+            parser.error("--argument-predictions requires argument_pooling_predicted")
+        from ekg.nodes.predicted_arguments import apply_predicted_arguments
+
+        docs = list(load_maven_ere(args.train))
+        apply_predicted_arguments(docs, args.argument_predictions)
+    else:
+        if ARGUMENT_POOLING_PREDICTED in components:
+            parser.error("argument_pooling_predicted requires --argument-predictions")
+        docs = list(load_maven_arg(args.train))
     if args.limit:
         docs = docs[: args.limit]
     # MAVEN-Arg and MAVEN-ERE are the same documents with different annotation
@@ -443,7 +466,7 @@ def main() -> int:
         head_lr=args.head_lr,
         warmup_steps=args.warmup_steps,
         accum_steps=args.accum_steps,
-        components=validate_components(args.components),
+        components=components,
         dev_docs=dev_docs,
         dev_pairs=build_eval_pairs(dev_docs) if dev_docs else None,
         save_every_epoch=args.save_every_epoch,

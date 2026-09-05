@@ -77,7 +77,14 @@ CONFIG_FILE = "coref_config.json"
 CONTEXT_POOLING = "context_pooling"
 CONFUSABILITY = "confusability"
 ARGUMENT_POOLING_ORACLE = "argument_pooling_oracle"
-ALL_COMPONENTS = (CONTEXT_POOLING, CONFUSABILITY, ARGUMENT_POOLING_ORACLE)
+ARGUMENT_POOLING_PREDICTED = "argument_pooling_predicted"
+ARGUMENT_COMPONENTS = {ARGUMENT_POOLING_ORACLE, ARGUMENT_POOLING_PREDICTED}
+ALL_COMPONENTS = (
+    CONTEXT_POOLING,
+    CONFUSABILITY,
+    ARGUMENT_POOLING_ORACLE,
+    ARGUMENT_POOLING_PREDICTED,
+)
 
 
 def validate_components(components) -> tuple[str, ...]:
@@ -87,6 +94,8 @@ def validate_components(components) -> tuple[str, ...]:
         raise ValueError(f"unknown coreference components: {sorted(unknown)}")
     if len(set(selected)) != len(selected):
         raise ValueError("duplicate coreference components")
+    if len(set(selected) & ARGUMENT_COMPONENTS) > 1:
+        raise ValueError("select exactly one argument source")
     return tuple(c for c in ALL_COMPONENTS if c in selected)
 
 
@@ -125,7 +134,7 @@ def head_input_dim(hidden_size: int, components=()) -> int:
         dim += hidden_size * 4
     if CONFUSABILITY in selected:
         dim += len(FEATURE_NAMES)
-    if ARGUMENT_POOLING_ORACLE in selected:
+    if set(selected) & ARGUMENT_COMPONENTS:
         dim += hidden_size * 4
     return dim
 
@@ -208,7 +217,7 @@ def pair_head_inputs(
                 device=device,
             )
         )
-    if ARGUMENT_POOLING_ORACLE in selected:
+    if set(selected) & ARGUMENT_COMPONENTS:
         if arguments is None:
             raise ValueError("argument_pooling_oracle requires argument features")
         if arguments.shape != triggers.shape:

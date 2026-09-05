@@ -6,8 +6,8 @@ import pytest
 
 from ekg.core.schema import EventNode, EvidenceSpan
 from ekg.nodes.discriminative import (
-    ALL_COMPONENTS,
     ARGUMENT_POOLING_ORACLE,
+    ARGUMENT_POOLING_PREDICTED,
     CONFUSABILITY,
     CONTEXT_POOLING,
     FEATURE_NAMES,
@@ -86,7 +86,7 @@ def test_head_input_dim_tracks_each_component_independently() -> None:
     assert head_input_dim(768, (CONTEXT_POOLING,)) == 768 * 8
     assert head_input_dim(768, (CONFUSABILITY,)) == 768 * 4 + len(FEATURE_NAMES)
     assert head_input_dim(768, (ARGUMENT_POOLING_ORACLE,)) == 768 * 8
-    assert head_input_dim(768, ALL_COMPONENTS) == 768 * 12 + len(FEATURE_NAMES)
+    assert head_input_dim(768, (ARGUMENT_POOLING_PREDICTED,)) == 768 * 8
 
 
 def test_argument_oracle_spans_are_deterministic_and_counted_per_mention() -> None:
@@ -133,3 +133,5 @@ def test_components_are_normalised_and_bad_ones_rejected() -> None:
         validate_components(["bogus"])
     with pytest.raises(ValueError, match="duplicate"):
         validate_components([CONTEXT_POOLING, CONTEXT_POOLING])
+    with pytest.raises(ValueError, match="one argument source"):
+        validate_components([ARGUMENT_POOLING_ORACLE, ARGUMENT_POOLING_PREDICTED])

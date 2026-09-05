@@ -530,6 +530,13 @@ def main() -> int:
             "(inference stays a plain argmax)"
         ),
     )
+    parser.add_argument(
+        "--context-mode",
+        choices=("document", "taco"),
+        default="document",
+        help="document windows or TacoERE-style intra/inter sentence-cluster contexts",
+    )
+    parser.add_argument("--cluster-seed", type=int, default=13)
     args = parser.parse_args()
     balance_components = validate_balance_components(args.balance_components)
     try:
@@ -620,6 +627,8 @@ def main() -> int:
             "coref_aux_rate": args.coref_aux_rate,
             "pair_head": args.pair_head,
             "balance_components": list(balance_components),
+            "context_mode": args.context_mode,
+            "cluster_seed": args.cluster_seed,
         },
     }
     _write_run_metadata(args.output, run_metadata)
@@ -631,7 +640,7 @@ def main() -> int:
     from ekg.relations.extractor.supervised import (
         _pair_features,
         distance_bucket,
-        encode_trigger_reps,
+        pair_trigger_embeddings,
     )
     from ekg.relations.objective_registry import build_relation_objective
     from ekg.relations.pair_heads import build_pair_head
@@ -706,6 +715,19 @@ def main() -> int:
         if args.coref_aux_rate
         else None
     )
+
+    def encode_pairs(doc, doc_rows):
+        return pair_trigger_embeddings(
+            encoder,
+            tokenizer,
+            doc.nodes,
+            doc.doc_text,
+            [(row.head_id, row.tail_id) for row in doc_rows],
+            args.max_length,
+            device,
+            context_mode=args.context_mode,
+            cluster_seed=args.cluster_seed,
+        )
     prototype_families = tuple(counts)
     if args.pair_head == PROTOTYPE_DEPENDENCY_HEAD:
         heads.set_dependency(
@@ -738,12 +760,10 @@ def main() -> int:
         with torch.no_grad():
             for doc_id, doc_rows in selected_by_doc.items():
                 doc = docs_by_id[doc_id]
-                embs = encode_trigger_reps(
-                    encoder, tokenizer, doc.nodes, doc.doc_text, args.max_length, device
-                )
+                head_emb, tail_emb = encode_pairs(doc, doc_rows)
                 pair_features = _pair_features(
-                    torch.stack([embs[row.head_id] for row in doc_rows]),
-                    torch.stack([embs[row.tail_id] for row in doc_rows]),
+                    head_emb,
+                    tail_emb,
                 )
                 dist_ids = torch.tensor(
                     [distance_bucket(row.distance) for row in doc_rows], device=device
@@ -912,14 +932,9 @@ def main() -> int:
             for doc_id in dev_ids:
                 doc = docs_by_id[doc_id]
                 doc_rows = rows_by_doc[doc_id]
-                embs = encode_trigger_reps(
-                    encoder, tokenizer, doc.nodes, doc.doc_text, args.max_length, device
-                )
+                head_emb, tail_emb = encode_pairs(doc, doc_rows)
                 logits = heads(
-                    _pair_features(
-                        torch.stack([embs[r.head_id] for r in doc_rows]),
-                        torch.stack([embs[r.tail_id] for r in doc_rows]),
-                    ),
+                    _pair_features(head_emb, tail_emb),
                     torch.tensor([distance_bucket(r.distance) for r in doc_rows], device=device),
                 )
                 for family in selected_families:
@@ -1011,14 +1026,10 @@ def main() -> int:
         running = 0.0
         for seen, doc_id in enumerate(doc_ids, start=1):
             doc = docs_by_id[doc_id]
-            embs = encode_trigger_reps(
-                encoder, tokenizer, doc.nodes, doc.doc_text, args.max_length, device
-            )
             doc_rows = rows_by_doc[doc_id]
+            head_emb, tail_emb = encode_pairs(doc, doc_rows)
             # One batched pair feature per document: per-pair construction launches
             # a kernel per candidate (thousands in a single document).
-            head_emb = torch.stack([embs[r.head_id] for r in doc_rows])
-            tail_emb = torch.stack([embs[r.tail_id] for r in doc_rows])
             dist_ids = torch.tensor(
                 [distance_bucket(r.distance) for r in doc_rows], device=device
             )
