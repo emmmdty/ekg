@@ -35,6 +35,8 @@ def test_commands_never_pass_evaluation_manifest_to_training(tmp_path: Path) -> 
     train, evaluate = oof.commands(args, manifests)
 
     assert str(manifests["evaluation"]) not in train
+    assert str(args.output / "training_source.jsonl") in train
+    assert str(args.source) not in train
     assert str(manifests["train"]) not in evaluate
     assert str(manifests["selection_dev"]) not in evaluate
     assert train[train.index("--seed") + 1] == "13"

@@ -56,12 +56,13 @@ def validate_fold(repo: Path, cv_path: Path, fold: int) -> dict[str, Path]:
 
 def commands(args: argparse.Namespace, manifests: dict[str, Path]) -> tuple[list[str], list[str]]:
     checkpoint = args.output / "checkpoint"
+    training_source = args.output / "training_source.jsonl"
     train = [
         sys.executable,
         "-u",
         "scripts/train_factuality_detector.py",
         "--train",
-        str(args.source),
+        str(training_source),
         "--train-manifest",
         str(manifests["train"]),
         "--dev-manifest",
@@ -130,6 +131,16 @@ def execute(args: argparse.Namespace, manifests: dict[str, Path]) -> None:
     _require(not missing, f"evaluation has {len(missing)} unknown documents")
 
     args.output.mkdir(parents=True)
+    training_ids = set(load_manifest_ids(manifests["train"])) | set(
+        load_manifest_ids(manifests["selection_dev"])
+    )
+    training_lines: list[str] = []
+    for line in args.source.read_text(encoding="utf-8").splitlines():
+        if line and json.loads(line).get("id") in training_ids:
+            training_lines.append(line)
+    _require(len(training_lines) == len(training_ids), "training source document cover")
+    training_source = args.output / "training_source.jsonl"
+    training_source.write_text("\n".join(training_lines) + "\n", encoding="utf-8")
     train, evaluate = commands(args, manifests)
     metadata = {
         "schema_version": "ekg.r1_factuality_oof_run.v1",
@@ -140,6 +151,7 @@ def execute(args: argparse.Namespace, manifests: dict[str, Path]) -> None:
         "commit": _git_commit(args.repo),
         "cv_sha256": sha256_file(args.cv),
         "source_sha256": sha256_file(args.source),
+        "training_source_sha256": sha256_file(training_source),
         "manifest_sha256": {
             role: sha256_file(path) for role, path in manifests.items()
         },
@@ -171,6 +183,7 @@ def execute(args: argparse.Namespace, manifests: dict[str, Path]) -> None:
             checkpoint / "model.safetensors",
             args.output / "evaluation_labels.json",
             args.output / "evaluation_report.json",
+            training_source,
         )
         for path in required:
             _require(path.is_file(), f"missing output: {path}")
