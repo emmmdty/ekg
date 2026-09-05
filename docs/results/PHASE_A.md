@@ -1142,7 +1142,7 @@ ATLoss 在当前三族单标签、全候选设置中复现了“无外部 class 
 temporal=2、causal=4、subevent=4，coref aux=.4。1 epoch 三族 F1=0 属于 smoke 欠训状态，
 不进入任何主表或方法判断。
 
-### A3.6 正式四臂冻结（2026-09-04，尚未产生指标）
+### A3.6 正式四臂冻结与启动快照（2026-09-04；最终结果见本页末尾）
 
 执行面提交 `96e2d64` 增加不可变四臂 launcher，并补齐逐族 checkpoint 的正确评分路径：第 4 臂分别用
 causal/subevent/temporal 各自从头训练所选 epoch 的共享 encoder + heads 推理，只合并对应族的边；不得把
@@ -1260,3 +1260,49 @@ P1 r12 protocol `0bd33e87…58497`、final-valid 未访问。
 - 产物 `gpu-4090:/data/TJK/ekg/runs/stages/A3/a3-v6-retriever-r3/stage1/seed-13/`：
   `retrieval_metrics.json` `86d37238…67ed8`、`run_metadata.json` `bcb5366f…dab08b`、
   `retriever_heads.pt` `53c9a931…4bdd69d`；日志 `f68894a9…434b60c`。
+
+## ★★★ A3.6 官方训练配方四臂分账：完成并以 `failed` 交接（2026-09-05）
+
+四臂在 gpu-4090 的 GPU0–3 独立后台完成；成功 SSH 观察到训练进程 GONE，四卡回到 17–18 MiB。
+每臂 `status=complete`、train/score return code 均为 0、seed 13、`exploratory=false`、
+`final_valid_accessed=false`。共同绑定 P1 r15 `1e31a9ac…f9655`、recipe plan
+`3f2f385d…c50be`、执行提交 `ebb57da0…35fa`、候选 digest `15a3b1a5…10910`；人口严格相同：
+291 篇、7,195 个事件 mention、234,870 个关系 pair、1,719 个 TIMEX。evaluator `32919e86…59598`、
+gold `bb8c6b48…ce7e3`、source lock `d0d7d848…89231` 均一致。
+
+### 官方 evaluator 主表（百分数）
+
+| 冻结臂 | causal P / R / F1 | subevent P / R / F1 | temporal P / R / F1 | 判定 |
+|---|---:|---:|---:|---|
+| promotion / guardrail | — / — / **>33.17** | — / — / **≥28.75** | — / — / **≥50.63** | 三项须同时过 |
+| local recipe 1/1/1 | 22.15 / 54.02 / **31.42** | 24.42 / 41.06 / **30.62** | 44.34 / 59.41 / **50.78** | FAIL causal |
+| rates-only 2/4/4 | 23.11 / 50.94 / **31.79** | 27.03 / 38.23 / **31.67** | 46.52 / 57.15 / **51.29** | FAIL causal |
+| + coref auxiliary .4 | 22.69 / 52.19 / **31.63** | 21.59 / 41.24 / **28.35** | 43.91 / 59.72 / **50.61** | FAIL 三门 |
+| + per-family selection | 22.35 / 56.94 / **32.10** | 20.42 / 54.18 / **29.66** | 44.46 / 61.09 / **51.47** | **FAIL causal** |
+
+单变量增量（F1 百分点）：
+
+| 变化 | causal | subevent | temporal |
+|---|---:|---:|---:|
+| rates-only − local | +0.374 | +1.046 | +0.510 |
+| +coref − rates-only | −0.160 | **−3.325** | −0.688 |
+| +per-family − +coref | +0.464 | +1.310 | +0.862 |
+| 完整官方配方 − local | +0.678 | **−0.968** | +0.684 |
+
+**结论**：官方 family rates 有小幅且一致的复现收益；coreference auxiliary 在本实现中反而伤害三族；
+逐族 checkpoint 能追回一部分损失并拿到四臂最高 causal F1，但仍低于冻结主锚 33.17，且相对 local 的
+subevent 下降 0.968。故 A3 旧方法按预注册规则保持 **FAIL**；这些改进只记 baseline 配方复现，不记论文
+方法贡献，不启动额外 seed。
+
+### 不可变失败交接
+
+- bundle：`runs/stages/A3/a3-v6-20260905-r17/`，`status=failed`；
+- protocol SHA-256：`c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`；
+- `predictions.jsonl`：`c61b3ea4992d2a8baaade19e3cb942e62ee24fac36f07fa4d924723f97813688`；
+- `metrics.json`：`24c211331a5a16b03508c59cd30a8318afd5ae7f12a8d16798905ea595d1f4b7`；
+- `status.json`：`fbfbd813bf6b7a2653c027b350d91c8233ced47772024d31e112225c12fd6e1e`。
+
+fallback 按既有 P1 规则取同协议 eligible arms 中 causal F1 最高者，即
+`rates_coref_family_selection`，只供 R1 功效与新 A4 对照使用，不改变 A3 判定。四臂 checkpoint 均留在
+`gpu-4090:/data/TJK/ekg/runs/stages/A3/a3-v6-recipe-accounting-r16/`，未跨机搬运；本地仅同步官方预测、
+评分和元数据，40 个首批文件及 3 个 selection 文件均与远端 SHA-256 一致。

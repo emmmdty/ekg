@@ -1,41 +1,39 @@
 # EKG 实时状态
 
-> 更新于 **2026-09-04**。新会话先读 [`HANDOFF.md`](HANDOFF.md)；数字以
+> 更新于 **2026-09-05**。新会话先读 [`HANDOFF.md`](HANDOFF.md)；数字以
 > [`results/`](results/README.md) 为唯一事实源。
 
-## 唯一正式活动阶段
+## 当前正式活动阶段
 
-`A3 Ch2`。**工作点线已封存 FAILED**（两个核心设计周期用完）；近似 retriever 三片
-（r1/r2/r3）Stage-1 三连未过门，同样封存；prototype、ATLoss 此前已止损。
-当前不追加以上任何方案的 seed 或调参，也不做第三个工作点、第四个 retriever。
+`R1 方法设计准入`。A3 已用不可变 bundle `a3-v6-20260905-r17` 正式 `failed` 交接；工作点、近似
+retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未放行任何 proposed GPU pilot。
 
 ## 下一步
 
-1. P1 r15、A3.6 r16 preflight 已双端 SHA-256 一致，4090 P1 `validate-only` PASS；
-2. A3.6 四臂已于 2026-09-04 18:03（Asia/Taipei）用 GPU0–3 后台并行启动：local → rates-only →
-   +coref aux → +per-family selection。任务使用 `setsid nohup`、独立 SID/run-dir/log，SSH 仅作观测；
-   下一步按 ALIVE/GONE/SSH-failed 三态监控，成功观测 GONE 后校验并评分；
-   ⚠️ 第 4 臂必须从头重跑，**不得回收 r13 的 `best_by_family` 曲线**；
-3. A3 写入真实结果并导出 `status=failed` handoff；旧机制判定不因 v6.1 改写；
-4. 并行开展 R1 中不读取 A3 待出结果的论文/代码矩阵、MAVEN-ARG 跨数据 ID 审计和 Ch1/Ch3
-   MDE/power；T012–T017、T019 已完成并记入 [`results/PHASE_R1.md`](results/PHASE_R1.md)：Ch1 功效
-   通过但 baseline/input closure blocked，Ch3 当前 291-document 设计 underpowered，MAVEN-ARG cluster
-   arguments 禁止复制到 ERE mentions。A3 handoff 后完成 Ch2 power 与整体准入；
-5. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
+1. P1 r15 仍是可信根；A3.6 四臂全部完成并通过 metadata、单变量、人口、evaluator、final-valid 与
+   双端 artifact hash 校验。旧方法最高 causal F1 仍未过主锚，权威数字见
+   [`results/PHASE_A.md`](results/PHASE_A.md)；
+2. T018 Ch2 prospective power 已通过；当前 R1 三章状态：Ch1 power PASS 但 mention-local input/强 baseline
+   blocked，Ch2 power PASS 但缺第二个独立同协议强 baseline，Ch3 五折 OOF 已冻结但 baseline OOF/power
+   仍 blocked；
+3. Ch3 RoBERTa+CLS / DMRoBERTa 五折 OOF 已在 4090 四卡后台排队运行，run root
+   `runs/stages/R1/r1-v61-factuality-oof-r2/`；每卡先跑一个 CLS fold，再自动接后续任务。首轮四卡均已
+   进入 epoch 1，SSH 断开后仍存活。等待期间继续寻找 Ch1/Ch2 强 baseline，不写 proposed 方法；
+4. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
    sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
    这是可修订 plan，不是 SPEC；
-6. 4090 空卡可用于互不冲突的不同方案/任务并行；多种子仍须逐次授权。
+5. 4090/5090 当前可用于互不冲突的**准入 baseline smoke/OOF**；长任务继续 `setsid nohup`，不依赖 SSH
+   存活。多种子与跨机 checkpoint 搬运仍须另行授权。
 
 ## 当前三端
 
-- local：`main`；P1 r15 为当前可信根（`1e31a9ac…f9655`），A3.6 r16 recipe plan 为
-  `3f2f385d…c50be`；R1 审计提交 `8e3eb7a`，481 passed / 24 skipped、ruff 0、smoke OK；
-- 4090：**已恢复**，启动前四卡全空、无进程、worktree clean，随后同步到 `ebb57da`；正式 backbone pin
-  `71be7419…c961ea9` 在此；当前四张卡分别运行 A3.6 r16 的四个冻结臂，最近观测全部 ALIVE、显存
-  6.8–7.5 GiB、训练在 epoch 7–8，`final_valid_accessed=false`；
+- local：`main`；P1 r15 `1e31a9ac…f9655`；A3 handoff protocol `c187bf03…9359e`；R1 最新代码提交
+  `277b36f`，488 passed / 24 skipped、ruff 0、smoke OK；
+- 4090：A3.6 四臂已 GONE 且 GPU0–3 空闲；checkpoint 均留在
+  `/data/TJK/ekg/runs/stages/A3/a3-v6-recipe-accounting-r16/`，未搬运；
 - 5090：可连接，HEAD `4e893c1`；R1 JSON/逐实例 anchor 双端 SHA-256 一致。32,607 MiB 中约
   12,222 MiB 被既有 Qwen rerank/embed 服务占用，服务不动、checkpoint 不搬。R1 尚未放行 proposed
-  pilot，因此本轮没有为占卡而启动无效训练。
+  pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡启动无效训练。
 
 ## 禁止
 

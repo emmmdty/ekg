@@ -2,7 +2,8 @@
 
 > **ACTIVE，终局分账中。** 位置工作点沿用启动时冻结的 P1 r12 / A3 r13 plan；prototype 新代码使用
 > P1 r13。A3.0 baseline、A3.1 复现底座、A3.2 两个工作点周期和三条替代探索均已完成并封存；当前唯一
-> 正式动作是 A3.6 官方训练配方分账，随后交付 `status=failed` handoff 并进入 R1。历史数字见
+> **COMPLETED / FAILED（2026-09-05）**。A3.6 官方训练配方分账已完成，已交付
+> `a3-v6-20260905-r17` failed handoff 并进入 R1。历史数字见
 > [`../results/PHASE_A.md`](../results/PHASE_A.md)。
 
 ## Goal
@@ -184,12 +185,16 @@ validate-only，再跑 seed13 2ep smoke；行为门与完整 official promotion 
 temporal 非零，未过看结果前冻结的行为门。故不启动 50ep、不跑 official scorer、不增加 class weight、
 ATGL 或额外 seed。具体曲线与 artifact hash 只见 `../results/PHASE_A.md`。
 
-### A3.6：官方训练配方分账（2026-09-02，接线 smoke PASS，正式实验待执行）
+### A3.6：官方训练配方分账（2026-09-05，正式四臂完成 / A3 FAILED）
 
 代码提交 `7840b5f` 将剩余 official gap 的三个协议变量拆成独立开关：family loss rates 2/4/4、
 coreference auxiliary rate .4、per-family checkpoint selection；`b2ab8a7` 记录 5090 CUDA smoke。
 30-doc / 1-epoch smoke 已验证 encoder/head 反传以及主 checkpoint、coref auxiliary head、三族独立
 checkpoint 落盘。该分数不进入主表。
+
+正式四臂已在 P1 r15、同一候选全集与 official evaluator 上完成；最高 causal F1 来自逐族 checkpoint
+选择臂，但仍低于冻结主锚，因此按预注册 stop condition 以 `failed` 交接。精确数字与 artifact hash 只见
+`../results/PHASE_A.md`，不可变 bundle protocol SHA-256 为 `c187bf03…9359e`。
 
 因为 `train_supervised_relations.py` 属于 P1 `CODE_PATHS`，正式分账前必须从当前 HEAD 重建 trust root。
 随后只用冻结 seed 13，在相同 manifest/candidate/evaluator/backbone/预算下依次运行 local recipe、

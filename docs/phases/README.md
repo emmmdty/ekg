@@ -23,9 +23,9 @@ ID 审计、CPU smoke 也可并行。每个 phase 仍须交付 `pass|failed|bloc
 
 | Phase | 作用 | 当前状态 | GPU | 契约 |
 |---|---|---|---|---|
-| **P1** | 冻结 manifests、scorer、baseline smoke 与 stage bundle | **COMPLETED / PASS；r12；global=PASS，A3 entry=PASS** | 4090 协议前向已完成 | [`PHASE_P1_protocol_freeze.md`](PHASE_P1_protocol_freeze.md) |
-| **A3** | Ch2 旧机制终局分账与失败交接 | **ACTIVE；下一步 A3.6，随后 `failed` handoff** | 4090 | [`PHASE_A3_relation_balanced.md`](PHASE_A3_relation_balanced.md) |
-| **R1** | 三方法章的文献、ID、因果链、power 与 protocol 审查 | PREPARATION ACTIVE；promotion blocked by A3 handoff | CPU | [`PHASE_R1_method_design_freeze.md`](PHASE_R1_method_design_freeze.md) |
+| **P1** | 冻结 manifests、scorer、baseline smoke 与 stage bundle | **COMPLETED / PASS；r15；global=PASS，A3 entry=PASS** | 4090 协议前向已完成 | [`PHASE_P1_protocol_freeze.md`](PHASE_P1_protocol_freeze.md) |
+| **A3** | Ch2 旧机制终局分账与失败交接 | **COMPLETED / FAILED；handoff r17** | 4090 已完成 | [`PHASE_A3_relation_balanced.md`](PHASE_A3_relation_balanced.md) |
+| **R1** | 三方法章的文献、ID、因果链、power 与 protocol 审查 | ACTIVE；Ch1/Ch2 baseline closure 与 Ch3 OOF anchor blocked | CPU；baseline smoke 可用 GPU | [`PHASE_R1_method_design_freeze.md`](PHASE_R1_method_design_freeze.md) |
 | **C5/A4/D4** | v6.1 三个新方法家族 | BLOCKED BY R1；契约由 R1 的冻结产物生成 | 4090 | 见 [`../replan/METHODOLOGY_REDESIGN_20260904.md`](../replan/METHODOLOGY_REDESIGN_20260904.md) |
 | **D3/C4** | v6 旧方法契约 | **SUPERSEDED FOR FUTURE EXECUTION**；历史结果仍有效 | 不再执行 | [`PHASE_D3_evidence_conditioned.md`](PHASE_D3_evidence_conditioned.md)、[`PHASE_C4_context_identity.md`](PHASE_C4_context_identity.md) |
 | **E3** | Ch4 本地重建 query 协议的消费者 factorial | BLOCKED BY C5/A4/D4 handoffs | 4090；5090 逐次授权 | [`PHASE_E3_factorial_consumers.md`](PHASE_E3_factorial_consumers.md) |

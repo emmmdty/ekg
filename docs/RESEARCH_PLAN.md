@@ -2,8 +2,8 @@
 
 | Field | Value |
 |---|---|
-| Plan Version | `0.2.0` |
-| Date | `2026-09-04` |
+| Plan Version | `0.2.1` |
+| Date | `2026-09-05` |
 | Spec | [`SPEC.md`](SPEC.md) |
 | Status | Working design; method hypotheses remain revisable until their phase protocol is frozen. |
 
@@ -37,7 +37,7 @@ Detailed evidence and primary-source links are in
 |---|---|---|
 | Research validity | One manifest/candidate/evaluator per comparison; final-valid excluded from selection | PASS |
 | Adaptable design | Candidate mechanisms live here, not in the specification | PASS |
-| Reproducibility | P1 trust root and immutable stage bundles required | PASS: P1 r15 and R1 audit hashes frozen |
+| Reproducibility | P1 trust root and immutable stage bundles required | PASS: P1 r15 and A3 failed handoff r17 frozen |
 | Honest evidence | Existing A3/D3/C4 failures retain identity; oracle inputs remain oracle | PASS |
 | Testable simplicity | Each candidate must define treatment, mediator, outcome, ablation and negative control | CONDITIONAL: briefs exist; baseline/power gates remain blocked |
 | Reuse first | Official implementations preferred; fidelity matrix required | BLOCKED for Ch1/Ch2: no second recent same-protocol runnable method |
@@ -83,8 +83,9 @@ uncertainty; uncertainty negative control. Gold arguments remain a separate orac
 
 ### Relation study
 
-**Observed problem**: Fixed/adaptive family workpoints and three approximate retrieval variants failed their frozen gates;
-cross-sentence causal false positives remain a dominant error source. Official recipe variables are not fully accounted.
+**Observed problem**: Fixed/adaptive family workpoints and three approximate retrieval variants failed their frozen gates.
+A3.6 has now accounted for official rates, coreference auxiliary and per-family selection: the best recipe still misses the
+causal anchor, and 7,115 of its 9,490 causal false positives are cross-sentence.
 
 **Candidate hypothesis**: Under the complete candidate universe, pair-specific evidence sufficiency and abstention risk
 can reduce cross-sentence false positives without sacrificing recall or other relation families.
@@ -113,7 +114,8 @@ output distribution. Better evidence location alone is explicitly not the treatm
 **Required mediator**: pre-registered changes in unknown, modality-only and polarity-only confusion categories.
 
 **Minimum causal matrix**: primary anchor; official evidence pipeline; proposed; flat five-class head; cue-permutation
-negative control. This matrix cannot run until stratified repeated-split or cross-validation manifests are frozen.
+negative control. The five-fold train/selection/evaluation manifests are frozen, but this matrix cannot run until
+leakage-free baseline OOF predictions establish pooled prospective power.
 
 ### System evaluation
 
@@ -164,7 +166,7 @@ doc/event/mention/offset identity before any argument or factuality join.
 
 The current dependency plan is:
 
-`P1/A3.6 closure → R1 design review → {identity, relation, factuality} → consumer factorial → thesis audit`.
+`P1/A3.6 closed → R1 baseline/input closure → {identity, relation, factuality} → consumer factorial → thesis audit`.
 
 The three component studies may be reordered or run in parallel when R1 finds no real data/model dependency. This is a
 plan choice, not a specification requirement. It may change after R1, provided every study remains independently

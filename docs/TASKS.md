@@ -1,7 +1,8 @@
 # Tasks: EKG Thesis Research Program
 
 **Input**: [`SPEC.md`](SPEC.md), [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)
-**Current executable scope**: P1/A3.6 closure plus R1 preparation that does not consume pending A3 results.
+**Current executable scope**: R1 baseline/input closure, factuality OOF anchors and cross-artifact review. P1/A3.6 are
+closed; proposed-method implementation remains blocked.
 Proposed-method implementation tasks are intentionally not generated until R1 approves their design and contracts.
 
 ## Format
@@ -42,9 +43,9 @@ Proposed-method implementation tasks are intentionally not generated until R1 ap
   evaluator/backbone/budget → matrix review shows only the intended recipe variables differ.
 - [x] **T009 [RS-002]** Present exact 4090 command, cwd, GPU selection check and expected artifacts to the user before
   launch → pre-run record exists; no long job starts implicitly.
-- [ ] **T010 [RS-002]** Run and score local recipe, rates-only, rates+coref-aux and rates+coref-aux+per-family-selection →
+- [x] **T010 [RS-002]** Run and score local recipe, rates-only, rates+coref-aux and rates+coref-aux+per-family-selection →
   four immutable outputs use the official evaluator; no old curve is recycled.
-- [ ] **T011 [RS-002]** Append actual results only to `docs/results/PHASE_A.md` and export an A3 `status=failed`
+- [x] **T011 [RS-002]** Append actual results only to `docs/results/PHASE_A.md` and export an A3 `status=failed`
   relation fallback bundle → hashes, command, checkpoint location and final-valid ledger are complete.
 
 **Checkpoint**: A3 is closed; recipe improvements, if any, are baseline reproduction rather than method credit.
@@ -65,7 +66,7 @@ Proposed-method implementation tasks are intentionally not generated until R1 ap
   fixtures → full coverage/ambiguity report and version hashes; no silent mapping.
 - [x] **T017 [P] [RS-001]** Generate prospective identity power/MDE analysis from frozen per-document anchor outputs →
   fixed RNG, raw power table, 80% target and minimum meaningful effect.
-- [ ] **T018 [P] [RS-002]** Generate prospective relation power/MDE analysis → same evidence requirements as T017.
+- [x] **T018 [P] [RS-002]** Generate prospective relation power/MDE analysis → same evidence requirements as T017.
 - [x] **T019 [P] [RS-003]** Generate prospective factuality power/MDE analysis including rare-class limitations → same
   evidence requirements as T017 plus a legal evidence-strengthening path.
 - [ ] **T020 [RS-001]** Write the identity causal design brief (treatment, mediator, outcome, negative control, ablations,
@@ -121,8 +122,8 @@ coverage, but they cannot be checked complete until the corresponding executable
 
 - T004 depends on T001–T003; T005 depends on T004.
 - T006–T011 are sequential because each changes or consumes the trust root and experimental identity.
-- T012–T019 tasks that do not read pending A3 outputs may run in parallel now; the Ch2 final brief and all promotion
-  decisions wait for the A3 handoff.
+- T012–T019 are complete. T020–T022 may progress independently as each chapter closes its baseline/input/power blocker;
+  no proposed method is released merely because its brief exists.
 - T017–T019 may run in parallel after their required per-document outputs are verified.
 - T020–T022 depend on the corresponding literature and power tasks; they may run in parallel with one another.
 - T023 depends on T012–T022; each T024 contract depends on T023 and that method's prerequisites, not on a fixed chapter
