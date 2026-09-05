@@ -13,12 +13,11 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 1. P1 r15 仍是可信根；A3.6 四臂全部完成并通过 metadata、单变量、人口、evaluator、final-valid 与
    双端 artifact hash 校验。旧方法最高 causal F1 仍未过主锚，权威数字见
    [`results/PHASE_A.md`](results/PHASE_A.md)；
-2. T018 Ch2 prospective power 已通过；当前 R1 三章状态：Ch1 power PASS 但 mention-local input/强 baseline
-   blocked，Ch2 power PASS 但缺第二个独立同协议强 baseline，Ch3 五折 OOF 已冻结但 baseline OOF/power
-   仍 blocked；
-3. Ch3 RoBERTa+CLS / DMRoBERTa 五折 OOF 已在 4090 四卡后台排队运行，run root
-   `runs/stages/R1/r1-v61-factuality-oof-r2/`；每卡先跑一个 CLS fold，再自动接后续任务。首轮四卡均已
-   进入 epoch 1，SSH 断开后仍存活。等待期间继续寻找 Ch1/Ch2 强 baseline，不写 proposed 方法；
+2. 当前 R1 三章状态：Ch1 power PASS 但 mention-local input/强 baseline blocked；Ch2 power PASS 但缺第二个
+   独立同协议强 baseline；Ch3 五折 OOF baseline 与 pooled power 已验收 PASS，下一门是 T022/T023/T024；
+3. Ch3 RoBERTa+CLS / DMRoBERTa 的 10/10 个后台任务已完成，80 个产物重哈希、fold 互斥/覆盖、训练源
+   隔离与独立指标重算均通过。远端 run root 为 `runs/stages/R1/r1-v61-factuality-oof-r2/`，精确数字与
+   acceptance hash 只见 [`results/PHASE_R1.md`](results/PHASE_R1.md)；
 4. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
    sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
    这是可修订 plan，不是 SPEC；
@@ -27,13 +26,13 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 
 ## 当前三端
 
-- local：`main`；P1 r15 `1e31a9ac…f9655`；A3 handoff protocol `c187bf03…9359e`；R1 最新代码提交
-  `277b36f`，488 passed / 24 skipped、ruff 0、smoke OK；
-- 4090：A3.6 四臂已 GONE 且 GPU0–3 空闲；checkpoint 均留在
-  `/data/TJK/ekg/runs/stages/A3/a3-v6-recipe-accounting-r16/`，未搬运；
-- 5090：可连接，HEAD `4e893c1`；R1 JSON/逐实例 anchor 双端 SHA-256 一致。32,607 MiB 中约
-  12,222 MiB 被既有 Qwen rerank/embed 服务占用，服务不动、checkpoint 不搬。R1 尚未放行 proposed
-  pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡启动无效训练。
+- local：`main`；P1 r15 `1e31a9ac…f9655`；A3 handoff protocol `c187bf03…9359e`；Ch3 OOF 训练提交
+  `277b36f`，collector 已提交到 `6532264`；最近代码门 488 passed / 24 skipped、ruff 0、smoke OK；
+- 4090：A3.6 与 Ch3 OOF 进程均已 GONE，GPU0–3 空闲；checkpoint 与 OOF 产物均留在各自远端 run root，
+  未搬运；
+- 5090：可连接；既有 Qwen 与其他 Python 服务保持运行，使用前重新查询动态显存占用，服务不动、
+  checkpoint 不搬。R1 尚未放行 proposed pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡
+  启动无效训练。
 
 ## 禁止
 

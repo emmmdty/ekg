@@ -59,13 +59,14 @@ drift。
 |---|---|---:|---:|---|
 | Ch1 | official joint / MUC .809847 | +.010 | 纠正 5 个错误文档，Δ 中位数 +.007174，power 1.00 | **PASS** |
 | Ch2 | A3.6 fallback / causal F1 .320973 | +.010 | 纠正 5 个跨句误报文档，Δ 中位数 +.002002，power 1.00 | **PASS** |
-| Ch3 | RoBERTa+CLS / macro-F1 .545765 | +.030 | 纠正 5 个 PS−/Uu 错例，Δ 中位数 +.059213，power .99 | **UNDERPOWERED** |
+| Ch3（291-doc internal-dev） | RoBERTa+CLS / macro-F1 .545765 | +.030 | 纠正 5 个 PS−/Uu 错例，Δ 中位数 +.059213，power .99 | **UNDERPOWERED** |
+| Ch3（2,913-doc 五折 OOF） | RoBERTa+CLS / macro-F1 .553995 | +.030 | 纠正 5 个 PS−/Uu 错例，Δ 中位数 +.004556，power 1.00 | **PASS** |
 
-Ch3 在 3 个纠正错例、Δ 中位数 +.0370 时 power 仍为 0；检测门在约 +.059 才打开。因此不能在单一
-internal-dev 上把 +.03 左右差异解释为胜出。合法补强是**预先冻结**保留 PS−/Uu 支持的 repeated splits 或
-cross-validation；FactBank/UW 标签空间不同，只能作为单列外部有效性表。
+Ch3 的首行是合法补强前的历史裁决：在 3 个纠正错例、Δ 中位数 +.0370 时 power 仍为 0，检测门在约
++.059 才打开，因此不能在单一 internal-dev 上把 +.03 左右差异解释为胜出。预先冻结的五折 OOF 补强完成
+后，第二行成为当前裁决；FactBank/UW 标签空间不同，仍只能作为单列外部有效性表。
 
-### Ch3 五折 OOF 补强已冻结
+### Ch3 五折 OOF 补强与验收
 
 只读取 MAVEN-FACT public train 的 2,913 篇文档（69,782 CT+、2,262 PS+、1,492 CT−、285 PS−、
 118 Uu），固定 seed `260904` 做五组文档级平衡。每轮以 3 组训练、下一组选择 checkpoint、剩余
@@ -80,9 +81,32 @@ cross-validation；FactBank/UW 标签空间不同，只能作为单列外部有�
 | PS− mentions | 56 | 58 |
 | Uu mentions | 23 | 25 |
 
-这已经解除“补强 manifest 未冻结”的阻塞，但**尚未证明功效 PASS**：必须先用同一五折协议产生
-RoBERTa+CLS / DMRoBERTa OOF anchor，再在 2,913 篇配对文档上重算 prospective power。public valid /
-final-valid 未读取、未入折；额外 seed 仍未授权。
+4090 上的 seed 13 后台队列已完成 10/10 个训练与评估任务。验收重哈希 80 个声明产物，逐折确认
+train / selection-dev / evaluation 互斥、training source 不含 evaluation 文档，五个 evaluation fold 恰好覆盖
+2,913 篇、73,939 个 mention 一次；public valid / final-valid 未读取、未入折。
+
+| baseline | 五折 selected epochs | pooled accuracy | pooled macro-F1 | CT+ | PS+ | CT− | PS− | Uu |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| RoBERTa+CLS | 7 / 5 / 4 / 8 / 5 | .949161 | **.553995** | .975305 | .552612 | .662753 | .382456 | .196850 |
+| DMRoBERTa dynamic-multi | 12 / 7 / 3 / 7 / 2 | .950216 | .545603 | .976054 | .539288 | .671224 | .374150 | .167300 |
+
+按预冻结“pooled 五类 macro-F1 最高者”规则选择 RoBERTa+CLS 为 anchor。dynamic-multi − CLS 为
+−.008392，2,000 次 document-cluster paired bootstrap 的 95% CI 为 [−.022869, .006978]；两者没有统计分开，
+但这不改变事前冻结的点估计 anchor 规则。
+
+以 CLS OOF anchor、RNG `260904`、2,000 次 document bootstrap、每个注入点 200 次模拟重算 prospective
+power；269 个 PS−/Uu 错例可用于预注册注入。首次达到 80% power 的点是纠正 5 个错例：Δ macro-F1
+中位数 +.004556、95% CI 下界中位数 +.000647、power 1.00。MDE 小于预设最小有意义效应 +.030，故
+**Ch3 pooled power PASS**。这只证明设计有检出力，不代表 proposed 方法成立，也不授权额外 seed。
+
+可追溯身份：
+
+- 远端产物根：`gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-factuality-oof-r2/`；
+- 训练代码提交：`277b36f94cf88c8584fe60f83470a965d4d849ef`；
+- `oof_summary.json`：`21e7e50596aa773f54037b95146c37838c68c250e579ae955b2730db6fe88165`；
+- `acceptance_audit.py`：`2e6355a9d98ef1c3494081bbc8fdf6ac82a003a2a9956fd68ad674b315db87ef`；
+- `acceptance.json`：`7de7177f9eb4e837c5c4eb8ff6822d103a9b0cb022065bf1d2ae34ce367e58af`；
+- collector Git blob：`97cc743f710ed08a65a82109a10e5de3a80bcc0c`；CV/source SHA-256 与本页第 1 节一致。
 
 Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
 `c187bf03…9359e`）：按冻结 P1 主锚规则选择四臂中 causal F1 最高的 per-family-selection 配方。
@@ -110,9 +134,10 @@ Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
   baseline/input 门仍 `blocked`。
 - Ch2：official joint 可运行，但 2025 two-stage ERE、RESIJ、TacoERE 未取得官方实现，KnowQA 作者 URL
   当前不可得且是 sampled/gold-argument setting；relation baseline 门 `blocked`。
-- Ch3：MAVEN-FACT 官方代码可得，但 trainer 每 epoch 用 `test_data` 选 best、best checkpoint 保存被注释，且
-  `RawBert` 调用签名不一致；需要透明 protocol patch。ModaFact 是意大利语 mT5-XXL 的不同任务，只作结构化
-  对照。factuality baseline 工程可继续，但不因此放行 proposed 方法。
+- Ch3：MAVEN-FACT 官方代码可得，但原 trainer 每 epoch 用 `test_data` 选 best、best checkpoint 保存被注释，且
+  `RawBert` 调用签名不一致；本轮以透明 protocol patch 完成了泄漏隔离的 RoBERTa+CLS / DMRoBERTa 五折
+  OOF。ModaFact 是意大利语 mT5-XXL 的不同任务，只作结构化对照。baseline 与 power blocker 已解除，但
+  proposed 方法仍须通过 T022、T023、T024。
 
 ## 5. 当前方法裁决
 
@@ -121,6 +146,7 @@ Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
 - Ch2 草案避开已失败的 retriever/weighting 家族，改查 **full-candidate counterfactual evidence
   sufficiency/necessity**；A3 error profile 与功效门已支持该中介，但仍缺第二个独立同协议强 baseline。
 - Ch3 草案改为 **certainty/polarity factorization + cue-conditioned residual**；它不把“找准 evidence span”
-  当主要贡献。五折 OOF manifest 已冻结，先完成 baseline OOF 与功效复算，再谈 proposed GPU pilot。
+  当主要贡献。五折 OOF baseline 与 pooled power 已验收 PASS；下一门是 T022 因果 brief、T023 跨产物审计
+  和 T024 phase contract，未完成前不启动 proposed GPU pilot。
 
 三者均未获 promotion；5090/4090 的空闲本身不能替代 R1 准入证据。

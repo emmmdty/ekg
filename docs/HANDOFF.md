@@ -154,8 +154,8 @@ T012–T019 已完成（T018 已在 A3 handoff 后补齐），精确数字、has
 `277b36f`。当前硬结论：ERE↔FACT 身份闭环；ERE↔ARG mention 仅约 95.4% 覆盖且共享 mention 有父簇
 冲突，故 event-level arguments→mention 的 deployable 路线 blocked；Ch1 prospective power PASS，但缺
 argument-aware 同协议 runnable baseline；Ch2 prospective power PASS，但缺第二个独立同协议 runnable
-baseline；Ch3 的 291-document 五类 macro-F1 设计 underpowered，五折 OOF 已冻结但 baseline OOF anchor
-与 pooled power 尚未产生。
+baseline；Ch3 的 291-document 设计 underpowered，但预冻结五折 OOF 已完成并验收，CLS anchor 与
+2,913-document pooled power 均 PASS。精确数字与 acceptance hash 只见 [`results/PHASE_R1.md`](results/PHASE_R1.md)。
 
 学位类型、入学年份、学科与专业未知项均保持 `null`；同济校级标准来源/date/hash 已冻结，未知项不影响
 项目自定的更高科研硬门。文献矩阵已只读冻结 CorefPrompt、MAVEN-FACT、ModaFact、TextEE、OmniEvent
@@ -168,8 +168,8 @@ baseline；Ch3 的 291-document 五类 macro-F1 设计 underpowered，五折 OOF
 
 后续按 [`TASKS.md`](TASKS.md) 的 T020–T024 继续，但各章仍先补齐自身 blocker：
 
-1. Ch3：把 RoBERTa+CLS 与 DMRoBERTa 接到已冻结五折 train/select/evaluate manifests，先做 CPU fixture 与
-   单卡 CUDA smoke，再以 seed 13 后台生成 OOF anchors；
+1. Ch3：执行 T022 因果 design brief，再与已验收 OOF/power 产物进入 T023 一致性审计；通过后才能生成
+   T024 phase contract，未冻结前不启动 proposed GPU pilot；
 2. Ch1：继续寻找可忠实运行的 mention-local argument-aware baseline/checkpoint；没有 checkpoint 时只做
    adapter 与 fixture，不把跨 ontology 重训冒充官方复现；
 3. Ch2：取得或透明适配第二个独立近期同协议 baseline，保持完整候选全集；
