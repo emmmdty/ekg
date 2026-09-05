@@ -76,6 +76,13 @@ from ekg.relations.prototype import (
 # Official MAVEN-ERE marks unscoreable family/pair combinations with -100
 # (`joint/src/data.py::get_relation_labels`), which is also torch's default.
 _IGNORE_INDEX = -100
+_P1_VALIDITY_HASH_CATEGORIES = {
+    "candidate",
+    "config",
+    "data",
+    "evaluator",
+    "manifests",
+}
 
 
 def _load_json(path: Path) -> dict:
@@ -127,6 +134,9 @@ def validate_v6_protocol_inputs(
             evidence_root=repo_root,
             expected_protocol_sha256=expected_p1_protocol_sha256,
             known_upstream_bundle_ids=set(),
+            # P1 freezes validity assets, not every future downstream trainer.
+            # The current trainer is hashed into this run's binding below.
+            verify_external_hash_categories=_P1_VALIDITY_HASH_CATEGORIES,
         )
     except StageBundleError as exc:
         raise ValueError(f"P1 stage bundle validation failed: {exc}") from exc
@@ -217,6 +227,9 @@ def validate_v6_protocol_inputs(
             "internal_dev_manifest": manifest_hashes["internal-dev"],
             "trainer": sha256_file(Path(__file__).resolve()),
         },
+        "p1_verified_external_hash_categories": sorted(
+            _P1_VALIDITY_HASH_CATEGORIES
+        ),
         "candidate_summaries": summaries,
         "split_counts": {
             role: len(payload["doc_ids"]) for role, payload in manifest_payloads.items()

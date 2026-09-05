@@ -209,6 +209,36 @@ def test_v6_protocol_binding_recomputes_split_and_label_universe(
     ] == 234_870
 
 
+def test_v6_binding_verifies_protocol_assets_but_hashes_current_trainer(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    captured: dict = {}
+
+    def validate(*args, **kwargs):
+        captured.update(kwargs)
+        return {}
+
+    monkeypatch.setattr(tr, "validate_stage_bundle", validate)
+    protocol = _ready_protocol(tmp_path)
+    binding = tr.validate_v6_protocol_inputs(
+        repo_root=_REPO,
+        train_path=_REPO / "data/processed/maven_ere/train.jsonl",
+        train_manifest=protocol / "manifests/maven_ere_train.json",
+        dev_manifest=protocol / "manifests/maven_ere_internal-dev.json",
+        protocol_root=protocol,
+        expected_p1_protocol_sha256=_TEST_P1_HASH,
+    )
+
+    assert captured["verify_external_hash_categories"] == {
+        "candidate",
+        "config",
+        "data",
+        "evaluator",
+        "manifests",
+    }
+    assert len(binding["hashes"]["trainer"]) == 64
+
+
 def test_v6_protocol_binding_rejects_wrong_trust_root(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
 ) -> None:

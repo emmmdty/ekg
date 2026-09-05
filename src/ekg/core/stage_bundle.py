@@ -137,8 +137,15 @@ def validate_stage_bundle(
     evidence_root: Path,
     expected_protocol_sha256: str,
     known_upstream_bundle_ids: set[str] | None = None,
+    verify_external_hash_categories: set[str] | None = None,
 ) -> dict[str, object]:
-    """Validate the trust root, external evidence, bundle contents, and IDs."""
+    """Validate the trust root, selected external evidence, contents, and IDs.
+
+    ``verify_external_hash_categories`` supports a downstream consumer whose own
+    implementation legitimately post-dates an upstream bundle. The default still
+    verifies every locally bound category; callers narrowing the set must record
+    their current code independently.
+    """
     missing_files = [name for name in FILES if not (path / name).is_file()]
     if missing_files:
         raise StageBundleError(f"bundle is missing files: {missing_files}")
@@ -244,7 +251,18 @@ def validate_stage_bundle(
                 f"expected {expected_hash}, got {actual_hash}"
             )
 
-    for category in local_categories:
+    selected_categories = (
+        set(local_categories)
+        if verify_external_hash_categories is None
+        else set(verify_external_hash_categories)
+    )
+    undeclared_categories = selected_categories - set(local_categories)
+    if undeclared_categories:
+        raise StageBundleError(
+            "requested external hash categories are not local evidence: "
+            f"{sorted(undeclared_categories)}"
+        )
+    for category in selected_categories:
         if not hash_groups[category]:
             raise StageBundleError(f"local hash category {category} must not be empty")
         for relative_path, digest in hash_groups[category].items():
@@ -308,4 +326,9 @@ def validate_stage_bundle(
         unknown = set(upstream) - known_upstream_bundle_ids
         if unknown:
             raise StageBundleError(f"unknown upstream bundle IDs: {sorted(unknown)}")
-    return {"protocol": protocol, "metrics": metrics, "status": status}
+    return {
+        "protocol": protocol,
+        "metrics": metrics,
+        "status": status,
+        "verified_external_hash_categories": sorted(selected_categories),
+    }

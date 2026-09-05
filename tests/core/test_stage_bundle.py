@@ -126,6 +126,32 @@ def test_external_evidence_tampering_stops_validation(tmp_path: Path) -> None:
         _validate(bundle, root)
 
 
+def test_selected_external_categories_decouple_downstream_code(tmp_path: Path) -> None:
+    bundle = tmp_path / "p1-test"
+    root = _make(bundle)
+    (root / "evidence/code.json").write_text('{"changed":true}\n', encoding="utf-8")
+
+    result = _validate(
+        bundle,
+        root,
+        verify_external_hash_categories={
+            "data",
+            "manifests",
+            "candidate",
+            "evaluator",
+            "config",
+        },
+    )
+
+    assert result["verified_external_hash_categories"] == [
+        "candidate",
+        "config",
+        "data",
+        "evaluator",
+        "manifests",
+    ]
+
+
 def test_fabricated_declared_external_hash_stops_even_with_updated_protocol_hash(
     tmp_path: Path,
 ) -> None:
