@@ -153,6 +153,40 @@ def test_nuextract_generation_uses_remote_code_continuations() -> None:
     assert decoded == ["answer"]
 
 
+def test_nuextract_localizes_only_its_frozen_dynamic_code_repo() -> None:
+    module = _load("predict_mention_arguments")
+    config = type(
+        "Config",
+        (),
+        {
+            "auto_map": {
+                "AutoConfig": "configuration_internvl_chat.InternVLChatConfig",
+                "AutoModel": "numind/NuExtract-2-2B--modeling_internvl_chat.Model",
+                "AutoModelForCausalLM": (
+                    "numind/NuExtract-2-2B--modeling_internvl_chat.Model"
+                ),
+            }
+        },
+    )()
+
+    module.localize_dynamic_auto_map(config, model_repo="numind/NuExtract-2-2B")
+
+    assert config.auto_map["AutoModel"] == "modeling_internvl_chat.Model"
+    assert config.auto_map["AutoModelForCausalLM"] == "modeling_internvl_chat.Model"
+
+
+def test_nuextract_rejects_another_dynamic_code_repo() -> None:
+    module = _load("predict_mention_arguments")
+    config = type(
+        "Config",
+        (),
+        {"auto_map": {"AutoModelForCausalLM": "someone/else--modeling.Model"}},
+    )()
+
+    with pytest.raises(ValueError, match="unexpected dynamic-code repository"):
+        module.localize_dynamic_auto_map(config, model_repo="numind/NuExtract-2-2B")
+
+
 def test_ere_population_counts_unseen_mentions_as_singletons() -> None:
     """The pipeline's population is smaller than ERE's; the gap must not vanish."""
     module = _load("build_canonical_nodes")

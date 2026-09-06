@@ -15,6 +15,7 @@ from ekg.core.protocol import load_manifest_ids
 from ekg.relations.data.maven_ere import load_maven_ere
 
 TEMPLATE = '{"participant": ["verbatim-string"], "place": ["verbatim-string"]}'
+_LOCAL_AUTO_CLASSES = {"AutoModel", "AutoModelForCausalLM"}
 
 
 def _sha256(path: Path) -> str:
@@ -30,6 +31,19 @@ def prepare_nuextract_model(model, tokenizer) -> int:
 def decode_nuextract_responses(tokenizer, generated) -> list[str]:
     """Decode NuExtract continuations; its inputs-embeds path omits prompt IDs."""
     return tokenizer.batch_decode(generated, skip_special_tokens=True)
+
+
+def localize_dynamic_auto_map(config, *, model_repo: str) -> None:
+    """Force NuExtract's downloaded remote code to resolve from the local snapshot."""
+    auto_map = getattr(config, "auto_map", {})
+    for key in _LOCAL_AUTO_CLASSES:
+        reference = auto_map.get(key)
+        if not isinstance(reference, str) or "--" not in reference:
+            continue
+        repo, local_reference = reference.split("--", 1)
+        if repo != model_repo:
+            raise ValueError(f"unexpected dynamic-code repository for {key}: {repo}")
+        auto_map[key] = local_reference
 
 
 def parse_roles(
@@ -136,15 +150,25 @@ def main() -> int:
         requests = requests[: args.limit]
 
     import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained(
-        args.model, trust_remote_code=True, padding_side="left"
-    )
-    model = AutoModelForCausalLM.from_pretrained(
         args.model,
         trust_remote_code=True,
+        padding_side="left",
+        local_files_only=True,
+    )
+    model_repo = args.model_id.split("@", 1)[0]
+    config = AutoConfig.from_pretrained(
+        args.model, trust_remote_code=True, local_files_only=True
+    )
+    localize_dynamic_auto_map(config, model_repo=model_repo)
+    model = AutoModelForCausalLM.from_pretrained(
+        args.model,
+        config=config,
+        trust_remote_code=True,
         torch_dtype=torch.bfloat16,
+        local_files_only=True,
     ).to("cuda").eval()
     eos_token_id = prepare_nuextract_model(model, tokenizer)
     args.output.mkdir(parents=True)
