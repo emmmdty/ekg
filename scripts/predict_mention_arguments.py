@@ -16,10 +16,66 @@ from ekg.relations.data.maven_ere import load_maven_ere
 
 TEMPLATE = '{"participant": ["verbatim-string"], "place": ["verbatim-string"]}'
 _LOCAL_AUTO_CLASSES = {"AutoModel", "AutoModelForCausalLM"}
+QWEN3_FILES = {
+    "config.json": (728, "f7c4eadfbbf522470667b797a3c89be2524832d2d599797248dc304fff447c30"),
+    "generation_config.json": (
+        239,
+        "2325da0f15bb848e018c5ae071b7943332e9f871d6b60e2ed22ca97d4cb993d2",
+    ),
+    "model-00001-of-00005.safetensors": (
+        3_996_250_744,
+        "31d6a825ae35f11fb85b195b4c42c146c051e446433125a215336abdf95cbf5f",
+    ),
+    "model-00002-of-00005.safetensors": (
+        3_993_160_032,
+        "5991236cea6fe21f3d43cab0f0e84448734fbbe0789816202989f2ddc9d18282",
+    ),
+    "model-00003-of-00005.safetensors": (
+        3_959_604_768,
+        "c5185c4794be2d8a9784d5753c9922db38df478ce11f9ed0b415b7304d896836",
+    ),
+    "model-00004-of-00005.safetensors": (
+        3_187_841_392,
+        "b5ee7de71fbf17db3d5704e0c8f2bc7d005ca9e1d7ca2aeb19827b0cfcaa917a",
+    ),
+    "model-00005-of-00005.safetensors": (
+        1_244_659_840,
+        "20c2d6366ab85c90786ccdd829cd2b9e7d30ef3b2ebbb998280e7e4014b542ff",
+    ),
+    "model.safetensors.index.json": (
+        32_878,
+        "f9fdbcb91c23971c13ec5d5f2573d2349e8f61f2f049371ec699281748fdb1bc",
+    ),
+    "tokenizer.json": (
+        11_422_654,
+        "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+    ),
+    "tokenizer_config.json": (
+        9_732,
+        "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+    ),
+}
 
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def validate_qwen3_snapshot(root: Path) -> dict[str, dict[str, int | str]]:
+    files = {}
+    for relative, (size, expected) in QWEN3_FILES.items():
+        path = root / relative
+        if not path.is_file() or path.stat().st_size != size:
+            raise ValueError(f"Qwen3 model file size mismatch: {relative}")
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            while chunk := handle.read(8 * 1024 * 1024):
+                digest.update(chunk)
+        actual = digest.hexdigest()
+        if actual != expected:
+            raise ValueError(f"Qwen3 model file hash mismatch: {relative}")
+        files[relative] = {"bytes": size, "sha256": actual}
+    return files
 
 
 def prepare_nuextract_model(model, tokenizer) -> int:
@@ -144,10 +200,17 @@ def main() -> int:
     parser.add_argument("--manifest", required=True, type=Path, nargs="+")
     parser.add_argument("--model", required=True, type=Path)
     parser.add_argument("--model-id", required=True)
+    parser.add_argument("--backend", choices=("nuextract", "qwen3"), default="nuextract")
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--batch-size", type=int, default=16)
+    parser.add_argument("--num-shards", type=int, default=1)
+    parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--limit", type=int)
     args = parser.parse_args()
+    if not 1 <= args.batch_size:
+        parser.error("batch size must be positive")
+    if not 1 <= args.num_shards or not 0 <= args.shard_index < args.num_shards:
+        parser.error("invalid shard index/count")
     if args.output.exists() and any(args.output.iterdir()):
         parser.error(f"output directory is not empty: {args.output}")
 
@@ -159,54 +222,72 @@ def main() -> int:
     if missing:
         parser.error(f"manifest documents missing from ERE source: {len(missing)}")
     docs = [by_id[doc_id] for doc_id in wanted]
-    requests = _requests(docs)
+    all_requests = _requests(docs)
+    requests = all_requests[args.shard_index :: args.num_shards]
     if args.limit:
         requests = requests[: args.limit]
 
     import torch
     from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        args.model,
-        trust_remote_code=True,
-        padding_side="left",
-        local_files_only=True,
-    )
-    model_repo = args.model_id.split("@", 1)[0]
-    config = AutoConfig.from_pretrained(
-        args.model, trust_remote_code=True, local_files_only=True
-    )
-    localize_dynamic_auto_map(config, model_repo=model_repo)
-    model = AutoModelForCausalLM.from_pretrained(
-        args.model,
-        config=config,
-        trust_remote_code=True,
-        torch_dtype=torch.bfloat16,
-        local_files_only=True,
-    ).to("cuda").eval()
-    from transformers.generation import GenerationMixin
+    model_files = None
+    if args.backend == "qwen3":
+        model_files = validate_qwen3_snapshot(args.model)
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.model, padding_side="left", local_files_only=True
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model, torch_dtype=torch.bfloat16, local_files_only=True
+        ).to("cuda").eval()
+        eos_token_id = tokenizer.eos_token_id
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.model,
+            trust_remote_code=True,
+            padding_side="left",
+            local_files_only=True,
+        )
+        model_repo = args.model_id.split("@", 1)[0]
+        config = AutoConfig.from_pretrained(
+            args.model, trust_remote_code=True, local_files_only=True
+        )
+        localize_dynamic_auto_map(config, model_repo=model_repo)
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model,
+            config=config,
+            trust_remote_code=True,
+            torch_dtype=torch.bfloat16,
+            local_files_only=True,
+        ).to("cuda").eval()
+        from transformers.generation import GenerationMixin
 
-    ensure_generation_mixin(model.language_model, GenerationMixin)
-    eos_token_id = prepare_nuextract_model(model, tokenizer)
+        ensure_generation_mixin(model.language_model, GenerationMixin)
+        eos_token_id = prepare_nuextract_model(model, tokenizer)
     args.output.mkdir(parents=True)
     output = args.output / "predictions.jsonl"
     with output.open("w", encoding="utf-8") as handle, torch.no_grad():
         for offset in range(0, len(requests), args.batch_size):
             batch = requests[offset : offset + args.batch_size]
+            conversations = [[{"role": "user", "content": row["message"]}] for row in batch]
+            template_kwargs = {"enable_thinking": False} if args.backend == "qwen3" else {}
             prompts = tokenizer.apply_chat_template(
-                [[{"role": "user", "content": row["message"]}] for row in batch],
+                conversations,
                 tokenize=False,
                 add_generation_prompt=True,
+                **template_kwargs,
             )
             encoded = tokenizer(prompts, return_tensors="pt", padding=True).to("cuda")
+            generation_kwargs = {"pixel_values": None} if args.backend == "nuextract" else {}
             generated = model.generate(
                 **encoded,
-                pixel_values=None,
+                **generation_kwargs,
                 do_sample=False,
                 num_beams=1,
                 max_new_tokens=128,
                 eos_token_id=eos_token_id,
             )
+            if args.backend == "qwen3":
+                generated = generated[:, encoded.input_ids.shape[1] :]
             responses = decode_nuextract_responses(tokenizer, generated)
             for row, response in zip(batch, responses, strict=True):
                 roles = parse_roles(
@@ -236,10 +317,15 @@ def main() -> int:
         "schema_version": "ekg.mention_arguments.v1",
         "status": "complete",
         "command_argv": list(sys.argv),
+        "backend": args.backend,
         "model_id": args.model_id,
+        "model_files": model_files,
         "model_revision": model_revision,
         "documents": len(docs),
         "mentions": len(requests),
+        "mentions_in_manifests": len(all_requests),
+        "num_shards": args.num_shards,
+        "shard_index": args.shard_index,
         "source_sha256": _sha256(args.ere),
         "manifest_sha256": {str(path): _sha256(path) for path in args.manifest},
         "predictions_sha256": _sha256(output),

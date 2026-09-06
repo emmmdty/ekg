@@ -289,6 +289,27 @@ def test_oneke_snapshot_validation_checks_size_and_hash(tmp_path) -> None:
         module.validate_model_snapshot(tmp_path, expected)
 
 
+def test_qwen_snapshot_validation_checks_size_and_hash(tmp_path, monkeypatch) -> None:
+    module = _load("predict_mention_arguments")
+    model_file = tmp_path / "model.safetensors"
+    model_file.write_bytes(b"weights")
+    monkeypatch.setattr(
+        module,
+        "QWEN3_FILES",
+        {
+            "model.safetensors": (
+                7,
+                hashlib.sha256(b"weights").hexdigest(),
+            )
+        },
+    )
+
+    assert module.validate_qwen3_snapshot(tmp_path)["model.safetensors"]["bytes"] == 7
+    model_file.write_bytes(b"changed")
+    with pytest.raises(ValueError, match="hash mismatch"):
+        module.validate_qwen3_snapshot(tmp_path)
+
+
 def test_ere_population_counts_unseen_mentions_as_singletons() -> None:
     """The pipeline's population is smaller than ERE's; the gap must not vanish."""
     module = _load("build_canonical_nodes")
