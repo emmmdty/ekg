@@ -155,6 +155,21 @@ def test_nuextract_generation_uses_remote_code_continuations() -> None:
     assert decoded == ["answer"]
 
 
+def test_qwen_argument_message_has_no_copyable_filler_placeholder() -> None:
+    module = _load("predict_mention_arguments")
+    message = module.qwen_argument_message(
+        {
+            "event_type": "Attack",
+            "trigger": "attacked",
+            "sentence": "Alice attacked Rome.",
+        }
+    )
+
+    assert "verbatim-string" not in message
+    assert 'Output schema: {"participant": [], "place": []}' in message
+    assert "Alice attacked Rome." in message
+
+
 def test_nuextract_localizes_only_its_frozen_dynamic_code_repo() -> None:
     module = _load("predict_mention_arguments")
     config = type(

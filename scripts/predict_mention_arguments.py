@@ -89,6 +89,20 @@ def decode_nuextract_responses(tokenizer, generated) -> list[str]:
     return tokenizer.batch_decode(generated, skip_special_tokens=True)
 
 
+def qwen_argument_message(row: dict) -> str:
+    """Describe the strict schema without a literal filler that can be copied."""
+    return (
+        "Extract only the participant(s) and place(s) of the specified event. "
+        "Every returned value must be an exact substring of the sentence. Return exactly "
+        "one JSON object with arrays under participant and place; use an empty array when "
+        "the role is absent. Do not return schema descriptions or placeholder values.\n"
+        f"Event type: {row['event_type']}\n"
+        f"Event trigger: {row['trigger']}\n"
+        f"Sentence: {row['sentence']}\n"
+        'Output schema: {"participant": [], "place": []}'
+    )
+
+
 def localize_dynamic_auto_map(config, *, model_repo: str) -> None:
     """Force NuExtract's downloaded remote code to resolve from the local snapshot."""
     auto_map = getattr(config, "auto_map", {})
@@ -268,7 +282,19 @@ def main() -> int:
     with output.open("w", encoding="utf-8") as handle, torch.no_grad():
         for offset in range(0, len(requests), args.batch_size):
             batch = requests[offset : offset + args.batch_size]
-            conversations = [[{"role": "user", "content": row["message"]}] for row in batch]
+            conversations = [
+                [
+                    {
+                        "role": "user",
+                        "content": (
+                            qwen_argument_message(row)
+                            if args.backend == "qwen3"
+                            else row["message"]
+                        ),
+                    }
+                ]
+                for row in batch
+            ]
             template_kwargs = {"enable_thinking": False} if args.backend == "qwen3" else {}
             prompts = tokenizer.apply_chat_template(
                 conversations,
@@ -290,12 +316,17 @@ def main() -> int:
                 generated = generated[:, encoded.input_ids.shape[1] :]
             responses = decode_nuextract_responses(tokenizer, generated)
             for row, response in zip(batch, responses, strict=True):
-                roles = parse_roles(
-                    response,
-                    row["sentence"],
-                    sentence_start=row["sentence_start"],
-                    trigger_start=row["trigger_start"],
-                )
+                try:
+                    roles = parse_roles(
+                        response,
+                        row["sentence"],
+                        sentence_start=row["sentence_start"],
+                        trigger_start=row["trigger_start"],
+                    )
+                except ValueError as exc:
+                    raise ValueError(
+                        f"invalid response for {row['mention_id']}: {response!r}"
+                    ) from exc
                 result = {
                     "doc_id": row["doc_id"],
                     "mention_id": row["mention_id"],
