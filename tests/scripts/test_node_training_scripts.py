@@ -187,6 +187,31 @@ def test_nuextract_rejects_another_dynamic_code_repo() -> None:
         module.localize_dynamic_auto_map(config, model_repo="numind/NuExtract-2-2B")
 
 
+def test_nuextract_restores_generation_mixin_only_when_missing() -> None:
+    module = _load("predict_mention_arguments")
+
+    class GenerationMixin:
+        def generate(self):
+            return "generated"
+
+    class LegacyModel:
+        pass
+
+    legacy = LegacyModel()
+    module.ensure_generation_mixin(legacy, GenerationMixin)
+    assert legacy.generate() == "generated"
+
+    class CurrentModel:
+        def generate(self):
+            return "current"
+
+    current = CurrentModel()
+    original_class = type(current)
+    module.ensure_generation_mixin(current, GenerationMixin)
+    assert type(current) is original_class
+    assert current.generate() == "current"
+
+
 def test_ere_population_counts_unseen_mentions_as_singletons() -> None:
     """The pipeline's population is smaller than ERE's; the gap must not vanish."""
     module = _load("build_canonical_nodes")

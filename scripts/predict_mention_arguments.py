@@ -46,6 +46,18 @@ def localize_dynamic_auto_map(config, *, model_repo: str) -> None:
         auto_map[key] = local_reference
 
 
+def ensure_generation_mixin(language_model, generation_mixin) -> None:
+    """Restore the generation API removed from PreTrainedModel in Transformers 4.50+."""
+    if hasattr(language_model, "generate"):
+        return
+    patched_class = type(
+        f"{type(language_model).__name__}WithGenerationMixin",
+        (type(language_model), generation_mixin),
+        {},
+    )
+    language_model.__class__ = patched_class
+
+
 def parse_roles(
     response: str,
     sentence: str,
@@ -170,6 +182,9 @@ def main() -> int:
         torch_dtype=torch.bfloat16,
         local_files_only=True,
     ).to("cuda").eval()
+    from transformers.generation import GenerationMixin
+
+    ensure_generation_mixin(model.language_model, GenerationMixin)
     eos_token_id = prepare_nuextract_model(model, tokenizer)
     args.output.mkdir(parents=True)
     output = args.output / "predictions.jsonl"
