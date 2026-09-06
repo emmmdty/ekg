@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import sys
@@ -272,6 +273,20 @@ def test_mention_argument_shard_merge_requires_exact_ids_and_order() -> None:
         module.ordered_rows([rows[0], rows[0]], ["m2"])
     with pytest.raises(ValueError, match="missing predictions=1"):
         module.ordered_rows(rows[:1], ["m1", "m2"])
+
+
+def test_oneke_snapshot_validation_checks_size_and_hash(tmp_path) -> None:
+    module = _load("predict_mention_arguments_oneke")
+    model_file = tmp_path / "model.bin"
+    model_file.write_bytes(b"weights")
+    expected = {
+        "model.bin": (len(b"weights"), hashlib.sha256(b"weights").hexdigest())
+    }
+
+    assert module.validate_model_snapshot(tmp_path, expected)["model.bin"]["bytes"] == 7
+    model_file.write_bytes(b"changed")
+    with pytest.raises(ValueError, match="hash mismatch"):
+        module.validate_model_snapshot(tmp_path, expected)
 
 
 def test_ere_population_counts_unseen_mentions_as_singletons() -> None:

@@ -20,10 +20,60 @@ _SYSTEM_PROMPT = (
     "<<SYS>>\nYou are a helpful assistant. You perform faithful information "
     "extraction.\n<</SYS>>\n\n"
 )
+ONEKE_FILES = {
+    "config.json": (676, "c490b4eebd65fcc5b9af955344c9b4f84114b8ecfa56e0ace9cbff33a3c89024"),
+    "configuration.json": (
+        65,
+        "084e63482865b26a7f4fd043a1bfb67b755707c7aa32d302d07cc6a3a4d0b208",
+    ),
+    "pytorch_model-00001-of-00003.bin": (
+        9_940_832_938,
+        "9f1d0e5973b9c428bb71334c22abd72592b0cfd73d8242bb76b7e284a2e920c0",
+    ),
+    "pytorch_model-00002-of-00003.bin": (
+        9_867_476_673,
+        "81f9c0b70774391a9c0de879a1098977ffd336364b7a1ec6a232a9cbb02b274d",
+    ),
+    "pytorch_model-00003-of-00003.bin": (
+        6_700_645_527,
+        "b4ecd8ad32be39f367cd48070563e9bfd038efac4072487c9dbe7803409a3c8b",
+    ),
+    "pytorch_model.bin.index.json": (
+        29_894,
+        "53210b932f39dfbcb706e7c1285a8aa26fc8c570f4415108146bcd4999cca961",
+    ),
+    "special_tokens_map.json": (
+        435,
+        "dfd7f38bbbe1f22c1f6e05db6241ad82176a9765d91b51b3fee3e3835e6ac75f",
+    ),
+    "tokenizer.model": (
+        844_403,
+        "a3b8844863b200dfcca971db228e96ce388290dfcf72c15d7a9d2f604bac787c",
+    ),
+    "tokenizer_config.json": (
+        766,
+        "305a57cf5eca7b87705ffe64d9c0ccb23ff09e85342597227ac4207953f7fea6",
+    ),
+}
 
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def validate_model_snapshot(
+    root: Path, expected: dict[str, tuple[int, str]] = ONEKE_FILES
+) -> dict[str, dict[str, int | str]]:
+    records = {}
+    for relative, (size, digest) in expected.items():
+        path = root / relative
+        if not path.is_file() or path.stat().st_size != size:
+            raise ValueError(f"model file size mismatch: {relative}")
+        actual = _sha256(path)
+        if actual != digest:
+            raise ValueError(f"model file hash mismatch: {relative}")
+        records[relative] = {"bytes": size, "sha256": actual}
+    return records
 
 
 def one_ke_prompt(row: dict) -> str:
@@ -146,6 +196,7 @@ def main() -> int:
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
+    model_files = validate_model_snapshot(args.model)
     tokenizer = AutoTokenizer.from_pretrained(
         args.model, trust_remote_code=True, local_files_only=True, padding_side="left"
     )
@@ -216,6 +267,7 @@ def main() -> int:
         "command_argv": list(sys.argv),
         "backend": "oneke_4bit_nf4",
         "model_id": args.model_id,
+        "model_files": model_files,
         "documents_in_manifests": len(docs),
         "mentions_in_manifests": len(all_requests),
         "mentions": len(requests),
