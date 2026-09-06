@@ -127,6 +127,8 @@ def _requests(docs) -> list[dict]:
                 {
                     "doc_id": doc.doc_id,
                     "mention_id": node.event_id,
+                    "event_type": node.event_type,
+                    "trigger": node.trigger,
                     "sentence": sentence,
                     "sentence_start": starts[span.sent_id],
                     "trigger_start": span.char_start,

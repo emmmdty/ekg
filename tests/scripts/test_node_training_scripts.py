@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -210,6 +211,67 @@ def test_nuextract_restores_generation_mixin_only_when_missing() -> None:
     module.ensure_generation_mixin(current, GenerationMixin)
     assert type(current) is original_class
     assert current.generate() == "current"
+
+
+def test_oneke_normalizes_direct_and_event_argument_json() -> None:
+    module = _load("predict_mention_arguments_oneke")
+
+    direct = module.normalize_oneke_response(
+        'prefix {"Participant": ["Alice"], "place": "NAN"}', trigger="attacked"
+    )
+    event = module.normalize_oneke_response(
+        json.dumps(
+            [
+                {
+                    "event_type": "Attack",
+                    "event_trigger": "attacked",
+                    "arguments": {"participant": "Alice", "place": ["Rome"]},
+                }
+            ]
+        ),
+        trigger="attacked",
+    )
+
+    assert direct == {"participant": ["Alice"]}
+    assert event == {"participant": ["Alice"], "place": ["Rome"]}
+
+
+def test_oneke_rejects_unknown_roles_and_ambiguous_events() -> None:
+    module = _load("predict_mention_arguments_oneke")
+
+    with pytest.raises(ValueError, match="unknown role"):
+        module.normalize_oneke_response('{"time": "Monday"}', trigger="attacked")
+    with pytest.raises(ValueError, match="ambiguous events"):
+        module.normalize_oneke_response(
+            '[{"arguments": {}}, {"arguments": {}}]', trigger="attacked"
+        )
+
+
+def test_oneke_prompt_binds_target_event_and_schema() -> None:
+    module = _load("predict_mention_arguments_oneke")
+    prompt = module.one_ke_prompt(
+        {
+            "event_type": "Attack",
+            "trigger": "attacked",
+            "sentence": "Alice attacked Rome.",
+        }
+    )
+
+    assert prompt.startswith("[INST] <<SYS>>")
+    assert '"event_type": "Attack"' in prompt
+    assert '"trigger": "attacked"' in prompt
+    assert '"arguments": ["participant", "place"]' in prompt
+
+
+def test_mention_argument_shard_merge_requires_exact_ids_and_order() -> None:
+    module = _load("merge_mention_argument_shards")
+    rows = [{"mention_id": "m2"}, {"mention_id": "m1"}]
+
+    assert module.ordered_rows(rows, ["m1", "m2"]) == [rows[1], rows[0]]
+    with pytest.raises(ValueError, match="duplicate"):
+        module.ordered_rows([rows[0], rows[0]], ["m2"])
+    with pytest.raises(ValueError, match="missing predictions=1"):
+        module.ordered_rows(rows[:1], ["m1", "m2"])
 
 
 def test_ere_population_counts_unseen_mentions_as_singletons() -> None:
