@@ -9,6 +9,7 @@ import json
 import re
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
 
 from ekg.core.protocol import load_manifest_ids
@@ -128,6 +129,61 @@ def ensure_generation_mixin(language_model, generation_mixin) -> None:
     language_model.__class__ = patched_class
 
 
+def _role_payload(response: str) -> dict:
+    start, end = response.find("{"), response.rfind("}")
+    if start < 0 or end < start:
+        raise ValueError(f"model response has no JSON object: {response!r}")
+    payload = json.loads(response[start : end + 1])
+    if not isinstance(payload, dict):
+        raise ValueError("model response JSON is not an object")
+    unknown = set(payload) - {"participant", "place"}
+    if unknown:
+        raise ValueError(f"model returned unknown roles: {sorted(unknown)}")
+    return payload
+
+
+def _token_spans(text: str) -> list[tuple[str, int, int]]:
+    return [
+        (match.group().casefold(), match.start(), match.end())
+        for match in re.finditer(r"\w+(?:['’]\w+)*|&", text)
+    ]
+
+
+def _locate_filler(
+    value: str,
+    sentence: str,
+    *,
+    sentence_start: int,
+    trigger_start: int,
+) -> dict:
+    matches = [
+        (match.start(), match.end())
+        for match in re.finditer(re.escape(value), sentence, re.I)
+    ]
+    if not matches:
+        wanted = [token for token, _, _ in _token_spans(value)]
+        sentence_tokens = _token_spans(sentence)
+        matches = [
+            (sentence_tokens[index][1], sentence_tokens[index + len(wanted) - 1][2])
+            for index in range(len(sentence_tokens) - len(wanted) + 1)
+            if wanted
+            and [token for token, _, _ in sentence_tokens[index : index + len(wanted)]]
+            == wanted
+        ]
+    if not matches:
+        raise ValueError(f"predicted filler cannot align to sentence: {value!r}")
+    distances = [abs(sentence_start + start - trigger_start) for start, _ in matches]
+    nearest = min(distances)
+    if distances.count(nearest) != 1:
+        raise ValueError(f"equidistant filler occurrence is ambiguous: {value!r}")
+    start, end = matches[distances.index(nearest)]
+    return {
+        "text": sentence[start:end],
+        "char_start": sentence_start + start,
+        "char_end": sentence_start + end,
+    }
+
+
 def parse_roles(
     response: str,
     sentence: str,
@@ -135,14 +191,8 @@ def parse_roles(
     sentence_start: int,
     trigger_start: int,
 ) -> dict[str, list[dict]]:
-    """Parse NuExtract JSON and locate each filler nearest to the trigger."""
-    start, end = response.find("{"), response.rfind("}")
-    if start < 0 or end < start:
-        raise ValueError(f"model response has no JSON object: {response!r}")
-    payload = json.loads(response[start : end + 1])
-    unknown = set(payload) - {"participant", "place"}
-    if unknown:
-        raise ValueError(f"model returned unknown roles: {sorted(unknown)}")
+    """Parse role JSON and conservatively align every filler to the sentence."""
+    payload = _role_payload(response)
     roles: dict[str, list[dict]] = {}
     for role in ("participant", "place"):
         values = payload.get(role) or []
@@ -150,27 +200,60 @@ def parse_roles(
             values = [values]
         if not isinstance(values, list) or any(not isinstance(value, str) for value in values):
             raise ValueError(f"model returned invalid {role} values")
-        fillers = []
-        for value in dict.fromkeys(values):
-            matches = list(re.finditer(re.escape(value), sentence, re.IGNORECASE))
-            if not matches:
-                raise ValueError(f"predicted filler is not verbatim: {value!r}")
-            distances = [abs(sentence_start + match.start() - trigger_start) for match in matches]
-            nearest = min(distances)
-            if distances.count(nearest) != 1:
-                raise ValueError(f"equidistant filler occurrence is ambiguous: {value!r}")
-            match = matches[distances.index(nearest)]
-            surface = sentence[match.start() : match.end()]
-            fillers.append(
-                {
-                    "text": surface,
-                    "char_start": sentence_start + match.start(),
-                    "char_end": sentence_start + match.end(),
-                }
+        fillers = [
+            _locate_filler(
+                value,
+                sentence,
+                sentence_start=sentence_start,
+                trigger_start=trigger_start,
             )
+            for value in dict.fromkeys(values)
+        ]
         if fillers:
             roles[role] = fillers
     return roles
+
+
+def parse_roles_with_rejections(
+    response: str,
+    sentence: str,
+    *,
+    sentence_start: int,
+    trigger_start: int,
+) -> tuple[dict[str, list[dict]], list[dict[str, str | None]]]:
+    """Return aligned fillers and explicit abstentions for unusable model output."""
+    try:
+        payload = _role_payload(response)
+    except (json.JSONDecodeError, ValueError) as exc:
+        return {}, [{"role": None, "value": response, "reason": str(exc)}]
+
+    roles: dict[str, list[dict]] = {}
+    rejected: list[dict[str, str | None]] = []
+    for role in ("participant", "place"):
+        values = payload.get(role) or []
+        if isinstance(values, str):
+            values = [values]
+        if not isinstance(values, list) or any(not isinstance(value, str) for value in values):
+            rejected.append(
+                {"role": role, "value": json.dumps(values), "reason": "invalid role values"}
+            )
+            continue
+        fillers = []
+        for value in dict.fromkeys(values):
+            try:
+                fillers.append(
+                    _locate_filler(
+                        value,
+                        sentence,
+                        sentence_start=sentence_start,
+                        trigger_start=trigger_start,
+                    )
+                )
+            except ValueError as exc:
+                rejected.append({"role": role, "value": value, "reason": str(exc)})
+        if fillers:
+            roles[role] = fillers
+    return roles, rejected
 
 
 def _requests(docs) -> list[dict]:
@@ -279,6 +362,8 @@ def main() -> int:
         eos_token_id = prepare_nuextract_model(model, tokenizer)
     args.output.mkdir(parents=True)
     output = args.output / "predictions.jsonl"
+    status_counts: Counter[str] = Counter()
+    rejected_fillers = 0
     with output.open("w", encoding="utf-8") as handle, torch.no_grad():
         for offset in range(0, len(requests), args.batch_size):
             batch = requests[offset : offset + args.batch_size]
@@ -316,23 +401,36 @@ def main() -> int:
                 generated = generated[:, encoded.input_ids.shape[1] :]
             responses = decode_nuextract_responses(tokenizer, generated)
             for row, response in zip(batch, responses, strict=True):
-                try:
+                rejected = []
+                if args.backend == "qwen3":
+                    roles, rejected = parse_roles_with_rejections(
+                        response,
+                        row["sentence"],
+                        sentence_start=row["sentence_start"],
+                        trigger_start=row["trigger_start"],
+                    )
+                else:
                     roles = parse_roles(
                         response,
                         row["sentence"],
                         sentence_start=row["sentence_start"],
                         trigger_start=row["trigger_start"],
                     )
-                except ValueError as exc:
-                    raise ValueError(
-                        f"invalid response for {row['mention_id']}: {response!r}"
-                    ) from exc
+                if rejected:
+                    status = "partial" if roles else "rejected"
+                else:
+                    status = "ok" if roles else "empty"
                 result = {
                     "doc_id": row["doc_id"],
                     "mention_id": row["mention_id"],
-                    "status": "ok" if roles else "empty",
+                    "status": status,
                     "roles": roles,
                 }
+                if rejected:
+                    result["rejected"] = rejected
+                    result["raw_response"] = response
+                    rejected_fillers += len(rejected)
+                status_counts[status] += 1
                 handle.write(json.dumps(result, sort_keys=True) + "\n")
             handle.flush()
             done = min(offset + len(batch), len(requests))
@@ -355,6 +453,8 @@ def main() -> int:
         "documents": len(docs),
         "mentions": len(requests),
         "mentions_in_manifests": len(all_requests),
+        "prediction_status_counts": dict(sorted(status_counts.items())),
+        "rejected_fillers": rejected_fillers,
         "num_shards": args.num_shards,
         "shard_index": args.shard_index,
         "source_sha256": _sha256(args.ere),

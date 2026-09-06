@@ -50,6 +50,59 @@ def test_predicted_arguments_bind_exact_mention_local_spans(tmp_path) -> None:
     assert node.arguments == {"participant": "Alice", "place": "Rome"}
     assert node.argument_evidence["place"][0].text == "Rome"
     assert node.metadata["argument_source"] == "predicted_mention_local"
+    assert node.metadata["argument_prediction_status"] == "ok"
+
+
+def test_predicted_arguments_accept_explicit_partial_rejection(tmp_path) -> None:
+    path = tmp_path / "predictions.jsonl"
+    path.write_text(
+        json.dumps(
+            {
+                "doc_id": "d",
+                "mention_id": "d::m1",
+                "status": "partial",
+                "roles": {
+                    "participant": [{"text": "Alice", "char_start": 0, "char_end": 5}]
+                },
+                "rejected": [
+                    {"role": "place", "value": "Italy", "reason": "cannot align"}
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    node = _node()
+    doc = type(
+        "Doc", (), {"doc_id": "d", "doc_text": "Alice attacked Rome.", "nodes": [node]}
+    )()
+
+    apply_predicted_arguments([doc], path)
+
+    assert node.arguments == {"participant": "Alice"}
+    assert node.metadata["argument_prediction_status"] == "partial"
+
+
+def test_predicted_arguments_reject_inconsistent_rejection_status(tmp_path) -> None:
+    path = tmp_path / "predictions.jsonl"
+    path.write_text(
+        json.dumps(
+            {
+                "doc_id": "d",
+                "mention_id": "d::m1",
+                "status": "rejected",
+                "roles": {},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    doc = type(
+        "Doc", (), {"doc_id": "d", "doc_text": "Alice attacked Rome.", "nodes": [_node()]}
+    )()
+
+    with pytest.raises(ValueError, match="rejection metadata mismatch"):
+        apply_predicted_arguments([doc], path)
 
 
 def test_predicted_arguments_require_one_valid_row_per_mention(tmp_path) -> None:

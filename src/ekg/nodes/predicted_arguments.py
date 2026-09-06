@@ -9,6 +9,7 @@ from pathlib import Path
 from ekg.core.schema import EvidenceSpan
 
 _ROLES = {"participant", "place"}
+_STATUSES = {"ok", "empty", "partial", "rejected"}
 
 
 def apply_predicted_arguments(docs: Sequence, path: str | Path) -> None:
@@ -32,9 +33,17 @@ def apply_predicted_arguments(docs: Sequence, path: str | Path) -> None:
     for doc in docs:
         for node in doc.nodes:
             row = by_id[node.event_id]
-            if row.get("doc_id") != doc.doc_id or row.get("status") not in {"ok", "empty"}:
+            status = row.get("status")
+            if row.get("doc_id") != doc.doc_id or status not in _STATUSES:
                 raise ValueError(f"invalid prediction status or doc_id for {node.event_id}")
             roles = row.get("roles") or {}
+            rejected = row.get("rejected") or []
+            if (status in {"partial", "rejected"}) != bool(rejected):
+                raise ValueError(f"prediction rejection metadata mismatch for {node.event_id}")
+            if status in {"ok", "partial"} and not roles:
+                raise ValueError(f"prediction status has no roles for {node.event_id}")
+            if status in {"empty", "rejected"} and roles:
+                raise ValueError(f"prediction status unexpectedly has roles for {node.event_id}")
             unknown = set(roles) - _ROLES
             if unknown:
                 raise ValueError(f"unknown predicted roles for {node.event_id}: {sorted(unknown)}")
@@ -63,3 +72,4 @@ def apply_predicted_arguments(docs: Sequence, path: str | Path) -> None:
             node.arguments = arguments
             node.argument_evidence = evidence
             node.metadata["argument_source"] = "predicted_mention_local"
+            node.metadata["argument_prediction_status"] = status

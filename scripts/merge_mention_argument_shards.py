@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 from predict_mention_arguments import _requests
@@ -100,6 +101,8 @@ def main() -> int:
         encoding="utf-8",
     )
     apply_predicted_arguments(docs, output)
+    status_counts = Counter(row["status"] for row in merged)
+    rejected_fillers = sum(len(row.get("rejected", [])) for row in merged)
     metadata = {
         "schema_version": "ekg.mention_arguments_merged.v1",
         "status": "complete",
@@ -107,6 +110,8 @@ def main() -> int:
         "model_id": model_ids.pop(),
         "documents": len(docs),
         "mentions": len(merged),
+        "prediction_status_counts": dict(sorted(status_counts.items())),
+        "rejected_fillers": rejected_fillers,
         "source_sha256": _sha256(args.ere),
         "manifest_sha256": {str(path): _sha256(path) for path in args.manifest},
         "predictions_sha256": _sha256(output),

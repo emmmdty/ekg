@@ -132,6 +132,46 @@ def test_predicted_argument_response_uses_nearest_verbatim_occurrence() -> None:
     assert roles["place"][0]["char_start"] == 48
 
 
+def test_predicted_argument_response_aligns_unique_punctuation_normalization() -> None:
+    module = _load("predict_mention_arguments")
+    sentence = 'The group "The Spinners," performed at the Classic.'
+
+    roles = module.parse_roles(
+        '{"participant": ["The Spinners"], "place": ["Classic"]}',
+        sentence,
+        sentence_start=0,
+        trigger_start=26,
+    )
+
+    assert roles["participant"] == [
+        {"text": "The Spinners", "char_start": 11, "char_end": 23}
+    ]
+
+
+def test_qwen_argument_response_records_partial_and_complete_rejections() -> None:
+    module = _load("predict_mention_arguments")
+
+    roles, rejected = module.parse_roles_with_rejections(
+        '{"participant": ["Alice", "the FA Cup"], "place": []}',
+        "Alice competed in London.",
+        sentence_start=10,
+        trigger_start=16,
+    )
+    invalid_roles, invalid = module.parse_roles_with_rejections(
+        "not JSON",
+        "Alice competed in London.",
+        sentence_start=10,
+        trigger_start=16,
+    )
+
+    assert roles == {
+        "participant": [{"text": "Alice", "char_start": 10, "char_end": 15}]
+    }
+    assert rejected[0]["value"] == "the FA Cup"
+    assert invalid_roles == {}
+    assert invalid[0]["role"] is None
+
+
 def test_nuextract_generation_uses_remote_code_continuations() -> None:
     module = _load("predict_mention_arguments")
 
