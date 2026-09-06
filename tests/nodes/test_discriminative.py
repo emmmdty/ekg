@@ -103,6 +103,18 @@ def test_argument_oracle_spans_are_deterministic_and_counted_per_mention() -> No
     assert counts == [2, 0]
 
 
+def test_argument_pooling_anchors_leading_whitespace_to_a_source_token() -> None:
+    node = _node("a", "attack", 0, 10)
+    node.argument_evidence = {
+        "place": [EvidenceSpan(doc_id="d", char_start=30, char_end=36, text=" Sabha")]
+    }
+
+    spans, counts = argument_spans_and_counts([node])
+
+    assert spans == [(31, 36)]
+    assert counts == [1]
+
+
 def test_argument_oracle_pooling_and_pair_layout_with_torch() -> None:
     torch = pytest.importorskip("torch")
     encoded = torch.tensor([[1.0, 3.0], [3.0, 5.0], [8.0, 10.0]])

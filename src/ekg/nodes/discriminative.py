@@ -142,21 +142,28 @@ def head_input_dim(hidden_size: int, components=()) -> int:
 def argument_spans_and_counts(
     nodes: Sequence[EventNode],
 ) -> tuple[list[tuple[int, int]], list[int]]:
-    """Deterministic gold argument spans and per-mention counts for the oracle.
+    """Deterministic token anchors and per-mention counts for argument pooling.
 
     MAVEN-Arg annotates arguments at event level and copies them to every mention
     of that event.  Consequently this is intentionally named an oracle: using it
     at inference exposes cluster-level annotation.  Sorting roles and spans keeps
-    the tensor layout stable across training and scoring.
+    the tensor layout stable across training and scoring. A predicted filler may
+    include source-verbatim leading whitespace; tokenizers do not map whitespace
+    to a token, so use its first non-whitespace source character as the anchor.
+    An all-whitespace predicted filler has no valid encoder representation.
     """
     spans: list[tuple[int, int]] = []
     counts: list[int] = []
     for node in nodes:
-        selected = sorted(
-            (span.char_start, span.char_end)
-            for role in sorted(node.argument_evidence)
-            for span in node.argument_evidence[role]
-        )
+        selected = []
+        for role in sorted(node.argument_evidence):
+            for span in node.argument_evidence[role]:
+                text = span.text
+                leading = len(text) - len(text.lstrip()) if text else 0
+                if text and leading == len(text):
+                    raise ValueError(f"{node.event_id}: argument filler is all whitespace")
+                selected.append((span.char_start + leading, span.char_end))
+        selected.sort()
         spans.extend(selected)
         counts.append(len(selected))
     return spans, counts
