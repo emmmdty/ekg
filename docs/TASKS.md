@@ -3,7 +3,8 @@
 **Input**: [`SPEC.md`](SPEC.md), [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)
 **Current executable scope**: R1 baseline/input closure, factuality OOF anchors and cross-artifact review. P1/A3.6 are
 closed; proposed-method implementation remains blocked.
-Proposed-method implementation tasks are intentionally not generated until R1 approves their design and contracts.
+Method-phase tasks are generated from the frozen R1 design contracts; they remain unchecked until their stated
+implementation and verification evidence exists.
 
 ## Format
 
@@ -83,18 +84,66 @@ Proposed-method implementation tasks are intentionally not generated until R1 ap
 **Checkpoint**: R1 PASS releases one method phase. Candidate mechanisms may be replaced during R1 if evidence rejects
 them; `SPEC.md` does not need amendment unless the outcome or quality requirement changes.
 
-## Later Phases — Generated after R1
+## Phase 4 — C5 identity method
 
-The following are dependency placeholders, not implementation tasks:
+- [ ] **T025 [RS-001]** Implement the C5 posterior/uncertainty sidecar, role-alignment residual, registered mediator,
+  bundle exporter and fail-fast ID/schema tests → targeted tests and the complete local gate pass.
+- [ ] **T026 [RS-001]** Materialize C5 immutable preflight and replay official-joint, annealed no-argument and Qwen3
+  argument-aware baselines → hashes, population and official coreference metrics independently validate.
+- [ ] **T027 [RS-001]** Run the registered seed-13 full/remove-core/hard-argument/permutation matrix after CPU/CUDA
+  smoke → only the frozen treatment varies and no gold event-level argument enters a deployable arm.
+- [ ] **T028 [RS-001]** Score the C5 pilot with official MUC/B3/CEAFe/BLANC and the false-merge mediator → apply every
+  single-seed gate without changing threshold, epoch, input or claim.
+- [ ] **T029 [RS-001]** If T028 passes, stop for explicit extra-seed authorization; if authorized, run matched seeds,
+  paired inference and one sealed final-valid evaluation → emit immutable pass/failed handoff either way.
 
-1. Identity method phase satisfying RS-001 and SC-002.
-2. Relation method phase satisfying RS-002 and SC-003.
-3. Factuality method phase satisfying RS-003 and SC-004.
-4. Same-instance consumer factorial satisfying RS-004 and SC-005.
-5. Reproduction/traceability acceptance satisfying SC-006 through SC-009.
+## Phase 5 — A4 relation method
 
-Each phase's tasks will be generated from its frozen design brief and grouped so its component study is independently
-testable. This prevents the task list from prematurely turning a current hypothesis into a permanent specification.
+- [ ] **T030 [RS-002]** Implement pair evidence selection, retained/removed counterfactual forwards, registered
+  mediator, exporter and full-candidate tests → targeted tests and the complete local gate pass.
+- [ ] **T031 [RS-002]** Materialize A4 immutable preflight and replay A3 fallback plus TacoERE adaptation → P1/A3/R1,
+  candidate, evaluator, baseline predictions and metrics hashes independently validate.
+- [ ] **T032 [RS-002]** Run the registered seed-13 full/remove-core/non-evidence/no-constraint matrix after CPU/CUDA
+  smoke → all arms preserve the complete candidate universe and differ only on registered variables.
+- [ ] **T033 [RS-002]** Score causal/subevent/temporal P/R/F1 and cross-sentence error mediator → apply primary,
+  recall, family guardrail and negative-control gates without post-hoc pruning or thresholds.
+- [ ] **T034 [RS-002]** If T033 passes, stop for explicit extra-seed authorization; if authorized, run matched seeds,
+  paired inference and one sealed final-valid evaluation → emit immutable pass/failed handoff either way.
+
+## Phase 6 — D4 factuality method
+
+- [ ] **T035 [RS-003]** Implement typed cues, factorized logits/recomposition, flat-head control, cue permutation,
+  registered confusion mediator and evidence exporter → targeted tests and complete local gate pass.
+- [ ] **T036 [RS-003]** Materialize D4 immutable preflight, revalidate accepted CLS/DMRoBERTa OOF predictions and
+  build the leakage-free supporting-word OOF baseline → fold, source, code and metric identities validate.
+- [ ] **T037 [RS-003]** Run seed-13 five-fold full/remove-core/permutation after CPU/CUDA smoke → each of 2,913
+  documents and 73,939 mentions receives exactly one evaluation prediction per arm with no fold leakage.
+- [ ] **T038 [RS-003]** Recompute pooled five-class/evidence metrics and registered confusions → apply primary,
+  rare-class, evidence and negative-control gates without substituting diagnostics for macro-F1.
+- [ ] **T039 [RS-003]** If T038 passes, stop for explicit extra-seed authorization; if authorized, run matched seeds,
+  paired inference and one sealed final-valid evaluation → emit immutable pass/failed handoff either way.
+
+## Phase 7 — E3 same-instance consumer factorial
+
+- [ ] **T040 [RS-004]** Freeze reconstructed query/candidate evaluation units and validate C5/A4/D4 bundle adapters →
+  all 24 base conditions have identical IDs and no gold proxy masquerades as predicted input.
+- [ ] **T041 [RS-004]** Reproduce random/frequency/text-only/graph consumers and same-backbone frozen/fine-tuned
+  controls → strong graph arm passes predictive validity before quality effects are inspected.
+- [ ] **T042 [RS-004]** Run graph/no-graph or gold/permuted dependence controls → at least one conclusion-bearing
+  consumer passes its registered graph-dependence test above its noise floor.
+- [ ] **T043 [RS-004]** Run the 2×2×3×2 same-instance factorial and paired document bootstrap with Holm correction →
+  fixed queries, candidates and checkpoints yield all registered marginal and interaction contrasts.
+- [ ] **T044 [RS-004]** Export ranks/raw metrics/status and choose the evidence-supported Ch4 claim boundary → positive,
+  null and negative effects remain in one immutable E3 handoff.
+
+## Phase 8 — H2 reproduction and thesis acceptance
+
+- [ ] **T045** Re-run full tests/lint/smoke plus cross-bundle ID/hash/evaluator checks at every promoted identity →
+  no missing instance, unchecked schema drift or unrecomputable metric remains.
+- [ ] **T046** Recompute each intended thesis table from immutable raw predictions and frozen evaluators → every entry
+  maps to one bundle/commit/config/checkpoint and all failed/null evidence identities remain visible.
+- [ ] **T047** Audit the four-chapter research-question closure and independent falsifiability → SC-001–SC-009 receive
+  pass/failed evidence without adding a new outcome or silently lowering the specification.
 
 ## Requirements Traceability
 
@@ -102,18 +151,18 @@ This matrix records coverage without pretending that future implementation detai
 
 | Specification coverage | Current task evidence | Later executable coverage |
 |---|---|---|
-| RS-001; SC-002 | T013, T016, T017, T020, T023, T024 | Identity method phase |
-| RS-002; SC-003 | T001–T011, T014, T018, T021, T023, T024 | Relation method phase |
-| RS-003; SC-004 | T015, T019, T022, T023, T024 | Factuality method phase |
-| RS-004; SC-005 | T023, T024 | Consumer-factorial phase |
-| FR-001–FR-005; SC-001 | T020–T024 | Three method phases + consumer phase |
-| FR-006, FR-012 | T013–T015, T020–T024 | Baseline fidelity tasks in each method phase |
-| FR-007; QR-001–QR-004 | T017–T022, T024 | Matched-seed, power, guardrail and inference tasks |
-| FR-008; QR-005 | T023, T024 | Consumer validity, graph-dependence and factorial tasks |
-| FR-009–FR-011; QR-007 | T001–T011, T023, T024 | Bundle/result/negative-evidence checks in every phase |
-| FR-013–FR-014 | T001–T005, T016, T023 | ID/schema tests at each stage boundary |
-| FR-015; QR-006 | T004, T005, T009, T024 | Local gates and run-authorization checks in every phase |
-| SC-006–SC-009 | T023, T024 | Final reproduction/traceability acceptance phase |
+| RS-001; SC-002 | T013, T016, T017, T020, T023–T029 | C5 |
+| RS-002; SC-003 | T001–T011, T014, T018, T021, T023–T024, T030–T034 | A4 |
+| RS-003; SC-004 | T015, T019, T022–T024, T035–T039 | D4 |
+| RS-004; SC-005 | T023–T024, T040–T044 | E3 |
+| FR-001–FR-005; SC-001 | T020–T024, T025–T044 | C5/A4/D4/E3 |
+| FR-006, FR-012 | T013–T015, T020–T024, T026, T031, T036 | Baseline fidelity |
+| FR-007; QR-001–QR-004 | T017–T024, T029, T034, T039 | Matched seeds, power and inference |
+| FR-008; QR-005 | T023–T024, T040–T044 | Consumer validity and factorial |
+| FR-009–FR-011; QR-007 | T001–T011, T023–T024, T025–T047 | Bundles and honest evidence |
+| FR-013–FR-014 | T001–T005, T016, T023, T025, T035, T040, T045 | ID/schema boundaries |
+| FR-015; QR-006 | T004–T005, T009, T024–T026, T030–T031, T035–T036, T040, T045 | Gates/auth |
+| SC-006–SC-009 | T023–T024, T040–T047 | Reproduction/traceability acceptance |
 
 T023 fails if any row has neither current evidence nor a generated later task. Placeholders may establish planned
 coverage, but they cannot be checked complete until the corresponding executable tasks and verification artifacts exist.
@@ -128,5 +177,7 @@ coverage, but they cannot be checked complete until the corresponding executable
 - T020–T022 depend on the corresponding literature and power tasks; they may run in parallel with one another.
 - T023 depends on T012–T022; each T024 contract depends on T023 and that method's prerequisites, not on a fixed chapter
   order.
-- Within future method phases, baseline reproduction and engineering tests may run in parallel only when they do not
+- T025/T030/T035 are independently runnable after T024; each following chapter task is sequential within that chapter.
+- T040 waits for C5/A4/D4 immutable handoffs or their explicit fallback component bundles; T045 waits for E3.
+- Within method phases, baseline reproduction and engineering tests may run in parallel only when they do not
   expose confirmatory results early or share mutable experimental state.

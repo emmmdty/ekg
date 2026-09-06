@@ -16,6 +16,15 @@ from ekg.core.protocol import load_manifest_ids
 from ekg.nodes.predicted_arguments import apply_predicted_arguments
 from ekg.relations.data.maven_ere import load_maven_ere
 
+SHARD_BINDING_FIELDS = (
+    "backend",
+    "model_id",
+    "model_files",
+    "source_sha256",
+    "manifest_sha256",
+    "mentions_in_manifests",
+)
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -33,6 +42,14 @@ def ordered_rows(rows: list[dict], expected_ids: list[str]) -> list[dict]:
     if missing or extra:
         raise ValueError(f"missing predictions={len(missing)} extra predictions={len(extra)}")
     return [by_id[mention_id] for mention_id in expected_ids]
+
+
+def shard_binding(metadata: dict) -> dict:
+    """Return fields that must be identical across a deterministic shard set."""
+    missing = [field for field in SHARD_BINDING_FIELDS if field not in metadata]
+    if missing:
+        raise ValueError(f"shard metadata missing binding fields: {missing}")
+    return {field: metadata[field] for field in SHARD_BINDING_FIELDS}
 
 
 def main() -> int:
@@ -59,6 +76,7 @@ def main() -> int:
     rows = []
     model_ids = set()
     shard_indices = set()
+    common_binding = None
     expected_count = len(args.shards)
     for prediction_path in args.shards:
         metadata_path = prediction_path.parent / "run_metadata.json"
@@ -73,6 +91,11 @@ def main() -> int:
             raise ValueError(f"shard prediction hash mismatch: {prediction_path}")
         model_ids.add(metadata.get("model_id"))
         shard_indices.add(metadata.get("shard_index"))
+        binding = shard_binding(metadata)
+        if common_binding is None:
+            common_binding = binding
+        elif binding != common_binding:
+            raise ValueError(f"shard model/input binding mismatch: {prediction_path}")
         shard_rows = [
             json.loads(line)
             for line in prediction_path.read_text(encoding="utf-8").splitlines()
@@ -108,6 +131,8 @@ def main() -> int:
         "status": "complete",
         "command_argv": list(sys.argv),
         "model_id": model_ids.pop(),
+        "model_files": common_binding["model_files"],
+        "backend": common_binding["backend"],
         "documents": len(docs),
         "mentions": len(merged),
         "prediction_status_counts": dict(sorted(status_counts.items())),

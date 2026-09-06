@@ -62,6 +62,7 @@ def cluster_sentence_ids(
     """TacoERE-style deterministic sentence clusters from text and event triggers."""
     if not sentences:
         return ()
+    import numpy as np
     from sklearn.cluster import KMeans
     from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -71,7 +72,13 @@ def cluster_sentence_ids(
         for index, sentence in enumerate(sentences)
     ]
     matrix = TfidfVectorizer(stop_words="english").fit_transform(enriched)
-    labels = KMeans(n_clusters=k, random_state=seed, n_init=10).fit_predict(matrix)
+    # Supplying the seeded initial centers avoids relying on a parallel random
+    # initializer whose tie resolution differs across sklearn/OpenMP builds.
+    initial_indices = np.random.RandomState(seed).choice(len(sentences), size=k, replace=False)
+    initial_centers = matrix[initial_indices].toarray()
+    labels = KMeans(
+        n_clusters=k, init=initial_centers, n_init=1, algorithm="lloyd"
+    ).fit_predict(matrix)
     # KMeans label numbers are arbitrary. Canonicalize by each cluster's first sentence.
     order = {
         label: rank

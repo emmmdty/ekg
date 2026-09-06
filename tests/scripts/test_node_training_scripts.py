@@ -330,6 +330,23 @@ def test_mention_argument_shard_merge_requires_exact_ids_and_order() -> None:
         module.ordered_rows(rows[:1], ["m1", "m2"])
 
 
+def test_mention_argument_shard_binding_covers_model_and_inputs() -> None:
+    module = _load("merge_mention_argument_shards")
+    metadata = {
+        "backend": "qwen3",
+        "model_id": "Qwen/Qwen3-8B@revision",
+        "model_files": {"config.json": {"sha256": "a" * 64}},
+        "source_sha256": "b" * 64,
+        "manifest_sha256": {"train.json": "c" * 64},
+        "mentions_in_manifests": 73939,
+        "shard_index": 0,
+    }
+
+    assert module.shard_binding(metadata) == {
+        field: metadata[field] for field in module.SHARD_BINDING_FIELDS
+    }
+
+
 def test_oneke_snapshot_validation_checks_size_and_hash(tmp_path) -> None:
     module = _load("predict_mention_arguments_oneke")
     model_file = tmp_path / "model.bin"
