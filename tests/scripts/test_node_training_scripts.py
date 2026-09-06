@@ -345,6 +345,9 @@ def test_mention_argument_shard_binding_covers_model_and_inputs() -> None:
     assert module.shard_binding(metadata) == {
         field: metadata[field] for field in module.SHARD_BINDING_FIELDS
     }
+    del metadata["model_files"]
+    with pytest.raises(ValueError, match="missing binding fields"):
+        module.shard_binding(metadata)
 
 
 def test_oneke_snapshot_validation_checks_size_and_hash(tmp_path) -> None:
