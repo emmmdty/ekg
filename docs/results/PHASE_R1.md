@@ -1,6 +1,6 @@
 # Phase R1 · 方法设计准入审计
 
-> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
+> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
 > `preparation_partial_blocked`，没有方法获得 GPU pilot 准入。
 
 ## 1. 产物与代码身份
@@ -15,7 +15,9 @@
 - `design_briefs.json`：`3dfbb8810fa041983f246d7aac1a251b0fc240583582a48fd03027228c570731`
   ⚠️ **已两次改变**：先在 2026-09-06 未同步地漂移到 `d5d6a61c…7986`（见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)，
   原字节已存档为 `audit/design_briefs.drift-20260906T1527.json`），再由 E3 写入 T021 关系 brief 后成为
-  `f421436ded8c5bb33f2c5bcfb8c586f75154eca9b6dc701a4f8a1142a3f49f6c`（见 [§12](#12-e3--t021-ch2-关系因果-design-brief2026-09-07)）。
+  `f421436d…9f6c`，再由 §13 的作者裁决修订 roster 与 promotion 后成为
+  `81ad43a3fdce8b1cd951bf0fa2570c521ff3979e2a1caa51c48d0a96c8f9a382`
+  （见 [§12](#12-e3--t021-ch2-关系因果-design-brief2026-09-07)、[§13](#13-relation-baseline-门的重新界定作者裁决2026-09-07)）。
   `protocol.json` **未**随之重冻结，漂移裁决仍归 E5；
 - `factuality_cv/factuality_cv.json`：
   `3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4`；
@@ -25,8 +27,9 @@
 - `protocol.json`：`fed98d2a20e281d1d037eaf46e523e17fb9a24358a0c98e3b6f456a170f619fc`
   （随上一条重算；旧值 `cc80e066…75dc`。R1 的 protocol.json 没有被 A3/P1 或任何下游产物引用，
   重冻结不影响其他信任根）；
-- `status.json`：`6f26538e8372607321672f0b1fee6e153c1858a9f94fbb6d8226ccbaa8cf623c`
-  （E3 加入 `relation_design_brief` 并把 T021 移入 `completed_tasks` / `accepted_not_promoted`，
+- `status.json`：`0dcd7d988ce70239eee5c043c1f85d193a709cc3a801cb13076db05c7e0b6f42`
+  （§13 加入 `relation_baseline_gate_decision` 并重写 `blocking_gates.relation`，前值 `6f26538e…623c`；
+  再往前 E3 加入 `relation_design_brief` 并把 T021 移入 `completed_tasks` / `accepted_not_promoted`，
   E3 前值 `904cb5fc…ce37d`；再往前：由 E2 加入 `llmere_feasibility`（`c6ee4826…ee5e`），由 §10/§11 加入
   `degree_requirements_correction` 与 `known_inconsistencies`；E1 值 `099b7aaf…30e4`，
   再前一版 `24c2aac4…87af07`。`protocol.json` 的 artifacts 哈希集合不含 `status.json`，无身份漂移）。
@@ -580,5 +583,47 @@ QR-007 中介改善而主指标不胜出时保留为负结果、不促章。
 - **(b)** 排 LLMERE 适配：先清 [§9.5](#95-裁决与阻断点) 的 B1–B4，代价是 4090 整机数天级占用 + 一个
   Meta 许可决定。
 
-本 brief 不替作者做这个决定；在决定之前 relation baseline 门维持 `blocked`，**A4 phase contract 不得冻结**。
+**该问题已于同日由作者裁决为 (b) 的缩小并行版本，见 [§13](#13-relation-baseline-门的重新界定作者裁决2026-09-07)**；
+brief 的 roster 与 promotion 已按裁决修订（`amendments[0]` 保留被取代的原文，修订发生在任何 A4 数字存在之前）。
 本节没有启动任何 GPU 任务：E3 全程是文档与静态核查。
+
+## 13. relation baseline 门的重新界定（作者裁决，2026-09-07）
+
+### 13.1 为什么改门而不是改章
+
+Ch2 的近期方法逐个核过：RESIJ 无公开代码、2025 two-stage（RepL4NLP）无公开代码、KnowQA 仓库审计日 404
+且是 sampled + gold-argument 设定、TacoERE 无公开代码、LLMERE 有方法本体但**全历史 5 个 commit 无 trainer**
+（[§9.1](#91-仓库实际提供什么方法本体有训练没有)）。**没有任何一个近期 MAVEN-ERE 方法发布了可跑的官方训练
+代码**，只有 2022 的 official joint 有。因此「第二个**官方实现**的同协议 baseline」这道门，投入再多 GPU 也
+不可能通过——这是我们自己写的运行口径出了问题，不是章的质量出了问题。
+
+裁决：回到 SPEC `QR-001` 本身的措辞——**第二个不同方法族 · 由我们在冻结协议下跑通 · fidelity 缺口写明 ·
+且不弱于冻结主锚**。`SPEC.md` 无需修订（它本来就是这么写的），改的只是我们自己更严的运行措辞。
+
+按新措辞门**仍然打开**：`taco-s13-r3` 是不同方法族、同口径，但 causal **32.01 < 主锚 33.17**，赢它由赢主锚
+蕴含，不构成对抗压力。**只接受「主锚 + 透明适配」= 拿稻草人当对手，不采纳。**
+
+### 13.2 采纳的方案：LLMERE-causal，缩小 + 并行（队列 E8）
+
+| 项 | 决定 |
+|---|---|
+| 范围 | **先只跑 causal**：训练 48,365 条、internal-dev 推理 11,149 次，约为 joint（199,757 / 49,156）的 1/4。subevent/temporal 是**我们方法的护栏**，不是 baseline 的义务；`official_single` 是 causal-only baseline 的既有先例 |
+| B2 权重 | **不需要作者接受 Meta 许可**：用 E2 实测返回 200 的未设门镜像，权重 SHA-256 作为**披露的替换**记录 |
+| B1 / B3 / B4 | 由我们按论文散文写 LLaMA-Factory LoRA SFT 配置（**标注透明适配**）；GPU 机上单开 venv、单独记 hash；写 `generated_predictions.jsonl` → 官方提交格式的适配器，用**我们冻结的 `evaluate.py`** 打分 |
+| 配方 | LoRA r64 / lr 2e-4 / cosine / 3 epoch / max len 2048 / seed 13；converter 侧沿用上游 seed 42 的确定性转换，**逐字不改**（含 `convert_causal.py` 实际 neg = 1.5×pos 与论文 1:1 不符这一条，照实保留、不"修好"） |
+| 排程 | **与文档队列并行，不排在 A4 pilot 前面**。pilot 只吃一张卡而 4090 有四张；第二 baseline 只在**确认性 promotion** 时才生效 |
+| 对 T024 的影响 | A4 契约**照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化（upstream commit、converter 身份、backbone、LoRA 配置、评分口径），**只有它的数字 pending**。这不违反 T024 的"baselines 必须 exact"——主锚的数字同样先于契约存在 |
+
+**必须披露的天花板**：LLMERE 的 k=30 事件分区使**跨分区的对按构造不可能被生成**。这些对在评分时计为漏报，
+因此比较仍然公平，但天花板落在 baseline 自己身上，不是落在评测上。这条要写进它的每一次报告。
+
+### 13.3 接受的风险与明确不做的事
+
+**接受的风险**：若 LLMERE-causal 在我们轴上高于主锚，Ch2 的及格线就抬高，A4 可能失败。**这正是现在跑它的
+理由——九月发现比写作时发现便宜。** 另外 8B LoRA 对 RoBERTa-base 存在 backbone 尺度错配；真输了，诚实的
+结论是"A4 的机制必须在可比规模上证明，或移植到 LLM 设定"，那是结果不是灾难。
+
+**明确不做**：把 LLMERE 已发布的预测转成官方格式、用我们的 `evaluate.py` 在 710 篇 official valid 上重打分。
+它便宜且诱人，但 official valid 就是封存的 final-valid，会毁掉 [§2](#2-跨数据身份审计) 那句干净的
+"没有计算或查看关系/事实性指标"；而其自写评测器对 causal 的定义（正类 micro、排除 TIMEX、全序对枚举）
+本来就接近组织方口径，重打分的信息增量抵不上这笔账。

@@ -9,7 +9,7 @@
 | 项 | 值 |
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
-| 当前队列 | 任务 E.2，共 E1–E7（E1、E2、E3 已 `done`） |
+| 当前队列 | 任务 E.2，共 E1–E8（E1、E2、E3 已 `done`；**E8 可与 E4–E7 并行**） |
 | **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E4：T020 Ch1 因果 design brief**） |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
@@ -188,7 +188,7 @@ baseline；Ch3 的 291-document 设计 underpowered，但预冻结五折 OOF 已
    才能生成 T024 D4 phase contract；未冻结前不启动 proposed GPU pilot；
 2. Ch1：继续寻找可忠实运行的 mention-local argument-aware baseline/checkpoint；没有 checkpoint 时只做
    adapter 与 fixture，不把跨 ontology 重训冒充官方复现；
-3. Ch2：T021 brief 已 PASS；仍须取得第二个独立近期同协议强 baseline（或由作者接受「主锚 + 透明适配」并披露 fidelity 缺口），保持完整候选全集；
+3. Ch2：T021 brief 已 PASS；门已按 §E.1a 重新界定，第二个不同方法族由 **E8 的 LLMERE-causal**透明适配承担，保持完整候选全集；
 4. 对满足 blocker 的剩余 brief 做 T020/T021 审查，再做 T023 跨产物一致性审计；只有通过者才能生成 T024
    phase contract。继续不看 final-valid、不写 proposed 训练代码。
 
@@ -229,6 +229,8 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
    `.worktrees/r1-t023-t024` 与已并入 main 的 `feat/r1-t023-t024`。）
 5. **活动任务独占产物**：持有活动任务的代理独占该任务涉及的全部结果页与 `runs/` 目录；
    另一代理此时**只读**，不写任何 `results/`、`runs/`、`TASKS.md`。
+   *唯一例外（2026-09-07 作者裁决）*：E8 的长训练只写 `baselines/relation/llmere-causal-*` 这一个
+   namespace，持有队列的代理**可以先把它挂到后台再继续做文档行**；回填结果页时才需要重新独占。
 6. **未完成就交接**：把已做到哪一步、卡在什么证据上写进本表该行，状态标 `wip`，不留只有自己知道的上下文。
 
 #### E.1 联网核实结论（2026-09-07，影响下面的排期）
@@ -252,6 +254,28 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
   这条赛道当前最干净。结合"Ch3 三个 blocker 全清、pooled power PASS、T022 已过"，
   **D4 是三章里最该先放行 pilot 的一章**。
 
+#### E.1a 作者裁决（2026-09-07）：relation baseline 门重新界定，LLMERE 缩小并行
+
+E3 把 QR-001 的名单问题交给作者后，作者当日裁决**采纳 (b) 的缩小并行版本**。要点：
+
+1. **改门，不改章**：近期 MAVEN-ERE 方法**无一发布可跑的官方训练代码**（RESIJ / 2025 two-stage / KnowQA /
+   TacoERE / LLMERE 全部缺），所以「第二个**官方实现**」这道门投入再多 GPU 也过不去——是我们自己的运行口径
+   写错了。改回 SPEC `QR-001` 本身的措辞：**第二个不同方法族 · 我们在冻结协议下跑通 · fidelity 缺口写明 ·
+   且不弱于主锚**。`SPEC.md` 不修订。
+2. **不接受稻草人**：`taco-s13-r3` 只有 causal 32.01 < 主锚 33.17，赢它由赢主锚蕴含。只接受
+   「主锚 + 透明适配」被否决。
+3. **LLMERE 缩小成 causal-only**：48,365 训练 / 11,149 推理，约 joint 的 1/4；subevent/temporal 是**我们方法的
+   护栏**而非 baseline 的义务（`official_single` 是既有先例）。**B2 不需要 Meta 许可**——用未设门镜像 + 披露
+   权重 SHA-256。
+4. **并行，不串行**：A4 pilot 只吃一张卡而 4090 有四张；第二 baseline 只在确认性 promotion 时生效，
+   所以 **T024 照常冻结 A4 契约**，LLMERE-causal 以"已规格化、数字 pending"入 roster。
+5. **接受的风险**：LLMERE 若高于主锚，Ch2 及格线抬高、A4 可能失败——**这正是现在跑它的理由**。
+6. **明确不做**：拿 LLMERE 已发布的预测在 710 篇 official valid 上用我们的评测器重打分（那是封存的
+   final-valid，不值这笔账）。
+
+完整裁决与规格见 [`results/PHASE_R1.md` §13](results/PHASE_R1.md)；brief 的 roster/promotion 已按此修订并在
+`amendments[0]` 保留原文（修订发生在任何 A4 数字存在之前）。
+
 #### E.2 本周队列（9/7 – 9/9；写代码由 Claude/Codex 承担，故时间成本压在决策与 GPU 上）
 
 | 序 | 任务 | 前置 | 完成判定 | 状态 | commit |
@@ -261,8 +285,9 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
 | E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | done | `d584ca8` |
 | E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | todo | — |
 | E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾。**已有两条确凿输入证据**：`design_briefs.json` 与 `literature_matrix.json` 在 2026-09-06 15:27 被改动却没同步 `protocol.json`，哈希已漂移，且 matrix 把 relation/identity 门写成 `pass`（与自身 `global_decision`、`status.json`、结果页、E1 预注册判断四处矛盾），briefs 把三份 brief 全标 `accepted`。**必须先查明 09-06 改动来源，不得先改哈希让审计变绿**；漂移字节已由 E3 存档在 `runs/stages/R1/r1-v61-20260904/audit/design_briefs.drift-20260906T1527.json`，`briefs.relation` 已被 E3 的正式 T021 审查取代、`briefs.identity` 仍是 09-06 原样；详见 `results/PHASE_R1.md` §11 与 §11.1 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试；两条漂移各有裁决 | todo | — |
-| E6 | T024 冻结 C5/A4/D4 phase contract | E5 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash | todo | — |
+| E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符 | todo | — |
 | E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | todo | — |
+| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | todo | — |
 
 E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 KMeans 初始化，全量实测 2,913 篇里
 2,743 篇聚类归属改变，**是确定性的代码致输入变化，不是 GPU 非确定性**；旧初始化器还在同进程内对 5 篇
@@ -304,10 +329,17 @@ LLMERE 生成式范式 · CovEReD 反事实数据集 · SURE-RAG 选择性弃答
 
 本周真实 GPU 需求只有 E1 的一次评分（已于 2026-09-07 在 4090 GPU1 跑完，约 1 分钟）。E2 只做静态核查
 不训练，E3（已完成，未用 GPU）–E7 全是文档与审计。
-因此 **9/7–9/9 期间 4090 大面积空闲是正常的**；卡是公用资源，不得为了"看起来在跑"启动无准入的训练。
-真实的大 GPU 需求在下周：T024 放行后的第一个 seed-13 pilot（按 E.1 的证据，优先 D4）。
-LLMERE 同协议重跑**暂不排期**——E2 裁定为 `conditionally_runnable` 但有四条未清阻断点，且是 4090 整机
-数天级占用，须先清阻断点并取得作者同意。5090 单卡有既有 Qwen 服务约 17 GB，使用前仍须逐次取得作者授权。
+卡是公用资源，不得为了"看起来在跑"启动无准入的训练；但**卡空着也不要串行**。
+
+**已排期的两笔真实 GPU 需求**（作者 2026-09-07 已同意，见 §E.1a）：
+
+1. **E8 · LLMERE-causal**：现在就可以排，不必等 E4–E7。缩小到 causal-only 后约为原估计的 1/4，
+   仍是 4090 上的长任务；`setsid nohup` + `python -u` + 独立日志，一条 ssh 只发一个后台任务，
+   启动前按 §5 展示完整命令、cwd 与预期产物。权重走未设门镜像并记 SHA-256，**不必等 Meta 许可**。
+2. **T024 放行后的第一个 seed-13 pilot**（按 E.1 的证据优先 D4）：只吃一张卡，与 E8 **并行**，
+   不互相排队。
+
+5090 单卡有既有 Qwen 服务约 17 GB，使用前仍须逐次取得作者授权。多种子始终另行授权。
 
 ## 4. R1 后的候选方向：不是固定答案
 
