@@ -59,8 +59,8 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
   `277b36f`，collector 已提交到 `6532264`；最近代码门 **520 passed / 24 skipped**、ruff 0、smoke OK；
 - 4090：A3.6 与 Ch3 OOF 进程均已 GONE；E8 的专用 CUDA venv、固定 LLaMA-Factory 与约 15GB 的未设门
   Llama-3-8B 镜像权重已落在 `llmere-causal-s13` namespace，均未搬运也未污染项目 `.venv`。模型下载虽有
-  Xet 自动续传，最终完整；准备阶段因远端缺少 R1 protocol fail-fast，尚未 conversion/SFT/推理/评分，GPU0–3
-  当前均空闲。按 `HANDOFF.md` E8 同步并双端校验该小型协议文件后，从严格的续跑脚本继续，checkpoint 与 OOF
+  Xet 自动续传，最终完整；R1 protocol 已双端验 SHA 后，E8 PID `1566260` 已完成上游/split/converter 准备并
+  在 GPU0 运行 seed-13 LoRA SFT（18,138 steps）。GPU1–3 空闲；尚未产生推理、评分或指标。checkpoint 与 OOF
   既有产物仍留在各自远端 run root；
 - 5090：可连接；既有 Qwen 与其他 Python 服务保持运行，使用前重新查询动态显存占用，服务不动、
   checkpoint 不搬。R1 尚未放行 proposed pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡
