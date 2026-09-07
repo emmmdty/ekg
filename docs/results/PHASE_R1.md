@@ -17,7 +17,8 @@
 - `protocol/degree_requirements.json`：
   `ceeb581bc1ff2c22ea0dd94811c892d0c91a4e4bca8c3c7aedfd4c5f6f2da47e`；
 - `protocol.json`：`cc80e066deb6b5ff735e15defe54ddb9c68384a626685cc516897440543575dc`；
-- `status.json`：`24c2aac4ff31bba5997461b24e7a70c223d101c2369514b9c3b25963e887af07`。
+- `status.json`：`099b7aaf1ae22394f2befead5779fc243b831a811fca42f267ffa1428afe30e4`
+  （E1 改写 relation 门与 next_actions 并统一为仓库 JSON 写法 `indent=2, sort_keys`；旧值 `24c2aac4…87af07`。`protocol.json` 的 artifacts 哈希集合不含 `status.json`，无身份漂移）。
 
 代码门：489 passed / 24 expected skips，ruff 0，`ekg-smoke` OK。
 
@@ -133,7 +134,9 @@ Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
   MAVEN event type 会成为新的未经验证 adapter，不能冒充官方 baseline。RESIJ 未取得官方代码；identity
   baseline/input 门仍 `blocked`。
 - Ch2：official joint 可运行，但 2025 two-stage ERE、RESIJ、TacoERE 未取得官方实现，KnowQA 作者 URL
-  当前不可得且是 sampled/gold-argument setting；relation baseline 门 `blocked`。
+  当前不可得且是 sampled/gold-argument setting；relation baseline 门 `blocked`。TacoERE 无公开代码这一条
+  已由自建**透明适配**档补上同协议对照，正式档、选档预注册与官方三族 F1 见 [§8](#8-e1--ch2-tacoere-适配档的选档预注册)；
+  透明适配不算官方复现，故不关闭该门。
 - Ch3：MAVEN-FACT 官方代码可得，但原 trainer 每 epoch 用 `test_data` 选 best、best checkpoint 保存被注释，且
   `RawBert` 调用签名不一致；本轮以透明 protocol patch 完成了泄漏隔离的 RoBERTa+CLS / DMRoBERTa 五折
   OOF。ModaFact 是意大利语 mT5-XXL 的不同任务，只作结构化对照。baseline 与 power blocker 已解除，但
@@ -229,14 +232,15 @@ NuExtract 的 remote-code/generation compatibility 两轮修复后仍不能完�
 该函数的输出决定 TacoERE 把哪些句子编进同一段上下文（`cluster_pair_groups` → `pair_trigger_embeddings`），
 因此**换的是编码器输入本身**。CPU 复算（脚本
 `runs/stages/R1/r1-v61-20260904/baselines/relation/audit_cluster_context_divergence.py`，SHA-256
-`51faffc6f6581b756a84cf0eb808fcf831ef4cbaadee4c4b70a3e9034ea024f2`）在前 200 个训练文档上实测：
+`51faffc6f6581b756a84cf0eb808fcf831ef4cbaadee4c4b70a3e9034ea024f2`；结果
+`cluster_context_divergence.json`，SHA-256 `c347f6fa200666fb0fceeb5ecd5fbdab9b8b7e3a4dc96913e322ef0836d5ba39`；
+sklearn 1.7.2 / numpy 2.2.6）在 `maven_ere/train.jsonl` 全部 2,913 篇上实测：
 
-| 项 | 值 |
-|---|---:|
-| 检查文档数 | 200 |
-| 聚类结果改变的文档数 | 196 |
-| 改变归属的句子数 / 总句子数 | 1,414 / 2,776 |
-| 旧代码在同一进程内自相矛盾的文档数 | 1 |
+| 项 | 全量 2,913 篇 | 预注册时的 200 篇 pilot |
+|---|---:|---:|
+| 聚类结果改变的文档数 | **2,743**（94.2%） | 196 |
+| 改变归属的句子数 / 总句子数 | **15,627 / 32,431**（48.2%） | 1,414 / 2,776 |
+| 旧代码在同一进程内自相矛盾的文档数 | **5** | 1 |
 
 结论：r2/r3 的差距是**确定性的代码致输入变化**，GPU 非确定性不是主因；且旧初始化器连同进程内自洽
 都做不到，`taco-s13-r2` 在当前 HEAD 上无法复现。
@@ -259,3 +263,65 @@ NuExtract 的 remote-code/generation compatibility 两轮修复后仍不能完�
 `src/ekg/relations/extractor/supervised.py`。这就是两档携带同一 trainer hash 却构造出不同编码器输入的原因。
 把 relation extractor 模块加进哈希集合不会改动任何既有 hash，但改动 trainer 本身会打断 P1 r15 的
 external evidence hash（`taco-s13` 首跑即因此 fail-fast），须单独排期。
+
+### 8.4 正式档 `taco-s13-r3` 的官方三族 F1（2026-09-07，gpu-4090 GPU1）
+
+评分命令（cwd `/data/TJK/ekg`，服务器 HEAD `91e818e` = 预注册提交，相对 `95e37bd` 只改 docs）：
+
+```bash
+CUDA_VISIBLE_DEVICES=1 setsid nohup .venv/bin/python -u scripts/score_a3_arm.py \
+  --run-dir runs/stages/R1/r1-v61-baseline-closure-r3/ch2/taco-s13-r3 \
+  --gold runs/stages/A3/a3-v6-recipe-accounting-r16/preflight/data/MAVEN_ERE/valid.jsonl \
+  --candidate-digest 15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910 \
+  --per-family-checkpoints > logs/r1_taco_s13_r3_score.log 2>&1 &
+```
+
+口径与 A3.6 四臂逐条相同：internal-dev 291 篇 / 7,195 mentions / 234,870 pairs / 1,719 TIMEX，候选
+digest `15a3b1a5…10910`、evaluator `32919e86…59598`、gold `bb8c6b48…ce7e3`、source lock
+`d0d7d848…89231`；`final_valid_accessed=false`、`device=cuda`、`confirmation_eligible=true`。
+
+| 系统 | causal P / R / F1 | subevent P / R / F1 | temporal P / R / F1 |
+|---|---:|---:|---:|
+| promotion / guardrail | — / — / **>33.17** | — / — / **≥28.75** | — / — / **≥50.63** |
+| **`taco-s13-r3`（正式档）** | 23.48 / 50.25 / **32.01** | 19.46 / 55.39 / **28.80** | 43.81 / 62.42 / **51.48** |
+| `taco-s13-r2`（superseded） | 23.16 / 55.40 / **32.67** | 22.04 / 47.17 / **30.04** | 43.11 / 63.32 / **51.30** |
+| 冻结主锚 official_joint | 34.37 / 32.05 / **33.17** | — / — / 29.75 | — / — / 51.63 |
+
+精确值（正式档）：causal `32.00956302297782`、subevent `28.798318346373936`、
+temporal `51.48427815831971`。
+
+判定：**causal 32.01 低于主锚 33.17，未过 promotion 门**；subevent 28.80 与 temporal 51.48 只是压线
+过护栏（余量 +0.05 / +0.85）。TacoERE 式聚类上下文同样没有把 Ch2 抬过主锚，与 A3 的 `failed` 结论一致。
+
+**预注册规则选中的是三族里 causal 与 subevent 更低的那一档**（−0.66 / −1.24），这本身就是规则未被分数
+驱动的证据。
+
+⚠️ 同次评分的共指栏 MUC 0.00 / B³ 95.85 / CEAFe 94.21 / BLANC 49.69 按构造必然（本档不训练 coref 头，
+`n_pred=0`），**不得作为 Ch1 数字引用**。
+
+⚠️ **不存在单变量的 document-context 双胞胎**：`taco-s13-r3` 是 rates 1/1/1 + coref aux 0 + 逐族选模 +
+taco 上下文，而 A3.6 的 `local recipe 1/1/1` 是同 rates 但 **macro 选模 + document 上下文**。两者差两个轴，
+因此**不得**把差值写成"taco 上下文的增益"。
+
+### 8.5 对 relation baseline 门的影响
+
+TacoERE 至今没有公开代码，`taco-s13-r3` 是我们自建的**透明适配**，不是官方复现，因此它
+**不关闭**"第二个独立近期同协议 runnable baseline"这道门。它的定位是：与主锚同口径的可运行同协议
+对照、A4 的 error-profile 输入，以及 causal 高召回/低精度工作点的又一个证据点。官方实现方向由队列
+E2（LLMERE）裁决。
+
+本地产物：`runs/stages/R1/r1-v61-20260904/baselines/relation/taco-s13-r3/`，与
+`gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-baseline-closure-r3/ch2/taco-s13-r3/` 双端 SHA-256 一致：
+
+| 文件 | SHA-256 |
+|---|---|
+| `official_metrics.json` | `4bf12d77e864dd68b4afe419d140714d6dfa1fc7836f8ef9dea88519e31f0cfb` |
+| `official_predictions.jsonl` | `d410fdeb3b3308f7b8bb682eff5a1effefb24da6d6571e31f782a3f72a1ed911` |
+| `run_metadata.json` | `a611e3bfbc28a0717b79692529f31e78d05682532dfa373c9f11f0a2b9e85b57` |
+| `score.log` | `b3e2c11b962bc409f00b45f8b65eb1a5422a1e85f7e82d4febc78ee28fac5a08` |
+| `train.log` | `506d75141a6a046e78e69cb45bb04a797cb944f861508720b2c83945db6da30f` |
+| `native_metrics.causal.json` | `f46ba392a9da5e2353e9eeaa143f357812b33de00200e8dc8747318d81e757ad` |
+| `native_metrics.subevent.json` | `0bbe2f86b95ae785c2a52b5921f6c62609e28821ebd944c30f91d63123abd0f1` |
+| `native_metrics.temporal.json` | `e0d45f4e7702bbc0022375607907a06e6020538fa79b8e341ab862d6058675fe` |
+
+checkpoint 留在 4090 原地，未跨机搬运。
