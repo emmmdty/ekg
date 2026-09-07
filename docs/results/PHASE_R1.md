@@ -206,3 +206,56 @@ tokenizer token 而 fail-fast；r2 只在 encoder anchor 处转向该 span 的�
 NuExtract 的 remote-code/generation compatibility 两轮修复后仍不能完成预测，OneKE 的 ModelScope snapshot
 只完成部分下载，因此均未进入 deployable baseline。T020 的 runnable input/baseline blocker 由 Qwen artifact
 关闭；C5 proposed pilot 仍必须等待 T023/T024。
+
+## 8. E1 · Ch2 TacoERE 适配档的选档预注册
+
+**本节在 `taco-s13-r3` 被评分之前提交**，提交本身即为预注册时间戳。产物：
+`runs/stages/R1/r1-v61-20260904/baselines/relation/checkpoint_selection_rule.json`
+（SHA-256 `7eca646f38dbd4e77179e05b24c92f03007ed0a52ef93b3586eb968263c59abe`）。
+
+### 8.1 两档差异的来源：代码身份，不是 GPU 非确定性
+
+`taco-s13-r2` 与 `taco-s13-r3` 的 `configuration`、`protocol_binding` 与 `hashes.trainer`
+（`5c513bdb…d0f2c6`）**逐字节相同**，dev 曲线却不同（`best_epoch` 5 vs 7；causal by-family
+`best_epoch` 5 vs 40）。差异来自服务器端的代码身份切换：
+
+| 档 | 训练时服务器 HEAD | 含 `3f02640` | 训练窗口 |
+|---|---|---|---|
+| `taco-s13-r2` | `d8fcd30` | 否 | 2026-09-05 23:56 → 2026-09-06 14:18 |
+| `taco-s13-r3` | `e796182` | 是 | 2026-09-06 14:27 → 21:20（`rc=0`） |
+
+`3f02640` 改的是 `src/ekg/relations/extractor/supervised.py::cluster_sentence_ids`：把
+`KMeans(n_init=10, random_state=seed)` 换成显式播种初始中心 + `n_init=1` + `algorithm="lloyd"`。
+该函数的输出决定 TacoERE 把哪些句子编进同一段上下文（`cluster_pair_groups` → `pair_trigger_embeddings`），
+因此**换的是编码器输入本身**。CPU 复算（脚本
+`runs/stages/R1/r1-v61-20260904/baselines/relation/audit_cluster_context_divergence.py`，SHA-256
+`51faffc6f6581b756a84cf0eb808fcf831ef4cbaadee4c4b70a3e9034ea024f2`）在前 200 个训练文档上实测：
+
+| 项 | 值 |
+|---|---:|
+| 检查文档数 | 200 |
+| 聚类结果改变的文档数 | 196 |
+| 改变归属的句子数 / 总句子数 | 1,414 / 2,776 |
+| 旧代码在同一进程内自相矛盾的文档数 | 1 |
+
+结论：r2/r3 的差距是**确定性的代码致输入变化**，GPU 非确定性不是主因；且旧初始化器连同进程内自洽
+都做不到，`taco-s13-r2` 在当前 HEAD 上无法复现。
+
+### 8.2 预注册的选档规则
+
+> **按训练代码身份选档，不看分数。** 记入正式记录的是训练期 relation 代码与冻结仓库 HEAD 一致的那一档，
+> 使训练与推理重建的是同一套 TacoERE 上下文；训练代码已被取代的档保留为 superseded 产物，且不在新代码下重新评分。
+
+据此：`taco-s13-r3` 为正式档，`taco-s13-r2` 为 superseded。**披露**：`taco-s13-r2` 的官方分数在
+2026-09-06 已算出并在仓库产物中（本节写定时已知）；`taco-s13-r3` 在本节写定时**没有任何分数**。
+选择只由上表的代码身份得出，与两档分数无关。
+
+评分口径要求：`taco-s13-r3` 必须在含 `3f02640` 的提交下评分（HEAD `1f3daaa` 相对服务器 `95e37bd`
+未改动 `src/`、`scripts/` 任一文件），以满足"训练与推理口径成对"。
+
+### 8.3 可追溯性缺口（记录，不在 E1 修）
+
+`run_metadata.protocol_binding.hashes` 只哈希 `scripts/train_supervised_relations.py`，**不含**
+`src/ekg/relations/extractor/supervised.py`。这就是两档携带同一 trainer hash 却构造出不同编码器输入的原因。
+把 relation extractor 模块加进哈希集合不会改动任何既有 hash，但改动 trainer 本身会打断 P1 r15 的
+external evidence hash（`taco-s13` 首跑即因此 fail-fast），须单独排期。
