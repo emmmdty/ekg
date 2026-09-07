@@ -10,7 +10,7 @@
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，E8 的 transparent baseline 正在运行；**未放行任何 proposed GPU 训练** |
 | 当前队列 | 任务 E.2，共 E1–E10（E1–E5、E9–E10 已 `done`；**E8 可与 E6–E7 并行**） |
-| **活动任务** | **E8：LLMERE-causal 透明适配 baseline**（`wip`；2026-09-07 的首次环境安装因根分区临时空间不足失败，修复后以 4090 GPU0 PID `1518478` 重启）。命令、cwd 与预期产物已按 §5 展示；A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
+| **活动任务** | **E8：LLMERE-causal 透明适配 baseline**（`wip`；首次 pip 临时空间与第二次 LLaMA-Factory TLS 失败均已修复，现以 4090 GPU0 PID `1534100` 继续环境安装）。命令、cwd 与预期产物已按 §5 展示；A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -315,7 +315,7 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | done | `9b43573` |
 | E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约已由 E9 解锁、可冻结；C5 因 E10 `not_runnable` 仍缺第二方法族，先由作者另议名单，不得伪冻结**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | done | `1fcc7db` |
 | E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | done | `1c922fd` |
-| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | wip | `b8b2352` |
+| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | wip | `749d9b7` |
 
 E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 KMeans 初始化，全量实测 2,913 篇里
 2,743 篇聚类归属改变，**是确定性的代码致输入变化，不是 GPU 非确定性**；旧初始化器还在同进程内对 5 篇
@@ -463,6 +463,17 @@ final-valid、未产生预测/指标。修复提交 `b8b2352` 使 launcher 将 `
 generated/official predictions、metrics、metadata 和小型转换报告并做双端 SHA-256。重试启动后 PID ALIVE，
 专用 tmp/cache 已写入 `/data` 且日志无 error；B3 仍在进行，不能把安装日志写成实验结果。任何完成、失败或
 ssh 失败都按 §5 三态规则处理，并在本行和 `results/PHASE_R1.md` 如实回填。
+
+重试 PID `1518478` 已成功安装 CUDA PyTorch（`.venv-llmere-causal-s13` 约 6.5GB，专用 pip cache 约 3.7GB），
+但随后从 `https://github.com/hiyouga/LLaMA-Factory.git` 克隆固定 `v0.9.3` 时遇到
+`GnuTLS recv error (-110): The TLS connection was non-properly terminated`，进程 GONE。该失败发生在模型下载、
+converter、LoRA SFT 与评分之前，故没有实验产物。直接 HTTP/1.1 identity probe 在 30 秒内未完成；已验证
+`https://gh-proxy.com/https://github.com/hiyouga/LLaMA-Factory.git` 的 `v0.9.3` tag 是预期
+`ca75f1edf3cb50343ed1c98605141c3e22075b5f`。修复提交 `749d9b7` 使用此可访问源的**浅克隆**，仍 fail-fast
+逐位检查该 commit；保留已验证的独立 CUDA 环境/cache，删除第二次失败的 run root 与 4KB tmp（无 model、
+checkpoint 或结果），并在 final metadata 中新增 factory origin、commit、tree 与 dirty-state 记录。新任务 PID
+`1534100` 已成功 clone 到该固定 detached commit，当前在独立 venv 安装 LLaMA-Factory，GPU0 仍无训练负载且
+日志无 error。
 
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 
