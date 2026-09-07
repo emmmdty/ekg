@@ -237,12 +237,29 @@ TRACEABILITY = {
 
 
 class ConsistencyAuditError(ValueError):
-    """A declared requirement, task, artifact, or trust identity is inconsistent."""
+    """An audited artifact is missing, so the audit itself cannot be performed."""
 
 
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise ConsistencyAuditError(message)
+
+
+class _Findings:
+    """Collect every inconsistency instead of stopping at the first one.
+
+    T023 is an audit, not an acceptance test: stopping at the first failure hides the
+    remaining rows and, because the old code demanded a checked T023, made the audit a
+    precondition for itself.
+    """
+
+    def __init__(self) -> None:
+        self.items: list[dict[str, str]] = []
+
+    def check(self, condition: bool, code: str, message: str) -> bool:
+        if not condition:
+            self.items.append({"code": code, "message": message})
+        return condition
 
 
 def _base_requirement_ids(text: str) -> set[str]:
@@ -300,41 +317,80 @@ def build_audit(repo: Path) -> dict:
     for relative in AUDITED_PATHS:
         _require((repo / relative).is_file(), f"audited artifact missing: {relative}")
 
+    findings = _Findings()
     spec_text = (repo / "docs/SPEC.md").read_text(encoding="utf-8")
     tasks_text = (repo / "docs/TASKS.md").read_text(encoding="utf-8")
     defined = _defined_requirement_ids(spec_text)
-    _require(defined == set(TRACEABILITY), "traceability map does not exactly cover SPEC")
+    unmapped = sorted(defined - set(TRACEABILITY))
+    unknown_mapped = sorted(set(TRACEABILITY) - defined)
+    findings.check(
+        not unmapped, "requirement-unmapped", f"SPEC requirements with no mapping: {unmapped}"
+    )
+    findings.check(
+        not unknown_mapped,
+        "requirement-undeclared",
+        f"mapped requirements absent from SPEC: {unknown_mapped}",
+    )
 
     tasks = _task_ids(tasks_text)
     referenced_tasks = {
         task for entry in TRACEABILITY.values() for task in entry["verification_tasks"]
     }
-    _require(referenced_tasks <= tasks, "traceability map references undeclared tasks")
+    findings.check(
+        referenced_tasks <= tasks,
+        "task-undeclared",
+        f"traceability map references undeclared tasks: {sorted(referenced_tasks - tasks)}",
+    )
     for requirement, entry in TRACEABILITY.items():
-        _require(entry["current_evidence"], f"requirement has no evidence: {requirement}")
-        _require(entry["verification_tasks"], f"requirement has no tasks: {requirement}")
-        _require(entry["phase_contracts"], f"requirement has no contract: {requirement}")
+        findings.check(
+            bool(entry["current_evidence"]),
+            "requirement-no-evidence",
+            f"requirement has no evidence: {requirement}",
+        )
+        findings.check(
+            bool(entry["verification_tasks"]),
+            "requirement-no-task",
+            f"requirement has no tasks: {requirement}",
+        )
+        findings.check(
+            bool(entry["phase_contracts"]),
+            "requirement-no-contract",
+            f"requirement has no contract: {requirement}",
+        )
         for reference in entry["current_evidence"]:
             relative, _, anchor = reference.partition("#")
-            _require(
+            if not findings.check(
                 (repo / relative).is_file(),
+                "evidence-missing",
                 f"requirement evidence missing for {requirement}: {relative}",
-            )
+            ):
+                continue
             if anchor and relative.endswith(".md"):
                 headings = _markdown_heading_anchors(
                     (repo / relative).read_text(encoding="utf-8")
                 )
-                _require(
+                findings.check(
                     anchor in headings,
+                    "evidence-anchor-missing",
                     f"requirement evidence anchor missing for {requirement}: {reference}",
                 )
             if anchor and relative.endswith(".json"):
-                _require(
+                findings.check(
                     _json_pointer_exists(_load(repo / relative), anchor),
+                    "evidence-pointer-missing",
                     f"requirement evidence pointer missing for {requirement}: {reference}",
                 )
-    for task in ("T020", "T021", "T022", "T023", "T024"):
-        _require(_checked_task(tasks_text, task), f"R1 task is not complete: {task}")
+
+    # T023 depends on T012-T022 only. T023 may not require itself, and T024 is released by
+    # this audit rather than being a precondition for it.
+    incomplete = [
+        f"T{number:03d}"
+        for number in range(12, 23)
+        if not _checked_task(tasks_text, f"T{number:03d}")
+    ]
+    findings.check(
+        not incomplete, "prerequisite-task-open", f"T023 prerequisites not complete: {incomplete}"
+    )
 
     scanned = (
         "docs/RESEARCH_PLAN.md",
@@ -350,61 +406,125 @@ def build_audit(repo: Path) -> dict:
         unknown = sorted(referenced - defined)
         if unknown:
             undeclared[relative] = unknown
-    _require(not undeclared, f"documents reference undeclared requirements: {undeclared}")
+    findings.check(
+        not undeclared,
+        "document-undeclared-requirement",
+        f"documents reference undeclared requirements: {undeclared}",
+    )
 
     r1_root = repo / R1_ROOT
     r1_protocol_path = r1_root / "protocol.json"
     r1_protocol = _load(r1_protocol_path)
-    _require(r1_protocol.get("schema_version") == "ekg.r1_protocol.v1", "R1 protocol schema")
+    findings.check(
+        r1_protocol.get("schema_version") == "ekg.r1_protocol.v1",
+        "protocol-schema",
+        "R1 protocol schema is not ekg.r1_protocol.v1",
+    )
+    artifact_identities: dict[str, dict[str, str]] = {}
     for name, artifact in r1_protocol.get("artifacts", {}).items():
         path = r1_root / artifact["path"]
-        _require(path.is_file(), f"R1 protocol artifact missing: {name}")
-        _require(sha256_file(path) == artifact["sha256"], f"R1 artifact hash drift: {name}")
+        if not findings.check(
+            path.is_file(), "artifact-missing", f"R1 protocol artifact missing: {name}"
+        ):
+            continue
+        actual = sha256_file(path)
+        artifact_identities[name] = {
+            "path": artifact["path"],
+            "frozen_sha256": artifact["sha256"],
+            "actual_sha256": actual,
+            "state": "frozen" if actual == artifact["sha256"] else "drifted",
+        }
+        findings.check(
+            actual == artifact["sha256"],
+            "artifact-hash-drift",
+            f"R1 artifact hash drift: {name} frozen {artifact['sha256']} actual {actual}",
+        )
     final_valid = r1_protocol.get("final_valid_ledger", {})
-    _require(not final_valid.get("used_for_model_or_method_selection"), "final-valid leakage")
+    findings.check(
+        not final_valid.get("used_for_model_or_method_selection"),
+        "final-valid-leakage",
+        "final-valid was used for model or method selection",
+    )
     status = _load(r1_root / "status.json")
-    _require(status.get("status") == "pass", "R1 status is not pass")
-    _require(
-        set(status.get("completed_tasks", [])) >= {f"T{number:03d}" for number in range(12, 25)},
-        "R1 status does not close T012-T024",
+    prerequisites = {f"T{number:03d}" for number in range(12, 23)}
+    findings.check(
+        set(status.get("completed_tasks", [])) >= prerequisites,
+        "status-task-mismatch",
+        "R1 status does not close T012-T022",
     )
 
-    contracts = r1_protocol.get("phase_contracts", {})
-    _require(set(contracts) == set(METHOD_PHASE_PATHS), "R1 phase-contract set mismatch")
+    # T024 freezes the method phase contracts, so their absence before T024 is the expected
+    # state and is reported as pending rather than as an inconsistency. A contract that is
+    # declared but does not match its file is an inconsistency.
+    contracts = r1_protocol.get("phase_contracts") or {}
+    contract_states: dict[str, dict[str, object]] = {}
     for name, relative in METHOD_PHASE_PATHS.items():
         contract_path = repo / relative
-        missing_sections = _missing_contract_sections(contract_path.read_text(encoding="utf-8"))
-        _require(not missing_sections, f"{name} contract sections missing: {missing_sections}")
-        binding = contracts[name]
-        _require(binding.get("path") == relative, f"{name} contract path mismatch")
-        _require(
-            binding.get("sha256") == sha256_file(contract_path),
-            f"{name} contract hash drift",
-        )
+        binding = contracts.get(name)
+        state: dict[str, object] = {
+            "path": relative,
+            "missing_sections": _missing_contract_sections(
+                contract_path.read_text(encoding="utf-8")
+            ),
+            "frozen_in_protocol": binding is not None,
+        }
+        if binding is None:
+            state["state"] = "pending_t024"
+        else:
+            actual = sha256_file(contract_path)
+            state["state"] = (
+                "frozen"
+                if binding.get("path") == relative and binding.get("sha256") == actual
+                else "drifted"
+            )
+            findings.check(
+                state["state"] == "frozen",
+                "contract-drift",
+                f"{name} phase contract does not match its frozen binding",
+            )
+            findings.check(
+                not state["missing_sections"],
+                "contract-sections-missing",
+                f"{name} contract sections missing: {state['missing_sections']}",
+            )
+        contract_states[name] = state
 
     p1_path, a3_path = repo / P1_PROTOCOL, repo / A3_PROTOCOL
     _require(p1_path.is_file(), "P1 protocol missing")
     _require(a3_path.is_file(), "A3 protocol missing")
-    _require(
+    findings.check(
         sha256_file(p1_path) == "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
-        "P1 identity drift",
+        "p1-identity-drift",
+        "P1 trust root identity drift",
     )
-    _require(
+    findings.check(
         sha256_file(a3_path) == "c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e",
-        "A3 identity drift",
+        "a3-identity-drift",
+        "A3 handoff identity drift",
     )
 
+    r1_pass_blockers = [
+        f"R1 status is {status.get('status')}, not pass",
+        *(f"phase contract pending T024: {name}" for name, state in contract_states.items()
+          if state["state"] == "pending_t024"),
+        *(f"cross-artifact finding open: {item['code']}" for item in findings.items),
+    ]
     return {
-        "schema_version": "ekg.r1_cross_artifact_audit.v1",
-        "status": "pass",
+        "schema_version": "ekg.r1_cross_artifact_audit.v2",
+        "status": "pass" if not findings.items else "blocked",
+        "findings": findings.items,
         "requirements": TRACEABILITY,
         "coverage": {
             "declared_requirements": len(defined),
             "mapped_requirements": len(TRACEABILITY),
             "referenced_tasks": len(referenced_tasks),
-            "unmapped_requirements": [],
-            "undeclared_requirement_references": {},
+            "unmapped_requirements": unmapped,
+            "undeclared_requirement_references": undeclared,
         },
+        "artifact_identities": artifact_identities,
+        "phase_contracts": contract_states,
+        "r1_status": status.get("status"),
+        "r1_pass_blockers": r1_pass_blockers,
         "artifact_sha256": {relative: sha256_file(repo / relative) for relative in AUDITED_PATHS},
         "trust_roots": {
             "r1_protocol": {
@@ -414,7 +534,9 @@ def build_audit(repo: Path) -> dict:
             "p1_protocol": {"path": P1_PROTOCOL, "sha256": sha256_file(p1_path)},
             "a3_protocol": {"path": A3_PROTOCOL, "sha256": sha256_file(a3_path)},
         },
-        "final_valid_used_for_model_or_method_selection": False,
+        "final_valid_used_for_model_or_method_selection": bool(
+            final_valid.get("used_for_model_or_method_selection")
+        ),
     }
 
 
@@ -426,7 +548,10 @@ def main() -> int:
     report = build_audit(args.repo_root.resolve())
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"PASS: {report['coverage']['mapped_requirements']} requirements mapped")
+    mapped = report["coverage"]["mapped_requirements"]
+    print(f"{report['status'].upper()}: {mapped} requirements mapped")
+    for item in report["findings"]:
+        print(f"  {item['code']}: {item['message']}")
     return 0
 
 
