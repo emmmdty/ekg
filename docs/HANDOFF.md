@@ -9,8 +9,8 @@
 | 项 | 值 |
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
-| 当前队列 | 任务 E.2，共 E1–E10（E1–E5、E9 已 `done`；**E8 可与 E6–E7 并行**） |
-| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E10：ACCI 仓库静态核查**）。**执行顺序认表里的行序，不认编号大小** |
+| 当前队列 | 任务 E.2，共 E1–E10（E1–E5、E9–E10 已 `done`；**E8 可与 E6–E7 并行**） |
+| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E6：T024 phase contract 冻结**）。A4/D4 可按既有输入推进；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -186,14 +186,14 @@ runnable baseline；Ch3 的 291-document 设计 underpowered，但预冻结五�
 
 后续按 [`TASKS.md`](TASKS.md) 的 T020–T024 继续，但各章仍先补齐自身 blocker：
 
-1. Ch3：T022 因果 brief 已通过；T020/T021/T022 现已全部通过，**T023 的前置已满足**，之后
-   才能生成 T024 D4 phase contract；未冻结前不启动 proposed GPU pilot；
-2. Ch1：T020 brief 已 PASS；input/baseline blocker 已由 `qwen3-argument-s13-r2` 闭合，但**第二个不弱于
-   主锚的方法族仍空缺**（IP&M 2024 无公开代码、OmniEvent EAE checkpoint 失效、RESIJ 未取得），
-   与 Ch2 同构，等作者按 §E.2 的 E4 说明二选一；没有 checkpoint 时只做 adapter 与 fixture，
-   不把跨 ontology 重训冒充官方复现；
+1. Ch3：T022 因果 brief 与 T023 跨产物审计均已通过；E6 可冻结 D4 phase contract，未冻结前不启动
+   proposed GPU pilot；
+2. Ch1：T020 brief 已 PASS；input/baseline blocker 已由 `qwen3-argument-s13-r2` 闭合，但按 §E.1b 的
+   四条新措辞第二方法族仍空缺。**E10 已实测 ACCI 公开仓库全历史只有 README**，没有 trainer、模型、
+   checkpoint、依赖或数据/评测接口，裁决 `not_runnable`；不得从论文重写后冒充透明移植，下一候选名单需作者
+   按 §E.1b 另议。IP&M 2024 无公开代码、OmniEvent EAE checkpoint 失效、RESIJ 未取得；
 3. Ch2：T021 brief 已 PASS；门已按 §E.1a 重新界定，第二个不同方法族由 **E8 的 LLMERE-causal**透明适配承担，保持完整候选全集；
-4. 三份 brief 的 T020/T021/T022 审查均已 PASS，下一步是 T023 跨产物一致性审计；只有通过者才能生成 T024
+4. 三份 brief 的 T020/T021/T022 审查与 T023 均已 PASS；下一步按 E6 冻结各自有充分输入的 T024
    phase contract。继续不看 final-valid、不写 proposed 训练代码。
 
 上面四条是**依赖关系**，不是执行顺序；本周的实际执行顺序与判定标准以任务 E.2 的队列表为准。
@@ -312,8 +312,8 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | done | `0210fba` |
 | E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾。**已有两条确凿输入证据**：`design_briefs.json` 与 `literature_matrix.json` 在 2026-09-06 15:27 被改动却没同步 `protocol.json`，哈希已漂移，且 matrix 把 relation/identity 门写成 `pass`（与自身 `global_decision`、`status.json`、结果页、E1 预注册判断四处矛盾），briefs 把三份 brief 全标 `accepted`。**必须先查明 09-06 改动来源，不得先改哈希让审计变绿**；漂移字节已由 E3 存档在 `runs/stages/R1/r1-v61-20260904/audit/design_briefs.drift-20260906T1527.json`，`briefs.relation` 已被 E3 的正式 T021 审查取代、`briefs.identity` 仍是 09-06 原样；详见 `results/PHASE_R1.md` §11 与 §11.1 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试；两条漂移各有裁决 | done | `54a10cf` |
 | E9 **（排在 E6 之前）** | 核实 IP&M 2024（Zhang et al., IP&M 61(5) 103811）的口径：取全文对照表，看**它复现的 MAVEN-ERE official joint baseline** 与我们自跑官方码是否对齐（MAQInstruct 判据）。订阅墙走作者主页 / ResearchGate / 机构库 / OpenAlex（作者 Junchi Zhang，dblp `153/2859`） | 已满足 | 三种处置之一落到 `results/PHASE_R1.md` §15.3；**无论结果都不进 roster**；若判定可比则 A4 及格线在 E6 前重估 | done | `03d972a` |
-| E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | todo | — |
-| E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约已由 E9 解锁、可冻结；C5 契约仍等 E10 裁决**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | todo | — |
+| E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | done | `PENDING` |
+| E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约已由 E9 解锁、可冻结；C5 因 E10 `not_runnable` 仍缺第二方法族，先由作者另议名单，不得伪冻结**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | todo | — |
 | E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | todo | — |
 | E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | todo | — |
 
@@ -415,6 +415,15 @@ A4 的及格线定义在**我们协议内的主锚与第二方法族**上，它�
 条目进 identity 与 relation 两章，**只追加不改既有条目**，随后按 E5 的顺序重冻结哈希。
 全部证据见 [`results/PHASE_R1.md` §17](results/PHASE_R1.md)。
 
+E10 已完成（2026-09-07，静态核查，未训练、未推理、未用 GPU）：ACCI 官方仓库冻结在 commit
+`7f5bcd81…23fa` / tree `d4c8aa14…fe43`，全历史仅一个 commit、tree 仅一个 `README.md`，无 LICENSE、
+release、trainer、推理入口、模型、checkpoint、配置、依赖、dataset reader、candidate builder 或 evaluator。
+因此裁决 **`not_runnable`**：从论文散文重建会是我们新写的实现，不能叫官方复现或透明移植，故不排
+single-card seed-13。冻结 MAVEN-ERE 输入的 2,622/291 manifest 全量 probe 验证 66,744/7,195 mention 可构造
+`<m> trigger </m>` 输入、完整文档内候选对为 1,148,762/117,435；这只证明本地数据足供另写 adapter，
+不构成对不存在上游接口的兼容。Ch1 第二方法族门保持 `blocked`，下一候选名单需作者按 §E.1b 四条措辞另议。
+完整产物、hash 与裁决见 [`results/PHASE_R1.md` §18](results/PHASE_R1.md)。
+
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 
 本周真实 GPU 需求只有 E1 的一次评分（已于 2026-09-07 在 4090 GPU1 跑完，约 1 分钟）。E2 只做静态核查
@@ -429,8 +438,8 @@ A4 的及格线定义在**我们协议内的主锚与第二方法族**上，它�
 2. **T024 放行后的第一个 seed-13 pilot**（按 E.1 的证据优先 D4）：只吃一张卡，与 E8 **并行**，
    不互相排队。
 
-**第三笔 GPU 需求待定**：Ch1 的 ACCI 透明移植（单卡 seed 13，RoBERTa-base 量级）**只有在 E10 静态核查
-判定可跑之后才排期**，核查本身不用 GPU。
+**Ch1 的 ACCI GPU 需求已取消**：E10 已判定其公开仓库 `not_runnable`；不得从论文散文重建后把它称作
+透明移植。只有作者冻结一个满足 §E.1b 四条件的新名单后，才重新评估 Ch1 的 GPU 需要。
 
 5090 单卡有既有 Qwen 服务约 17 GB，使用前仍须逐次取得作者授权。多种子始终另行授权。
 

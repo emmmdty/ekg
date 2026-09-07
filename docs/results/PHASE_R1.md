@@ -1,6 +1,6 @@
 # Phase R1 · 方法设计准入审计
 
-> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13，E4 补 §14，作者裁决补 §15，E5 补 §16，E9 补 §17）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
+> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13，E4 补 §14，作者裁决补 §15，E5 补 §16，E9 补 §17，E10 补 §18）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
 > `preparation_partial_blocked`，没有方法获得 GPU pilot 准入。
 
 ## 1. 产物与代码身份
@@ -39,8 +39,8 @@
   再往前 E5 在两条漂移**各自裁决之后**重冻结 `design_briefs` 与 `literature_matrix` 两个 artifact 哈希，
   并写入 `amendments[0]` 记录溯源与处置，前值 `fed98d2a…f619fc`；再往前因学位前提纠正由 `cc80e066…75dc`
   重算。R1 的 protocol.json 没有被 A3/P1 或任何下游产物引用，重冻结不影响其他信任根）；
-- `status.json`：`f407643c448e5c0b509b362d2c0efd7659808f8d1ed7bba11cda1fcc363e2182`
-  （E9 补齐 `ipm_2024_protocol_verification` 的实测结论，前值 `167d5219…5212`；再往前 E5 加入 `cross_artifact_audit`、把 T023 移入 `completed_tasks`、把 `known_inconsistencies`
+- `status.json`：`e15ccbb6a110c1f7c95758e2de02a5c69433b4619000e1420ef0374529cb8c2c`
+  （E10 补 `acci_feasibility` 并把 identity gate 从「待审计」更新为 `not_runnable`，前值 `f407643c…2182`；E9 补齐 `ipm_2024_protocol_verification` 的实测结论，前值 `167d5219…5212`；再往前 E5 加入 `cross_artifact_audit`、把 T023 移入 `completed_tasks`、把 `known_inconsistencies`
   标记为 RESOLVED，前值 `196339e9…0bf9`；再往前 §15 加入 `identity_baseline_gate_decision` 与 `ipm_2024_protocol_verification` 并重写
   `blocking_gates.identity`，前值 `bd7e87f3…fa6a`；再往前 E4 加入 `identity_design_brief`、把 T020 移入
   `completed_tasks` / `accepted_not_promoted`、清空 `drafted_not_promoted`，E4 前值 `0dcd7d98…6f42`；
@@ -162,8 +162,10 @@ Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
   trigger 和 offset，再用公开固定表把 20 个角色归为 participant/place。但官方 EAE checkpoint 链接在审计日
   返回 `Link does not exist`，两台 GPU 服务器均无缓存。TextEE 的 RAMS/WikiEvents 路径分别覆盖 139/65 与
   50/59 个 event-type/role，但 PAIE/TagPrime 强依赖源 ontology prompt/map，仓库又无 checkpoint；直接套
-  MAVEN event type 会成为新的未经验证 adapter，不能冒充官方 baseline。RESIJ 未取得官方代码；identity
-  baseline/input 门仍 `blocked`。
+  MAVEN event type 会成为新的未经验证 adapter，不能冒充官方 baseline。RESIJ 未取得官方代码。**E10 进一步
+  证实 ACCI 的公开仓库只是 README-only 占位符**：没有 trainer、模型、checkpoint、依赖或数据/评测接口，
+  所以既不能透明移植，也不能作为我们协议下的第二方法族；详情见 [§18](#18-e10--acci-官方仓库静态核查2026-09-07)。
+  Ch1 input blocker 已由 §7 的 Qwen artifact 关闭，但按 §15 重界定后的第二方法族门仍 `blocked`。
 - Ch2（**2026-09-07 按 E2 实测修订**）：official joint 可运行。此前写的“LLMERE 未取得官方实现”不准确，
   真实情况是**官方实现只覆盖方法本体，不覆盖训练**——仓库全历史（5 个 commit）含数据构造、评测器与
   已发布预测，但**没有任何训练/推理代码、配置、依赖清单、checkpoint 或 base model 名称**。逐条证据、我们
@@ -998,3 +1000,50 @@ CodaLab 通道尚开（我们直到 2026-07-30 才发现关闭，见
 📌 **文献矩阵补收**：它此前**不在** `literature_matrix.json` 里，与 E.1 发现的 LLMERE 漏收同类。
 本节已把它作为 `no_public_code` 条目补进 identity 与 relation 两章的 `methods`，
 并按 [§16.3](#163-两条漂移的裁决两条走不同的路) 的顺序重冻结哈希。
+
+## 18. E10 · ACCI 官方仓库静态核查（2026-09-07）
+
+**本节只做仓库、论文与冻结输入的静态核查：未训练、未推理、未用 GPU、未访问 final-valid。** 产物为
+`runs/stages/R1/r1-v61-20260904/baselines/identity/acci_feasibility/feasibility.json`
+（SHA-256 `1885d8d3460f2d1d94a068ce0269ea18486eb177975960ff9e823863ad5eee59`）。
+
+### 18.1 官方仓库实际没有实现
+
+冻结的只读克隆 `upstream/acci` 对应 `github.com/era211/ACCI` 的 `main`：commit
+`7f5bcd81e0a352f15263a5c7e7c4853b9e3023fa`（2025-06-02），tree
+`d4c8aa14a2462126060a4a69bf54cea11d62fe43`。`git ls-remote` 与 GitHub API 都返回同一 main
+commit；全历史**仅一个 commit**、tree **仅一个 `README.md`**（其 SHA-256
+`c8e0dc4e6c3d712d9c297603cd302f995fa0695515d7894468b18b08aec727e8`），无 root LICENSE，API
+显示 repository size 0 KiB、release 0。
+
+因此缺失的不是一小段 glue code，而是全部可执行链：**没有** trainer、推理入口、模型实现、配置、
+dataset reader、candidate builder、evaluator、checkpoint、release asset 或 dependency manifest。论文
+([arXiv:2506.01488](https://arxiv.org/abs/2506.01488)) 的 PyTorch/AdamW、`1e-5` 模型学习率、`1e-4`
+分类头学习率与 4×A40 设置只能说明作者曾有私有实现，不能成为可验证的公开复现配方。
+
+### 18.2 冻结 MAVEN-ERE 输入可供新写适配器，但不能让缺失接口“兼容”
+
+用 `probe_acci_pairs.py` 在 `maven_ere_{train,internal-dev}.json` manifest 上全量读取
+`data/processed/maven_ere/train.jsonl`。它逐 mention 校验 sentence ID、token offset、trigger span，并构造
+论文所述 `<m> trigger </m>` 句子；输出 `manifest_probe.json`（SHA-256
+`1ece0e2fae7d01f5ca8a711f9f4f5c2d2a7853b0501b9cb76d4379c120f80c19`）。
+
+| split | documents | marker-ready mentions | 完整文档内候选对 | coreferent pairs |
+|---|---:|---:|---:|---:|
+| train | 2,622 | 66,744 | 1,148,762 | 14,011 |
+| internal-dev | 291 | 7,195 | 117,435 | 1,456 |
+
+这证明本地源数据**足够让我们另写** marked-pair adapter；它**不**证明与 ACCI code 兼容——上游根本没有
+可调用的 parser 或 candidate interface。更关键的是，论文的任务是 ECB+/GVC **跨文档** ECR，候选对先限制
+在同一 subtopic，并使用 discourse-coherence retrieval 或 heuristic non-coreference filtering；C5 必须评分
+MAVEN-ERE **文档内完整候选全集**。任何假想重写都至少要重做其数据/候选构造与输入、训练、推理、聚类和评分，
+不是忠实移植。
+
+### 18.3 裁决
+
+**裁决：`not_runnable`。** E10 不授权从论文散文重建 ACCI；那会是我们新写的实现，既不是官方复现，也不是
+对可运行官方代码的透明移植，无法满足 §15 的第 3 条（由我们在冻结协议下跑通该独立机制）。故**不排**
+single-card seed-13、**不使用 GPU**，也不把 ECB+/GVC 的 CoNLL F1 写入 MAVEN-ERE 对照表。
+
+Ch1 的第二方法族门保持 `blocked`。下一步需要在 §15 的四条新措辞下由作者对替代名单作出决定；E6 可以
+处理已解锁的 A4/D4 contract，但不能把 C5 baseline 缺口伪装成已冻结。
