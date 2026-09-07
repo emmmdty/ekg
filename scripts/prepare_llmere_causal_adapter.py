@@ -18,7 +18,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+# The canonical URL remains the identity recorded in the run metadata.  The
+# transport mirror only avoids the repeatedly observed direct-GitHub TLS reset
+# on gpu-4090; the detached commit and tree checks below are authoritative.
 UPSTREAM_URL = "https://github.com/HerbertHu/LLMERE.git"
+UPSTREAM_TRANSPORT_URL = "https://gh-proxy.com/https://github.com/HerbertHu/LLMERE.git"
 UPSTREAM_COMMIT = "94d4ef2781ec7e071d38ac7fd8632a8fffbda798"
 UPSTREAM_TREE = "f0fd6928ac8bad89efa76ea47b8237fb1b8fa06f"
 P1_PROTOCOL_SHA256 = "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655"
@@ -143,7 +147,7 @@ def main() -> int:
     upstream = run_root / "upstream/llmere"
     if upstream.exists():
         raise SystemExit(f"refusing to overwrite an existing upstream checkout: {upstream}")
-    command(["git", "clone", UPSTREAM_URL, str(upstream)], cwd=project)
+    command(["git", "clone", UPSTREAM_TRANSPORT_URL, str(upstream)], cwd=project)
     command(["git", "checkout", "--detach", UPSTREAM_COMMIT], cwd=upstream)
     commit = git_value(upstream, "rev-parse", "HEAD")
     tree = git_value(upstream, "rev-parse", "HEAD^{tree}")
@@ -240,6 +244,7 @@ def main() -> int:
         },
         "upstream": {
             "url": UPSTREAM_URL,
+            "transport_url": UPSTREAM_TRANSPORT_URL,
             "commit": commit,
             "tree": tree,
             "causal_converter_sha256": converter_before,
