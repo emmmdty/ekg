@@ -57,10 +57,11 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 
 - local：`main`；P1 r15 `1e31a9ac…f9655`；A3 handoff protocol `c187bf03…9359e`；Ch3 OOF 训练提交
   `277b36f`，collector 已提交到 `6532264`；最近代码门 **520 passed / 24 skipped**、ruff 0、smoke OK；
-- 4090：A3.6 与 Ch3 OOF 进程均已 GONE；2026-09-07 在 GPU1 完成 E1 的 `taco-s13-r3` 官方评分后 GPU0–3
-  再次空闲（E2 当日只读核查确认四卡全空）；checkpoint 与 OOF 产物均留在各自远端 run root，未搬运；
-  机上无任何 Llama 权重、`llamafactory` 未安装、HF token 我们的账号读不到（E8 走未设门镜像 + 单开 venv，
-  不 pip 进钉死的 cu128 `.venv`）；
+- 4090：A3.6 与 Ch3 OOF 进程均已 GONE；E8 的专用 CUDA venv、固定 LLaMA-Factory 与约 15GB 的未设门
+  Llama-3-8B 镜像权重已落在 `llmere-causal-s13` namespace，均未搬运也未污染项目 `.venv`。模型下载虽有
+  Xet 自动续传，最终完整；准备阶段因远端缺少 R1 protocol fail-fast，尚未 conversion/SFT/推理/评分，GPU0–3
+  当前均空闲。按 `HANDOFF.md` E8 同步并双端校验该小型协议文件后，从严格的续跑脚本继续，checkpoint 与 OOF
+  既有产物仍留在各自远端 run root；
 - 5090：可连接；既有 Qwen 与其他 Python 服务保持运行，使用前重新查询动态显存占用，服务不动、
   checkpoint 不搬。R1 尚未放行 proposed pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡
   启动无效训练。

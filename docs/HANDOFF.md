@@ -10,7 +10,7 @@
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，E8 的 transparent baseline 正在运行；**未放行任何 proposed GPU 训练** |
 | 当前队列 | 任务 E.2，共 E1–E10（E1–E5、E9–E10 已 `done`；**E8 可与 E6–E7 并行**） |
-| **活动任务** | **E8：LLMERE-causal 透明适配 baseline**（`wip`；首次 pip 临时空间与第二次 LLaMA-Factory TLS 失败均已修复，现以 4090 GPU0 PID `1534100` 继续环境安装）。命令、cwd 与预期产物已按 §5 展示；A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
+| **活动任务** | **E8：LLMERE-causal 透明适配 baseline**（`wip`；专用 CUDA 环境、固定 LLaMA-Factory 与 15GB 未设门镜像权重均已验证；PID `1540062` 因远端缺失 R1 `protocol.json` 在准备阶段 fail-fast 停止，未进入转换或训练。恢复代码 `0c07ba5` 已推送，下一步是同步这个 8.7KB 协议文件、双端校验后续跑）。命令、cwd 与预期产物已按 §5 展示；A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -315,7 +315,7 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | done | `9b43573` |
 | E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约已由 E9 解锁、可冻结；C5 因 E10 `not_runnable` 仍缺第二方法族，先由作者另议名单，不得伪冻结**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | done | `1fcc7db` |
 | E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | done | `1c922fd` |
-| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | wip | `749d9b7` |
+| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | wip（权重已齐，待同步 R1 协议后从 prepare 续跑） | `0c07ba5` |
 
 E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 KMeans 初始化，全量实测 2,913 篇里
 2,743 篇聚类归属改变，**是确定性的代码致输入变化，不是 GPU 非确定性**；旧初始化器还在同进程内对 5 篇
@@ -474,6 +474,21 @@ converter、LoRA SFT 与评分之前，故没有实验产物。直接 HTTP/1.1 i
 checkpoint 或结果），并在 final metadata 中新增 factory origin、commit、tree 与 dirty-state 记录。新任务 PID
 `1534100` 已成功 clone 到该固定 detached commit，当前在独立 venv 安装 LLaMA-Factory，GPU0 仍无训练负载且
 日志无 error。
+
+PID `1540062` 随后完成固定 LLaMA-Factory 安装，并以 `https://hf-mirror.com` 下载
+`NousResearch/Meta-Llama-3-8B@315b20096dc791d381d514deb5f8bd9c8d6d3061` 的全部 14 个文件（四个
+`.safetensors` 分片合计约 15GB）。镜像底层 Xet 两个分片曾 read timeout，但 downloader 自动续传且最终
+打印成功；这不是训练完成。接着 `prepare_llmere_causal_adapter.py` 因 4090 缺少
+`runs/stages/R1/r1-v61-20260904/protocol.json` 而 fail-fast，进程 GONE；远端 P1 r15 协议仍为预期
+`1e31a9ac…f9655`。因此尚未 clone LLMERE、运行 converter、进行 LoRA SFT、生成预测或计算指标，GPU0–3
+均空闲。保留已验证的权重、专用环境、LLaMA-Factory 与 `base_model.json`，不重下也不删除。
+
+恢复提交 `0c07ba5` 新增只接续该精确状态的脚本：它先验证上述已有目录、固定 LLaMA-Factory commit/洁净状态，
+并拒绝覆盖任何 LLMERE checkout、train、predict 或 score 半成品；同时把 LLMERE 拉取改走已验证的
+`gh-proxy` transport，但仍对 canonical URL 的固定 commit `94d4ef27…a798` 与 tree `f0fd6928…a06f` fail-fast
+核对、并将二者写入 metadata。下一步仅同步本地已冻结的 8.7KB R1 protocol，双端 SHA-256 必须为
+`199852a1f0b81e088f7568d9462d9fe226db15bdd21a78346b6d03bef80cf058`；通过后才以 GPU0 的后台续跑命令进入
+converter 与单 seed-13 SFT。
 
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 
