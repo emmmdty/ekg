@@ -6,6 +6,8 @@ project_root=${1:?usage: run_llmere_causal_adapter.sh /data/TJK/ekg GPU_INDEX}
 gpu_index=${2:?usage: run_llmere_causal_adapter.sh /data/TJK/ekg GPU_INDEX}
 run_root="$project_root/runs/stages/R1/r1-v61-20260904/baselines/relation/llmere-causal-s13"
 worker_env="$project_root/.venv-llmere-causal-s13"
+tmp_root="$project_root/.tmp/llmere-causal-s13"
+pip_cache="$project_root/.cache/pip/llmere-causal-s13"
 model_path="$run_root/weights/NousResearch--Meta-Llama-3-8B"
 llamafactory_root="$run_root/upstream/llama-factory"
 llamafactory_ref=ca75f1edf3cb50343ed1c98605141c3e22075b5f
@@ -14,7 +16,11 @@ candidate_digest=313ec48e657374bc5afb7d09df9282c32f1d7a3acfdbfe1bc35435765042df3
 cd "$project_root"
 test ! -e "$run_root"
 test ! -e "$worker_env"
-mkdir -p "$run_root" "$project_root/logs"
+test ! -e "$tmp_root"
+test ! -e "$pip_cache"
+mkdir -p "$run_root" "$project_root/logs" "$tmp_root" "$pip_cache"
+export TMPDIR="$tmp_root"
+export PIP_CACHE_DIR="$pip_cache"
 
 "$project_root/.venv/bin/python" -m venv "$worker_env"
 "$worker_env/bin/python" -m pip install --upgrade pip
