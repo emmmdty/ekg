@@ -13,7 +13,10 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 1. P1 r15 仍是可信根；A3.6 四臂全部完成并通过 metadata、单变量、人口、evaluator、final-valid 与
    双端 artifact hash 校验。旧方法最高 causal F1 仍未过主锚，权威数字见
    [`results/PHASE_A.md`](results/PHASE_A.md)；
-2. 当前 R1 三章状态：Ch1 power PASS 但 mention-local input/强 baseline blocked；Ch2 power PASS，自建
+2. 当前 R1 三章状态：Ch1 power PASS，mention-local input/baseline blocker 已由 `qwen3-argument-s13-r2` 闭合，
+   T020 因果 brief 已于 2026-09-07 由 E4 审查 PASS（仅设计轴）；但 **QR-001 第二方法族名单仍空缺**——
+   该档 MUC .803676 低于主锚 .809847，且 IP&M 2024（MUC 86.1）无公开代码、口径未核实，
+   与 Ch2 同构，需作者裁决（推荐透明移植 ACCI 的 TBM/CAE）；Ch2 power PASS，自建
    TacoERE **透明适配**档 `taco-s13-r3` 已按预注册规则选定并评分（causal 32.01 未过主锚 33.17），但它不是
    官方复现；T021 因果 brief 已于 2026-09-07 由 E3 审查 PASS（仅设计轴）。**同日作者裁决重新界定 relation
    baseline 门**：近期方法无一发布可跑官方 trainer，故回到 QR-001 措辞「第二个不同方法族 · 我们跑通 ·
@@ -21,7 +24,7 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 3. Ch3 RoBERTa+CLS / DMRoBERTa 的 10/10 个后台任务已完成，80 个产物重哈希、fold 互斥/覆盖、训练源
    隔离与独立指标重算均通过。远端 run root 为 `runs/stages/R1/r1-v61-factuality-oof-r2/`，精确数字与
    acceptance hash 只见 [`results/PHASE_R1.md`](results/PHASE_R1.md)；
-4. T023 依赖 T020–T022 全部完成，当前仍等待 Ch1/Ch2 blocker；通过后才可用 T024 冻结 D4 phase contract，
+4. T020–T022 **已全部完成**，T023 的前置已满足，可开工；通过后才可用 T024 冻结 D4 phase contract，
    此前不启动 proposed GPU pilot；
 5. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
    sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
@@ -31,7 +34,8 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 7. **执行队列与交替推进约束见 [`HANDOFF.md`](HANDOFF.md) 任务 E**：~~E1 关 Ch2 TacoERE 适配档的账~~
    ~~→ E2 核查 LLMERE 官方实现~~（均 2026-09-07 `done`；E2 裁决 `conditionally_runnable`，
    LLMERE 无官方 trainer，**不关闭** Ch2 第二 baseline 门；~~E3 写 T021 Ch2 因果 brief~~ 同日 `done`，
-   审查 PASS）→ **E4 T020** → E5 T023 →
+   审查 PASS；~~E4 写 T020 Ch1 因果 brief~~ 同日 `done`，审查 PASS，并留下 Ch1 QR-001 名单裁决）
+   → **E5 T023** →
    E6 T024（A4 契约照常冻结，LLMERE-causal 以「已规格化、数字 pending」入 roster）→ E7 补 relation 代码
    哈希缺口；**E8 LLMERE-causal 训练可与 E4–E7 并行**，只写自己的 namespace。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
    开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
