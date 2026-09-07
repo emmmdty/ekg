@@ -27,8 +27,9 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 6. 4090/5090 当前可用于互不冲突的**准入 baseline smoke/OOF**；长任务继续 `setsid nohup`，不依赖 SSH
    存活。多种子与跨机 checkpoint 搬运仍须另行授权。
 7. **执行队列与交替推进约束见 [`HANDOFF.md`](HANDOFF.md) 任务 E**：~~E1 关 Ch2 TacoERE 适配档的账~~
-   （2026-09-07 `done`）→ **E2 核查 LLMERE 官方实现** → E3 T021 → E4 T020 → E5 T023 → E6 T024 →
-   E7 补 relation 代码哈希缺口。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
+   ~~→ E2 核查 LLMERE 官方实现~~（均 2026-09-07 `done`；E2 裁决 `conditionally_runnable`，
+   LLMERE 无官方 trainer，**不关闭** Ch2 第二 baseline 门）→ **E3 T021** → E4 T020 → E5 T023 →
+   E6 T024 → E7 补 relation 代码哈希缺口。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
    开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
 
 ## 当前三端
@@ -36,7 +37,8 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 - local：`main`；P1 r15 `1e31a9ac…f9655`；A3 handoff protocol `c187bf03…9359e`；Ch3 OOF 训练提交
   `277b36f`，collector 已提交到 `6532264`；最近代码门 **520 passed / 24 skipped**、ruff 0、smoke OK；
 - 4090：A3.6 与 Ch3 OOF 进程均已 GONE；2026-09-07 在 GPU1 完成 E1 的 `taco-s13-r3` 官方评分后 GPU0–3
-  再次空闲；checkpoint 与 OOF 产物均留在各自远端 run root，未搬运；
+  再次空闲（E2 当日只读核查确认四卡全空）；checkpoint 与 OOF 产物均留在各自远端 run root，未搬运；
+  机上无任何 Llama 权重、`llamafactory` 未安装、HF token 我们的账号读不到；
 - 5090：可连接；既有 Qwen 与其他 Python 服务保持运行，使用前重新查询动态显存占用，服务不动、
   checkpoint 不搬。R1 尚未放行 proposed pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡
   启动无效训练。

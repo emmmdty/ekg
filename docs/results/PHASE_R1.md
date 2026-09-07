@@ -1,6 +1,6 @@
 # Phase R1 · 方法设计准入审计
 
-> 更新于 **2026-09-05**。本页只记录已实测的 R1 数字与审计结论。R1 仍是
+> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
 > `preparation_partial_blocked`，没有方法获得 GPU pilot 准入。
 
 ## 1. 产物与代码身份
@@ -17,8 +17,9 @@
 - `protocol/degree_requirements.json`：
   `ceeb581bc1ff2c22ea0dd94811c892d0c91a4e4bca8c3c7aedfd4c5f6f2da47e`；
 - `protocol.json`：`cc80e066deb6b5ff735e15defe54ddb9c68384a626685cc516897440543575dc`；
-- `status.json`：`099b7aaf1ae22394f2befead5779fc243b831a811fca42f267ffa1428afe30e4`
-  （E1 改写 relation 门与 next_actions 并统一为仓库 JSON 写法 `indent=2, sort_keys`；旧值 `24c2aac4…87af07`。`protocol.json` 的 artifacts 哈希集合不含 `status.json`，无身份漂移）。
+- `status.json`：`c6ee4826e569ec0044ff5f8805be9213abc194825b31d8d83aae84004ecbee5e`
+  （E2 加入 `llmere_feasibility` 块、改写 relation 门与 next_actions；E1 值 `099b7aaf…30e4`，
+  再前一版 `24c2aac4…87af07`。`protocol.json` 的 artifacts 哈希集合不含 `status.json`，无身份漂移）。
 
 代码门：489 passed / 24 expected skips，ruff 0，`ekg-smoke` OK。
 
@@ -117,7 +118,7 @@ Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
 
 ## 4. 文献/代码可运行性
 
-只读取得并冻结五个官方仓库：
+只读取得并冻结六个官方仓库（LLMERE 由 E2 于 2026-09-07 补入）：
 
 | 仓库 | commit | tree | 根 LICENSE |
 |---|---|---|---|
@@ -126,6 +127,7 @@ Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
 | ModaFact | `ca8dea62…3867` | `78408509…be11` | 未发现 |
 | TextEE | `567baa9b…5dd3` | `4f0fe960…7dd` | Apache-2.0 |
 | OmniEvent | `ec72e727…cbac` | `35fb4c92…1a3b` | MIT |
+| LLMERE | `94d4ef27…a798` | `f0fd6928…a06f` | MIT |
 
 - Ch1：CorefPrompt 官方预处理给出一条不读 cluster gold 的 mention-local 路线：OmniEvent EAE 只收句子、
   trigger 和 offset，再用公开固定表把 20 个角色归为 participant/place。但官方 EAE checkpoint 链接在审计日
@@ -133,10 +135,15 @@ Ch2 anchor 来自不可变 A3 failed handoff `a3-v6-20260905-r17`（protocol
   50/59 个 event-type/role，但 PAIE/TagPrime 强依赖源 ontology prompt/map，仓库又无 checkpoint；直接套
   MAVEN event type 会成为新的未经验证 adapter，不能冒充官方 baseline。RESIJ 未取得官方代码；identity
   baseline/input 门仍 `blocked`。
-- Ch2：official joint 可运行，但 2025 two-stage ERE、RESIJ、TacoERE 未取得官方实现，KnowQA 作者 URL
-  当前不可得且是 sampled/gold-argument setting；relation baseline 门 `blocked`。TacoERE 无公开代码这一条
-  已由自建**透明适配**档补上同协议对照，正式档、选档预注册与官方三族 F1 见 [§8](#8-e1--ch2-tacoere-适配档的选档预注册)；
-  透明适配不算官方复现，故不关闭该门。
+- Ch2（**2026-09-07 按 E2 实测修订**）：official joint 可运行。此前写的“LLMERE 未取得官方实现”不准确，
+  真实情况是**官方实现只覆盖方法本体，不覆盖训练**——仓库全历史（5 个 commit）含数据构造、评测器与
+  已发布预测，但**没有任何训练/推理代码、配置、依赖清单、checkpoint 或 base model 名称**。逐条证据、我们
+  2622/291 manifest 上的转换实测与四条阻断点见 [§9](#9-e2--llmere-官方实现可运行性核查)。裁决
+  `conditionally_runnable`：真跑出来的将是**对官方方法代码的透明适配**，与 TacoERE 同类（缺口小得多），
+  因此**不关闭**“第二个独立近期同协议 runnable baseline”门。RESIJ、2025 two-stage ERE 仍未取得官方实现，
+  KnowQA 作者 URL 当前不可得且是 sampled/gold-argument setting；relation baseline 门维持 `blocked`。
+  TacoERE 无公开代码这一条已由自建**透明适配**档补上同协议对照，正式档、选档预注册与官方三族 F1 见
+  [§8](#8-e1--ch2-tacoere-适配档的选档预注册)。
 - Ch3：MAVEN-FACT 官方代码可得，但原 trainer 每 epoch 用 `test_data` 选 best、best checkpoint 保存被注释，且
   `RawBert` 调用签名不一致；本轮以透明 protocol patch 完成了泄漏隔离的 RoBERTa+CLS / DMRoBERTa 五折
   OOF。ModaFact 是意大利语 mT5-XXL 的不同任务，只作结构化对照。baseline 与 power blocker 已解除，但
@@ -325,3 +332,96 @@ E2（LLMERE）裁决。
 | `native_metrics.temporal.json` | `e0d45f4e7702bbc0022375607907a06e6020538fa79b8e341ab862d6058675fe` |
 
 checkpoint 留在 4090 原地，未跨机搬运。
+
+## 9. E2 · LLMERE 官方实现可运行性核查
+
+**本节只做静态核查与转换实测，未训练、未推理、未访问 final-valid 指标。** 产物：
+`runs/stages/R1/r1-v61-20260904/baselines/relation/llmere_feasibility/`。
+
+| 文件 | SHA-256 |
+|---|---|
+| `feasibility.json` | `311f9ad8dbd3f077e5c527368c6f1350784f0b1b4774e34a97185c50001204dc` |
+| `build_llmere_splits.py` | `ba928dc78dc192e54bf091b0f410a2923e1005a8f0f2539681bb5fa90709fb96` |
+
+冻结的只读克隆：`runs/stages/R1/r1-v61-20260904/upstream/llmere`，commit
+`94d4ef2781ec7e071d38ac7fd8632a8fffbda798`（2025-02-01），tree
+`f0fd6928ac8bad89efa76ea47b8237fb1b8fa06f`，LICENSE MIT。
+`literature_matrix.json` 是 T013 的冻结产物，**不回改**（其哈希见第 1 节）；LLMERE 的矩阵字段记在
+本节与 `feasibility.json` 里。
+
+### 9.1 仓库实际提供什么：方法本体有，训练没有
+
+| 组件 | 官方仓库 | 我们能否忠实运行 |
+|---|---|---|
+| 数据构造（prompt 模板 · 文档分区 · 负采样 · rationale/多跳链构造） | ✅ `data_handle_MAVEN_ERE/` | ✅ 已在我们 2622/291 manifest 上**实跑通过**（§9.3） |
+| 评测器 | ⚠️ `eval/MAVEN_ERE/`，是**自写复现**，非组织方 `evaluate.py` | ⚠️ 需另写 predictions→官方提交格式的转换 |
+| 训练代码 / 推理代码 / 配置 / 依赖清单 | ❌ **全历史 5 个 commit 均无** | ❌ 只能按论文散文用 LLaMA-Factory 复搭 |
+| checkpoint / base model 名称 | ❌ 仓库内不存在任何模型名 | — |
+| 超参 | ✅ 论文给全 | ✅ |
+| 已发布预测与分数 | ✅ `output/predict`、`output/eval` | ✅ 可作外部校准 |
+
+论文（COLING 2025，[2025.coling-main.500](https://aclanthology.org/2025.coling-main.500/)）实现细节：
+LLaMA-Factory 框架；backbone Llama2-7b-base/chat 与 Llama3-8b-base/instruct（最好是 Llama3-8b-base）；
+**LoRA rank 64**（PEFT，非全参）；max seq len 2048；每篇标注事件阈值 k=30；lr 2e-4 + cosine；
+MAVEN-ERE 训 **3 epoch**；**单张 NVIDIA A100 40GB**；正负样本比 temporal 4:1 / causal 1:1 /
+subevent 2:3 / coref 2:3；切分（Appendix C）为官方 train 按 8:2 切 train/valid，官方 valid 当 test。
+
+**代码与论文的三处出入**（记录，不影响裁决方向）：`convert_causal.py` 实际留 `neg = 1.5×pos`（2:3），
+与论文写的 causal 1:1 不符；`convert_temporal.py` 对训练集有未写进论文的硬截断 `keep_num = 100000`；
+`merge.py` 把 subevent 训练集复制两份（`expansion_ratio = 2`），论文亦未写。
+
+### 9.2 已发布预测确实落在官方 valid 上（对齐已实测）
+
+`output/predict/MAVEN_ERE_causal/generated_predictions.jsonl` 实有 **29,080** 条（文件末尾无换行，
+`wc -l` 只报 29,079）。用其分区规则在**我们这份**官方 valid（710 篇）上重算 `doc_split_num`，
+总和恰为 **29,080**，与预测条数逐条对齐。故其 test 集即官方 valid，且分区可从我们的数据复现。
+其自带评测器给出 causal 36.0440 / subevent 28.2240 / temporal 54.7063 / coref mean 90.9207，
+与论文 Llama3-8b-base 行（36.0 / 28.2 / 54.7 / 90.9）一致，可确认发布的就是该档。
+
+⚠️ **这 36.04 不得与我们的冻结主锚 causal 33.17 相比**：两者差**两条轴**——文档集不同
+（官方 valid 710 篇 vs 我们 internal-dev 291 篇）、评分器不同（其自写复现 vs 组织方 `evaluate.py`）。
+把它写进同一张表就是[内部口径混进对外表格]那个已经犯过四次的错。
+
+### 9.3 在我们 2622/291 manifest 上的转换实测（CPU，本地）
+
+用 `build_llmere_splits.py` 以我们的 manifest 覆盖上游 `split_data.py` 的 8:2 随机切分
+（train = 2,622 篇，valid/test = internal-dev 291 篇），随后**逐字不改**跑上游四个 converter 与
+`merge.py`，全部成功：
+
+| 子任务 | 训练正例 | 负例池 | 保留负例 | 训练样本 | internal-dev 推理样本 |
+|---|---:|---:|---:|---:|---:|
+| temporal | 100,080 | 48,428 | 25,020 | **100,000**（触发硬截断） | 15,709 |
+| causal | 19,346 | 88,220 | 29,019 | 48,365 | 11,149 |
+| subevent | 5,036 | 102,530 | 7,554 | 12,590 | 11,149 |
+| coreference | 10,485 | 97,081 | 15,727 | 26,212 | 11,149 |
+| **合并 joint** | — | — | — | **199,757**（subevent 计两份） | **49,156** |
+
+split 文件 SHA-256：train `8b6c9c21…a4fe`，valid/test（同一 291 篇）`e8dc33e4…1b0d`。
+转换产物约 1.7 GB，在 seed 42 下确定性可重生成，**不入库**；排训练时在 GPU 机上现生成。
+
+结论：**数据接口完全兼容，不需要改上游一行代码。**
+
+### 9.4 环境实测（gpu-4090，2026-09-07，只读）
+
+4 张 RTX 4090 24GB 查时全空；`torch 2.8.0+cu128`、`transformers 4.53.3`、`peft`/`trl`/`accelerate`/
+`bitsandbytes` 均在；**`llamafactory` 未安装**，`deepspeed`、`vllm` 不在（vllm 是既定移除）。
+`/data/TJK` 下无任何 Llama 权重，HF 缓存仅 9.6 MB。`HF_HOME=/data/.cache/huggingface` 存在但其
+`token` 文件我们的账号读不到（权限不够）。`meta-llama/Meta-Llama-3-8B` 为 `gated: manual`，
+未认证取 `resolve/main/config.json` 返回 **401**；`NousResearch/Meta-Llama-3-8B` 未设门，返回 200。
+
+### 9.5 裁决与阻断点
+
+**裁决 `conditionally_runnable`；不关闭 relation baseline 门。** 训练/推理代码整体缺失意味着即使跑出
+数字，那也是**我们对官方方法代码的透明适配**，与 TacoERE 同类（只是缺的是标准 LoRA SFT，不是方法本体），
+**不得写成官方复现**。排训练前须先清掉四条：
+
+| 编号 | 阻断点 | 处理 |
+|---|---|---|
+| B1 | 无官方 trainer/推理代码 | 由我们按论文散文写 LLaMA-Factory LoRA SFT 配置，产物必须标注为透明适配 |
+| B2 | Llama-3-8B 权重 gated，两台机均无可用 token | 需作者接受 Meta 许可并提供 token，或改用未设门镜像并记录权重 SHA-256 作为披露的替换 |
+| B3 | `llamafactory` 未装，且**不得** pip 进已钉死的 cu128 `.venv` | GPU 机上单开一个 venv，单独记 hash |
+| B4 | 上游评测器是自写复现 | 写 `generated_predictions.jsonl` → 官方提交格式的转换后用我们冻结的 `evaluate.py` 打分；上游 eval 代码里已有 `e{n}` → event id 映射可复用 |
+
+成本（未实测，供作者决策）：joint 训练集 199,757 条 × 3 epoch × 最长 2048 token，论文用单张 A100-40G；
+8B bf16 + LoRA r64 在 24GB 上预计**需要 gradient checkpointing**才装得下，本步未验证。推理侧 49,156 次
+生成且栈里没有 vllm。合起来是 4090 整机数天级占用，**须先取得作者同意再排期**。

@@ -9,8 +9,8 @@
 | 项 | 值 |
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
-| 当前队列 | 任务 E.2，共 E1–E7（E1 已 `done`） |
-| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E2：核查 LLMERE 官方实现的可运行性**） |
+| 当前队列 | 任务 E.2，共 E1–E7（E1、E2 已 `done`） |
+| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E3：T021 Ch2 因果 design brief**） |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -172,7 +172,8 @@ baseline；Ch3 的 291-document 设计 underpowered，但预冻结五折 OOF 已
 
 学位类型、入学年份、学科与专业未知项均保持 `null`；同济校级标准来源/date/hash 已冻结，未知项不影响
 项目自定的更高科研硬门。文献矩阵已只读冻结 CorefPrompt、MAVEN-FACT、ModaFact、TextEE、OmniEvent
-五个官方仓库 HEAD，但没有把不同数据/split/evaluator 的代码误记为同协议 baseline。Ch3 因果 brief 已
+五个官方仓库 HEAD（E2 又冻结了第六个 LLMERE，记录在 `results/PHASE_R1.md` §4/§9，
+`literature_matrix.json` 保持原哈希不动），但没有把不同数据/split/evaluator 的代码误记为同协议 baseline。Ch3 因果 brief 已
 通过 T022 并绑定已验收 OOF/power；Ch1/Ch2 brief 仍为 blocked/draft，**未放行 proposed GPU 训练**。
 
 两台服务器都没有可恢复的 OmniEvent/TextEE EAE checkpoint；OmniEvent 官方 checkpoint URL 已失效，
@@ -253,7 +254,7 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
 | 序 | 任务 | 前置 | 完成判定 | 状态 | commit |
 |---|---|---|---|---|---|
 | E1 | 关 Ch2 TacoERE 适配档的账：查清 `taco-s13-r2` 与 `taco-s13-r3` 差异来源 → **预注册**选档规则 → 评分正式档 → 三族官方 F1 写进 `results/PHASE_R1.md` → 更新 `status.json` | 已满足 | 差异有书面解释；选档规则在看分数前写定；结果页与 `status.json` 不再互相矛盾 | done | `91e818e` + `bc6b07e` |
-| E2 | 取 LLMERE 官方实现做可运行性核查：冻结 commit/tree hash、核对 MAVEN-ERE 数据接口、base model、显存与是否 LoRA，裁决"能否在我们 2622/291 manifest 与官方 evaluator 下忠实重跑"；**本步不训练** | E1 | 裁决落到 `results/PHASE_R1.md` 第 4 节，并修订该节 Ch2 结论；能跑则排下周训练，不能跑则写明具体阻断点 | todo | — |
+| E2 | 取 LLMERE 官方实现做可运行性核查：冻结 commit/tree hash、核对 MAVEN-ERE 数据接口、base model、显存与是否 LoRA，裁决"能否在我们 2622/291 manifest 与官方 evaluator 下忠实重跑"；**本步不训练** | E1 | 裁决落到 `results/PHASE_R1.md` 第 4 节，并修订该节 Ch2 结论；能跑则排下周训练，不能跑则写明具体阻断点 | done | `PLACEHOLDER` |
 | E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | todo | — |
 | E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | todo | — |
 | E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试 | todo | — |
@@ -267,13 +268,27 @@ E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 K
 33.17。taco 是**透明适配**，不关闭"第二个独立同协议 runnable baseline"门。全部证据见
 [`results/PHASE_R1.md` §8](results/PHASE_R1.md)。
 
+E2 已完成（2026-09-07，静态核查，未训练）：LLMERE 冻结在 commit `94d4ef27…a798` / tree `f0fd6928…a06f`，
+LICENSE MIT。**E.1 里"官方实现优先于自建 TacoERE 适配"这条判断需要按实测收窄**：该仓库全历史 5 个
+commit 只有数据构造、评测器与已发布预测，**没有训练/推理代码、配置、依赖清单、checkpoint，也没有出现
+过任何 base model 名称**；训练细节只在论文里（LLaMA-Factory + LoRA r64 + lr 2e-4 + 3 epoch + len 2048 +
+单张 A100-40G）。裁决 `conditionally_runnable`：能跑，但跑出来的是**我们对官方方法代码的透明适配**，
+和 TacoERE 同类，**不关闭**"第二个独立官方同协议 runnable baseline"门；relation 门维持 `blocked`。
+数据接口已实测兼容——用我们 2622/291 manifest 替掉上游的 8:2 随机切分后，四个 converter 与 `merge.py`
+**逐字不改**跑通，得到 199,757 条 joint 训练样本与 internal-dev 上 49,156 次推理。四条待清阻断点
+（无官方 trainer / Llama-3-8B 权重 gated 且无可用 token / `llamafactory` 未装且不得污染 cu128 `.venv` /
+上游评测器不是组织方 `evaluate.py`）与成本估计见 [`results/PHASE_R1.md` §9](results/PHASE_R1.md)。
+⚠️ 其发布的 causal 36.04 落在官方 valid 710 篇 + 自写评测器上，**与我们 internal-dev 291 篇的主锚 33.17
+差两条轴，不得同表比较**。
+
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 
 本周真实 GPU 需求只有 E1 的一次评分（已于 2026-09-07 在 4090 GPU1 跑完，约 1 分钟）。E2 只做静态核查
 不训练，E3–E7 全是文档与审计。
 因此 **9/7–9/9 期间 4090 大面积空闲是正常的**；卡是公用资源，不得为了"看起来在跑"启动无准入的训练。
-真实的大 GPU 需求在下周：LLMERE 同协议重跑（若 E2 裁定可行）与 T024 放行后的第一个 seed-13 pilot
-（按 E.1 的证据，优先 D4）。5090 单卡有既有 Qwen 服务约 17 GB，使用前仍须逐次取得作者授权。
+真实的大 GPU 需求在下周：T024 放行后的第一个 seed-13 pilot（按 E.1 的证据，优先 D4）。
+LLMERE 同协议重跑**暂不排期**——E2 裁定为 `conditionally_runnable` 但有四条未清阻断点，且是 4090 整机
+数天级占用，须先清阻断点并取得作者同意。5090 单卡有既有 Qwen 服务约 17 GB，使用前仍须逐次取得作者授权。
 
 ## 4. R1 后的候选方向：不是固定答案
 
