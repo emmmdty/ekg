@@ -1,6 +1,6 @@
 # Phase R1 · 方法设计准入审计
 
-> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13，E4 补 §14）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
+> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13，E4 补 §14，作者裁决补 §15）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
 > `preparation_partial_blocked`，没有方法获得 GPU pilot 准入。
 
 ## 1. 产物与代码身份
@@ -13,13 +13,17 @@
 - `literature_matrix.json`：`64874f4c07a3d057240f2716f33eea018e4cf49bdebf0bf2aa5369d3bf442476`
   ⚠️ **磁盘上的文件已不是这个值**（实为 `b874d34c…6171`），见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)；
 - `design_briefs.json`：`3dfbb8810fa041983f246d7aac1a251b0fc240583582a48fd03027228c570731`
-  ⚠️ **已两次改变**：先在 2026-09-06 未同步地漂移到 `d5d6a61c…7986`（见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)，
+  ⚠️ **已多次改变**：先在 2026-09-06 未同步地漂移到 `d5d6a61c…7986`（见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)，
   原字节已存档为 `audit/design_briefs.drift-20260906T1527.json`），再由 E3 写入 T021 关系 brief 后成为
   `f421436d…9f6c`，再由 §13 的作者裁决修订 roster 与 promotion 后成为
-  `81ad43a3…a382`，再由 E4 写入 T020 身份 brief 后成为
-  `cd40e664934fdab97a6c5668cb10dcc322da46c1b84c6fe4f39cc7e5f0ca4366`
+  `81ad43a3…a382`，再由 E4 写入 T020 身份 brief 后成为 `cd40e664…4366`，
+  再由 §15 的作者裁决修订 identity 的 roster / promotion / open_finding 后成为
+  `2220b86cac83939c36d16b502f063111ac48af9ab0981d4a3dc6994a3fa11999`
   （见 [§12](#12-e3--t021-ch2-关系因果-design-brief2026-09-07)、[§13](#13-relation-baseline-门的重新界定作者裁决2026-09-07)、
-  [§14](#14-e4--t020-ch1-身份因果-design-brief2026-09-07)）。
+  [§14](#14-e4--t020-ch1-身份因果-design-brief2026-09-07)、
+  [§15](#15-identity-baseline-门的重新界定与-ipm-口径核实排期作者裁决2026-09-07)）。
+  identity brief 的因果链、中介、三臂、负控、护栏、power 绑定与 stop **未被修订**，原 roster / promotion /
+  open_finding 逐字保留在 `amendments[0]`，修订发生在任何 C5 数字存在之前；
   `protocol.json` **未**随之重冻结，漂移裁决仍归 E5；
 - `factuality_cv/factuality_cv.json`：
   `3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4`；
@@ -29,9 +33,10 @@
 - `protocol.json`：`fed98d2a20e281d1d037eaf46e523e17fb9a24358a0c98e3b6f456a170f619fc`
   （随上一条重算；旧值 `cc80e066…75dc`。R1 的 protocol.json 没有被 A3/P1 或任何下游产物引用，
   重冻结不影响其他信任根）；
-- `status.json`：`bd7e87f3cf6c7f401bf2cafd364793c3e676342b2655655f8bcfe8ec99d6fa6a`
-  （E4 加入 `identity_design_brief`、把 T020 移入 `completed_tasks` / `accepted_not_promoted`、清空
-  `drafted_not_promoted` 并重写 `blocking_gates.identity`，E4 前值 `0dcd7d98…6f42`；
+- `status.json`：`196339e92e3616e49edd42682714cc60aa233da79ed0e7027ba7c600b2a50bf9`
+  （§15 加入 `identity_baseline_gate_decision` 与 `ipm_2024_protocol_verification` 并重写
+  `blocking_gates.identity`，前值 `bd7e87f3…fa6a`；再往前 E4 加入 `identity_design_brief`、把 T020 移入
+  `completed_tasks` / `accepted_not_promoted`、清空 `drafted_not_promoted`，E4 前值 `0dcd7d98…6f42`；
   再往前 §13 加入 `relation_baseline_gate_decision` 并重写 `blocking_gates.relation`，前值 `6f26538e…623c`；
   再往前 E3 加入 `relation_design_brief` 并把 T021 移入 `completed_tasks` / `accepted_not_promoted`，
   E3 前值 `904cb5fc…ce37d`；再往前：由 E2 加入 `llmere_feasibility`（`c6ee4826…ee5e`），由 §10/§11 加入
@@ -730,3 +735,71 @@ QR-007 中介改善而主指标不胜出时保留为负结果、不促章；RS-0
 作为一条待办登记，而不是留在会话记忆里。
 
 本节没有启动任何 GPU 任务：E4 全程是文档与静态核查，未训练、未访问 final-valid。
+
+## 15. identity baseline 门的重新界定与 IP&M 口径核实排期（作者裁决，2026-09-07）
+
+E4 把两个问题交给作者后，作者当日给出两条裁决。本节记录裁决本身与其依据；**两条都在任何 C5 数字
+存在之前作出**。
+
+### 15.1 为什么 Ch1 也改门而不是改章
+
+Ch1 的候选逐个核过：IP&M 2024 graph propagation **无公开代码**（2026-09-07 检索未命中仓库）；
+OmniEvent EAE checkpoint URL 在 2026-09-04 返回 `Link does not exist`，两台服务器均无缓存；
+TextEE 无 checkpoint 且强依赖源 ontology prompt；RESIJ 始终未取得；CorefPrompt 在 TAC KBP 且正是依赖
+那个失效的 EAE checkpoint。**MAVEN-ERE 文档内共指上，除主锚外没有第二个公开可跑的方法**——
+与 [§13.1](#131-为什么改门而不是改章) 对 Ch2 的结论逐条同构。
+
+E.1a 给 Ch2 加的「**且不弱于冻结主锚**」是为了挡住 `taco-s13-r3` 那种我们自造的弱变体当稻草人。
+对 Ch2 坚持它有意义：LLMERE 是 2025 的生成式范式，**真有可能强过主锚**。对 Ch1 不成立：唯一有公开
+仓库的近期工作 ACCI 是**跨文档 ECB+/GVC** 方法，移植到文档内 MAVEN-ERE 后 `ECB+ 88.4` 完全不保证
+能过 `.809847`，**大概率低于主锚**。若维持原措辞，这次移植的期望价值接近零——跑完低于主锚，门照样
+关不上，等于第二个「投入再多 GPU 也过不去」的门。
+
+### 15.2 采纳的措辞与执行顺序
+
+裁决：**按 Ch1 现实调整门措辞**。防稻草人的等效标准改为四条同时成立——
+
+1. 是**独立发表工作的机制**，不是我们自造的变体或主锚的再调参；
+2. 在**其原始基准上有强证据**（发表时的 SOTA 级结果）；
+3. 由我们在**冻结协议**（同 manifest / mention / 候选全集 / 官方 evaluator）下跑通；
+4. fidelity 缺口逐表写明，标注**透明适配**而非官方复现。
+
+`SPEC.md` 不修订——QR-001 原文本就是 "another strong, distinct method family under one protocol"，
+"strong" 修饰的是 family，不是"必须强过 anchor"；改的只是我们自己更严的运行措辞。
+按新措辞 `taco-s13-r3` 式的自造弱变体仍被挡住（不满足第 1 条），而 ACCI 满足第 1、2 条。
+
+执行顺序**倒过来**：**先做静态核查，再决定训练**。
+
+| 步 | 动作 | 为什么在这个位置 |
+|---|---|---|
+| 1 | ACCI 仓库静态核查（队列 E10），复用 E2 对 LLMERE 的流程，**不训练** | E2 刚教过：**仓库有方法本体不等于有 trainer**（LLMERE 全历史 5 个 commit 无训练代码）。成本近零却直接决定这条路通不通，必须在任何 GPU 决定之前做 |
+| 2 | 核查通过 → 透明移植 + 单卡 seed 13；不通过 → 记录阻断点，Ch1 名单按新措辞另议 | RoBERTa-base 量级、无 gated 权重、无许可决定，成本远低于 E8 |
+
+**`qwen3-argument-s13-r2` 的角色同时被重新定义**：它低于主锚（.803676 < .809847）不是废数据，而是
+「**朴素把预测论元池化进编码器会掉点**」的负面对照——正是 C5「论元不是加了就有用，要角色对齐 +
+不确定性门控」这一立论的直接证据。它以这个角色留在名单里，**不再充当第二方法族**。
+
+### 15.3 IP&M 2024 口径核实：判据、三种处置与排期
+
+裁决：**排在 E6 之前**（队列 E9）。理由是 IP&M 2024 同时报 **causal 37.4**，高于 Ch2 冻结主锚 33.17，
+而 E6 就要冻结 A4 契约——**先核实口径再冻结，避免用一个可能已被超越的及格线冻结整章**。
+
+**判据用现成的**：取该文的对照表，看**它复现的 MAVEN-ERE official joint baseline 数字**，与我们自跑
+官方码的数字对齐。这正是 MAQInstruct 那次用过的尺子（我们自跑官方码 causal 31.37，它报 BertERE 30.9，
+两者对上 → 关系栏可用；共指栏因协议未声明且比 dev 外推值高 3 点 → 不可用）。
+
+| 核实结果 | 处置 |
+|---|---|
+| 它的 baseline ≈ 我们自跑官方码 | 口径可比，86.1 / 37.4 是真差距。Ch1 论文里正面承认；A4 及格线重估后再冻结契约 |
+| 它的 baseline 也高一截 | 口径不同，只进 related work，**不进对照表**，我们的主锚不动 |
+| 拿不到全文 | 登记为「**未核实口径的更强公开数字**」，论文如实披露，**既不当对手，也不当我们已被超越的证据** |
+
+获取途径：ScienceDirect 有订阅墙，先试作者主页 / ResearchGate / 机构仓库 / OpenAlex
+（作者 Junchi Zhang，dblp `153/2859` 已定位）。成本是一次检索。
+
+**为什么不能就这么放着**：这是[「内部口径混进对外表格」](#4-文献代码可运行性)那个已犯过四次的错的**镜像**。
+前四次是我们把内部数字当对外数字用；这次的风险是反过来——要么把别人未核实口径的数字当同表对手
+（吓退自己），要么假装没看见（送审时被审稿人拿出来）。两个方向都错，唯一出路是核实口径。
+
+**为什么它仍不能进 roster**：无公开代码 → 无法在我们协议下跑通 → 按 FR-006 不能当 baseline。
+核实的价值是「知道自己站在哪里、论文里那句话怎么写」，不是找到一个新对手。

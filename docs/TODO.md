@@ -14,9 +14,10 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    双端 artifact hash 校验。旧方法最高 causal F1 仍未过主锚，权威数字见
    [`results/PHASE_A.md`](results/PHASE_A.md)；
 2. 当前 R1 三章状态：Ch1 power PASS，mention-local input/baseline blocker 已由 `qwen3-argument-s13-r2` 闭合，
-   T020 因果 brief 已于 2026-09-07 由 E4 审查 PASS（仅设计轴）；但 **QR-001 第二方法族名单仍空缺**——
-   该档 MUC .803676 低于主锚 .809847，且 IP&M 2024（MUC 86.1）无公开代码、口径未核实，
-   与 Ch2 同构，需作者裁决（推荐透明移植 ACCI 的 TBM/CAE）；Ch2 power PASS，自建
+   T020 因果 brief 已于 2026-09-07 由 E4 审查 PASS（仅设计轴）。**同日作者裁决把 Ch1 门按四条措辞重新界定**
+   （独立发表机制 · 原始基准上强 · 我们冻结协议下跑通 · 缺口写明），ACCI 移植改为**先静态核查（E10）
+   再谈训练**，`qwen3-argument-s13-r2` 重定义为「朴素池化论元会掉点」的注册负面对照；
+   **IP&M 2024（MUC 86.1 / causal 37.4，无代码、口径未核实）的核实前置为 E9，排在 E6 之前**；Ch2 power PASS，自建
    TacoERE **透明适配**档 `taco-s13-r3` 已按预注册规则选定并评分（causal 32.01 未过主锚 33.17），但它不是
    官方复现；T021 因果 brief 已于 2026-09-07 由 E3 审查 PASS（仅设计轴）。**同日作者裁决重新界定 relation
    baseline 门**：近期方法无一发布可跑官方 trainer，故回到 QR-001 措辞「第二个不同方法族 · 我们跑通 ·
@@ -35,7 +36,7 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    ~~→ E2 核查 LLMERE 官方实现~~（均 2026-09-07 `done`；E2 裁决 `conditionally_runnable`，
    LLMERE 无官方 trainer，**不关闭** Ch2 第二 baseline 门；~~E3 写 T021 Ch2 因果 brief~~ 同日 `done`，
    审查 PASS；~~E4 写 T020 Ch1 因果 brief~~ 同日 `done`，审查 PASS，并留下 Ch1 QR-001 名单裁决）
-   → **E5 T023** →
+   → **E5 T023** → E9 IP&M 口径核实 → E10 ACCI 静态核查 →
    E6 T024（A4 契约照常冻结，LLMERE-causal 以「已规格化、数字 pending」入 roster）→ E7 补 relation 代码
    哈希缺口；**E8 LLMERE-causal 训练可与 E4–E7 并行**，只写自己的 namespace。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
    开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
