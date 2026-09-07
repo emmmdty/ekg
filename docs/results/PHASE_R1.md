@@ -1,6 +1,6 @@
 # Phase R1 · 方法设计准入审计
 
-> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
+> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13，E4 补 §14）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
 > `preparation_partial_blocked`，没有方法获得 GPU pilot 准入。
 
 ## 1. 产物与代码身份
@@ -16,8 +16,10 @@
   ⚠️ **已两次改变**：先在 2026-09-06 未同步地漂移到 `d5d6a61c…7986`（见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)，
   原字节已存档为 `audit/design_briefs.drift-20260906T1527.json`），再由 E3 写入 T021 关系 brief 后成为
   `f421436d…9f6c`，再由 §13 的作者裁决修订 roster 与 promotion 后成为
-  `81ad43a3fdce8b1cd951bf0fa2570c521ff3979e2a1caa51c48d0a96c8f9a382`
-  （见 [§12](#12-e3--t021-ch2-关系因果-design-brief2026-09-07)、[§13](#13-relation-baseline-门的重新界定作者裁决2026-09-07)）。
+  `81ad43a3…a382`，再由 E4 写入 T020 身份 brief 后成为
+  `cd40e664934fdab97a6c5668cb10dcc322da46c1b84c6fe4f39cc7e5f0ca4366`
+  （见 [§12](#12-e3--t021-ch2-关系因果-design-brief2026-09-07)、[§13](#13-relation-baseline-门的重新界定作者裁决2026-09-07)、
+  [§14](#14-e4--t020-ch1-身份因果-design-brief2026-09-07)）。
   `protocol.json` **未**随之重冻结，漂移裁决仍归 E5；
 - `factuality_cv/factuality_cv.json`：
   `3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4`；
@@ -27,8 +29,10 @@
 - `protocol.json`：`fed98d2a20e281d1d037eaf46e523e17fb9a24358a0c98e3b6f456a170f619fc`
   （随上一条重算；旧值 `cc80e066…75dc`。R1 的 protocol.json 没有被 A3/P1 或任何下游产物引用，
   重冻结不影响其他信任根）；
-- `status.json`：`0dcd7d988ce70239eee5c043c1f85d193a709cc3a801cb13076db05c7e0b6f42`
-  （§13 加入 `relation_baseline_gate_decision` 并重写 `blocking_gates.relation`，前值 `6f26538e…623c`；
+- `status.json`：`bd7e87f3cf6c7f401bf2cafd364793c3e676342b2655655f8bcfe8ec99d6fa6a`
+  （E4 加入 `identity_design_brief`、把 T020 移入 `completed_tasks` / `accepted_not_promoted`、清空
+  `drafted_not_promoted` 并重写 `blocking_gates.identity`，E4 前值 `0dcd7d98…6f42`；
+  再往前 §13 加入 `relation_baseline_gate_decision` 并重写 `blocking_gates.relation`，前值 `6f26538e…623c`；
   再往前 E3 加入 `relation_design_brief` 并把 T021 移入 `completed_tasks` / `accepted_not_promoted`，
   E3 前值 `904cb5fc…ce37d`；再往前：由 E2 加入 `llmere_feasibility`（`c6ee4826…ee5e`），由 §10/§11 加入
   `degree_requirements_correction` 与 `known_inconsistencies`；E1 值 `099b7aaf…30e4`，
@@ -627,3 +631,102 @@ Ch2 的近期方法逐个核过：RESIJ 无公开代码、2025 two-stage（RepL4
 它便宜且诱人，但 official valid 就是封存的 final-valid，会毁掉 [§2](#2-跨数据身份审计) 那句干净的
 "没有计算或查看关系/事实性指标"；而其自写评测器对 causal 的定义（正类 micro、排除 TIMEX、全序对枚举）
 本来就接近组织方口径，重打分的信息增量抵不上这笔账。
+
+## 14. E4 · T020 Ch1 身份因果 design brief（2026-09-07）
+
+**本节只做设计准入，不训练、不用 GPU、不访问 final-valid。** 产物是 `design_briefs.json` 的
+`briefs.identity` 子树；写入前 `81ad43a3…a382`，写入后全文件 SHA-256
+`cd40e664934fdab97a6c5668cb10dcc322da46c1b84c6fe4f39cc7e5f0ca4366`。只重写 `briefs.identity` 一个子树，
+`briefs.relation`、`briefs.factuality` 与三个顶层字段**逐字节未动**（写入脚本内以 JSON 对比断言）；
+`protocol.json` 仍**未**重冻结，09-06 漂移的裁决仍归 E5。
+
+冻结的因果链是：
+
+`mention-local 预测角色后验 + 显式缺失状态`
+→ `高相似度误合并数（注册中介）`
+→ `官方 MUC F1`。
+
+- **observed error**：两个可运行系统在冻结 internal-dev 上都是**误合并主导**。`qwen3-argument-s13-r2`
+  有 618 个 pairwise 错误，其中 over-merge 388（62.8%）对 under-merge 230（37.2%）；MUC 层面 143 条多余
+  链接（60.9%）对 92 条缺失（39.1%）；pairwise precision .759603 明显低于 recall .842033。误合并集中在
+  trigger 表面形式最无区分力的地方：388 个 over-merge 里 **251 个 trigger 相似度 ≥ .8、232 个恰好等于
+  1.0、333 个跨句**。主锚同样受限于精度（MUC P 78.842975 vs R 83.246073）。
+- **可干预原因**：pair 打分器只把论元 span 当池化上下文，模型内部没有「这个 span 充当哪个角色」
+  「该角色判定有多确信」「这个 mention 根本没有抽到角色」这三件事的表示。于是「同 trigger + 参与者冲突」
+  与「同 trigger + 参与者一致」在模型看来一样，分数被 trigger 表面形式主导；目标函数里也没有任何东西
+  让决策对角色冲突**非对称**，更没有区分「未观察到冲突」与「没有角色证据」。
+- **treatment**：冻结的 mention-local 抽取器给出每个 mention 的 participant/place 角色后验与**显式抽取状态**
+  （ok / empty / partial / rejected）；role-alignment 残差加在既有 pair 分数上，并由该对齐的不确定性门控——
+  只有当两端都带着高置信且互相冲突的角色时残差才推开这一对，任一端角色证据缺失或低置信时门关向零。
+  **残差只改分数，绝不删候选，也绝不读 cluster 身份。**
+- **三臂**：full ｜ remove-core（同编码器/输入/候选全集/seed/预算/参数量，把 role 残差 detach，退回论元池化
+  pair 分类器）｜ strongest-alternative（`qwen3-argument-s13-r2`，同 manifest/候选/评测器）。
+  remove-core **不是** `qwen3-argument-s13-r2` 的替代品，两者都要报。
+- **负控**：在 event type 与文档内置换 role posterior，保持角色密度、缺失状态分布与置信度分布，
+  前向次数、序列长度、参数量不变。**负控必须抹掉 full−remove-core 的中介改善**；抹不掉就说明收益来自
+  多出来的残差容量或其正则效应，即使 MUC 上升也判机制失败。
+- **中介检验**：在同一 291 篇 / 7,195 mention 冻结候选全集上，用 2,000 次 document-cluster paired bootstrap
+  （RNG `260904`，与 power 审计同配置）比较 full 与 remove-core 的高相似度误合并数。
+  ⚠️ **口径分账**：中介的基线画像取自 `qwen3-argument-s13-r2`（251 / 1,774 hard pair，hard mis-merge rate
+  .141488），而 power 注入基于 **official joint anchor** 的逐文档 MUC——两者是不同产物，中介检验只做
+  **同一实现在同一实例集上的内部比较**，任何时候都不把 baseline 的中介数直接从主锚数字里减。
+
+护栏（全部预注册）：推理枚举 7,195 个 mention 上的完整 coreference 候选全集，不确定性门只改置信度，
+不得丢弃/过滤/弃答任何候选对；**MUC recall 不得低于主锚自身的 83.246073**，且 MUC P/R/F1 必须同时报告，
+防止把纯精度移动写成机制胜出；B³ F1 ≥ 97.04、CEAF-e F1 ≥ 96.73、BLANC F1 ≥ 88.88（主锚减 1.0 margin）；
+每个 mention 必须带显式 ok/empty/partial/rejected 状态，无静默默认后验、无 MAVEN-ARG cluster gold 进入
+可部署臂；gold event-level 论元与 gold identity 只作**标注为 non-deployable 的 oracle**；导出保持一个
+mention 对应唯一可追溯 cluster 并通过 `metadata` 暴露校准置信度，**`EventNode` 零新增字段**
+（RS-001 场景 3）。
+
+功效绑定如实记录：`power_analysis.json#identity` 主锚 .8098471986，评价单元为 document cluster，
+291 篇中 125 篇可纠正，最小有意义效应 +.010，RNG `260904`，2,000 次 bootstrap，200 次模拟。
+**5 篇纠正时 power 已达 1.00，但中位效应只有 +.007174（CI 下界 +.001185），低于最小有意义效应**；
++.010 目标对应约 **8 篇**纠正（中位效应 +.011839、CI 下界 +.003613、power 1.00）。
+注册的目标是**效应量**，不是"最小的能把 power 顶到 1.00 的纠正数"。
+
+### 14.1 四条已被占的一般命题与 C5 的窄 delta
+
+| 工作 | 一般命题（已被占） | 其范围 | C5 的 delta |
+|---|---|---|---|
+| **ACCI**（arXiv 2506.01488 / Sci Rep） | 跨文档事件共指过度依赖 trigger 词面；结构因果图 + 后门调整 + 反事实 trigger 扰动 + 论元增强模块可端到端去偏 | 跨文档 ECB+（25/8/10 topic，574/196/206 篇）与 GVC；gold 事件 mention；候选对**在 subtopic 内检索**（沿用其主 baseline 的 heuristic 数据构造，算法输入含 gold/clustered topics）；RoBERTa-base/large cross-encoder，lr 1e-5 + 分类头 1e-4，4×A40；消融 w/o TBM −0.6、w/o CAE −0.8 CoNLL F1；代码在 `github.com/era211/ACCI`（我们未做可运行性审计） | **已按 E.1 要求核实其论元来源：ACCI 根本不抽论元。** 它用 masking 把输入切成 trigger 子序列 `X_trg` 与上下文子序列 `X_arg = X \ X_trg`，所谓"论元语义"就是 trigger 的补集——没有角色类型、没有逐角色后验、也不存在"角色证据缺失"这个状态。C5 消费的是**显式抽取的、带角色类型的 mention-local 后验 + 四态抽取状态**，门控的是**角色对齐的不确定性**而不是 trigger 偏差。任务与协议也不同：C5 是**文档内 MAVEN-ERE + 完整冻结候选全集、无检索步骤**。其 88.4 / 85.2 CoNLL F1 **不得与我们的 MUC 同表** |
+| **IP&M 2024 graph propagation**（Zhang et al., 61(5) 103811） | 用 AMR 图抽**跨句隐式论元**，把 trigger 与角色在 structure-aware encoder 里聚合，再over事件关系子图传播 + triadic contrastive loss，联合提升含 coreference 的四族关系抽取 | MAVEN-ERE 联合抽取；报 **MUC 86.1** 与 temporal 60.7 / causal 37.4 / subevent 32.9；2026-09-07 检索**未找到公开代码仓库** | **这是最贴近的抢占：「用预测论元提升 MAVEN-ERE coreference」这一般命题已被占。** delta 在论元作用的位置与被测量的对象：它把论元喂进联合文档表示并在关系图上传播，一次改动四族；C5 不动编码器输入也不动候选全集，只在既有 pair 分数上加一条**由角色不确定性与缺失门控的残差**，预注册高相似度误合并数为中介，主指标只有 MUC。⚠️ **对标轴未核实**：无公开代码，其 86.1 落在哪个 split、用哪个评测器**尚未建立**，只作 context，**不得同表比较** |
+| **CorefPrompt**（EMNLP 2023） | 把预测的 participant/place 兼容性做成 prompt 辅助任务，与事件类型兼容性一起提升逐对事件共指 | TAC KBP 2015-2017，候选对**欠采样**；Longformer-large selector + RoBERTa-large prompt 模型；AVG-F over MUC/B³/CEAF-e/BLANC；论元来自 OmniEvent EAE，其 checkpoint URL 在 2026-09-04 返回 `Link does not exist` | C5 把论元信号留在 prompt 之外、编码器输入之外：它是带显式缺失状态的**校准后验**，以**非对称残差**作用，并在 MAVEN-ERE 完整候选全集与官方 scorer 上评测，而不是欠采样的 TAC KBP 对。冻结的 20→participant/place 角色归并**沿用 CorefPrompt 已发布的映射并如实署名**；正因为它依赖的 OmniEvent EAE checkpoint 不可得，我们的抽取器才是 Qwen 适配并标注为适配 |
+| **HGCN-ECR**（Information Fusion 115:102769, 2025） | 用 SRL 输出搭多文档 trigger 中心事件超图，超图卷积 + 多头注意力捕获高阶语义，做跨文档共指 | 跨文档 ECR，BiLSTM-CRF SRL 前端 + 超图卷积网络（转引自 ACCI 相关工作，我们未审计其代码） | 共享的只有「抽取出的角色结构能帮事件共指」这一句。HGCN-ECR 造图并做图上推理；C5 不加任何图结构、不改编码器输入、不动候选全集，贡献是**角色对齐上的不确定性门控**，包括对"没抽到角色"的 mention 的显式处理 |
+
+窄 delta 是**交集**而不是任一部件：*带显式缺失状态的 mention-local 预测角色后验 · 作为既有 pair 分数上的
+**非对称**不确定性门控残差 · 在完整候选全集与官方 scorer 均不受触碰的冻结文档内 MAVEN-ERE 协议里 ·
+以高相似度误合并数作预注册中介 · 且 gold event-level 论元被限制在标注过的 oracle 内*。**不写「首次」**。
+
+### 14.2 审查结论与仍然打开的问题
+
+审查结论 **PASS（仅设计轴）**，逐条对照：R1.5 十二个必填字段齐全；FR-005 机制可证伪（remove-core 只
+detach 注册残差、类型内角色置换是负控，各只差一个注册变量）；FR-006 名单内两个可运行 baseline 同
+manifest / mention / 候选 / 输入假设 / 评测器，ACCI 的 ECB+/GVC 分数与 IP&M 的 MUC 86.1 只作 context 并
+写明差异轴；FR-011 Phase C 的 context/confusability 机制保留其失败身份，C5 是实质不同的干预而非改名；
+FR-012 公开实现能用则用、fidelity 缺口写明（OmniEvent EAE checkpoint 不可得，故抽取器明确是 Qwen 适配）；
+QR-003 B³/CEAF-e/BLANC 非劣护栏 + MUC recall 下界，正对"抑制合并"这类机制最容易犯的纯精度交易；
+QR-007 中介改善而主指标不胜出时保留为负结果、不促章；RS-001 三条场景逐条落成护栏（同实例同评测器 ·
+不读 gold identity 的预注册机制诊断 · 唯一可追溯 cluster + 校准置信度且 `EventNode` 零新增字段）。
+
+⚠️ **仍打开、且需要作者决定：Ch1 的 QR-001 名单，与作者 2026-09-07 为 Ch2 关掉的那个洞结构完全相同。**
+`qwen3-argument-s13-r2` 在完全相同的协议下是一个够格的对照臂，但 MUC **.803676 低于主锚 .809847**，
+且是我们自己的透明适配，赢它由赢主锚蕴含。本轮检索没有找到可运行的替代：IP&M 2024（MUC 86.1）
+**无公开代码**且口径未核实、RESIJ 始终未取得、OmniEvent EAE checkpoint 已失效。
+二选一：
+
+- **(a)** 接受「主锚 + 更弱的自建适配」，并在每张表里披露 fidelity 缺口；
+- **(b)** 把 **ACCI 的 TBM/CAE 透明移植**到文档内 MAVEN-ERE 协议，作为第二个不同方法族。
+
+**推荐 (b)**，理由是它比 Ch2 那笔账便宜得多：ACCI 有公开仓库、backbone 是 RoBERTa 量级、
+**没有 gated 权重、没有许可决定、没有 8B LoRA 的多天整机占用**；而且它的方法族（trigger 偏差反事实去偏）
+与我们的（角色不确定性门控）确实不同，正好把当前最强的抢占工作变成对照臂。
+代价是我们要为一个跨文档方法写文档内适配层，且必须标注为透明适配而非官方复现。
+**本 brief 不替作者决定**；T024 冻结 C5 契约前必须先有这个裁决。
+
+📌 **给 E5/E6 的输入证据（不在本节裁决）**：IP&M 2024 那一篇同时报 **causal 37.4**，高于 Ch2 冻结主锚
+33.17。它与 MUC 86.1 一样口径未核实（无公开代码、split/评测器未建立），因此**既不能当作 Ch2 已被超越的
+证据，也不能当作可比对手**；但 T023 的跨产物审计应把"是否存在我们尚未核实口径的更强公开数字"
+作为一条待办登记，而不是留在会话记忆里。
+
+本节没有启动任何 GPU 任务：E4 全程是文档与静态核查，未训练、未访问 final-valid。

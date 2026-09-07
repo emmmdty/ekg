@@ -70,7 +70,7 @@ implementation and verification evidence exists.
 - [x] **T018 [P] [RS-002]** Generate prospective relation power/MDE analysis → same evidence requirements as T017.
 - [x] **T019 [P] [RS-003]** Generate prospective factuality power/MDE analysis including rare-class limitations → same
   evidence requirements as T017 plus a legal evidence-strengthening path.
-- [ ] **T020 [RS-001]** Write the identity causal design brief (treatment, mediator, outcome, negative control, ablations,
+- [x] **T020 [RS-001]** Write the identity causal design brief (treatment, mediator, outcome, negative control, ablations,
   guardrails, stop) → constitution/spec traceability review passes.
 - [x] **T021 [RS-002]** Write the relation causal design brief → same review, and inference preserves the full candidate
   universe.
