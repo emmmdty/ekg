@@ -9,8 +9,8 @@
 | 项 | 值 |
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
-| 当前队列 | 任务 E.2，共 E1–E7（E1、E2 已 `done`） |
-| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E3：T021 Ch2 因果 design brief**） |
+| 当前队列 | 任务 E.2，共 E1–E7（E1、E2、E3 已 `done`） |
+| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E4：T020 Ch1 因果 design brief**） |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -176,7 +176,8 @@ baseline；Ch3 的 291-document 设计 underpowered，但预冻结五折 OOF 已
 [`results/PHASE_R1.md` §10](results/PHASE_R1.md)。行政线一律不得用来降低项目自定的更高科研硬门。文献矩阵已只读冻结 CorefPrompt、MAVEN-FACT、ModaFact、TextEE、OmniEvent
 五个官方仓库 HEAD（E2 又冻结了第六个 LLMERE，记录在 `results/PHASE_R1.md` §4/§9，
 `literature_matrix.json` 保持原哈希不动），但没有把不同数据/split/evaluator 的代码误记为同协议 baseline。Ch3 因果 brief 已
-通过 T022 并绑定已验收 OOF/power；Ch1/Ch2 brief 仍为 blocked/draft，**未放行 proposed GPU 训练**。
+通过 T022 并绑定已验收 OOF/power；Ch2 brief 已由 E3 通过 T021 审查（**仅设计轴 PASS**，relation baseline
+门仍 `blocked`）；Ch1 brief 仍为 draft，**未放行 proposed GPU 训练**。
 
 两台服务器都没有可恢复的 OmniEvent/TextEE EAE checkpoint；OmniEvent 官方 checkpoint URL 已失效，
 因此不得把随机初始化或跨 ontology 重训冒充官方 baseline。5090 的既有 Qwen 服务保持运行。
@@ -187,7 +188,7 @@ baseline；Ch3 的 291-document 设计 underpowered，但预冻结五折 OOF 已
    才能生成 T024 D4 phase contract；未冻结前不启动 proposed GPU pilot；
 2. Ch1：继续寻找可忠实运行的 mention-local argument-aware baseline/checkpoint；没有 checkpoint 时只做
    adapter 与 fixture，不把跨 ontology 重训冒充官方复现；
-3. Ch2：取得或透明适配第二个独立近期同协议 baseline，保持完整候选全集；
+3. Ch2：T021 brief 已 PASS；仍须取得第二个独立近期同协议强 baseline（或由作者接受「主锚 + 透明适配」并披露 fidelity 缺口），保持完整候选全集；
 4. 对满足 blocker 的剩余 brief 做 T020/T021 审查，再做 T023 跨产物一致性审计；只有通过者才能生成 T024
    phase contract。继续不看 final-valid、不写 proposed 训练代码。
 
@@ -257,9 +258,9 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
 |---|---|---|---|---|---|
 | E1 | 关 Ch2 TacoERE 适配档的账：查清 `taco-s13-r2` 与 `taco-s13-r3` 差异来源 → **预注册**选档规则 → 评分正式档 → 三族官方 F1 写进 `results/PHASE_R1.md` → 更新 `status.json` | 已满足 | 差异有书面解释；选档规则在看分数前写定；结果页与 `status.json` 不再互相矛盾 | done | `91e818e` + `bc6b07e` |
 | E2 | 取 LLMERE 官方实现做可运行性核查：冻结 commit/tree hash、核对 MAVEN-ERE 数据接口、base model、显存与是否 LoRA，裁决"能否在我们 2622/291 manifest 与官方 evaluator 下忠实重跑"；**本步不训练** | E1 | 裁决落到 `results/PHASE_R1.md` 第 4 节，并修订该节 Ch2 结论；能跑则排下周训练，不能跑则写明具体阻断点 | done | `8a8ac1a` |
-| E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | todo | — |
+| E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | done | `d584ca8` |
 | E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | todo | — |
-| E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾。**已有两条确凿输入证据**：`design_briefs.json` 与 `literature_matrix.json` 在 2026-09-06 15:27 被改动却没同步 `protocol.json`，哈希已漂移，且 matrix 把 relation/identity 门写成 `pass`（与自身 `global_decision`、`status.json`、结果页、E1 预注册判断四处矛盾），briefs 把三份 brief 全标 `accepted`。**必须先查明 09-06 改动来源，不得先改哈希让审计变绿**；详见 `results/PHASE_R1.md` §11 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试；两条漂移各有裁决 | todo | — |
+| E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾。**已有两条确凿输入证据**：`design_briefs.json` 与 `literature_matrix.json` 在 2026-09-06 15:27 被改动却没同步 `protocol.json`，哈希已漂移，且 matrix 把 relation/identity 门写成 `pass`（与自身 `global_decision`、`status.json`、结果页、E1 预注册判断四处矛盾），briefs 把三份 brief 全标 `accepted`。**必须先查明 09-06 改动来源，不得先改哈希让审计变绿**；漂移字节已由 E3 存档在 `runs/stages/R1/r1-v61-20260904/audit/design_briefs.drift-20260906T1527.json`，`briefs.relation` 已被 E3 的正式 T021 审查取代、`briefs.identity` 仍是 09-06 原样；详见 `results/PHASE_R1.md` §11 与 §11.1 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试；两条漂移各有裁决 | todo | — |
 | E6 | T024 冻结 C5/A4/D4 phase contract | E5 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash | todo | — |
 | E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | todo | — |
 
@@ -283,10 +284,26 @@ commit 只有数据构造、评测器与已发布预测，**没有训练/推理�
 ⚠️ 其发布的 causal 36.04 落在官方 valid 710 篇 + 自写评测器上，**与我们 internal-dev 291 篇的主锚 33.17
 差两条轴，不得同表比较**。
 
+E3 已完成（2026-09-07，纯文档与静态核查，未训练、未用 GPU）：T021 关系因果 brief 写入
+`design_briefs.json` 的 `briefs.relation`，冻结链是 **逐对反事实证据充分性+必要性 → 跨句 causal 误报数
+（注册中介）→ 官方 causal micro-F1**；三臂为 full / remove-core（关掉证据选择与两次反事实前向）/
+`taco-s13-r3` cluster-context，负控是**等长非证据句替换**且必须抹掉中介改善。护栏含**完整候选全集不得被
+弃答或检索裁剪**与 causal recall 不得低于主锚自身的 32.05。四条已被占的一般命题（TacoERE 上下文重构 ·
+LLMERE 生成式范式 · CovEReD 反事实数据集 · SURE-RAG 选择性弃答）逐条写进 brief，窄 delta 定义为它们的
+**交集**而非任一部件，**不写「首次」**。审查结论 **PASS（仅设计轴）**。
+⚠️ **留给作者的决定**：QR-001 要求"主锚 + 另一个强的不同方法族"，而 `taco-s13-r3`（32.01）**低于主锚
+33.17** 且是我们自己的透明适配，赢它由赢主锚蕴含。T024 冻结 A4 契约前必须二选一——(a) 接受"主锚 + 透明
+适配"并在每张表披露 fidelity 缺口，或 (b) 清掉 LLMERE 的 B1–B4 后排训练（4090 整机数天 + 一个 Meta 许可
+决定）。在决定前 relation baseline 门维持 `blocked`。
+📎 **取证**：E3 写 `design_briefs.json` 前先把 09-06 的漂移字节原样存档为
+`runs/stages/R1/r1-v61-20260904/audit/design_briefs.drift-20260906T1527.json`（`d5d6a61c…7986`，mtime 保留），
+只重写 `briefs.relation` 一个子树，`protocol.json` **未**重冻结——E5 的漂移裁决不受影响。
+全部证据见 [`results/PHASE_R1.md` §11.1/§12](results/PHASE_R1.md)。
+
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 
 本周真实 GPU 需求只有 E1 的一次评分（已于 2026-09-07 在 4090 GPU1 跑完，约 1 分钟）。E2 只做静态核查
-不训练，E3–E7 全是文档与审计。
+不训练，E3（已完成，未用 GPU）–E7 全是文档与审计。
 因此 **9/7–9/9 期间 4090 大面积空闲是正常的**；卡是公用资源，不得为了"看起来在跑"启动无准入的训练。
 真实的大 GPU 需求在下周：T024 放行后的第一个 seed-13 pilot（按 E.1 的证据，优先 D4）。
 LLMERE 同协议重跑**暂不排期**——E2 裁定为 `conditionally_runnable` 但有四条未清阻断点，且是 4090 整机
