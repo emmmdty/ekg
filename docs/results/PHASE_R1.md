@@ -1,6 +1,6 @@
 # Phase R1 · 方法设计准入审计
 
-> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13，E4 补 §14，作者裁决补 §15，E5 补 §16）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
+> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12，作者裁决补 §13，E4 补 §14，作者裁决补 §15，E5 补 §16，E9 补 §17）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
 > `preparation_partial_blocked`，没有方法获得 GPU pilot 准入。
 
 ## 1. 产物与代码身份
@@ -10,9 +10,11 @@
 - P1 绑定：r15 / `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`；
 - `id_coverage.json`：`ca481ecf3b899cacf553f258992f6603f8fa417a97cd25ee94176e3f313bb2e6`；
 - `power_analysis.json`：`0e137ae52d06c03a2bd5f1bcf0c8ed55b36e2218fdb70c6318b3cf2ee99ab3df`；
-- `literature_matrix.json`：`5d9bcf9e75261f124093706368f17b7c90c51ade626645abe67ef093f136c07c`
-  （原冻结值 `64874f4c…2476`，09-06 漂移到 `b874d34c…6171`；E5 **先纠正两个 `baseline_gate` 再重冻结**，
-  被取代的值逐字保留在该文件的 `amendments[0]`，见 [§16.3](#163-两条漂移的裁决两条走不同的路)）；
+- `literature_matrix.json`：`b87752670fb9c4d1426776b8130a401af95bc5c6185f6ca91d1fee24c7dc753d`
+  （原冻结值 `64874f4c…2476`，09-06 漂移到 `b874d34c…6171`；E5 **先纠正两个 `baseline_gate` 再重冻结**
+  为 `5d9bcf9e…6c07c`，被取代的值逐字保留在该文件的 `amendments[0]`，见
+  [§16.3](#163-两条漂移的裁决两条走不同的路)；E9 再**追加**两条 IP&M 2024 的 `no_public_code` 条目，
+  未改动任何既有条目与门裁决，见 [§17.4](#174-对-a4-契约与-e6-的影响不阻塞)）；
 - `design_briefs.json`：`3dfbb8810fa041983f246d7aac1a251b0fc240583582a48fd03027228c570731`
   ⚠️ **已多次改变**：先在 2026-09-06 未同步地漂移到 `d5d6a61c…7986`（见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)，
   原字节已存档为 `audit/design_briefs.drift-20260906T1527.json`），再由 E3 写入 T021 关系 brief 后成为
@@ -32,12 +34,13 @@
 - `protocol/degree_requirements.json`：
   `f47eb6a3022c7787fb54f2289878d55e6453c462f1333047f12ececbc7207ac8`
   （**2026-09-07 因作者纠正学校前提而重冻结**，v1 值 `ceeb581b…a47e` 作废，见 [§10](#10-学位标准前提纠正2026-09-07)）；
-- `protocol.json`：`497aae22784974c918bc21f665c36f44fa5ba5817322df90439dfd5483423155`
-  （E5 在两条漂移**各自裁决之后**重冻结 `design_briefs` 与 `literature_matrix` 两个 artifact 哈希，
+- `protocol.json`：`81ad04f8aa351de4e8f384619f3f4ce48683bc49f8df96bfa99122c739c39390`
+  （E9 随文献矩阵补收重冻结 `literature_matrix` 哈希，前值 `497aae22…423155`；
+  再往前 E5 在两条漂移**各自裁决之后**重冻结 `design_briefs` 与 `literature_matrix` 两个 artifact 哈希，
   并写入 `amendments[0]` 记录溯源与处置，前值 `fed98d2a…f619fc`；再往前因学位前提纠正由 `cc80e066…75dc`
   重算。R1 的 protocol.json 没有被 A3/P1 或任何下游产物引用，重冻结不影响其他信任根）；
-- `status.json`：`167d5219c49085382fec48deebb0a9d2d1aab1d5ab79e5ca597dc4ec8a675212`
-  （E5 加入 `cross_artifact_audit`、把 T023 移入 `completed_tasks`、把 `known_inconsistencies`
+- `status.json`：`f407643c448e5c0b509b362d2c0efd7659808f8d1ed7bba11cda1fcc363e2182`
+  （E9 补齐 `ipm_2024_protocol_verification` 的实测结论，前值 `167d5219…5212`；再往前 E5 加入 `cross_artifact_audit`、把 T023 移入 `completed_tasks`、把 `known_inconsistencies`
   标记为 RESOLVED，前值 `196339e9…0bf9`；再往前 §15 加入 `identity_baseline_gate_decision` 与 `ipm_2024_protocol_verification` 并重写
   `blocking_gates.identity`，前值 `bd7e87f3…fa6a`；再往前 E4 加入 `identity_design_brief`、把 T020 移入
   `completed_tasks` / `accepted_not_promoted`、清空 `drafted_not_promoted`，E4 前值 `0dcd7d98…6f42`；
@@ -912,3 +915,86 @@ uv run python scripts/audit_r1_consistency.py \
    复现。与 E7 已经持有的 `supervised.py` 缺口同类，**本节不顺手修**，交 E7 一并处理。
 
 本节没有启动任何 GPU 任务，也没有为让审计变绿而改动任何哈希。
+
+## 17. E9 · IP&M 2024 口径核实（2026-09-07）
+
+**本节只做文献口径核实，不训练、不用 GPU、不访问 final-valid。**
+目标：Zhang et al., *A graph propagation model with rich event structures for joint event relation
+extraction*, Information Processing & Management **61(5) 103811 (2024)**，DOI `10.1016/j.ipm.2024.103811`，
+OpenAlex `W4399936537`，DBLP `journals/ipm/ZhangCLZRW24`，报 MAVEN-ERE **MUC 86.1 / temporal 60.7 /
+causal 37.4 / subevent 32.9**。
+
+### 17.1 全文不可得：四条途径逐条实测
+
+| 途径 | 实测结果 |
+|---|---|
+| OpenAlex API | `open_access.is_oa = false`、`oa_status = closed`、`any_repository_has_fulltext = false`、`locations_count = 1`（仅 Elsevier），`best_oa_location = null` |
+| Semantic Scholar API | `openAccessPdf = {"url": "", "status": "CLOSED"}` |
+| arXiv / preprint 检索 | 未找到任何 preprint 或作者自存版本 |
+| 引用文献（`cited_by_count = 12`，取回 10 条） | **无一开放获取**，且主题多为其他 IE 任务，没有在 MAVEN-ERE 上复现其数字的候选 |
+
+因此**预注册判据的原始形式（读它自己的对照表）无法执行**。
+
+### 17.2 改用等价路径：证明我们的尺子就是官方尺子
+
+判据的实质是「把它的数字和我们的数字放到同一把尺上」。它的对照表拿不到，但**它对标的官方论文
+数字是公开的**，于是把这一环换成：**我们的官方 joint 复现 vs MAVEN-ERE 官方论文发表数字**。
+若两者对齐，则我们的尺子即官方尺子，其他论文引用官方数字时就与我们同尺。
+
+官方数字取自 MAVEN-ERE（EMNLP 2022）arXiv `2211.07342v1` **Table 7 与 Table 8**，
+RoBERTa-base，**5 次随机试验的均值与标准差**，评测集为官方 **test**：
+
+| 指标 | 官方单任务 | 官方 **+joint** | 我们的主锚（official joint，seed 13，291 篇 internal-dev） | 差 |
+|---|---:|---:|---:|---:|
+| MUC F1 | 81.4 (sd .51) | **82.1** (sd .43) | **80.98** | −1.1 |
+| B³ F1 | 98.1 (.10) | 98.2 (.11) | 98.04 | −0.16 |
+| CEAF-e F1 | 97.7 (.13) | 97.9 (.09) | 97.73 | −0.17 |
+| BLANC F1 | 89.8 (.36) | 90.2 (.27) | 89.88 | −0.32 |
+| causal F1 | 30.6 (.44) | **31.5** (.42) | **33.17** | **+1.7** |
+| subevent F1 | 26.7 (1.34) | **27.5** (1.10) | 29.75 | +2.25 |
+| temporal F1 | 55.8 (.42) | **56.0** (.59) | 51.63 | **−4.4** |
+
+**共指四个指标全部落在 ±0.4 以内**，causal 与 subevent 我们略高，temporal 我们低 4.4 点。
+两点必须如实说明：(1) 官方数字在 **857 篇 test** 上、我们在 **291 篇 internal-dev** 上，文档集不同，
+±1–2 点的自然波动不可归因于实现差异；(2) temporal 的 4.4 点缺口方向与
+[`PHASE_A.md`](PHASE_A.md) 已记录的 **TIMEX 头缺失**一致，但本节没有做隔离实验，**不作因果结论**，
+登记为待查。
+
+即便如此，共指四指标同时对齐这一条足以支持：**我们的官方 joint 复现忠实于官方发表口径**。
+这是我们第一次用官方论文的发表数字独立佐证主锚复现的忠实性。
+
+### 17.3 裁决与对判断的修正
+
+按 [§15.3](#153-ipm-2024-口径核实判据三种处置与排期) 预注册的三种处置，本次落在**第三种：拿不到全文**——
+登记为「**未核实口径的更强公开数字**」，论文如实披露，**既不当对手，也不当我们已被超越的证据**。
+但它带回来的证据比原判据更强，因此要同时修正一处此前的推断：
+
+> ⚠️ **修正 [§15.3](#153-ipm-2024-口径核实判据三种处置与排期) 的推断。** 该节写「86.1 比我们已知的任何
+> MAVEN-ERE 共指数字都高 5–9 点……几乎必然含口径成分」。这个推断**被新证据削弱**：拿来比的
+> `77.47` 是 Phase A **我们自己的方法档**在 710 篇 valid 上的分数，不是官方 joint 的复现，混用它是不对的。
+> 正确的对照是官方论文 +joint 的 **82.1**，IP&M 高出 **4.0** 点；且 causal +5.9、temporal +4.7、
+> subevent +5.4——**四族齐涨 4–6 点，模式内部一致**。口径差异通常不会在四个敏感度不同的任务上如此均匀，
+> 所以**更可能是真实的方法增益**。原推断的方向记录在案，不掩饰。
+
+仍然未确证的一环：**IP&M 用的是官方 test 还是 valid、是否用组织方 `evaluate.py`**。2024 年 6 月
+CodaLab 通道尚开（我们直到 2026-07-30 才发现关闭，见
+[§4](#4-文献代码可运行性)与 `PHASE_A.md`），所以它报 test 是合理猜测，但**没有证据，不写进结论**。
+
+### 17.4 对 A4 契约与 E6 的影响：不阻塞
+
+**E6 可以照常冻结 A4 契约**，理由三条：
+
+1. **它进不了 roster**：无公开代码 ⇒ 无法在我们的冻结协议下运行 ⇒ 按 FR-006 不能当 baseline。
+   这条与核实结果无关，核实前后都成立。
+2. **A4 的及格线是内部对照，不是"超过所有公开数字"**：QR-001 要求超过**冻结主锚**与**第二方法族**，
+   两者都在我们自己的协议内。IP&M 的 37.4 不在协议内，改不了这条线。
+3. **披露义务已经落地**：Ch1 与 Ch2 的相关工作必须写明这篇报了更高的四族数字、我们无法复现也无法
+   同协议运行、口径未确证。本节即为该披露的出处。
+
+同时它对两章的**方法叙述**有实质影响，已写进 [§14.1](#141-四条已被占的一般命题与-c5-的窄-delta)：
+「用预测论元提升 MAVEN-ERE coreference」这一般命题被它占住，C5 的 delta 必须收在
+**角色后验 + 缺失感知的不确定性门控**上，不能是"用论元帮共指"。这一条与它的数字能否对齐无关。
+
+📌 **文献矩阵补收**：它此前**不在** `literature_matrix.json` 里，与 E.1 发现的 LLMERE 漏收同类。
+本节已把它作为 `no_public_code` 条目补进 identity 与 relation 两章的 `methods`，
+并按 [§16.3](#163-两条漂移的裁决两条走不同的路) 的顺序重冻结哈希。
