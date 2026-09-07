@@ -1,6 +1,6 @@
 # EKG 实时状态
 
-> 更新于 **2026-09-05**。新会话先读 [`HANDOFF.md`](HANDOFF.md)；数字以
+> 更新于 **2026-09-07**。新会话先读 [`HANDOFF.md`](HANDOFF.md)；数字以
 > [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
@@ -25,6 +25,9 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    这是可修订 plan，不是 SPEC；
 6. 4090/5090 当前可用于互不冲突的**准入 baseline smoke/OOF**；长任务继续 `setsid nohup`，不依赖 SSH
    存活。多种子与跨机 checkpoint 搬运仍须另行授权。
+7. **本窗口执行序与分工见 [`HANDOFF.md`](HANDOFF.md) 任务 E**（E1 关 Ch2 第二 baseline 账 → E2/E3
+   brief → E4 T023 → E5 T024；Codex 只做 F1 服务器 git 同步与 F2 E3 评估单元冻结）。两个执行代理
+   按该表独占文件，不并行改同一结果页。
 
 ## 当前三端
 

@@ -1,6 +1,6 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-09-05**。本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，不回溯聊天记录。
+> 更新于 **2026-09-07**。本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，不回溯聊天记录。
 > 本文只记录状态、决策、依赖与下一步，不复制实验表格。实验数字只认
 > [`results/`](results/README.md)。
 
@@ -193,6 +193,52 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
 
 不得新增 seed 17/42，不得把官方配方收益记成方法贡献。R1 只把 causal 最强臂当 prospective-power 与
 下一新家族的 fallback 对照。
+
+### 任务 E：本窗口分工与执行序（2026-09-07 → 09-09）
+
+**为什么先做这一节**：`runs/stages/R1/r1-v61-20260904/status.json` 已经落后于磁盘事实——Ch1 的
+argument-aware baseline 已在 `f6966a0` 闭环（[`results/PHASE_R1.md`](results/PHASE_R1.md) 第 7 节），
+Ch2 的 TacoERE 适配 `taco-s13-r2` 已训练并用官方 evaluator 评分但**未写进任何结果页**，
+`taco-s13-r3` 于 09-06 21:20 训练结束（rc=0）却**未评分、未回传**。在关掉这两笔账之前，
+T020–T024 的任何裁决都建立在过期状态上。本窗口不启动任何 proposed 训练。
+
+主线（严格串行；前一项没写回 `results/` 就不开下一项）：
+
+| 序 | 任务 | 前置 | 判定 |
+|---|---|---|---|
+| E1 | 关闭 Ch2 第二 baseline 账 | 已满足 | r2/r3 差异有解释、选档规则预注册、正式档官方三族 F1 进 `results/PHASE_R1.md`，`status.json` 的 relation blocker 更新 |
+| E2 | T021 Ch2 因果 design brief 提交审查 | E1 | constitution/spec 可追溯审查 PASS，且推理保持完整候选全集 |
+| E3 | T020 Ch1 因果 design brief 提交审查 | 已满足（blocker 已关） | 同上；不得使用 MAVEN-ARG cluster gold |
+| E4 | T023 跨产物一致性审计 | E2 + E3 + 已有 T022 | `scripts/audit_r1_consistency.py` 实跑，输出 `cross_artifact_audit.json`；每条需求映射到任务/测试，且 `status.json` 与结果页不再互相矛盾 |
+| E5 | T024 冻结 C5/A4/D4 phase contract | E4 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash |
+
+E1 的具体要求：`taco-s13-r2` 与 `taco-s13-r3` 是**同 seed 13、同配置**（`context_mode=taco`、50 epochs、
+`save_best_by_family=true`、`neg_ratio=inf`、lr 1e-5/1e-4、warmup 200），但 dev 结果不同
+（best_epoch 5 vs 7；causal by-family best_epoch 5 vs 40）。差异只可能来自 09-06 13:24 之后对
+`src/ekg/relations/extractor/supervised.py` 的改动（`3f02640`）或 GPU 非确定性。**必须先查清来源，
+再预注册选档规则**（例如「以最新代码身份的档为准」），最后才评分。禁止先看两档分数再决定用哪档——
+那是 Phase C 已经犯过的选模轴伪影。
+
+并行面（Codex 执行，完全不碰 R1 产物）：
+
+| 序 | 任务 | 产物 |
+|---|---|---|
+| F1 | 服务器 git 同步核对：4090 在 `95e37bd`、5090 在 `4e893c1`，均落后 `origin/main` `f6966a0`；`git fetch && git reset --hard origin/main`，**不动 `runs/`** | 两端 HEAD 与 origin/main 一致，`runs/` 目录清单前后不变 |
+| F2 | Ch4/E3 中不依赖上游 handoff 的部分：冻结 1,908 个 query、候选集与序列化顺序，做逐实例一致性检查（T040 前半），**不接任何 C5/A4/D4 产物**，不做 24 条件矩阵 | `runs/stages/E3/…` + 追加到 `results/PHASE_E.md` |
+
+文件所有权（本窗口内不得越界写）：
+
+| 归属 | 独占 |
+|---|---|
+| Claude | `results/PHASE_R1.md`、`results/PHASE_A.md`、`runs/stages/R1/**`、`TASKS.md` 的 T020–T024、`phases/PHASE_{C5,A4,D4}_*.md` |
+| Codex | `results/PHASE_E.md`、`runs/stages/E3/**`、`phases/PHASE_E3_factorial_consumers.md` |
+| 共同 | `HANDOFF.md`、`TODO.md`：只**追加或替换自己那一节**，不重写对方的节；提交前先 `git pull --rebase` |
+
+分支与工作树：只在 `main` 上按逻辑单元提交，不开长期分叉。现存 `.worktrees/r1-t023-t024`
+（`de20e07`，已是 `main` 的祖先，工作树干净）在确认无人使用后删除，避免第二份 R1 工作树。
+
+GPU 说明：4090 四卡当前 0 %，5090 单卡被既有 Qwen 服务占约 17 GB。R1 未放行 proposed 训练，E1 的
+评分是短任务，因此本窗口**四卡空闲属于正常状态**，不得为占卡启动没有准入的训练。
 
 ## 4. R1 后的候选方向：不是固定答案
 
