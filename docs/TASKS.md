@@ -72,7 +72,7 @@ implementation and verification evidence exists.
   evidence requirements as T017 plus a legal evidence-strengthening path.
 - [ ] **T020 [RS-001]** Write the identity causal design brief (treatment, mediator, outcome, negative control, ablations,
   guardrails, stop) → constitution/spec traceability review passes.
-- [ ] **T021 [RS-002]** Write the relation causal design brief → same review, and inference preserves the full candidate
+- [x] **T021 [RS-002]** Write the relation causal design brief → same review, and inference preserves the full candidate
   universe.
 - [x] **T022 [RS-003]** Write the factuality causal design brief → same review, and diagnostics cannot replace macro-F1.
 - [ ] **T023** Run the cross-artifact consistency audit across constitution, SPEC, plan, tasks, phase contracts and result

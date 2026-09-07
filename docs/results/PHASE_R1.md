@@ -1,6 +1,6 @@
 # Phase R1 · 方法设计准入审计
 
-> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
+> 更新于 **2026-09-07**（E1 补 §8、E2 补 §9、E3 补 §12）。本页只记录已实测的 R1 数字与审计结论。R1 仍是
 > `preparation_partial_blocked`，没有方法获得 GPU pilot 准入。
 
 ## 1. 产物与代码身份
@@ -13,7 +13,10 @@
 - `literature_matrix.json`：`64874f4c07a3d057240f2716f33eea018e4cf49bdebf0bf2aa5369d3bf442476`
   ⚠️ **磁盘上的文件已不是这个值**（实为 `b874d34c…6171`），见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)；
 - `design_briefs.json`：`3dfbb8810fa041983f246d7aac1a251b0fc240583582a48fd03027228c570731`
-  ⚠️ **同样已漂移**（实为 `d5d6a61c…7986`），见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)；
+  ⚠️ **已两次改变**：先在 2026-09-06 未同步地漂移到 `d5d6a61c…7986`（见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)，
+  原字节已存档为 `audit/design_briefs.drift-20260906T1527.json`），再由 E3 写入 T021 关系 brief 后成为
+  `f421436ded8c5bb33f2c5bcfb8c586f75154eca9b6dc701a4f8a1142a3f49f6c`（见 [§12](#12-e3--t021-ch2-关系因果-design-brief2026-09-07)）。
+  `protocol.json` **未**随之重冻结，漂移裁决仍归 E5；
 - `factuality_cv/factuality_cv.json`：
   `3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4`；
 - `protocol/degree_requirements.json`：
@@ -22,8 +25,9 @@
 - `protocol.json`：`fed98d2a20e281d1d037eaf46e523e17fb9a24358a0c98e3b6f456a170f619fc`
   （随上一条重算；旧值 `cc80e066…75dc`。R1 的 protocol.json 没有被 A3/P1 或任何下游产物引用，
   重冻结不影响其他信任根）；
-- `status.json`：`904cb5fc7117c443966175982683ddac62bccf3b4ce591a25e190760d87ce37d`
-  （本轮先由 E2 加入 `llmere_feasibility`（`c6ee4826…ee5e`），再由 §10/§11 加入
+- `status.json`：`6f26538e8372607321672f0b1fee6e153c1858a9f94fbb6d8226ccbaa8cf623c`
+  （E3 加入 `relation_design_brief` 并把 T021 移入 `completed_tasks` / `accepted_not_promoted`，
+  E3 前值 `904cb5fc…ce37d`；再往前：由 E2 加入 `llmere_feasibility`（`c6ee4826…ee5e`），由 §10/§11 加入
   `degree_requirements_correction` 与 `known_inconsistencies`；E1 值 `099b7aaf…30e4`，
   再前一版 `24c2aac4…87af07`。`protocol.json` 的 artifacts 哈希集合不含 `status.json`，无身份漂移）。
 
@@ -497,3 +501,84 @@ R1 的 `protocol.json` 不被 A3 handoff、P1 r15 或任何下游产物引用，
 E3/E4 仍需按队列执行。哈希与语义的对账是 E5（T023 跨产物一致性审计）的份内事，本节即为它的输入证据；
 E5 必须查明 09-06 改动的来源，再决定是重冻结 `protocol.json` 还是回退这两个文件——**不得先改哈希
 让审计变绿**。
+
+### 11.1 E3 写入前的取证存档（2026-09-07）
+
+E3 必须写 `design_briefs.json`（T021 关系 brief 的法定位置），而该文件正处于争议状态。为了不让 E5 失去证据，
+写入前先把漂移版本**原样**存档（`cp -p` 保留 mtime）：
+
+| 项 | 值 |
+|---|---|
+| 存档路径 | `runs/stages/R1/r1-v61-20260904/audit/design_briefs.drift-20260906T1527.json` |
+| SHA-256 | `d5d6a61c4bfdda38ab2a835814d695da6d7e8eb4d95025bb45f664509b037986` |
+| 原 mtime | 2026-09-06 15:27:24.592885782 +0800 |
+
+`runs/` 在 `.gitignore` 里，**该文件从未进过 git**，所以没有可回溯的提交历史；冻结版本 `3dfbb881…0731`
+的字节在本地已不存在（全仓 `find` 只有一份 `design_briefs.json`）。这是 E5 追溯 09-06 改动时能拿到的
+全部本地证据，剩下的线索只有 4090 上是否留有副本。
+
+E3 只重写了 `briefs.relation` 一个子树，`briefs.factuality`、`briefs.identity` 与三个顶层字段
+**逐字节未动**（已用 JSON 对比确认）。因此 identity brief 上那条 09-06 未授权的 `accepted_pending_t023_t024`
+仍原样留给 E4/E5；relation 那一条则被本轮正式的 T021 审查取代。`protocol.json` 仍**未**重冻结——
+E5 的规则不变：先查明 09-06 来源，再决定重冻结还是回退，不得先改哈希让审计变绿。
+
+## 12. E3 · T021 Ch2 关系因果 design brief（2026-09-07）
+
+**本节只做设计准入，不训练、不访问 final-valid。** 产物是 `design_briefs.json` 的 `briefs.relation` 子树
+（写入后全文件 SHA-256 `f421436ded8c5bb33f2c5bcfb8c586f75154eca9b6dc701a4f8a1142a3f49f6c`）。
+
+冻结的因果链是：
+
+`pair-specific counterfactual evidence sufficiency + necessity`
+→ `跨句 causal 误报数（注册中介）`
+→ `官方 causal 正类 micro-F1`。
+
+- **可干预原因**：pair 分类器读整篇文档却不必指出「哪段文本让这条关系成立」，跨句对可以只靠共现被判正；
+  目标函数里没有任何东西区分「拿掉自己声称的证据后仍然成立」与「拿掉就不成立」的预测。
+- **treatment**：每个 pair 选一段 claimed rationale，再做两次对照前向——移除该证据、以及等长的非证据替换；
+  充分性与必要性共同监督 pair 置信度。**证据只改表示与置信度，绝不删候选。**
+- **三臂**：full ｜ remove-core（同编码器/输入/预算/参数量，关掉证据选择与两次反事实前向）｜
+  strongest-alternative（`taco-s13-r3` 的 K=3 cluster-conditioned context，同口径）。
+- **负控**：把选中的 rationale 换成选择器没选中的等长句子，前向次数、序列长度、参数量不变。
+  **负控必须抹掉 full−remove-core 的中介改善**；抹不掉就说明收益来自多一次前向或正则化，
+  即使 causal F1 上升也判机制失败。
+- **中介检验**：同一 291 篇 / 7,195 mention / 234,870 pair 候选全集上，用 2,000 次 document-cluster
+  paired bootstrap（RNG `260904`，与 power 审计同配置）比较跨句 causal 误报数。功效审计注入的正是这条中介
+  （见 [§3](#3-前瞻性功效)：锚 .320973、9,490 FP / 2,065 FN、其中 274 篇共 7,115 个跨句 FP、
+  最小有意义效应 +.010、5 篇纠正即达 power 1.00）。
+
+护栏（全部预注册）：推理枚举完整候选全集，任何检索/分区/聚类/弃答都不得删候选；causal recall 不得低于
+冻结主锚自身的 **32.05**，且 P/R/F1 必须同时报告，防止把纯精度移动写成机制胜出；subevent ≥ 28.75、
+temporal ≥ 50.63；训练与推理在 TIMEX 等每条轴上成对；superseded 的 `taco-s13-r2` 分数与 final-valid
+一律不进选择。
+
+### 12.1 四条已被占的一般命题与 A4 的窄 delta
+
+| 工作 | 一般命题（已被占） | 其范围 | A4 的 delta |
+|---|---|---|---|
+| TacoERE（LREC-COLING 2024） | 按事件聚类重构上下文能提升 ERE | 改「编码器读什么」，不改「模型要为什么负责」；无公开代码 | A4 不动上下文与候选全集，只干预逐对证据归因；同口径实测 cluster context 只有 causal **32.01**，低于主锚，故它是对照臂不是机制 |
+| LLMERE（COLING 2025） | 把文档级 ERE 变成事件分区上的生成式指令微调（模板 + 负采样 + rationale/多跳链）胜过判别式 | 范式与规模：Llama-3-8B + LoRA r64 + 2048 token + 每区 k=30 事件；其 causal 36.04 落在官方 valid 710 篇 + 自写评测器 | A4 保持冻结 RoBERTa-base 判别式与完整候选全集；贡献是反事实证据目标，不是更大 backbone。**LLMERE 的 rationale 是生成产物、从不被反事实检验；A4 的证据主张被自己的移除前向证伪** |
+| CovEReD（Findings of EMNLP 2024） | 文档级 RE 依赖实体与外部知识的伪信号；用实体替换生成反事实数据可暴露并修复不一致 | Re-DocRED 的实体关系，反事实作用在**实体表面形式**，产出是 Re-DocRED-CF 数据集 | A4 在冻结的 MAVEN-ERE 语料内扰动**单个 pair 的证据集合**，不造数据集、不替换实体，主指标是官方 causal micro-F1 而非一致性率。共享的只有「反事实扰动能暴露无支撑抽取」这一句，被扰动对象、任务与结果指标三者都不同 |
+| SURE-RAG（arXiv 2605.03534） | 相关 ≠ 充分；把逐 passage 的 claim-evidence 关系聚合成集合级 coverage / relation strength / uncertainty / retrieval 特征，给出 support/refute/insufficient 与选择性弃答 | 选择性 RAG 问答（HotpotQA-RAG、HaluBench），**弃答就是交付物** | 冻结 ERE 协议下弃答不能是交付物：每个候选必须给判定，过滤即静默裁剪评测全集、违反 RS-002 场景 1。A4 把充分性降为对全部 234,870 对的置信度整形，弃答风险只作诊断；并且**多一条必要性**——SURE-RAG 给手上的证据打分，A4 打的是「把证据拿走会怎样」 |
+
+窄 delta 是**交集**而不是任一部件：*逐候选对的反事实证据充分性与必要性目标 · 在冻结的完整候选全集事件关系
+协议内 · 以跨句误报率作预注册中介 · 且明令弃答不得裁剪候选*。**不写「首次」**。
+
+### 12.2 审查结论与仍然打开的问题
+
+审查结论 **PASS（仅设计轴）**，逐条对照：R1.5 十二个必填字段齐全；FR-005 机制可证伪（remove-core 是核心
+消融、非证据替换是负控，各只差一个注册变量）；FR-006 名单内 baseline 同 manifest / 候选 / 输入假设 / 评测器，
+LLMERE 的 36.04 明确只作 context（差文档集与评分器两条轴）；FR-011 A4 是实质不同的干预而非失败家族改名；
+FR-012 公开实现能用则用、fidelity 缺口写明；RS-002 场景 1 落成硬护栏；QR-003 三族护栏 + recall 下界；
+QR-007 中介改善而主指标不胜出时保留为负结果、不促章。
+
+⚠️ **仍打开、且需要作者决定**：QR-001 要「主锚 + 另一个强的不同方法族」。`taco-s13-r3` 字面满足，但它
+**低于主锚**（32.01 < 33.17）且是我们自己的透明适配，赢它由赢主锚蕴含，几乎不构成对抗压力。T024 冻结 A4
+契约前必须二选一：
+
+- **(a)** 接受「主锚 + 透明适配」，并在每张表里披露 fidelity 缺口；
+- **(b)** 排 LLMERE 适配：先清 [§9.5](#95-裁决与阻断点) 的 B1–B4，代价是 4090 整机数天级占用 + 一个
+  Meta 许可决定。
+
+本 brief 不替作者做这个决定；在决定之前 relation baseline 门维持 `blocked`，**A4 phase contract 不得冻结**。
+本节没有启动任何 GPU 任务：E3 全程是文档与静态核查。
