@@ -38,10 +38,15 @@ def command_output(argv: list[str]) -> str:
     return subprocess.check_output(argv, text=True, encoding="utf-8")
 
 
+def git_value(repository: Path, *args: str) -> str:
+    return command_output(["git", "-C", str(repository), *args]).strip()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-root", required=True, type=Path)
     parser.add_argument("--worker-python", required=True, type=Path)
+    parser.add_argument("--llamafactory-root", required=True, type=Path)
     parser.add_argument("--model-path", required=True, type=Path)
     parser.add_argument("--model-record", required=True, type=Path)
     parser.add_argument("--generated-predictions", required=True, type=Path)
@@ -55,6 +60,7 @@ def main() -> int:
         raise SystemExit(f"metadata is absent: {metadata_path}")
     for path in (
         args.worker_python,
+        args.llamafactory_root,
         args.model_path,
         args.model_record,
         args.generated_predictions,
@@ -68,6 +74,15 @@ def main() -> int:
     metadata: dict[str, Any] = json.loads(metadata_path.read_text(encoding="utf-8"))
     model_tree_sha, model_entries = tree_manifest(args.model_path)
     model_record = json.loads(args.model_record.read_text(encoding="utf-8"))
+    llamafactory = {
+        "path": str(args.llamafactory_root),
+        "origin": git_value(args.llamafactory_root, "remote", "get-url", "origin"),
+        "commit": git_value(args.llamafactory_root, "rev-parse", "HEAD"),
+        "tree": git_value(args.llamafactory_root, "rev-parse", "HEAD^{tree}"),
+        "status": git_value(args.llamafactory_root, "status", "--porcelain"),
+    }
+    if llamafactory["status"]:
+        raise SystemExit("LLaMA-Factory checkout is dirty")
     freeze = command_output([str(args.worker_python), "-m", "pip", "freeze", "--all"])
     environment_path = args.run_root / "adapter/llamafactory_environment.txt"
     environment_path.write_text(freeze, encoding="utf-8")
@@ -85,6 +100,7 @@ def main() -> int:
             },
             "environment": {
                 "python": str(args.worker_python),
+                "llamafactory": llamafactory,
                 "freeze_path": str(environment_path),
                 "freeze_sha256": sha256_file(environment_path),
             },
