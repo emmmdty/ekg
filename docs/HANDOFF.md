@@ -4,6 +4,18 @@
 > 本文只记录状态、决策、依赖与下一步，不复制实验表格。实验数字只认
 > [`results/`](results/README.md)。
 
+## ▶ 当前阶段（新窗口先看这张表）
+
+| 项 | 值 |
+|---|---|
+| 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
+| 当前队列 | 任务 E.2，共 E1–E6 |
+| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E1：关 Ch2 TacoERE 适配档的账**） |
+| 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
+| 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
+
+新窗口不要问“接下来做什么”，也不要重读整个仓库：只读检查通过后，直接开 E.2 里第一个 `todo`。
+
 ## 0. 接手后先做什么
 
 先执行只读检查：
@@ -24,6 +36,7 @@ git merge-base --is-ancestor 23b4fad HEAD
 4. 当前 R1 准入契约：
    [`phases/PHASE_R1_method_design_freeze.md`](phases/PHASE_R1_method_design_freeze.md)。
 
+只读检查通过后，**直接执行任务 E.2 表中第一个 `状态 = todo` 的行**；不要重跑已 `done` 的行，
 不要先重读整个仓库，也不要直接进入旧 D3/C4。
 
 ## 1. 当前裁决与状态
@@ -147,7 +160,7 @@ python3 -c "import json; p=json.load(open('data/protocols/v6/registry.json')); p
 
 本次未发生旧 remote smoke 或 hash 漂移失败，也未重跑 4090 smoke。
 
-### 任务 B：R1 准入闭环（当前活动阶段）
+### 任务 B：R1 准入闭环（进行中；**具体执行顺序看任务 E.2 队列，不要从本节自行挑任务**）
 
 T012–T019 与 T022 已完成（T018 已在 A3 handoff 后补齐），精确数字、hash 和裁决见
 [`results/PHASE_R1.md`](results/PHASE_R1.md)，产物根为 `runs/stages/R1/r1-v61-20260904/`，代码提交
@@ -174,6 +187,8 @@ baseline；Ch3 的 291-document 设计 underpowered，但预冻结五折 OOF 已
 3. Ch2：取得或透明适配第二个独立近期同协议 baseline，保持完整候选全集；
 4. 对满足 blocker 的剩余 brief 做 T020/T021 审查，再做 T023 跨产物一致性审计；只有通过者才能生成 T024
    phase contract。继续不看 final-valid、不写 proposed 训练代码。
+
+上面四条是**依赖关系**，不是执行顺序；本周的实际执行顺序与判定标准以任务 E.2 的队列表为准。
 
 产物进入 `runs/stages/R1/r1-v61-20260904/`，结构与完成门以
 [`PHASE_R1_method_design_freeze.md`](phases/PHASE_R1_method_design_freeze.md) 为准。R1 准备可以部分完成，
@@ -235,14 +250,14 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
 
 #### E.2 本周队列（9/7 – 9/9；写代码由 Claude/Codex 承担，故时间成本压在决策与 GPU 上）
 
-| 序 | 任务 | 前置 | 完成判定 | 状态 |
-|---|---|---|---|---|
-| E1 | 关 Ch2 TacoERE 适配档的账：查清 `taco-s13-r2` 与 `taco-s13-r3` 差异来源 → **预注册**选档规则 → 评分正式档 → 三族官方 F1 写进 `results/PHASE_R1.md` → 更新 `status.json` | 已满足 | 差异有书面解释；选档规则在看分数前写定；结果页与 `status.json` 不再互相矛盾 | todo |
-| E2 | 取 LLMERE 官方实现做可运行性核查：冻结 commit/tree hash、核对 MAVEN-ERE 数据接口、base model、显存与是否 LoRA，裁决"能否在我们 2622/291 manifest 与官方 evaluator 下忠实重跑"；**本步不训练** | E1 | 裁决落到 `results/PHASE_R1.md` 第 4 节，并修订该节 Ch2 结论；能跑则排下周训练，不能跑则写明具体阻断点 | todo |
-| E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | todo |
-| E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | todo |
-| E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试 | todo |
-| E6 | T024 冻结 C5/A4/D4 phase contract | E5 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash | todo |
+| 序 | 任务 | 前置 | 完成判定 | 状态 | commit |
+|---|---|---|---|---|---|
+| E1 | 关 Ch2 TacoERE 适配档的账：查清 `taco-s13-r2` 与 `taco-s13-r3` 差异来源 → **预注册**选档规则 → 评分正式档 → 三族官方 F1 写进 `results/PHASE_R1.md` → 更新 `status.json` | 已满足 | 差异有书面解释；选档规则在看分数前写定；结果页与 `status.json` 不再互相矛盾 | todo | — |
+| E2 | 取 LLMERE 官方实现做可运行性核查：冻结 commit/tree hash、核对 MAVEN-ERE 数据接口、base model、显存与是否 LoRA，裁决"能否在我们 2622/291 manifest 与官方 evaluator 下忠实重跑"；**本步不训练** | E1 | 裁决落到 `results/PHASE_R1.md` 第 4 节，并修订该节 Ch2 结论；能跑则排下周训练，不能跑则写明具体阻断点 | todo | — |
+| E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | todo | — |
+| E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | todo | — |
+| E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试 | todo | — |
+| E6 | T024 冻结 C5/A4/D4 phase contract | E5 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash | todo | — |
 
 E1 的具体要求：两档是**同 seed 13、同配置**（`context_mode=taco`、50 epochs、`save_best_by_family=true`、
 `neg_ratio=inf`、lr 1e-5 / head 1e-4、warmup 200），但 dev 不同（best_epoch 5 vs 7；causal by-family
@@ -287,18 +302,27 @@ R1 若证明上述候选与近期工作重复、数据不支持、功效不足�
 - 一条 SSH 只启动一个后台任务；长任务使用 `setsid nohup`、`python -u` 和独立日志；
 - 改代码后必须运行 `uv run pytest`、`uv run ruff check src tests scripts`、`uv run ekg-smoke`。
 
-## 6. 新窗口的完成汇报格式
+## 6. 完成、回填与交接程序
 
-每完成一项，用以下格式更新本文和最终回复：
+一项任务走完下面五步才算完成；缺任何一步，下一个窗口都不得开工。
+
+1. **产物落地**：命令、日志与 artifact 落到 `runs/stages/<PHASE>/<run root>/`；跨机产物双端 SHA-256 一致。
+2. **写结果页**：数字只写进对应的 `results/PHASE_*.md`，升降如实、失败如实；其他文档只引用不复制。
+3. **回填队列**：把任务 E.2 表里该行 `状态` 改成 `done`，`commit` 填短 hash；没做完改 `wip`
+   并在该行写清卡在哪条证据上，不留只有自己知道的上下文。
+4. **推进队列**：确认下一行前置已满足。**整条队列清空时**，由本次持有者按 §3 依赖图和
+   [`TASKS.md`](TASKS.md) 生成下一批 E 队列写进本表，**先写表再开工**，并同步更新顶部当前阶段卡片。
+5. **提交并推送**：按逻辑单元 commit，`git push origin main`。**没 push 就没交接。**
+
+最终回复用这六行，不写长篇叙事：
 
 ```text
-完成：<task ID / phase>
+完成：<E 队列序号 / task ID>
 身份：<commit / protocol hash / bundle ID>
 验证：<实际命令与 PASS/FAIL>
 结果：<只引用 docs/results/PHASE_*.md 位置>
-状态：pass | failed | blocked；原因
-下一步：<真实依赖；是否需要 GPU/多种子/用户授权>
+状态：done | wip | blocked；原因
+下一步：<E 队列里下一个 todo；是否需要 GPU / 多种子 / 作者授权>
 ```
 
-新窗口不要先问宽泛的“接下来做什么”。若工作树和依赖检查正常，直接执行任务 A，并可同时推进任务 B；
-到任务 C 的长 GPU 命令时，再按规则向作者展示完整命令和预期产物。
+长 GPU 任务启动前，仍须按 §5 向作者展示完整命令、cwd 与预期产物；5090 每次单独取得授权。
