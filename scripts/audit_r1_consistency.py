@@ -288,6 +288,18 @@ def _missing_contract_sections(text: str) -> list[str]:
     return [section for section in CONTRACT_SECTIONS if section not in text]
 
 
+def _contract_binding_state(
+    binding: dict[str, object] | None, relative: str, actual_sha256: str
+) -> str:
+    if binding is None:
+        return "pending_t024"
+    if binding.get("state") == "blocked":
+        return "blocked_pre_admission"
+    if binding.get("path") == relative and binding.get("sha256") == actual_sha256:
+        return "frozen"
+    return "drifted"
+
+
 def _markdown_heading_anchors(text: str) -> set[str]:
     anchors = set()
     for title in re.findall(r"^#{1,6}\s+(.+?)\s*$", text, re.M):
@@ -453,9 +465,10 @@ def build_audit(repo: Path) -> dict:
         "R1 status does not close T012-T022",
     )
 
-    # T024 freezes the method phase contracts, so their absence before T024 is the expected
-    # state and is reported as pending rather than as an inconsistency. A contract that is
-    # declared but does not match its file is an inconsistency.
+    # T024 can freeze each independently approved phase while recording an explicit
+    # pre-admission block for another. An absent binding is pending before T024; a blocked
+    # record is deliberately not a document hash binding; all other declared bindings must
+    # reproduce the contract file exactly.
     contracts = r1_protocol.get("phase_contracts") or {}
     contract_states: dict[str, dict[str, object]] = {}
     for name, relative in METHOD_PHASE_PATHS.items():
@@ -466,19 +479,22 @@ def build_audit(repo: Path) -> dict:
             "missing_sections": _missing_contract_sections(
                 contract_path.read_text(encoding="utf-8")
             ),
-            "frozen_in_protocol": binding is not None,
+            "frozen_in_protocol": False,
         }
-        if binding is None:
-            state["state"] = "pending_t024"
-        else:
-            actual = sha256_file(contract_path)
-            state["state"] = (
-                "frozen"
-                if binding.get("path") == relative and binding.get("sha256") == actual
-                else "drifted"
-            )
+        actual = sha256_file(contract_path)
+        binding_state = _contract_binding_state(binding, relative, actual)
+        state["state"] = binding_state
+        if binding_state == "blocked_pre_admission":
+            state["reason"] = binding.get("reason")
             findings.check(
-                state["state"] == "frozen",
+                bool(binding.get("reason")),
+                "contract-block-reason",
+                f"{name} phase block has no reason",
+            )
+        elif binding_state in {"frozen", "drifted"}:
+            state["frozen_in_protocol"] = binding_state == "frozen"
+            findings.check(
+                binding_state == "frozen",
                 "contract-drift",
                 f"{name} phase contract does not match its frozen binding",
             )
@@ -507,6 +523,9 @@ def build_audit(repo: Path) -> dict:
         f"R1 status is {status.get('status')}, not pass",
         *(f"phase contract pending T024: {name}" for name, state in contract_states.items()
           if state["state"] == "pending_t024"),
+        *(f"phase contract blocked before admission: {name}"
+          for name, state in contract_states.items()
+          if state["state"] == "blocked_pre_admission"),
         *(f"cross-artifact finding open: {item['code']}" for item in findings.items),
     ]
     return {

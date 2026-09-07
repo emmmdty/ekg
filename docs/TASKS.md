@@ -77,9 +77,9 @@ implementation and verification evidence exists.
 - [x] **T022 [RS-003]** Write the factuality causal design brief → same review, and diagnostics cannot replace macro-F1.
 - [x] **T023** Run the cross-artifact consistency audit across constitution, SPEC, plan, tasks, phase contracts and result
   identities → every requirement maps to a task/test; no task adds an undeclared outcome.
-- [ ] **T024** Freeze each approved method phase contract only after its R1 prerequisites and T023 pass → exact inputs,
-  baselines, protocol hashes, promotion, stop, bundle and GPU commands exist; independent phases may be released in any
-  evidence-supported order.
+- [x] **T024** Freeze each approved method phase contract only after its R1 prerequisites and T023 pass → A4/D4 frozen
+  with exact inputs, baselines, protocol bindings, promotion, stop, bundle and GPU commands; C5 deliberately remains
+  unapproved and unbound because E10 found ACCI not runnable, so it awaits an author-selected replacement family.
 
 **Checkpoint**: R1 PASS releases one method phase. Candidate mechanisms may be replaced during R1 if evidence rejects
 them; `SPEC.md` does not need amendment unless the outcome or quality requirement changes.

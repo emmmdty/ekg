@@ -44,6 +44,22 @@ def test_phase_contract_requires_every_execution_section() -> None:
     ]
 
 
+def test_contract_binding_distinguishes_pending_blocked_and_frozen() -> None:
+    relative = "docs/phases/PHASE_A4_pair_evidence.md"
+    digest = "a" * 64
+
+    assert audit._contract_binding_state(None, relative, digest) == "pending_t024"
+    assert audit._contract_binding_state({"state": "blocked"}, relative, digest) == (
+        "blocked_pre_admission"
+    )
+    assert audit._contract_binding_state(
+        {"path": relative, "sha256": digest}, relative, digest
+    ) == "frozen"
+    assert audit._contract_binding_state(
+        {"path": relative, "sha256": "b" * 64}, relative, digest
+    ) == "drifted"
+
+
 def test_markdown_heading_anchors_cover_english_and_chinese_titles() -> None:
     text = "## Current Candidate Design\n### E3.4 统计推断\n## 错误隔离与交接\n"
 

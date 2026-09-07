@@ -1,7 +1,9 @@
 # PHASE A4 — 完整候选上的关系证据充分性与必要性
 
-> **FROZEN / NOT STARTED。** 本契约由 R1 T023/T024 放行。A3 的工作点、近似 retriever、prototype 与
-> ATLoss 保持 failed/sealed；A4 是不同机制家族。只允许 seed 13，额外 seeds 未获授权。
+> **FROZEN / NOT STARTED（E6 / T024，2026-09-07）。** A3 的工作点、近似 retriever、prototype 与
+> ATLoss 保持 failed/sealed；A4 是不同机制家族。只允许 seed 13，额外 seeds 未获授权。外部 hash binding
+> 由 R1 `protocol.json` 的 `phase_contracts.relation` 持有，避免把会反向绑定本文件的 outer-protocol hash
+> 写进本文件而形成自指。
 
 ## Goal
 
@@ -18,9 +20,11 @@ QR-006–QR-007、SC-001、SC-003、SC-006–SC-009。
   `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`；
 - A3 failed handoff：`runs/stages/A3/a3-v6-20260905-r17/protocol.json`，SHA-256
   `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`；
-- R1：`runs/stages/R1/r1-v61-20260904/protocol.json` 与同目录 `cross_artifact_audit.json`；protocol SHA-256
-  以 `docs/results/PHASE_R1.md` 为准，audit SHA-256 只从 `docs/HANDOFF.md` / `docs/TODO.md` 读取，避免
-  audit 对结果页形成自引用；
+- R1：`runs/stages/R1/r1-v61-20260904/protocol.json`、`cross_artifact_audit.json` 与
+  `phase_contracts/t024_freeze.json`；T024 使用的 design brief / literature matrix / power audit SHA-256
+  分别为 `2220b86c…1999` / `b8775267…753d` / `0e137ae5…b3df`。outer R1 protocol 对本文件的最终
+  hash binding 和 T024 artifact hash 见 `docs/results/PHASE_R1.md` §19；不在本文件复制 outer-protocol
+  hash，避免自指；
 - train/internal-dev manifest SHA-256：`47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68` /
   `f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f`；
 - MAVEN-ERE train SHA-256：`6a5519fe7c30448690adb13d49217c50d474fc57480eae10aecb29df7eb638b7`；
@@ -28,8 +32,12 @@ QR-006–QR-007、SC-001、SC-003、SC-006–SC-009。
 - official evaluator SHA-256：`32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598`；
 - encoder：ModelScope 可下载的 RoBERTa-base，冻结到内容寻址目录
   `.../roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9`；
-- T021 TacoERE adaptation：checkpoint、predictions、official metrics、transparent fidelity delta 与 SHA-256
-  只从 R1 protocol 读取；运行数字只从 `docs/results/PHASE_R1.md` 读取。
+- TacoERE adaptation：`taco-s13-r3` 的 checkpoint、predictions、official metrics、transparent fidelity
+  delta 与 SHA-256 只从 R1 protocol 读取；运行数字只从 `docs/results/PHASE_R1.md` 读取；
+- LLMERE-causal：`llmere-causal-s13` 是 metrics pending 的透明适配 baseline，冻结 upstream
+  `94d4ef2781ec7e071d38ac7fd8632a8fffbda798`、未改动 converter、causal-only 48,365 train / 11,149
+  internal-dev generations、ungated-mirror Llama-3-8B（weight SHA-256 必须在 run metadata 披露）、LoRA
+  r64 / lr `2e-4` / cosine / 3 epochs / max length 2048 / seed 13，以及 frozen `evaluate.py`。
 
 禁止评测时 retrieval/pruning；禁止改变 official mention expansion、candidate order、TIMEX 对称性、关系方向
 或 scorer。A3 failed bundle 保持原身份，不因 A4 重新标记。
@@ -38,15 +46,19 @@ QR-006–QR-007、SC-001、SC-003、SC-006–SC-009。
 
 同一 manifest/candidate/evaluator/backbone 下冻结：
 
-1. MAVEN-ERE official joint；
+1. MAVEN-ERE official joint primary anchor；
 2. A3.6 strongest fallback（official recipe，failed method identity retained）；
-3. TacoERE-inspired K=3 cluster-conditioned RoBERTa adaptation（independent recent family）；
-4. proposed pair evidence sufficiency/necessity（full）；
-5. full 去掉 evidence objectives（remove-core）；
-6. length-matched non-evidence sentence（negative control）；
-7. evidence representation 保留、sufficiency/necessity consistency disabled（no structural constraint）。
+3. TacoERE-inspired K=3 cluster-conditioned RoBERTa transparent adaptation `taco-s13-r3`；它是固定
+   同协议对照，不是第二条强方法族；
+4. LLMERE-causal transparent adaptation `llmere-causal-s13`（上述实现规格已冻结，metrics pending）；它是
+   第二条不同方法族，只有其 metrics 落地后才约束确认性 promotion。其 k=30 event partition 使跨分区对
+   不可生成，评分时这些漏报仍留在完整 candidate universe 内，故 ceiling 在 baseline 自身而不在评测；
+5. proposed pair evidence sufficiency/necessity（full）；
+6. full 去掉 evidence objectives（remove-core）；
+7. length-matched non-evidence sentence（negative control）；
+8. evidence representation 保留、sufficiency/necessity consistency disabled（no structural constraint）。
 
-矩阵 3–7 必须使用完整冻结候选；TF-IDF/KMeans 仅为 baseline 的 context construction，不得成为 A4 的
+矩阵 3、5–8 必须使用完整冻结候选；TF-IDF/KMeans 仅为 baseline 的 context construction，不得成为 A4 的
 proposed treatment 或修改候选。
 
 ## Tasks
@@ -71,7 +83,7 @@ predictions 行数与 candidate digest 完全一致。
 
 ### A4.3 seed-13 pilot
 
-运行矩阵 4–7 的 seed 13，固定 50 epochs、warmup 200、encoder lr `1e-5`、head lr `1e-4`、gradient
+运行矩阵 5–8 的 seed 13，固定 50 epochs、warmup 200、encoder lr `1e-5`、head lr `1e-4`、gradient
 accumulation 8、full negatives、per-family checkpoint selection。逐实例保存 evidence、原/移除/保留 evidence
 logits 和 cross-sentence error profile；不扫 threshold。
 
@@ -83,12 +95,13 @@ seed-13 同时过主门、中介、负控和护栏后，只写 `confirmation_eli
 
 ## Promotion gate
 
-- seed-13 causal F1 严格高于 A3 fallback 与 TacoERE adaptation；
+- seed-13 causal F1 严格高于 official-joint anchor、A3 fallback 与 TacoERE adaptation；
 - full 相对 remove-core 降低 cross-sentence causal false-positive rate，且 length-matched control 不保留相同
   sufficiency/necessity mediator；causal recall 不低于 A3 fallback 1.0 个绝对 F1 点；
 - subevent F1 ≥ `0.2875`，temporal F1 ≥ `0.5063`；candidate population/digest 必须逐位相同；
-- confirmation：仅在授权后，matched seeds 13/17/42 的 mean causal delta ≥ `+0.010`，至少 2/3 为正，
-  10,000 次 document-cluster paired-bootstrap 95% CI 下界 > 0，且均值超过两条强 baseline；
+- confirmation：先等待并超过 LLMERE-causal；仅在额外 seeds 获授权后，matched seeds 13/17/42 的 mean
+  causal delta ≥ `+0.010`，至少 2/3 为正，10,000 次 document-cluster paired-bootstrap 95% CI 下界 > 0，
+  且均值超过 official-joint 与 LLMERE-causal 两条强 baseline；
 - 辅助 evidence/abstention 指标只能支持或否定机制，不能替代 causal 主指标。
 
 ## Stop conditions

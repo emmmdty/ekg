@@ -25,8 +25,8 @@ ID 审计、CPU smoke 也可并行。每个 phase 仍须交付 `pass|failed|bloc
 |---|---|---|---|---|
 | **P1** | 冻结 manifests、scorer、baseline smoke 与 stage bundle | **COMPLETED / PASS；r15；global=PASS，A3 entry=PASS** | 4090 协议前向已完成 | [`PHASE_P1_protocol_freeze.md`](PHASE_P1_protocol_freeze.md) |
 | **A3** | Ch2 旧机制终局分账与失败交接 | **COMPLETED / FAILED；handoff r17** | 4090 已完成 | [`PHASE_A3_relation_balanced.md`](PHASE_A3_relation_balanced.md) |
-| **R1** | 三方法章的文献、ID、因果链、power 与 protocol 审查 | T020–T024 收口中；proposed pilot 尚未启动 | CPU；baseline smoke 可用 GPU | [`PHASE_R1_method_design_freeze.md`](PHASE_R1_method_design_freeze.md) |
-| **C5** | mention-local 论元后验与不确定性感知身份消解 | FROZEN / NOT STARTED；仅 seed 13 已预注册 | 4090 | [`PHASE_C5_argument_uncertainty.md`](PHASE_C5_argument_uncertainty.md) |
+| **R1** | 三方法章的文献、ID、因果链、power 与 protocol 审查 | A4/D4 已由 T024 冻结；C5 仍等作者名单，proposed pilot 尚未启动 | CPU；baseline smoke 可用 GPU | [`PHASE_R1_method_design_freeze.md`](PHASE_R1_method_design_freeze.md) |
+| **C5** | mention-local 论元后验与不确定性感知身份消解 | BLOCKED / NOT FROZEN；ACCI 不可运行，等作者指定第二方法族 | 不得使用 | [`PHASE_C5_argument_uncertainty.md`](PHASE_C5_argument_uncertainty.md) |
 | **A4** | 完整候选上的 pair evidence 充分性/必要性 | FROZEN / NOT STARTED；仅 seed 13 已预注册 | 4090 | [`PHASE_A4_pair_evidence.md`](PHASE_A4_pair_evidence.md) |
 | **D4** | typed cue 与分解式事实性决策 | FROZEN / NOT STARTED；仅 seed 13 已预注册 | 4090 | [`PHASE_D4_typed_cue_factuality.md`](PHASE_D4_typed_cue_factuality.md) |
 | **D3/C4** | v6 旧方法契约 | **SUPERSEDED FOR FUTURE EXECUTION**；历史结果仍有效 | 不再执行 | [`PHASE_D3_evidence_conditioned.md`](PHASE_D3_evidence_conditioned.md)、[`PHASE_C4_context_identity.md`](PHASE_C4_context_identity.md) |

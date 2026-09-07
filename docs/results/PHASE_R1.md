@@ -1047,3 +1047,46 @@ single-card seed-13、**不使用 GPU**，也不把 ECB+/GVC 的 CoNLL F1 写入
 
 Ch1 的第二方法族门保持 `blocked`。下一步需要在 §15 的四条新措辞下由作者对替代名单作出决定；E6 可以
 处理已解锁的 A4/D4 contract，但不能把 C5 baseline 缺口伪装成已冻结。
+
+## 19. E6 · T024 冻结获准的 method phase contract（2026-09-07）
+
+**本节只冻结契约与可追溯身份：未实现、未训练、未推理、未用 GPU、未访问 final-valid。** T024 的语义是
+“冻结每一个已经通过自身准入的 phase”，不是把仍缺强 baseline 的章节伪造为放行。因此 A4 与 D4 进入
+`frozen`，C5 明确留在 `blocked_pre_admission`。
+
+| phase | T024 裁决 | 契约 SHA-256 | R1 protocol binding |
+|---|---|---|---|
+| A4 / relation | `frozen` | `fe15945d602373fa5b7ed664243e6eb81e697ee0621d29e127dbcd1a8ca9ac80` | `phase_contracts.relation` |
+| D4 / factuality | `frozen` | `01e1ba2f74627216a19c02ad47dbc5bbf35e72fe4530ce18ede76072328c49b1` | `phase_contracts.factuality` |
+| C5 / identity | `blocked_pre_admission`，**不绑定**草案 | `8bc031b92de56af01d39e00f96f979be7d3a0cdb66a8a6e00d460f71f35066f8`（仅记录） | `phase_contracts.identity.state=blocked`，无 path/hash binding |
+
+T024 artifact 是
+`runs/stages/R1/r1-v61-20260904/phase_contracts/t024_freeze.json`，SHA-256
+`3b44a2e2fdf402bfa55492d6527e642a7f75bb9301ad1c1e4098477ec7edd81b`；最终 R1 `protocol.json` SHA-256 是
+`2fde1577c92d826d0ee12e722e6183b92421477ea38769e15144cdaa300c7094`。契约文件引用 R1 的已冻结 inputs，
+outer protocol 持有契约文件 hash，而不在契约内反写 outer-protocol hash，避免 self-hash cycle。
+
+- A4 的 roster 已按 §13 改正：`taco-s13-r3` 是固定透明适配对照、不是第二条强方法族；
+  `llmere-causal-s13` 以 upstream `94d4ef27…a798`、未改 converter、causal-only 48,365 / 11,149、
+  Llama-3-8B ungated-mirror weight disclosure、LoRA r64 / lr `2e-4` / cosine / 3 epochs / 2048 / seed 13 和
+  frozen `evaluate.py` 完整规格化，但 metrics 仍 pending。A4 seed-13 pilot 可在 A4.0–A4.2、local gate
+  和重新核卡后启动；它只有在 LLMERE 数字落地且被超过后才可进入确认性 promotion。
+- D4 的 T022 roster、five-fold OOF inputs、promotion/stop、bundle 与 GPU command 已与契约逐项一致，故只
+  增加冻结身份而不改方法内容。
+- C5 不再称 `qwen3-argument-s13-r2` 为 strong baseline；它是“朴素池化预测论元会掉点”的注册负面对照。
+  E10 已裁决 ACCI `not_runnable`，而 IP&M 2024 无公开代码，故两者都不能占第二方法族。旧的 annealed
+  local-pair 与 hard-argument 臂也不在 E4 通过的 brief roster 中，已从待重新准入草案移除。作者按 §15
+  四条件指定新名单前，禁止 C5 的实现、preflight、smoke 或 GPU。
+
+重跑的审计命令：
+
+```bash
+uv run python scripts/audit_r1_consistency.py \
+  --output runs/stages/R1/r1-v61-20260904/audit/cross_artifact_audit.json
+```
+
+结果为 `pass`、`findings = 0`、35/35 requirements mapped。审计现在区分尚未发生的 `pending_t024` 与已记录但不
+绑定文档的 `blocked_pre_admission`：A4/D4 是 `frozen`，C5 是后者。R1 状态仍
+`preparation_partial_blocked`，仅余 C5 的 author roster blocker；这不是 A4/D4 pilot 的 R1 blocker。
+`scripts/audit_r1_consistency.py` 尚未进入 R1 `code.files`，这个可追溯性缺口以及 relation trainer hash
+缺口按队列留给 E7，未在 E6 顺手重冻结。

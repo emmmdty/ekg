@@ -1,8 +1,9 @@
 # PHASE D4 — typed cue 与分解式事件事实性检测
 
-> **FROZEN / NOT STARTED。** 本契约由 R1 T023/T024 放行。历史 D3 evidence locator 家族保持 failed；
+> **FROZEN / NOT STARTED（E6 / T024，2026-09-07）。** 历史 D3 evidence locator 家族保持 failed；
 > D4 的 treatment 是 typed cues 条件下的 known/unknown→modality→polarity 决策结构。只允许 seed 13，
-> 额外 seeds 未获授权。
+> 额外 seeds 未获授权。外部 hash binding 由 R1 `protocol.json` 的 `phase_contracts.factuality` 持有，避免
+> 在本文件复制会反向绑定它的 outer-protocol hash。
 
 ## Goal
 
@@ -18,8 +19,10 @@ QR-001–QR-004、QR-006–QR-007、SC-001、SC-004、SC-006–SC-009。
 - P1：`runs/stages/P1/p1-v6-20260904-r15/protocol.json`，SHA-256
   `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`；
 - R1：`runs/stages/R1/r1-v61-20260904/protocol.json`、`cross_artifact_audit.json`、
-  `factuality_cv/factuality_cv.json`；protocol SHA-256 以 `docs/results/PHASE_R1.md` 为准，audit SHA-256
-  只从 `docs/HANDOFF.md` / `docs/TODO.md` 读取，避免 audit 对结果页形成自引用；
+  `phase_contracts/t024_freeze.json` 与 `factuality_cv/factuality_cv.json`；T024 使用的 design brief /
+  literature matrix / power audit SHA-256 分别为 `2220b86c…1999` / `b8775267…753d` /
+  `0e137ae5…b3df`。outer R1 protocol 对本文件的最终 hash binding 和 T024 artifact hash 见
+  `docs/results/PHASE_R1.md` §19；不在本文件复制 outer-protocol hash，避免自指；
 - factuality CV manifest SHA-256：
   `3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4`；
 - MAVEN-FACT train SHA-256：`190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7`；

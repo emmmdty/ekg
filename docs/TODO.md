@@ -30,8 +30,10 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    09-06 漂移已溯源到 `f6966a0` 同一会话并按「先溯源→再纠正内容→最后动哈希」裁决完毕。
    ⚠️ E5 另查出 **A4 与 C5 两份 phase 契约的 roster 与 §13/§15 裁决矛盾，E6 必须改内容不能只补哈希**。
    **E9 已证我们的官方 joint 复现忠实于官方发表口径**（共指四指标与官方论文 ±0.4 内），
-   IP&M 2024 全文不可得、进不了 roster、不阻塞 A4 契约；
-   T024 冻结前不启动 proposed GPU pilot；
+   IP&M 2024 全文不可得、进不了 roster、不阻塞 A4 契约；**E6 已完成 T024 的获准 phase 冻结**：
+   A4/D4 的契约均已 hash-bound，C5 因 ACCI `not_runnable` 与无替代作者名单而显式
+   `blocked_pre_admission`、不绑定草案。A4/D4 仍须完成各自实现、本地 gate、preflight、CPU/CUDA smoke
+   与重新核卡后才可启动 seed-13 pilot；
 5. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
    sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
    这是可修订 plan，不是 SPEC；
@@ -44,8 +46,9 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    ；~~E5 跑 T023 跨产物审计~~ 同日 `done`，审计 `pass`；~~E9 核实 IP&M 口径~~ 同日 `done`，
    全文不可得、改用官方论文数字做等价对照，**A4 契约已解锁**；~~E10 ACCI 静态核查~~（同日 `done`，
    仓库全历史仅 README，`not_runnable`，不排 GPU；C5 baseline roster 需作者另议）→
-   **E6 T024**（**契约内容须先对齐 §13/§15 裁决，不能只补哈希**；A4 的 LLMERE-causal 以「已规格化、数字
-   pending」入 roster；C5 仍缺第二方法族，不能伪冻结）→ E7 补 relation 代码哈希缺口 **与审计脚本哈希缺口**；
+   ~~E6 T024~~（A4/D4 已 hash-bound；A4 的 LLMERE-causal 以「已规格化、数字 pending」入 roster；
+   C5 仍缺第二方法族，已明确 `blocked_pre_admission` 而非伪冻结）→ **E7** 补 relation 代码哈希缺口
+   **与审计脚本哈希缺口**；
    **E8 LLMERE-causal 训练可与 E4–E7 并行**，只写自己的 namespace。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
    开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
 
