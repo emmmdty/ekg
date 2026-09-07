@@ -9,8 +9,8 @@
 | 项 | 值 |
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
-| 当前队列 | 任务 E.2，共 E1–E10（E1–E5 已 `done`；**E8 可与 E6–E7 并行**） |
-| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E9：IP&M 2024 口径核实**）。**执行顺序认表里的行序，不认编号大小**——E9/E10 物理排在 E6 之前 |
+| 当前队列 | 任务 E.2，共 E1–E10（E1–E5、E9 已 `done`；**E8 可与 E6–E7 并行**） |
+| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E10：ACCI 仓库静态核查**）。**执行顺序认表里的行序，不认编号大小** |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -311,9 +311,9 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | done | `d584ca8` |
 | E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | done | `0210fba` |
 | E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾。**已有两条确凿输入证据**：`design_briefs.json` 与 `literature_matrix.json` 在 2026-09-06 15:27 被改动却没同步 `protocol.json`，哈希已漂移，且 matrix 把 relation/identity 门写成 `pass`（与自身 `global_decision`、`status.json`、结果页、E1 预注册判断四处矛盾），briefs 把三份 brief 全标 `accepted`。**必须先查明 09-06 改动来源，不得先改哈希让审计变绿**；漂移字节已由 E3 存档在 `runs/stages/R1/r1-v61-20260904/audit/design_briefs.drift-20260906T1527.json`，`briefs.relation` 已被 E3 的正式 T021 审查取代、`briefs.identity` 仍是 09-06 原样；详见 `results/PHASE_R1.md` §11 与 §11.1 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试；两条漂移各有裁决 | done | `54a10cf` |
-| E9 **（排在 E6 之前）** | 核实 IP&M 2024（Zhang et al., IP&M 61(5) 103811）的口径：取全文对照表，看**它复现的 MAVEN-ERE official joint baseline** 与我们自跑官方码是否对齐（MAQInstruct 判据）。订阅墙走作者主页 / ResearchGate / 机构库 / OpenAlex（作者 Junchi Zhang，dblp `153/2859`） | 已满足 | 三种处置之一落到 `results/PHASE_R1.md` §15.3；**无论结果都不进 roster**；若判定可比则 A4 及格线在 E6 前重估 | todo | — |
+| E9 **（排在 E6 之前）** | 核实 IP&M 2024（Zhang et al., IP&M 61(5) 103811）的口径：取全文对照表，看**它复现的 MAVEN-ERE official joint baseline** 与我们自跑官方码是否对齐（MAQInstruct 判据）。订阅墙走作者主页 / ResearchGate / 机构库 / OpenAlex（作者 Junchi Zhang，dblp `153/2859`） | 已满足 | 三种处置之一落到 `results/PHASE_R1.md` §15.3；**无论结果都不进 roster**；若判定可比则 A4 及格线在 E6 前重估 | done | `03d972a` |
 | E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | todo | — |
-| E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约在 E9 判定后冻结，C5 契约在 E10 裁决后冻结**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | todo | — |
+| E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约已由 E9 解锁、可冻结；C5 契约仍等 E10 裁决**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | todo | — |
 | E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | todo | — |
 | E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | todo | — |
 
@@ -396,6 +396,24 @@ E5 已完成（2026-09-07，纯文档与静态审计，未训练、未用 GPU）
 5. 📌 **给 E7 的新缺口**：`scripts/audit_r1_consistency.py` 不在 `protocol.json` 的 `code.files` 里，
    而同类的 `audit_r1_dataset_ids.py` 在，本次审计因此无法从冻结代码集复现。本轮**不顺手修**，并入 E7。
 全部证据见 [`results/PHASE_R1.md` §16](results/PHASE_R1.md)。
+
+E9 已完成（2026-09-07，纯文献核实，未训练、未用 GPU）：**全文拿不到**——OpenAlex `oa_status = closed`
+且无 repository 全文、Semantic Scholar `openAccessPdf = CLOSED`、无 preprint、12 篇引用文献（取回 10 条）
+无一开放获取。预注册判据的原始形式（读它自己的对照表）**无法执行**，改用**等价路径**：
+拿 MAVEN-ERE 官方论文（arXiv `2211.07342v1` Table 7/8，RoBERTa-base，5 次试验均值，官方 test）
+与我们的主锚对照——**共指四指标全部在 ±0.4 内**（MUC 80.98 vs 82.1、B³ 98.04 vs 98.2、
+CEAF-e 97.73 vs 97.9、BLANC 89.88 vs 90.2），causal 33.17 vs 31.5、subevent 29.75 vs 27.5 我们更高，
+temporal 51.63 vs 56.0 低 4.4（方向与 `PHASE_A.md` 已记录的 TIMEX 头缺口一致，但**未做隔离实验，不作结论**）。
+**结论：我们的官方 joint 复现忠实于官方发表口径。**
+⚠️ **同时修正一处此前的推断**：§15.3 写「86.1 几乎必然含口径成分」是**不对的**——那里拿来比的 77.47 是
+Phase A **我们自己的方法档**在 710 valid 上的分数，不是官方 joint 复现，混用它是错的。正确对照是官方
++joint 的 **82.1**，IP&M 高 **4.0**；causal +5.9、temporal +4.7、subevent +5.4，**四族齐涨 4–6 点**，
+模式内部一致，**更像真实增益而非口径差**。未确证的仍有一环：它用 test 还是 valid、是否用组织方 `evaluate.py`。
+✅ **对 E6 不阻塞，A4 契约可照常冻结**：它无公开代码 ⇒ 无法在冻结协议下运行 ⇒ 按 FR-006 进不了 roster；
+A4 的及格线定义在**我们协议内的主锚与第二方法族**上，它改不了这条线；披露义务已由 §17 落地。
+📌 它此前**根本不在** `literature_matrix.json` 里（与 E.1 的 LLMERE 漏收同类），已补两条 `no_public_code`
+条目进 identity 与 relation 两章，**只追加不改既有条目**，随后按 E5 的顺序重冻结哈希。
+全部证据见 [`results/PHASE_R1.md` §17](results/PHASE_R1.md)。
 
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 

@@ -27,7 +27,9 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    acceptance hash 只见 [`results/PHASE_R1.md`](results/PHASE_R1.md)；
 4. **T023 已于 2026-09-07 由 E5 完成并 `pass`**（`findings` 0，35 条需求全部映射，六个产物身份全 `frozen`）。
    09-06 漂移已溯源到 `f6966a0` 同一会话并按「先溯源→再纠正内容→最后动哈希」裁决完毕。
-   ⚠️ E5 另查出 **A4 与 C5 两份 phase 契约的 roster 与 §13/§15 裁决矛盾，E6 必须改内容不能只补哈希**；
+   ⚠️ E5 另查出 **A4 与 C5 两份 phase 契约的 roster 与 §13/§15 裁决矛盾，E6 必须改内容不能只补哈希**。
+   **E9 已证我们的官方 joint 复现忠实于官方发表口径**（共指四指标与官方论文 ±0.4 内），
+   IP&M 2024 全文不可得、进不了 roster、不阻塞 A4 契约；
    T024 冻结前不启动 proposed GPU pilot；
 5. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
    sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
@@ -38,7 +40,8 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    ~~→ E2 核查 LLMERE 官方实现~~（均 2026-09-07 `done`；E2 裁决 `conditionally_runnable`，
    LLMERE 无官方 trainer，**不关闭** Ch2 第二 baseline 门；~~E3 写 T021 Ch2 因果 brief~~ 同日 `done`，
    审查 PASS；~~E4 写 T020 Ch1 因果 brief~~ 同日 `done`，审查 PASS，并留下 Ch1 QR-001 名单裁决
-   ；~~E5 跑 T023 跨产物审计~~ 同日 `done`，审计 `pass`）→ **E9 IP&M 口径核实** → E10 ACCI 静态核查 →
+   ；~~E5 跑 T023 跨产物审计~~ 同日 `done`，审计 `pass`；~~E9 核实 IP&M 口径~~ 同日 `done`，
+   全文不可得、改用官方论文数字做等价对照，**A4 契约已解锁**）→ **E10 ACCI 静态核查** →
    E6 T024（**契约内容须先对齐 §13/§15 裁决，不能只补哈希**；LLMERE-causal 以「已规格化、数字 pending」
    入 A4 roster）→ E7 补 relation 代码哈希缺口 **与审计脚本哈希缺口**；**E8 LLMERE-causal 训练可与 E4–E7 并行**，只写自己的 namespace。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
    开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
