@@ -9,8 +9,8 @@
 | 项 | 值 |
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
-| 当前队列 | 任务 E.2，共 E1–E6 |
-| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E1：关 Ch2 TacoERE 适配档的账**） |
+| 当前队列 | 任务 E.2，共 E1–E7（E1 已 `done`） |
+| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E2：核查 LLMERE 官方实现的可运行性**） |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -252,22 +252,25 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
 
 | 序 | 任务 | 前置 | 完成判定 | 状态 | commit |
 |---|---|---|---|---|---|
-| E1 | 关 Ch2 TacoERE 适配档的账：查清 `taco-s13-r2` 与 `taco-s13-r3` 差异来源 → **预注册**选档规则 → 评分正式档 → 三族官方 F1 写进 `results/PHASE_R1.md` → 更新 `status.json` | 已满足 | 差异有书面解释；选档规则在看分数前写定；结果页与 `status.json` 不再互相矛盾 | todo | — |
+| E1 | 关 Ch2 TacoERE 适配档的账：查清 `taco-s13-r2` 与 `taco-s13-r3` 差异来源 → **预注册**选档规则 → 评分正式档 → 三族官方 F1 写进 `results/PHASE_R1.md` → 更新 `status.json` | 已满足 | 差异有书面解释；选档规则在看分数前写定；结果页与 `status.json` 不再互相矛盾 | done | `91e818e` + `bc6b07e` |
 | E2 | 取 LLMERE 官方实现做可运行性核查：冻结 commit/tree hash、核对 MAVEN-ERE 数据接口、base model、显存与是否 LoRA，裁决"能否在我们 2622/291 manifest 与官方 evaluator 下忠实重跑"；**本步不训练** | E1 | 裁决落到 `results/PHASE_R1.md` 第 4 节，并修订该节 Ch2 结论；能跑则排下周训练，不能跑则写明具体阻断点 | todo | — |
 | E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | todo | — |
 | E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | todo | — |
 | E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试 | todo | — |
 | E6 | T024 冻结 C5/A4/D4 phase contract | E5 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash | todo | — |
+| E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | todo | — |
 
-E1 的具体要求：两档是**同 seed 13、同配置**（`context_mode=taco`、50 epochs、`save_best_by_family=true`、
-`neg_ratio=inf`、lr 1e-5 / head 1e-4、warmup 200），但 dev 不同（best_epoch 5 vs 7；causal by-family
-best_epoch 5 vs 40）。差异只可能来自 09-06 13:24 之后对 `src/ekg/relations/extractor/supervised.py`
-的改动（`3f02640`）或 GPU 非确定性。**先查清来源，再预注册选档规则**（例如"以最新代码身份的档为准"），
-最后才评分。禁止先看两档分数再决定用哪档——那是 Phase C 已经犯过的选模轴伪影。
+E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 KMeans 初始化，全量实测 2,913 篇里
+2,743 篇聚类归属改变，**是确定性的代码致输入变化，不是 GPU 非确定性**；旧初始化器还在同进程内对 5 篇
+自相矛盾。选档规则在 `taco-s13-r3` 评分**之前**以提交 `91e818e` 预注册（按训练代码身份选，不看分数），
+选中 `taco-s13-r3`，其官方三族 F1 为 causal 32.01 / subevent 28.80 / temporal 51.48，causal 未过主锚
+33.17。taco 是**透明适配**，不关闭"第二个独立同协议 runnable baseline"门。全部证据见
+[`results/PHASE_R1.md` §8](results/PHASE_R1.md)。
 
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 
-本周真实 GPU 需求只有 E1 的一次评分（短任务，单卡）。E2 只做静态核查不训练，E3–E6 全是文档与审计。
+本周真实 GPU 需求只有 E1 的一次评分（已于 2026-09-07 在 4090 GPU1 跑完，约 1 分钟）。E2 只做静态核查
+不训练，E3–E7 全是文档与审计。
 因此 **9/7–9/9 期间 4090 大面积空闲是正常的**；卡是公用资源，不得为了"看起来在跑"启动无准入的训练。
 真实的大 GPU 需求在下周：LLMERE 同协议重跑（若 E2 裁定可行）与 T024 放行后的第一个 seed-13 pilot
 （按 E.1 的证据，优先 D4）。5090 单卡有既有 Qwen 服务约 17 GB，使用前仍须逐次取得作者授权。

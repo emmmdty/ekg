@@ -13,8 +13,9 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 1. P1 r15 仍是可信根；A3.6 四臂全部完成并通过 metadata、单变量、人口、evaluator、final-valid 与
    双端 artifact hash 校验。旧方法最高 causal F1 仍未过主锚，权威数字见
    [`results/PHASE_A.md`](results/PHASE_A.md)；
-2. 当前 R1 三章状态：Ch1 power PASS 但 mention-local input/强 baseline blocked；Ch2 power PASS 但缺第二个
-   独立同协议强 baseline；Ch3 五折 OOF baseline、pooled power 与 T022 因果 brief 均 PASS；
+2. 当前 R1 三章状态：Ch1 power PASS 但 mention-local input/强 baseline blocked；Ch2 power PASS，自建
+   TacoERE **透明适配**档 `taco-s13-r3` 已按预注册规则选定并评分（causal 32.01 未过主锚 33.17），但它不是
+   官方复现，**仍缺第二个独立同协议强 baseline**；Ch3 五折 OOF baseline、pooled power 与 T022 因果 brief 均 PASS；
 3. Ch3 RoBERTa+CLS / DMRoBERTa 的 10/10 个后台任务已完成，80 个产物重哈希、fold 互斥/覆盖、训练源
    隔离与独立指标重算均通过。远端 run root 为 `runs/stages/R1/r1-v61-factuality-oof-r2/`，精确数字与
    acceptance hash 只见 [`results/PHASE_R1.md`](results/PHASE_R1.md)；
@@ -25,16 +26,17 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    这是可修订 plan，不是 SPEC；
 6. 4090/5090 当前可用于互不冲突的**准入 baseline smoke/OOF**；长任务继续 `setsid nohup`，不依赖 SSH
    存活。多种子与跨机 checkpoint 搬运仍须另行授权。
-7. **执行队列与交替推进约束见 [`HANDOFF.md`](HANDOFF.md) 任务 E**：E1 关 Ch2 TacoERE 适配档的账 →
-   E2 核查 LLMERE 官方实现 → E3 T021 → E4 T020 → E5 T023 → E6 T024。Claude 与 Codex **轮流**持有
-   同一条队列，任何时刻只有一个活动任务；开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
+7. **执行队列与交替推进约束见 [`HANDOFF.md`](HANDOFF.md) 任务 E**：~~E1 关 Ch2 TacoERE 适配档的账~~
+   （2026-09-07 `done`）→ **E2 核查 LLMERE 官方实现** → E3 T021 → E4 T020 → E5 T023 → E6 T024 →
+   E7 补 relation 代码哈希缺口。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
+   开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
 
 ## 当前三端
 
 - local：`main`；P1 r15 `1e31a9ac…f9655`；A3 handoff protocol `c187bf03…9359e`；Ch3 OOF 训练提交
-  `277b36f`，collector 已提交到 `6532264`；最近代码门 489 passed / 24 skipped、ruff 0、smoke OK；
-- 4090：A3.6 与 Ch3 OOF 进程均已 GONE，GPU0–3 空闲；checkpoint 与 OOF 产物均留在各自远端 run root，
-  未搬运；
+  `277b36f`，collector 已提交到 `6532264`；最近代码门 **520 passed / 24 skipped**、ruff 0、smoke OK；
+- 4090：A3.6 与 Ch3 OOF 进程均已 GONE；2026-09-07 在 GPU1 完成 E1 的 `taco-s13-r3` 官方评分后 GPU0–3
+  再次空闲；checkpoint 与 OOF 产物均留在各自远端 run root，未搬运；
 - 5090：可连接；既有 Qwen 与其他 Python 服务保持运行，使用前重新查询动态显存占用，服务不动、
   checkpoint 不搬。R1 尚未放行 proposed pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡
   启动无效训练。
