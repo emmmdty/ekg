@@ -10,15 +10,21 @@
 - P1 绑定：r15 / `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`；
 - `id_coverage.json`：`ca481ecf3b899cacf553f258992f6603f8fa417a97cd25ee94176e3f313bb2e6`；
 - `power_analysis.json`：`0e137ae52d06c03a2bd5f1bcf0c8ed55b36e2218fdb70c6318b3cf2ee99ab3df`；
-- `literature_matrix.json`：`64874f4c07a3d057240f2716f33eea018e4cf49bdebf0bf2aa5369d3bf442476`；
-- `design_briefs.json`：`3dfbb8810fa041983f246d7aac1a251b0fc240583582a48fd03027228c570731`；
+- `literature_matrix.json`：`64874f4c07a3d057240f2716f33eea018e4cf49bdebf0bf2aa5369d3bf442476`
+  ⚠️ **磁盘上的文件已不是这个值**（实为 `b874d34c…6171`），见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)；
+- `design_briefs.json`：`3dfbb8810fa041983f246d7aac1a251b0fc240583582a48fd03027228c570731`
+  ⚠️ **同样已漂移**（实为 `d5d6a61c…7986`），见 [§11](#11-审计发现两个-r1-产物的哈希已漂移且内容自相矛盾2026-09-07-记录未修)；
 - `factuality_cv/factuality_cv.json`：
   `3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4`；
 - `protocol/degree_requirements.json`：
-  `ceeb581bc1ff2c22ea0dd94811c892d0c91a4e4bca8c3c7aedfd4c5f6f2da47e`；
-- `protocol.json`：`cc80e066deb6b5ff735e15defe54ddb9c68384a626685cc516897440543575dc`；
-- `status.json`：`c6ee4826e569ec0044ff5f8805be9213abc194825b31d8d83aae84004ecbee5e`
-  （E2 加入 `llmere_feasibility` 块、改写 relation 门与 next_actions；E1 值 `099b7aaf…30e4`，
+  `f47eb6a3022c7787fb54f2289878d55e6453c462f1333047f12ececbc7207ac8`
+  （**2026-09-07 因作者纠正学校前提而重冻结**，v1 值 `ceeb581b…a47e` 作废，见 [§10](#10-学位标准前提纠正2026-09-07)）；
+- `protocol.json`：`fed98d2a20e281d1d037eaf46e523e17fb9a24358a0c98e3b6f456a170f619fc`
+  （随上一条重算；旧值 `cc80e066…75dc`。R1 的 protocol.json 没有被 A3/P1 或任何下游产物引用，
+  重冻结不影响其他信任根）；
+- `status.json`：`904cb5fc7117c443966175982683ddac62bccf3b4ce591a25e190760d87ce37d`
+  （本轮先由 E2 加入 `llmere_feasibility`（`c6ee4826…ee5e`），再由 §10/§11 加入
+  `degree_requirements_correction` 与 `known_inconsistencies`；E1 值 `099b7aaf…30e4`，
   再前一版 `24c2aac4…87af07`。`protocol.json` 的 artifacts 哈希集合不含 `status.json`，无身份漂移）。
 
 代码门：489 passed / 24 expected skips，ruff 0，`ekg-smoke` OK。
@@ -425,3 +431,69 @@ split 文件 SHA-256：train `8b6c9c21…a4fe`，valid/test（同一 291 篇）`
 成本（未实测，供作者决策）：joint 训练集 199,757 条 × 3 epoch × 最长 2048 token，论文用单张 A100-40G；
 8B bf16 + LoRA r64 在 24GB 上预计**需要 gradient checkpointing**才装得下，本步未验证。推理侧 49,156 次
 生成且栈里没有 vllm。合起来是 4090 整机数天级占用，**须先取得作者同意再排期**。
+
+## 10. 学位标准前提纠正（2026-09-07）
+
+R1.1 / T012 在 2026-09-04 冻结的 `degree_requirements.json` v1 把**四份同济大学文件**当作适用的学位授予
+标准。**作者本人不在同济**，因此整套行政来源指向了错误的机构，必须作废——这不是措辞问题，是前提错误。
+
+作者当日给出的替代口径：**按国内顶级 985（清华、北大、复旦、上交、浙大、中科大等）的毕业要求做项目
+约束，且不得借此降级项目。** 据此把 v1 的四条同济来源整体删除，重新只读取得并哈希三份可核实文件：
+
+| 来源 | URL | 发布 | 取得 | SHA-256 |
+|---|---|---|---|---|
+| 中华人民共和国学位法 | `gov.cn/.../content_6947841.htm` | 2024-04-26 | 2026-09-07 | `7facb7c0…2c59` |
+| 清华大学学位授予工作实施办法 | `tsinghua.edu.cn/info/1236/124249.htm` | 2026-02-05（2025-12-10 审议通过） | 2026-09-07 | `31985e84…970b` |
+| 北京大学学位授予工作实施办法 | `dean.pku.edu.cn/web/rules_info.php?id=59` | 未标注 | 2026-09-07 | `15738c38…5af1` |
+
+**实读结论（不是转述）**：学位法第二十条（硕士）只要求“掌握坚实的基础理论和系统的专门知识”与
+“具有从事学术研究工作的能力”，**并不要求创新性成果**；第二十一条（博士）才追加“在学术研究领域做出
+创新性成果”；第二十二条把**各学科的具体标准**下放给学位授予单位。清华实施办法第十一至十三条逐条
+复刻该三条，并由第十四条把具体标准交给学位评定分委员会；北大实施办法第七、十条同样把具体标准交给
+学位分会。
+
+因此这一层的顶级 985 校级规则**是统一而笼统的：没有任何一家在校级文件里写论文数或期刊会议清单**。
+真正卡人的学术门槛在下一层——作者所在单位的学科分委员会标准，而**作者所在单位当前未知**。结论是：
+**没有任何行政文件能提供本项目的质量底线，也没有任何行政文件可以被用来降低它。**
+
+`personal_fields` 现在显式包含 `institution: null`，与 `degree_type`、`admission_year`、`discipline`、
+`program` 一样保持未知，不猜。顶级 985 只作为**雄心的地板**：行政最低线与顶级 985 的学科惯例冲突时，
+项目取更严的一侧。章节结构（三个方法章 + 一个系统评估章）与逐章门槛**不因机制失败、对手强或行政线更低
+而下调**。
+
+身份变更：`degree_requirements.json` v1 `ceeb581b…a47e` → v2 `f47eb6a3…7ac8`（`schema_version`
+`ekg.r1_degree_requirements.v2`，新增 `institution`、`correction`、`reference_bar` 三块，v1 哈希与被删来源
+都记在 `correction` 里）；R1 `protocol.json` 随之 `cc80e066…75dc` → `fed98d2a…19fc`。
+R1 的 `protocol.json` 不被 A3 handoff、P1 r15 或任何下游产物引用，重冻结不影响其他信任根。
+
+## 11. 审计发现：两个 R1 产物的哈希已漂移且内容自相矛盾（2026-09-07 记录，未修）
+
+在为 §10 重冻结 `protocol.json` 时按 artifacts 表逐个重算哈希，发现**两个我本轮没有触碰的产物**与冻结
+记录不符。两者的 mtime 都是 **2026-09-06 15:27**，早于本会话，说明是上一个会话改了文件却没有同步
+`protocol.json`、`status.json` 与本页。
+
+| 产物 | `protocol.json` 记录 | 实际 | 结论 |
+|---|---|---|---|
+| `design_briefs.json` | `3dfbb881…0731` | `d5d6a61c…7986` | **漂移** |
+| `literature_matrix.json` | `64874f4c…2476` | `b874d34c…6171` | **漂移** |
+| `degree_requirements.json` | `f47eb6a3…7ac8` | 同 | 一致（§10 本轮重冻结） |
+| `factuality_cv/factuality_cv.json` | `3a724cf7…52c4` | 同 | 一致 |
+| `id_coverage.json` | `ca481ecf…bb2e` | 同 | 一致 |
+| `power_analysis.json` | `0e137ae5…3df3` | 同 | 一致 |
+
+漂移后的内容与本页、`status.json` 三处冲突，其中一处是**文件内部自相矛盾**：
+
+1. `literature_matrix.json` 的 `chapters.relation.baseline_gate` 与 `chapters.identity.baseline_gate` 现在都是
+   **`pass`**，理由是透明 TacoERE 适配与 Qwen mention-local baseline 已闭合协议；但**同一个文件**的
+   `global_decision` 仍写着 “R1 literature gate remains blocked for identity and relation”。
+2. 该 `pass` 与本页 §4、§5 和 `status.json` 的 `blocked` 相反，也与 E1 在 [§8.5](#85-对-relation-baseline-门的影响)
+   预注册的判断相反——**透明适配不是官方复现，不关闭该门**。
+3. `design_briefs.json` 现在把 identity / relation / factuality **三份 brief 全部**标成
+   `accepted_pending_t023_t024`；但 `status.json` 仍把 T020/T021 列在 `drafted_not_promoted`，
+   E.2 队列里 E3（T021）与 E4（T020）也仍是 `todo`。
+
+**本轮不修**：我无法核实 09-06 那次改动的意图与授权，而按文档层级，裁决以本页与 `status.json` 为准
+（`docs/results/` 是运行事实的唯一权威）。据此，relation 与 identity 门**仍是 `blocked`**，
+E3/E4 仍需按队列执行。哈希与语义的对账是 E5（T023 跨产物一致性审计）的份内事，本节即为它的输入证据；
+E5 必须查明 09-06 改动的来源，再决定是重冻结 `protocol.json` 还是回退这两个文件——**不得先改哈希
+让审计变绿**。
