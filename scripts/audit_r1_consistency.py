@@ -432,6 +432,13 @@ def build_audit(repo: Path) -> dict:
         "protocol-schema",
         "R1 protocol schema is not ekg.r1_protocol.v1",
     )
+    audit_script = "scripts/audit_r1_consistency.py"
+    findings.check(
+        r1_protocol.get("code", {}).get("files", {}).get(audit_script)
+        == sha256_file(repo / audit_script),
+        "audit-script-hash-drift",
+        "R1 protocol does not freeze the current consistency-audit script",
+    )
     artifact_identities: dict[str, dict[str, str]] = {}
     for name, artifact in r1_protocol.get("artifacts", {}).items():
         path = r1_root / artifact["path"]
@@ -451,6 +458,30 @@ def build_audit(repo: Path) -> dict:
             "artifact-hash-drift",
             f"R1 artifact hash drift: {name} frozen {artifact['sha256']} actual {actual}",
         )
+    reconciliation = r1_protocol.get("artifacts", {}).get(
+        "relation_code_hash_reconciliation"
+    )
+    findings.check(
+        reconciliation is not None,
+        "relation-code-hash-artifact-missing",
+        "R1 protocol has no relation code-hash reconciliation artifact",
+    )
+    if reconciliation is not None:
+        reconciliation_payload = _load(r1_root / reconciliation["path"])
+        for run_name, run in reconciliation_payload["runs"].items():
+            metadata_path = r1_root / run["metadata_path"]
+            metadata = _load(metadata_path)
+            findings.check(
+                sha256_file(metadata_path) == run["metadata_sha256_after"],
+                "relation-run-metadata-drift",
+                f"relation run metadata drift: {run_name}",
+            )
+            findings.check(
+                metadata["protocol_binding"]["hashes"].get("supervised_extractor")
+                == run["supervised_extractor"]["sha256"],
+                "relation-extractor-hash-drift",
+                f"relation extractor hash drift: {run_name}",
+            )
     final_valid = r1_protocol.get("final_valid_ledger", {})
     findings.check(
         not final_valid.get("used_for_model_or_method_selection"),

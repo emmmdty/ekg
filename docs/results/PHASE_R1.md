@@ -1090,3 +1090,40 @@ uv run python scripts/audit_r1_consistency.py \
 `preparation_partial_blocked`，仅余 C5 的 author roster blocker；这不是 A4/D4 pilot 的 R1 blocker。
 `scripts/audit_r1_consistency.py` 尚未进入 R1 `code.files`，这个可追溯性缺口以及 relation trainer hash
 缺口按队列留给 E7，未在 E6 顺手重冻结。
+
+## 20. E7 · relation 与审计代码身份闭环（2026-09-07）
+
+**本节只补可追溯性身份：未改 trainer、未重训、未评分、未用 GPU、未访问 final-valid。** E1 的根因已是
+确定性的 encoder-input 变化，不能把当前 `supervised.py` 的 hash 回填给历史 r2。因此只在两个 relation
+`run_metadata.protocol_binding.hashes` 中新增 `supervised_extractor` 键，所有既有 hash（尤其 trainer
+`5c513bdb…d0f2c6`）、checkpoint、预测与指标字节均未动：
+
+| run | 训练 commit | `supervised.py` SHA-256 | 更新后 `run_metadata.json` SHA-256 | 身份 |
+|---|---|---|---|---|
+| `taco-s13-r2` | `d8fcd30e…ea4f` | `ffb40460c454a29b3a14d3075141b654bf510cd5d6277d61a2728a56ea4a1a25` | `f9b10fc724bef7c195bc964eb5b6f2a6a78cc647f11d8493a5933daa3e6e8706` | superseded；pre-`3f02640` context 不在当前源码下复现 |
+| `taco-s13-r3` | `e7961828…3775` | `9cdf54a7991af2bcacef70d2b249158cb46665f89fec2366de62f4e86387ab7c` | `44ffe6267202aec11cc16c84f41059447160f135d39716831ffc7fef2f472999` | recorded；含 `3f02640`，与冻结当前源码一致 |
+
+对账产物
+`runs/stages/R1/r1-v61-20260904/baselines/relation/code_hash_reconciliation.json` 的 SHA-256 是
+`833b3c4d96630c015ca2e70020c358b30b1ac9b88d8b0f0ddfbfbf2fefbc5ebd`，已作为
+`artifacts.relation_code_hash_reconciliation` 绑定进 R1 protocol。它明确断言没有修改 trainer、没有重建
+P1，也没有改动任何已有 hash；所以 P1 r15 与 A3 r17 身份不需要重绑。
+
+`scripts/audit_r1_consistency.py` 现以 SHA-256
+`f6fdc099502065f1640ec17712a80a818bd31175ddb788bd428aff0a81aeef90` 加入 R1
+`protocol.json.code.files`，并在每次审计中自行比对该绑定；后续脚本漂移会产生
+`audit-script-hash-drift` finding，不能再静默重跑审计。审计还逐一重算两个 `run_metadata.json` 的
+digest，并确认其 `supervised_extractor` 键与对账产物一致；漂移会产生
+`relation-run-metadata-drift` 或 `relation-extractor-hash-drift` finding。最终 R1 protocol SHA-256 为
+`199852a1f0b81e088f7568d9462d9fe226db15bdd21a78346b6d03bef80cf058`。
+
+验证命令：
+
+```bash
+uv run python scripts/audit_r1_consistency.py \
+  --output runs/stages/R1/r1-v61-20260904/audit/cross_artifact_audit.json
+```
+
+结果为 `pass`、`findings = 0`、35/35 requirements mapped；新对账 artifact 的 frozen/actual SHA-256 一致。
+R1 仍是 `preparation_partial_blocked`，只剩 C5 的 author roster / `blocked_pre_admission`，不是 E7 的
+traceability finding。

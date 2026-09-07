@@ -33,7 +33,8 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    IP&M 2024 全文不可得、进不了 roster、不阻塞 A4 契约；**E6 已完成 T024 的获准 phase 冻结**：
    A4/D4 的契约均已 hash-bound，C5 因 ACCI `not_runnable` 与无替代作者名单而显式
    `blocked_pre_admission`、不绑定草案。A4/D4 仍须完成各自实现、本地 gate、preflight、CPU/CUDA smoke
-   与重新核卡后才可启动 seed-13 pilot；
+   与重新核卡后才可启动 seed-13 pilot；**E7 已补齐 relation 与审计代码身份**：两档 TacoERE run 分别绑定
+   各自训练时的 `supervised.py` hash，R1 protocol 已冻结 `audit_r1_consistency.py` 并由审计自检；
 5. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
    sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
    这是可修订 plan，不是 SPEC；
@@ -47,8 +48,8 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    全文不可得、改用官方论文数字做等价对照，**A4 契约已解锁**；~~E10 ACCI 静态核查~~（同日 `done`，
    仓库全历史仅 README，`not_runnable`，不排 GPU；C5 baseline roster 需作者另议）→
    ~~E6 T024~~（A4/D4 已 hash-bound；A4 的 LLMERE-causal 以「已规格化、数字 pending」入 roster；
-   C5 仍缺第二方法族，已明确 `blocked_pre_admission` 而非伪冻结）→ **E7** 补 relation 代码哈希缺口
-   **与审计脚本哈希缺口**；
+   C5 仍缺第二方法族，已明确 `blocked_pre_admission` 而非伪冻结）→ ~~E7~~（两档 relation run 已分别
+   绑定历史 `supervised.py` 身份；审计脚本已纳入 R1 `code.files` 并自检）→ **E8**；
    **E8 LLMERE-causal 训练可与 E4–E7 并行**，只写自己的 namespace。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
    开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
 
