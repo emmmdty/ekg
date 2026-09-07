@@ -10,7 +10,7 @@
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
 | 当前队列 | 任务 E.2，共 E1–E10（E1–E5、E9–E10 已 `done`；**E8 可与 E6–E7 并行**） |
-| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E7：补 relation 与审计脚本的冻结代码 hash**）。A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
+| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E8：LLMERE-causal 透明适配 baseline**）。启动前必须按 §5 向作者展示完整 GPU 命令、cwd 与预期产物；A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -314,7 +314,7 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | E9 **（排在 E6 之前）** | 核实 IP&M 2024（Zhang et al., IP&M 61(5) 103811）的口径：取全文对照表，看**它复现的 MAVEN-ERE official joint baseline** 与我们自跑官方码是否对齐（MAQInstruct 判据）。订阅墙走作者主页 / ResearchGate / 机构库 / OpenAlex（作者 Junchi Zhang，dblp `153/2859`） | 已满足 | 三种处置之一落到 `results/PHASE_R1.md` §15.3；**无论结果都不进 roster**；若判定可比则 A4 及格线在 E6 前重估 | done | `03d972a` |
 | E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | done | `9b43573` |
 | E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约已由 E9 解锁、可冻结；C5 因 E10 `not_runnable` 仍缺第二方法族，先由作者另议名单，不得伪冻结**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | done | `1fcc7db` |
-| E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | todo | — |
+| E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | done | `1c922fd` |
 | E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | todo | — |
 
 E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 KMeans 初始化，全量实测 2,913 篇里
@@ -437,6 +437,17 @@ frozen `evaluate.py` 完整规格化为 metrics-pending 的确认性 baseline；
 requirements mapped，A4/D4 `frozen`、C5 `blocked_pre_admission`。审计脚本现在明确区分该状态和
 `pending_t024`，其自身 hash 仍由紧接的 E7 纳入冻结代码集。全部证据见
 [`results/PHASE_R1.md` §19](results/PHASE_R1.md)。
+
+E7 已完成（2026-09-07，可追溯性修复，未改 trainer、未重训、未评分、未用 GPU）：不把 r3 的源码身份
+错误回填给 r2。`taco-s13-r2` 的 `supervised.py` 绑定训练提交 `d8fcd30` 的
+`ffb40460…a1a25`，`taco-s13-r3` 绑定训练提交 `e796182` / 当前源码的 `9cdf54a…7ab7c`；两档只新增
+`protocol_binding.hashes.supervised_extractor`，原 trainer `5c513bdb…d0f2c6`、checkpoint、预测和指标 hash
+未动。对账 artifact `code_hash_reconciliation.json`（SHA-256 `833b3c4d…c5ebd`）已进入 R1 artifacts，审计会
+重算两份 metadata digest 与该键。`audit_r1_consistency.py` 以 `f6fdc099…eef90` 加入 `code.files`，并自检其
+自身 hash；后续脚本/metadata 漂移都会生成 finding。R1 protocol SHA-256
+`199852a1f0b81e088f7568d9462d9fe226db15bdd21a78346b6d03bef80cf058`；审计 `pass`、0 findings、35/35
+requirements mapped。P1 r15/A3 r17 不需重绑，R1 唯一余项仍是 C5 `blocked_pre_admission`。全部证据见
+[`results/PHASE_R1.md` §20](results/PHASE_R1.md)。
 
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 
