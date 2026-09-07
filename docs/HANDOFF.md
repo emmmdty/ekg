@@ -9,8 +9,8 @@
 | 项 | 值 |
 |---|---|
 | 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`，**未放行任何 proposed GPU 训练** |
-| 当前队列 | 任务 E.2，共 E1–E10（E1、E2、E3、E4 已 `done`；**E8 可与 E5–E7 并行**） |
-| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E5：T023 跨产物一致性审计**）。**执行顺序认表里的行序，不认编号大小**——E9/E10 是后加的，物理排在 E6 之前 |
+| 当前队列 | 任务 E.2，共 E1–E10（E1–E5 已 `done`；**E8 可与 E6–E7 并行**） |
+| **下一个要做的任务** | **E.2 表里第一个 `状态 = todo` 的行**（当前是 **E9：IP&M 2024 口径核实**）。**执行顺序认表里的行序，不认编号大小**——E9/E10 物理排在 E6 之前 |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -310,11 +310,11 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | E2 | 取 LLMERE 官方实现做可运行性核查：冻结 commit/tree hash、核对 MAVEN-ERE 数据接口、base model、显存与是否 LoRA，裁决"能否在我们 2622/291 manifest 与官方 evaluator 下忠实重跑"；**本步不训练** | E1 | 裁决落到 `results/PHASE_R1.md` 第 4 节，并修订该节 Ch2 结论；能跑则排下周训练，不能跑则写明具体阻断点 | done | `8a8ac1a` |
 | E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | done | `d584ca8` |
 | E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | done | `0210fba` |
-| E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾。**已有两条确凿输入证据**：`design_briefs.json` 与 `literature_matrix.json` 在 2026-09-06 15:27 被改动却没同步 `protocol.json`，哈希已漂移，且 matrix 把 relation/identity 门写成 `pass`（与自身 `global_decision`、`status.json`、结果页、E1 预注册判断四处矛盾），briefs 把三份 brief 全标 `accepted`。**必须先查明 09-06 改动来源，不得先改哈希让审计变绿**；漂移字节已由 E3 存档在 `runs/stages/R1/r1-v61-20260904/audit/design_briefs.drift-20260906T1527.json`，`briefs.relation` 已被 E3 的正式 T021 审查取代、`briefs.identity` 仍是 09-06 原样；详见 `results/PHASE_R1.md` §11 与 §11.1 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试；两条漂移各有裁决 | todo | — |
+| E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾。**已有两条确凿输入证据**：`design_briefs.json` 与 `literature_matrix.json` 在 2026-09-06 15:27 被改动却没同步 `protocol.json`，哈希已漂移，且 matrix 把 relation/identity 门写成 `pass`（与自身 `global_decision`、`status.json`、结果页、E1 预注册判断四处矛盾），briefs 把三份 brief 全标 `accepted`。**必须先查明 09-06 改动来源，不得先改哈希让审计变绿**；漂移字节已由 E3 存档在 `runs/stages/R1/r1-v61-20260904/audit/design_briefs.drift-20260906T1527.json`，`briefs.relation` 已被 E3 的正式 T021 审查取代、`briefs.identity` 仍是 09-06 原样；详见 `results/PHASE_R1.md` §11 与 §11.1 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试；两条漂移各有裁决 | done | `54a10cf` |
 | E9 **（排在 E6 之前）** | 核实 IP&M 2024（Zhang et al., IP&M 61(5) 103811）的口径：取全文对照表，看**它复现的 MAVEN-ERE official joint baseline** 与我们自跑官方码是否对齐（MAQInstruct 判据）。订阅墙走作者主页 / ResearchGate / 机构库 / OpenAlex（作者 Junchi Zhang，dblp `153/2859`） | 已满足 | 三种处置之一落到 `results/PHASE_R1.md` §15.3；**无论结果都不进 roster**；若判定可比则 A4 及格线在 E6 前重估 | todo | — |
 | E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | todo | — |
-| E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约在 E9 判定后冻结，C5 契约在 E10 裁决后冻结** | todo | — |
-| E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | todo | — |
+| E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约在 E9 判定后冻结，C5 契约在 E10 裁决后冻结**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | todo | — |
+| E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | todo | — |
 | E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | todo | — |
 
 E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 KMeans 初始化，全量实测 2,913 篇里
@@ -374,6 +374,28 @@ B³ ≥ 97.04 / CEAF-e ≥ 96.73 / BLANC ≥ 88.88、四态抽取状态无静默
 前置到 E6 之前。identity brief 的 roster / promotion / open_finding 已按裁决修订，
 原文逐字保留在 `amendments[0]`（`cd40e664…4366` → `2220b86c…1999`），因果链、中介、三臂、负控、
 护栏与 stop **未动**。全部证据见 [`results/PHASE_R1.md` §14/§15](results/PHASE_R1.md)。
+
+E5 已完成（2026-09-07，纯文档与静态审计，未训练、未用 GPU）：`cross_artifact_audit.json` 已落地，
+**审计 `pass`、`findings` 为 0**，SPEC 声明 35 条需求全部映射到任务与契约，六个 R1 产物身份全部 `frozen`，
+三份 method phase 契约为 `pending_t024`（**预期状态**），P1 r15 与 A3 r17 信任根逐位一致。
+**R1 仍未 PASS**——报告的 `r1_pass_blockers` 列出四条（status 非 pass + 三份契约待 T024）。
+1. **先修了一个使 T023 无法在自己时点运行的循环依赖**：`audit_r1_consistency.py` 要求 `T023` 已打勾才继续，
+   等于把这次审计写成它自己的前置，且第一个失败即 `raise`，永远产不出"列全问题"的报告。前置改为
+   `TASKS.md` 实际声明的 **T012–T022**，findings 改为收集式，`pending_t024` 不再算不一致。
+2. **09-06 漂移已溯源，证据是决定性的**：15:27 的改动属于 15:35 提交 `f6966a0` 的同一次会话，
+   而该提交自己的正文只关闭 Ch1 的 **input/baseline blocker**、并明写 Ch2 仍缺第二 baseline。
+   所以 identity 半是**把 blocker 关闭过度解读成审查通过**，relation 半**没有任何提交正文支持**且与同一提交矛盾；
+   `literature_matrix.json` 的 `audit_date` 至今仍是 09-04，是"改了内容没重跑审计"的旁证。
+3. **两条漂移走了不同的路**：`design_briefs.json` **原样重冻结**（磁盘字节已是 E3/E4 两次正式审查的产物，
+   factuality 子树逐条比对 T022 记录一致）；`literature_matrix.json` **先把两个 `baseline_gate` 从 `pass`
+   改回 `blocked` 再重冻结**，原值保留在其 `amendments[0]`，`methods` 与 `upstream_checkouts` 逐字节未动。
+   `protocol.json` **最后**才重冻结（`fed98d2a…f619fc` → `497aae22…423155`）。**顺序就是要点：
+   先溯源 → 再纠正内容 → 最后动哈希**，没有为让审计变绿而先改哈希。
+4. ⚠️ **给 E6 的硬输入**：脚本不读契约内容，人工核对查出 **A4 与 C5 两份契约的 roster 与 §13/§15 裁决矛盾**，
+   E6 必须改内容而不是只补哈希；D4 契约与 T022 记录一致。
+5. 📌 **给 E7 的新缺口**：`scripts/audit_r1_consistency.py` 不在 `protocol.json` 的 `code.files` 里，
+   而同类的 `audit_r1_dataset_ids.py` 在，本次审计因此无法从冻结代码集复现。本轮**不顺手修**，并入 E7。
+全部证据见 [`results/PHASE_R1.md` §16](results/PHASE_R1.md)。
 
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 
