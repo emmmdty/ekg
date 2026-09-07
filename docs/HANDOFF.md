@@ -194,51 +194,68 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
 不得新增 seed 17/42，不得把官方配方收益记成方法贡献。R1 只把 causal 最强臂当 prospective-power 与
 下一新家族的 fallback 对照。
 
-### 任务 E：本窗口分工与执行序（2026-09-07 → 09-09）
+### 任务 E：交替推进协议与本周队列（2026-09-07 起）
 
-**为什么先做这一节**：`runs/stages/R1/r1-v61-20260904/status.json` 已经落后于磁盘事实——Ch1 的
-argument-aware baseline 已在 `f6966a0` 闭环（[`results/PHASE_R1.md`](results/PHASE_R1.md) 第 7 节），
-Ch2 的 TacoERE 适配 `taco-s13-r2` 已训练并用官方 evaluator 评分但**未写进任何结果页**，
-`taco-s13-r3` 于 09-06 21:20 训练结束（rc=0）却**未评分、未回传**。在关掉这两笔账之前，
-T020–T024 的任何裁决都建立在过期状态上。本窗口不启动任何 proposed 训练。
+#### E.0 统一约束：Claude 与 Codex 交替推进，不并行、不分叉
 
-主线（严格串行；前一项没写回 `results/` 就不开下一项）：
+两个执行代理**轮流**持有同一条队列，任何时刻只有一个"活动任务"。约束只有六条，违反其一即视为交接失败：
 
-| 序 | 任务 | 前置 | 判定 |
-|---|---|---|---|
-| E1 | 关闭 Ch2 第二 baseline 账 | 已满足 | r2/r3 差异有解释、选档规则预注册、正式档官方三族 F1 进 `results/PHASE_R1.md`，`status.json` 的 relation blocker 更新 |
-| E2 | T021 Ch2 因果 design brief 提交审查 | E1 | constitution/spec 可追溯审查 PASS，且推理保持完整候选全集 |
-| E3 | T020 Ch1 因果 design brief 提交审查 | 已满足（blocker 已关） | 同上；不得使用 MAVEN-ARG cluster gold |
-| E4 | T023 跨产物一致性审计 | E2 + E3 + 已有 T022 | `scripts/audit_r1_consistency.py` 实跑，输出 `cross_artifact_audit.json`；每条需求映射到任务/测试，且 `status.json` 与结果页不再互相矛盾 |
-| E5 | T024 冻结 C5/A4/D4 phase contract | E4 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash |
+1. **单队列**：任务顺序只认下面 E.2 的编号表。要偏离顺序，**先改本表再执行**，不在会话里口头改计划。
+2. **开工前对齐**：除 §0 的三条只读检查外，必须确认 `git rev-parse HEAD` 等于 `git rev-parse origin/main`；
+   不相等就先 `git pull --rebase`，未对齐不开工。
+3. **交接靠文件不靠记忆**：一项任务算完成，必须四件齐全——产物落地、数字写进对应
+   `results/PHASE_*.md`、本表该行状态改为 `done` 并填 commit、**已 push 到 `origin/main`**。
+   没 push 就没交接，下一个代理不得开工。
+4. **不开分支、不开 worktree**：只在 `main` 上按逻辑单元提交。（2026-09-07 已删除
+   `.worktrees/r1-t023-t024` 与已并入 main 的 `feat/r1-t023-t024`。）
+5. **活动任务独占产物**：持有活动任务的代理独占该任务涉及的全部结果页与 `runs/` 目录；
+   另一代理此时**只读**，不写任何 `results/`、`runs/`、`TASKS.md`。
+6. **未完成就交接**：把已做到哪一步、卡在什么证据上写进本表该行，状态标 `wip`，不留只有自己知道的上下文。
 
-E1 的具体要求：`taco-s13-r2` 与 `taco-s13-r3` 是**同 seed 13、同配置**（`context_mode=taco`、50 epochs、
-`save_best_by_family=true`、`neg_ratio=inf`、lr 1e-5/1e-4、warmup 200），但 dev 结果不同
-（best_epoch 5 vs 7；causal by-family best_epoch 5 vs 40）。差异只可能来自 09-06 13:24 之后对
-`src/ekg/relations/extractor/supervised.py` 的改动（`3f02640`）或 GPU 非确定性。**必须先查清来源，
-再预注册选档规则**（例如「以最新代码身份的档为准」），最后才评分。禁止先看两档分数再决定用哪档——
-那是 Phase C 已经犯过的选模轴伪影。
+#### E.1 联网核实结论（2026-09-07，影响下面的排期）
 
-并行面（Codex 执行，完全不碰 R1 产物）：
+- **Ch2 的第二 baseline 有官方实现，我们此前漏收了**：LLMERE（COLING 2025，
+  [aclanthology.org/2025.coling-main.500](https://aclanthology.org/2025.coling-main.500/)）已开源，
+  仓库 [github.com/HerbertHu/LLMERE](https://github.com/HerbertHu/LLMERE)，`main` HEAD
+  `94d4ef2781ec7e071d38ac7fd8632a8fffbda798`，目录含 MAVEN-ERE / MATRES / HiEve。按"不重复造轮子"，
+  **官方实现优先于我们自建的 TacoERE 适配**；`results/PHASE_R1.md` 第 4 节"未取得官方实现"的
+  Ch2 结论需要按实测修订。TacoERE 仍无公开代码，本地适配档只能标注为**透明适配**，不得写成官方复现。
+- **C5 的一般命题已被抢占**：ACCI（[arXiv 2506.01488](https://arxiv.org/abs/2506.01488)，
+  Sci Rep 2026）已占"argument-centric + 结构因果图 + 后门调整 + counterfactual 模块"的事件共指命题，
+  ECB+ 88.4 / GVC 85.2 CoNLL F1。它是**跨文档、ECB+/GVC**，我们是**文档内 MAVEN-ERE + 预测
+  mention-local 论元 + 缺失感知不确定性门控（不用 gold 论元）**。T020 必须正面处理这条抢占，
+  写清窄 delta，并核实 ACCI 用的是 gold 还是预测论元；不能再写"首次"。
+- **A4 的一般命题同样被占，但组合仍有窄 delta**：CovEReD
+  （[2024.findings-emnlp.672](https://aclanthology.org/2024.findings-emnlp.672/)）已做文档级关系抽取的
+  counterfactual 一致性，SURE-RAG（[arXiv 2605.03534](https://arxiv.org/html/2605.03534v1)）已做
+  evidence sufficiency + 不确定性弃答。T021 必须把两者写进 related work。
+- **D4 暂无直接后续工作**：未检索到 MAVEN-FACT 上 typed cues / modality×polarity 因子化的跟进论文，
+  这条赛道当前最干净。结合"Ch3 三个 blocker 全清、pooled power PASS、T022 已过"，
+  **D4 是三章里最该先放行 pilot 的一章**。
 
-| 序 | 任务 | 产物 |
-|---|---|---|
-| F1 | 服务器 git 同步核对：4090 在 `95e37bd`、5090 在 `4e893c1`，均落后 `origin/main` `f6966a0`；`git fetch && git reset --hard origin/main`，**不动 `runs/`** | 两端 HEAD 与 origin/main 一致，`runs/` 目录清单前后不变 |
-| F2 | Ch4/E3 中不依赖上游 handoff 的部分：冻结 1,908 个 query、候选集与序列化顺序，做逐实例一致性检查（T040 前半），**不接任何 C5/A4/D4 产物**，不做 24 条件矩阵 | `runs/stages/E3/…` + 追加到 `results/PHASE_E.md` |
+#### E.2 本周队列（9/7 – 9/9；写代码由 Claude/Codex 承担，故时间成本压在决策与 GPU 上）
 
-文件所有权（本窗口内不得越界写）：
+| 序 | 任务 | 前置 | 完成判定 | 状态 |
+|---|---|---|---|---|
+| E1 | 关 Ch2 TacoERE 适配档的账：查清 `taco-s13-r2` 与 `taco-s13-r3` 差异来源 → **预注册**选档规则 → 评分正式档 → 三族官方 F1 写进 `results/PHASE_R1.md` → 更新 `status.json` | 已满足 | 差异有书面解释；选档规则在看分数前写定；结果页与 `status.json` 不再互相矛盾 | todo |
+| E2 | 取 LLMERE 官方实现做可运行性核查：冻结 commit/tree hash、核对 MAVEN-ERE 数据接口、base model、显存与是否 LoRA，裁决"能否在我们 2622/291 manifest 与官方 evaluator 下忠实重跑"；**本步不训练** | E1 | 裁决落到 `results/PHASE_R1.md` 第 4 节，并修订该节 Ch2 结论；能跑则排下周训练，不能跑则写明具体阻断点 | todo |
+| E3 | T021 Ch2 因果 design brief：写入 LLMERE/TacoERE 对照结构与 CovEReD、SURE-RAG 的一般命题，明确 A4 窄 delta | E2 | 审查 PASS，且推理保持完整候选全集 | todo |
+| E4 | T020 Ch1 因果 design brief：正面处理 ACCI 抢占，核实其论元来源，写清 C5 的窄 delta | 已满足 | 审查 PASS；不使用 MAVEN-ARG cluster gold；不出现"首次"表述 | todo |
+| E5 | T023 跨产物一致性审计：实跑 `scripts/audit_r1_consistency.py`，修掉 `status.json` 与结果页的矛盾 | E3 + E4 + 已有 T022 | 输出 `cross_artifact_audit.json`；每条需求映射到任务/测试 | todo |
+| E6 | T024 冻结 C5/A4/D4 phase contract | E5 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash | todo |
 
-| 归属 | 独占 |
-|---|---|
-| Claude | `results/PHASE_R1.md`、`results/PHASE_A.md`、`runs/stages/R1/**`、`TASKS.md` 的 T020–T024、`phases/PHASE_{C5,A4,D4}_*.md` |
-| Codex | `results/PHASE_E.md`、`runs/stages/E3/**`、`phases/PHASE_E3_factorial_consumers.md` |
-| 共同 | `HANDOFF.md`、`TODO.md`：只**追加或替换自己那一节**，不重写对方的节；提交前先 `git pull --rebase` |
+E1 的具体要求：两档是**同 seed 13、同配置**（`context_mode=taco`、50 epochs、`save_best_by_family=true`、
+`neg_ratio=inf`、lr 1e-5 / head 1e-4、warmup 200），但 dev 不同（best_epoch 5 vs 7；causal by-family
+best_epoch 5 vs 40）。差异只可能来自 09-06 13:24 之后对 `src/ekg/relations/extractor/supervised.py`
+的改动（`3f02640`）或 GPU 非确定性。**先查清来源，再预注册选档规则**（例如"以最新代码身份的档为准"），
+最后才评分。禁止先看两档分数再决定用哪档——那是 Phase C 已经犯过的选模轴伪影。
 
-分支与工作树：只在 `main` 上按逻辑单元提交，不开长期分叉。现存 `.worktrees/r1-t023-t024`
-（`de20e07`，已是 `main` 的祖先，工作树干净）在确认无人使用后删除，避免第二份 R1 工作树。
+#### E.3 GPU 使用：按需求，不为占卡而占卡
 
-GPU 说明：4090 四卡当前 0 %，5090 单卡被既有 Qwen 服务占约 17 GB。R1 未放行 proposed 训练，E1 的
-评分是短任务，因此本窗口**四卡空闲属于正常状态**，不得为占卡启动没有准入的训练。
+本周真实 GPU 需求只有 E1 的一次评分（短任务，单卡）。E2 只做静态核查不训练，E3–E6 全是文档与审计。
+因此 **9/7–9/9 期间 4090 大面积空闲是正常的**；卡是公用资源，不得为了"看起来在跑"启动无准入的训练。
+真实的大 GPU 需求在下周：LLMERE 同协议重跑（若 E2 裁定可行）与 T024 放行后的第一个 seed-13 pilot
+（按 E.1 的证据，优先 D4）。5090 单卡有既有 Qwen 服务约 17 GB，使用前仍须逐次取得作者授权。
 
 ## 4. R1 后的候选方向：不是固定答案
 

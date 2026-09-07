@@ -25,9 +25,9 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    这是可修订 plan，不是 SPEC；
 6. 4090/5090 当前可用于互不冲突的**准入 baseline smoke/OOF**；长任务继续 `setsid nohup`，不依赖 SSH
    存活。多种子与跨机 checkpoint 搬运仍须另行授权。
-7. **本窗口执行序与分工见 [`HANDOFF.md`](HANDOFF.md) 任务 E**（E1 关 Ch2 第二 baseline 账 → E2/E3
-   brief → E4 T023 → E5 T024；Codex 只做 F1 服务器 git 同步与 F2 E3 评估单元冻结）。两个执行代理
-   按该表独占文件，不并行改同一结果页。
+7. **执行队列与交替推进约束见 [`HANDOFF.md`](HANDOFF.md) 任务 E**：E1 关 Ch2 TacoERE 适配档的账 →
+   E2 核查 LLMERE 官方实现 → E3 T021 → E4 T020 → E5 T023 → E6 T024。Claude 与 Codex **轮流**持有
+   同一条队列，任何时刻只有一个活动任务；开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
 
 ## 当前三端
 

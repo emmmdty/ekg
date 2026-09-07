@@ -4,6 +4,7 @@
 > 本文件每次会话都入上下文，**只放「删掉就会出错」的东西**；细节一律放下面的文档，按需读。
 
 **新会话只读 `docs/HANDOFF.md`** 作为交接入口（状态快照 · 规矩 · 坑 · 下一步优先级）。
+Claude 与 Codex **交替推进同一条队列**：开工前按 `HANDOFF.md` 任务 E.0 的六条约束对齐（HEAD 必须等于 `origin/main`、单队列、改计划先改文件、不开分支/worktree、活动任务独占产物、交接必须已 push）。
 根目录不再维护 `task_plan.md`、`findings.md`、`progress.md`；阶段完成、出现新证据或关键决策时直接
 写回 `docs/HANDOFF.md`，不要恢复 planning-with-files 工作流。
 
