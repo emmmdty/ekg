@@ -39,7 +39,9 @@ git clone --depth 1 --branch v0.9.3 "$llamafactory_source" "$llamafactory_root"
 test "$(git -C "$llamafactory_root" rev-parse HEAD)" = "$llamafactory_ref"
 "$worker_env/bin/python" -m pip install "$llamafactory_root[torch]"
 
-HF_HOME="$run_root/hf-cache" "$worker_env/bin/python" -u scripts/download_llmere_base_model.py \
+HF_HOME="$run_root/hf-cache" HF_ENDPOINT=https://hf-mirror.com \
+  "$worker_env/bin/python" -u scripts/download_llmere_base_model.py \
+  --endpoint https://hf-mirror.com \
   --output "$model_path" \
   --record "$run_root/adapter/base_model.json"
 
