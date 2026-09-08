@@ -1,31 +1,56 @@
 #!/usr/bin/env bash
-# Resume the E8 namespace after base-model acquisition completed successfully.
-# Run only on gpu-4090. The checks intentionally reject any partial train,
-# prediction, score, or LLMERE preparation tree instead of overwriting it.
+# Resume E8 after its SFT adapter is complete but prediction has not started.
+# Run only on gpu-4090. It refuses to overwrite generated predictions or scores.
 set -euo pipefail
 
-project_root=${1:?usage: resume_llmere_causal_adapter.sh /data/TJK/ekg GPU_INDEX}
-gpu_index=${2:?usage: resume_llmere_causal_adapter.sh /data/TJK/ekg GPU_INDEX}
+project_root=${1:?usage: resume_llmere_causal_prediction.sh /data/TJK/ekg GPU_INDEX}
+gpu_index=${2:?usage: resume_llmere_causal_prediction.sh /data/TJK/ekg GPU_INDEX}
 run_root="$project_root/runs/stages/R1/r1-v61-20260904/baselines/relation/llmere-causal-s13"
 worker_env="$project_root/.venv-llmere-causal-s13"
 model_path="$run_root/weights/NousResearch--Meta-Llama-3-8B"
 llamafactory_root="$run_root/upstream/llama-factory"
 llamafactory_ref=ca75f1edf3cb50343ed1c98605141c3e22075b5f
+llmere_ref=94d4ef2781ec7e071d38ac7fd8632a8fffbda798
+llmere_tree=f0fd6928ac8bad89efa76ea47b8237fb1b8fa06f
 candidate_digest=313ec48e657374bc5afb7d09df9282c32f1d7a3acfdbfe1bc35435765042df3c
 
 cd "$project_root"
 test -s "$run_root/adapter/base_model.json"
+test -s "$run_root/adapter/run_metadata.json"
+test -s "$run_root/adapter/llmere_causal_predict.yaml"
+test -s "$run_root/train/adapter/adapter_model.safetensors"
+test -s "$run_root/train/adapter/train_results.json"
 test -d "$model_path"
 test -x "$worker_env/bin/python"
 test -x "$worker_env/bin/llamafactory-cli"
 test -d "$llamafactory_root"
 test "$(git -C "$llamafactory_root" rev-parse HEAD)" = "$llamafactory_ref"
 test -z "$(git -C "$llamafactory_root" status --porcelain)"
-test ! -e "$run_root/upstream/llmere"
-test ! -e "$run_root/train"
+test -d "$run_root/upstream/llmere/.git"
+test "$(git -C "$run_root/upstream/llmere" rev-parse HEAD)" = "$llmere_ref"
+test "$(git -C "$run_root/upstream/llmere" rev-parse HEAD^{tree})" = "$llmere_tree"
 test ! -e "$run_root/predict"
 test ! -e "$run_root/score"
-test ! -e "$run_root/adapter/run_metadata.json"
+
+"$project_root/.venv/bin/python" - "$run_root" <<'PY'
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+run_root = Path(sys.argv[1])
+metadata = json.loads((run_root / "adapter/run_metadata.json").read_text(encoding="utf-8"))
+if metadata.get("status") != "prepared":
+    raise SystemExit(f"expected prepared metadata, got {metadata.get('status')!r}")
+upstream = metadata.get("upstream", {})
+converter = run_root / "upstream/llmere/data_handle_MAVEN_ERE/convert_causal.py"
+actual = hashlib.sha256(converter.read_bytes()).hexdigest()
+if actual != upstream.get("causal_converter_sha256"):
+    raise SystemExit("LLMERE causal converter hash no longer matches prepared metadata")
+results = json.loads((run_root / "train/adapter/train_results.json").read_text(encoding="utf-8"))
+if results.get("epoch") != 3.0 or results.get("train_runtime", 0) <= 0:
+    raise SystemExit(f"SFT completion record is invalid: {results}")
+PY
 
 "$worker_env/bin/python" -m pip install jieba==0.42.1
 "$worker_env/bin/python" - <<'PY'
@@ -34,14 +59,6 @@ import jieba
 assert jieba.__version__ == "0.42.1", jieba.__version__
 PY
 
-CUDA_VISIBLE_DEVICES="$gpu_index" "$project_root/.venv/bin/python" -u \
-  scripts/prepare_llmere_causal_adapter.py \
-  --project-root "$project_root" \
-  --run-root "$run_root" \
-  --model-path "$model_path"
-
-CUDA_VISIBLE_DEVICES="$gpu_index" "$worker_env/bin/llamafactory-cli" train \
-  "$run_root/adapter/llmere_causal_sft.yaml"
 CUDA_VISIBLE_DEVICES="$gpu_index" "$worker_env/bin/llamafactory-cli" train \
   "$run_root/adapter/llmere_causal_predict.yaml"
 
