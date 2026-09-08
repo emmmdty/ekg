@@ -52,11 +52,19 @@ if results.get("epoch") != 3.0 or results.get("train_runtime", 0) <= 0:
     raise SystemExit(f"SFT completion record is invalid: {results}")
 PY
 
-"$worker_env/bin/python" -m pip install jieba==0.42.1
+"$worker_env/bin/python" -m pip install \
+  jieba==0.42.1 \
+  nltk==3.9.1 \
+  rouge-chinese==1.0.3
 "$worker_env/bin/python" - <<'PY'
 import jieba
+import nltk
+import rouge_chinese
+from importlib.metadata import version
 
-assert jieba.__version__ == "0.42.1", jieba.__version__
+assert version("jieba") == "0.42.1", jieba.__version__
+assert version("nltk") == "3.9.1", nltk.__version__
+assert version("rouge-chinese") == "1.0.3", rouge_chinese
 PY
 
 CUDA_VISIBLE_DEVICES="$gpu_index" "$worker_env/bin/llamafactory-cli" train \

@@ -27,11 +27,19 @@ test ! -e "$run_root/predict"
 test ! -e "$run_root/score"
 test ! -e "$run_root/adapter/run_metadata.json"
 
-"$worker_env/bin/python" -m pip install jieba==0.42.1
+"$worker_env/bin/python" -m pip install \
+  jieba==0.42.1 \
+  nltk==3.9.1 \
+  rouge-chinese==1.0.3
 "$worker_env/bin/python" - <<'PY'
 import jieba
+import nltk
+import rouge_chinese
+from importlib.metadata import version
 
-assert jieba.__version__ == "0.42.1", jieba.__version__
+assert version("jieba") == "0.42.1", jieba.__version__
+assert version("nltk") == "3.9.1", nltk.__version__
+assert version("rouge-chinese") == "1.0.3", rouge_chinese
 PY
 
 CUDA_VISIBLE_DEVICES="$gpu_index" "$project_root/.venv/bin/python" -u \
