@@ -60,9 +60,9 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 - 4090：A3.6 与 Ch3 OOF 进程均已 GONE；E8 的专用 CUDA venv、固定 LLaMA-Factory 与约 15GB 的未设门
   Llama-3-8B 镜像权重已落在 `llmere-causal-s13` namespace，均未搬运也未污染项目 `.venv`。模型下载虽有
   Xet 自动续传，最终完整；R1 protocol 已双端验 SHA 后，E8 的 seed-13 LoRA SFT 已完成 18,138 steps，adapter
-  留在原 namespace。预测启动前因专用环境缺少固定依赖 `jieba==0.42.1` 停止，未产生推理、评分或指标；严格的
-  prediction-only 恢复脚本将验证既有 SFT 和上游身份后续跑，绝不重训或覆盖半成品。GPU0–3 当前空闲，checkpoint
-  与 OOF 既有产物仍留在各自远端 run root；
+  留在原 namespace。prediction-only 第一次续跑安装 `jieba` 后仍因 LLaMA-Factory 生成预检缺 `nltk` 停止，未产生
+  推理、评分或指标；已核实该版本需整个 metrics extra，并固定 `jieba/nltk/rouge-chinese` 三项后再续跑，绝不重训
+  或覆盖半成品。GPU0–3 当前空闲，checkpoint 与 OOF 既有产物仍留在各自远端 run root；
 - 5090：可连接；既有 Qwen 与其他 Python 服务保持运行，使用前重新查询动态显存占用，服务不动、
   checkpoint 不搬。R1 尚未放行 proposed pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡
   启动无效训练。
