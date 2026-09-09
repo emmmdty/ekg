@@ -53,7 +53,10 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    **E8 LLMERE-causal generation** 只写自己的 namespace。作者已于 2026-09-09 明确授权，在其后台运行时并行推进
    **E11 D4.0–D4.2**（实现、本地 gate、immutable preflight、CPU/CUDA smoke）；未逐项通过前不得启动 D4 seed-13 pilot，
    不得启动额外 seeds。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务，例外与实际排期以
-   `HANDOFF.md` E.0/E.2 为准；
+   `HANDOFF.md` E.0/E.2 为准。**D4.0 已由 `727ab02` 完成**：五类保持不变的 unknown/modality/polarity
+   factorization、typed-cue sidecar、文档内 permutation negative control、注册混淆中介和独立 train/eval/preflight/smoke
+   入口均已落地；531 passed / 26 expected skips、ruff 0、CPU smoke OK。远端 preflight 尚未启动；SSH banner timeout
+   仅表示隧道不可达，不能当作 E8 或服务器进程结束；
    开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
 
 ## 当前三端
