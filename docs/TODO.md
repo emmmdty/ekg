@@ -50,7 +50,10 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
    ~~E6 T024~~（A4/D4 已 hash-bound；A4 的 LLMERE-causal 以「已规格化、数字 pending」入 roster；
    C5 仍缺第二方法族，已明确 `blocked_pre_admission` 而非伪冻结）→ ~~E7~~（两档 relation run 已分别
    绑定历史 `supervised.py` 身份；审计脚本已纳入 R1 `code.files` 并自检）→ **E8**；
-   **E8 LLMERE-causal 训练可与 E4–E7 并行**，只写自己的 namespace。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务；
+   **E8 LLMERE-causal generation** 只写自己的 namespace。作者已于 2026-09-09 明确授权，在其后台运行时并行推进
+   **E11 D4.0–D4.2**（实现、本地 gate、immutable preflight、CPU/CUDA smoke）；未逐项通过前不得启动 D4 seed-13 pilot，
+   不得启动额外 seeds。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务，例外与实际排期以
+   `HANDOFF.md` E.0/E.2 为准；
    开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
 
 ## 当前三端
@@ -63,7 +66,8 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
   留在原 namespace。prediction-only 第一次续跑安装 `jieba` 后仍因 LLaMA-Factory 生成预检缺 `nltk` 停止，未产生
   推理、评分或指标；已核实该版本需整个 metrics extra，并固定 `jieba/nltk/rouge-chinese` 三项。当前 PID
   `1819697` 已在 GPU0 执行 11,149 条逐条 generation（约 13.5 秒/条），结束后才一次性写预测文件、转换和评分；
-  不会重训或覆盖半成品。GPU1–3 空闲，checkpoint 与 OOF 既有产物仍留在各自远端 run root；
+  不会重训或覆盖半成品。2026-09-09 核卡：GPU1 空闲；GPU2–3 由既有 vLLM 服务占用，服务不得触碰。D4 只可在
+  实现、preflight 与 smoke 全部通过后使用届时真正空闲的一张卡，checkpoint 与 OOF 既有产物仍留在各自远端 run root；
 - 5090：可连接；既有 Qwen 与其他 Python 服务保持运行，使用前重新查询动态显存占用，服务不动、
   checkpoint 不搬。R1 尚未放行 proposed pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡
   启动无效训练。
