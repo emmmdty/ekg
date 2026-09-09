@@ -26,6 +26,7 @@ has demonstrated nothing.
 
 from __future__ import annotations
 
+import importlib
 import json
 import math
 from abc import ABC, abstractmethod
@@ -62,6 +63,7 @@ __all__ = [
     "FactualityPrediction",
     "FactualityDetector",
     "factuality_detectors",
+    "build_factuality_detector",
     "LexiconFactualityDetector",
     "SupervisedFactualityDetector",
     "predictions_to_labels",
@@ -360,6 +362,21 @@ class FactualityDetector(ABC):
 
 
 factuality_detectors: Registry[FactualityDetector] = Registry("factuality_detector")
+
+_LAZY_DETECTOR_MODULES = {
+    "baseline": "ekg.factuality.baselines",
+    "typed_cue": "ekg.factuality.typed_cues",
+}
+
+
+def build_factuality_detector(name: str, **kwargs: object) -> FactualityDetector:
+    """Construct a detector, importing optional method families only on demand."""
+    if name not in factuality_detectors:
+        module = _LAZY_DETECTOR_MODULES.get(name)
+        if module is None:
+            raise ValueError(f"unknown factuality detector {name!r}")
+        importlib.import_module(module)
+    return factuality_detectors.create(name, **kwargs)
 
 
 @factuality_detectors.register("lexicon")
