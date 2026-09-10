@@ -78,6 +78,24 @@ def test_converter_rejects_malformed_generation_instead_of_defaulting_to_none():
         )
 
 
+def test_converter_deduplicates_identical_references_within_one_field():
+    predictions, report = CONVERTER.convert_predictions(
+        source_records=[_document("d1")],
+        manifest_ids=["d1"],
+        generations=[
+            {"predict": "CAUSE: <e1 event>, <e1 event>; PRECONDITION: none"},
+            {"predict": "CAUSE: none; PRECONDITION: none"},
+        ],
+        partition_size=30,
+    )
+
+    assert report["emitted_causal_pairs"] == 1
+    assert predictions[0]["causal_relations"] == {
+        "CAUSE": [["m1", "m2"]],
+        "PRECONDITION": [],
+    }
+
+
 def test_converter_rejects_trailing_generation_rows():
     with pytest.raises(CONVERTER.ConversionError, match="trailing rows"):
         CONVERTER.convert_predictions(

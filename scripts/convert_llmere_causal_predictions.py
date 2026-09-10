@@ -3,9 +3,10 @@
 
 LLMERE emits one generation for every focal-event/partition example, whereas
 the frozen organisers' evaluator consumes one complete prediction object per
-document.  This converter preserves every internal-dev document and keeps the
-official candidate universe intact; ungenerated or malformed model responses
-are errors, never implicit all-NONE fallbacks.
+document. This converter preserves every internal-dev document and keeps the
+official candidate universe intact. Repeated identical references within one
+otherwise valid field are normalized to one relation-set member; ungenerated
+or malformed model responses are errors, never implicit all-NONE fallbacks.
 """
 
 from __future__ import annotations
@@ -100,9 +101,7 @@ def _parse_references(text: str, *, line_number: int, label: str) -> list[str]:
                 f"generation {line_number} has malformed {label} reference {raw!r}"
             )
         references.append(match.group("event"))
-    if len(references) != len(set(references)):
-        raise ConversionError(f"generation {line_number} repeats a {label} reference")
-    return references
+    return list(dict.fromkeys(references))
 
 
 def parse_causal_prediction(record: dict[str, Any], *, line_number: int) -> dict[str, list[str]]:
