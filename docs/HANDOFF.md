@@ -8,9 +8,9 @@
 
 | 项 | 值 |
 |---|---|
-| 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`。E8 的 transparent baseline 已完成 generation，正在等待语义无损转换修复后的官方评分；作者已授权在不触碰 E8 namespace 的前提下推进 D4 的实现/预检/烟测，**D4 seed-13 pilot 仍须依次通过这些门**。 |
+| 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`。E8 的 transparent baseline 已完成 generation，但生成文本无效、尚不能评分；任何新推理协议须先冻结并由作者授权。作者已授权在不触碰 E8 namespace 的前提下推进 D4 的实现/预检/烟测，**D4 seed-13 pilot 仍须依次通过这些门**。 |
 | 当前队列 | 任务 E.2，共 E1–E11（E1–E7、E9–E10 已 `done`；E8 generation 与 E11 的 D4 准备工作按 2026-09-09 作者授权并行） |
-| **活动任务** | **E8：LLMERE-causal 透明适配 baseline**（`wip`；SFT 与 11,149 条 generation 已完成；严格转换在第 107 条的重复 `PRECONDITION` 引用停止，尚无评分/指标。仅重复合法引用的语义无损归并已本地测试通过，待 4090 SSH 隧道恢复后同步并重新转换/评分，**不得重训或重新生成**）与 **E11：D4 typed-cue 准备**（`wip`；D4.0 已由 `727ab02` 完成并过本地三件套；远端 D4.1 preflight 尚未启动，因为本轮 SSH banner 超时。未经 preflight、CUDA smoke 与重新核卡不启动 pilot）。A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
+| **活动任务** | **E8：LLMERE-causal 透明适配 baseline**（`wip`；SFT 与 11,149 条 generation 已完成；除 1 条可无损重复引用外，另有 95 条 malformed 输出，官方评分不可运行且不得局部补齐/拼接；见 `results/PHASE_R1.md` §9.6。只有完整、统一的新推理协议冻结并经作者授权后，才能重生成）与 **E11：D4 typed-cue 准备**（`wip`；D4.0 已由 `727ab02` 完成并过本地三件套；远端 D4.1 preflight 尚未启动，因为本轮 SSH banner 超时。未经 preflight、CUDA smoke 与重新核卡不启动 pilot）。A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
@@ -318,7 +318,7 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | done | `9b43573` |
 | E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约已由 E9 解锁、可冻结；C5 因 E10 `not_runnable` 仍缺第二方法族，先由作者另议名单，不得伪冻结**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | done | `1fcc7db` |
 | E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | done | `1c922fd` |
-| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | wip（SFT 与 11,149 条 generation 已完成；第 107 条含重复合法 `PRECONDITION` 引用，严格转换停止。`372a6e2` 的通用语义无损归并已本地验证；4090 隧道恢复后只重跑转换/评分/finalize，尚无指标） | `20be231` + `372a6e2` |
+| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | wip（SFT 与 11,149 条 generation 已完成；`372a6e2` 解决 1 条精确重复引用，但全量扫描另有 95 条 malformed 输出，故官方评分不可运行。不得填 NONE、猜引用、只重生成 95 条或拼接；新统一推理协议须先冻结并获作者授权，详见结果页 §9.6） | `20be231` + `372a6e2` |
 | E11 **（2026-09-09 作者授权与 E8 generation 并行）** | D4 typed-cue factuality 的 D4.0 implementation/local gate → D4.1 immutable preflight/baseline replay → D4.2 CPU/CUDA smoke。只在三道门全过且重新核卡后，按冻结 seed-13 命令启动 D4.3；GPU 选择按实时空闲卡，记录实际 `CUDA_VISIBLE_DEVICES`。 | E6/T024 frozen；作者明确授权 | 实现与 targeted tests、三件套、preflight 的 source/manifest/fold/OOF hash 重验和 smoke 均通过；不读取 final-valid、不改五折 rotation、不启动 seed 17/42。任何一项失败即停止，不占卡重试。 | wip（D4.0 `727ab02` + `310b5be`：factorization、typed-cue sidecar、文档内 permutation、confusion mediator、独立 train/eval/preflight/smoke 入口及 preflight 合同测试已完成；533 passed / 26 expected skips、ruff 0、smoke OK。D4.1 未启动；SSH banner timeout，不能据此判断远端状态） | `727ab02` + `310b5be` |
 
 E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 KMeans 初始化，全量实测 2,913 篇里
@@ -529,15 +529,17 @@ GPU0 再启动 prediction-only 续跑。
 尚未出现不表示停滞。当前没有 error、尚无任何可报告的 causal P/R/F1；generation 完成后才依序执行严格转换、
 冻结 evaluator 评分和 final metadata。
 
-2026-09-10 状态更新：E8 已完成 11,149/11,149 generation，`generated_predictions.jsonl`（约 59 MB）与
-adapter 均留在原 4090 run root；成功 SSH 读取到外层/预测进程均 GONE、GPU0–3 空闲。生成日志随后在严格
-转换的第 107 条停止：同一 `PRECONDITION` 字段重复了完全相同的、格式合法的事件引用；尚未生成
-`score/official_predictions.jsonl`、官方 metrics 或 final metadata，故**没有可报告的 causal P/R/F1**。这不是
-训练、生成或服务器故障。转换器最终本就按关系集合写出 pair，因此本地仅将此类同字段精确重复归并为一个集合
-成员；未知引用、自环、缺字段、非法标签及其余 malformed 输出仍 fail-fast。修复提交 `372a6e2`；新增回归测试及完整本地三件套均
-通过（534 passed / 26 skipped、ruff 0、smoke OK）。当前 `gpu-4090` cpolar SSH 隧道返回 connection refused；
-此状态不能推断远端产物丢失或变更。隧道恢复后，先用 `.venv/bin/python` 扫描全部生成行；只有确认无其他
-语义异常，才同步该修复并**只**重跑 converter → frozen evaluator → finalize，不重训、不重生成。
+2026-09-10 状态更新：E8 已完成 11,149/11,149 generation，`generated_predictions.jsonl`（59,336,796 bytes）
+与 adapter 均留在原 4090 run root；成功 SSH 读取到外层/预测进程均 GONE、GPU0–3 空闲。`372a6e2` 的转换器
+将第 107 条的精确重复合法 `PRECONDITION` 引用归并为一个 relation-set 成员，定向测试及本地三件套均通过
+（534 passed / 26 skipped、ruff 0、smoke OK）。但同步到 4090 后的全量验证还发现 95 条不可无歧义解析的输出：
+第 7,817 条 1 条，以及第 8,842–8,935 条连续 94 条（同一 47-event 文档的两个分区）。它们缺失标签、断裂事件
+标记或混入自由文本；不得补 NONE、猜 event id 或局部重生成/拼接。固定 tokenizer 实测所有保存 prompt 均为
+286–2,015 tokens、没有一条超过 2048，因此不能把根因臆断为截断。尚未生成 `score/official_predictions.jsonl`、
+官方 metrics 或 final metadata，故**没有可报告的 causal P/R/F1**。完整失败记录与有效性边界见
+[`results/PHASE_R1.md` §9.6](results/PHASE_R1.md#96-e8--llmere-causal-s13-生成输出有效性失败2026-09-10)。
+要重取该 baseline 数字，必须先冻结一个完整、统一的推理/约束解码方案并取得作者授权，再重生成全 11,149 条；
+不重训 LoRA adapter。
 
 #### E.3 GPU 使用：按需求，不为占卡而占卡
 

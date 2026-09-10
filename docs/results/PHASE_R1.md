@@ -457,6 +457,29 @@ split 文件 SHA-256：train `8b6c9c21…a4fe`，valid/test（同一 291 篇）`
 8B bf16 + LoRA r64 在 24GB 上预计**需要 gradient checkpointing**才装得下，本步未验证。推理侧 49,156 次
 生成且栈里没有 vllm。合起来是 4090 整机数天级占用，**须先取得作者同意再排期**。
 
+### 9.6 E8 · `llmere-causal-s13` 生成输出有效性失败（2026-09-10）
+
+透明适配的 seed-13 LoRA SFT 已完成，随后对 291 篇 internal-dev 的 11,149 条 causal 分区完成 generation；
+adapter 与原始 `predict/generated_predictions.jsonl`（59,336,796 bytes）均保留在
+`gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-20260904/baselines/relation/llmere-causal-s13/`。但这一轮**没有
+产生可评分的官方 predictions、metrics 或 final metadata**：严格转换不能把生成文本无歧义地还原为关系集合。
+
+全量扫描得到两类互不混淆的现象：
+
+- 第 107 条在同一个 `PRECONDITION` 字段重复同一条格式合法的事件引用。转换器最终本来就以 relation set
+  写出 pair，故 `372a6e2` 仅将这类精确重复归并为一个成员；该归并有定向回归测试，未知引用、自环、缺字段、
+  非法标签及其余 malformed 输出仍 fail-fast。
+- 另有 **95** 条无法解析：第 7,817 条 1 条，及第 8,842–8,935 条连续 94 条。后 94 条全属于同一篇 47-event
+  文档的两个 k=30 分区，输出包括缺失 `CAUSE` 标签、断裂 `<e…>` 标记和自由文本，不能从文本唯一确定应输出的
+  关系或 NONE。把它们补为 NONE、猜 event id、只重生成该 94 条后与原结果拼接，都将改变或按结果选择推理口径，
+  因而禁止。
+
+初步的“字符长度导致截断”解释已被反证：用本轮固定 Llama-3 tokenizer 对全部 11,149 个保存 prompt 重计，
+范围为 286–2,015 tokens，**0 条**超过 `cutoff_len=2048`；95 条无效样本为 472–2,015 tokens。当前只能如实
+归因为模型输出未满足格式，不能把根因写成截断。官方 causal P/R/F1 仍为 **unavailable**，SFT loss、ROUGE 和
+BLEU 均不是本项目的实验指标。若要重新取得该 baseline 数字，必须先冻结一份完整、统一的新推理/约束解码
+方案并获作者授权，再对全 11,149 条重新生成；本轮不允许以局部修补替代。
+
 ## 10. 学位标准前提纠正（2026-09-07）
 
 R1.1 / T012 在 2026-09-04 冻结的 `degree_requirements.json` v1 把**四份同济大学文件**当作适用的学位授予
