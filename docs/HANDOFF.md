@@ -8,13 +8,21 @@
 
 | 项 | 值 |
 |---|---|
-| 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`。E8 的 transparent baseline 已完成 generation，但生成文本无效、尚不能评分；任何新推理协议须先冻结并由作者授权。作者已授权在不触碰 E8 namespace 的前提下推进 D4 的实现/预检/烟测，**D4 seed-13 pilot 仍须依次通过这些门**。 |
-| 当前队列 | 任务 E.2，共 E1–E11（E1–E7、E9–E10 已 `done`；E8 generation 与 E11 的 D4 准备工作按 2026-09-09 作者授权并行） |
-| **活动任务** | **E8：LLMERE-causal 透明适配 baseline**（`wip`；SFT 与 11,149 条 generation 已完成；除 1 条可无损重复引用外，另有 95 条 malformed 输出，官方评分不可运行且不得局部补齐/拼接；见 `results/PHASE_R1.md` §9.6。只有完整、统一的新推理协议冻结并经作者授权后，才能重生成）与 **E11：D4 typed-cue 准备**（`wip`；D4.0 已由 `727ab02` 完成并过本地三件套；远端 D4.1 preflight 尚未启动，因为本轮 SSH banner 超时。未经 preflight、CUDA smoke 与重新核卡不启动 pilot）。A4/D4 已由 E6/T024 冻结；C5 因 E10 判定 ACCI 不可运行，仍需作者另议第二方法族。**执行顺序认表里的行序，不认编号大小** |
+| 正式阶段 | `R1 方法设计准入`；状态 `preparation_partial_blocked`。E8 的 transparent baseline 已完成 generation，但本轮输出无效、不能评分；先审查并冻结统一恢复方案，获作者授权后才可全量重生成。D4 只完成实现与本地 gate；下周先做 D4.1 preflight、再做 D4.2 单卡 smoke，seed-13 pilot 仍未获启动授权。 |
+| 当前队列 | 历史队列 E1–E11 已收口到 E8/E11 两条 `wip` 支线；**下周执行顺序以 §E.2a 为准**。E1–E7、E9–E10 已 `done`。 |
+| **活动任务** | **E8：LLMERE-causal 透明适配 baseline**（SFT 与 11,149 条 generation 已完成；1 条可无损重复引用外另有 95 条 malformed 输出，官方评分不可运行，不得局部补齐或拼接；见 `results/PHASE_R1.md` §9.6）与 **E11：D4 typed-cue 准备**（D4.0 已完成本地 gate；D4.1/D4.2 未启动）。C5 仍缺作者指定的第二方法族；A4/D4 合同已冻结。 |
 | 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
 
-新窗口不要问“接下来做什么”，也不要重读整个仓库：只读检查通过后，直接开 E.2 里第一个 `todo`。
+新窗口不要重读整个仓库：完成 §0 的只读检查后，按 §E.2a 恢复一个明确的 `wip` 子任务。当前没有可直接
+开跑的长 GPU `todo`；不得把卡空闲理解成已经获得重生成或 pilot 授权。
+
+### 本次交接的已知工作树例外
+
+本次交接提交后，`HEAD` 应等于 `origin/main`。唯一已知的未提交修改是作者本人维护的
+`docs/reports/TEMPLATE_周报.md`：它是当前有效周报模板，**不得 stage、revert、clean 或混入任何实验提交**。
+其他未说明的改动仍按异常处理。最新导师可读周报是
+[`reports/2026-09-10_周报.md`](reports/2026-09-10_周报.md)。
 
 ## 0. 接手后先做什么
 
@@ -223,7 +231,7 @@ SHA-256 `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e`。
 
 两个执行代理**轮流**持有同一条队列，任何时刻只有一个"活动任务"。约束只有六条，违反其一即视为交接失败：
 
-1. **单队列**：任务顺序只认下面 E.2 的编号表。要偏离顺序，**先改本表再执行**，不在会话里口头改计划。
+1. **单队列**：任务顺序只认下面 E.2 的历史记录与 E.2a 的接续队列。要偏离顺序，**先改本表再执行**，不在会话里口头改计划。
 2. **开工前对齐**：除 §0 的三条只读检查外，必须确认 `git rev-parse HEAD` 等于 `git rev-parse origin/main`；
    不相等就先 `git pull --rebase`，未对齐不开工。
 3. **交接靠文件不靠记忆**：一项任务算完成，必须四件齐全——产物落地、数字写进对应
@@ -305,7 +313,7 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
    三种处置（可比 / 口径不同 / 拿不到全文）见 §15.3。无论结果如何**它都不能进 roster**——无公开代码，
    按 FR-006 无法在我们协议下跑通。
 
-#### E.2 本周队列（9/7 – 9/9；写代码由 Claude/Codex 承担，故时间成本压在决策与 GPU 上）
+#### E.2 历史队列（9/7 – 9/10；已完成行留作可追溯记录）
 
 | 序 | 任务 | 前置 | 完成判定 | 状态 | commit |
 |---|---|---|---|---|---|
@@ -318,8 +326,18 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | E10 **（排在 E6 之前）** | ACCI 仓库静态核查（`github.com/era211/ACCI`），**复用 E2 对 LLMERE 的流程，不训练**：有无 trainer / checkpoint / 依赖清单，数据接口能否接我们 2622/291 manifest 与完整候选全集，跨文档→文档内需要哪些适配 | E9 | 裁决落到结果页；能跑则排单卡 seed-13 透明移植，不能跑则写明具体阻断点并按新措辞另议 Ch1 名单 | done | `9b43573` |
 | E6 | T024 冻结 C5/A4/D4 phase contract。**A4 契约照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化，只有数字 pending；pilot 可先跑，确认性 promotion 不可 | E5 + E9 + E10 | 三份契约的输入、baseline、protocol hash、promotion/stop、bundle、GPU 命令齐全并落 hash；A4 的 pending baseline 有可执行规格而不是占位符；**A4 契约已由 E9 解锁、可冻结；C5 因 E10 `not_runnable` 仍缺第二方法族，先由作者另议名单，不得伪冻结**。⚠️ **E5 已查出契约内容本身与裁决矛盾**：A4 契约仍把 taco 适配写成 independent recent family（§13 已否）、C5 契约仍把 Qwen3 档写成 argument-aware strong baseline（§15 已改为负面对照），**必须改内容，不能只补哈希**；D4 契约与 T022 记录一致 | done | `1fcc7db` |
 | E7 | 修可追溯性缺口：把 `src/ekg/relations/extractor/supervised.py` 纳入 relation run 的哈希集合（E1 发现：两档携带同一 trainer hash 却构造不同编码器输入）；**并把 `scripts/audit_r1_consistency.py` 纳入 R1 `protocol.json` 的 `code.files`**（E5 发现：同类脚本 `audit_r1_dataset_ids.py` 在集合内，它却不在，导致 T023 审计无法从冻结代码集复现） | E6 | 新增 hash 键不改动任何既有 hash；若动到 trainer 本身则须同时重建 P1 bundle 并重绑 | done | `1c922fd` |
-| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | wip（SFT 与 11,149 条 generation 已完成；`372a6e2` 解决 1 条精确重复引用，但全量扫描另有 95 条 malformed 输出，故官方评分不可运行。不得填 NONE、猜引用、只重生成 95 条或拼接；新统一推理协议须先冻结并获作者授权，详见结果页 §9.6） | `20be231` + `372a6e2` |
-| E11 **（2026-09-09 作者授权与 E8 generation 并行）** | D4 typed-cue factuality 的 D4.0 implementation/local gate → D4.1 immutable preflight/baseline replay → D4.2 CPU/CUDA smoke。只在三道门全过且重新核卡后，按冻结 seed-13 命令启动 D4.3；GPU 选择按实时空闲卡，记录实际 `CUDA_VISIBLE_DEVICES`。 | E6/T024 frozen；作者明确授权 | 实现与 targeted tests、三件套、preflight 的 source/manifest/fold/OOF hash 重验和 smoke 均通过；不读取 final-valid、不改五折 rotation、不启动 seed 17/42。任何一项失败即停止，不占卡重试。 | wip（D4.0 `727ab02` + `310b5be`：factorization、typed-cue sidecar、文档内 permutation、confusion mediator、独立 train/eval/preflight/smoke 入口及 preflight 合同测试已完成；533 passed / 26 expected skips、ruff 0、smoke OK。D4.1 未启动；SSH banner timeout，不能据此判断远端状态） | `727ab02` + `310b5be` |
+| E8 **（可与 E4–E7 并行）** | LLMERE-causal 透明适配 baseline（`llmere-causal-s13`）：清 B1/B3/B4 → 用未设门镜像取权重并记 SHA-256 → converter **逐字不改**生成 causal 数据 → LoRA SFT → 用**我们冻结的 `evaluate.py`** 打分 → 数字写进 `results/PHASE_R1.md`。**先只跑 causal**（48,365 训练 / 11,149 推理，约 joint 的 1/4）；启动前按 §5 展示命令、cwd 与预期产物 | 已满足（裁决见 §E.1a） | 官方评测器下的 causal P/R/F1 落地；标注**透明适配**、披露 k=30 分区天花板与权重替换；relation 门按 §13 的新措辞判定 | wip（SFT 与 11,149 条 generation 已完成；`372a6e2` 解决 1 条精确重复引用，但全量扫描另有 95 条 malformed 输出，故官方评分不可运行。不得填 NONE、猜引用、只重生成 95 条或拼接；先完成 §E.2a 的恢复方案审查，获得作者明确授权后才能重生成） | `20be231` + `372a6e2` |
+| E11 **（2026-09-09 作者授权与 E8 generation 并行）** | D4 typed-cue factuality 的 D4.0 implementation/local gate → D4.1 immutable preflight/baseline replay → D4.2 CPU/CUDA smoke。只在三道门全过且重新核卡后，按冻结 seed-13 命令启动 D4.3；GPU 选择按实时空闲卡，记录实际 `CUDA_VISIBLE_DEVICES`。 | E6/T024 frozen；作者明确授权 D4.0–D4.2 | 实现与 targeted tests、三件套、preflight 的 source/manifest/fold/OOF hash 重验和 smoke 均通过；不读取 final-valid、不改五折 rotation、不启动 seed 17/42。任何一项失败即停止，不占卡重试。 | wip（D4.0 `727ab02` + `310b5be`：factorization、typed-cue sidecar、文档内 permutation、confusion mediator、独立 train/eval/preflight/smoke 入口及 preflight 合同测试已完成；**534 passed / 26 expected skips、ruff 0、smoke OK**。D4.1 未启动；4090 隧道后来恢复，但作者要求先停下准备汇报，故无 preflight/smoke/pilot 产物） | `727ab02` + `310b5be` |
+
+#### E.2a 下周接续队列（2026-09-10 冻结）
+
+| 顺序 | 子任务 | 可否立即执行 | 通过 / 停止条件 |
+|---|---|---|---|
+| 1 | **E8.1：审查并冻结全量恢复方案**。只读现有 generation、prompt/预测格式、LLMERE 上游能力与当前 converter；提出覆盖全部 11,149 条的统一生成/约束解码和重新评分方案。 | 可以；不使用 GPU、不写 E8 运行产物。 | 通过：完整候选全集、同一规则、原始输出保留、fail-fast 和成本均明确；停止：方案需猜补关系、局部重生成或不能保持同一口径，则将本轮标为不可评分失败。**方案通过不等于获准重生成。** |
+| 2 | **E11.1：D4 immutable preflight**。在 4090 以 `.venv/bin/python` 物化 `runs/stages/D4/d4-v61-typed-cues-r1/preflight/`，重验 R1/P1、五折 manifests、source、encoder、accepted OOF baseline 和 code hash。 | 可以；此前作者已授权 D4.0–D4.2；不使用 GPU、不读 final-valid。 | 通过：protocol `status=pass`，独立重算两条 accepted OOF baseline，所有 hash/覆盖/折隔离一致；停止：任何 hash、fold 或 final-valid ledger 不一致，不创建 smoke 或 pilot。 |
+| 3 | **E11.2：D4 CPU/CUDA smoke**。仅在 E11.1 PASS 后，重新核卡并先向作者展示准确命令、cwd 与预期产物；在单张真正空闲的 4090 上跑 1 fold、10 个 train-only documents 的 full/remove-core/permutation 三臂。 | 依赖顺序 2；GPU 短任务，须重新核卡。 | 通过：三臂 loss/logits/spans 有限，sidecar/report 完整，evaluation IDs 未入 train/selection；停止：任一检查失败即不启动 pilot。 |
+| 4 | **D4.3 seed-13 five-fold pilot**。 | **不可立即执行**；依赖顺序 3 PASS，且需作者在看到 preflight/smoke 结果后再次明确授权长 GPU 任务。 | 只有 author approval 后，按冻结命令、单 seed 13、五折三臂启动；不追加 seed 17/42。 |
+| 5 | **C5 第二方法族前置**。 | 仅可做“补前置”：等待作者按四项筛选条件指定新候选。 | 未收到名单时保持 `blocked_pre_admission`，不实现、不 smoke、不用 GPU。 |
 
 E1 已完成（2026-09-07）：差异来源是 `3f02640` 换掉了 TacoERE 的 KMeans 初始化，全量实测 2,913 篇里
 2,743 篇聚类归属改变，**是确定性的代码致输入变化，不是 GPU 非确定性**；旧初始化器还在同进程内对 5 篇
