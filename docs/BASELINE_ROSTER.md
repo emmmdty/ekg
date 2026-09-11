@@ -21,7 +21,7 @@
 | # | 方法 | 原始基准 | 代码 | 保真度路径 | 状态 |
 |---|---|---|---|---|---|
 | 1 | MAVEN-ERE official joint（主锚） | MAVEN-ERE | ✅ 官方 | **已验证**：四个共指指标与官方论文 ±0.4 内（E9，`PHASE_R1.md` §17.2） | **(a) 已完成** |
-| 2 | **Global-Local Topic**（Xu, Li, Zhu, EMNLP 2022） | KBP 2017 | ✅ EasyECR `example_emnlp2022.py` + `global_local_topic_mavenere.yaml`（1,715 行 Lightning trainer） | 见 §1.1 决策树 | **待核查** |
+| 2 | **Global-Local Topic**（Xu, Li, Zhu, EMNLP 2022） | KBP 2017 | ✅ EasyECR `example_emnlp2022.py` + `global_local_topic_mavenere.yaml`（1,715 行 Lightning trainer）；仓库 `github.com/hqyang/EasyECR` @ `f6cd779f…115a9` | **(b)**：KBP 2017 需 LDC 许可，不可得（`PHASE_R1.md` §22.5） | **conditionally_runnable**（C-2，2026-09-11，静态裁决；活体 import 待 4090） |
 | 3 | CorefPrompt（Xu et al., EMNLP 2023） | KBP 2017 | ⚠️ EasyECR 有实现，但配置依赖 OmniEvent 预测论元文件（checkpoint 已失效） | 若以我方 Qwen3 论元替代 → 必为 (b)，须列差异 | **降级候选** |
 | 4 | Qwen3 mention-local 论元池化 `qwen3-argument-s13-r2` | — | 自建 | **不适用**：本文自建的注册负面对照，非外部方法 | 已有 |
 | 5 | LLM 对照（Qwen3-8B，LoRA/prompt） | — | 自建 | **不适用**：同上 | 待建 |
@@ -38,6 +38,10 @@ RESIJ（未取得）、OmniEvent EAE checkpoint（失效）、TextEE（无 check
 └─ 不能 → (b) Unverifiable，障碍写「原始基准 KBP 2017 需 LDC 许可，本项目无法取得」
            须逐条列出差异：语料（KBP2017→MAVEN-ERE）、mention 来源（预测→金标）、
            评测器（TAC→MAVEN 官方 evaluate.py）、超参是否沿用原配置
+
+**C-2 已走右支（2026-09-11）**：本项目无 LDC 许可、无获取途径，也未申请 →
+**FR-016 状态 (b) Unverifiable**，四项差异按上面逐条列。第 5 章那行 baseline 可以有，
+但表里必须标「透明适配」。
 ```
 
 ⚠️ 交叉参考：徐昇学位论文表 3-2 给出该方法在 KBP 2017 上的 K-AVG 51.2 / MUC 46.2，
@@ -49,7 +53,13 @@ RESIJ（未取得）、OmniEvent EAE checkpoint（失效）、TextEE（无 check
 transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能上 4090（5090 sm_120 不支持 torch 2.0）；
 配置内路径为作者本机硬编码，需改写。
 
-⚠️ **依赖自相矛盾（2026-09-11 联网核实）**：`global_local_topic.py` 从
+✅ **C-2 实测补充（2026-09-11，见 `results/PHASE_R1.md` §22）**：MAVEN-ERE 适配器与配置**仓库里已有**，
+其自报计数与官方完全一致（2913/710/857 篇）；选档与 9 个聚类阈值都在 **dev** 上扫，不碰 test；
+另有独立 `predict` 通路，可取它的簇用我们冻结的官方 `evaluate.py` 重打分。
+阻断项共 6 条、全部点名可数，其中 vendor `SelfAttentiveSpanExtractor` **恰好 2 个调用点**。
+建议独立 venv 按其自身声明装 `torch==2.0.1`（4090 sm_89 支持），补丁数最少。
+
+⚠️ **依赖自相矛盾（2026-09-11 联网核实，同日由求解器机器复现，见 `PHASE_R1.md` §22.2）**：`global_local_topic.py` 从
 `allennlp.modules.span_extractors` 导入 `SelfAttentiveSpanExtractor`，而 **allennlp 最后一个发行版是
 2.10.1，其依赖约束为 `torch (<1.13.0,>=1.10.0)`**——与仓库自己声明的 `torch==2.0.1` **不可能同时满足**。
 因此 `pip install allennlp` 这条路在该仓库的声明环境下走不通。

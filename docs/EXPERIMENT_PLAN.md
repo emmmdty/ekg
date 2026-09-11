@@ -220,7 +220,7 @@ ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**须作者确认
 | ID | 实验 | 依赖 | 完成 = | 产物 |
 |---|---|---|---|---|
 | **C-1** | ~~D4.1 immutable preflight~~ → **已完成 2026-09-11**（`93f59f1`）：`status=pass`，两条 accepted OOF baseline 逐字段重算一致（CLS .553995 / DMRoBERTa .545603），preflight protocol SHA-256 `9429c5a8…5025e`。执行中修掉三个让它在服务器上跑不起来的缺陷，见 `results/PHASE_D.md` | 无 | 已达成 | `gpu-4090:.../runs/stages/D4/d4-v61-typed-cues-r1/preflight/` |
-| **C-2** | EasyECR 可运行性实跑核查（不训练） | 无 | 裁决 `runnable`/`conditionally_runnable`/`not_runnable` 落 `results/PHASE_R1.md`；KBP 2017 可得性判定写进名册 §1.1，定下 FR-016 状态 (a) 还是 (b) | 名册 §1.1 + 结果页 |
+| **C-2** | EasyECR 可运行性实跑核查（不训练） | 无 | **静态裁决 2026-09-11 已出：`conditionally_runnable`**，6 条阻断全部点名（`PHASE_R1.md` §22），KBP 2017 不可得 → **FR-016 (b)**。**剩余 C-2b**：4090 隧道恢复后建独立 venv 做活体 import 冒烟 | 名册 §1.1 + `PHASE_R1.md` §22 |
 | **C-3** | E8.1 LLMERE 恢复方案冻结 | 无 | 方案覆盖全部 11,149 条、同一规则、原始输出保留、fail-fast 与成本明确。**通过≠获准重生成** | 结果页 §9.x |
 | **C-4** | ~~Ch6 对手名册调研~~ → **已完成 2026-09-11**：SeDGPL 及其四个 CGEP 对手（BART contrastive / CSProm-KG / MCPredictor / SimKGC）全部有公开训练代码，**Gate 3 过**。剩余子项 **C-4b**：验证 CGEP-ESC 能否重建以取得 FR-016 状态 (a) | 无 | C-4 done；C-4b 给出 ESC 重建可行性裁决与切分口径确认 | 名册 §6 |
 | **C-5** | C5.0 实现 + 本地 gate | 无（QR-001 修订后已解锁） | targeted tests + 三件套全绿 | 代码 + 测试 |

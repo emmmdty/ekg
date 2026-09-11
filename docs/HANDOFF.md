@@ -378,7 +378,7 @@ baseline，v6.1 三份方法设计**一个都没跑过**；证明方法有没有
 | — | **E13：E3 重定向为「事件图谱构建与下游事件预测应用」**（乙形态，作者 2026-09-11 选定）；24 条件 factorial / Holm / frozen-vs-finetuned 全部撤销 | ✅ **已完成**（`phases/PHASE_E3_graph_application.md`） |
 | — | **E14：冻结 `EXPERIMENT_PLAN.md` 防漂移主表** | ✅ **已完成** |
 | **C-1** | D4.1 immutable preflight | ✅ **done 2026-09-11**（`93f59f1`，见 `results/PHASE_D.md`） |
-| **C-2** | EasyECR 可运行性实跑核查（不训练） | ✅ CPU |
+| **C-2** | EasyECR 可运行性实跑核查（不训练） | ⚠️ **静态部分 done 2026-09-11**（`conditionally_runnable`）；**C-2b 活体 import** 待 4090 隧道恢复 |
 | **C-3** | E8.1 LLMERE 恢复方案冻结 | ✅ 纯文档 + 只读 |
 | **C-4** | Ch6 对手名册调研与冻结 | ✅ 联网调研 |
 | **C-5** | C5.0 实现 + 本地 gate | ✅ CPU |

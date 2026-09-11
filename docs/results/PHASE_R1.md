@@ -1240,3 +1240,72 @@ FR-016 要求验证复现正确性；LLMERE 的可验证路径是用官方 `eval
 710 篇预测**打分、复现其 causal 36.04。但 `HANDOFF.md` §E.1a 第 6 条（作者 2026-09-07 裁决）明确
 **不做**此事，理由是 710 篇是封存 final-valid。两条规则抵触，本轮**不擅自选边**；名册 §2.1 列出三种
 出路并建议取「保持 §E.1a，LLMERE 记为 (b) Unverifiable，障碍写明」——成本为零且完全诚实。
+
+## 22. C-2 · EasyECR 可运行性核查：**conditionally_runnable**（2026-09-11，静态部分完成）
+
+主表 **C-2**。仓库先前从未在任何文档里留下 URL，本轮补上：**`github.com/hqyang/EasyECR`**，
+`main` HEAD **`f6cd779fbddc7ced2b14397041f83d92713115a9`**（2024-08-28 `doc: release EasyECR`，
+全历史仅 2 个 commit，2.9 MB）。本节的结论全部来自读码与**机器可复现的依赖求解**，不是网页转述；
+**未训练、未下载权重**。
+
+### 22.1 裁决
+
+**`conditionally_runnable`** —— 方法本体、MAVEN-ERE 适配器与 `predict` 通路都在，
+但必须打一组**点名可数**的透明补丁才能起跑。没有任何一条是"重写别人的方法"。
+
+| # | 阻断 | 证据 | 补丁 | 规模 |
+|---|---|---|---|---|
+| 1 | `global_local_topic.py:24` 导入 `allennlp.modules.span_extractors.SelfAttentiveSpanExtractor`，而 **`allennlp` 根本不在 `requirements.txt` 里** | 见 §22.2 的求解器输出 | vendor 该类 | **恰好 2 个调用点**（`:1001` `span_extractor`、`:1004` `mention_span_extractor`），1 行 import |
+| 2 | 配置里全是作者本机硬编码路径 `/home/nobody/code/...`、`/data/dev/ecr-data/...` | `config/model_dataset/global_local_topic_mavenere.yaml` | 改写 5 个路径键 | 配置改动 |
+| 3 | `example_emnlp2022.py` 在未设时把 `CUDA_VISIBLE_DEVICES` 写死为 `"3"` | 该文件第 5–9 行 | 显式传卡 | 环境变量 |
+| 4 | 我们要的是 **291 篇冻结评测集**，它默认吃官方整份 `train/valid/test.jsonl` | `ecr_data.{train,dev,test}_path` 是三个 jsonl | 按 manifest 过滤出子集 jsonl，记补丁前后 hash | 数据准备 |
+| 5 | 它自带的评测器是 **coval**，指标集 `['mentions','muc','bcub','ceafe','lea']`、`keep_singletons: True` | `ecr_evaluate.py:18-19` + yaml `evaluator` | **取 `predict` 输出的簇，用我们冻结的 MAVEN 官方 `evaluate.py` 重打分** | 接线 |
+| 6 | `maven_ere.py` 的 loader 需要 spacy `en_core_web_sm` | `load_documents()` 调 `spacy.load` | 下载语言包 | 环境 |
+
+### 22.2 依赖矛盾：这次是求解器说的，不是网页说的
+
+```
+$ uv pip compile <(printf 'torch==2.0.1\nallennlp==2.10.1\n') --python-version 3.10
+  × No solution found when resolving dependencies:
+  ╰─▶ Because allennlp==2.10.1 depends on torch>=1.10.0,<1.13.0 and you
+      require torch==2.0.1, we can conclude that your requirements and
+      allennlp==2.10.1 are incompatible.
+```
+
+放开 allennlp 的版本也救不回来：把 EasyECR **完整的** `requirements.txt` 加上一个不带版本的
+`allennlp` 一起求解，解算器只能回退到 **`allennlp==0.2.1`（2018）**；只留 `torch==2.0.1` + `allennlp`
+则回退到 **`0.9.0`（2019，并把 `spacy` 拉到 2.1.9，与仓库自己声明的 `spacy==3.7.2` 冲突）**。
+两者都不是 `span_extractors` 那条 API 线。**所以 vendor 不是偷懒的选择，是唯一的选择**，
+并按 FR-016 记录补丁前后 hash。
+
+### 22.3 三件好消息（降低 G-6 的风险）
+
+1. **MAVEN-ERE 适配器已经在仓库里**，不用我们写：`easyecr/ecr_data/datasets/maven_ere/maven_ere.py`
+   逐行读官方 jsonl，且它自己声明的统计量与官方**完全一致**——2913/710/857 篇、
+   73939/17780/20557 mentions、67984/16301/18908 events。`load_events()` 只对 `train`/`valid`
+   生效（test 无金标），与我们"valid 当 test"的既有做法同构。配置
+   `global_local_topic_mavenere.yaml` 也已经存在，`num_classes: 169` 是 MAVEN 事件类型数。
+2. **选档与阈值都在 dev 上选，不碰 test**：`ecr_framework.py:121-146` 的
+   `find_the_best_model(dev_data, ...)` 对 version × `distance_threshold`（9 个值 0.1–0.9）
+   做二维扫描，按 `main_metric: CoNLL` 的 F1 取最好。只要把**我们的 selection-dev** 喂给 `dev_data`、
+   把 291 篇留给 `predict`，就没有构造性泄漏。
+3. **有独立的 `predict` 通路**（`ecr_framework.py:183`），返回打好簇标签的 `EcrData`，
+   正好满足"拿它的预测、用我们的评测器打分"这条 A 类口径要求。
+
+### 22.4 还没做的：活体 import 与显存
+
+`conditionally_runnable` 目前是**静态裁决**。真正的建 venv + import 冒烟必须在服务器上做，
+而 4090 隧道在本轮后半程 `Connection refused`（先前可连，preflight 与 smoke 都已跑完落盘），
+5090 又不支持 torch 2.0（sm_120）。**建议的环境形态**：独立 venv **按 EasyECR 自己的声明**装
+`torch==2.0.1` / `transformers==4.21.2`（4090 是 sm_89，torch 2.0.1+cu118 支持），
+只 vendor span extractor——**这样补丁数最少、保真度最高**。若改用本项目的 cu128 栈，
+`transformers 4.53.3` 已移除 `transformers.AdamW`（`global_local_topic.py:21` 用它），
+补丁会从 1 处扩到多处，不划算。
+
+### 22.5 KBP 2017 与 FR-016 状态
+
+原文基准 KBP 2017 是 **LDC 许可语料**，本项目无许可、无获取途径，本轮也未申请。按名册 §1.1 决策树
+右支：**FR-016 状态 (b) Unverifiable**，障碍写「原始基准 KBP 2017 需 LDC 许可，本项目无法取得」，
+并逐条列出语料、mention 来源、评测器、超参四项差异。第 5 章那行 baseline **可以有**，
+但必须标「透明适配」。
+
