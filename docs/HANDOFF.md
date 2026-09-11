@@ -11,7 +11,7 @@
 | 正式阶段 | **方法实验准备期**。R1 准入已于 2026-09-11（E12）收口：`SPEC.md` 升 **v1.1.0**，QR-001 把 baseline 广度由**准入门**改为**主表报告要求**，新增 **FR-016** 复现保真度。C5 由 `blocked_pre_admission` 转 `frozen`；A4 的确认性 promotion 不再等 LLMERE。三章契约均已 hash 重绑，审计 `PASS` / 36 requirements。 |
 | **论文结构** | 第3章 事实性检测（D4）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表；本文 §E 队列只是它的当周切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | 无。2026-09-11（E17）完成 C-1 与 G-1 的 CPU 半边，并修掉三个 preflight 缺陷；数字见 [`results/PHASE_D.md`](results/PHASE_D.md)。新窗口从 §0 的启动清单开始。 |
+| **活动任务** | **有：D4 两条 anchor baseline 正在 gpu-5090 重训**（2026-09-11 16:55 起，10 次 = CLS/dynamic-multi × 五折，seed 13）。**不需要本机在线**——三个 worker 与收尾脚本都是 `setsid` 独立 session、PPID=1。接手方法见 §0.4。本轮已完成 C-1、G-1 的 CPU 半边、C-2 静态裁决、C-5 核心件。 |
 | ⛔ **gpu-4090（已降级，作者说不管了）** | **CUDA 完全不可用**。2026-09-11 06:05–06:08 unattended-upgrade 把 NVIDIA 由 580.173.02 升到 580.178.04，运行中的内核模块仍是 580.173.02 → `nvidia-smi` NVML 失败、`torch.cuda.is_available()=False`、`device_count=0`。磁盘已无旧用户态库，`nvmlshim` 实测无效，**绕不过去**。修复需 root（重启或重载 nvidia 模块），机器共用，**须作者联系机主**。**文件系统仍可 ssh 访问**（纯 CPU 任务照常跑）。E8 的 PID 1819697 已 GONE。 |
 | ✅ **gpu-5090 = 当前工作机** | 作者 2026-09-11 **第二次裁决**：**4090 不管了**，在 5090 上验证假设与方法；**可重新拉模型**；**≤1 天的任务直接执行，不再逐次请示**（超过一天仍要问，拉模型/跨机搬运也要先问位置）。host key 作者已确认为本人所加。实测当前**完全空闲**（32,607 MiB 用 209 MiB，原 Qwen 服务已不在）。仍有效的硬边界：**EasyECR 跑不了**（torch 2.0.1 不支持 sm_120）。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
@@ -71,6 +71,44 @@ uv run python scripts/audit_r1_consistency.py \
 ✅ **gpu-5090 host key 已确认**：`29.tcp.cpolar.top:13850` 在 `~/.ssh/known_hosts` 第 98 行，
 指纹 ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**作者 2026-09-11 确认是本人所加**。
 仍不得自行 TOFU 接受**新**指纹（cpolar 端口是复用的）。
+
+### 0.4 接手正在跑的 D4 anchor 重建（2026-09-11 起）
+
+**背景**：作者裁决不从 4090 搬任何东西，D4 改为在 5090 自足重建（主表 §3.6）。新 backbone 内容地址
+`2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736`，
+位于 `gpu-5090:/mnt/aidata/tongjiakai/models/local/roberta-base/2c7ff1f1…49736`，六件全部来自公开源。
+
+**在跑什么**：`runs/stages/R1/r1-v61-factuality-oof-5090-r1/`，10 次
+`run_r1_factuality_oof.py`（`cls` / `dynamic_multi` × fold 1–5，seed 13，12 epoch，lr 2e-5，alpha 0.5）。
+三个 worker 并行，实测约 3.1 分钟/epoch，预计 2026-09-11 19:10–19:30 收口。
+
+**怎么看状态**（本机关机不影响，进程 PPID=1 独立 session）：
+
+```bash
+ssh gpu-5090 'cd /mnt/aidata/tongjiakai/ekg && tail -3 logs/oof5090_w{1,2,3}.log logs/oof5090_finish.log'
+ssh gpu-5090 'ps -eo pid,ppid,etime,args | grep -E "oof_worker|oof_finish|run_r1_factuality" | grep -v grep'
+```
+
+worker 每完成一折打 `END fold=… rc=`，整条跑完打 `ALL_DONE`，失败打 `ABORTING` 并停住不再往下跑。
+
+**收尾脚本已挂好，自动做完机械部分**：`logs/oof5090_finish.log`。它等三个 worker 都 `ALL_DONE`，
+把 `fold-N/<pooling>` 归位成 collector 要的 `<pooling>/fold-N`，再跑
+`collect_r1_factuality_oof.py` 产出 `oof_summary.json` 与两份 `*_oof_labels.json`。
+任一 worker `ABORTING` 则**不汇总**并写明原因。编排脚本已随产物存档
+（`oof_worker.sh` `56a3163a…9d890`、`oof_finish.sh` `91960af4…7b08a`）；每次运行的精确命令行也在各自
+`run_metadata.json` 的 `train_argv` / `evaluation_argv` 里。
+
+**⚠️ 汇总之后的三步必须由人做，不得自动化**（这是重新求主锚，顺序见主表 §3.6）：
+
+1. 新的 pooled macro-F1 写进 [`results/PHASE_D.md`](results/PHASE_D.md)，并标明这是 5090 新线，
+   与 4090 旧数字（CLS .553995 / DMRoBERTa .545603）**不相减、不混表**；
+2. 需要一份 `acceptance.json`——4090 那份是由运行目录里的 `acceptance_audit.py` 产出的，
+   **该脚本不在仓库里**，是一处可追溯性缺口，本轮要么把它补进 `scripts/`，要么在结果页写清替代做法；
+3. `scripts/prepare_d4_typed_cue_preflight.py` 里三个硬编码常量
+   （`EXPECTED_MODEL_SHA256` / `EXPECTED_OOF_SUMMARY_SHA256` / `EXPECTED_OOF_ACCEPTANCE_SHA256`）
+   换成新登记值，**必须在跑 D4 三臂之前写死，不得事后调绿**。
+
+三步做完才允许跑 D4.3。
 
 ## 1. 当前裁决与状态
 
