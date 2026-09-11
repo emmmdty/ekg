@@ -11,7 +11,7 @@
 | 正式阶段 | **方法实验准备期**。R1 准入已于 2026-09-11（E12）收口：`SPEC.md` 升 **v1.1.0**，QR-001 把 baseline 广度由**准入门**改为**主表报告要求**，新增 **FR-016** 复现保真度。C5 由 `blocked_pre_admission` 转 `frozen`；A4 的确认性 promotion 不再等 LLMERE。三章契约均已 hash 重绑，审计 `PASS` / 36 requirements。 |
 | **论文结构** | 第3章 事实性检测（D4）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表；本文 §E 队列只是它的当周切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | 无。上一窗口只做文档，未跑任何实验。新窗口从 §0 的启动清单开始。 |
+| **活动任务** | 无。2026-09-11（E17）完成 C-1 与 G-1 的 CPU 半边，并修掉三个 preflight 缺陷；数字见 [`results/PHASE_D.md`](results/PHASE_D.md)。新窗口从 §0 的启动清单开始。 |
 | ⛔ **gpu-4090** | **CUDA 完全不可用**。2026-09-11 06:05–06:08 unattended-upgrade 把 NVIDIA 由 580.173.02 升到 580.178.04，运行中的内核模块仍是 580.173.02 → `nvidia-smi` NVML 失败、`torch.cuda.is_available()=False`、`device_count=0`。磁盘已无旧用户态库，`nvmlshim` 实测无效，**绕不过去**。修复需 root（重启或重载 nvidia 模块），机器共用，**须作者联系机主**。**文件系统仍可 ssh 访问**（纯 CPU 任务照常跑）。E8 的 PID 1819697 已 GONE。 |
 | ✅ **gpu-5090** | **已获授权作临时顶替**（作者 2026-09-11）：4090 不可达期间可跑 **smoke 与小任务**，**主体实验仍回 4090**。边界与禁区见 `EXPERIMENT_PLAN.md` §3.5——**EasyECR 跑不了**（其 torch 2.0.1 不支持 sm_120）、**Qwen3-8B LoRA 装不下**（余量约 15GB）。**每次使用仍须逐次取得作者授权**；host key 待作者确认（见 §0）。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
@@ -60,14 +60,15 @@ uv run python scripts/audit_r1_consistency.py \
 | 2 | **C-1 D4.1 immutable preflight** | 纯 hash 与指标重算，实测 `scripts/prepare_d4_typed_cue_preflight.py` 不 import torch，**驱动坏着也能跑**；它是第 3 章 pilot 的前置 |
 | 3 | **C-5 C5.0 实现** / **C-6 A4.0 实现** | 驱动一修好就能直接开跑，不浪费卡 |
 
-⚠️ **开工前必做的一次同步**：`runs/` 是 gitignored，E12 改过其中三个 JSON
-（`protocol.json`、`phase_contracts/t024_freeze.json`、`audit/cross_artifact_audit.json`）。
-必须**双端 SHA-256 同步到 gpu-4090**，否则远端 preflight 会因契约 hash 不符而 fail-fast。
-本地权威值见 [`results/PHASE_R1.md`](results/PHASE_R1.md) §21.3。
+✅ **那次同步已在 2026-09-11（E17）做完**：三个 gitignored JSON 已双端 SHA-256 核对一致
+（`protocol.json` `f0b4702b…50829`、`t024_freeze.json` `9133a73c…587e7`、
+`cross_artifact_audit.json` `622d094b…f8467`；4090 旧档备份为 `protocol.json.pre-e12-20260911`）。
+`results/PHASE_R1.md` §21.3 原记的是 E12 中途的哈希，已一并更正。
 
-⚠️ **gpu-5090 首次使用前**：`29.tcp.cpolar.top:13850` 的 host key 不在 `known_hosts`，实测指纹为
-ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`。**请作者确认该指纹后再写入**；
-不得自行 TOFU 接受（cpolar 端口是复用的）。
+⚠️ **gpu-5090 host key**：2026-09-11 09:58 起 `29.tcp.cpolar.top:13850` 的条目**已在**
+`~/.ssh/known_hosts`（第 98 行），指纹 ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`
+与本文此前实测值一致。写入不是执行代理做的（E17 接手时它已存在）；**请作者确认是本人所加**。
+仍不得自行 TOFU 接受新指纹（cpolar 端口是复用的）。
 
 ## 1. 当前裁决与状态
 
@@ -103,9 +104,10 @@ SPEC。只有研究问题、范围或质量标准改变时才修订 SPEC。
   cross-validation folds`、`32cfd46 feat(r1): close relation handoff and power gate`、
   `277b36f fix(r1): isolate factuality OOF training source`；
 - 本文提交后以新的 `origin/main` HEAD 为准；
-- 最新本地验证：489 passed / 24 expected skips，ruff 0，`ekg-smoke` OK，P1 local gate PASS；
+- 最新本地验证（2026-09-11，`93f59f1`）：**535 passed / 26 expected skips**，ruff 0，`ekg-smoke` OK，P1 local gate PASS；
 - local gate 的 `tested_tree_sha256`：
-  `3bff2ac2b5366ed06ebe81c9b2e549f0949216c832ad8e6098a6782e0c701d3c`；
+  `52c639ff79fb9401f71d42d4d1ecaec6abacf65701cecf72f1dcac7edb04f46e`（220 个文件；
+  前值 `3bff2ac2…c701d3c` 对应 `886185e`）；
 - A3.6 只运行了已授权 seed 13；R1 功效只读 train-derived internal-dev。跨数据 ID 审计按合同读取了
   public-valid 结构字段但未计算关系/事实性指标，访问已在 ledger 披露；没有搬运 checkpoint。
 
@@ -375,7 +377,7 @@ baseline，v6.1 三份方法设计**一个都没跑过**；证明方法有没有
 | — | **E12：SPEC v1.1.0 + FR-016 + 三契约重绑** | ✅ **已完成**（`results/PHASE_R1.md` §21） |
 | — | **E13：E3 重定向为「事件图谱构建与下游事件预测应用」**（乙形态，作者 2026-09-11 选定）；24 条件 factorial / Holm / frozen-vs-finetuned 全部撤销 | ✅ **已完成**（`phases/PHASE_E3_graph_application.md`） |
 | — | **E14：冻结 `EXPERIMENT_PLAN.md` 防漂移主表** | ✅ **已完成** |
-| **C-1** | D4.1 immutable preflight | ✅ CPU，驱动坏着也能跑 |
+| **C-1** | D4.1 immutable preflight | ✅ **done 2026-09-11**（`93f59f1`，见 `results/PHASE_D.md`） |
 | **C-2** | EasyECR 可运行性实跑核查（不训练） | ✅ CPU |
 | **C-3** | E8.1 LLMERE 恢复方案冻结 | ✅ 纯文档 + 只读 |
 | **C-4** | Ch6 对手名册调研与冻结 | ✅ 联网调研 |
@@ -386,7 +388,7 @@ baseline，v6.1 三份方法设计**一个都没跑过**；证明方法有没有
 | — | **E15：E3 重定向为「乙」形态 + 撤销 factorial** | ✅ **已完成** |
 | — | **E16：`EXPERIMENT_PLAN.md` 时间线按项目自身基准率重估**（初版 3 周收口是错的，把 GPU 计算耗时当成了日历时间） | ✅ **已完成** |
 | **G-0** | **修复 gpu-4090 驱动** | ❌ **需作者联系机主**，我们无 root |
-| **G-1** | D4.2 smoke | ⚠️ 可走 **5090**（逐次授权，见 `EXPERIMENT_PLAN.md` §3.5） |
+| **G-1** | D4.2 smoke | ⚠️ **CPU 半边 done 2026-09-11**；CUDA 半边待 G-0 或作者批准搬 backbone 到 5090 |
 | **G-2** | **D4.3 seed-13 五折 pilot** | ❌ 长任务，等 G-0 + 作者授权；**不放 5090** |
 
 完整主表（含 G-3…G-12、三个 Gate、GPU 预算与 phase 契约映射）见

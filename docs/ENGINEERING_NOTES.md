@@ -30,6 +30,14 @@
 
 ## 代码 / 评测
 
+- ⚠️ **校验远端产物的脚本，测试必须钉住远端记录的真实身份，不能钉住脚本自己的算法**
+  （2026-09-11，D4.1 preflight 连吃三次 fail-fast）。三条都是「本地三件套全绿、服务器上根本跑不起来」：
+  ① 脚本自造了一种目录摘要去比 P1 注册的内容地址 `71be7419…c961ea9`，而**唯一的测试是拿脚本算法
+  和它自己对**，永远绿、永远错；② `acceptance.json` 的裁决键是 `acceptance` 不是 `status`，
+  且没有 `final_valid_accessed` 字段；③ `oof_summary.json` 记的是**仓库相对**路径，脚本拿 run root 去拼。
+  共同点：**没有一处假设是照着真文件写的**。写这类脚本时先 `cat` 一遍目标产物，测试里放真实记录值。
+  backbone 内容地址的规范形式现已落成 `stage_bundle.content_digest`（对 `{相对路径: 文件 SHA-256}`
+  取 compact/key-sorted JSON 再 SHA-256），不要再各写一份。
 - **平坦分数假象**：词表只在 train 建 → 测试全编码失败 → 返回平坦分数 → 乐观 tie-break 下 gold 全排 0 → 假 MRR 1.0。用 `mrr_strict` 戳穿；`UnscorableInstance` 计最差排名 + 单独报 `n_unscorable`，**绝不丢出分母**。
 - **查询边判据 = 尾节点出度 0 且入度 1**（不只出度 0）。gold 若出现在其他边会把答案印进 prompt（ESC 1192/1192 成立）。
 - **DsGL 截断 = 按存储顺序取前 20 条边**（`EDGE_BUDGET=20`），最短路距离只用于**排序**幸存边（远边在前）。

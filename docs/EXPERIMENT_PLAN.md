@@ -219,7 +219,7 @@ ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**须作者确认
 
 | ID | 实验 | 依赖 | 完成 = | 产物 |
 |---|---|---|---|---|
-| **C-1** | D4.1 immutable preflight | 无 | protocol `status=pass`；独立重算两条 accepted OOF baseline；全部 hash/覆盖/折隔离一致 | `runs/stages/D4/d4-v61-typed-cues-r1/preflight/` |
+| **C-1** | ~~D4.1 immutable preflight~~ → **已完成 2026-09-11**（`93f59f1`）：`status=pass`，两条 accepted OOF baseline 逐字段重算一致（CLS .553995 / DMRoBERTa .545603），preflight protocol SHA-256 `9429c5a8…5025e`。执行中修掉三个让它在服务器上跑不起来的缺陷，见 `results/PHASE_D.md` | 无 | 已达成 | `gpu-4090:.../runs/stages/D4/d4-v61-typed-cues-r1/preflight/` |
 | **C-2** | EasyECR 可运行性实跑核查（不训练） | 无 | 裁决 `runnable`/`conditionally_runnable`/`not_runnable` 落 `results/PHASE_R1.md`；KBP 2017 可得性判定写进名册 §1.1，定下 FR-016 状态 (a) 还是 (b) | 名册 §1.1 + 结果页 |
 | **C-3** | E8.1 LLMERE 恢复方案冻结 | 无 | 方案覆盖全部 11,149 条、同一规则、原始输出保留、fail-fast 与成本明确。**通过≠获准重生成** | 结果页 §9.x |
 | **C-4** | ~~Ch6 对手名册调研~~ → **已完成 2026-09-11**：SeDGPL 及其四个 CGEP 对手（BART contrastive / CSProm-KG / MCPredictor / SimKGC）全部有公开训练代码，**Gate 3 过**。剩余子项 **C-4b**：验证 CGEP-ESC 能否重建以取得 FR-016 状态 (a) | 无 | C-4 done；C-4b 给出 ESC 重建可行性裁决与切分口径确认 | 名册 §6 |
@@ -235,7 +235,7 @@ CPU 泳道**全部 8 项都不依赖 GPU，现在就能做**，且彼此无强�
 | ID | 实验 | 依赖 | 粗估 | 完成 = |
 |---|---|---|---|---|
 | **G-0** | **修复 gpu-4090 驱动**（重启或重载 nvidia 模块） | **作者联系机主，我们无 root** | — | `nvidia-smi` 正常且 `torch.cuda.is_available()` 为真 |
-| **G-1** | D4.2 CPU/CUDA smoke（1 fold / 10 docs / 三臂） | C-1 + **（G-0 或 5090 逐次授权）** | 分钟级 | 三臂 loss/logits/spans 有限；evaluation ID 未入 train/selection |
+| **G-1** | D4.2 CPU/CUDA smoke（1 fold / 10 docs / 三臂） | C-1 + **（G-0 或 5090 逐次授权）** | 分钟级 | **CPU 半边 2026-09-11 已过**（4090 无 CUDA 时自动落 CPU，契约绑定不变，`smoke.json` `d0003af5…97c75`）；**CUDA 半边仍欠**——5090 虽空闲但缺 `factuality_cv/` 且 backbone 闭合不了 pin（差 `pytorch_model.bin` vs `model.safetensors` 与 `tokenizer_config.json`），要么等 G-0，要么经作者同意搬 476 MB 目录 |
 | **G-2** | **D4.3 seed-13 五折 pilot（三臂）** ← **GPU 恢复后的队首** | G-1 + 作者授权长任务 | ~1.5 GPU·day | 2,913 篇 / 73,939 mention 各恰好一次 OOF 预测；逐实例概率/cue/evidence/三级 logits/confusion 落盘 |
 | **G-3** | D4 supporting-word baseline 五折重建 | C-1 + G-0 | ~1 GPU·day | 先在官方划分复现官方数字（容差事前定 ±1.0 macro-F1）→ FR-016 状态 (a)；再转五折 OOF |
 | **G-4** | A4.2 smoke → **A4.3 seed-13 pilot（四臂）** | C-6 + G-0 + 授权 | ~2–3 GPU·day | 完整候选逐位不变；逐实例 evidence 与三种 counterfactual logits 落盘 |

@@ -473,3 +473,106 @@ oracle 的分类结构比总分更有信息量：PS− 从 .5000 **降到 .3529*
 `dev_curve.json` 为 `b1de149c…2711f`，`internal_dev_report.json` 为 `e08dfbe3…0ed3`，
 `internal_dev_labels.json` 为 `9a73514a…839b`，标签头为 `f514606f…ad50`。
 smoke 日志为 `f2bf5cdc…5162f`。训练退出码为 0，checkpoint 明确恢复 epoch 10。
+
+
+## D4.1 immutable preflight：通过，但先修了三个让它跑不起来的缺陷（2026-09-11，4090 CPU）
+
+主表 **C-1** 完成。产物 `gpu-4090:/data/TJK/ekg/runs/stages/D4/d4-v61-typed-cues-r1/preflight/protocol.json`，
+SHA-256 `9429c5a8f7b3a2b64de3816073285c20649647901f247f1ab11a68ff2a65025e`，`status=pass`、
+`final_valid_accessed=false`、`code_files=6`。代码 `93f59f1`。4090 的 CUDA 仍然坏着，
+preflight 不碰 GPU，全程 CPU。
+
+### 三个缺陷都是「本地绿灯、服务器上根本跑不起来」
+
+D4.0 的本地三件套全绿，但 preflight 从没对着真产物跑过，于是连续 fail-fast 三次：
+
+| # | 症状 | 根因 | 处置 |
+|---|---|---|---|
+| 1 | `RoBERTa content hash drift` | 脚本自己发明了一种目录摘要（`名字\0哈希\0` 拼接），而 pin `71be7419…c961ea9` 是 P1 r9 注册的内容地址；两者永远不可能相等。唯一的测试是拿脚本算法和它自己对，所以本地测不出来 | 从 4090 盘上反解出注册形式：对 `{相对路径: 文件 SHA-256}` 取 compact/key-sorted JSON 再 SHA-256，覆盖**六个**文件。落成 `stage_bundle.content_digest` / `model_content_digest`，**常量不动**；测试改为用六个文件的实测摘要钉住该 pin |
+| 2 | `OOF acceptance is not pass` | `acceptance.json` 的裁决键是 `acceptance` 而不是 `status`，且根本没有 `final_valid_accessed` 字段（该字段在 `oof_summary.json` 上） | 读对键名；把那条查不到的 final-valid 检查换成文件真正支持的交叉绑定：summary 与 acceptance 都必须绑定同一份 CV 与 source，acceptance 还必须按哈希绑定被验收的 summary |
+| 3 | 标签文件「缺失」 | `oof_summary.json` 记的是**仓库相对**路径，脚本却拿 run root 去拼 | 从仓库根解析，并要求解析结果仍落在 accepted OOF root 之内 |
+
+三条都记进 `ENGINEERING_NOTES`：**本地三件套绿 ≠ 契约脚本能在服务器上跑**，凡是校验远端产物的
+脚本，测试必须钉住远端记录的真实身份，不能钉住脚本自己的算法。
+
+### 独立重算的两条 accepted OOF baseline（2,913 篇 / 73,939 mentions，逐 mention 覆盖一致）
+
+| baseline | five-class macro-F1 | accuracy | CT+ | CT− | PS+ | PS− | Uu |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| RoBERTa+CLS（主锚） | **.553995** | .949161 | .975305 | .662753 | .552612 | .382456 | .196850 |
+| DMRoBERTa（dynamic-multi） | **.545603** | .950216 | .976054 | .671224 | .539288 | .374150 | .167300 |
+
+两条都与 `oof_summary.json` 记录的 report **逐字段相同**（非近似），标签文件哈希、mention 全集、
+折隔离与 `acceptance=pass` 均一致。`dynamic_minus_cls = −.008392`，配对 bootstrap 95% CI
+`[−.022869, +.006978]` 跨 0——**两条 baseline 在同协议下不可区分**，D4 的 promotion gate 要求同时
+严格高于两者。
+
+### 绑定进 preflight 的身份
+
+| 项 | SHA-256 |
+|---|---|
+| D4 phase 契约 | `01e1ba2f74627216a19c02ad47dbc5bbf35e72fe4530ce18ede76072328c49b1` |
+| R1 `protocol.json` | `f0b4702b258ef61257d0aeae20fd23bb48f36e4ff4761a575ac1b97277150829` |
+| `t024_freeze.json` | `9133a73c46d7e277fca1bef8b2459896d436b816971f68297c9f93aebd5587e7` |
+| factuality CV | `3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4` |
+| MAVEN-FACT train | `190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7` |
+| backbone 内容地址 | `71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9` |
+
+训练面冻结为 seed 13 / 12 epochs / lr 2e-5 / alpha 0.5 / max_len 128 / stride 64 /
+permutation_seed 13，三臂 `full` · `remove_core` · `permutation`，选档只用 selection-dev。
+
+### 开工前做的双端同步
+
+E12 改过的三个 gitignored JSON 已同步到 4090 并双端核对一致（旧 `protocol.json` 备份为
+`protocol.json.pre-e12-20260911`，`199852a1…cf058`，未删）：`protocol.json` `f0b4702b…50829`、
+`phase_contracts/t024_freeze.json` `9133a73c…587e7`、`audit/cross_artifact_audit.json` `622d094b…f8467`。
+4090 仓库已 `reset --hard` 到 `93f59f1`。
+
+## D4.2 smoke：CPU 半边通过，CUDA 半边仍缺一张能跑的卡（2026-09-11）
+
+主表 **G-1** 的 CPU 部分完成。4090 的 CUDA 仍不可用，而 `train_d4_typed_cue.py` 是
+`device = "cuda" if torch.cuda.is_available() else "cpu"`，所以同一条冻结命令在 4090 上自动落到 CPU，
+**契约绑定不变**。产物 `gpu-4090:.../runs/stages/D4/d4-v61-typed-cues-r1/smoke/cpu-fold1-10docs/`，
+`smoke.json` SHA-256 `d0003af5943f0962d8edf022eec7d2e17ef5001dbef1da76868993a9c6497c75`，
+`status=pass`、`final_valid_accessed=false`、fold 1 / 10 documents（5 训练 + 5 selection）。
+
+```bash
+cd /data/TJK/ekg
+.venv/bin/python -u scripts/smoke_d4_typed_cue.py \
+  --contract runs/stages/D4/d4-v61-typed-cues-r1/preflight/protocol.json \
+  --output runs/stages/D4/d4-v61-typed-cues-r1/smoke/cpu-fold1-10docs \
+  --fold 1 --documents 10
+```
+
+| arm | mentions | report SHA-256 | labels SHA-256 | sidecar SHA-256 |
+|---|---:|---|---|---|
+| `full` | 104 | `693b30815b4e…` | `85f87d788824…` | `bc8d40f2956e…` |
+| `remove_core` | 104 | `6a84458fd07e…` | `6bb0d3e57ed1…` | `e03ade0d5445…` |
+| `permutation` | 104 | `92ba648e104f…` | `85f87d788824…` | `6c6b3fbdcddd…` |
+
+三臂各自完成 forward/backward/checkpoint 导出/重载/评分，`labels` 与 `typed_cues` sidecar 覆盖一致，
+sidecar 状态全部落在 `{ok, empty}` 内，contract hash 与 preflight 一致。
+`full` 与 `permutation` 的 labels 哈希相同、sidecar 哈希不同——这正是负控的设计：
+permutation 只打乱 document 内的 cue 表示，1 epoch / 5 篇训练下还不足以改变输出标签。
+**分数（macro-F1 .0000 / .1072 / .0000）在 5 篇 1 epoch 下没有任何意义，不得引用。**
+
+仍欠 CUDA 半边：它要证明的是 device 侧接线与显存，CPU 跑通不能替代。
+
+### 为什么 5090 顶不了这一次（实测，不是推测）
+
+5090 当前**完全空闲**（32,607 MiB 中仅用 209 MiB，利用率 0%），train.jsonl 与 4090 逐字节相同
+（`190522b4…6bab7`），但两件事挡着：
+
+1. `runs/stages/R1/r1-v61-20260904/` 下**没有** `factuality_cv/`，五折 manifest 不在 5090；
+2. **backbone 无法闭合 pin**。5090 只有 HF cache 快照
+   `models--roberta-base/snapshots/e2da8e2f…ac7b`，其内容摘要为
+   `732bfab4a11769fb63013ca7a9e35697c0173c379653665bb6fb2640af33f649` ≠ pin `71be7419…c961ea9`。
+   逐文件比对给出了确切原因（2026-09-02 A3 那条「无法闭合」的记录至此有了解释）：
+   `config.json` / `merges.txt` / `tokenizer.json` / `vocab.json` **四个文件逐字节相同**，
+   差别只有两处——权重是 `model.safetensors`（`5bde1d28…ade81`）而 4090 pin 的是
+   `pytorch_model.bin`（`278b7a95…e461b`），序列化格式不同故哈希天然不可比；
+   `tokenizer_config.json` 内容不同（`994f4675…cd18ce` vs `dfef6647…cfa5c5`）。
+
+因此 5090 上任何 D4 运行都只能是 exploratory，除非把 4090 的六文件目录（476 MB）整搬过去；
+按 `GPU_RUNBOOK` 两跳约 70 分钟，**跨机搬运须先问作者**，本轮未搬。
+
