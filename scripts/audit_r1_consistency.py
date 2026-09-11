@@ -153,6 +153,11 @@ TRACEABILITY = {
         ["T026", "T031", "T036"],
         [PHASE_PATHS["identity"], PHASE_PATHS["relation"], PHASE_PATHS["factuality"]],
     ),
+    "FR-016": _entries(
+        ["docs/BASELINE_ROSTER.md#fr-016-fidelity-states"],
+        ["T026", "T031", "T036"],
+        [PHASE_PATHS["identity"], PHASE_PATHS["relation"], PHASE_PATHS["factuality"]],
+    ),
     "QR-001": _entries(
         [f"{R1_ROOT}/design_briefs.json#/briefs"],
         ["T028", "T033", "T038"],

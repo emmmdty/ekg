@@ -1,7 +1,9 @@
 # PHASE A4 — 完整候选上的关系证据充分性与必要性
 
-> **FROZEN / NOT STARTED（E6 / T024，2026-09-07）。** A3 的工作点、近似 retriever、prototype 与
-> ATLoss 保持 failed/sealed；A4 是不同机制家族。只允许 seed 13，额外 seeds 未获授权。外部 hash binding
+> **FROZEN / NOT STARTED（E6 / T024，2026-09-07；2026-09-11 按 `SPEC.md` v1.1.0 修订 baseline 条款）。**
+> QR-001 已把 baseline 广度由准入门改为报告要求：**A4 的确认性 promotion 不再等待 LLMERE 数字**。
+> 外部对手按 [`../BASELINE_ROSTER.md`](../BASELINE_ROSTER.md) §2 补齐，每个复现带 FR-016 保真度状态。
+> A3 的工作点、近似 retriever、prototype 与 ATLoss 保持 failed/sealed；A4 是不同机制家族。只允许 seed 13，额外 seeds 未获授权。外部 hash binding
 > 由 R1 `protocol.json` 的 `phase_contracts.relation` 持有，避免把会反向绑定本文件的 outer-protocol hash
 > 写进本文件而形成自指。
 
@@ -50,9 +52,12 @@ QR-006–QR-007、SC-001、SC-003、SC-006–SC-009。
 2. A3.6 strongest fallback（official recipe，failed method identity retained）；
 3. TacoERE-inspired K=3 cluster-conditioned RoBERTa transparent adaptation `taco-s13-r3`；它是固定
    同协议对照，不是第二条强方法族；
-4. LLMERE-causal transparent adaptation `llmere-causal-s13`（上述实现规格已冻结，metrics pending）；它是
-   第二条不同方法族，只有其 metrics 落地后才约束确认性 promotion。其 k=30 event partition 使跨分区对
-   不可生成，评分时这些漏报仍留在完整 candidate universe 内，故 ceiling 在 baseline 自身而不在评测；
+4. LLMERE-causal transparent adaptation `llmere-causal-s13`（实现规格已冻结）。**2026-09-11 修订**：它是
+   主表的一行，不是 promotion 的前置条件——metrics 落地就进表并参与胜出判定，未落地则在可得性表中
+   写明当前障碍（2026-09-10 全量 generation 有 95 条解码退化输出，官方评分不可运行，
+   见 `../results/PHASE_R1.md` §9.6）。其保真度状态见名册 §2.1：因验证需读取封存 final-valid，
+   预设为 **(b) Unverifiable**，障碍须写明。其 k=30 event partition 使跨分区对不可生成，评分时这些漏报
+   仍留在完整 candidate universe 内，故 ceiling 在 baseline 自身而不在评测；
 5. proposed pair evidence sufficiency/necessity（full）；
 6. full 去掉 evidence objectives（remove-core）；
 7. length-matched non-evidence sentence（negative control）；
@@ -99,16 +104,17 @@ seed-13 同时过主门、中介、负控和护栏后，只写 `confirmation_eli
 - full 相对 remove-core 降低 cross-sentence causal false-positive rate，且 length-matched control 不保留相同
   sufficiency/necessity mediator；causal recall 不低于 A3 fallback 1.0 个绝对 F1 点；
 - subevent F1 ≥ `0.2875`，temporal F1 ≥ `0.5063`；candidate population/digest 必须逐位相同；
-- confirmation：先等待并超过 LLMERE-causal；仅在额外 seeds 获授权后，matched seeds 13/17/42 的 mean
-  causal delta ≥ `+0.010`，至少 2/3 为正，10,000 次 document-cluster paired-bootstrap 95% CI 下界 > 0，
-  且均值超过 official-joint 与 LLMERE-causal 两条强 baseline；
+- confirmation：**不再以「等到 LLMERE 数字」为前置**（2026-09-11，QR-001 v1.1.0）。仅在额外 seeds 获授权后，
+  matched seeds 13/17/42 的 mean causal delta ≥ `+0.010`，至少 2/3 为正，10,000 次 document-cluster
+  paired-bootstrap 95% CI 下界 > 0，且均值超过 official-joint 主锚以及名册 §2 中**每一个已完成复现**的
+  公开方法；未完成复现的方法不阻断本门，但其状态必须在主表与可得性表中如实列出；
 - 辅助 evidence/abstention 指标只能支持或否定机制，不能替代 causal 主指标。
 
 ## Stop conditions
 
 - 任何候选被删除、增加、重排或无法评分：立即停止并回 A4.1；
 - full 不降低注册 mediator、negative control 保留同样 mediator、或增益只来自 recall collapse：机制失败；
-- 任一有效周期未超过两条强 baseline 或破坏 relation guardrail：该周期失败；两个有效周期后封存；
+- 任一有效周期未超过 official-joint 主锚、或破坏 relation guardrail：该周期失败；两个有效周期后封存；
 - 不恢复第四个 retriever、阈值/损失扫参、换 split/更大 backbone 或 final-valid feedback。
 
 ## Bundle

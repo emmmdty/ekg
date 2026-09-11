@@ -1,16 +1,18 @@
 # PHASE C5 — mention-local 论元不确定性感知的事件身份消解
 
-> **BLOCKED / NOT FROZEN（E6 / T024，2026-09-07）。** E10 已证明唯一已核实的候选 ACCI 是 README-only
-> 仓库，不能透明移植；作者尚未按 Ch1 的四条件指定替代第二方法族。本文件保留为待重新准入的草案，
-> **不进入** R1 `protocol.json` 的 `phase_contracts`，不得实现、preflight、smoke 或启动 GPU。额外 seeds
-> 未获授权，seed-13 pilot 过门前不得建立 seed-17/42 目录。
+> **ADMITTED（2026-09-11，作者授权 + `SPEC.md` v1.1.0）。** 取代 2026-09-07 的
+> `BLOCKED / NOT FROZEN`：QR-001 已把 baseline 广度由**准入门**改为**报告要求**，因此「缺第二方法族」
+> 不再阻断本章的实现、preflight、smoke 与 pilot。外部对手按 [`../BASELINE_ROSTER.md`](../BASELINE_ROSTER.md)
+> §1 逐个补齐，每个复现须带 FR-016 保真度状态；跑不了的进可得性表写明障碍，不得静默省略。
+> 额外 seeds 仍未获授权，seed-13 pilot 过门前不得建立 seed-17/42 目录。
 
 ## Goal
 
-待作者指定第二条满足四条件的方法族后，检验 independently predicted mention-local participant/place 精确
+检验 independently predicted mention-local participant/place 精确
 spans，以及由这些 hard spans 学得的 pairwise role-compatibility posterior 与缺失不确定性，能否在完整
 MAVEN-ERE mention candidate 上减少角色冲突的高置信 false merge，并在官方 MUC 与全部 coreference 护栏上
-超过 official joint、Qwen3 注册负面对照与新指定的第二方法族。Qwen3 本身不提供已校准 role posterior；
+超过 official joint 与 Qwen3 注册负面对照，并与 §Baselines 名册中每一个已复现的公开方法同表对读。
+Qwen3 本身不提供已校准 role posterior；
 不得把生成字符串伪称为概率。
 
 Specification coverage：RS-001、FR-001、FR-003–FR-007、FR-009–FR-015、QR-001–QR-004、QR-006–QR-007、
@@ -50,15 +52,20 @@ SC-001–SC-002、SC-006–SC-009。
 1. MAVEN-ERE official joint primary anchor；
 2. Qwen3 mention-local participant/place + learned argument-span pair pooling `qwen3-argument-s13-r2`；它低于
    anchor，是「朴素池化预测论元会掉点」的注册负面对照，**不是**第二方法族或 strong baseline；
-3. 第二条方法族：**作者待指定**。ACCI 不可运行，IP&M 2024 无公开代码，均不得填入此项；
-4. proposed span-conditioned role-compatibility posterior + missingness-aware uncertainty gate（full，待重新准入）；
-5. full 去掉 role residual（remove-core，待重新准入）；
-6. document×event-type 内 role posterior permutation（negative control，待重新准入）；
+3. **Global-Local Topic**（Xu, Li, Zhu, EMNLP 2022）经 EasyECR `example_emnlp2022.py` +
+   `global_local_topic_mavenere.yaml` 的透明移植。它是独立发表工作的机制、在原始基准 KBP 2017 上有强证据、
+   有 1,715 行可运行 Lightning trainer。**保真度状态按 `../BASELINE_ROSTER.md` §1.1 的决策树判定后才可写进
+   表格标签**；EasyECR 的无 LICENSE、老 torch 栈、allennlp 与硬编码路径四项差异无论 (a)/(b) 都必须披露。
+   ACCI（README-only）与 IP&M 2024（无代码）进可得性表，不得填入本行；
+4. proposed span-conditioned role-compatibility posterior + missingness-aware uncertainty gate（full）；
+5. full 去掉 role residual（remove-core）；
+6. document×event-type 内 role posterior permutation（negative control）；
 7. MAVEN-ARG event-level gold arguments 仅列 non-deployable oracle，不参与胜出门。
 
-除注册组件外，2、以及重新准入后 3–6 的 encoder、pair population、optimizer steps、seed、预算和 scorer
-必须逐位一致。旧的 annealed local pair classifier 与 hard-arguments-without-uncertainty 臂不在 E4 通过的
-brief roster 中，故不纳入本草案。
+除注册组件外，2 与 4–6 的 encoder、pair population、optimizer steps、seed、预算和 scorer 必须逐位一致。
+3 是外部方法的透明移植，其 encoder 与超参沿用上游原配置，**不强制与 4–6 对齐**，但每一处与上游的偏离
+都必须按 FR-016 逐条披露。旧的 annealed local pair classifier 与 hard-arguments-without-uncertainty 臂
+不在 E4 通过的 brief roster 中，故不纳入。
 
 ## Tasks
 
@@ -69,7 +76,7 @@ brief roster 中，故不纳入本草案。
 
 ### C5.1 immutable preflight and baseline replay
 
-**不得执行，直到作者名单重新准入并写入新 T024 binding。** 届时物化
+物化
 `runs/stages/C5/c5-v61-argument-uncertainty-r1/preflight/`，冻结 source/manifest/candidate/evaluator、
 extractor、encoder、code/config/command hashes 与 final-valid ledger。重算 official joint、Qwen3 注册负面对照
 与新第二方法族的 official MUC/B3/CEAFe/BLANC；任何 population 或 hash 漂移立即停止。
@@ -82,7 +89,7 @@ forward/backward/export/reload；断言 logits/loss/uncertainty 有限，所有 
 
 ### C5.3 seed-13 pilot
 
-**不得执行，直到重新准入。** 届时只运行矩阵 4–6 的 seed 13。训练期仅读 train；internal-dev 只按固定
+只运行矩阵 4–6 的 seed 13。训练期仅读 train；internal-dev 只按固定
 退火终点评分，不扫 threshold/epoch。
 逐文档保存 official scorer sufficient statistics、false merge mediator、coverage 与 calibration。
 
@@ -94,21 +101,23 @@ final-valid 一次。无论 pass/failed 都输出不可变 handoff。
 
 ## Promotion gate
 
-- 本草案没有 seed-13 promotion 权限。重新准入后：full 的 MUC 必须严格高于 official joint、Qwen3 注册负
-  对照与作者指定的第二方法族；full 相对 remove-core 降低注册的 incompatible-role false-merge rate，且
-  permutation 消除该中介改善；
+- full 的 MUC 必须严格高于 official joint 与 Qwen3 注册负面对照，并高于名册中**每一个已完成复现**的公开
+  方法；尚未复现完成的公开方法不阻断本门，但必须在主表与可得性表中如实列出其状态。full 相对
+  remove-core 降低注册的 incompatible-role false-merge rate，且 permutation 消除该中介改善；
 - internal-dev secondary floors：B3、CEAFe、BLANC 分别不低于 official-joint anchor 的 0.5 个绝对 F1 点；
-- confirmation：仅在重新准入及授权后，matched seeds 13/17/42 的 mean MUC delta ≥ `+0.010`，至少 2/3 为正，
-  10,000 次 document-cluster paired-bootstrap 95% CI 下界 > 0，且均值超过 official joint 与新第二方法族；
+- confirmation：仅在授权后，matched seeds 13/17/42 的 mean MUC delta ≥ `+0.010`，至少 2/3 为正，
+  10,000 次 document-cluster paired-bootstrap 95% CI 下界 > 0，且均值超过 official joint 与名册中每一个
+  已完成复现的公开方法；
 - coverage 必须是 manifest 的 291 documents / 7,195 mentions，全量显式 `ok` / `empty` / `partial` /
   `rejected`；拒绝率与原因必须报告，任何 silently dropped mention 直接失败。
 
 ## Stop conditions
 
-- 未有作者指定且可按四条件运行的第二方法族：保持 blocked，不得把 Qwen3 或 ACCI 填作替身；
+- 把 Qwen3 注册负面对照或任何未通过 FR-016 保真度判定的产物**冒充**为公开方法族：立即停止；
+  缺公开方法族本身不再是 stop condition（QR-001 v1.1.0），但主表必须如实反映名册状态；
 - Qwen3 artifact 不能完成 manifest、使用非 verbatim span、或需要 cluster gold 才能覆盖：停止输入线；
 - full 不改变注册 mediator，或 permutation 保留同样 mediator 改善：机制 claim 失败；
-- 任一有效周期未超过两条强 baseline 或 secondary floor：该周期失败；两个有效周期后封存家族；
+- 任一有效周期未超过 official joint 主锚、或未守住 secondary floor：该周期失败；两个有效周期后封存家族；
 - 不以更大 backbone、threshold/epoch sweep、换 split 或 oracle argument 救结果；失败身份进入 E3 fallback。
 
 ## Bundle
@@ -119,8 +128,7 @@ coreference predictions、raw official metrics、mediator/paired statistics、ch
 
 ## GPU command
 
-此命令**当前禁止执行**。仅在作者指定第二方法族、R1 建立新的 C5 T024 binding、实现与 preflight 完成后，
-固定入口为：
+R1 已于 2026-09-11 建立 C5 的 T024 binding。实现与 preflight 完成后，固定入口为：
 
 ```bash
 cd /data/TJK/ekg
