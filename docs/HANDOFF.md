@@ -12,8 +12,8 @@
 | **论文结构** | 第3章 事实性检测（D4）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表；本文 §E 队列只是它的当周切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
 | **活动任务** | 无。2026-09-11（E17）完成 C-1 与 G-1 的 CPU 半边，并修掉三个 preflight 缺陷；数字见 [`results/PHASE_D.md`](results/PHASE_D.md)。新窗口从 §0 的启动清单开始。 |
-| ⛔ **gpu-4090** | **CUDA 完全不可用**。2026-09-11 06:05–06:08 unattended-upgrade 把 NVIDIA 由 580.173.02 升到 580.178.04，运行中的内核模块仍是 580.173.02 → `nvidia-smi` NVML 失败、`torch.cuda.is_available()=False`、`device_count=0`。磁盘已无旧用户态库，`nvmlshim` 实测无效，**绕不过去**。修复需 root（重启或重载 nvidia 模块），机器共用，**须作者联系机主**。**文件系统仍可 ssh 访问**（纯 CPU 任务照常跑）。E8 的 PID 1819697 已 GONE。 |
-| ✅ **gpu-5090** | **已获授权作临时顶替**（作者 2026-09-11）：4090 不可达期间可跑 **smoke 与小任务**，**主体实验仍回 4090**。边界与禁区见 `EXPERIMENT_PLAN.md` §3.5——**EasyECR 跑不了**（其 torch 2.0.1 不支持 sm_120）、**Qwen3-8B LoRA 装不下**（余量约 15GB）。**每次使用仍须逐次取得作者授权**；host key 待作者确认（见 §0）。 |
+| ⛔ **gpu-4090（已降级，作者说不管了）** | **CUDA 完全不可用**。2026-09-11 06:05–06:08 unattended-upgrade 把 NVIDIA 由 580.173.02 升到 580.178.04，运行中的内核模块仍是 580.173.02 → `nvidia-smi` NVML 失败、`torch.cuda.is_available()=False`、`device_count=0`。磁盘已无旧用户态库，`nvmlshim` 实测无效，**绕不过去**。修复需 root（重启或重载 nvidia 模块），机器共用，**须作者联系机主**。**文件系统仍可 ssh 访问**（纯 CPU 任务照常跑）。E8 的 PID 1819697 已 GONE。 |
+| ✅ **gpu-5090 = 当前工作机** | 作者 2026-09-11 **第二次裁决**：**4090 不管了**，在 5090 上验证假设与方法；**可重新拉模型**；**≤1 天的任务直接执行，不再逐次请示**（超过一天仍要问，拉模型/跨机搬运也要先问位置）。host key 作者已确认为本人所加。实测当前**完全空闲**（32,607 MiB 用 209 MiB，原 Qwen 服务已不在）。仍有效的硬边界：**EasyECR 跑不了**（torch 2.0.1 不支持 sm_120）。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改队列行状态与 commit → 推进队列 → commit + **push** |
 
@@ -49,9 +49,12 @@ uv run python scripts/audit_r1_consistency.py \
 
 按需再读：对应章节的 `phases/PHASE_*.md` 契约、`results/PHASE_*.md`（数字唯一权威）。
 
-### 0.3 直接开工：CPU 泳道
+### 0.3 直接开工
 
-**4090 的 GPU 不可用，但它的文件系统可 ssh 访问，CPU 泳道八项全部不受影响。**
+⚠️ **2026-09-11 下午起 4090 连 ssh 都不通了（`Connection refused`，隧道掉线，非驱动问题）。
+作者裁决：4090 不管，改用 5090。** 下面这段按旧情况写，路径仍然有效，机器换成 5090。
+
+**CPU 泳道八项全部不依赖 GPU。**
 从 `EXPERIMENT_PLAN.md` §4.1 取第一个未完成项。建议起手顺序：
 
 | 次序 | 主表 ID | 为什么先做它 |
@@ -65,10 +68,9 @@ uv run python scripts/audit_r1_consistency.py \
 `cross_artifact_audit.json` `622d094b…f8467`；4090 旧档备份为 `protocol.json.pre-e12-20260911`）。
 `results/PHASE_R1.md` §21.3 原记的是 E12 中途的哈希，已一并更正。
 
-⚠️ **gpu-5090 host key**：2026-09-11 09:58 起 `29.tcp.cpolar.top:13850` 的条目**已在**
-`~/.ssh/known_hosts`（第 98 行），指纹 ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`
-与本文此前实测值一致。写入不是执行代理做的（E17 接手时它已存在）；**请作者确认是本人所加**。
-仍不得自行 TOFU 接受新指纹（cpolar 端口是复用的）。
+✅ **gpu-5090 host key 已确认**：`29.tcp.cpolar.top:13850` 在 `~/.ssh/known_hosts` 第 98 行，
+指纹 ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**作者 2026-09-11 确认是本人所加**。
+仍不得自行 TOFU 接受**新**指纹（cpolar 端口是复用的）。
 
 ## 1. 当前裁决与状态
 

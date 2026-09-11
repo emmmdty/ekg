@@ -300,3 +300,38 @@ hash。这是本轮解耦的直接回报：过去这类修复要重建整个信�
 
 P1 r12 构建本身只完成协议与 CPU preflight，没有产生科研分数。随后的 r13 2 epoch GPU
 行为 smoke 见 [`PHASE_A.md`](PHASE_A.md)；它同样未调用 official evaluator，不改变 P1 的结论边界。
+
+## 内容寻址 pin 的可重建性：**六个文件里五个能从 ModelScope 逐字节重建**（2026-09-11，5090）
+
+作者 2026-09-11 把 5090 定为当前工作机（4090 隧道 `Connection refused`、驱动仍待机主处理），
+并授权重新拉取模型。按 `docs/HANDOFF.md` 确认的位置
+`gpu-5090:/mnt/aidata/tongjiakai/models/local/roberta-base/`，从 **ModelScope `AI-ModelScope/roberta-base`**
+逐文件拉取并核对：
+
+| 文件 | ModelScope 拉到的 SHA-256 | 与 4090 pin 一致？ |
+|---|---|---|
+| `config.json` | `ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9` | ✅ |
+| `merges.txt` | `1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5` | ✅ |
+| **`pytorch_model.bin`** | `278b7a95739c4392fae9b818bb5343dde20be1b89318f37a6d939e1e1b9e461b` | ✅（476 MB 权重逐字节相同） |
+| `tokenizer.json` | `847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e` | ✅ |
+| `vocab.json` | `9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655` | ✅ |
+| `tokenizer_config.json` | **404，ModelScope 这个仓库不提供** | ❌ 缺 |
+
+**结论：跨机搬运的成本从 476 MB / 约 70 分钟塌缩成一个几 KB 的 JSON。** 目前 5 个文件已落在
+`/mnt/aidata/tongjiakai/models/local/.staging-roberta-base/`，摘要
+`b1261eaedd3d7f4eb28140d8af6758247ff3bc9253e7555ec44869d600535e84`（只含 5 文件，**不闭合** pin）。
+
+### 缺的那个文件不是从公网能拿到的
+
+pin 里的 `tokenizer_config.json` 是 `dfef66475ba1a217ceab1a29ba012843041e11627cab56f5f83c7b9804cfa5c5`，
+而三个上游源（ModelScope `FacebookAI/roberta-base`、hf-mirror `FacebookAI/roberta-base`、
+hf-mirror `roberta-base`）给的**都是同一个**
+`994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce`（25 字节，内容就是
+`{"model_max_length": 512}`）。用 transformers 4.53.3 的 `save_pretrained` 重写也对不上
+（得到 `4ea8648e…`，1,246 字节）。
+
+因此 **P1 的内容寻址 pin 里含有一个公网不提供、本地写出来的文件**——这是一处可追溯性弱点
+（B 类）：pin 本身仍可由任何拿到该目录的人重算，但**不能只凭公开来源重建**。
+处置：等 4090 隧道恢复后把那一个文件 scp 过来闭合 pin；若长期拿不到，则在 5090 另注册一个
+backbone 身份，并**明确写出**「结果不与 4090 冻结的 CLS/DMRoBERTa 直接相减」。不得偷偷换 backbone 继续算。
+
