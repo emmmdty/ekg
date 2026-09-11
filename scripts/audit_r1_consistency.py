@@ -14,7 +14,7 @@ PHASE_PATHS = {
     "identity": "docs/phases/PHASE_C5_argument_uncertainty.md",
     "relation": "docs/phases/PHASE_A4_pair_evidence.md",
     "factuality": "docs/phases/PHASE_D4_typed_cue_factuality.md",
-    "consumer": "docs/phases/PHASE_E3_factorial_consumers.md",
+    "consumer": "docs/phases/PHASE_E3_graph_application.md",
 }
 METHOD_PHASE_PATHS = {key: PHASE_PATHS[key] for key in ("identity", "relation", "factuality")}
 CONTRACT_SECTIONS = (
@@ -74,7 +74,7 @@ TRACEABILITY = {
         [PHASE_PATHS["factuality"]],
     ),
     "RS-004": _entries(
-        ["docs/phases/PHASE_E3_factorial_consumers.md"],
+        ["docs/phases/PHASE_E3_graph_application.md"],
         ["T040", "T041", "T042", "T043", "T044"],
         [PHASE_PATHS["consumer"]],
     ),
@@ -84,7 +84,7 @@ TRACEABILITY = {
         [PHASE_PATHS["identity"], PHASE_PATHS["relation"], PHASE_PATHS["factuality"]],
     ),
     "FR-002": _entries(
-        ["docs/phases/PHASE_E3_factorial_consumers.md#goal"],
+        ["docs/phases/PHASE_E3_graph_application.md#goal"],
         ["T040", "T044"],
         [PHASE_PATHS["consumer"]],
     ),
@@ -114,7 +114,7 @@ TRACEABILITY = {
         [PHASE_PATHS["identity"], PHASE_PATHS["relation"], PHASE_PATHS["factuality"]],
     ),
     "FR-008": _entries(
-        ["docs/phases/PHASE_E3_factorial_consumers.md#e34-统计推断"],
+        ["docs/phases/PHASE_E3_graph_application.md#e34-构建质量评估"],
         ["T042", "T043", "T044"],
         [PHASE_PATHS["consumer"]],
     ),
@@ -183,7 +183,7 @@ TRACEABILITY = {
         [PHASE_PATHS["identity"], PHASE_PATHS["relation"], PHASE_PATHS["factuality"]],
     ),
     "QR-005": _entries(
-        ["docs/phases/PHASE_E3_factorial_consumers.md#e32-预测有效性与图依赖正控"],
+        ["docs/phases/PHASE_E3_graph_application.md#baselines"],
         ["T041", "T042", "T044"],
         [PHASE_PATHS["consumer"]],
     ),
@@ -214,7 +214,7 @@ TRACEABILITY = {
         [PHASE_PATHS["factuality"]],
     ),
     "SC-005": _entries(
-        ["docs/phases/PHASE_E3_factorial_consumers.md#e33-全-factorial"],
+        ["docs/phases/PHASE_E3_graph_application.md#e33-下游事件预测对比实验本章主表"],
         ["T042", "T043", "T044"],
         [PHASE_PATHS["consumer"]],
     ),
@@ -414,7 +414,7 @@ def build_audit(repo: Path) -> dict:
         "docs/TASKS.md",
         "docs/phases/PHASE_R1_method_design_freeze.md",
         *PHASE_PATHS.values(),
-        "docs/phases/PHASE_E3_factorial_consumers.md",
+        "docs/phases/PHASE_E3_graph_application.md",
         "docs/phases/PHASE_H2_thesis_acceptance.md",
     )
     undeclared: dict[str, list[str]] = {}

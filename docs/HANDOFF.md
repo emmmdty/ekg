@@ -342,19 +342,31 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 
 #### E.2b 当前队列（2026-09-11 冻结，取代 E.2a）
 
-**排序原则（本轮变更）**：先跑自己的方法，再补外部对手。E1–E11 十一个任务全部是协议、审计、文献与
+> **本队列已降为 [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md) 主表的当周切片。**
+> 可执行实验只认那份主表；**本表不得出现主表以外的新任务**。要偏离顺序先改主表。
+
+**排序原则**：先跑自己的方法，再补外部对手。E1–E11 十一个任务全部是协议、审计、文献与
 baseline，v6.1 三份方法设计**一个都没跑过**；证明方法有没有价值才是实验质量的主要判据，统计门槛是
 锦上添花（作者 2026-09-11）。
 
-| 顺序 | 子任务 | 可否立即执行 | 通过 / 停止条件 |
-|---|---|---|---|
-| E12 | **SPEC v1.1.0 + FR-016 + 三契约重绑** | — | **已完成**，见 `results/PHASE_R1.md` §21；审计 PASS / 36 requirements |
-| 1 | **E13：D4.1 immutable preflight**。在 4090 以 `.venv/bin/python` 物化 `runs/stages/D4/d4-v61-typed-cues-r1/preflight/`，重验 R1/P1、五折 manifests、source、encoder、accepted OOF baseline 与 code hash。 | ✅ **现在就能做**：实测 `scripts/prepare_d4_typed_cue_preflight.py` 不 import torch，纯 hash/指标重算，**驱动坏着也能跑**，只要 ssh 通 | 通过：protocol `status=pass`，独立重算两条 accepted OOF baseline，所有 hash/覆盖/折隔离一致。停止：任何 hash、fold 或 final-valid ledger 不一致 |
-| 2 | **E14：EasyECR 可运行性实跑核查**（复用 E2/E10 流程，**不训练**）。冻结 commit/tree hash、核对 `maven_ere.py` 能否接 2622/291 manifest、`allennlp` 与老 torch 栈的独立 venv 方案、KBP 2017 可得性（决定 FR-016 状态 (a)/(b)）。 | ✅ CPU，现在就能做 | 裁决落 `results/PHASE_R1.md` 与名册 §1.1；能跑则排 C5 的 baseline 复现，不能跑则写明具体阻断点 |
-| 3 | **E15：E8.1 恢复方案冻结**。新证据：95 条无效输出**不是** `max_new_tokens=512` 截断（重算输出 token 323–510，0 条到顶；反而有效输出里 25 条 ≥511），真实形态是**解码退化**（第 7,817 条 `aste-information: none` 无限重复；第 8,842 起 94 条自环+pair 循环）。方案必须在解码层阻断重复。 | ✅ 纯文档 + 只读 | 通过：覆盖全部 11,149 条、同一规则、原始输出保留、fail-fast 与成本明确。**方案通过不等于获准重生成** |
-| 4 | **E16：C5.0 实现 + 本地 gate** | ✅ CPU，QR-001 修订后已解锁 | targeted tests + 三件套全绿 |
-| 5 | **D4.2 CPU/CUDA smoke** → **D4.3 seed-13 五折 pilot** | ❌ **等 4090 驱动修复**；D4.3 另需作者授权长 GPU 任务 | 见 `phases/PHASE_D4_typed_cue_factuality.md` |
-| 6 | **A4.0 实现** → A4.1/A4.2 → A4.3 | A4.0 ✅ CPU 可做；pilot 等 GPU | 见 `phases/PHASE_A4_pair_evidence.md` |
+| 主表 ID | 子任务 | 可否立即执行 |
+|---|---|---|
+| — | **E12：SPEC v1.1.0 + FR-016 + 三契约重绑** | ✅ **已完成**（`results/PHASE_R1.md` §21） |
+| — | **E13：E3 重定向为「事件图谱构建与下游事件预测应用」**（乙形态，作者 2026-09-11 选定）；24 条件 factorial / Holm / frozen-vs-finetuned 全部撤销 | ✅ **已完成**（`phases/PHASE_E3_graph_application.md`） |
+| — | **E14：冻结 `EXPERIMENT_PLAN.md` 防漂移主表** | ✅ **已完成** |
+| **C-1** | D4.1 immutable preflight | ✅ CPU，驱动坏着也能跑 |
+| **C-2** | EasyECR 可运行性实跑核查（不训练） | ✅ CPU |
+| **C-3** | E8.1 LLMERE 恢复方案冻结 | ✅ 纯文档 + 只读 |
+| **C-4** | Ch6 对手名册调研与冻结 | ✅ 联网调研 |
+| **C-5** | C5.0 实现 + 本地 gate | ✅ CPU |
+| **C-6** | A4.0 实现 + 本地 gate | ✅ CPU |
+| **C-7** | LLM 对照脚手架 | ✅ CPU |
+| **C-8** | 第 2 章统一评测协议素材整理 | ✅ CPU |
+| **G-0** | **修复 gpu-4090 驱动** | ❌ **需作者联系机主**，我们无 root |
+| **G-1 → G-2** | D4.2 smoke → **D4.3 seed-13 五折 pilot**（GPU 恢复后的队首） | ❌ 等 G-0 + 授权 |
+
+完整主表（含 G-3…G-12、三个 Gate、GPU 预算与 phase 契约映射）见
+[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)。
 
 ⚠️ **E12 改动了 `runs/` 下的三个 JSON，而 `runs/` 是 gitignored**（产物走 scp）。开工前必须把
 `runs/stages/R1/r1-v61-20260904/protocol.json`、`phase_contracts/t024_freeze.json`、

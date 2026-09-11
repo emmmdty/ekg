@@ -30,7 +30,7 @@ ID 审计、CPU smoke 也可并行。每个 phase 仍须交付 `pass|failed|bloc
 | **A4** | 完整候选上的 pair evidence 充分性/必要性 | FROZEN / NOT STARTED；仅 seed 13 已预注册 | 4090 | [`PHASE_A4_pair_evidence.md`](PHASE_A4_pair_evidence.md) |
 | **D4** | typed cue 与分解式事实性决策 | FROZEN / NOT STARTED；仅 seed 13 已预注册 | 4090 | [`PHASE_D4_typed_cue_factuality.md`](PHASE_D4_typed_cue_factuality.md) |
 | **D3/C4** | v6 旧方法契约 | **SUPERSEDED FOR FUTURE EXECUTION**；历史结果仍有效 | 不再执行 | [`PHASE_D3_evidence_conditioned.md`](PHASE_D3_evidence_conditioned.md)、[`PHASE_C4_context_identity.md`](PHASE_C4_context_identity.md) |
-| **E3** | Ch4 本地重建 query 协议的消费者 factorial | BLOCKED BY C5/A4/D4 handoffs | 4090；5090 逐次授权 | [`PHASE_E3_factorial_consumers.md`](PHASE_E3_factorial_consumers.md) |
+| **E3** | 事件图谱构建与下游事件预测应用（带公开对手；factorial 已撤销） | 需 C5/A4/D4 的 bundle 或其 fallback | 4090；5090 逐次授权 | [`PHASE_E3_graph_application.md`](PHASE_E3_graph_application.md) |
 | **H2** | 汇总三种子、消融、复现与论文表格反查 | BLOCKED BY E3 | 视缺口 | [`PHASE_H2_thesis_acceptance.md`](PHASE_H2_thesis_acceptance.md) |
 
 G0 实际筛查见

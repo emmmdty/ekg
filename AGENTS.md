@@ -9,16 +9,22 @@ Claude 与 Codex **交替推进同一条队列**：开工前按 `HANDOFF.md` 任
 写回 `docs/HANDOFF.md`，不要恢复 planning-with-files 工作流。
 
 研究宪章 `.specify/memory/constitution.md`｜稳定需求 `docs/SPEC.md`｜可迭代设计 `docs/RESEARCH_PLAN.md`｜
-可执行任务 `docs/TASKS.md`｜实时状态 `docs/TODO.md`｜**实测数字 `docs/results/`**｜
+可执行任务 `docs/TASKS.md`｜**完整实验规划（防漂移主表）`docs/EXPERIMENT_PLAN.md`**｜**对手名册与复现保真度 `docs/BASELINE_ROSTER.md`**｜实时状态 `docs/TODO.md`｜**实测数字 `docs/results/`**｜
 baseline 与消融 `docs/EXPERIMENTS.md`｜工程坑 `docs/ENGINEERING_NOTES.md`｜
 服务器运维 `docs/GPU_RUNBOOK.md`｜三端流水线 `docs/PIPELINE.md`｜归档索引 `docs/ARCHIVE_INDEX.md`。
 
-**当前研究计划是 v6.1 四章**（2026-09-04）：Ch1 事件身份消解 · Ch2 事件关系抽取 · Ch3 事件事实性检测 ·
-Ch4 构建错误的下游代价与消费者依赖性。结构继续是**三个高质量方法章 + 一个系统评估章，不降标**；
-当前实验 phase 是 `docs/phases/PHASE_A3_relation_balanced.md` 的复现分账与失败交接；R1 中不读取 A3
-待出结果的文献/ID/功效准备任务可并行。当前依赖计划为 R1 → {C5, A4, D4} → E3，其中三个方法章按
-真实数据依赖与资源动态排程，不把计划顺序写成 SPEC。R1 冻结文献/代码矩阵、跨数据 ID、power、
-因果 design brief 和新 protocol；
+**当前论文结构（2026-09-11 作者选定）**：第3章 事件事实性检测（D4）· 第4章 事件关系抽取（A4）·
+第5章 事件身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3，带公开对手的应用章）**。
+章序按把握度排，不按依赖。**Ch6 不要求胜过任何方法章**；原 24 条件 factorial、Holm 校正家族与
+frozen-vs-fine-tuned 同 backbone 对照**已撤销，不得恢复**。
+**可执行实验只认 `docs/EXPERIMENT_PLAN.md` 的防漂移主表**，`HANDOFF.md` 的 E 队列只是它的当周切片；
+要偏离顺序先改主表。三个 Gate（D4.3 出结果 / A4.3+C5.3 出结果 / Ch6 名册冻结）是预先安排的
+重规划时刻，Gate 之外不重排计划。
+**SPEC v1.1.0**：QR-001 把 baseline 广度由准入门改为**主表报告要求**；FR-016 要求每个外部复现带
+保真度状态——(a) 在其原始基准复现出已发表数字（容差事前定），或 (b) 点名障碍、标「透明适配」、
+逐条列差异。名册见 `docs/BASELINE_ROSTER.md`。
+**实验质量的主要判据是证明方法有价值**（主表对手、消融、负控、误差分析），统计检验是锦上添花；
+不要先去调效应量门槛或 seed 数。
 旧 D3/C4 以及 A2/C3/D2/E2 禁止继续执行。
 > P1 唯一可信根：`runs/stages/P1/p1-v6-20260831-r12/`，其 `protocol.json` SHA-256 为
 > `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497`；A3 命令必须显式传入。
