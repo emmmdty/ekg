@@ -109,21 +109,55 @@ LLM 行属自建对照，不适用 FR-016 的保真度验证，但须披露 back
 
 ## 6. Ch6 · 下游事件预测应用（本地重建 CGEP-MAVEN；MRR 与 Hit@1/3/10/20/50）
 
-> **本节尚未冻结。** `PHASE_E3_graph_application.md` 的 E3.3 主表在本节冻结之前不得运行。
-> 队列任务 **E17** 负责用联网调研填满这张表。
+> C-4 调研已完成（2026-09-11，联网核实）。**Gate 3 判定：能凑够 ≥3 个公开对手，Ch6 按带对手的
+> 应用章执行。** 保真度路径见 §6.2，尚未冻结的是各对手在**我们重建协议**上的实跑。
 
-| # | 方法 | 原始基准 | 代码 | 保真度路径 | 状态 |
-|---|---|---|---|---|---|
-| 1 | SeDGPL（本项目自跑基线，Ch6 的构建图消费者） | CGEP-MAVEN | ✅ `zhanchuanhong/SeDGPL` | 本项目已自跑，gold 复现 .1802 逐位一致；与原文口径的差异须列明 | 已有 |
-| 2–4 | **公开对手 ≥3 个：待 E17 填入** | — | — | 每个须走 FR-016 (a)/(b) 判定 | **待定** |
-| 5 | random / frequency | — | 自建 | 不适用（平凡对照） | 已有 |
-| 6 | `no_graph` / `rewired` 图依赖正控 | — | 自建 | 不适用（结构对照） | **已通过**（.1802 / .1185 / .0811） |
+基座论文：**SeDGPL** —《What Would Happen Next? Predicting Consequences from An Event Causality
+Graph》，**Findings of EMNLP 2024**，Chuanhong Zhan，[aclanthology.org/2024.findings-emnlp.45](https://aclanthology.org/2024.findings-emnlp.45.pdf)，
+代码 [github.com/zhanchuanhong/SeDGPL](https://github.com/zhanchuanhong/SeDGPL)（含 `main.py`/`model.py`/`load_data.py`/`run.sh`，训练代码齐备）。
 
-⚠️ **MCNC（多选叙事完形）类方法不可直接入表**：那是多选设定，与我们「候选列表排序」口径不同；
-若要引用只能作背景，不能同表比较。
+### 6.1 候选对手（全部是 SeDGPL 论文自己比过的 CGEP 对手，均有公开训练代码）
 
-⚠️ 若 E17 找不到 ≥3 个可跑的公开对手，按 `PHASE_E3_graph_application.md` 的 stop condition，
-Ch6 降为**描述性构建与应用章**，这是允许的收缩，不是失败。
+原论文 **CGEP-MAVEN（512 候选）** 表，MRR / Hit@1 / @3 / @10 / @20 / @50：
+
+| 方法 | 出处 | 原文 CGEP-MAVEN 数字 | 代码 | 训练代码 |
+|---|---|---|---|---|
+| **SeDGPL** | Findings of EMNLP 2024 | **27.9 / 21.9 / 28.9 / 40.8 / 48.1 / 57.9** | [zhanchuanhong/SeDGPL](https://github.com/zhanchuanhong/SeDGPL) | ✅ |
+| **BART contrastive** | Zhu et al., AAAI 2023 | 24.7 / 19.5 / 24.5 / 34.8 / 42.6 / 53.6 | [zhufq00/mcnc](https://github.com/zhufq00/mcnc) | ✅ 两阶段训练命令齐备 |
+| **CSProm-KG** | Chen et al., Findings of ACL 2023 | 22.3 / 18.1 / 23.2 / 31.0 / 38.4 / 50.7 | [chenchens190009/CSProm-KG](https://github.com/chenchens190009/CSProm-KG) | ✅ |
+| **MCPredictor** | Bai et al., EMNLP 2021 | 18.1 / 13.0 / 18.4 / 27.3 / 32.0 / 43.2 | [waltbai/MCPredictor](https://github.com/waltbai/MCPredictor) | ✅ |
+| **SimKGC** | Wang et al., ACL 2022 | 9.3 / 4.5 / 9.2 / 18.0 / 25.3 / 35.0 | [intfloat/SimKGC](https://github.com/intfloat/SimKGC) | ✅ |
+
+四个非 SeDGPL 对手的原任务都不是 CGEP（CSProm-KG/SimKGC 是知识图谱补全，BART contrastive 与
+MCPredictor 是五选一的 MCNC），**它们的 CGEP 数字是 SeDGPL 作者自己做的适配**，并非其原论文结果。
+
+### 6.2 ⚠️ 保真度的硬约束：原文数字不可直接入我们的表
+
+**原论文的 CGEP-MAVEN 派生数据（512 候选）从未发布**，我们用的是**本地重建协议**（1,908 实例）。
+因此上表的 27.9 等数字与我们自跑的 gold `.1802` **不可同表比较**——候选集规模与构造方式都不同。
+
+FR-016 判定：
+
+- **我们必须在自己的重建协议上重跑这五个方法**，重跑结果才是 Ch6 主表的行；
+- 保真度状态取决于能否复现它们的已发表数字。由于 MAVEN 侧派生数据未发布，
+  **默认落 (b) Unverifiable，障碍写「原论文 CGEP-MAVEN 派生 split/candidates 未公开」**；
+- **可能升到 (a) 的一条路**：原论文同时报 **CGEP-ESC（256 候选）**，而 EventStoryLine 是公开语料。
+  若能按原文描述重建 CGEP-ESC 并复现其 ESC 列数字（容差事前定），则保真度在 ESC 上取得 (a)，
+  再以同一份代码转到我们的 MAVEN 重建协议。**这条路要先验证 ESC 重建是否可行**。
+  ⚠️ 已知坑：我们此前实测 ESC 的 19.6 依赖切分泄漏（topic-CV 0.0599 vs doc-split 0.1802），
+  重建时必须先确认原文用的是哪种切分，否则复现出来的「一致」是假的。
+
+### 6.3 不可入表
+
+- **MCNC 五选一方法**（PMI/Bigram、Event-Comp、PairLSTM、SGNN、SAM-Net、HeterEvent、GraphBERT
+  的原始设定）：多选准确率与「候选列表排序」口径不同，只能作背景引用，不得同表比较；
+- 代码或协议不可核实者：DocScript、Relational Transformer、CEEG、Pred-ID、TimeEchain/MPF
+  ——进可得性表。
+
+### 6.4 另加对照
+
+random / frequency（平凡对照）；`no_graph` / `rewired`（图依赖正控，**已通过**：
+gold .1802 / rewired .1185 / no_graph .0811，见 `results/PHASE_E.md`）。
 
 ## 5. 主结果表的目标形态
 
