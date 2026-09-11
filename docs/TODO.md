@@ -1,79 +1,46 @@
 # EKG 实时状态
 
-> 更新于 **2026-09-07**。新会话先读 [`HANDOFF.md`](HANDOFF.md)；数字以
-> [`results/`](results/README.md) 为唯一事实源。
+> 更新于 **2026-09-11**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
 
-`R1 方法设计准入`。A3 已用不可变 bundle `a3-v6-20260905-r17` 正式 `failed` 交接；工作点、近似
-retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未放行任何 proposed GPU pilot。
+**方法实验准备期**。R1 准入已于 2026-09-11（E12）收口。**可执行实验只认
+[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md) 的 §4 主表**；`HANDOFF.md` 的 E 队列只是它的当周切片。
+
+- `SPEC.md` 升 **v1.1.0**：QR-001 把 baseline 广度由准入门改为**主表报告要求**；新增 **FR-016**
+  复现保真度（(a) Verified / (b) Unverifiable 二选一）。
+- **C5 已由 `blocked_pre_admission` 转 `frozen`**，A4 的确认性 promotion 不再等 LLMERE；
+  三章契约 hash 已重绑，审计 `PASS` / 36 requirements。
+- 论文结构定为：第3章 D4 事实性 · 第4章 A4 关系 · 第5章 C5 身份 · **第6章 E3 图谱构建与
+  下游事件预测应用**。原 24 条件 factorial、Holm 校正家族、frozen-vs-fine-tuned 同 backbone 对照
+  **已撤销，不得恢复**。
+- **v6.1 三份方法设计一个都没跑过**：C5/A4 未实现，D4 只完成 D4.0 实现与本地 gate。
 
 ## 下一步
 
-1. P1 r15 仍是可信根；A3.6 四臂全部完成并通过 metadata、单变量、人口、evaluator、final-valid 与
-   双端 artifact hash 校验。旧方法最高 causal F1 仍未过主锚，权威数字见
-   [`results/PHASE_A.md`](results/PHASE_A.md)；
-2. 当前 R1 三章状态：Ch1 power PASS，mention-local input/baseline blocker 已由 `qwen3-argument-s13-r2` 闭合，
-   T020 因果 brief 已于 2026-09-07 由 E4 审查 PASS（仅设计轴）。**同日作者裁决把 Ch1 门按四条措辞重新界定**
-   （独立发表机制 · 原始基准上强 · 我们冻结协议下跑通 · 缺口写明）。**E10 已核查 ACCI：官方仓库只有
-   README，占位而非实现，故 `not_runnable`、不排训练或 GPU，Ch1 第二方法族门仍需作者另议**；
-   `qwen3-argument-s13-r2` 重定义为「朴素池化论元会掉点」的注册负面对照；
-   **IP&M 2024（MUC 86.1 / causal 37.4，无代码、口径未核实）的核实前置为 E9，排在 E6 之前**；Ch2 power PASS，自建
-   TacoERE **透明适配**档 `taco-s13-r3` 已按预注册规则选定并评分（causal 32.01 未过主锚 33.17），但它不是
-   官方复现；T021 因果 brief 已于 2026-09-07 由 E3 审查 PASS（仅设计轴）。**同日作者裁决重新界定 relation
-   baseline 门**：近期方法无一发布可跑官方 trainer，故回到 QR-001 措辞「第二个不同方法族 · 我们跑通 ·
-   缺口写明 · 不弱于主锚」，由 **E8 的 LLMERE-causal 透明适配**承担（缩小到 causal-only，与文档队列并行）；Ch3 五折 OOF baseline、pooled power 与 T022 因果 brief 均 PASS；
-3. Ch3 RoBERTa+CLS / DMRoBERTa 的 10/10 个后台任务已完成，80 个产物重哈希、fold 互斥/覆盖、训练源
-   隔离与独立指标重算均通过。远端 run root 为 `runs/stages/R1/r1-v61-factuality-oof-r2/`，精确数字与
-   acceptance hash 只见 [`results/PHASE_R1.md`](results/PHASE_R1.md)；
-4. **T023 已于 2026-09-07 由 E5 完成并 `pass`**（`findings` 0，35 条需求全部映射，六个产物身份全 `frozen`）。
-   09-06 漂移已溯源到 `f6966a0` 同一会话并按「先溯源→再纠正内容→最后动哈希」裁决完毕。
-   ⚠️ E5 另查出 **A4 与 C5 两份 phase 契约的 roster 与 §13/§15 裁决矛盾，E6 必须改内容不能只补哈希**。
-   **E9 已证我们的官方 joint 复现忠实于官方发表口径**（共指四指标与官方论文 ±0.4 内），
-   IP&M 2024 全文不可得、进不了 roster、不阻塞 A4 契约；**E6 已完成 T024 的获准 phase 冻结**：
-   A4/D4 的契约均已 hash-bound，C5 因 ACCI `not_runnable` 与无替代作者名单而显式
-   `blocked_pre_admission`、不绑定草案。A4/D4 仍须完成各自实现、本地 gate、preflight、CPU/CUDA smoke
-   与重新核卡后才可启动 seed-13 pilot；**E7 已补齐 relation 与审计代码身份**：两档 TacoERE run 分别绑定
-   各自训练时的 `supervised.py` hash，R1 protocol 已冻结 `audit_r1_consistency.py` 并由审计自检；
-5. 当前依赖计划：R1 后开展 C5 mention-local argument uncertainty、A4 full-candidate pair-evidence
-   sufficiency 与 D4 typed-cue factuality；没有额外依赖时可重排或并行，三者 handoff 齐备后进入 E3。
-   这是可修订 plan，不是 SPEC；
-6. 4090/5090 当前可用于互不冲突的**准入 baseline smoke/OOF**；长任务继续 `setsid nohup`，不依赖 SSH
-   存活。多种子与跨机 checkpoint 搬运仍须另行授权。
-7. **执行队列与交替推进约束见 [`HANDOFF.md`](HANDOFF.md) 任务 E**：~~E1 关 Ch2 TacoERE 适配档的账~~
-   ~~→ E2 核查 LLMERE 官方实现~~（均 2026-09-07 `done`；E2 裁决 `conditionally_runnable`，
-   LLMERE 无官方 trainer，**不关闭** Ch2 第二 baseline 门；~~E3 写 T021 Ch2 因果 brief~~ 同日 `done`，
-   审查 PASS；~~E4 写 T020 Ch1 因果 brief~~ 同日 `done`，审查 PASS，并留下 Ch1 QR-001 名单裁决
-   ；~~E5 跑 T023 跨产物审计~~ 同日 `done`，审计 `pass`；~~E9 核实 IP&M 口径~~ 同日 `done`，
-   全文不可得、改用官方论文数字做等价对照，**A4 契约已解锁**；~~E10 ACCI 静态核查~~（同日 `done`，
-   仓库全历史仅 README，`not_runnable`，不排 GPU；C5 baseline roster 需作者另议）→
-   ~~E6 T024~~（A4/D4 已 hash-bound；A4 的 LLMERE-causal 以「已规格化、数字 pending」入 roster；
-   C5 仍缺第二方法族，已明确 `blocked_pre_admission` 而非伪冻结）→ ~~E7~~（两档 relation run 已分别
-   绑定历史 `supervised.py` 身份；审计脚本已纳入 R1 `code.files` 并自检）→ **E8**；
-   **E8 LLMERE-causal generation** 只写自己的 namespace。作者已于 2026-09-09 明确授权，在其后台运行时并行推进
-   **E11 D4.0–D4.2**（实现、本地 gate、immutable preflight、CPU/CUDA smoke）；未逐项通过前不得启动 D4 seed-13 pilot，
-   不得启动额外 seeds。Claude 与 Codex **轮流**持有同一条队列，任何时刻只有一个活动任务，例外与实际排期以
-   `HANDOFF.md` E.0/E.2 为准。**D4.0 已由 `727ab02` 完成**：五类保持不变的 unknown/modality/polarity
-   factorization、typed-cue sidecar、文档内 permutation negative control、注册混淆中介和独立 train/eval/preflight/smoke
-   入口均已落地；533 passed / 26 expected skips、ruff 0、CPU smoke OK。远端 preflight 尚未启动；SSH banner timeout
-   仅表示隧道不可达，不能当作 E8 或服务器进程结束；
-   开工前 HEAD 必须等于 `origin/main`，交接必须已 push。
+CPU 泳道八项全部可立即开工（4090 的 GPU 死了但文件系统可 ssh）。建议起手
+**C-2 EasyECR 核查 → C-1 D4.1 preflight → C-5/C-6 实现**，逐项判据见主表 §4.1。
+
+长任务 GPU pilot 全部阻断在 **G-0（修 4090 驱动，需机主，我们无 root）**。
+**gpu-5090 已获授权作临时顶替**，只跑 smoke 与小任务，逐次授权，边界见主表 §3.5。
+
+实验截止 **2027-02**；排期与估算基准率见主表 §3，顺利情形 2027-01 底收口、2 月缓冲。
 
 ## 当前三端
 
-- local：`main`；P1 r15 `1e31a9ac…f9655`；A3 handoff protocol `c187bf03…9359e`；Ch3 OOF 训练提交
-  `277b36f`，collector 已提交到 `6532264`；最近代码门 **520 passed / 24 skipped**、ruff 0、smoke OK；
-- 4090：A3.6 与 Ch3 OOF 进程均已 GONE；E8 的专用 CUDA venv、固定 LLaMA-Factory 与约 15GB 的未设门
-  Llama-3-8B 镜像权重已落在 `llmere-causal-s13` namespace，均未搬运也未污染项目 `.venv`。模型下载虽有
-  Xet 自动续传，最终完整；R1 protocol 已双端验 SHA 后，E8 的 seed-13 LoRA SFT 已完成 18,138 steps，adapter
-  留在原 namespace。prediction-only 第一次续跑安装 `jieba` 后仍因 LLaMA-Factory 生成预检缺 `nltk` 停止，未产生
-  推理、评分或指标；已核实该版本需整个 metrics extra，并固定 `jieba/nltk/rouge-chinese` 三项。当前 PID
-  `1819697` 已在 GPU0 执行 11,149 条逐条 generation（约 13.5 秒/条），结束后才一次性写预测文件、转换和评分；
-  不会重训或覆盖半成品。2026-09-09 核卡：GPU1 空闲；GPU2–3 由既有 vLLM 服务占用，服务不得触碰。D4 只可在
-  实现、preflight 与 smoke 全部通过后使用届时真正空闲的一张卡，checkpoint 与 OOF 既有产物仍留在各自远端 run root；
-- 5090：可连接；既有 Qwen 与其他 Python 服务保持运行，使用前重新查询动态显存占用，服务不动、
-  checkpoint 不搬。R1 尚未放行 proposed pilot；可在具体 baseline 命令和协议冻结后使用，不为占卡
-  启动无效训练。
+- **local**：`main`；三件套 **534 passed / 26 skipped**、ruff 0、`ekg-smoke` OK；
+  审计 `PASS` / 36 requirements。P1 r15 `1e31a9ac…f9655`；A3 handoff protocol `c187bf03…9359e`；
+  三份 phase 契约与 R1 protocol 的最新 SHA-256 见 [`results/PHASE_R1.md`](results/PHASE_R1.md) §21.3；
+- **gpu-4090**：⛔ **CUDA 完全不可用**（2026-09-11 驱动内核模块 580.173.02 与用户态库 580.178.04
+  版本不符，需 root 重启或重载模块，机器共用）。**文件系统仍可 ssh 访问**，纯 CPU 任务照常。
+  我方无进程在跑；E8 的 17G 产物、专用 CUDA venv 与 Llama-3-8B 镜像权重均留在原 namespace。
+  远端 git 落后于本地，开工前 `git fetch && git reset --hard origin/main`；
+  **`runs/` 下 E12 改过的三个 JSON 须双端 SHA-256 同步**，否则远端 preflight 会 fail-fast；
+- **gpu-5090**：✅ **已授权作 4090 不可达期间的临时顶替**（smoke 与小任务，逐次授权，
+  主体实验回 4090）。硬边界：EasyECR 跑不了（torch 2.0.1 不支持 sm_120）、Qwen3-8B LoRA 装不下
+  （余量约 15GB）、长任务 pilot 不放这里。host key 不在 `known_hosts`，指纹
+  ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**须作者确认后再写入**。
 
 ## 禁止
 
@@ -86,7 +53,13 @@ retriever、prototype、ATLoss 均封存，不追加 seed 或调参。R1 尚未�
 
 ## 成功条件
 
-Ch1–Ch3 必须在统一公开主指标上超过多个同协议方法；否则只能作为系统组件。所有结论必须可从
-结果表追溯到 commit、manifest、candidate、evaluator、命令、checkpoint 和 hash。三方法章 + 一系统章
-不预设降标；旧机制失败后只有通过 R1 的实质不同方法家族才能重开，不能以换名、扫参或更大 backbone
-绕过止损。
+Ch1–Ch3 各自在统一公开主指标上**超过冻结主锚**，主表另报多个已复现的公开方法族
+（`SPEC.md` v1.1.0 QR-001：广度是报告要求，不是准入门；跑不了的进可得性表写明障碍）。
+每个外部复现带 FR-016 保真度状态。所有结论必须可从结果表追溯到 commit、manifest、candidate、
+evaluator、命令、checkpoint 和 hash。
+
+**三种可接受的最终形态**（见 `EXPERIMENT_PLAN.md` §7.5）：三方法章 + 应用章（博士量级）／
+两方法章 + 应用章（领域硕士标准形态）／≤1 方法章时与导师共同决定改纲。
+**不自行降级**；旧机制失败后只有通过实质不同的方法家族才能重开，不能以换名、扫参或更大
+backbone 绕过止损。每个家族允许**两个有效周期**——5 个月预算下第二周期是可负担的，
+第一轮失败不等于该章结束。

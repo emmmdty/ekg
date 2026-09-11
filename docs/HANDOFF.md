@@ -8,45 +8,66 @@
 
 | 项 | 值 |
 |---|---|
-| 正式阶段 | `R1 方法设计准入`。**2026-09-11（E12）作者授权 `SPEC.md` v1.1.0**：QR-001 把 baseline 广度由**准入门**改为**报告要求**，新增 FR-016 复现保真度。**C5 已由 `blocked_pre_admission` 转 `frozen`；A4 的确认性 promotion 不再等 LLMERE。**三章契约均已 hash 重绑，审计 `PASS` / 36 requirements。三章都还没跑过任何 proposed method。 |
-| 当前队列 | 历史队列 E1–E11 已收口到 E8/E11 两条 `wip` 支线；**下周执行顺序以 §E.2a 为准**。E1–E7、E9–E10 已 `done`。 |
-| **活动任务** | 无。E12 已收口并 push。下一批按 §E.2b 执行。 |
-| ⛔ **GPU 硬阻断** | **gpu-4090 当前完全不可用**：2026-09-11 06:05–06:08 unattended-upgrade 把 NVIDIA 由 580.173.02 升到 580.178.04，运行中的内核模块仍是 580.173.02 → `nvidia-smi` NVML 失败、`torch.cuda.is_available()=False`、`device_count=0`。磁盘已无旧用户态库，`nvmlshim` 实测无效，**绕不过去**。修复需 root（重启或重载 nvidia 模块），机器共用，**须作者联系机主**。E8 的 PID 1819697 已 GONE（成功 ssh 读到）。 |
-| 开工前读什么 | 本文 §0 只读检查 → 任务 E.0 六条约束 → E.1 联网核实结论 → E.2 队列表；其余按需 |
-| 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改 E.2 该行状态与 commit → 推进队列 → commit + **push** |
-
-新窗口不要重读整个仓库：完成 §0 的只读检查后，按 §E.2a 恢复一个明确的 `wip` 子任务。当前没有可直接
-开跑的长 GPU `todo`；不得把卡空闲理解成已经获得重生成或 pilot 授权。
+| 正式阶段 | **方法实验准备期**。R1 准入已于 2026-09-11（E12）收口：`SPEC.md` 升 **v1.1.0**，QR-001 把 baseline 广度由**准入门**改为**主表报告要求**，新增 **FR-016** 复现保真度。C5 由 `blocked_pre_admission` 转 `frozen`；A4 的确认性 promotion 不再等 LLMERE。三章契约均已 hash 重绑，审计 `PASS` / 36 requirements。 |
+| **论文结构** | 第3章 事实性检测（D4）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。 |
+| **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表；本文 §E 队列只是它的当周切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
+| **活动任务** | 无。上一窗口只做文档，未跑任何实验。新窗口从 §0 的启动清单开始。 |
+| ⛔ **gpu-4090** | **CUDA 完全不可用**。2026-09-11 06:05–06:08 unattended-upgrade 把 NVIDIA 由 580.173.02 升到 580.178.04，运行中的内核模块仍是 580.173.02 → `nvidia-smi` NVML 失败、`torch.cuda.is_available()=False`、`device_count=0`。磁盘已无旧用户态库，`nvmlshim` 实测无效，**绕不过去**。修复需 root（重启或重载 nvidia 模块），机器共用，**须作者联系机主**。**文件系统仍可 ssh 访问**（纯 CPU 任务照常跑）。E8 的 PID 1819697 已 GONE。 |
+| ✅ **gpu-5090** | **已获授权作临时顶替**（作者 2026-09-11）：4090 不可达期间可跑 **smoke 与小任务**，**主体实验仍回 4090**。边界与禁区见 `EXPERIMENT_PLAN.md` §3.5——**EasyECR 跑不了**（其 torch 2.0.1 不支持 sm_120）、**Qwen3-8B LoRA 装不下**（余量约 15GB）。**每次使用仍须逐次取得作者授权**；host key 待作者确认（见 §0）。 |
+| 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
+| 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改队列行状态与 commit → 推进队列 → commit + **push** |
 
 ### 本次交接的已知工作树例外
 
-本次交接提交后，`HEAD` 应等于 `origin/main`。唯一已知的未提交修改是作者本人维护的
+交接提交后 `HEAD` 应等于 `origin/main`。唯一已知的未提交修改是作者本人维护的
 `docs/reports/TEMPLATE_周报.md`：它是当前有效周报模板，**不得 stage、revert、clean 或混入任何实验提交**。
-其他未说明的改动仍按异常处理。最新导师可读周报是
+其他未说明的改动按异常处理。最新导师可读周报是
 [`reports/2026-09-10_周报.md`](reports/2026-09-10_周报.md)。
 
 ## 0. 接手后先做什么
 
-先执行只读检查：
+### 0.1 只读检查（三条，全过才开工）
 
 ```bash
 cd /home/tjk/myProjects/masterProjects/ekg
-git status -sb
+git status -sb                      # 期望：main 与 origin/main 同步、工作树干净
 git log -3 --oneline --decorate
-git merge-base --is-ancestor 23b4fad HEAD
+uv run python scripts/audit_r1_consistency.py \
+  --output runs/stages/R1/r1-v61-20260904/audit/cross_artifact_audit.json
+                                    # 期望：PASS: 36 requirements mapped
 ```
 
-预期：本地 `main` 与 `origin/main` 同步、工作树干净，协议代码提交 `23b4fad` 是当前 HEAD 的祖先。
-若工作树出现未说明改动，先查来源，不覆盖、不清理。随后只需按任务读取：
+工作树若出现未说明改动，**先查来源，不覆盖、不清理**。
 
-1. 当前执行状态：[`TODO.md`](TODO.md)；
-2. 可执行任务与依赖：[`TASKS.md`](TASKS.md)；
-3. 已关闭的 A3 契约与交接：[`phases/PHASE_A3_relation_balanced.md`](phases/PHASE_A3_relation_balanced.md)；
-4. 当前 R1 准入契约：
-   [`phases/PHASE_R1_method_design_freeze.md`](phases/PHASE_R1_method_design_freeze.md)。
+### 0.2 按顺序读这三份（够了，不要重读整个仓库）
 
-只读检查通过后，**直接执行任务 E.2 表中第一个 `状态 = todo` 的行**；不要重跑已 `done` 的行，
-不要先重读整个仓库，也不要直接进入旧 D3/C4。
+1. **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** —— 唯一权威计划。§4 主表挑任务，§3 看排期与
+   5090 边界，§7 看每章最终要交的表长什么样；
+2. **[`BASELINE_ROSTER.md`](BASELINE_ROSTER.md)** —— 四章的外部对手名册与 FR-016 保真度路径；
+3. 本文 §E.0 的六条交接约束（HEAD 等于 origin/main、单队列、改计划先改文件、不开分支/worktree、
+   活动任务独占产物、交接必须已 push）。
+
+按需再读：对应章节的 `phases/PHASE_*.md` 契约、`results/PHASE_*.md`（数字唯一权威）。
+
+### 0.3 直接开工：CPU 泳道
+
+**4090 的 GPU 不可用，但它的文件系统可 ssh 访问，CPU 泳道八项全部不受影响。**
+从 `EXPERIMENT_PLAN.md` §4.1 取第一个未完成项。建议起手顺序：
+
+| 次序 | 主表 ID | 为什么先做它 |
+|---|---|---|
+| 1 | **C-2 EasyECR 可运行性实跑核查** | 决定第 5 章那行 baseline 到底能不能有；已知 allennlp（最后版本 2.10.1，约束 `torch <1.13`）与仓库声明的 `torch==2.0.1` **硬冲突**，必须实跑才能定 vendor 方案 |
+| 2 | **C-1 D4.1 immutable preflight** | 纯 hash 与指标重算，实测 `scripts/prepare_d4_typed_cue_preflight.py` 不 import torch，**驱动坏着也能跑**；它是第 3 章 pilot 的前置 |
+| 3 | **C-5 C5.0 实现** / **C-6 A4.0 实现** | 驱动一修好就能直接开跑，不浪费卡 |
+
+⚠️ **开工前必做的一次同步**：`runs/` 是 gitignored，E12 改过其中三个 JSON
+（`protocol.json`、`phase_contracts/t024_freeze.json`、`audit/cross_artifact_audit.json`）。
+必须**双端 SHA-256 同步到 gpu-4090**，否则远端 preflight 会因契约 hash 不符而 fail-fast。
+本地权威值见 [`results/PHASE_R1.md`](results/PHASE_R1.md) §21.3。
+
+⚠️ **gpu-5090 首次使用前**：`29.tcp.cpolar.top:13850` 的 host key 不在 `known_hosts`，实测指纹为
+ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`。**请作者确认该指纹后再写入**；
+不得自行 TOFU 接受（cpolar 端口是复用的）。
 
 ## 1. 当前裁决与状态
 
@@ -338,7 +359,7 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 | 2 | **E11.1：D4 immutable preflight**。在 4090 以 `.venv/bin/python` 物化 `runs/stages/D4/d4-v61-typed-cues-r1/preflight/`，重验 R1/P1、五折 manifests、source、encoder、accepted OOF baseline 和 code hash。 | 可以；此前作者已授权 D4.0–D4.2；不使用 GPU、不读 final-valid。 | 通过：protocol `status=pass`，独立重算两条 accepted OOF baseline，所有 hash/覆盖/折隔离一致；停止：任何 hash、fold 或 final-valid ledger 不一致，不创建 smoke 或 pilot。 |
 | 3 | **E11.2：D4 CPU/CUDA smoke**。仅在 E11.1 PASS 后，重新核卡并先向作者展示准确命令、cwd 与预期产物；在单张真正空闲的 4090 上跑 1 fold、10 个 train-only documents 的 full/remove-core/permutation 三臂。 | 依赖顺序 2；GPU 短任务，须重新核卡。 | 通过：三臂 loss/logits/spans 有限，sidecar/report 完整，evaluation IDs 未入 train/selection；停止：任一检查失败即不启动 pilot。 |
 | 4 | **D4.3 seed-13 five-fold pilot**。 | **不可立即执行**；依赖顺序 3 PASS，且需作者在看到 preflight/smoke 结果后再次明确授权长 GPU 任务。 | 只有 author approval 后，按冻结命令、单 seed 13、五折三臂启动；不追加 seed 17/42。 |
-| 5 | **C5 第二方法族前置**。 | 仅可做“补前置”：等待作者按四项筛选条件指定新候选。 | 未收到名单时保持 `blocked_pre_admission`，不实现、不 smoke、不用 GPU。 |
+| 5 | ~~**C5 第二方法族前置**~~ **（已被 E12 取代，2026-09-11）**：QR-001 v1.1.0 后 baseline 广度不再是准入门，C5 已转 `frozen`，可实现、preflight、smoke 与 pilot。 | ~~仅可做「补前置」~~ | ~~未收到名单时保持 `blocked_pre_admission`~~ |
 
 #### E.2b 当前队列（2026-09-11 冻结，取代 E.2a）
 
@@ -362,8 +383,11 @@ baseline，v6.1 三份方法设计**一个都没跑过**；证明方法有没有
 | **C-6** | A4.0 实现 + 本地 gate | ✅ CPU |
 | **C-7** | LLM 对照脚手架 | ✅ CPU |
 | **C-8** | 第 2 章统一评测协议素材整理 | ✅ CPU |
+| — | **E15：E3 重定向为「乙」形态 + 撤销 factorial** | ✅ **已完成** |
+| — | **E16：`EXPERIMENT_PLAN.md` 时间线按项目自身基准率重估**（初版 3 周收口是错的，把 GPU 计算耗时当成了日历时间） | ✅ **已完成** |
 | **G-0** | **修复 gpu-4090 驱动** | ❌ **需作者联系机主**，我们无 root |
-| **G-1 → G-2** | D4.2 smoke → **D4.3 seed-13 五折 pilot**（GPU 恢复后的队首） | ❌ 等 G-0 + 授权 |
+| **G-1** | D4.2 smoke | ⚠️ 可走 **5090**（逐次授权，见 `EXPERIMENT_PLAN.md` §3.5） |
+| **G-2** | **D4.3 seed-13 五折 pilot** | ❌ 长任务，等 G-0 + 作者授权；**不放 5090** |
 
 完整主表（含 G-3…G-12、三个 Gate、GPU 预算与 phase 契约映射）见
 [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)。
@@ -492,7 +516,8 @@ E6 已完成（2026-09-07，T024 契约冻结，未实现、未训练、未推�
 没有为使审计变绿而只补 hash。A4 的 `taco-s13-r3` 已降回固定透明适配对照，`llmere-causal-s13` 以
 upstream / unmodified converter / causal-only 48,365 train + 11,149 internal-dev generations / LoRA 配方 /
 frozen `evaluate.py` 完整规格化为 metrics-pending 的确认性 baseline；A4 seed-13 只在 A4.0–A4.2、local gate
-与重新核卡后可跑，确认性 promotion 必须等待并超过 LLMERE。D4 与 T022 记录一致，冻结其 five-fold OOF
+与重新核卡后可跑，确认性 promotion 必须等待并超过 LLMERE（⚠️ **这一句已被 E12 取代，2026-09-11**：
+确认性 promotion 不再以「等到 LLMERE 数字」为前置，见 `results/PHASE_R1.md` §21）。D4 与 T022 记录一致，冻结其 five-fold OOF
 契约。C5 因 ACCI `not_runnable`、IP&M 无公开代码且无作者指定替代家族，记录为
 `blocked_pre_admission`，**没有**将草案 hash 当作 phase contract binding；Qwen3 已改为注册负面对照，
 非 roster 的 annealed-local-pair / hard-argument 臂已移除。R1 protocol SHA-256
@@ -618,7 +643,12 @@ GPU0 再启动 prediction-only 续跑。
 **Ch1 的 ACCI GPU 需求已取消**：E10 已判定其公开仓库 `not_runnable`；不得从论文散文重建后把它称作
 透明移植。只有作者冻结一个满足 §E.1b 四条件的新名单后，才重新评估 Ch1 的 GPU 需要。
 
-5090 单卡有既有 Qwen 服务约 17 GB，使用前仍须逐次取得作者授权。多种子始终另行授权。
+**5090 的新授权（作者 2026-09-11）**：4090 不可达期间，5090 可用于**临时性 GPU 任务**
+（smoke、小规模 preflight、短时诊断），**主体实验仍回 4090**。
+硬边界：**EasyECR 跑不了**（其栈 `torch==2.0.1` 不支持 Blackwell sm_120）；
+**Qwen3-8B LoRA 装不下**（卡上既有服务约 17 GB，余量约 15 GB，8B bf16 需约 16 GB）；
+**长任务 pilot 一律不放 5090**。每次使用仍须逐次取得作者授权；既有服务不得触碰。
+完整边界见 [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md) §3.5。多种子始终另行授权。
 
 ## 4. R1 后的候选方向：不是固定答案
 

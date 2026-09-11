@@ -2,7 +2,7 @@
 
 > 冻结于 **2026-09-11**。服务 `SPEC.md` v1.1.0。
 > **这份文件取代「每周想一遍下周做什么」。** 每周不再重新排任务，只从 §3 的主表里取下一个
-> 未完成项；时间线见 §3，预期结果表见 §7。要偏离顺序，**先改本文件再执行**；口头改计划一律无效。
+> 未完成项；**时间线与估算基准率见 §3**，预期结果表见 §7。要偏离顺序，**先改本文件再执行**；口头改计划一律无效。
 > 数字仍只写进 `results/PHASE_*.md`，本文件不复制任何实验数字。
 
 ## 0. 防漂移的四条规则
@@ -51,11 +51,34 @@ X.4.4 消融实验 + 负控
 | 各章主锚 | Ch1 MUC `.809847`；Ch2 causal F1 `33.17`；Ch3 pooled 5 类 macro-F1 `.553995` |
 | Ch6 已有资产 | 图依赖正控**已通过**（gold .1802 / rewired .1185 / no_graph .0811）；构建损失 −.0218＝整图价值 22.0%；受控扰动曲线已测 |
 | gpu-4090 | **CUDA 完全不可用**（驱动内核模块与用户态库版本不符，需 root 修复，机器共用） |
-| gpu-5090 | 可连，但 host key 待确认、剩约 15GB、须逐次授权 |
+| gpu-5090 | **已授权作 4090 不可达期间的临时顶替**（作者 2026-09-11）：只跑 smoke 与小任务，主体实验回 4090。host key 待确认、余量约 15GB、须逐次授权。边界见 §3.5 |
 
 ## 3. 时间线
 
-### 3.1 依赖图
+> **2026-09-11 重估。** 初版排期（全部实验 3 周收口）是错的：当时把 **GPU 计算耗时**当成了
+> **项目日历时间**，既没算调试与抢修，也没留失败重试预算。本节改用**项目自身的历史基准率**估算。
+
+### 3.1 估算基准率（来自本仓库 git 历史，不是拍脑袋）
+
+| 参照事件 | 起止 | 日历天 | 结果 | 说明 |
+|---|---|---:|---|---|
+| **E8 LLMERE**：跑别人的 converter + LoRA SFT + 全量生成 | 09-07 → 09-10 | **4** | **失败** | 约 10 个抢修 commit：TLS、磁盘、未设门镜像、依赖 extras、断点续跑。计算本身约 2 天，其余全是环境 |
+| **A3 关系方法族**：四臂，我们自己的机制 | 08-28 → 09-05 | **9** | **失败** | 20 个 commit |
+| Ch3 五折 OOF baseline：2 baseline × 5 折 = 10 个训练任务 | 09-04 → 09-05 | **2** | 成功 | 最顺的一次：无新机制、GPU 正常 |
+| D4.0 实现 + 本地 gate | 09-09 | **~2** | 成功 | 建立在既有 factuality 代码上 |
+
+由此得到四条**换算规则**，本节所有估算都按它推：
+
+1. **复现一个外部方法 ≈ 4–9 个日历天，且首次失败概率高**（LLMERE 4 天失败、taco 反复多轮）；
+2. **跑一个我们自己的多臂方法 pilot ≈ 6–12 个日历天**（A3 九天）；
+3. **纯 baseline 扫（无新机制 + 基础设施正常）≈ 2 天**；
+4. **实现 + 本地 gate ≈ 2–7 天**，取决于要不要新建机制组件。
+
+另加三项初版完全没算的开销：**失败重试预算**（我们方法机制首次成功率 0/6）、
+**第二设计周期**（`RESEARCH_PLAN` 明确允许每个家族两轮）、**基础设施再故障**
+（4090 于 2026-09-11 自发损坏；ssh 隧道约 40% 掉线）。
+
+### 3.2 依赖图
 
 ```mermaid
 flowchart LR
@@ -70,92 +93,125 @@ flowchart LR
     C8["C-8 协议表"]
   end
 
-  G0{{"G-0 修复 4090 驱动<br/>外部依赖 · 需机主 · 我们无 root"}}
+  G0{{"G-0 修复 4090 驱动<br/>外部依赖 · 需机主"}}
+  S90["gpu-5090<br/>临时顶替 · 仅限小任务 · 逐次授权"]
 
-  C1 --> G1["G-1 D4 smoke"] --> G2["G-2 D4.3 五折 pilot"]
-  G0 --> G1
-  C1 --> G3["G-3 supporting-word baseline"]
-  G0 --> G3
-  C6 --> G4["G-4 A4.3 pilot"]
+  C1 --> G1["G-1 D4 smoke"] --> G2["G-2 D4.3 首跑"]
+  S90 -.可跑 smoke.-> G1
+  G0 --> G2
+  C6 --> G4["G-4 A4.3 首跑"]
+  C5 --> G5["G-5 C5.3 首跑"]
   G0 --> G4
-  C5 --> G5["G-5 C5.3 pilot"]
   G0 --> G5
+  C1 --> G3["G-3 supporting-word (a)"]
   C2 --> G6["G-6 EasyECR 复现"]
-  G0 --> G6
   C7 --> G7["G-7 LLM 对照 x3"]
-  G0 --> G7
-  C3 --> G8["G-8 LLMERE 重生成<br/>需作者授权"]
+  C3 --> G8["G-8 LLMERE 重生成<br/>需授权"]
 
   G2 --> GATE1{{"Gate 1<br/>typed-cue 有没有价值"}}
-  GATE1 --> G9["G-9 matched seeds<br/>仅对过门的章 · 需授权"]
+  GATE1 -->|不过| CYC["第二设计周期<br/>5 个月预算下可负担"]
+  GATE1 -->|过| G9["G-9 matched seeds<br/>需逐次授权"]
   G4 --> GATE2{{"Gate 2<br/>还剩几个方法章"}}
   G5 --> GATE2
   GATE2 --> G9
+  CYC --> GATE2
   G9 --> G10["G-10 sealed final-valid x1"]
 
-  C4b --> G11["G-11 第6章 构建与应用"]
-  G3 --> G11
-  G6 --> G11
-  G7 --> G11
-  G8 -.可选.-> G11
-  G10 --> G11
-  G11 --> G12["G-12 H2 全篇验收"]
+  C4b --> G11a["G-11a 第6章 4 个外部对手复现<br/>不依赖方法章 · 提前启动"]
+  G11a --> G11b["G-11b 第6章 主实验"]
+  G3 --> G11b
+  G6 --> G11b
+  G7 --> G11b
+  G8 -.可选.-> G11b
+  G10 --> G11b
+  G11b --> G12["G-12 H2 全篇验收"]
 
   classDef blocked fill:#fde2e2,stroke:#c0392b,stroke-width:2px
   classDef ready fill:#e8f6ec,stroke:#27ae60
   classDef gate fill:#fdf3d7,stroke:#c9932b,stroke-width:2px
+  classDef temp fill:#e3eefc,stroke:#2c6fbb
   class G0 blocked
   class C1,C2,C3,C4b,C5,C6,C7,C8 ready
   class GATE1,GATE2 gate
+  class S90 temp
 ```
 
-### 3.2 排期
-
-> CPU 泳道用真实日期。**GPU 泳道以 `D0` = 4090 驱动修复当日为锚**，下图把 `D0` 占位在 2026-09-15；
-> 驱动晚修好几天，整条 GPU 泳道就整体平移几天，**相对顺序与时长不变**。
+### 3.3 排期 2026-09 → 2027-02
 
 ```mermaid
 gantt
-    title EKG 实验排期（D0 = 4090 驱动修复日，此处占位 2026-09-15）
+    title EKG 实验排期（按 §3.1 基准率重估；截止 2027-02）
     dateFormat YYYY-MM-DD
-    axisFormat %m-%d
+    axisFormat %m/%d
 
     section CPU 泳道
-    C-1 D4 preflight            :c1,  2026-09-11, 1d
-    C-2 EasyECR 核查            :c2,  2026-09-11, 2d
-    C-5 C5.0 实现               :c5,  2026-09-12, 4d
-    C-6 A4.0 实现               :c6,  2026-09-12, 4d
-    C-3 LLMERE 恢复方案         :c3,  2026-09-16, 2d
-    C-7 LLM 对照脚手架          :c7,  2026-09-16, 3d
-    C-4b CGEP-ESC 可行性        :c4b, 2026-09-18, 2d
-    C-8 统一评测协议表          :c8,  2026-09-18, 2d
+    C-1 D4 preflight              :c1,   2026-09-12, 2d
+    C-2 EasyECR 核查              :c2,   2026-09-12, 5d
+    C-5 C5.0 实现                 :c5,   2026-09-15, 7d
+    C-3 LLMERE 恢复方案           :c3,   2026-09-17, 3d
+    C-6 A4.0 实现                 :c6,   2026-09-22, 7d
+    C-7 LLM 对照脚手架            :c7,   2026-09-29, 4d
+    C-4b CGEP-ESC 可行性          :c4b,  2026-10-03, 5d
+    C-8 统一评测协议表            :c8,   2026-10-08, 2d
 
-    section G-0 外部依赖
-    修复 4090 驱动（需机主）    :crit, g0, 2026-09-15, 1d
+    section 基础设施
+    G-0 修 4090 驱动（需机主）    :crit, g0, 2026-09-12, 7d
+    5090 临时顶替（smoke/小任务） :active, s90, 2026-09-12, 21d
 
-    section GPU 卡 A · 第3章优先
-    G-1 D4 smoke                :g1,  after g0, 1d
-    G-2 D4.3 五折 pilot         :crit, g2, after g1, 2d
-    Gate 1 裁决                 :milestone, gate1, after g2, 0d
-    G-3 supporting-word baseline:g3,  after g2, 1d
-    G-9a D4 matched seeds       :g9a, after g3, 3d
+    section 第3章 D4
+    G-1 smoke                     :g1,   2026-10-01, 1d
+    G-2 D4.3 首跑                 :crit, g2, 2026-10-02, 6d
+    Gate 1 裁决                   :milestone, gate1, 2026-10-08, 0d
+    D4 第二周期（若不过）         :g2b,  2026-10-09, 10d
+    G-3 supporting-word 做到 a    :g3,   2026-11-01, 7d
 
-    section GPU 卡 B · 并行
-    G-4 A4.3 pilot              :g4,  after g0, 4d
-    G-5 C5.3 pilot              :g5,  after g4, 2d
-    Gate 2 裁决                 :milestone, gate2, after g5, 0d
-    G-6 EasyECR 复现            :g6,  after g5, 2d
+    section 第4章 A4
+    G-4 A4.3 首跑                 :g4,   2026-10-09, 12d
+    A4 第二周期（若需）           :g4b,  2026-10-22, 12d
 
-    section 收尾
-    G-7 LLM 对照 x3             :g7,  after gate2, 3d
-    G-11 第6章 构建与应用       :g11, after g7, 3d
-    G-10 sealed final-valid     :g10, after g11, 1d
-    G-12 H2 全篇验收            :g12, after g10, 3d
+    section 第5章 C5
+    G-5 C5.3 首跑                 :g5,   2026-11-03, 9d
+    Gate 2 裁决                   :milestone, gate2, 2026-11-12, 0d
+    C5 第二周期（若需）           :g5b,  2026-11-13, 9d
+
+    section 第6章 提前启动
+    G-11a 4 个外部对手复现        :g11a, 2026-11-01, 28d
+    G-11b 第6章 主实验            :g11b, 2026-12-15, 14d
+
+    section baseline 广度
+    G-6 EasyECR 复现              :g6,   2026-12-01, 12d
+    G-7 LLM 对照 x3               :g7,   2026-12-13, 12d
+
+    section 收口
+    G-9 matched seeds             :g9,   2027-01-05, 14d
+    G-10 sealed final-valid       :g10,  2027-01-20, 3d
+    G-12 H2 全篇验收              :g12,  2027-01-24, 8d
+    缓冲                          :buf,  2027-02-01, 21d
 ```
 
-**日历读数**：CPU 泳道约 **8 个工作日**（现在起，不等任何人）。GPU 泳道从 `D0` 起约 **19 天**
-到 H2 验收完成。若 `D0` 落在 2026-09-15，全部实验约在 **D0+19 ≈ 2026-10-04** 收口；
-`D0` 每推迟一天，收口日同步推迟一天。**这是顺利情形**——任一 Gate 判「不过」都会改变后半段。
+### 3.4 三条关键推论
+
+1. **顺利情形下 2027-01 底收口，2026-02 整月是缓冲。** 但若**两个以上**方法章各需第二设计周期，
+   缓冲清零。5 个月不宽裕，是**刚好够**。
+2. **第 6 章必须提前启动，不能排在最后。** 那 4 个外部对手（CSProm-KG / SimKGC / BART contrastive /
+   MCPredictor）与方法章**没有依赖关系**——它们只需要冻结的 evaluation unit。初版把 G-11 估成 1–2 天
+   是本次最大的低估：按基准率 1，4 个外部复现单独就要 **3–4 周**。故从 2026-11 起就在卡 B 上滚。
+3. **G-0 每拖一周，缓冲就少一周。** 这是当前唯一该催的外部事项。
+
+### 3.5 GPU 使用：5090 的临时授权与边界
+
+作者 2026-09-11 授权：**4090 不可达期间，gpu-5090 可用于临时性 GPU 任务；主体实验仍回 4090。**
+
+| 能在 5090 上跑 | 不能 |
+|---|---|
+| D4 / C5 / A4 的 **CPU/CUDA smoke**（RoBERTa-base 量级，显存需求小） | **EasyECR**：其栈是 `torch==2.0.1`，5090 是 Blackwell sm_120，**torch 2.0 不支持该架构**，只能等 4090 |
+| 小规模 preflight 里需要 CUDA 的片段 | **Qwen3-8B LoRA 的 LLM 对照**：卡上已有约 17 GB 的既有服务，余量约 15 GB，8B bf16 需约 16 GB，**装不下** |
+| 短时诊断、显存探测 | **任何长任务 pilot**（D4.3 / A4.3 / C5.3）：主体实验按作者要求留在 4090 |
+
+**使用前置**：① `29.tcp.cpolar.top:13850` 的 host key 不在 `known_hosts`，指纹为
+ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**须作者确认后再写入**；
+② 每次使用**逐次取得作者授权**；③ 先 `nvidia-smi` 查实时显存，既有 Qwen 与其他服务**不得触碰**；
+④ checkpoint 训在哪留在哪，跨机搬运先问作者。
 
 ## 4. 实验主表
 
@@ -174,12 +230,12 @@ gantt
 
 CPU 泳道**全部 8 项都不依赖 GPU，现在就能做**，且彼此无强依赖，可任意顺序并行。
 
-### 4.2 GPU 泳道（全部阻断在 G-0）
+### 4.2 GPU 泳道（长任务阻断在 G-0；smoke 可走 5090，见 §3.5）
 
 | ID | 实验 | 依赖 | 粗估 | 完成 = |
 |---|---|---|---|---|
 | **G-0** | **修复 gpu-4090 驱动**（重启或重载 nvidia 模块） | **作者联系机主，我们无 root** | — | `nvidia-smi` 正常且 `torch.cuda.is_available()` 为真 |
-| **G-1** | D4.2 CPU/CUDA smoke（1 fold / 10 docs / 三臂） | C-1 + G-0 | 分钟级 | 三臂 loss/logits/spans 有限；evaluation ID 未入 train/selection |
+| **G-1** | D4.2 CPU/CUDA smoke（1 fold / 10 docs / 三臂） | C-1 + **（G-0 或 5090 逐次授权）** | 分钟级 | 三臂 loss/logits/spans 有限；evaluation ID 未入 train/selection |
 | **G-2** | **D4.3 seed-13 五折 pilot（三臂）** ← **GPU 恢复后的队首** | G-1 + 作者授权长任务 | ~1.5 GPU·day | 2,913 篇 / 73,939 mention 各恰好一次 OOF 预测；逐实例概率/cue/evidence/三级 logits/confusion 落盘 |
 | **G-3** | D4 supporting-word baseline 五折重建 | C-1 + G-0 | ~1 GPU·day | 先在官方划分复现官方数字（容差事前定 ±1.0 macro-F1）→ FR-016 状态 (a)；再转五折 OOF |
 | **G-4** | A4.2 smoke → **A4.3 seed-13 pilot（四臂）** | C-6 + G-0 + 授权 | ~2–3 GPU·day | 完整候选逐位不变；逐实例 evidence 与三种 counterfactual logits 落盘 |
@@ -195,9 +251,12 @@ CPU 泳道**全部 8 项都不依赖 GPU，现在就能做**，且彼此无强�
 **GPU 预算粗估**：不含 matched seeds 约 **10–14 GPU·day**；三章都过门并跑 matched seeds + final-valid
 则合计约 **25–30 GPU·day**。两卡并行且 namespace 不重叠时可对半。
 
-**两卡并行的合法组合**（G-0 修复后）：卡 A 跑 G-2（D4，写 `runs/stages/D4/`），
-卡 B 跑 G-4（A4，写 `runs/stages/A4/`）或 G-6（EasyECR，独立 venv 与 namespace）。
+**两卡并行的合法组合**（G-0 修复后，均在 4090 上）：卡 A 跑 G-2（D4，写 `runs/stages/D4/`），
+卡 B 跑 G-4（A4，写 `runs/stages/A4/`）、G-6（EasyECR，独立 venv 与 namespace）或 G-11a（第6章外部对手）。
 **不得**用并行跑同一方案的多个 seed——多种子始终另行授权。
+
+**4090 不可达期间**：只有 smoke 与小任务可按 §3.5 放到 5090，且每次单独取得作者授权；
+长任务 pilot 一律等 G-0。
 
 ## 5. 三个决策点（预先安排的重规划时刻）
 

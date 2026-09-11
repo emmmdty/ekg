@@ -214,6 +214,11 @@ MCPredictor 可选。
 | factuality | gold / predicted / masked |
 | consumer | frozen / fine-tuned |
 
+> ⚠️ **本段关于 E3 的 24 条件 factorial 已于 2026-09-11 整体撤销**（作者选定「乙」形态）。
+> 现行契约是 [`phases/PHASE_E3_graph_application.md`](phases/PHASE_E3_graph_application.md)：
+> 第 6 章改为**带公开对手的应用章**，factorial、Holm 校正家族与 frozen-vs-fine-tuned 同 backbone
+> 对照均不得恢复。以下保留为历史记录。
+
 基础设计 24 条件。identity 只改变 graph grouping，不改变 mention-level query/candidates；factuality 必须作为
 节点属性输入，删节点只保留为历史 perturbation 副表。
 
