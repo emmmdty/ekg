@@ -45,9 +45,16 @@ RESIJ（未取得）、OmniEvent EAE checkpoint（失效）、TextEE（无 check
 
 ### 1.2 EasyECR 本身的已知差异（无论 (a)/(b) 都必须披露）
 
-仓库**无 LICENSE**（需联系作者或在论文中声明用途）；依赖 `torch==2.0.1 / transformers==4.21.2 / allennlp`，
-与本项目 cu128 栈互斥，须独立 venv 且只能上 4090（5090 sm_120 不支持 torch 2.0）；
-`allennlp` 已停维护，`SelfAttentiveSpanExtractor` 可能需 vendor；配置内路径为作者本机硬编码，需改写。
+仓库**无 LICENSE**（需联系作者或在论文中声明用途）；`requirements.txt` 声明 `torch==2.0.1 /
+transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能上 4090（5090 sm_120 不支持 torch 2.0）；
+配置内路径为作者本机硬编码，需改写。
+
+⚠️ **依赖自相矛盾（2026-09-11 联网核实）**：`global_local_topic.py` 从
+`allennlp.modules.span_extractors` 导入 `SelfAttentiveSpanExtractor`，而 **allennlp 最后一个发行版是
+2.10.1，其依赖约束为 `torch (<1.13.0,>=1.10.0)`**——与仓库自己声明的 `torch==2.0.1` **不可能同时满足**。
+因此 `pip install allennlp` 这条路在该仓库的声明环境下走不通。
+**结论：必须 vendor `SelfAttentiveSpanExtractor`**（约 50 行自注意力加权 span 池化），
+作为 FR-016 必须披露的透明补丁之一，并记录补丁前后的文件 hash。这不是可选项，是 C-2 的必做项。
 
 ## 2. Ch2 · 事件关系抽取（MAVEN-ERE；causal/subevent/temporal P/R/F1，官方 `evaluate.py`）
 
