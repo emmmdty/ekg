@@ -9,12 +9,11 @@ encoder.  It never opens a final-valid manifest or result.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 
 from ekg.core.protocol import load_manifest_ids
-from ekg.core.stage_bundle import sha256_file
+from ekg.core.stage_bundle import model_content_digest, sha256_file
 from ekg.factuality.metrics import factuality_report
 from ekg.relations.data.maven_fact import load_maven_fact
 
@@ -54,19 +53,6 @@ def _resolve(root: Path, value: object, field: str) -> Path:
         raise PreflightError(f"{field} has no path")
     path = Path(value)
     return path if path.is_absolute() else root / path
-
-
-def _model_tree_hash(model: Path) -> str:
-    files = [path.relative_to(model) for path in sorted(model.rglob("*")) if path.is_file()]
-    _require(files, f"model directory is empty: {model}")
-    # The canonical model identifier is a digest over file identities, not a
-    # second hash that reads the concatenated checkpoint bytes in a new order.
-    digest = hashlib.sha256()
-    for relative in files:
-        digest.update(f"{relative.as_posix()}\0".encode())
-        digest.update(sha256_file(model / relative).encode())
-        digest.update(b"\0")
-    return digest.hexdigest()
 
 
 def _validate_cv(repo: Path, cv_path: Path, source: Path) -> dict:
@@ -188,10 +174,8 @@ def prepare(args: argparse.Namespace) -> dict:
     _require(args.alpha == 0.5, "D4 class-weight alpha is frozen")
     _require(args.max_length == 128 and args.stride == 64, "D4 sequence settings are frozen")
     _require(args.model.is_dir(), f"missing model directory: {args.model}")
-    _require(
-        _model_tree_hash(args.model) == EXPECTED_MODEL_SHA256,
-        "RoBERTa content hash drift",
-    )
+    model_digest = model_content_digest(args.model)
+    _require(model_digest == EXPECTED_MODEL_SHA256, "RoBERTa content hash drift")
     _validate_cv(args.repo, args.cv, args.source)
     contracts = _validate_contract(args.repo, args.r1_protocol, args.t024)
     baselines = _validate_baselines(args.accepted_oof_root, args.source)
@@ -205,7 +189,7 @@ def prepare(args: argparse.Namespace) -> dict:
         "cv": {"path": str(args.cv), "sha256": sha256_file(args.cv), "folds": 5},
         "contracts": contracts,
         "accepted_oof": baselines,
-        "model": {"path": str(args.model), "tree_sha256": _model_tree_hash(args.model)},
+        "model": {"path": str(args.model), "content_sha256": model_digest},
         "training": {
             "arms": ["full", "remove_core", "permutation"],
             "epochs": args.epochs,

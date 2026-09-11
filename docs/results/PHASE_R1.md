@@ -1205,10 +1205,18 @@ traceability finding。
 
 - `phase_contracts/t024_freeze.json`：`9133a73c46d7e277fca1bef8b2459896d436b816971f68297c9f93aebd5587e7`
   （identity 由 `blocked_contracts` 移入 `approved_contracts`，原 binding 原文保留在 `amendments[0]`）；
-- `scripts/audit_r1_consistency.py`：`8103bc2da920577da747983838495727a13a797375a405b38087d0f2fda2c77a`
+- `scripts/audit_r1_consistency.py`：`a1d99a7f7d95e1ea3e1b656d75c496bc893b3a57dffa0a2587009667ea7a65ca`
   （新增 FR-016 的可追溯性映射，并已同步进 R1 `code.files`）；
-- `audit/cross_artifact_audit.json`：`37b0a10da8a1d6c9f5a3d8fb787339346619fab8dde162eff6664695c3742591`；
-- R1 `protocol.json`：`6434816bf87ec2a07ae1dfd22c3bf2e2a6aefee4b89ef191c2ceceb357e37ff5`。
+- `audit/cross_artifact_audit.json`：`622d094bc8befe2fe059cee81e495b6b2b567e1b67a62d56c17d7c97867f8467`；
+- R1 `protocol.json`：`f0b4702b258ef61257d0aeae20fd23bb48f36e4ff4761a575ac1b97277150829`。
+
+> **2026-09-11 更正（E17 开工核对时发现并当场修）。** 上面三行原本记的是
+> `8103bc2d…2c77a` / `37b0a10d…42591` / `6434816b…37ff5`，那是 E12 中途的状态：审计脚本随后在
+> `30dc25a` 又改了一次，R1 `protocol.json` 的 `code.files` 因此在 14:24 重绑到新脚本哈希，
+> `cross_artifact_audit.json` 的内容也随输入一起变。三份产物在盘上彼此自洽（脚本哈希
+> `a1d99a7f…a65ca` 与 `protocol.json` 内记录的值逐字相同，审计重跑两次字节一致、`PASS` / 36
+> requirements），**漂移只发生在本文档的记录里**，故只更正记录，不动产物。
+> `phase_contracts/t024_freeze.json`（`9133a73c…587e7`）与三份 phase 契约哈希不受影响。
 
 ### 21.4 验证
 

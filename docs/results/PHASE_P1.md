@@ -255,7 +255,12 @@ r6 是同一修复的中间版本（`--bundle` 默认值尚未修），保留不
 ### 模型 pin 改为内容寻址
 
 服务器已有完整 roberta-base 快照但**无 revision 元数据**。不声称未经核实的上游 commit，改用
-五个文件 SHA-256 的规范摘要作为目录名与 `revision`（`revision_kind=local_content_digest`）：
+目录下全部文件 SHA-256 的规范摘要作为目录名与 `revision`（`revision_kind=local_content_digest`）。
+规范形式于 2026-09-11（E17）从盘上反解并落成代码：`content_digest` = 对
+`{仓库相对路径: 文件 SHA-256}` 取 **compact、key-sorted 的 JSON**（`separators=(",",":")`）再 SHA-256，
+覆盖 `config.json`/`merges.txt`/`pytorch_model.bin`/`tokenizer.json`/`tokenizer_config.json`/`vocab.json`
+**六个**文件（本节原写「五个文件」，实测为六个）。实现在 `src/ekg/core/stage_bundle.py`，
+回归测试 `tests/scripts/test_prepare_d4_typed_cue_preflight.py` 直接钉住该 pin：
 `/data/TJK/models/local/roberta-base/71be7419…c961ea9`（硬链接，零额外磁盘）。
 加载自检：124.6M 参数 / hidden 768 / 12 层 / vocab 50265 / tokenizer 往返正确。
 

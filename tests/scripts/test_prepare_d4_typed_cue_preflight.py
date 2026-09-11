@@ -6,6 +6,8 @@ import hashlib
 import importlib.util
 from pathlib import Path
 
+from ekg.core.stage_bundle import content_digest, model_content_digest
+
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "prepare_d4_typed_cue_preflight", ROOT / "scripts/prepare_d4_typed_cue_preflight.py"
@@ -30,18 +32,33 @@ def test_cv_and_t024_contract_are_currently_eligible() -> None:
     )
 
 
-def test_model_digest_is_a_canonical_map_of_file_digests(tmp_path: Path) -> None:
+def test_model_digest_reproduces_the_pinned_backbone_address() -> None:
+    # The 4090 snapshot carried no upstream revision, so P1 r9 made the directory
+    # name the content address itself.  These are the six recorded file digests of
+    # /data/TJK/models/local/roberta-base/71be7419...; the pin must fall out of them.
+    recorded = {
+        "config.json": "ef0185e2aae6e06c5f105a285006952c340e20c7dbf43c86ec82601b13fc45e9",
+        "merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+        "pytorch_model.bin": "278b7a95739c4392fae9b818bb5343dde20be1b89318f37a6d939e1e1b9e461b",
+        "tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+        "tokenizer_config.json": "dfef66475ba1a217ceab1a29ba012843041e11627cab56f5f83c7b9804cfa5c5",
+        "vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655",
+    }
+
+    assert content_digest(recorded) == preflight.EXPECTED_MODEL_SHA256
+
+
+def test_model_digest_reads_every_file_under_the_directory(tmp_path: Path) -> None:
     model = tmp_path / "model"
-    model.mkdir()
+    (model / "nested").mkdir(parents=True)
     (model / "config.json").write_text("config", encoding="utf-8")
-    nested = model / "nested"
-    nested.mkdir()
-    (nested / "weights.bin").write_bytes(b"weights")
+    (model / "nested/weights.bin").write_bytes(b"weights")
 
-    expected = hashlib.sha256()
-    for relative in (Path("config.json"), Path("nested/weights.bin")):
-        expected.update(f"{relative.as_posix()}\0".encode())
-        expected.update(hashlib.sha256((model / relative).read_bytes()).hexdigest().encode())
-        expected.update(b"\0")
+    expected = content_digest(
+        {
+            "config.json": hashlib.sha256(b"config").hexdigest(),
+            "nested/weights.bin": hashlib.sha256(b"weights").hexdigest(),
+        }
+    )
 
-    assert preflight._model_tree_hash(model) == expected.hexdigest()
+    assert model_content_digest(model) == expected

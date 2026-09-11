@@ -53,6 +53,25 @@ def tree_sha256(root: Path, paths: Iterable[Path]) -> str:
     return digest.hexdigest()
 
 
+def content_digest(file_digests: Mapping[str, str]) -> str:
+    """Canonical digest of a path -> SHA-256 map (compact, key-sorted JSON)."""
+    payload = json.dumps(dict(file_digests), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def model_content_digest(root: Path) -> str:
+    """Recompute the content address of a pinned model directory.
+
+    P1 r9 registered this form: the server snapshot carried no upstream revision
+    metadata, so the directory is named after ``content_digest`` over every file
+    it holds.  Any pinned backbone therefore verifies by recomputation.
+    """
+    files = sorted(path for path in root.rglob("*") if path.is_file())
+    if not files:
+        raise FileNotFoundError(root)
+    return content_digest({path.relative_to(root).as_posix(): sha256_file(path) for path in files})
+
+
 def id_digest(ids: Iterable[str]) -> str:
     digest = hashlib.sha256()
     for item in sorted(ids):
