@@ -224,6 +224,39 @@ gantt
 **闭合 pin 只需从 4090 取这一个几 KB 的文件**，隧道恢复即可；在那之前 5090 上的 D4 结果不能与
 冻结的 CLS/DMRoBERTa 直接相减。详见 `results/PHASE_P1.md`。
 
+## 3.6 D4 改为在 5090 自足重建，不从 4090 搬任何东西（作者 2026-09-11 裁决）
+
+作者问「为什么要搬？不能在 5090 从新开始？」——核对后答案是**能，而且更干净**。原先列的两件
+「必须从 4090 取」的东西，唯一用途都是复用 4090 已经花掉的算力：
+
+| 原以为要搬 | 实际情况 |
+|---|---|
+| `tokenizer_config.json`（闭合旧 pin） | 只为复现**4090 那个** pin。旧 pin 里恰好含一个公网不提供的本地文件；5090 重新登记的 pin **六件全部来自公开源**，可重建性反而更强 |
+| `r1-v61-factuality-oof-r2/` 四个 JSON | 只为复用 4090 训好的两条 baseline。用同一份冻结五折 CV 在 5090 重训即可 |
+| （以为也要搬）`factuality_cv/` | **本地就有，640 KB / 16 文件**，与 4090 无关，已 rsync 到 5090 并双端核对一致 |
+| `train.jsonl` | 5090 早已有，SHA-256 与 4090 逐字节相同 |
+
+**新登记的 5090 backbone 内容地址**：
+`2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736`，位于
+`gpu-5090:/mnt/aidata/tongjiakai/models/local/roberta-base/2c7ff1f1…49736`。
+六个文件中五个直接来自 ModelScope `AI-ModelScope/roberta-base`（含 476 MB 权重，与 4090 pin 逐字节相同），
+`tokenizer_config.json` 是 ModelScope 与 hf-mirror 都提供的同一份 25 字节规范文件。
+
+**这条线更符合 A 类口径要求**：baseline 与三臂在同一台机、同一 backbone、同一份五折 manifest 下训出来，
+三轴天然一致；反倒是「4090 的 baseline + 5090 的臂」才是该被质疑的混搭。
+
+⚠️ **必须守的顺序（这等于重新求一次主锚）**：现在做合法，因为 D4 三臂**一个都还没训**，锚仍在看到
+方法结果之前冻结。执行顺序不得颠倒：
+
+1. 登记 backbone 内容摘要（**已完成**，见上）；
+2. 同一份冻结五折 CV 上重训两条 baseline（CLS / dynamic-multi × 5 折 = 10 次 `run_r1_factuality_oof.py`）；
+3. 汇总并**把新数字冻进 `results/PHASE_D.md`**，同时把 `prepare_d4_typed_cue_preflight.py` 里三个硬编码
+   常量换成新登记值——**必须在跑臂之前写死，不得事后调绿**；
+4. 才允许跑 D4 三臂。
+
+4090 上那套数字（CLS .553995 / DMRoBERTa .545603，backbone pin `71be7419…`）作为**历史身份保留**，
+与新线**不相减、不混表**。
+
 ## 4. 实验主表
 
 ### 4.1 CPU 泳道（GPU 不可用时照常推进）
