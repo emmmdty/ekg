@@ -22,6 +22,10 @@ from collections.abc import Mapping, Sequence
 
 from ekg.core.schema import EventNode
 from ekg.nodes.coref import trigger_similarity
+from ekg.nodes.role_uncertainty import (
+    ROLE_FEATURE_NAMES,
+    batch_role_compatibility_features,
+)
 
 FEATURE_NAMES = (
     "same_trigger_exact",
@@ -79,11 +83,17 @@ CONFUSABILITY = "confusability"
 ARGUMENT_POOLING_ORACLE = "argument_pooling_oracle"
 ARGUMENT_POOLING_PREDICTED = "argument_pooling_predicted"
 ARGUMENT_COMPONENTS = {ARGUMENT_POOLING_ORACLE, ARGUMENT_POOLING_PREDICTED}
+# Role compatibility is a residual on the pair logit, not a second pooling of the
+# argument text: the head reads whether the two mentions' fillers can hold at
+# once and which side the extractor could not answer for. Pooling the fillers
+# themselves is the registered negative control, and it loses MUC.
+ROLE_COMPATIBILITY = "role_compatibility"
 ALL_COMPONENTS = (
     CONTEXT_POOLING,
     CONFUSABILITY,
     ARGUMENT_POOLING_ORACLE,
     ARGUMENT_POOLING_PREDICTED,
+    ROLE_COMPATIBILITY,
 )
 
 
@@ -136,6 +146,8 @@ def head_input_dim(hidden_size: int, components=()) -> int:
         dim += len(FEATURE_NAMES)
     if set(selected) & ARGUMENT_COMPONENTS:
         dim += hidden_size * 4
+    if ROLE_COMPATIBILITY in selected:
+        dim += len(ROLE_FEATURE_NAMES)
     return dim
 
 
@@ -199,6 +211,7 @@ def pair_head_inputs(
     *,
     components=(),
     arguments=None,
+    role_features=None,
 ):
     """The single implementation of the head's input, shared by training and scoring.
 
@@ -233,4 +246,20 @@ def pair_head_inputs(
                 f"arguments={tuple(arguments.shape)} triggers={tuple(triggers.shape)}"
             )
         parts.append(pair_features(arguments[head_idx], arguments[tail_idx]))
+    if ROLE_COMPATIBILITY in selected:
+        # Passed in rather than recomputed here so the permutation arm can hand
+        # over shuffled vectors without a second code path deciding the layout.
+        if role_features is None:
+            role_features = batch_role_compatibility_features(pairs, nodes_by_id)
+        if len(role_features) != len(pairs):
+            raise ValueError(
+                f"role features cover {len(role_features)} of {len(pairs)} pairs"
+            )
+        parts.append(
+            torch.tensor(
+                [list(row) for row in role_features],
+                dtype=parts[0].dtype,
+                device=device,
+            )
+        )
     return parts[0] if len(parts) == 1 else torch.cat(parts, dim=-1)

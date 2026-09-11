@@ -383,7 +383,7 @@ baseline，v6.1 三份方法设计**一个都没跑过**；证明方法有没有
 | **C-2** | EasyECR 可运行性实跑核查（不训练） | ⚠️ **静态部分 done 2026-09-11**（`conditionally_runnable`）；**C-2b 活体 import** 待 4090 隧道恢复 |
 | **C-3** | E8.1 LLMERE 恢复方案冻结 | ✅ 纯文档 + 只读 |
 | **C-4** | Ch6 对手名册调研与冻结 | ✅ 联网调研 |
-| **C-5** | C5.0 实现 + 本地 gate | ✅ CPU |
+| **C-5** | C5.0 实现 + 本地 gate | ⚠️ **核心件 done 2026-09-11**（`role_uncertainty.py` + `role_compatibility` 组件，15 测试，550 passed）；**C-5b 四个入口脚本**待做 |
 | **C-6** | A4.0 实现 + 本地 gate | ✅ CPU |
 | **C-7** | LLM 对照脚手架 | ✅ CPU |
 | **C-8** | 第 2 章统一评测协议素材整理 | ✅ CPU |

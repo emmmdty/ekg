@@ -234,7 +234,7 @@ gantt
 | **C-2** | EasyECR 可运行性实跑核查（不训练） | 无 | **静态裁决 2026-09-11 已出：`conditionally_runnable`**，6 条阻断全部点名（`PHASE_R1.md` §22），KBP 2017 不可得 → **FR-016 (b)**。**剩余 C-2b**：4090 隧道恢复后建独立 venv 做活体 import 冒烟 | 名册 §1.1 + `PHASE_R1.md` §22 |
 | **C-3** | E8.1 LLMERE 恢复方案冻结 | 无 | 方案覆盖全部 11,149 条、同一规则、原始输出保留、fail-fast 与成本明确。**通过≠获准重生成** | 结果页 §9.x |
 | **C-4** | ~~Ch6 对手名册调研~~ → **已完成 2026-09-11**：SeDGPL 及其四个 CGEP 对手（BART contrastive / CSProm-KG / MCPredictor / SimKGC）全部有公开训练代码，**Gate 3 过**。剩余子项 **C-4b**：验证 CGEP-ESC 能否重建以取得 FR-016 状态 (a) | 无 | C-4 done；C-4b 给出 ESC 重建可行性裁决与切分口径确认 | 名册 §6 |
-| **C-5** | C5.0 实现 + 本地 gate | 无（QR-001 修订后已解锁） | targeted tests + 三件套全绿 | 代码 + 测试 |
+| **C-5** | C5.0 实现 + 本地 gate | 无（QR-001 修订后已解锁） | **2026-09-11 完成核心件**：`src/ekg/nodes/role_uncertainty.py`（sidecar / role 兼容性特征 / 分层 permutation / mediator 计数）+ `discriminative.py` 新增 `role_compatibility` 组件；15 条 targeted tests，**550 passed / 26 skipped、ruff 0、smoke OK**。bundle exporter 复用既有 `create_stage_bundle`（`protocol_extra` 足够挂 sidecar/mediator/fallback id），不另写。**剩余 C-5b**：train/evaluate/preflight/smoke 四个入口脚本 | 代码 + 测试 |
 | **C-6** | A4.0 实现 + 本地 gate | 无 | 同上 | 代码 + 测试 |
 | **C-7** | LLM 对照脚手架（提示模板、LoRA 配置、评分接线） | 无 | 三章各有一个 CPU fixture：给定 10 条固定输入产出**格式合法**的预测文件，且能被该章冻结的 evaluator 打分（分数高低不论）；提示模板与 LoRA 配置落 hash | 代码 + 测试 |
 | **C-8** | 第 2 章「统一评测协议」素材整理 | 无 | 产出一份 `docs/PROTOCOL_TABLE.md`：三章各自的 manifest SHA-256、文档/mention 计数、划分来源、evaluator SHA-256、指标定义、final-valid 封存状态，**每一格都能从 `results/` 或 `runs/` 反查到**；无空格、无「待补」 | `docs/PROTOCOL_TABLE.md` |
