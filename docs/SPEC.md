@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Specification ID | `001-occurrence-ekg-thesis` |
-| Version | `1.0.0` |
+| Version | `1.1.0` |
 | Created | `2026-09-04` |
 | Status | Review-ready |
 **Input**: Build a thesis-grade occurrence-level event graph system with three method contributions and one system-level
@@ -137,11 +137,23 @@ controls, credible baselines and paired inference.
 - **FR-014**: Extension data MUST live in metadata; the public `EventNode` schema MUST NOT gain task-specific fields.
 - **FR-015**: Every GPU method run MUST be preceded by a locally passing implementation gate and a frozen experiment
   contract. Additional random seeds require explicit user authorization.
+- **FR-016**: *(added 1.1.0, 2026-09-11)* Every externally authored method reproduced for a comparison table MUST carry
+  a documented **reproduction fidelity check**, in one of exactly two states. **(a) Verified**: the reproduction recovers
+  the method's own published numbers on its original benchmark and split within a tolerance stated before the run; the
+  table row may then carry the method name and citation. **(b) Unverifiable**: verification is impossible and the
+  specific obstacle is named (no released trainer, licensed corpus, dead checkpoint, undisclosed split); the row MUST
+  then be labelled a transparent adaptation with every enumerated delta from the published setting disclosed. A
+  reproduction in state (b) MUST NOT be presented as a faithful reproduction, and MUST NOT support a claim that the
+  published method is weaker than it reported.
 
 ### Quality and Evidence Requirements
 
-- **QR-001**: Ch1–Ch3 primary outcomes MUST each exceed a frozen primary anchor and another strong, distinct method
-  family under one protocol.
+- **QR-001**: *(amended 1.1.0, 2026-09-11)* Ch1–Ch3 primary outcomes MUST each exceed a frozen primary anchor under
+  one protocol. Each method chapter's main comparison table MUST additionally report multiple independently published
+  method families reproduced under that same protocol. Baseline breadth is a **reporting requirement, not an admission
+  gate**: a chapter MAY implement, pilot and report while further families are still being reproduced. Published methods
+  that cannot be run MUST appear in a method/code availability table naming the specific blocker, and MUST NOT be
+  silently omitted.
 - **QR-002**: For randomized primary comparisons, the mean improvement MUST be positive, at least two of three matched
   seed differences MUST be positive, and the document-cluster paired-bootstrap 95% confidence-interval lower bound MUST
   exceed zero.

@@ -1,0 +1,116 @@
+# 外部对手名册与复现保真度计划
+
+> 建立于 **2026-09-11**，服务 `SPEC.md` v1.1.0 的 **QR-001**（baseline 广度是报告要求，不是准入门）
+> 与 **FR-016**（每个外部复现必须带保真度状态）。
+> 本文件只定义**名册与验证路径**；任何实测数字只写进 `results/PHASE_*.md`。
+
+## FR-016 fidelity states
+
+（FR-016 的两种合法状态）
+
+| 状态 | 判据 | 论文表里怎么写 |
+|---|---|---|
+| **(a) Verified** | 在该方法**自己的原始基准与划分**上复现出其**已发表数字**，落在**事前声明**的容差内 | `方法名[ref]` |
+| **(b) Unverifiable** | 验证不可能，且**点名具体障碍**（无 trainer / 语料需许可 / checkpoint 失效 / 划分未公开） | `方法名[ref]（透明适配）` + 脚注逐条列出与原设定的差异 |
+
+**红线**：状态 (b) 的行**不得**写成"忠实复现"，**不得**用来主张"该公开方法比它自己报的弱"。
+容差必须在跑之前写定；跑完再定容差等同于没有验证。
+
+## 1. Ch1 · 事件身份消解（MAVEN-ERE 文档内共指；MUC/B³/CEAFe/BLANC，官方 `evaluate.py`）
+
+| # | 方法 | 原始基准 | 代码 | 保真度路径 | 状态 |
+|---|---|---|---|---|---|
+| 1 | MAVEN-ERE official joint（主锚） | MAVEN-ERE | ✅ 官方 | **已验证**：四个共指指标与官方论文 ±0.4 内（E9，`PHASE_R1.md` §17.2） | **(a) 已完成** |
+| 2 | **Global-Local Topic**（Xu, Li, Zhu, EMNLP 2022） | KBP 2017 | ✅ EasyECR `example_emnlp2022.py` + `global_local_topic_mavenere.yaml`（1,715 行 Lightning trainer） | 见 §1.1 决策树 | **待核查** |
+| 3 | CorefPrompt（Xu et al., EMNLP 2023） | KBP 2017 | ⚠️ EasyECR 有实现，但配置依赖 OmniEvent 预测论元文件（checkpoint 已失效） | 若以我方 Qwen3 论元替代 → 必为 (b)，须列差异 | **降级候选** |
+| 4 | Qwen3 mention-local 论元池化 `qwen3-argument-s13-r2` | — | 自建 | **不适用**：本文自建的注册负面对照，非外部方法 | 已有 |
+| 5 | LLM 对照（Qwen3-8B，LoRA/prompt） | — | 自建 | **不适用**：同上 | 待建 |
+
+**不可运行，进可得性表**：ACCI（`era211/ACCI` 全历史仅 README）、IP&M 2024（无公开代码，全文不可得，E9）、
+RESIJ（未取得）、OmniEvent EAE checkpoint（失效）、TextEE（无 checkpoint）。
+
+### 1.1 Global-Local Topic 的保真度决策树
+
+```
+能否取得 KBP 2017（LDC 许可语料）？
+├─ 能 → 在 KBP2017 上跑 EasyECR，对照原文 K-AVG/MUC/B³/CEAFe/BLANC
+│        容差事前定为 ±1.0 K-AVG  →  落入则 (a) Verified
+└─ 不能 → (b) Unverifiable，障碍写「原始基准 KBP 2017 需 LDC 许可，本项目无法取得」
+           须逐条列出差异：语料（KBP2017→MAVEN-ERE）、mention 来源（预测→金标）、
+           评测器（TAC→MAVEN 官方 evaluate.py）、超参是否沿用原配置
+```
+
+⚠️ 交叉参考：徐昇学位论文表 3-2 给出该方法在 KBP 2017 上的 K-AVG 51.2 / MUC 46.2，
+可作为容差比对的第二来源（见 `replan/THESIS_REF_f5_徐昇_事件共指.md`）。
+
+### 1.2 EasyECR 本身的已知差异（无论 (a)/(b) 都必须披露）
+
+仓库**无 LICENSE**（需联系作者或在论文中声明用途）；依赖 `torch==2.0.1 / transformers==4.21.2 / allennlp`，
+与本项目 cu128 栈互斥，须独立 venv 且只能上 4090（5090 sm_120 不支持 torch 2.0）；
+`allennlp` 已停维护，`SelfAttentiveSpanExtractor` 可能需 vendor；配置内路径为作者本机硬编码，需改写。
+
+## 2. Ch2 · 事件关系抽取（MAVEN-ERE；causal/subevent/temporal P/R/F1，官方 `evaluate.py`）
+
+| # | 方法 | 原始基准 | 代码 | 保真度路径 | 状态 |
+|---|---|---|---|---|---|
+| 1 | MAVEN-ERE official joint（主锚） | MAVEN-ERE | ✅ 官方 | **已验证**（E9） | **(a) 已完成** |
+| 2 | TacoERE `taco-s13-r3` | — | ❌ 无公开代码 | 不可能 → **(b)**，障碍＝「论文未发布实现」 | **(b) 已成立** |
+| 3 | LLMERE-causal（COLING 2025） | MAVEN-ERE official valid 710 篇，自写评测器，causal 36.04 | ⚠️ 有数据构造/评测器/**已发布预测**，无 trainer | 见 §2.1 | **本轮生成失败**（退化重复） |
+| 4 | A3.6 fallback | — | 本文 | **不适用**：本文前期方法，`failed` 身份须在表头标明 | 已有 |
+| 5 | LLM 对照（Qwen3-8B 等） | — | 自建 | **不适用** | 待建 |
+
+**不可运行，进可得性表**：RESIJ、KnowQA、2025 two-stage ERE、MAQInstruct（口径可引用但无同协议复现）。
+
+### 2.1 LLMERE 的保真度路径存在一处与既有裁决的冲突，须作者裁定
+
+FR-016 要求验证复现正确性。LLMERE **发布了自己在 official valid 710 篇上的预测文件**，
+因此最直接的验证是：用官方 `evaluate.py` 给它的已发布预测打分，看能否复现其 causal 36.04。
+
+但 `HANDOFF.md` §E.1a 第 6 条（作者 2026-09-07 裁决）明确写着**不做**这件事，理由是
+「710 篇是封存的 final-valid，不值这笔账」。
+
+⚠️ **两条规则现在互相抵触，本文件不擅自选边。** 三种出路：
+1. 保持 §E.1a，LLMERE 直接记为 **(b) Unverifiable**，障碍＝「保真度验证需读取封存 final-valid，
+   按 A 类红线放弃验证」——**成本为零，且完全诚实**；
+2. 只做一次**评分性**读取（不选任何模型/阈值/结构），按 Phase E 的先例记入 final-valid ledger；
+3. 放弃 LLMERE，改用其他关系方法族。
+
+**建议取 1。** 它不花 GPU、不碰 final-valid，且 (b) 状态本来就允许它留在主表。
+
+## 3. Ch3 · 事件事实性检测（MAVEN-FACT；五类 macro-F1，2,913 篇五折 OOF）
+
+| # | 方法 | 原始基准 | 代码 | 保真度路径 | 状态 |
+|---|---|---|---|---|---|
+| 1 | RoBERTa+CLS（主锚） | MAVEN-FACT | ✅ | 已在预冻结五折 OOF 上验收（80 产物重哈希、折隔离、覆盖核对） | 已完成 |
+| 2 | DMRoBERTa dynamic-multi | MAVEN-FACT | ✅ | 同上 | 已完成 |
+| 3 | **MAVEN-FACT supporting-word pipeline** | MAVEN-FACT 官方划分 | ✅ `THU-KEG/MAVEN-FACT` | **可验证**：先在官方划分上复现官方论文数字（容差事前定 ±1.0 macro-F1），再转本项目五折 OOF | **(a) 可达，待做** |
+| 4 | LLM 对照 | MAVEN-FACT 论文自带 LLM 结果 | 自建 | 可与论文 LLM 行对读 | 待建 |
+
+Ch3 是三章里保真度最容易做实的一章：官方仓库、官方划分、官方数字三者齐备。
+
+## 4. LLM 对照的定位（作者 2026-09-11 授权）
+
+LLM **只作 baseline 行与训练侧数据增强**，**不得**为主评测生成标注（`SPEC.md` Scope Boundaries 禁止
+新标注进入训练、选模或主评测；MAVEN 三件套本就有官方金标）。
+
+先例：陈玉婷主表 7 个对手里 3 个是 LLaMA2-7B / Baichuan2-7B / ChatGLM3-6B 的 LoRA 微调；
+钱子杰用 ChatGPT 做跨语言数据增强（训练侧）。
+
+本项目现成资源：gpu-4090 已有 Qwen3-8B 权重（C5 契约内容寻址目录）与 `.venv-llmere-causal-s13`
+里的 LLaMA-Factory。**这是我们能拿到的最便宜的主表宽度。**
+LLM 行属自建对照，不适用 FR-016 的保真度验证，但须披露 backbone、权重 revision、微调方式与提示模板。
+
+## 5. 主结果表的目标形态
+
+```
+| 方法                          | 指标… |
+| 公开方法 A[ref]                |       |   ← (a) 或 (b)，(b) 加「透明适配」标注
+| 公开方法 B[ref]                |       |
+| 公开方法 C[ref]                |       |
+| LLM 对照（Qwen3-8B LoRA）       |       |   ← 自建对照
+| 本文前期方法（failed 身份标明）    |       |   ← 徐昇 ch4/ch5 先例：自家上一章方法入表
+| **本文最终方案**                |       |   ← 末行
+```
+
+外部公开方法**不少于 3 个**（徐昇全篇即 3 个，第四/五章各 1 个；李璐 ECB+ 章 7 个；钱子杰 9 个）。
+跑不了的**必须**进可得性表并写明具体障碍，不得静默省略。
