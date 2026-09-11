@@ -1150,3 +1150,85 @@ uv run python scripts/audit_r1_consistency.py \
 结果为 `pass`、`findings = 0`、35/35 requirements mapped；新对账 artifact 的 frozen/actual SHA-256 一致。
 R1 仍是 `preparation_partial_blocked`，只剩 C5 的 author roster / `blocked_pre_admission`，不是 E7 的
 traceability finding。
+
+## 21. E12 · QR-001 修订与 FR-016 复现保真度（2026-09-11）
+
+**本节只记录治理修订与身份重绑：未实现、未训练、未推理、未用 GPU、未访问 final-valid。**
+修订发生时 C5/A4/D4 **三章都不存在任何 proposed-method 结果**（C5/A4 未实现，D4 只完成 D4.0
+实现与本地 gate，`runs/stages/D4/` 在本机与 gpu-4090 上均不存在），故不构成「看到分数再改规则」。
+
+### 21.1 触发证据：九篇同领域学位论文的实测体例
+
+作者提供 9 篇知网学位论文，本机 `/mnt/d` 直读、`pdftotext -layout` 转换后逐篇提取，
+完整记录见 `docs/replan/THESIS_REF_f2/f4/f5_*.md` 与 `docs/replan/REPLAN_20260911_*.md`。
+
+| 论文 | 学校/学位 | 页 | 方法章 | 外部公开 baseline | 胜出幅度 | 统计检验 |
+|---|---|---|---|---|---|---|
+| 徐昇《面向事件表述多样性和信息缺失性的事件共指消解研究》 | 苏州大学（129 页，疑博） | 129 | 3 | **3**（第四/五章各 1） | 章间 +0.1 / +0.4 K-AVG | **0** |
+| 钱子杰《基于多维数据增强的篇章级事件事实性识别》 | 苏州大学 硕 | 72 | 2 | 9 | 宏 F1 +0.97 | **0** |
+| 宁婉廷《提示驱动的事件关系抽取研究与应用》 | 大连理工 硕 | 92 | 2 | 3–11 | +2.9（时序）/ +0.1（粗粒度） | **0** |
+| 李璐《事件抽取与事件共指消解的研究与应用》 | 西南交大 工程硕 | 67 | 2 | 1–7 | 触发词 **+0.19**；ECB+ CoNLL **+0.2**（B³ 输给 CD-LM） | **0** |
+| 陈玉婷《基于复杂事件因果关系抽取的事理图谱构建研究》 | 华科 硕 | 77 | 2 | 7 | +1.45 F1 | **0** |
+| 李磊《军事领域事理图谱的构建与应用研究》 | 哈工大 专硕 | 79 | 2 | — | 人工对照 P 56.9 | **0** |
+| 邓宇涛《基于问答大模型的事理图谱构建技术研究》 | 硕 | 69 | 2 | — | — | **0** |
+| 陈泽《事件知识图谱构建关键技术及应用研究》 | 辽宁大学 博 | 150 | 3+应用 | — | — | — |
+| 陈勇《面向开源信息的图谱构建与事件预测研究》 | 中科大 工博 | 196 | 3+ | 16 | — | 少量 |
+
+两条与本项目直接冲突的实测事实：
+
+1. **外部公开对手 3 个即可**，且**自家前章方法可作后章主表对照行**（徐昇第四/五章即
+   「MultiRep（自家 ch3）+ CorefPrompt（自家 ch4）+ Lu&Ng2021」）。此前把「第二个可跑的公开方法族」
+   当作**准入门**，是我们自己的运行口径，不是领域要求，且已使 C5 停摆数周、A4 串在 LLMERE 之后。
+2. **胜出幅度实测分布为 +0.19 ~ +2.9**；徐昇第四章 CorefPrompt（EMNLP 2023 正式发表）的 MUC 45.3
+   **低于**自家第三章 MultiRep 46.2，正文自述「性能相当」并把卖点改为显存减半，章节照样成立。
+
+### 21.2 SPEC v1.1.0 的两处修订
+
+- **QR-001（修订）**：主指标仍须超过冻结主锚；**baseline 广度由准入门改为报告要求**——章节可在其余
+  方法族尚在复现时实现、pilot 与报告；跑不了的必须进「方法/代码可得性」表并写明具体障碍。
+- **FR-016（新增）**：每个为对比表复现的外部方法必须带保真度状态，二选一——**(a) Verified**：在其
+  原始基准与划分上复现出其已发表数字，落在**事前声明**的容差内；**(b) Unverifiable**：点名具体障碍
+  （无 trainer / 语料需许可 / checkpoint 失效 / 划分未公开），该行标「透明适配」并逐条披露差异。
+  状态 (b) 不得写成忠实复现，也不得用于主张该公开方法弱于其自报数字。
+
+名册与逐方法保真度路径见 [`../BASELINE_ROSTER.md`](../BASELINE_ROSTER.md)。
+
+### 21.3 三份 phase 契约的重绑
+
+| phase | 变更 | 新契约 SHA-256 |
+|---|---|---|
+| identity / C5 | `blocked_pre_admission` → **`frozen`**；第二方法族填入 Global-Local Topic（Xu et al., EMNLP 2022）经 EasyECR 的透明移植，保真度状态按名册 §1.1 决策树判定 | `b504f29cd96134e3ec54d920fa76c27209d4126234d884e0638c029f09432d1f` |
+| relation / A4 | 确认性 promotion **不再以「等到 LLMERE 数字」为前置**；LLMERE 降为主表一行，保真度预设 (b) | `79281df74c71db01b5894f28105fb5b7cf5c41be0d721ae791aaf3b90325e529` |
+| factuality / D4 | **内容未改**，hash 不变 | `01e1ba2f74627216a19c02ad47dbc5bbf35e72fe4530ce18ede76072328c49b1` |
+
+同步更新的身份：
+
+- `phase_contracts/t024_freeze.json`：`9133a73c46d7e277fca1bef8b2459896d436b816971f68297c9f93aebd5587e7`
+  （identity 由 `blocked_contracts` 移入 `approved_contracts`，原 binding 原文保留在 `amendments[0]`）；
+- `scripts/audit_r1_consistency.py`：`8103bc2da920577da747983838495727a13a797375a405b38087d0f2fda2c77a`
+  （新增 FR-016 的可追溯性映射，并已同步进 R1 `code.files`）；
+- `audit/cross_artifact_audit.json`：`37b0a10da8a1d6c9f5a3d8fb787339346619fab8dde162eff6664695c3742591`；
+- R1 `protocol.json`：`6434816bf87ec2a07ae1dfd22c3bf2e2a6aefee4b89ef191c2ceceb357e37ff5`。
+
+### 21.4 验证
+
+```bash
+uv run python scripts/audit_r1_consistency.py \
+  --output runs/stages/R1/r1-v61-20260904/audit/cross_artifact_audit.json
+```
+
+结果 **`PASS`，36 requirements mapped**（修订前为 35，新增 FR-016）、`findings = 0`。
+本地三件套：**534 passed / 26 skipped**、ruff **0**、`ekg-smoke` **OK**。
+
+### 21.5 未修订的项
+
+Ch1/Ch2/Ch3 的最小有意义效应（`+.010` / `+.010` / `+.030`）、matched seeds 13/17/42、10,000 次文档聚类
+配对 bootstrap、Holm 校正、final-valid 封存纪律、各章 guardrail 与 stop conditions **全部不变**。
+作者 2026-09-11 明确：统计检验不是实验质量的主要判据，证明方法价值才是；故本轮不动统计门槛。
+
+### 21.6 打开的问题：LLMERE 保真度与 §E.1a 第 6 条冲突
+
+FR-016 要求验证复现正确性；LLMERE 的可验证路径是用官方 `evaluate.py` 给它**已发布的 official valid
+710 篇预测**打分、复现其 causal 36.04。但 `HANDOFF.md` §E.1a 第 6 条（作者 2026-09-07 裁决）明确
+**不做**此事，理由是 710 篇是封存 final-valid。两条规则抵触，本轮**不擅自选边**；名册 §2.1 列出三种
+出路并建议取「保持 §E.1a，LLMERE 记为 (b) Unverifiable，障碍写明」——成本为零且完全诚实。
