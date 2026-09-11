@@ -125,7 +125,7 @@ def _validate_contract(repo: Path, r1_protocol: Path, t024: Path) -> dict[str, s
     }
 
 
-def _validate_baselines(root: Path, source: Path) -> dict:
+def _validate_baselines(repo: Path, root: Path, source: Path, cv_sha256: str) -> dict:
     summary_path = root / "oof_summary.json"
     acceptance_path = root / "acceptance.json"
     _require(sha256_file(summary_path) == EXPECTED_OOF_SUMMARY_SHA256, "OOF summary hash drift")
@@ -137,8 +137,21 @@ def _validate_baselines(root: Path, source: Path) -> dict:
     acceptance = _load(acceptance_path)
     _require(summary.get("status") == "pass", "OOF summary is not pass")
     _require(summary.get("final_valid_accessed") is False, "OOF summary accessed final-valid")
-    _require(acceptance.get("status") == "pass", "OOF acceptance is not pass")
-    _require(acceptance.get("final_valid_accessed") is False, "OOF acceptance accessed final-valid")
+    source_sha256 = sha256_file(source)
+    _require(summary.get("cv_sha256") == cv_sha256, "OOF summary binds another CV")
+    _require(summary.get("source_sha256") == source_sha256, "OOF summary binds another source")
+    # acceptance.json states its verdict as "acceptance" and carries no
+    # final-valid flag of its own; the summary it binds does.
+    _require(acceptance.get("acceptance") == "pass", "OOF acceptance is not pass")
+    _require(
+        acceptance.get("summary_sha256") == EXPECTED_OOF_SUMMARY_SHA256,
+        "OOF acceptance binds another summary",
+    )
+    _require(acceptance.get("cv_sha256") == cv_sha256, "OOF acceptance binds another CV")
+    _require(
+        acceptance.get("source_sha256") == source_sha256,
+        "OOF acceptance binds another source",
+    )
     docs = list(load_maven_fact(source))
     gold = {mention.mention_id: mention.factuality for doc in docs for mention in doc.mentions}
     verified: dict[str, dict] = {}
@@ -147,8 +160,12 @@ def _validate_baselines(root: Path, source: Path) -> dict:
         _require(isinstance(entry, dict), f"OOF summary has no {name} baseline")
         labels = entry.get("labels")
         _require(isinstance(labels, dict), f"{name} baseline has no labels identity")
-        labels_path = _resolve(root, labels.get("path"), f"{name} labels")
+        # The summary records label paths relative to the repository, not to the
+        # run root, so resolve from the repository and then require that the file
+        # really lives inside the accepted OOF root.
+        labels_path = _resolve(repo, labels.get("path"), f"{name} labels")
         _require(labels_path.is_file(), f"missing {name} OOF labels")
+        _require(root in labels_path.parents, f"{name} labels are outside the accepted OOF root")
         _require(sha256_file(labels_path) == labels.get("sha256"), f"{name} labels hash drift")
         predicted = _load(labels_path)
         _require(set(predicted) == set(gold), f"{name} OOF mention coverage")
@@ -162,6 +179,7 @@ def _validate_baselines(root: Path, source: Path) -> dict:
     return {
         "summary_sha256": sha256_file(summary_path),
         "acceptance_sha256": sha256_file(acceptance_path),
+        "acceptance": acceptance.get("acceptance"),
         "baselines": verified,
     }
 
@@ -176,9 +194,10 @@ def prepare(args: argparse.Namespace) -> dict:
     _require(args.model.is_dir(), f"missing model directory: {args.model}")
     model_digest = model_content_digest(args.model)
     _require(model_digest == EXPECTED_MODEL_SHA256, "RoBERTa content hash drift")
+    cv_sha256 = sha256_file(args.cv)
     _validate_cv(args.repo, args.cv, args.source)
     contracts = _validate_contract(args.repo, args.r1_protocol, args.t024)
-    baselines = _validate_baselines(args.accepted_oof_root, args.source)
+    baselines = _validate_baselines(args.repo, args.accepted_oof_root, args.source, cv_sha256)
     code = {path: sha256_file(args.repo / path) for path in CODE_FILES}
     protocol = {
         "schema_version": "ekg.d4_typed_cue_preflight.v1",
@@ -186,7 +205,7 @@ def prepare(args: argparse.Namespace) -> dict:
         "seed": args.seed,
         "final_valid_accessed": False,
         "source": {"path": str(args.source), "sha256": sha256_file(args.source)},
-        "cv": {"path": str(args.cv), "sha256": sha256_file(args.cv), "folds": 5},
+        "cv": {"path": str(args.cv), "sha256": cv_sha256, "folds": 5},
         "contracts": contracts,
         "accepted_oof": baselines,
         "model": {"path": str(args.model), "content_sha256": model_digest},
