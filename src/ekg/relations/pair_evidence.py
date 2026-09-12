@@ -65,6 +65,9 @@ __all__ = [
     "PairEvidence",
     "arm_flags",
     "build_pair_evidence",
+    "CONSISTENCY_FAMILY",
+    "CONSISTENCY_PAIR_CAP",
+    "consistency_rows",
     "counterfactual_sentence_ids",
     "document_pair_evidence",
     "lexicon_digest",
@@ -84,6 +87,19 @@ CONFIG_SCHEMA_VERSION = "ekg.relation_pair_evidence.v1"
 # How many sentences a pair may cite.  Frozen rather than tuned: A4's stop
 # conditions forbid a threshold sweep, and a fixed budget has nothing to sweep.
 EVIDENCE_BUDGET = 2
+
+# The consistency terms run on the causal family alone.  A4's claim and its
+# registered mediator are both about cross-sentence causal false positives;
+# temporal carries ~39x the positives, so including it would pay for most of the
+# counterfactual forwards to supervise a family that is only a guardrail here.
+CONSISTENCY_FAMILY = "causal"
+
+# Worst-case bound on counterfactual forwards per document.  A document with more
+# causal positives than this supervises its first `CONSISTENCY_PAIR_CAP` in
+# candidate order and records the rest as skipped, so the cost of one training
+# step is bounded and the choice is replayable.
+# ponytail: fixed cap; raise it if the skipped count is ever a large share.
+CONSISTENCY_PAIR_CAP = 16
 
 FULL_ARM = "full"
 REMOVE_CORE_ARM = "remove_core"
@@ -381,6 +397,30 @@ def necessity_scoreable(record: PairEvidence, *, arm: str) -> bool:
     return bool(set(record.cited(arm)) - set(record.protected))
 
 
+def consistency_rows(
+    records: Sequence[PairEvidence],
+    positive: Sequence[bool],
+    *,
+    arm: str,
+    cap: int = CONSISTENCY_PAIR_CAP,
+) -> tuple[tuple[int, ...], int]:
+    """Which rows carry the consistency terms, and how many the cap dropped.
+
+    Only scoreable causal positives: the claim is about what supports a positive
+    prediction, and the counterfactual forwards are the expensive part, so
+    spending them on negatives would buy nothing.  Selection is by candidate
+    order, so a capped document supervises the same rows on every replay.
+    """
+    if len(records) != len(positive):
+        raise ValueError(f"{len(positive)} labels for {len(records)} candidate pairs")
+    if cap < 0:
+        raise ValueError("consistency pair cap must not be negative")
+    if not arm_flags(arm).evidence_stream:
+        return (), 0
+    eligible = [index for index, flag in enumerate(positive) if flag]
+    return tuple(eligible[:cap]), max(0, len(eligible) - cap)
+
+
 def unsupported_cross_sentence_causal(
     records: Sequence[PairEvidence],
     predicted: Mapping[tuple[str, str], str],
@@ -448,12 +488,22 @@ def pair_evidence_sidecar(records: Sequence[PairEvidence], *, arm: str) -> dict[
 
 
 def pair_evidence_config(arm: str, *, budget: int = EVIDENCE_BUDGET) -> dict[str, object]:
-    """The arm identity a checkpoint carries, so an arm cannot be mistaken."""
+    """The arm identity a checkpoint carries, so an arm cannot be mistaken.
+
+    `residual_rows` is the rule by which a row receives the evidence residual,
+    and it is recorded because it has to be the same rule at training and at
+    inference: the base pass's own causal prediction, never a gold label.
+    Training additionally *supervises* the gold positives — supervision only
+    exists at train time, so that is not an asymmetry in the scored rule.
+    """
     return {
         "schema_version": CONFIG_SCHEMA_VERSION,
         "arm": validate_a4_arm(arm),
         "budget": budget,
         "lexicon_sha256": lexicon_digest(),
+        "consistency_family": CONSISTENCY_FAMILY,
+        "consistency_pair_cap": CONSISTENCY_PAIR_CAP,
+        "residual_rows": "base_predicted_positive",
     }
 
 
@@ -468,12 +518,19 @@ def load_pair_evidence_config(checkpoint: Path) -> dict[str, object]:
     if not path.is_file():
         raise FileNotFoundError(f"{path} is missing; the arm identity is unknown")
     payload = json.loads(path.read_text(encoding="utf-8"))
-    expected = {"schema_version", "arm", "budget", "lexicon_sha256"}
+    expected = set(pair_evidence_config(FULL_ARM))
     if not isinstance(payload, dict) or set(payload) != expected:
         raise ValueError(f"{path} must contain exactly {sorted(expected)}")
     if payload["schema_version"] != CONFIG_SCHEMA_VERSION:
         raise ValueError(f"{path} has an unsupported schema_version")
     validate_a4_arm(payload["arm"])
+    if payload["consistency_family"] != CONSISTENCY_FAMILY:
+        raise ValueError(
+            f"{path} was trained on the {payload['consistency_family']!r} family, "
+            f"code now supervises {CONSISTENCY_FAMILY!r}"
+        )
+    if payload["residual_rows"] != "base_predicted_positive":
+        raise ValueError(f"{path} carries an unknown residual rule")
     current = lexicon_digest()
     if payload["lexicon_sha256"] != current or payload["budget"] != EVIDENCE_BUDGET:
         raise ValueError(
@@ -487,6 +544,7 @@ try:  # pragma: no cover - exercised on a GPU host
     import torch
     import torch.nn as nn
 
+    from ekg.relations.extractor.supervised import encode_trigger_reps
     from ekg.relations.pair_heads import build_pair_head
 
     class PairEvidenceClassifier(nn.Module):
@@ -548,6 +606,55 @@ try:  # pragma: no cover - exercised on a GPU host
     ) -> PairEvidenceClassifier:
         return PairEvidenceClassifier(hidden_size, subtype_counts, mlp_hidden, dist_dim)
 
+    def pair_counterfactual_embeddings(
+        encoder,
+        tokenizer,
+        nodes,
+        doc_text: str,
+        requests: Sequence[tuple[tuple[str, str], tuple[int, ...]]],
+        max_length: int,
+        device: str = "cpu",
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Endpoint embeddings for each (pair, sentence set) request.
+
+        Requests sharing a sentence set share one forward, which is what makes
+        this affordable: a retained set is 2-4 sentences, and a masked set is the
+        document minus one or two.  It is `encode_trigger_reps` underneath, with
+        the same window packing and the same fail-fast on an unlocatable trigger,
+        so a counterfactual pools its endpoints exactly the way the base forward
+        does — a second packing implementation here is how the two would drift.
+
+        Gradient flows; the caller decides train or eval mode.
+        """
+        if not requests:
+            empty = torch.zeros((0, encoder.config.hidden_size), device=device)
+            return empty, empty
+        groups: dict[tuple[int, ...], list[int]] = {}
+        for index, (_, sentence_ids) in enumerate(requests):
+            groups.setdefault(tuple(sentence_ids), []).append(index)
+        heads: list[torch.Tensor | None] = [None] * len(requests)
+        tails: list[torch.Tensor | None] = [None] * len(requests)
+        for sentence_ids, indices in groups.items():
+            embeddings = encode_trigger_reps(
+                encoder,
+                tokenizer,
+                list(nodes),
+                doc_text,
+                max_length,
+                device,
+                sentence_ids=list(sentence_ids),
+            )
+            for index in indices:
+                head_id, tail_id = requests[index][0]
+                if head_id not in embeddings or tail_id not in embeddings:
+                    raise ValueError(
+                        f"counterfactual context {sentence_ids} does not hold "
+                        f"({head_id}, {tail_id}); a trigger sentence was masked"
+                    )
+                heads[index] = embeddings[head_id]
+                tails[index] = embeddings[tail_id]
+        return torch.stack(heads), torch.stack(tails)
+
     def sufficiency_necessity_loss(
         base: torch.Tensor,
         masked: torch.Tensor,
@@ -584,7 +691,11 @@ try:  # pragma: no cover - exercised on a GPU host
         necessity = torch.relu(margin - (gold_base - gold_masked)).mean()
         return sufficiency + necessity
 
-    __all__ += ["PairEvidenceClassifier", "sufficiency_necessity_loss"]
+    __all__ += [
+        "PairEvidenceClassifier",
+        "pair_counterfactual_embeddings",
+        "sufficiency_necessity_loss",
+    ]
 
 except ImportError:  # pragma: no cover - the local CPU environment lacks torch
     pass
