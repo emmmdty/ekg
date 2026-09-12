@@ -623,3 +623,62 @@ contract hash 与 preflight 一致。**三臂的 report / labels / sidecar 哈�
 4090 上的产物全部完好：preflight `9429c5a8…5025e`、CPU smoke `d0003af5…97c75`、
 accepted OOF `21e7e505…f88165` / `7de7177f…e58af`，与中断前记录逐字节一致，无残留进程。
 
+## ★ D4.3 seed-13 五折三臂 pilot：**机制失败**，且消融与负控都赢过 full（2026-09-12，4090）
+
+第一个真正跑完的 v6.1 方法结果。`status=failed`、`confirmation_eligible=false`、**未启动 seed 17/42**。
+产物 `gpu-4090:.../runs/stages/D4/d4-v61-typed-cues-r1/pilot/seed-13/`，
+`pilot_summary.json` `f26425a8…b29483`、`status.json` `3b4dbba2…a46234`，契约
+`preflight-r2` `dae0e0b4…e15c4`。覆盖断言通过：**2,913 篇 / 73,939 mentions 各恰好一次**，
+五个 evaluation manifest 重建出源文档全集，`final_valid_accessed=false`。
+
+### 主表
+
+| 臂 | pooled macro-F1 | vs CLS `.553995` | vs DMRoBERTa `.545603` | 逐折 |
+|---|---:|---:|---:|---|
+| **full**（typed cue + 分解式决策） | **.476515** | **−.0775** | **−.0691** | .4755 / .5398 / **.3481** / .4349 / .5391 |
+| remove-core（同容量 flat head） | **.536788** | −.0172 | −.0088 | .5156 / .5400 / .5373 / .5235 / .5711 |
+| permutation（负控） | **.495260** | −.0587 | −.0503 | .4579 / .5197 / .4838 / .5052 / .4933 |
+
+**三条门全破**：
+
+1. **主门**：full 没有超过任何一个锚，差距 −.078 / −.069，是 ±.01 可复现地板的**七倍以上**，不是噪声。
+2. **预注册中介**：full 的注册 confusion 率 **.04681**，remove-core **.04424**——full **抬高了**它本该降低的那个量。
+   permutation 反而最低（**.04337**）。
+3. **稀有类护栏**（margin `−0.030`）：full 的 PS− **.1688** vs CLS `.3825`（**−.2137**）、
+   Uu **.1317** vs `.1969`（**−.0652**），两条同时击穿。
+
+**消融赢过 full 6.0 个点，负控也赢过 full 1.9 个点。** 后者尤其致命：打乱 document 内的 cue 表示反而
+更好，说明 cue 配对没有携带可用信息。
+
+### 为什么会这样：不是 bug，是参数化本身
+
+先排除了 bug。`recompose_factor_probabilities` 的标签顺序与 `FACTUALITY_LABELS`
+（`CT+, PS+, CT-, PS-, Uu`）**逐位对齐**，五个概率恒和为 1，因子投影矩阵满行秩；full 与 remove-core
+共享同一 encoder、同一 cue 残差、同一 latent 宽度与同一预算。
+
+机制性解释：full 把五类分布**约束成** `unknown × modality × polarity` 的乘积族。
+于是 `P(PS−) = known · modality · polarity` 要求两个因子同时抬高，而 PS− 只有 285/73,939；
+模型没法在不伤害共享因子的大量 CT−/PS+ 的前提下抬起它。预测计数正好印证：
+full 只出 **272** 个 PS−，remove-core 出 **457**（gold 285）。这也解释了 full 的不稳定——
+fold 3 直接塌到 **.3481**，而 remove-core 五折全在 .516–.571 的窄带里。
+
+**证据侧完全没动**：三臂的 evidence macro(CT−/PS+/PS−) 分别 .5995 / .5957 / .5917，机制对证据零影响。
+
+### 更基本的一条：这套 head 即使去掉分解，也没到锚
+
+remove-core `.536788` 比 CLS `.553995` 低 **.0172**，仍在 ±.01 地板之外。所以问题不止是「分解式决策不好」，
+而是**整个 D4 head 低于冻结基线**。一个**尚未验证的候选原因**：`latent_size = len(FACTUALITY_LABELS) = 5`，
+即 head 是 `hidden → 5 → tanh → 5`，中间有一个**五维瓶颈**，而 CLS 基线是 hidden 直接到五类。
+这只是与数据一致的假设，本轮**没有做实验去证它**，不得当成结论。
+
+### 判定与下一步
+
+按 `phases/PHASE_D4_typed_cue_factuality.md` 的 stop conditions，本轮是 **typed-cue 机制家族的第 1 个有效
+周期，失败**。两个有效周期后封存该家族。
+
+**不做的事**（stop conditions 明写）：不调 threshold、不扫 epoch、不换 split、不加大 backbone 来救这一轮。
+若要开第 2 个周期，必须把上面那个五维瓶颈假设**作为预注册的单变量**重新登记设计，而不是悄悄改个宽度再跑一次。
+
+⚠️ **4090 现已被他人占用**：用户 `Zhyw` 的 vllm 进程 2026-09-12 19:0x 起占满四张卡（各约 20–22 GB）。
+我们的 pilot 20:03 正常结束，产物完整；后续任何 4090 任务**必须先核卡**。
+
