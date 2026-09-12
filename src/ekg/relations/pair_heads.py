@@ -19,6 +19,7 @@ __all__ = [
     "LINEAR_HEAD",
     "PAIR_HEAD_CONFIG_FILE",
     "PAIR_HEAD_NAMES",
+    "PAIR_EVIDENCE_HEAD",
     "PROTOTYPE_DEPENDENCY_HEAD",
     "PROTOTYPE_HEAD",
     "build_pair_head",
@@ -30,7 +31,22 @@ PAIR_HEAD_CONFIG_FILE = "pair_head.json"
 LINEAR_HEAD = "linear"
 PROTOTYPE_HEAD = "prototype"
 PROTOTYPE_DEPENDENCY_HEAD = "prototype_dependency"
-PAIR_HEAD_NAMES = (LINEAR_HEAD, PROTOTYPE_HEAD, PROTOTYPE_DEPENDENCY_HEAD)
+PAIR_EVIDENCE_HEAD = "pair_evidence"
+PAIR_HEAD_NAMES = (
+    LINEAR_HEAD,
+    PROTOTYPE_HEAD,
+    PROTOTYPE_DEPENDENCY_HEAD,
+    PAIR_EVIDENCE_HEAD,
+)
+
+# Where each head's factory is registered; imported on first use so a CPU box
+# still resolves the registry without torch installed.
+_HEAD_MODULES = {
+    LINEAR_HEAD: "ekg.relations.extractor.supervised",
+    PROTOTYPE_HEAD: "ekg.relations.prototype",
+    PROTOTYPE_DEPENDENCY_HEAD: "ekg.relations.prototype",
+    PAIR_EVIDENCE_HEAD: "ekg.relations.pair_evidence",
+}
 
 pair_head_factories: Registry[Any] = Registry("relation_pair_head")
 
@@ -56,10 +72,5 @@ def build_pair_head(name: str, **kwargs: object):
     if name not in PAIR_HEAD_NAMES:
         raise ValueError(f"unknown pair head {name!r}")
     if name not in pair_head_factories:
-        module = (
-            "ekg.relations.extractor.supervised"
-            if name == LINEAR_HEAD
-            else "ekg.relations.prototype"
-        )
-        importlib.import_module(module)
+        importlib.import_module(_HEAD_MODULES[name])
     return pair_head_factories.create(name, **kwargs)
