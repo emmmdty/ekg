@@ -23,7 +23,6 @@ from pathlib import Path
 from ekg.relations.data.maven_ere import load_maven_ere
 from ekg.relations.pair_evidence import (
     CONSISTENCY_FAMILY,
-    CONSISTENCY_PAIR_CAP,
     arm_flags,
     context_dependence_report,
     counterfactual_sentence_ids,
@@ -123,12 +122,19 @@ def main() -> int:
 
             selected: list[int] = []
             if flags.evidence_stream:
+                # Every row the base pass calls causal-positive, with no cap.
+                # The per-document cap bounds *training* memory; applying it here
+                # would make the scored prediction rule depend on candidate order
+                # and leave the rest of the positives unrevised and unmeasured
+                # (the 2026-09-12 smoke read 0/0 for exactly that reason).
+                # `pair_counterfactual_embeddings` groups by sentence set, so the
+                # cost is one pair of forwards per distinct span, not per row.
                 selected = [
                     index
                     for index, value in enumerate(causal_class.tolist())
                     if value != NONE_INDEX
                     and CONSISTENCY_FAMILY not in rows[index].ignored_families
-                ][:CONSISTENCY_PAIR_CAP]
+                ]
             if selected:
                 sentences = len(doc.doc_text.split("\n"))
                 requests = {"masked": [], "retained": []}
@@ -207,6 +213,20 @@ def main() -> int:
                     mediator_records.append(records[position])
             edges_rows.append({"doc_id": doc.doc_id, "edges": doc_edges})
             evidence[doc.doc_id] = pair_evidence_sidecar(records, arm=arm)
+
+    # Every causal positive that survives to the output went through the revised
+    # pass, so it has a measured logit drop. A row without one escaped the
+    # intervention, and its mediator counters would be silently wrong.
+    unmeasured = [
+        key
+        for key, subtype in predicted_causal.items()
+        if subtype != "NONE" and key not in logit_drop
+    ]
+    if flags.evidence_stream and unmeasured:
+        raise SystemExit(
+            f"{len(unmeasured)} predicted causal positives were never revised, "
+            f"e.g. {unmeasured[:3]}"
+        )
 
     args.edges_output.parent.mkdir(parents=True, exist_ok=True)
     args.edges_output.write_text(

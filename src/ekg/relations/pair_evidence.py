@@ -114,10 +114,13 @@ CONSISTENCY_FAMILY = "causal"
 # mediator are read on one scale.
 NECESSITY_MARGIN = 1.0
 
-# Worst-case bound on counterfactual forwards per document.  A document with
+# Worst-case bound on counterfactual forwards per **training** document, where
+# every forward's activations stay alive for the backward pass.  A document with
 # more supervised pairs than this takes the first `CONSISTENCY_PAIR_CAP` in
 # candidate order and records the rest as skipped, so one training step has a
-# bounded cost and the choice is replayable.
+# bounded cost and the choice is replayable.  Inference must not apply it: the
+# scored rule would then depend on candidate order, and the positives past the
+# cap would go unrevised and unmeasured.
 # ponytail: fixed cap; raise it if the skipped count is ever a large share.
 CONSISTENCY_PAIR_CAP = 16
 

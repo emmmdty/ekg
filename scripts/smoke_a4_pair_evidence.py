@@ -26,7 +26,7 @@ from pathlib import Path
 
 from ekg.core.protocol import load_manifest_ids
 from ekg.core.stage_bundle import sha256_file
-from ekg.relations.pair_evidence import A4_ARMS
+from ekg.relations.pair_evidence import A4_ARMS, arm_flags
 
 ARTIFACTS = ("edges.jsonl", "evidence.json", "logits.json", "report.json")
 
@@ -206,6 +206,21 @@ def run(args: argparse.Namespace) -> dict:
         for trace in traces.values():
             for kind in ("base", "masked", "retained", "revised_probabilities"):
                 _require(_finite(trace[kind]), f"{arm}: non-finite {kind} logits")
+        mediator = report["mediator"]
+        # Every causal positive that survived to the output must have been
+        # revised and therefore measured. The first run of this smoke reported
+        # 0/0 here because the per-document training cap was also being applied
+        # at inference, leaving most positives unrevised.
+        _require(
+            mediator["measured_cross_sentence_false_positives"]
+            == mediator["cross_sentence_false_positives"],
+            f"{arm}: {mediator['cross_sentence_false_positives']} cross-sentence false "
+            f"positives but only {mediator['measured_cross_sentence_false_positives']} measured",
+        )
+        if arm_flags(arm).evidence_stream:
+            _require(
+                report["revised_rows"] > 0, f"{arm}: the evidence stream revised no row at all"
+            )
         populations[arm] = report["candidate_pairs"]
         pair_keys[arm] = sorted(
             f"{doc_id}::{key}" for doc_id, pairs in evidence.items() for key in pairs
@@ -217,7 +232,7 @@ def run(args: argparse.Namespace) -> dict:
             "epoch_mean_loss": losses,
             "revised_rows": report["revised_rows"],
             "predicted_edges": report["predicted_edges"],
-            "mediator": report["mediator"],
+            "mediator": mediator,
             "artifact_sha256": {name: sha256_file(root / name) for name in ARTIFACTS},
         }
 
