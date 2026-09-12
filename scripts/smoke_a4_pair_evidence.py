@@ -207,19 +207,33 @@ def run(args: argparse.Namespace) -> dict:
             for kind in ("base", "masked", "retained", "revised_probabilities"):
                 _require(_finite(trace[kind]), f"{arm}: non-finite {kind} logits")
         mediator = report["mediator"]
-        # Every causal positive that survived to the output must have been
-        # revised and therefore measured. The first run of this smoke reported
-        # 0/0 here because the per-document training cap was also being applied
-        # at inference, leaving most positives unrevised.
-        _require(
-            mediator["measured_cross_sentence_false_positives"]
-            == mediator["cross_sentence_false_positives"],
-            f"{arm}: {mediator['cross_sentence_false_positives']} cross-sentence false "
-            f"positives but only {mediator['measured_cross_sentence_false_positives']} measured",
-        )
         if arm_flags(arm).evidence_stream:
+            # Every causal positive that survives to the output went through the
+            # revised pass, so it is measured. This read 0/0 on the first run
+            # because the per-document *training* cap was also being applied at
+            # inference, leaving most positives unrevised.
+            _require(
+                mediator["measured_cross_sentence_false_positives"]
+                == mediator["cross_sentence_false_positives"],
+                f"{arm}: {mediator['cross_sentence_false_positives']} cross-sentence false "
+                f"positives but {mediator['measured_cross_sentence_false_positives']} measured",
+            )
             _require(
                 report["revised_rows"] > 0, f"{arm}: the evidence stream revised no row at all"
+            )
+            # The revision may suppress an unsupported positive; it may not
+            # suppress the class. Annihilating it is the contract's own recall
+            # collapse, and it is visible at smoke scale (measured: the revision
+            # sent all 554 base positives to NONE before the row balance was
+            # fixed, leaving the arm with zero causal edges).
+            _require(
+                mediator["predicted_causal"] > 0,
+                f"{arm}: the revised pass suppressed every causal positive",
+            )
+        else:
+            _require(
+                mediator["measured_cross_sentence_false_positives"] == 0,
+                f"{arm}: an arm with no evidence stream measured a counterfactual",
             )
         populations[arm] = report["candidate_pairs"]
         pair_keys[arm] = sorted(

@@ -344,26 +344,46 @@ def necessity_scoreable(record: PairEvidence, *, arm: str) -> bool:
 
 def consistency_rows(
     records: Sequence[PairEvidence],
-    positive: Sequence[bool],
+    gold_positive: Sequence[bool],
+    predicted_positive: Sequence[bool],
     *,
     arm: str,
     cap: int = CONSISTENCY_PAIR_CAP,
 ) -> tuple[tuple[int, ...], int]:
-    """Which rows carry the consistency terms, and how many the cap dropped.
+    """Which rows the revised pass trains on, and how many the cap dropped.
 
-    Only scoreable causal positives: the claim is about what supports a positive
-    prediction, and the counterfactual forwards are the expensive part, so
-    spending them on negatives would buy nothing.  Selection is by candidate
-    order, so a capped document supervises the same rows on every replay.
+    Half the budget to scoreable gold positives, half to the false positives the
+    base pass currently proposes, both in candidate order so a replay picks the
+    same rows.  **The balance is the point.**  Trained on base-predicted
+    positives alone the revised pass sees a row set that is ~80% gold-NONE —
+    cross-sentence precision is .1998 — and "always NONE" is then near-optimal
+    for it.  Measured on the 2026-09-12 smoke: it revised all 554 base
+    positives to NONE and the arm emitted **zero** causal edges, which the
+    contract's own stop condition would have read as a recall collapse.
+
+    This is a training distribution, not a change to the scored rule: inference
+    revises every base-predicted positive, and the main per-family objective
+    keeps every negative (`negatives: all`).
     """
-    if len(records) != len(positive):
-        raise ValueError(f"{len(positive)} labels for {len(records)} candidate pairs")
-    if cap < 0:
-        raise ValueError("consistency pair cap must not be negative")
+    if not len(records) == len(gold_positive) == len(predicted_positive):
+        raise ValueError(
+            f"{len(gold_positive)}/{len(predicted_positive)} labels "
+            f"for {len(records)} candidate pairs"
+        )
+    if cap < 2:
+        raise ValueError("the revision cap must leave room for both halves")
     if not arm_flags(arm).evidence_stream:
         return (), 0
-    eligible = [index for index, flag in enumerate(positive) if flag]
-    return tuple(eligible[:cap]), max(0, len(eligible) - cap)
+    positives = [index for index, flag in enumerate(gold_positive) if flag]
+    false_positives = [
+        index
+        for index, flag in enumerate(predicted_positive)
+        if flag and not gold_positive[index]
+    ]
+    half = cap // 2
+    selected = sorted(positives[:half] + false_positives[: cap - min(half, len(positives))])
+    dropped = max(0, len(positives) + len(false_positives) - len(selected))
+    return tuple(selected), dropped
 
 
 def context_dependence_report(
@@ -480,6 +500,7 @@ def pair_evidence_config(arm: str) -> dict[str, object]:
         "consistency_pair_cap": CONSISTENCY_PAIR_CAP,
         "necessity_margin": NECESSITY_MARGIN,
         "residual_rows": "base_predicted_positive",
+        "revision_training_rows": "balanced_gold_and_false_positive",
     }
 
 
@@ -507,6 +528,7 @@ def load_pair_evidence_config(checkpoint: Path) -> dict[str, object]:
         "consistency_pair_cap",
         "necessity_margin",
         "residual_rows",
+        "revision_training_rows",
     ):
         if payload[field] != expected[field]:
             raise ValueError(

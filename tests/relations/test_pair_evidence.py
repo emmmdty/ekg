@@ -224,16 +224,26 @@ def test_a_span_the_document_cannot_hold_is_refused() -> None:
         counterfactual_sentence_ids(record, 3, arm=FULL_ARM)
 
 
-def test_only_scoreable_positives_carry_the_consistency_terms() -> None:
+def test_the_revision_trains_on_a_balanced_row_set() -> None:
     records = [record_for("m0", "m4"), record_for("m0", "m3"), record_for("m1", "m4")]
+    gold = [True, False, False]
+    predicted = [True, True, True]
 
-    assert consistency_rows(records, [True, False, True], arm=FULL_ARM) == ((0, 2), 0)
-    # The cap keeps a training step's cost bounded and records what it dropped.
-    assert consistency_rows(records, [True, True, True], arm=FULL_ARM, cap=2) == ((0, 1), 1)
+    # One gold positive and one of the two current false positives: trained on
+    # base-predicted positives alone the revision sees ~80% gold-NONE rows and
+    # collapses to always-NONE, which it measurably did.
+    assert consistency_rows(records, gold, predicted, arm=FULL_ARM, cap=2) == ((0, 1), 1)
+    # With room for everything the cap drops nothing.
+    assert consistency_rows(records, gold, predicted, arm=FULL_ARM) == ((0, 1, 2), 0)
+    # A gold positive that the base pass misses still trains the revision.
+    assert consistency_rows(records, [True, False, False], [False, True, False],
+                            arm=FULL_ARM) == ((0, 1), 0)
     # remove_core has no evidence stream, so it supervises nothing this way.
-    assert consistency_rows(records, [True, True, True], arm=REMOVE_CORE_ARM) == ((), 0)
-    with pytest.raises(ValueError, match="labels for"):
-        consistency_rows(records, [True], arm=FULL_ARM)
+    assert consistency_rows(records, gold, predicted, arm=REMOVE_CORE_ARM) == ((), 0)
+    with pytest.raises(ValueError, match="labels"):
+        consistency_rows(records, [True], predicted, arm=FULL_ARM)
+    with pytest.raises(ValueError, match="both halves"):
+        consistency_rows(records, gold, predicted, arm=FULL_ARM, cap=1)
 
 
 def test_the_mediator_registers_cross_sentence_false_positives_with_no_intervention() -> None:
@@ -297,6 +307,7 @@ def test_a_checkpoint_whose_mechanism_drifted_is_refused(tmp_path) -> None:
         ("consistency_family", "temporal"),
         ("necessity_margin", 0.25),
         ("residual_rows", "gold_positive"),
+        ("revision_training_rows", "base_predicted_positive"),
     ):
         (tmp_path / CONFIG_FILE).write_text(
             json.dumps({**config, field: value}), encoding="utf-8"
@@ -318,6 +329,10 @@ def test_every_arm_has_a_config_and_all_four_are_covered() -> None:
     for arm in A4_ARMS:
         assert pair_evidence_config(arm)["arm"] == arm
         assert pair_evidence_config(arm)["evidence_rule"] == "span_interior"
+        assert (
+            pair_evidence_config(arm)["revision_training_rows"]
+            == "balanced_gold_and_false_positive"
+        )
 
 
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")

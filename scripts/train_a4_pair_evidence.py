@@ -234,11 +234,13 @@ def main() -> int:
         return out
 
     def supervised_rows(records, logits, targets):
-        """Rows the residual applies to: the base pass's own causal positives.
+        """The rows the revised pass trains on, balanced by `consistency_rows`.
 
-        Gold positives join them at training time so the mechanism has gradient
-        before the base pass predicts anything at all; the residual rule itself
-        is identical to the one inference uses.
+        Gold positives and the base pass's current false positives in equal
+        measure: trained on base-predicted positives alone the revision sees a
+        row set that is ~80% gold-NONE and collapses to always-NONE (measured).
+        The scored rule is unchanged — inference revises every base-predicted
+        positive.
 
         A pair that is unscoreable for causal (a TIMEX endpoint) is excluded on
         both counts.  It has to be: the official protocol does not score it, so
@@ -249,11 +251,13 @@ def main() -> int:
         """
         causal = logits[CONSISTENCY_FAMILY].detach().argmax(dim=-1)
         target = targets[CONSISTENCY_FAMILY]
-        eligible = [
-            bool(gold != IGNORE_INDEX and (predicted != NONE_INDEX or gold != NONE_INDEX))
-            for predicted, gold in zip(causal.tolist(), target.tolist(), strict=True)
-        ]
-        return consistency_rows(records, eligible, arm=arm)
+        gold_positive: list[bool] = []
+        predicted_positive: list[bool] = []
+        for predicted, gold in zip(causal.tolist(), target.tolist(), strict=True):
+            scoreable = gold != IGNORE_INDEX
+            gold_positive.append(bool(scoreable and gold != NONE_INDEX))
+            predicted_positive.append(bool(scoreable and predicted != NONE_INDEX))
+        return consistency_rows(records, gold_positive, predicted_positive, arm=arm)
 
     def dev_scores() -> tuple[float, dict[str, float]]:
         """Macro pair F1 over non-NONE classes, with the residual applied."""
