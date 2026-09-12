@@ -1,6 +1,6 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-09-11**。本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，不回溯聊天记录。
+> 更新于 **2026-09-12**。本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，不回溯聊天记录。
 > 本文只记录状态、决策、依赖与下一步，不复制实验表格。实验数字只认
 > [`results/`](results/README.md)。
 
@@ -8,12 +8,13 @@
 
 | 项 | 值 |
 |---|---|
-| 正式阶段 | **方法实验准备期**。R1 准入已于 2026-09-11（E12）收口：`SPEC.md` 升 **v1.1.0**，QR-001 把 baseline 广度由**准入门**改为**主表报告要求**，新增 **FR-016** 复现保真度。C5 由 `blocked_pre_admission` 转 `frozen`；A4 的确认性 promotion 不再等 LLMERE。三章契约均已 hash 重绑，审计 `PASS` / 36 requirements。 |
-| **论文结构** | 第3章 事实性检测（D4）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。 |
-| **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表；本文 §E 队列只是它的当周切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | 无。**D4.3 pilot 2026-09-12 20:03 跑完并判定失败**（typed-cue 家族第 1 个有效周期；full .4765 < remove-core .5368 < 锚，中介反向，护栏双破）——数字与归因见 [`results/PHASE_D.md`](results/PHASE_D.md)，不可变 handoff 在 `pilot/seed-13/status.json` `3b4dbba2…a46234`。⚠️ 4090 四卡现被他人 vllm 占用，再用须核卡。历史：**曾在 gpu-4090 跑**（2026-09-12 14:5x 起，5 折铺 4 张卡；契约 `preflight-r2` `dae0e0b4…e15c4`）。**不需要本机在线**——四个 shard 与收尾脚本都是独立 session、PPID=1。接手见 §0.5。此前：**G-0 与 G-1 均已完成**（4090 恢复；D4.2 CUDA 半边通过且与 CPU 逐字节相同），5090 的 anchor 重建已收口（CLS .543514 / DMRoBERTa .536622，见 `results/PHASE_D.md`）。**队首是新增的 C-9**：契约冻结的 `scripts/run_d4_typed_cue_oof.py` 从未被写过，D4.3 卡在这里。 |
-| ✅ **gpu-4090（2026-09-12 已恢复，重回主力）** | 驱动 **580.178.04**，`torch.cuda.is_available()=True`，**4 张卡全空**，CUDA 张量运算实测通过——**G-0 完成**。中断期间的产物全部完好（preflight `9429c5a8…`、CPU smoke `d0003af5…`、accepted OOF 两份 hash 与记录逐字节一致），无残留进程。**方法实验走这条线**，理由见 `EXPERIMENT_PLAN.md` §3.7。 |
-| ✅ **gpu-5090 = 当前工作机** | 作者 2026-09-11 **第二次裁决**：**4090 不管了**，在 5090 上验证假设与方法；**可重新拉模型**；**≤1 天的任务直接执行，不再逐次请示**（超过一天仍要问，拉模型/跨机搬运也要先问位置）。host key 作者已确认为本人所加。实测当前**完全空闲**（32,607 MiB 用 209 MiB，原 Qwen 服务已不在）。仍有效的硬边界：**EasyECR 跑不了**（torch 2.0.1 不支持 sm_120）。 |
+| 正式阶段 | **方法实验期，Gate 1 已触发**。2026-09-12 跑完 v6.1 的**第一个真方法结果** D4.3，**失败**。按事先冻结的 Gate 1 分支：**不开第二个周期**，转去把 A4 与 C5 跑出来，到 Gate 2 再判还剩几个方法章。 |
+| **⚠️ 这一轮最重要的一件事** | **Ch3（D4）的 typed-cue 家族已关闭**，以 `failed` 身份留档。full `.476515` 低于两个锚（`.553995` / `.545603`）**七倍地板**，消融 `.536788` 与负控 `.495260` **都赢过 full**，预注册中介**反向**，PS−/Uu 护栏双破。归因与「五维瓶颈」这个**未验证**的候选原因见 [`results/PHASE_D.md`](results/PHASE_D.md)；不可变 handoff `pilot/seed-13/status.json` `3b4dbba2…a46234`。 |
+| **论文结构** | 第3章 事实性检测（D4，**本轮失败**）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。**章节存废在 Gate 2 判，执行代理不得自行改成两方法章。** |
+| **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表与 §5 的 Gate；本文队列只是切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
+| **活动任务** | **无。GPU 上没有任何我们的进程。** 新窗口从 §0.3 的队列开工。 |
+| ⚠️ **gpu-4090** | 驱动已修好（580.178.04，`torch.cuda.is_available()=True`，G-0 完成），但 **2026-09-12 19:0x 起四张卡被用户 `Zhyw` 的 vllm 占满**（各约 20–22 GB）。**再用必须先 `nvidia-smi` 核卡，不得挤占。** |
+| ✅ **gpu-5090** | 作者授权：**≤1 天的任务直接执行，不再逐次请示**（超过一天要问；拉模型/跨机搬运先问位置）。backbone 已就位 `2c7ff1f1…49736`（六件全部公开源）。硬边界：**EasyECR 跑不了**（torch 2.0.1 不支持 sm_120）。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改队列行状态与 commit → 推进队列 → commit + **push** |
 
@@ -49,105 +50,65 @@ uv run python scripts/audit_r1_consistency.py \
 
 按需再读：对应章节的 `phases/PHASE_*.md` 契约、`results/PHASE_*.md`（数字唯一权威）。
 
-### 0.3 直接开工
+### 0.3 下一个窗口执行什么（2026-09-12 冻结）
 
-⚠️ **2026-09-11 下午起 4090 连 ssh 都不通了（`Connection refused`，隧道掉线，非驱动问题）。
-作者裁决：4090 不管，改用 5090。** 下面这段按旧情况写，路径仍然有效，机器换成 5090。
+**Gate 1 的裁决是事先写死的，不要重议**：`EXPERIMENT_PLAN.md` §5 的 Gate 1「不过」分支写着
+**不启动第二个周期，直接进 Gate 2 讨论结构**。D4.3 不过，所以 typed-cue 家族到此为止。
+`PHASE_D4` 的 stop conditions 里那句「两个有效周期后封存」允许第二轮，但**主表的 Gate 1 更具体
+且先于结果冻结，以主表为准**——Gate 存在的意义就是结果难看时不临时给自己加一次机会。
 
-**CPU 泳道八项全部不依赖 GPU。**
-从 `EXPERIMENT_PLAN.md` §4.1 取第一个未完成项。建议起手顺序：
+⛔ **因此下面这些一律不做**：D4 第二个周期、调 threshold、扫 epoch、换 split、加大 backbone、
+用 seed 17/42 去捞 D4、把「五维瓶颈」当成已证结论去改设计。
 
-| 次序 | 主表 ID | 为什么先做它 |
-|---|---|---|
-| 1 | **C-2 EasyECR 可运行性实跑核查** | 决定第 5 章那行 baseline 到底能不能有；已知 allennlp（最后版本 2.10.1，约束 `torch <1.13`）与仓库声明的 `torch==2.0.1` **硬冲突**，必须实跑才能定 vendor 方案 |
-| 2 | **C-1 D4.1 immutable preflight** | 纯 hash 与指标重算，实测 `scripts/prepare_d4_typed_cue_preflight.py` 不 import torch，**驱动坏着也能跑**；它是第 3 章 pilot 的前置 |
-| 3 | **C-5 C5.0 实现** / **C-6 A4.0 实现** | 驱动一修好就能直接开跑，不浪费卡 |
+**按这个顺序做，全部是 CPU，不占卡：**
 
-✅ **那次同步已在 2026-09-11（E17）做完**：三个 gitignored JSON 已双端 SHA-256 核对一致
-（`protocol.json` `f0b4702b…50829`、`t024_freeze.json` `9133a73c…587e7`、
-`cross_artifact_audit.json` `622d094b…f8467`；4090 旧档备份为 `protocol.json.pre-e12-20260911`）。
-`results/PHASE_R1.md` §21.3 原记的是 E12 中途的哈希，已一并更正。
+| 次序 | 主表 ID | 做什么 | 完成判据 |
+|---|---|---|---|
+| **1** | **C-6** | **A4.0 实现 + 本地 gate**（Ch4 关系抽取，方法**一行都还没写**） | targeted tests + 三件套全绿；契约见 `phases/PHASE_A4_pair_evidence.md` |
+| **2** | **C-5b** | C5 的四个入口脚本：`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_`（C5.0 核心件 `role_uncertainty.py` 已于 `fc25777` 交付） | 同上；**照 D4 的四件套形状写，并把 pilot 入口一起写掉** |
+| **3** | **C-9 的同类缺口** | **给 A4 与 C5 各写 pilot 入口**（`run_a4_*.py` / `run_c5_argument_uncertainty.py`） | 契约点名了它们；D4 就是因为这个缺口白等了一轮 |
+| 4 | **C-7** | LLM 对照脚手架（三章各一个 CPU fixture） | 见主表 §4.1 |
+| 5 | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
 
-✅ **gpu-5090 host key 已确认**：`29.tcp.cpolar.top:13850` 在 `~/.ssh/known_hosts` 第 98 行，
-指纹 ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**作者 2026-09-11 确认是本人所加**。
-仍不得自行 TOFU 接受**新**指纹（cpolar 端口是复用的）。
+**GPU 泳道（等 1–3 做完，且核卡确认有空闲）**：G-4（A4.2 smoke → A4.3 pilot）、
+G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**。跑完这两个就到 **Gate 2**。
 
-### 0.4 D4 anchor 在 5090 的重建（2026-09-11，**已完成**）
+#### 从 D4 这一轮学到、必须带进 A4/C5 的三件事
 
-**背景**：作者裁决不从 4090 搬任何东西，D4 改为在 5090 自足重建（主表 §3.6）。新 backbone 内容地址
-`2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736`，
-位于 `gpu-5090:/mnt/aidata/tongjiakai/models/local/roberta-base/2c7ff1f1…49736`，六件全部来自公开源。
+1. **先查契约点名的入口脚本在不在**。D4 的 `run_d4_typed_cue_oof.py` 从没被写过，
+   却在契约的 GPU 命令里躺了很久。**A4/C5 现在就有同样的洞。**
+2. **pilot 入口必须进 preflight 的 `code` 哈希集合**，否则那一跑是唯一钉不住的代码。
+   D4 为此重建了 preflight（`preflight-r2`，`code_files=7`，旧的不覆盖）。
+3. **报增益前先看噪声地板**。5090 的独立重建把 D4 anchor 的可复现地板量到约 **±.01**
+   （见 `results/PHASE_D.md`）；小于这个量级的差不要当效应。
 
-**已收口**：2026-09-11 19:48 全部完成，`oof_summary.json` `13b275eb…7d9de`，CLS **.543514** / DMRoBERTa **.536622**，anchor=CLS。数字与解读见 `results/PHASE_D.md`。4090 已于次日恢复，故**方法实验改走 4090 线**（`EXPERIMENT_PLAN.md` §3.7），本节保留作记录。
+#### 环境既成事实（不用再查）
 
-**当时跑的是**：`runs/stages/R1/r1-v61-factuality-oof-5090-r1/`，10 次
-`run_r1_factuality_oof.py`（`cls` / `dynamic_multi` × fold 1–5，seed 13，12 epoch，lr 2e-5，alpha 0.5）。
-三个 worker 并行，实测约 3.1 分钟/epoch，预计 2026-09-11 19:10–19:30 收口。
+- 三个 gitignored JSON 已双端核对（`protocol.json` `f0b4702b…50829`、`t024_freeze.json` `9133a73c…587e7`、
+  `cross_artifact_audit.json` `622d094b…f8467`；4090 旧档备份 `protocol.json.pre-e12-20260911`）；
+- gpu-5090 host key 在 `~/.ssh/known_hosts` 第 98 行，指纹
+  ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**作者确认是本人所加**；
+  仍不得自行 TOFU 接受**新**指纹（cpolar 端口复用）；
+- 两台机的 cpolar 隧道都会掉线。**ssh 失败 ≠ 远端进程死亡**，三态判活；长任务一律
+  `setsid nohup` + `python -u` + 重定向 `logs/`，**一条 ssh 只发一个后台任务**。
+  实测这样起的进程 PPID=1、独立 session，本机关机不影响。
 
-**怎么看状态**（本机关机不影响，进程 PPID=1 独立 session）：
+### 0.4 2026-09-11~12 这两轮做完了什么（记录，不用再做）
 
-```bash
-ssh gpu-5090 'cd /mnt/aidata/tongjiakai/ekg && tail -3 logs/oof5090_w{1,2,3}.log logs/oof5090_finish.log'
-ssh gpu-5090 'ps -eo pid,ppid,etime,args | grep -E "oof_worker|oof_finish|run_r1_factuality" | grep -v grep'
-```
+| 主表 ID | 结果 |
+|---|---|
+| **C-1** D4.1 preflight | ✅ PASS。执行中修掉三个「本地绿灯、服务器上跑不起来」的缺陷：脚本自造目录摘要去比 P1 的内容地址（唯一的测试是拿算法和它自己对）、`acceptance.json` 的裁决键是 `acceptance` 不是 `status`、`oof_summary.json` 记的是仓库相对路径。三条都进了 `ENGINEERING_NOTES.md` |
+| **C-2** EasyECR 核查 | ✅ 静态裁决 `conditionally_runnable`，仓库 `hqyang/EasyECR @ f6cd779f`（URL 此前项目里从没记过）。6 条阻断点名可数；allennlp 矛盾由求解器机器复现。KBP 2017 需 LDC 许可 → **FR-016 (b)**。**剩 C-2b**：活体 venv + import 冒烟 |
+| **C-5** C5.0 核心件 | ✅ `src/ekg/nodes/role_uncertainty.py` + `role_compatibility` 组件，15 条测试（`fc25777`） |
+| **C-9** D4 pilot 入口 | ✅ 新写 `scripts/run_d4_typed_cue_oof.py` 并纳入 preflight 哈希集合（`a90df4e`） |
+| **G-0** 4090 驱动 | ✅ 已修（580.178.04）。**但四张卡现被他人占用** |
+| **G-1** D4.2 smoke | ✅ CPU + CUDA 双半边，三臂产物**逐字节相同** |
+| **G-2** D4.3 pilot | ❌ **失败**，见本文 §▶ 表与 `results/PHASE_D.md` |
+| — | 5090 上用**全公开源** backbone（`2c7ff1f1…49736`）独立重建了 D4 的两条 anchor：CLS `.543514` / DMRoBERTa `.536622`，同一排序、绝对值低约 .010 → **可复现地板 ±.01** |
 
-worker 每完成一折打 `END fold=… rc=`，整条跑完打 `ALL_DONE`，失败打 `ABORTING` 并停住不再往下跑。
-
-**收尾脚本已挂好，自动做完机械部分**：`logs/oof5090_finish.log`。它等三个 worker 都 `ALL_DONE`，
-把 `fold-N/<pooling>` 归位成 collector 要的 `<pooling>/fold-N`，再跑
-`collect_r1_factuality_oof.py` 产出 `oof_summary.json` 与两份 `*_oof_labels.json`。
-任一 worker `ABORTING` 则**不汇总**并写明原因。编排脚本已随产物存档
-（`oof_worker.sh` `56a3163a…9d890`、`oof_finish.sh` `91960af4…7b08a`）；每次运行的精确命令行也在各自
-`run_metadata.json` 的 `train_argv` / `evaluation_argv` 里。
-
-**⚠️ 汇总之后的三步必须由人做，不得自动化**（这是重新求主锚，顺序见主表 §3.6）：
-
-1. 新的 pooled macro-F1 写进 [`results/PHASE_D.md`](results/PHASE_D.md)，并标明这是 5090 新线，
-   与 4090 旧数字（CLS .553995 / DMRoBERTa .545603）**不相减、不混表**；
-2. 需要一份 `acceptance.json`——4090 那份是由运行目录里的 `acceptance_audit.py` 产出的，
-   **该脚本不在仓库里**，是一处可追溯性缺口，本轮要么把它补进 `scripts/`，要么在结果页写清替代做法；
-3. `scripts/prepare_d4_typed_cue_preflight.py` 里三个硬编码常量
-   （`EXPECTED_MODEL_SHA256` / `EXPECTED_OOF_SUMMARY_SHA256` / `EXPECTED_OOF_ACCEPTANCE_SHA256`）
-   换成新登记值，**必须在跑 D4 三臂之前写死，不得事后调绿**。
-
-三步做完才允许跑 D4.3。
-
-### 0.5 D4.3 pilot（2026-09-12，**已跑完，判定 failed**）
-
-**为什么先有 C-9**：契约冻结的入口 `scripts/run_d4_typed_cue_oof.py` 从没被写过，2026-09-12 补上
-（`a90df4e`）。它同时进了 preflight 的 `code` 哈希集合——否则 seed-13 这一跑会成为唯一无法事后钉住的
-代码——所以 preflight 重建为 **`preflight-r2/protocol.json`**，SHA-256
-`dae0e0b4e404fa13ddb3e09c542bfbd4c54b74313da51ad4f47b33bc577e15c4`，`code_files=7`。
-旧的 `preflight/`（`9429c5a8…5025e`，6 个文件）**不覆盖、保留作历史**。
-
-为拿到契约要的逐实例决策轨迹，decision head 现在保留它本来就算出的 factor logits
-（flat 臂记为 **absent 而不是 0**，因为那个缺席正是消融本身），detector 保留五类概率，
-`evaluate` 用一个**可选**开关落盘——所以 smoke 的产物集合没变。改动是数值惰性的：
-同一条 smoke 在改动前后三臂产物**逐字节相同**（`cuda-fold1-10docs` vs `cuda-r2-fold1-10docs`）。
-
-**结果**：三条门全破，`status=failed`、`confirmation_eligible=false`、未启动 seed 17/42。pooled macro-F1 full **.476515** / remove-core **.536788** / permutation **.495260**，锚是 .553995 与 .545603。**消融与负控都赢过 full**；full 的注册 confusion 率反而更高。归因、逐折曲线与「五维瓶颈」这个**未验证**的候选原因见 `results/PHASE_D.md`。
-
-**当时在跑**：`runs/stages/D4/d4-v61-typed-cues-r1/pilot/seed-13/`，5 折 × 3 臂
-（full / remove_core / permutation），seed 13、12 epoch，按折分片：卡 0 跑 fold 1+2，卡 1/2/3 各跑
-fold 3/4/5。实测约 3.5 分钟/epoch → 每臂 ~42 分钟、每折 ~2.1 小时；卡 0 背两折是长杆，
-**预计 4–4.5 小时**。
-
-```bash
-ssh gpu-4090 'cd /data/TJK/ekg && tail -2 logs/d4_pilot_c{0_f12,1_f3,2_f4,3_f5}.log logs/d4_pilot_finish.log'
-ssh gpu-4090 'ps -eo pid,ppid,etime,args | grep -E "run_d4_typed_cue_oof|d4_pilot_finish" | grep -v grep'
-```
-
-**收尾脚本已挂好**（`logs/d4_pilot_finish.log`，独立 session，存档
-`pilot/d4_pilot_finish.sh` `e68db352…6553a6`）：等五个 `fold-N/fold.json` 都落地后跑
-`--aggregate`，产出 `pilot_summary.json`。若 shard 全死而折数不足，它**不汇总**并写明原因。
-汇总会断言 **2,913 篇 / 73,939 mention 各恰好一次**，且五个 evaluation manifest 能重建出源文档全集。
-
-**汇总之后要做的**（`phases/PHASE_D4_typed_cue_factuality.md` 的 promotion gate）：pooled 五类 macro-F1
-必须**同时**严格高于 CLS `.553995` 与 DMRoBERTa `.545603`（4090 线；5090 线的 `.543514` / `.536622`
-只作独立复现，**不混表**）；full 相对 remove-core 要降低三类注册 confusion 且 permutation 抹掉该改善；
-PS−/Uu 的 non-inferiority margin `-0.030`；evidence 不低于同协议 supporting-word baseline `0.030`。
-**过门只写 `confirmation_eligible=true` 然后停下请授权**，不得自行开 seed 17/42。
-⚠️ 记住 `results/PHASE_D.md` 记下的**可复现地板 ±.01**：小于这个量级的差值不要当成效应。
+**D4 的两条 anchor 线并存，永不混表**：4090 线（`.553995` / `.545603`，backbone `71be7419…`，
+有 preflight 与 acceptance）是主表用的；5090 线（`.543514` / `.536622`，backbone `2c7ff1f1…`）
+是独立复现与备份。各自标明机器与 backbone 地址，**不相减**。
 
 ## 1. 当前裁决与状态
 
@@ -183,7 +144,7 @@ SPEC。只有研究问题、范围或质量标准改变时才修订 SPEC。
   cross-validation folds`、`32cfd46 feat(r1): close relation handoff and power gate`、
   `277b36f fix(r1): isolate factuality OOF training source`；
 - 本文提交后以新的 `origin/main` HEAD 为准；
-- 最新本地验证（2026-09-11，`93f59f1`）：**535 passed / 26 expected skips**，ruff 0，`ekg-smoke` OK，P1 local gate PASS；
+- 最新本地验证（2026-09-12，`8f17cd1`）：**560 passed / 26 expected skips**，ruff 0，`ekg-smoke` OK；
 - local gate 的 `tested_tree_sha256`：
   `52c639ff79fb9401f71d42d4d1ecaec6abacf65701cecf72f1dcac7edb04f46e`（220 个文件；
   前值 `3bff2ac2…c701d3c` 对应 `886185e`）；
@@ -198,7 +159,7 @@ SPEC。只有研究问题、范围或质量标准改变时才修订 SPEC。
 |---|---|---|
 | Ch2 工作点与检索 | [`results/PHASE_A.md`](results/PHASE_A.md) | 工作点两个核心周期已用完；近似 retriever 三条均未过门；prototype/ATLoss 已封存 |
 | Ch1 历史方法 | [`results/PHASE_C.md`](results/PHASE_C.md) | 旧方法未稳定胜出；event-level gold argument 只能作泄漏型 oracle |
-| Ch3 历史方法 | [`results/PHASE_D.md`](results/PHASE_D.md) | 与强 baseline 未统计分开；gold evidence 不支持“只换 locator”作为主要解法 |
+| Ch3 历史方法 | [`results/PHASE_D.md`](results/PHASE_D.md) | 旧 D3：与强 baseline 未统计分开。**新 D4：typed-cue 家族 2026-09-12 失败并关闭**（Gate 1「不过」分支），消融与负控都赢过 full |
 | Ch4 历史系统证据 | [`results/PHASE_E.md`](results/PHASE_E.md) | 图依赖正控与部分构建损失成立；正式同实例 factorial 尚未完成 |
 | P1 可信根 | [`results/PHASE_P1.md`](results/PHASE_P1.md) | r15 是 A3.6 与当前 R1 的可信根；旧 A3 结果继续绑定各自历史根 |
 
