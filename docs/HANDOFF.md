@@ -11,8 +11,8 @@
 | 正式阶段 | **方法实验准备期**。R1 准入已于 2026-09-11（E12）收口：`SPEC.md` 升 **v1.1.0**，QR-001 把 baseline 广度由**准入门**改为**主表报告要求**，新增 **FR-016** 复现保真度。C5 由 `blocked_pre_admission` 转 `frozen`；A4 的确认性 promotion 不再等 LLMERE。三章契约均已 hash 重绑，审计 `PASS` / 36 requirements。 |
 | **论文结构** | 第3章 事实性检测（D4）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表；本文 §E 队列只是它的当周切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | **有：D4 两条 anchor baseline 正在 gpu-5090 重训**（2026-09-11 16:55 起，10 次 = CLS/dynamic-multi × 五折，seed 13）。**不需要本机在线**——三个 worker 与收尾脚本都是 `setsid` 独立 session、PPID=1。接手方法见 §0.4。本轮已完成 C-1、G-1 的 CPU 半边、C-2 静态裁决、C-5 核心件。 |
-| ⛔ **gpu-4090（已降级，作者说不管了）** | **CUDA 完全不可用**。2026-09-11 06:05–06:08 unattended-upgrade 把 NVIDIA 由 580.173.02 升到 580.178.04，运行中的内核模块仍是 580.173.02 → `nvidia-smi` NVML 失败、`torch.cuda.is_available()=False`、`device_count=0`。磁盘已无旧用户态库，`nvmlshim` 实测无效，**绕不过去**。修复需 root（重启或重载 nvidia 模块），机器共用，**须作者联系机主**。**文件系统仍可 ssh 访问**（纯 CPU 任务照常跑）。E8 的 PID 1819697 已 GONE。 |
+| **活动任务** | 无。2026-09-12：**G-0 与 G-1 均已完成**（4090 恢复；D4.2 CUDA 半边通过且与 CPU 逐字节相同），5090 的 anchor 重建已收口（CLS .543514 / DMRoBERTa .536622，见 `results/PHASE_D.md`）。**队首是新增的 C-9**：契约冻结的 `scripts/run_d4_typed_cue_oof.py` 从未被写过，D4.3 卡在这里。 |
+| ✅ **gpu-4090（2026-09-12 已恢复，重回主力）** | 驱动 **580.178.04**，`torch.cuda.is_available()=True`，**4 张卡全空**，CUDA 张量运算实测通过——**G-0 完成**。中断期间的产物全部完好（preflight `9429c5a8…`、CPU smoke `d0003af5…`、accepted OOF 两份 hash 与记录逐字节一致），无残留进程。**方法实验走这条线**，理由见 `EXPERIMENT_PLAN.md` §3.7。 |
 | ✅ **gpu-5090 = 当前工作机** | 作者 2026-09-11 **第二次裁决**：**4090 不管了**，在 5090 上验证假设与方法；**可重新拉模型**；**≤1 天的任务直接执行，不再逐次请示**（超过一天仍要问，拉模型/跨机搬运也要先问位置）。host key 作者已确认为本人所加。实测当前**完全空闲**（32,607 MiB 用 209 MiB，原 Qwen 服务已不在）。仍有效的硬边界：**EasyECR 跑不了**（torch 2.0.1 不支持 sm_120）。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改队列行状态与 commit → 推进队列 → commit + **push** |
@@ -72,13 +72,15 @@ uv run python scripts/audit_r1_consistency.py \
 指纹 ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**作者 2026-09-11 确认是本人所加**。
 仍不得自行 TOFU 接受**新**指纹（cpolar 端口是复用的）。
 
-### 0.4 接手正在跑的 D4 anchor 重建（2026-09-11 起）
+### 0.4 D4 anchor 在 5090 的重建（2026-09-11，**已完成**）
 
 **背景**：作者裁决不从 4090 搬任何东西，D4 改为在 5090 自足重建（主表 §3.6）。新 backbone 内容地址
 `2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736`，
 位于 `gpu-5090:/mnt/aidata/tongjiakai/models/local/roberta-base/2c7ff1f1…49736`，六件全部来自公开源。
 
-**在跑什么**：`runs/stages/R1/r1-v61-factuality-oof-5090-r1/`，10 次
+**已收口**：2026-09-11 19:48 全部完成，`oof_summary.json` `13b275eb…7d9de`，CLS **.543514** / DMRoBERTa **.536622**，anchor=CLS。数字与解读见 `results/PHASE_D.md`。4090 已于次日恢复，故**方法实验改走 4090 线**（`EXPERIMENT_PLAN.md` §3.7），本节保留作记录。
+
+**当时跑的是**：`runs/stages/R1/r1-v61-factuality-oof-5090-r1/`，10 次
 `run_r1_factuality_oof.py`（`cls` / `dynamic_multi` × fold 1–5，seed 13，12 epoch，lr 2e-5，alpha 0.5）。
 三个 worker 并行，实测约 3.1 分钟/epoch，预计 2026-09-11 19:10–19:30 收口。
 
@@ -427,9 +429,10 @@ baseline，v6.1 三份方法设计**一个都没跑过**；证明方法有没有
 | **C-8** | 第 2 章统一评测协议素材整理 | ✅ CPU |
 | — | **E15：E3 重定向为「乙」形态 + 撤销 factorial** | ✅ **已完成** |
 | — | **E16：`EXPERIMENT_PLAN.md` 时间线按项目自身基准率重估**（初版 3 周收口是错的，把 GPU 计算耗时当成了日历时间） | ✅ **已完成** |
-| **G-0** | **修复 gpu-4090 驱动** | ❌ **需作者联系机主**，我们无 root |
-| **G-1** | D4.2 smoke | ⚠️ **CPU 半边 done 2026-09-11**；CUDA 半边待 G-0 或作者批准搬 backbone 到 5090 |
-| **G-2** | **D4.3 seed-13 五折 pilot** | ❌ 长任务，等 G-0 + 作者授权；**不放 5090** |
+| **G-0** | 修复 gpu-4090 驱动 | ✅ **done 2026-09-12** |
+| **G-1** | D4.2 smoke | ✅ **done 2026-09-12**（CPU + CUDA 双半边，产物逐字节相同） |
+| **C-9** | **写 `scripts/run_d4_typed_cue_oof.py`**（契约点名、仓库里没有） | ✅ CPU，**当前队首** |
+| **G-2** | **D4.3 seed-13 五折 pilot** | ❌ 等 **C-9** + 作者授权长任务；4090 四卡可按折并行 |
 
 完整主表（含 G-3…G-12、三个 Gate、GPU 预算与 phase 契约映射）见
 [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)。

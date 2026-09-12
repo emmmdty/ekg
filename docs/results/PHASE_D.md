@@ -576,3 +576,50 @@ permutation 只打乱 document 内的 cue 表示，1 epoch / 5 篇训练下还�
 因此 5090 上任何 D4 运行都只能是 exploratory，除非把 4090 的六文件目录（476 MB）整搬过去；
 按 `GPU_RUNBOOK` 两跳约 70 分钟，**跨机搬运须先问作者**，本轮未搬。
 
+## D4 anchor 的独立重建：5090 线跑出同一个排序，绝对值低约 .010（2026-09-11）
+
+按主表 §3.6，在 5090 上用**完全来自公开源**的 backbone
+（`2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736`）和同一份冻结五折 CV
+重训两条 anchor baseline。10 次 `run_r1_factuality_oof.py`（seed 13 / 12 epoch / lr 2e-5 / alpha 0.5），
+三路并行约 2 小时 53 分完成（16:55 → 19:48），`status=pass`、`final_valid_accessed=false`、
+覆盖 2,913 篇 / 73,939 mentions，CV 与 source 哈希与 4090 线一致。
+
+| baseline | 5090 线 macro-F1 | 4090 线 macro-F1 | 差 | CT+ | CT− | PS+ | PS− | Uu |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| RoBERTa+CLS | **.543514** | .553995 | −.0105 | .9757 | .6591 | .5433 | .3636 | .1758 |
+| DMRoBERTa | **.536622** | .545603 | −.0090 | .9741 | .6472 | .5265 | .3495 | .1859 |
+
+**两条线给出同一个结论**：CLS 是 anchor，与 DMRoBERTa 的间距同向且量级相近（5090 +.0069，
+4090 +.0084），两者仍然接近到不该被当成可区分。差异来源只可能是 backbone 的
+`tokenizer_config.json` 与 GPU 架构/kernel 的非确定性——折、种子、源数据、超参逐项相同。
+因此这组数字的可复现性约在 **±.01** 量级，**这是报告方法增益时该记住的地板**。
+
+产物 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/R1/r1-v61-factuality-oof-5090-r1/`：
+`oof_summary.json` `13b275eb…7d9de`、`cls_oof_labels.json` `585ce0a1…0966d8`、
+`dynamic_multi_oof_labels.json` `866bd7b7…ff856d`。编排脚本随产物存档
+（`oof_worker.sh` `56a3163a…`、`oof_finish.sh` `91960af4…`），逐次命令行在各
+`run_metadata.json` 的 `train_argv` / `evaluation_argv`。
+
+**逐折选中的 epoch 差别很大**（CLS `[12,12,12,7,5]`，DMRoBERTa `[9,4,10,9,8]`）——稀有类驱动的
+selection 抖动，与 D3 期观察到的现象一致，不是本轮新问题。
+
+## D4.2 smoke 的 CUDA 半边：通过，且与 CPU 逐字节相同（2026-09-12，4090 GPU2）
+
+gpu-4090 已恢复（驱动 580.178.04，`torch.cuda.is_available()=True`，四张卡全空，实测 CUDA 张量运算
+正常）——**G-0 完成**。同一条冻结命令换 `CUDA_VISIBLE_DEVICES=2` 重跑：
+
+```bash
+cd /data/TJK/ekg
+CUDA_VISIBLE_DEVICES=2 .venv/bin/python -u scripts/smoke_d4_typed_cue.py \
+  --contract runs/stages/D4/d4-v61-typed-cues-r1/preflight/protocol.json \
+  --output runs/stages/D4/d4-v61-typed-cues-r1/smoke/cuda-fold1-10docs \
+  --fold 1 --documents 10
+```
+
+`smoke.json` `c4c90b1aa665a7c950c6c16609df13660c0b622cf4766f9b46bbb64f18c55583`，`status=pass`，
+contract hash 与 preflight 一致。**三臂的 report / labels / sidecar 哈希与 CPU 半边逐字段相同**，
+`source_subset` 也相同——这条路径上 device 不引入任何差异。**G-1 至此完整通过。**
+
+4090 上的产物全部完好：preflight `9429c5a8…5025e`、CPU smoke `d0003af5…97c75`、
+accepted OOF `21e7e505…f88165` / `7de7177f…e58af`，与中断前记录逐字节一致，无残留进程。
+
