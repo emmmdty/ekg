@@ -12,7 +12,7 @@
 | **⚠️ 这一轮最重要的一件事** | **Ch3（D4）的 typed-cue 家族已关闭**，以 `failed` 身份留档。full `.476515` 低于两个锚（`.553995` / `.545603`）**七倍地板**，消融 `.536788` 与负控 `.495260` **都赢过 full**，预注册中介**反向**，PS−/Uu 护栏双破。归因与「五维瓶颈」这个**未验证**的候选原因见 [`results/PHASE_D.md`](results/PHASE_D.md)；不可变 handoff `pilot/seed-13/status.json` `3b4dbba2…a46234`。 |
 | **论文结构** | 第3章 事实性检测（D4，**本轮失败**）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。**章节存废在 Gate 2 判，执行代理不得自行改成两方法章。** |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表与 §5 的 Gate；本文队列只是切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | **无。GPU 上没有任何我们的进程。** 新窗口从 §0.3 的队列开工。 |
+| **活动任务** | **无。GPU 上没有任何我们的进程。** 新窗口从 §0.3 的队列开工——队首已推进到 **C-6b**（A4 入口脚本），C-6 的核心件 2026-09-12 已 done（`790c35a`）。 |
 | ⚠️ **gpu-4090** | 驱动已修好（580.178.04，`torch.cuda.is_available()=True`，G-0 完成），但 **2026-09-12 19:0x 起四张卡被用户 `Zhyw` 的 vllm 占满**（各约 20–22 GB）。**再用必须先 `nvidia-smi` 核卡，不得挤占。** |
 | ✅ **gpu-5090** | 作者授权：**≤1 天的任务直接执行，不再逐次请示**（超过一天要问；拉模型/跨机搬运先问位置）。backbone 已就位 `2c7ff1f1…49736`（六件全部公开源）。硬边界：**EasyECR 跑不了**（torch 2.0.1 不支持 sm_120）。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
@@ -64,14 +64,27 @@ uv run python scripts/audit_r1_consistency.py \
 
 | 次序 | 主表 ID | 做什么 | 完成判据 |
 |---|---|---|---|
-| **1** | **C-6** | **A4.0 实现 + 本地 gate**（Ch4 关系抽取，方法**一行都还没写**） | targeted tests + 三件套全绿；契约见 `phases/PHASE_A4_pair_evidence.md` |
-| **2** | **C-5b** | C5 的四个入口脚本：`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_`（C5.0 核心件 `role_uncertainty.py` 已于 `fc25777` 交付） | 同上；**照 D4 的四件套形状写，并把 pilot 入口一起写掉** |
-| **3** | **C-9 的同类缺口** | **给 A4 与 C5 各写 pilot 入口**（`run_a4_*.py` / `run_c5_argument_uncertainty.py`） | 契约点名了它们；D4 就是因为这个缺口白等了一轮 |
-| 4 | **C-7** | LLM 对照脚手架（三章各一个 CPU fixture） | 见主表 §4.1 |
-| 5 | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
+| ~~**1**~~ | **C-6** | ✅ **2026-09-12 done**（`790c35a`）：`src/ekg/relations/pair_evidence.py` + `pair_evidence` 头，20 条 targeted tests，**578 passed / 28 skipped、ruff 0、smoke OK**，两条 torch 门在 gpu-5090 实跑过。**剩 C-6b**＝入口脚本（见新的次序 2） | 已达成 |
+| **2** | **C-6b** | **写 A4 的入口脚本**：契约点名的 `scripts/run_a4_pair_evidence.py`（pilot 驱动，反事实**前向**在这里接线）＋ preflight/smoke 入口。**主表里 G-4 的依赖只写 C-6**，所以 C-6 不留这个洞，G-4 才不会像 D4 那样白等一轮 | 契约的 GPU 命令能真的被执行；targeted tests + 三件套全绿 |
+| **3** | **C-5b** | C5 的四个入口脚本：`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_`（C5.0 核心件 `role_uncertainty.py` 已于 `fc25777` 交付） | 同上；**照 D4 的四件套形状写，并把 pilot 入口一起写掉** |
+| **4** | **C-9 的同类缺口** | 给 C5 写 pilot 入口 `run_c5_argument_uncertainty.py`（A4 的那半已并入上面的 C-6b） | 契约点名了它；D4 就是因为这个缺口白等了一轮 |
+| 5 | **C-7** | LLM 对照脚手架（三章各一个 CPU fixture） | 见主表 §4.1 |
+| 6 | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
 
-**GPU 泳道（等 1–3 做完，且核卡确认有空闲）**：G-4（A4.2 smoke → A4.3 pilot）、
+**GPU 泳道（等 2–4 做完，且核卡确认有空闲）**：G-4（A4.2 smoke → A4.3 pilot）、
 G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**。跑完这两个就到 **Gate 2**。
+
+#### C-6 落地时定下的两件事（不是契约条款，可被作者否掉，但否之前按这个执行）
+
+1. **A4 的 evidence selector 是确定性的、无阈值可扫**：候选句按 `crosssentence.py` 的冻结线索词表
+   （causal / ordering）、触发词是否被再次点名、与触发句的距离**字典序**排名，取前 `EVIDENCE_BUDGET=2`
+   句。理由有三条：A4 的 stop conditions 明确禁止扫阈值；整条选择路径因此能在**本地 CPU** 上验完，
+   而 D4 这一轮恰恰是栽在「本地绿灯、服务器上才发现洞」；离散 top-k 的可学选择器要 Gumbel/straight-through，
+   为一次 pilot 引入的复杂度不值。**冻结的因果链是「逐对反事实证据充分性+必要性」这个监督，
+   不是选择器的参数化**，所以这条不动 brief。学习的部分只有 encoder 与零初始化证据残差。
+2. **触发句是 protected**：它们锚定 pooling，永不 mask，因此同句对没有 necessity 项——这是如实的，
+   同句 38.07 不是这一章要打的缺口（跨句占 75% 正例且落后约 11 点）。触发句里的线索词**单独记账**
+   （`protected_cues`），所以「只有不可 mask 的线索」的对不会被中介算成 unsupported。
 
 #### 从 D4 这一轮学到、必须带进 A4/C5 的三件事
 
@@ -97,6 +110,13 @@ G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**�
   该行在 Host 块内且不是 `HostName`/`Port`，**不会被每日脚本覆盖**；改动前的 config 备份为
   `~/.ssh/config.before-hostkeyalias-20260912`。
   今后**只有指纹本身与上面这串不一致时才算异常**——那意味着隧道后面换了机器，**停下问作者，不得自行 TOFU**；
+- ⚠️ **gpu-5090 上的 `runs/stages/R1/r1-v61-20260904/protocol.json` 是 09-04 18:30 的旧档**
+  （`67a36354…c1c8`，`phase_contracts` 是**空的**），所以 `tests/scripts/test_prepare_d4_typed_cue_preflight.py`
+  在 5090 上必然 FAIL（`R1 protocol has no factuality phase contract`）。**这不是代码问题**，是
+  §E.2b 那三个 gitignored JSON 只被要求同步到 4090、5090 从没同步过。2026-09-12 用 5090 跑全量
+  pytest 时实测到这一条；其余用例全过。要在 5090 上跑任何 D4/A4 preflight，先同步这三个 JSON
+  并双端核 SHA-256（本地值见 `results/PHASE_R1.md` §21.3）——**同步动作本身请作者点头**，
+  因为它会成为那台机上的信任根。
 - 两台机的 cpolar 隧道都会掉线。**ssh 失败 ≠ 远端进程死亡**，三态判活；长任务一律
   `setsid nohup` + `python -u` + 重定向 `logs/`，**一条 ssh 只发一个后台任务**。
   实测这样起的进程 PPID=1、独立 session，本机关机不影响。
@@ -430,7 +450,7 @@ baseline，v6.1 三份方法设计**一个都没跑过**；证明方法有没有
 | **C-3** | E8.1 LLMERE 恢复方案冻结 | ✅ 纯文档 + 只读 |
 | **C-4** | Ch6 对手名册调研与冻结 | ✅ 联网调研 |
 | **C-5** | C5.0 实现 + 本地 gate | ⚠️ **核心件 done 2026-09-11**（`role_uncertainty.py` + `role_compatibility` 组件，15 测试，550 passed）；**C-5b 四个入口脚本**待做 |
-| **C-6** | A4.0 实现 + 本地 gate | ✅ CPU |
+| **C-6** | A4.0 实现 + 本地 gate | ⚠️ **核心件 done 2026-09-12**（`790c35a`）；**剩 C-6b** 入口脚本 |
 | **C-7** | LLM 对照脚手架 | ✅ CPU |
 | **C-8** | 第 2 章统一评测协议素材整理 | ✅ CPU |
 | — | **E15：E3 重定向为「乙」形态 + 撤销 factorial** | ✅ **已完成** |
