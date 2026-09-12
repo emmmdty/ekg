@@ -1312,31 +1312,68 @@ fallback 按既有 P1 规则取同协议 eligible arms 中 causal F1 最高者�
 C-6 与 C-6b。A4 的机制此前**一行代码都没有**，契约冻结的 GPU 入口
 `scripts/run_a4_pair_evidence.py` 也从未被写过（与 D4 白等一轮的缺口同型）。本轮落地：
 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头（零初始化证据残差）、
-`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_` / `run_` 五个入口、
-44 条 targeted tests；本地 **592 passed / 28 skipped、ruff 0、smoke OK**，local gate tree
-`f142b58abbb7f5d8b9a83820d06e1c4b9f6f7359da5f1c9d1557cc90f0d4e18e`。
+`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_` / `run_` 五个入口、44 条 targeted tests；
+本地 **592 passed / 28 skipped、ruff 0、smoke OK**，local gate tree
+`427e25614490039855f92889ed68b3204c1a6f5fc9aa75b41ed9526d2af483d6`。
 
-### 开发冒烟（`runs/stages/A4/dev-smoke-20260912/`，gpu-5090 GPU0）
+### ⚠️ 第一版设计被本页自己的数据否掉（`f90c8cd` 改正）
 
-四臂 × 1 epoch × 10 train / 10 internal-dev 文档，**用的是 5090 上公开 `roberta-base` 缓存快照
-`e2da8e2f`，不是契约冻结的 `71be7419…c961ea9`**，也没有 preflight 绑定。
-`smoke.json` SHA-256 `61051b54a2169b90babbb1c840df98b7fc51ba4550befd8230d970717b55a77a`，
-`status=pass`：四臂各 9,546 个候选对**逐键相同**，反事实 logits 有限，
-新建头与复现基线 head 在 init 逐位相等（`full` 与 `remove_core` 的可比性由此成立）。
+初版把「两触发词之间的**连接词**」当成证据选择信号。这与本页 2026-08-30 的测量直接冲突：
+金标 causal recall 按线索词分层只差 **.008（同句）/ .064（跨句）**，本页当时的结论就是
+**「不做连接词感知的上下文表示，它没有余量可拿」**。本轮又在真实数据上补测一次
+（60 篇 train / 109,234 个候选对）：线索词表把 **79.3%** 的候选对判成「有线索」，
+interior 句里 28% 带线索，长跨度上根本排不出先后。**引用了本页的假设却没读本页的结论，是同一类
+错误的第五次**（见 `ENGINEERING_NOTES.md` 的内部口径条）。
 
-⚠️ **这一格里没有任何可引用的数字**：1 epoch、10 篇、非冻结 backbone、非官方评测器，
-`epoch_mean_loss` 与 mediator 计数只用来证明「跑得起来」。A4 的主表数字要等 A4.1 preflight +
-A4.2 smoke + A4.3 seed-13 pilot（`docs/EXPERIMENT_PLAN.md` §4.2 的 G-4），在 gpu-4090 上按契约命令产出。
+改正后的定义：**一对的证据就是两个触发句之间的句子（interior），不排序、不打分、无预算、无阈值。**
+necessity = 去掉 interior 重编码；sufficiency = 只留该对的 span。这与本页 causal 误差结构
+（FP 占 83.6%、跨句 FP 8,354 = 78.4%、其中 59.4% 长距离、precision .1998 vs .2904 而 recall 只差 .062）
+对齐：**necessity 正是「预测根本没读上下文」这件事的可训练形式**，而误差剖析自己写的下一步
+就是「例如 evidence/context 选择」。MAVEN-ERE 无证据标注（记录只有 tokens/sentences/events/TIMEX
+与三张关系表，已核），所以 DocRED 线的 EIDER/SAIS/DREEAM 监督式证据用不了；DREEAM 的
+self-training 变体记为**升级路径**，不是本轮方案。
 
-### 冒烟抓到的一个真实缺陷（已修，`0615596`）
+中介同步改正：**注册中介仍是 `cross_sentence_false_positives`（无需任何干预即可算）**；
+细分不再用词表，而用**行为量**——去掉 interior 后预测类 logit 掉幅小于冻结 margin 的 FP，
+且「被测到的 FP」自带分母（cap 会漏测，用错分母就会把 cap 变成假效应）。
 
-第一次冒烟**四臂全绿而三个带证据流的臂 `mean_loss=nan`**，而冒烟仍然 PASS——它只检查了导出的
-logits 有限，没检查训练损失。根因：残差的适用行只看「base pass 判为 causal 正类或金标正类」，
-**没问这一对是否可被 causal 评分**；TIMEX 端点对 causal 是 `-100`，于是某一步选中的行全部不可评分时
-`cross_entropy` 在零行上求平均返回 nan（已直接复现：全 ignore 的 target → nan）。修法是把
-「causal 可评分」并入适用条件——这同时是口径上正确的：在官方评测器不评分的对上训练 causal 头，
-等于在报告口径之外训练。另外训练器现在**遇到非有限损失立刻 raise**，不再把 nan 平均进 epoch 均值
-并存下一个看起来训练过的 checkpoint；冒烟也开始断言 `run_metadata.json` 里的 `epoch_mean_loss` 有限。
+### 开发冒烟（`gpu-5090:runs/stages/A4/dev-smoke-20260912/`，GPU0；**不是结果**）
+
+四臂 × 1 epoch × 10 train / 10 internal-dev 文档，**用 5090 上公开 `roberta-base` 快照
+`e2da8e2f`，不是契约冻结的 `71be7419…c961ea9`**，无 preflight 绑定，非官方评测器。
+`smoke.json` SHA-256 `0b92a24fbbf156dd5ac277efad20c14026e7b628a0eb68faa2f4a9db337640de`，`status=pass`：
+四臂各 9,546 个候选对逐键相同，反事实 logits 有限，新建头与复现基线 head 在 init 逐位相等。
+
+| 臂 | epoch0 loss | revised | pred_causal | 跨句 FP | 其中 ctx-independent | 平均 FP 掉幅 | 平均 TP 掉幅 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| full | 5.4801 | 1,201 | 1,201 | 1,049 | 1,049 / 1,049 | +.0057 | +.0062 |
+| length_matched | 5.5237 | 1,019 | 970 | 820 | 820 / 820 | +.0099 | +.0085 |
+| no_constraint | 4.6650 | 561 | 561 | 472 | 472 / 472 | +.0014 | +.0042 |
+| remove_core | 3.5886 | 0 | 403 | 339 | 0 / 0 | 0 | 0 |
+
+⚠️ **这张表里没有任何可引用的数字**：1 epoch、10 篇、非冻结 backbone、非官方评测器；
+它只证明四臂跑得起来、口径一致、仪器读数完整。唯一有解释价值的一条是
+**平均掉幅 ~0.006 且 TP 与 FP 不分离**——1 epoch 的模型预测与上下文基本无关，
+这正是机制要去改变的基线读数。A4 的主表数字要等 A4.1 preflight + A4.2 smoke + A4.3 seed-13 pilot
+（`docs/EXPERIMENT_PLAN.md` §4.2 的 G-4），在 gpu-4090 上按契约命令产出。
+
+### 冒烟连抓三个真实缺陷（都已修）
+
+1. **`0615596`｜三臂 `mean_loss=nan` 而冒烟仍 PASS**。冒烟只查了导出的 logits，没查训练损失。
+   根因：残差的适用行没问「这一对是否可被 causal 评分」，TIMEX 端点对 causal 是 `-100`，
+   某一步全部选中行不可评分时 `cross_entropy` 在零行上求平均返回 nan（已直接复现）。
+   修法同时是口径正确的：官方评测器不评分的对上不该训练 causal 头。训练器现在遇非有限损失立刻 raise。
+2. **`3019dd3`｜把**训练**用的每篇 16 对上限也用在了推理上**。后果有两层：
+   ① 一个候选拿到什么预测取决于它在候选顺序里的位置，这不是模型的性质；
+   ② 中介的 context 计数分母为空（`0/0`）而 `cross_sentence_false_positives` 有数百，
+   **仪器什么都没量却照样 PASS**。推理现在修正所有 base 判正的行（按句集分组，
+   开销是每个不同 span 一对前向而非每行一对），cap 只留给训练（反向传播要保活活化值）。
+3. **`323fd7a`｜修 ② 之后，`full` 把 554 个 base 正例**全部**改判 NONE，causal 边数为 0**。
+   根因是第二段的训练分布：只在 base 判正的行上训练，其中约 80% 金标是 NONE
+   （跨句 precision .1998），「一律说 NONE」对它接近最优。改成**一半金标正例 + 一半当前假正例**，
+   抹掉正类就要付一半代价。这是训练分布（与复现基线自带的负采样同类），**不改被评分的规则**，
+   并写进 checkpoint 的 `revision_training_rows` 防漂移。冒烟新增两条断言：
+   「被测 FP 数必须等于 FP 总数」与「带证据流的臂不得把 causal 正类抹光」。
 
 ### A4.1 preflight 本地能验到哪一步
 
@@ -1344,3 +1381,11 @@ R1 protocol `f0b4702b…50829`、t024 `9133a73c…587e7` 解析成功，relation
 物化的 internal-dev gold **复算出契约钉的候选 digest `15a3b1a5…dac10910`**（291 篇 / 7,195 event
 mentions / 1,719 TIMEX / 234,870 对）。**尚不能在本地闭合的两项**：内容寻址 encoder 目录
 （`71be7419…c961ea9`，在 4090）与两条同协议 baseline 的官方预测文件（A3 fallback 与 taco 适配，也在 4090）。
+
+### 仍待作者裁决的两处（不阻塞执行，按现状执行并可被否）
+
+1. **契约 A4.0 的字面是「实现 evidence selector」，本轮实现的是「按 span 定义的证据集」**，
+   没有可学/可排序的选择器。理由是上面的证伪与「无标注可学」这两条；冻结的因果链
+   （逐对反事实证据充分性+必要性 → 跨句 causal 误报 → 官方 causal micro-F1）**未改动**。
+2. **一致性项只跑 causal 族**（causal FP 占 causal 误差 83.6%，且 causal 是本章主指标；
+   temporal 正例约 39 倍且在本章只是护栏）。

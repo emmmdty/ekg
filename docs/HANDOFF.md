@@ -65,7 +65,7 @@ uv run python scripts/audit_r1_consistency.py \
 | 次序 | 主表 ID | 做什么 | 完成判据 |
 |---|---|---|---|
 | ~~**1**~~ | **C-6** | ✅ **2026-09-12 done**（`790c35a`）：`src/ekg/relations/pair_evidence.py` + `pair_evidence` 头，20 条 targeted tests，**578 passed / 28 skipped、ruff 0、smoke OK**，两条 torch 门在 gpu-5090 实跑过。**剩 C-6b**＝入口脚本（见新的次序 2） | 已达成 |
-| ~~**2**~~ | **C-6b** | ✅ **2026-09-12 done**（`65cf64b` + `0615596` + `6a5fabe`）：五个入口齐全，pilot 入口已进 preflight 的 `CODE_FILES`；44 条 targeted tests，**592 passed / 28 skipped、ruff 0、smoke OK**；5090 四臂开发冒烟 pass（**非结果**）。**A4.1 还差 4090 上的 encoder 与两条 baseline 预测** | 已达成 |
+| ~~**2**~~ | **C-6b** | ✅ **2026-09-12 done**（`65cf64b` → `323fd7a`）：五个入口齐全，pilot 入口已进 preflight 的 `CODE_FILES`；44 条 targeted tests，**592 passed / 28 skipped、ruff 0、smoke OK**；5090 四臂开发冒烟 pass（**非结果**），期间按证据改了选择器设计并修掉三个真缺陷。**A4.1 还差 4090 上的 encoder 与两条 baseline 预测** | 已达成 |
 | **3（当前队首）** | **C-5b** | C5 的四个入口脚本：`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_`（C5.0 核心件 `role_uncertainty.py` 已于 `fc25777` 交付） | 同上；**照 D4 的四件套形状写，并把 pilot 入口一起写掉** |
 | **4** | **C-9 的同类缺口** | 给 C5 写 pilot 入口 `run_c5_argument_uncertainty.py`（A4 的那半已并入上面的 C-6b） | 契约点名了它；D4 就是因为这个缺口白等了一轮 |
 | 5 | **C-7** | LLM 对照脚手架（三章各一个 CPU fixture） | 见主表 §4.1 |
@@ -74,17 +74,28 @@ uv run python scripts/audit_r1_consistency.py \
 **GPU 泳道（等 3–4 做完，且核卡确认有空闲）**：G-4（A4.2 smoke → A4.3 pilot）、
 G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**。跑完这两个就到 **Gate 2**。
 
-#### C-6 落地时定下的两件事（不是契约条款，可被作者否掉，但否之前按这个执行）
+#### C-6 的设计已按证据自审改过一轮（`f90c8cd` / `3019dd3` / `323fd7a`）
 
-1. **A4 的 evidence selector 是确定性的、无阈值可扫**：候选句按 `crosssentence.py` 的冻结线索词表
-   （causal / ordering）、触发词是否被再次点名、与触发句的距离**字典序**排名，取前 `EVIDENCE_BUDGET=2`
-   句。理由有三条：A4 的 stop conditions 明确禁止扫阈值；整条选择路径因此能在**本地 CPU** 上验完，
-   而 D4 这一轮恰恰是栽在「本地绿灯、服务器上才发现洞」；离散 top-k 的可学选择器要 Gumbel/straight-through，
-   为一次 pilot 引入的复杂度不值。**冻结的因果链是「逐对反事实证据充分性+必要性」这个监督，
-   不是选择器的参数化**，所以这条不动 brief。学习的部分只有 encoder 与零初始化证据残差。
-2. **触发句是 protected**：它们锚定 pooling，永不 mask，因此同句对没有 necessity 项——这是如实的，
-   同句 38.07 不是这一章要打的缺口（跨句占 75% 正例且落后约 11 点）。触发句里的线索词**单独记账**
-   （`protected_cues`），所以「只有不可 mask 的线索」的对不会被中介算成 unsupported。
+初版用**连接词词表**排序候选句去选证据。**被本项目自己的数据否掉**：`results/PHASE_A.md`
+2026-08-30 的分层测量只差 .008（同句）/ .064（跨句），当时的结论就是「不做连接词感知的上下文表示」；
+本轮补测（60 篇 / 109,234 对）显示词表把 **79.3%** 的对判成有线索，长跨度上排不出先后。
+**引用了结果页的假设却没读结果页的结论，是同一类错误的第五次。**
+
+现行设计（细节与三个冒烟缺陷见 `results/PHASE_A.md` 的 A4 节）：
+
+1. **证据是「定义」不是「选择」**：一对的证据 = 两触发句之间的 interior。不排序、不打分、
+   无预算、无阈值。necessity = 去掉 interior；sufficiency = 只留该对 span。对齐 causal 误差结构
+   （FP 占 83.6%、跨句 FP 78.4%、59.4% 长距离、precision .1998 而 recall 只差 .062），
+   误差剖析自己写的下一步就是「evidence/context 选择」。MAVEN-ERE 无证据标注（已核），
+   所以 EIDER/SAIS/DREEAM 的监督式证据用不了，**DREEAM 的 self-training 记为升级路径**。
+2. **注册中介不变**：`cross_sentence_false_positives`，无需干预即可算。细分改为**行为量**
+   （去掉 interior 后 logit 掉幅 < 冻结 margin），自带「被测到的」分母。
+3. **推理修正所有 base 判正的行**，每篇 16 对的 cap **只用于训练**（反向要保活活化值）；
+   第二段训练分布**一半金标正例 + 一半当前假正例**，否则它会一律说 NONE（实测过）。
+4. **触发句 protected**：同句/相邻对没有 necessity 项——这是如实的，短距离不是误差所在。
+
+**仍可被作者否掉的两点**（不阻塞，已按现状执行）：契约字面写「实现 evidence selector」而这里是
+按 span 定义的证据集（冻结因果链未动）；一致性项只跑 causal 族。
 
 #### A4.1 下次开工需要的两样东西（其余已就绪）
 
@@ -101,8 +112,9 @@ preflight 脚本已写好并在本地验到能验的部分，`prepare_a4_pair_ev
    prediction 文件，先核对它的口径再决定能不能用。
 
 开发冒烟产物在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/A4/dev-smoke-20260912/`，
-`smoke.json` `61051b54a2169b90babbb1c840df98b7fc51ba4550befd8230d970717b55a77a`；
-**它不是 A4.2**（无 preflight 绑定、非冻结 backbone），A4.2 要带 `--contract` 重跑。
+`smoke.json` `0b92a24fbbf156dd5ac277efad20c14026e7b628a0eb68faa2f4a9db337640de`；
+**它不是 A4.2**（无 preflight 绑定、非冻结 backbone、非官方评测器），A4.2 要带 `--contract` 重跑。
+四臂读数与三个被抓到的缺陷见 `results/PHASE_A.md`；**表里没有可引用的数字**。
 
 #### 从 D4 这一轮学到、必须带进 A4/C5 的三件事
 
