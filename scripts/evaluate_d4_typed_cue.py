@@ -34,6 +34,9 @@ def main() -> int:
     parser.add_argument("--permutation-seed", type=int, default=13)
     parser.add_argument("--labels-output", required=True, type=Path)
     parser.add_argument("--sidecar-output", required=True, type=Path)
+    # Optional so the smoke keeps its existing output set; the pilot passes it
+    # because the contract requires a per-instance decision trace.
+    parser.add_argument("--probabilities-output", type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     args.arm = validate_typed_cue_arm(args.arm)
@@ -58,6 +61,7 @@ def main() -> int:
     labels: dict[str, str] = {}
     evidence: dict[str, set[tuple[int, int]]] = {}
     sidecar: dict[str, dict[str, object]] = {}
+    traces: dict[str, dict[str, object]] = {}
     gold: dict[str, str] = {}
     for doc in docs:
         predictions = detector.predict(doc)
@@ -72,6 +76,11 @@ def main() -> int:
             }
         )
         sidecar.update(detector.last_sidecar)
+        for mention_id in predictions:
+            traces[mention_id] = {
+                "class_probabilities": detector.last_probabilities[mention_id],
+                "factor_logits": detector.last_factor_logits.get(mention_id),
+            }
         gold.update({mention.mention_id: mention.factuality for mention in doc.mentions})
     if set(labels) != set(gold) or set(sidecar) != set(gold):
         raise RuntimeError("pooled prediction or sidecar coverage mismatch")
@@ -91,6 +100,10 @@ def main() -> int:
     }
     _write(args.labels_output, labels)
     _write(args.sidecar_output, sidecar)
+    if args.probabilities_output is not None:
+        if set(traces) != set(gold):
+            raise RuntimeError("decision trace coverage mismatch")
+        _write(args.probabilities_output, traces)
     _write(args.output, payload)
     print(
         f"[d4-evaluate] arm={args.arm} docs={len(docs)} "

@@ -27,6 +27,10 @@ CODE_FILES = (
     "scripts/evaluate_d4_typed_cue.py",
     "scripts/prepare_d4_typed_cue_preflight.py",
     "scripts/smoke_d4_typed_cue.py",
+    # The pilot driver runs under this contract, so it has to be inside the hash
+    # set the contract binds; otherwise the seed-13 run is the one piece of code
+    # nobody can pin afterwards.
+    "scripts/run_d4_typed_cue_oof.py",
 )
 
 

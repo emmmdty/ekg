@@ -347,6 +347,10 @@ def build_typed_cue_decision_head(
     class TypedCueDecisionHead(nn.Module):
         def __init__(self) -> None:
             super().__init__()
+            # Kept for the pilot's per-instance dump: the factor stage is
+            # recomputed nowhere else, so reading it back would mean a second
+            # implementation of the same arithmetic.
+            self.last_factor_logits = None
             self.base = nn.Linear(hidden_size + structure_size, latent_size)
             self.cue_residual = nn.Linear(cue_size, latent_size)
             self.output = nn.Linear(latent_size, latent_size)
@@ -378,8 +382,13 @@ def build_typed_cue_decision_head(
                 raise ValueError(f"cue features must be (n, {cue_size})")
             logits = self.output(torch.tanh(self.base(base_input) + self.cue_residual(cues)))
             if arm == REMOVE_CORE_ARM:
+                # The flat arm has no factor stage; that absence is the ablation,
+                # so record it as absent rather than as zeros.
+                self.last_factor_logits = None
                 return torch.softmax(logits, dim=-1)
-            return recompose_factor_probabilities(logits.matmul(self.factor_projection))
+            factors = logits.matmul(self.factor_projection)
+            self.last_factor_logits = factors
+            return recompose_factor_probabilities(factors)
 
     return TypedCueDecisionHead()
 
@@ -410,6 +419,10 @@ class TypedCueFactualityDetector(FactualityDetector):
         self._decision_head = None
         self._device = "cpu"
         self.last_sidecar: dict[str, dict[str, object]] = {}
+        # Per-instance decision trace the seed-13 pilot has to persist: the five
+        # class probabilities, and the three factor logits when the arm has them.
+        self.last_probabilities: dict[str, list[float]] = {}
+        self.last_factor_logits: dict[str, list[float]] = {}
 
     def _ensure_model(self) -> None:
         if self._decision_head is not None:
@@ -460,6 +473,8 @@ class TypedCueFactualityDetector(FactualityDetector):
     ) -> dict[str, FactualityPrediction]:
         if not doc.mentions:
             self.last_sidecar = {}
+            self.last_probabilities = {}
+            self.last_factor_logits = {}
             return {}
         self._ensure_model()
         import torch
@@ -502,6 +517,19 @@ class TypedCueFactualityDetector(FactualityDetector):
             probabilities = self._decision_head(triggers, structure, cues)
             confidence, labels = probabilities.max(dim=-1)
             self.last_sidecar = cue_sidecar(doc.mentions, candidates, cue_logits)
+            factor_logits = self._decision_head.last_factor_logits
+            self.last_probabilities = {
+                mention.mention_id: [float(value) for value in row]
+                for mention, row in zip(doc.mentions, probabilities.tolist(), strict=True)
+            }
+            self.last_factor_logits = (
+                {}
+                if factor_logits is None
+                else {
+                    mention.mention_id: [float(value) for value in row]
+                    for mention, row in zip(doc.mentions, factor_logits.tolist(), strict=True)
+                }
+            )
             evidence = [
                 tuple(
                     EvidenceSpan(

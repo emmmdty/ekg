@@ -62,3 +62,10 @@ def test_model_digest_reads_every_file_under_the_directory(tmp_path: Path) -> No
     )
 
     assert model_content_digest(model) == expected
+
+
+def test_the_pilot_driver_is_inside_the_bound_code_set() -> None:
+    # The seed-13 run must not be the one file the contract cannot pin.
+    assert "scripts/run_d4_typed_cue_oof.py" in preflight.CODE_FILES
+    for relative in preflight.CODE_FILES:
+        assert (ROOT / relative).is_file(), relative
