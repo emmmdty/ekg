@@ -1,103 +1,123 @@
-"""Pair-specific evidence: what licenses a relation, and what removing it costs.
+"""Pair-specific evidence: does a predicted relation depend on its context at all?
 
-`docs/results/PHASE_A.md` records where Ch2 actually stands: window encoding
-lifted cross-sentence causal F1 from 19.99 to 24.11, and **three further rounds
-of optimisation moved it by less than a point** while same-sentence pairs sit at
-38.07 and cross-sentence pairs carry 75% of the positives.  `crosssentence.py`
-measured the next hypothesis: for a cross-sentence pair the discourse cue lies
-*between* the two triggers, and nothing in the pair feature `[h; t; h*t; |h-t|]`
-points at it.
+The design here follows this project's own measurements, which rule out the
+obvious alternative.  From `docs/results/PHASE_A.md`:
 
-So a pair here gets an explicit evidence set — sentences it may cite — and two
-counterfactual forwards over that set:
+- **Causal errors are false positives, not misses.** TP/FP/FN = 2,706 / 10,659 /
+  2,090; false positives are 83.6% of all causal errors and 78.4% of them are
+  cross-sentence (8,354), of which 59.4% are long-distance.  Cross-sentence
+  precision is .1998 against .2904 same-sentence while recall differs by only
+  .062: the model emits 2.6x as many cross-sentence causal edges as there are
+  gold ones.  The error profile's own conclusion names the remedy — "下一机制
+  应直接提高长距离跨句『是否有因果边』的分离度，例如 evidence/context 选择".
+- **Discourse cues are not the missing signal.** Stratifying gold causal recall
+  by whether a connective sits between the triggers moves it by .008
+  same-sentence and .064 cross-sentence, and the page's verdict is explicit:
+  "不做『连接词感知的上下文表示』，它没有余量可拿".  Measured again here on 60
+  train documents / 109,234 candidate pairs, a cue lexicon labels **79.3%** of
+  all pairs as cue-bearing and 28% of the sentences inside a span, so it also
+  cannot rank one sentence above another on the long spans that carry the error
+  mass.  A cue-ranked selector was therefore removed from this module.
+
+So evidence is not *selected* here, it is *defined*: a pair's evidence is the
+sentences strictly between its two triggers.  Nothing is ranked, nothing is
+scored, and there is no budget or threshold to sweep.  Two counterfactual
+forwards ask the only question the error profile leaves open:
 
 ``necessity``
-    Encode the document with the cited sentences removed.  A supported positive
-    must lose logit when its evidence is gone.
+    Encode the document with the interior removed.  A cross-sentence positive
+    that keeps its logit here was never reading the context — which is exactly
+    the 2.6x over-emission, stated as something a loss can punish.
 ``sufficiency``
-    Encode only the trigger sentences plus the cited ones.  A supported positive
-    must survive on its evidence alone.
+    Encode the pair's span alone.  A positive must survive on it, which is what
+    stops necessity from being satisfied by predicting NONE more often (the
+    contract guards causal recall for the same reason).
+
+The two cover complementary ranges and that is deliberate: necessity is
+informative when the interior is large (long spans — the error mass), while
+sufficiency is informative when the span is small next to the document.
+Trigger sentences are *protected*: they anchor the pooling and are never
+masked, so a same-sentence or adjacent pair has no necessity term.  Those are
+the short distances, which the error profile shows are not where the errors are.
+
+MAVEN-ERE carries no evidence annotation (a record holds only `tokens`,
+`sentences`, `events`, `TIMEX` and the three relation tables), so the
+supervised-evidence route the DocRED literature takes — EIDER, SAIS, DREEAM —
+is not available; DREEAM's self-training variant is the named upgrade path if
+the intervention turns out to matter but this granularity is too coarse.
 
 The four frozen A4 arms differ **only** in the objective and in which sentences
-are cited: ``full`` cites its own evidence and trains both consistency terms;
-``remove_core`` passes no evidence stream at all; ``length_matched`` cites
-non-evidence sentences of matched token length (the registered negative
-control); ``no_constraint`` keeps the evidence representation and drops the
-consistency terms.  Every arm shares one head class, whose evidence residual is
-zero-initialised, so the base pair logits of all four coincide at init — the
-assertion `PHASE_A4` smoke makes — and a gain cannot come from capacity.
-
-The selector is deterministic and torch-free: candidate sentences are ranked by
-pair-conditioned lexical evidence (the frozen causal/ordering lexicons of
-`crosssentence.py`, plus whether a trigger is named again) and the top
-`EVIDENCE_BUDGET` are cited.  Nothing here has a threshold to sweep, and the
-whole selection path is checkable on CPU — which is where D4's cycle was lost.
-The learned part is the encoder and the residual, shaped by the consistency
-terms; the registered causal chain in `design_briefs.json` is that supervision,
-not the selector's parameterisation.
-
-Sentences hosting the two triggers are *protected*: they anchor the pooling and
-are never masked.  A same-sentence pair therefore has nothing maskable and no
-necessity term, which is honest — its 38.07 is not the gap this addresses.
+are intervened on: ``full`` uses its own interior and trains both consistency
+terms; ``remove_core`` passes no evidence stream at all; ``length_matched``
+intervenes on equally long sentences from outside the span (the registered
+negative control); ``no_constraint`` keeps the evidence representation and drops
+the consistency terms.  All four share one head class whose evidence residual is
+zero-initialised, so their base logits coincide at init and a gain cannot come
+from capacity.
 """
 
 from __future__ import annotations
 
-import hashlib
 import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
 
 from ekg.core.schema import EventNode
-from ekg.relations.crosssentence import CAUSAL_CUES, ORDERING_CUES, find_cues
 from ekg.relations.pair_heads import LINEAR_HEAD, PAIR_EVIDENCE_HEAD, pair_head_factories
 
 __all__ = [
     "A4_ARMS",
     "CONFIG_FILE",
-    "EVIDENCE_BUDGET",
+    "CONSISTENCY_FAMILY",
+    "CONSISTENCY_PAIR_CAP",
+    "EVIDENCE_RULE",
     "FULL_ARM",
     "LENGTH_MATCHED_ARM",
+    "NECESSITY_MARGIN",
     "NO_CONSTRAINT_ARM",
     "REMOVE_CORE_ARM",
     "ArmFlags",
     "PairEvidence",
     "arm_flags",
     "build_pair_evidence",
-    "CONSISTENCY_FAMILY",
-    "CONSISTENCY_PAIR_CAP",
     "consistency_rows",
+    "context_dependence_report",
     "counterfactual_sentence_ids",
     "document_pair_evidence",
-    "lexicon_digest",
     "load_pair_evidence_config",
     "necessity_scoreable",
     "pair_evidence_config",
     "pair_evidence_sidecar",
-    "sentence_tokens",
-    "unsupported_cross_sentence_causal",
+    "sentence_lengths",
     "validate_a4_arm",
     "with_length_matched_substitutes",
 ]
 
 CONFIG_FILE = "pair_evidence_config.json"
-CONFIG_SCHEMA_VERSION = "ekg.relation_pair_evidence.v1"
+CONFIG_SCHEMA_VERSION = "ekg.relation_pair_evidence.v2"
 
-# How many sentences a pair may cite.  Frozen rather than tuned: A4's stop
-# conditions forbid a threshold sweep, and a fixed budget has nothing to sweep.
-EVIDENCE_BUDGET = 2
+# What counts as a pair's evidence.  Recorded in every checkpoint because it is
+# code, not data: change it and inference intervenes on different sentences than
+# training did, while the numbers still look comparable.
+EVIDENCE_RULE = "span_interior"
 
-# The consistency terms run on the causal family alone.  A4's claim and its
-# registered mediator are both about cross-sentence causal false positives;
-# temporal carries ~39x the positives, so including it would pay for most of the
-# counterfactual forwards to supervise a family that is only a guardrail here.
+# The consistency terms run on the causal family alone.  Causal false positives
+# are 83.6% of causal errors and causal micro-F1 is the chapter's primary
+# metric; temporal carries ~39x the positives and is a guardrail here, so
+# including it would pay for most of the counterfactual forwards to supervise
+# something the promotion gate only asks us not to break.
 CONSISTENCY_FAMILY = "causal"
 
-# Worst-case bound on counterfactual forwards per document.  A document with more
-# causal positives than this supervises its first `CONSISTENCY_PAIR_CAP` in
-# candidate order and records the rest as skipped, so the cost of one training
-# step is bounded and the choice is replayable.
+# How much logit a positive must lose when its evidence is removed.  Frozen, and
+# also the margin the context-dependence report counts at, so the loss and the
+# mediator are read on one scale.
+NECESSITY_MARGIN = 1.0
+
+# Worst-case bound on counterfactual forwards per document.  A document with
+# more supervised pairs than this takes the first `CONSISTENCY_PAIR_CAP` in
+# candidate order and records the rest as skipped, so one training step has a
+# bounded cost and the choice is replayable.
 # ponytail: fixed cap; raise it if the skipped count is ever a large share.
 CONSISTENCY_PAIR_CAP = 16
 
@@ -135,30 +155,13 @@ def arm_flags(arm: str) -> ArmFlags:
     return _ARM_FLAGS[validate_a4_arm(arm)]
 
 
-# Tokens are compared against the frozen lexicons, so trailing punctuation must
-# not hide a cue: "because," never equals "because".
-_EDGE_PUNCTUATION = ".,;:!?\"'`()[]{}"
+def sentence_lengths(doc_text: str) -> list[int]:
+    """Token count per sentence of the canonical doc text (one line each).
 
-
-def sentence_tokens(doc_text: str) -> list[list[str]]:
-    """One token list per sentence of the canonical doc text (one line each)."""
-    return [
-        [token for token in (raw.strip(_EDGE_PUNCTUATION) for raw in line.split()) if token]
-        for line in doc_text.split("\n")
-    ]
-
-
-def lexicon_digest() -> str:
-    """Identity of the frozen selector inputs, for train/inference drift."""
-    payload = json.dumps(
-        {
-            "causal": [list(entry) for entry in CAUSAL_CUES],
-            "ordering": [list(entry) for entry in ORDERING_CUES],
-            "budget": EVIDENCE_BUDGET,
-        },
-        sort_keys=True,
-    )
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    Only used to match the negative control's length; the counterfactuals
+    themselves address sentences by index, never by content.
+    """
+    return [len(line.split()) for line in doc_text.split("\n")]
 
 
 @dataclass(frozen=True)
@@ -170,10 +173,7 @@ class PairEvidence:
     tail_id: str
     head_sent: int
     tail_sent: int
-    candidates: tuple[int, ...]
-    selected: tuple[int, ...]
-    selected_cues: tuple[str, ...]
-    protected_cues: tuple[str, ...]
+    interior: tuple[int, ...]
     substitutes: tuple[int, ...] = ()
     substitutes_requested: int = 0
 
@@ -183,33 +183,18 @@ class PairEvidence:
         return tuple(sorted({self.head_sent, self.tail_sent}))
 
     @property
+    def span(self) -> tuple[int, ...]:
+        """The closed sentence span the pair covers, triggers included."""
+        first, last = sorted((self.head_sent, self.tail_sent))
+        return tuple(range(first, last + 1))
+
+    @property
     def cross_sentence(self) -> bool:
         return self.head_sent != self.tail_sent
 
-    @property
-    def supported(self) -> bool:
-        """Whether any cue licensed this pair, cited or inside a trigger sentence."""
-        return bool(self.selected_cues or self.protected_cues)
-
     def cited(self, arm: str) -> tuple[int, ...]:
         """The sentences this arm actually intervenes on."""
-        return self.substitutes if arm_flags(arm).substitute_control else self.selected
-
-
-def _rank_key(
-    sent_id: int, tokens: Sequence[str], triggers: Sequence[str], protected: Sequence[int]
-) -> tuple[int, int, int, int, int]:
-    """Ranking is lexicographic on counts, so there is no weight to tune."""
-    lowered = [token.lower() for token in tokens]
-    named = sum(1 for trigger in triggers if trigger.lower() in lowered)
-    nearest = min(abs(sent_id - anchor) for anchor in protected)
-    return (
-        len(find_cues(tokens, CAUSAL_CUES)),
-        len(find_cues(tokens, ORDERING_CUES)),
-        named,
-        -nearest,
-        -sent_id,
-    )
+        return self.substitutes if arm_flags(arm).substitute_control else self.interior
 
 
 def build_pair_evidence(
@@ -219,85 +204,46 @@ def build_pair_evidence(
     *,
     head_sent: int,
     tail_sent: int,
-    head_trigger: str,
-    tail_trigger: str,
-    sentences: Sequence[Sequence[str]],
-    budget: int = EVIDENCE_BUDGET,
+    n_sentences: int,
 ) -> PairEvidence:
-    """Rank the sentences between the two triggers and cite the top `budget`.
+    """A pair's evidence: the sentences strictly between its two triggers.
 
-    Candidates are the closed sentence span the pair spans; the two trigger
-    sentences are protected and so are not citable — citing them would change
-    neither counterfactual.  Their cues are reported separately instead, so a
-    pair whose only cue is unmaskable is not counted as unsupported.
+    Definition, not selection.  There is nothing to rank here, which is the
+    point: the cue lexicon that would have done the ranking labels four pairs in
+    five as cue-bearing and cannot separate sentences inside a long span (see
+    the module docstring for the measurement).
     """
-    if budget < 0:
-        raise ValueError("evidence budget must not be negative")
     for sent_id in (head_sent, tail_sent):
-        if not 0 <= sent_id < len(sentences):
-            raise ValueError(f"{doc_id}: sent_id {sent_id} outside {len(sentences)} sentences")
+        if not 0 <= sent_id < n_sentences:
+            raise ValueError(f"{doc_id}: sent_id {sent_id} outside {n_sentences} sentences")
     first, last = sorted((head_sent, tail_sent))
-    candidates = tuple(range(first, last + 1))
-    protected = tuple(sorted({head_sent, tail_sent}))
-    triggers = (head_trigger, tail_trigger)
-
-    selectable = [sent_id for sent_id in candidates if sent_id not in protected]
-    ranked = sorted(
-        selectable,
-        key=lambda sent_id: _rank_key(sent_id, sentences[sent_id], triggers, protected),
-        reverse=True,
-    )
-    selected = tuple(sorted(ranked[:budget]))
-    selected_cues = tuple(
-        sorted(
-            {
-                cue
-                for sent_id in selected
-                for lexicon in (CAUSAL_CUES, ORDERING_CUES)
-                for cue in find_cues(sentences[sent_id], lexicon)
-            }
-        )
-    )
-    protected_cues = tuple(
-        sorted(
-            {
-                cue
-                for sent_id in protected
-                for lexicon in (CAUSAL_CUES, ORDERING_CUES)
-                for cue in find_cues(sentences[sent_id], lexicon)
-            }
-        )
-    )
     return PairEvidence(
         doc_id=doc_id,
         head_id=head_id,
         tail_id=tail_id,
         head_sent=head_sent,
         tail_sent=tail_sent,
-        candidates=candidates,
-        selected=selected,
-        selected_cues=selected_cues,
-        protected_cues=protected_cues,
+        interior=tuple(range(first + 1, last)),
     )
 
 
 def with_length_matched_substitutes(
-    record: PairEvidence, sentences: Sequence[Sequence[str]]
+    record: PairEvidence, lengths: Sequence[int]
 ) -> PairEvidence:
-    """The negative control's citation: non-evidence sentences of matched length.
+    """The negative control's target: equally long sentences from outside the span.
 
     Matching length keeps the amount of text the counterfactuals move constant,
     so a mediator improvement that survives this came from moving *text*, not
-    from moving evidence.  A document with too few sentences outside the pair's
-    span cannot supply a match; the shortfall is recorded rather than padded,
-    because a silently shorter control is a control that no longer matches.
+    from moving the pair's own context.  A span that leaves too few sentences
+    outside it cannot be matched; the shortfall is recorded rather than padded,
+    because a silently shorter control is a control that no longer matches — and
+    it is the long spans, the ones carrying the error mass, that run short, so
+    this count has to be read alongside the arm.
     """
-    outside = [
-        sent_id for sent_id in range(len(sentences)) if sent_id not in set(record.candidates)
-    ]
+    outside = [sent_id for sent_id in range(len(lengths)) if sent_id not in set(record.span)]
     substitutes: list[int] = []
-    for target in record.selected:
-        want = len(sentences[target])
+    for target in record.interior:
+        want = lengths[target]
         available = [sent_id for sent_id in outside if sent_id not in substitutes]
         if not available:
             break
@@ -305,7 +251,7 @@ def with_length_matched_substitutes(
             min(
                 available,
                 key=lambda sent_id: (
-                    abs(len(sentences[sent_id]) - want),
+                    abs(lengths[sent_id] - want),
                     abs(sent_id - target),
                     sent_id,
                 ),
@@ -314,7 +260,7 @@ def with_length_matched_substitutes(
     return replace(
         record,
         substitutes=tuple(sorted(substitutes)),
-        substitutes_requested=len(record.selected),
+        substitutes_requested=len(record.interior),
     )
 
 
@@ -330,8 +276,6 @@ def document_pair_evidence(
     nodes: Sequence[EventNode],
     doc_text: str,
     pairs: Sequence[tuple[str, str]],
-    *,
-    budget: int = EVIDENCE_BUDGET,
 ) -> list[PairEvidence]:
     """One record per candidate pair, in the order the candidates were given.
 
@@ -339,9 +283,9 @@ def document_pair_evidence(
     returns exactly as many records as it was given pairs, in the same order,
     and fails on a pair whose endpoints it cannot place.  Every record carries
     its length-matched substitutes too, so all four arms read one record rather
-    than each rebuilding the selection they intervene on.
+    than each rebuilding the intervention they act on.
     """
-    sentences = sentence_tokens(doc_text)
+    lengths = sentence_lengths(doc_text)
     by_id = {node.event_id: node for node in nodes}
     records: list[PairEvidence] = []
     for head_id, tail_id in pairs:
@@ -354,12 +298,9 @@ def document_pair_evidence(
             tail_id,
             head_sent=_trigger_sentence(head),
             tail_sent=_trigger_sentence(tail),
-            head_trigger=head.trigger,
-            tail_trigger=tail.trigger,
-            sentences=sentences,
-            budget=budget,
+            n_sentences=len(lengths),
         )
-        records.append(with_length_matched_substitutes(record, sentences))
+        records.append(with_length_matched_substitutes(record, lengths))
     return records
 
 
@@ -369,11 +310,11 @@ def counterfactual_sentence_ids(
     """The sentence sets of the three forwards this arm needs.
 
     ``base`` is the document as the reproduction baseline encodes it, ``masked``
-    drops the cited sentences, ``retained`` keeps only the trigger sentences and
-    the cited ones.  ``remove_core`` has no evidence stream and therefore only a
-    base forward.
+    drops the intervened sentences, ``retained`` keeps the pair's span (with the
+    control's substitutes in place of the interior, when that arm is running).
+    ``remove_core`` has no evidence stream and therefore only a base forward.
     """
-    if n_sentences <= max(record.candidates):
+    if n_sentences <= max(record.span):
         raise ValueError(f"{record.doc_id}: {n_sentences} sentences cannot hold the pair's span")
     base = tuple(range(n_sentences))
     if not arm_flags(arm).evidence_stream:
@@ -387,10 +328,11 @@ def counterfactual_sentence_ids(
 
 
 def necessity_scoreable(record: PairEvidence, *, arm: str) -> bool:
-    """Whether masking this pair's citation changes the document at all.
+    """Whether the intervention changes the document at all.
 
-    A pair with nothing maskable would contribute the full margin as a constant,
-    which is gradient on nothing; it is excluded rather than absorbed.
+    A pair with an empty interior would contribute the full margin as a
+    constant, which is gradient on nothing; it is excluded rather than absorbed.
+    Same-sentence and adjacent pairs are exactly that case.
     """
     if not arm_flags(arm).evidence_stream:
         return False
@@ -421,27 +363,46 @@ def consistency_rows(
     return tuple(eligible[:cap]), max(0, len(eligible) - cap)
 
 
-def unsupported_cross_sentence_causal(
+def context_dependence_report(
     records: Sequence[PairEvidence],
     predicted: Mapping[tuple[str, str], str],
     gold: Mapping[tuple[str, str], str],
-) -> dict[str, int]:
-    """The registered mediator: unsupported cross-sentence causal false positives.
+    *,
+    logit_drop: Mapping[tuple[str, str], float] | None = None,
+    margin: float = NECESSITY_MARGIN,
+) -> dict[str, float | int]:
+    """The registered mediator, plus how much the predictions used their context.
 
-    A false positive is *unsupported* when no cue licensed the pair anywhere in
-    its span — neither in a cited sentence nor in a trigger sentence.  The
-    denominators travel with the counts so a rate can be recomputed without
-    re-reading predictions, and so a drop cannot be read as progress when it
-    came from predicting fewer causal edges overall.
+    `cross_sentence_false_positives` is the quantity the frozen causal chain
+    registers, and it needs no interventions.  The context-dependence counters
+    refine it with what the counterfactual forwards measure: a false positive
+    whose causal logit barely moves when its interior is removed was not reading
+    the context at all, which is the 2.6x cross-sentence over-emission stated as
+    a per-instance fact.
+
+    That refinement is deliberately **behavioural rather than lexical** — an
+    earlier version of this function called a pair "unsupported" when no
+    discourse cue appeared in its span, and measured on real data that labels
+    79.3% of pairs supported, so it could not have separated anything.
+
+    Only pairs with a measured drop enter the context counters, and their own
+    denominator travels with them: the per-document cap means not every false
+    positive is measured, and a rate over the wrong denominator is how a cap
+    turns into an apparent effect.
     """
-    counts: dict[str, int] = {
+    drops = dict(logit_drop or {})
+    counts: dict[str, float | int] = {
         "pairs": 0,
         "cross_sentence": 0,
         "predicted_causal": 0,
         "false_positives": 0,
         "cross_sentence_false_positives": 0,
-        "unsupported_cross_sentence_false_positives": 0,
+        "measured_cross_sentence_false_positives": 0,
+        "context_independent_cross_sentence_false_positives": 0,
+        "measured_true_positives": 0,
     }
+    false_positive_drops: list[float] = []
+    true_positive_drops: list[float] = []
     for record in records:
         key = (record.head_id, record.tail_id)
         if key not in predicted or key not in gold:
@@ -454,17 +415,31 @@ def unsupported_cross_sentence_causal(
         counts["false_positives"] += int(false_positive)
         cross_false = false_positive and record.cross_sentence
         counts["cross_sentence_false_positives"] += int(cross_false)
-        counts["unsupported_cross_sentence_false_positives"] += int(
-            cross_false and not record.supported
-        )
+        drop = drops.get(key)
+        if drop is None:
+            continue
+        if cross_false:
+            counts["measured_cross_sentence_false_positives"] += 1
+            false_positive_drops.append(drop)
+            counts["context_independent_cross_sentence_false_positives"] += int(drop < margin)
+        elif is_causal and predicted[key] == gold[key]:
+            counts["measured_true_positives"] += 1
+            true_positive_drops.append(drop)
+    counts["margin"] = margin
+    counts["mean_false_positive_logit_drop"] = (
+        sum(false_positive_drops) / len(false_positive_drops) if false_positive_drops else 0.0
+    )
+    counts["mean_true_positive_logit_drop"] = (
+        sum(true_positive_drops) / len(true_positive_drops) if true_positive_drops else 0.0
+    )
     return counts
 
 
 def pair_evidence_sidecar(records: Sequence[PairEvidence], *, arm: str) -> dict[str, dict]:
-    """Per-pair record of what was cited, for every pair — never a subset.
+    """Per-pair record of what was intervened on, for every pair — never a subset.
 
-    Coverage is what A4.1 gates on, so a pair with an empty citation is written
-    with its empty citation instead of being left out and counted as scored.
+    Coverage is what A4.1 gates on, so a pair with an empty interior is written
+    with its empty interior instead of being left out and counted as scored.
     """
     validate_a4_arm(arm)
     sidecar: dict[str, dict] = {}
@@ -475,19 +450,17 @@ def pair_evidence_sidecar(records: Sequence[PairEvidence], *, arm: str) -> dict[
         sidecar[key] = {
             "doc_id": record.doc_id,
             "position": "cross_sentence" if record.cross_sentence else "same_sentence",
-            "candidates": len(record.candidates),
-            "selected": list(record.selected),
+            "span": len(record.span),
+            "interior": list(record.interior),
             "cited": list(record.cited(arm)),
-            "selected_cues": list(record.selected_cues),
-            "protected_cues": list(record.protected_cues),
             "substitutes_requested": record.substitutes_requested,
-            "supported": record.supported,
+            "control_matched": len(record.substitutes) == record.substitutes_requested,
             "necessity_scoreable": necessity_scoreable(record, arm=arm),
         }
     return sidecar
 
 
-def pair_evidence_config(arm: str, *, budget: int = EVIDENCE_BUDGET) -> dict[str, object]:
+def pair_evidence_config(arm: str) -> dict[str, object]:
     """The arm identity a checkpoint carries, so an arm cannot be mistaken.
 
     `residual_rows` is the rule by which a row receives the evidence residual,
@@ -499,44 +472,44 @@ def pair_evidence_config(arm: str, *, budget: int = EVIDENCE_BUDGET) -> dict[str
     return {
         "schema_version": CONFIG_SCHEMA_VERSION,
         "arm": validate_a4_arm(arm),
-        "budget": budget,
-        "lexicon_sha256": lexicon_digest(),
+        "evidence_rule": EVIDENCE_RULE,
         "consistency_family": CONSISTENCY_FAMILY,
         "consistency_pair_cap": CONSISTENCY_PAIR_CAP,
+        "necessity_margin": NECESSITY_MARGIN,
         "residual_rows": "base_predicted_positive",
     }
 
 
 def load_pair_evidence_config(checkpoint: Path) -> dict[str, object]:
-    """Read an arm identity and refuse it if the selector drifted underneath it.
+    """Read an arm identity and refuse it if the mechanism drifted underneath it.
 
-    The selector's lexicon and budget are code, not data: if they change after a
-    checkpoint was trained, inference cites different sentences than training
-    did, and the run's numbers silently stop meaning what they claim.
+    The evidence rule, the supervised family and the margin are code, not data:
+    if they change after a checkpoint was trained, inference intervenes on
+    different sentences than training did, and the run's numbers silently stop
+    meaning what they claim.
     """
     path = Path(checkpoint) / CONFIG_FILE
     if not path.is_file():
         raise FileNotFoundError(f"{path} is missing; the arm identity is unknown")
     payload = json.loads(path.read_text(encoding="utf-8"))
-    expected = set(pair_evidence_config(FULL_ARM))
-    if not isinstance(payload, dict) or set(payload) != expected:
+    expected = pair_evidence_config(FULL_ARM)
+    if not isinstance(payload, dict) or set(payload) != set(expected):
         raise ValueError(f"{path} must contain exactly {sorted(expected)}")
     if payload["schema_version"] != CONFIG_SCHEMA_VERSION:
         raise ValueError(f"{path} has an unsupported schema_version")
     validate_a4_arm(payload["arm"])
-    if payload["consistency_family"] != CONSISTENCY_FAMILY:
-        raise ValueError(
-            f"{path} was trained on the {payload['consistency_family']!r} family, "
-            f"code now supervises {CONSISTENCY_FAMILY!r}"
-        )
-    if payload["residual_rows"] != "base_predicted_positive":
-        raise ValueError(f"{path} carries an unknown residual rule")
-    current = lexicon_digest()
-    if payload["lexicon_sha256"] != current or payload["budget"] != EVIDENCE_BUDGET:
-        raise ValueError(
-            f"{path} evidence selector hash drift: checkpoint "
-            f"{payload['lexicon_sha256']}/{payload['budget']} vs code {current}/{EVIDENCE_BUDGET}"
-        )
+    for field in (
+        "evidence_rule",
+        "consistency_family",
+        "consistency_pair_cap",
+        "necessity_margin",
+        "residual_rows",
+    ):
+        if payload[field] != expected[field]:
+            raise ValueError(
+                f"{path} mechanism drift on {field}: checkpoint {payload[field]!r} "
+                f"vs code {expected[field]!r}"
+            )
     return payload
 
 
@@ -553,10 +526,10 @@ try:  # pragma: no cover - exercised on a GPU host
         The base path *is* `PairClassifier`, so `full` and `remove_core` do not
         merely agree at init by construction of matched shapes — they run the
         same parameters.  The residual reads how the pair feature moves when only
-        the evidence is in context (`retained` minus `base`), which is the
-        quantity the sufficiency term is defined on, and starts at exactly zero
-        so it has to earn its weight (an `N(0, 1)` stream over a tuned feature
-        path halved MRR once; see `docs/ENGINEERING_NOTES.md`).
+        the span is in context (`retained` minus `base`), which is the quantity
+        the sufficiency term is defined on, and starts at exactly zero so it has
+        to earn its weight (an `N(0, 1)` stream over a tuned feature path halved
+        MRR once; see `docs/ENGINEERING_NOTES.md`).
         """
 
         def __init__(
@@ -618,11 +591,11 @@ try:  # pragma: no cover - exercised on a GPU host
         """Endpoint embeddings for each (pair, sentence set) request.
 
         Requests sharing a sentence set share one forward, which is what makes
-        this affordable: a retained set is 2-4 sentences, and a masked set is the
-        document minus one or two.  It is `encode_trigger_reps` underneath, with
-        the same window packing and the same fail-fast on an unlocatable trigger,
-        so a counterfactual pools its endpoints exactly the way the base forward
-        does — a second packing implementation here is how the two would drift.
+        this affordable: pairs spanning the same sentences intervene on the same
+        interior.  It is `encode_trigger_reps` underneath, with the same window
+        packing and the same fail-fast on an unlocatable trigger, so a
+        counterfactual pools its endpoints exactly the way the base forward does
+        — a second packing implementation here is how the two would drift.
 
         Gradient flows; the caller decides train or eval mode.
         """
@@ -663,16 +636,16 @@ try:  # pragma: no cover - exercised on a GPU host
         *,
         scoreable: torch.Tensor,
         ignore_index: int = -100,
-        margin: float = 1.0,
+        margin: float = NECESSITY_MARGIN,
         slack: float = 0.5,
     ) -> torch.Tensor:
         """Both consistency terms for one relation family, on positive rows only.
 
-        Necessity: masking the citation must cost the gold subtype at least
-        `margin` of logit.  Sufficiency: the citation alone must hold the gold
-        subtype within `slack` of the full context.  Negative rows are excluded —
-        the claim is about what supports a positive, and asking a NONE row to
-        lose logit when its evidence is removed is a claim about nothing.
+        Necessity: removing the interior must cost the gold subtype at least
+        `margin` of logit.  Sufficiency: the span alone must hold it within
+        `slack` of the full context.  Negative rows are excluded — the claim is
+        about what supports a positive, and asking a NONE row to lose logit when
+        its context is removed is a claim about nothing.
         """
         positive = (target != ignore_index) & (target != 0)
         if not torch.any(positive):

@@ -25,11 +25,12 @@ from ekg.relations.pair_evidence import (
     CONSISTENCY_FAMILY,
     CONSISTENCY_PAIR_CAP,
     arm_flags,
+    context_dependence_report,
     counterfactual_sentence_ids,
     document_pair_evidence,
     load_pair_evidence_config,
+    necessity_scoreable,
     pair_evidence_sidecar,
-    unsupported_cross_sentence_causal,
 )
 from ekg.relations.pair_heads import PAIR_EVIDENCE_HEAD, load_pair_head_config
 
@@ -93,6 +94,7 @@ def main() -> int:
     mediator_records = []
     predicted_causal: dict[tuple[str, str], str] = {}
     gold_causal: dict[tuple[str, str], str] = {}
+    logit_drop: dict[tuple[str, str], float] = {}
     candidates = 0
     revised_rows = 0
 
@@ -154,12 +156,24 @@ def main() -> int:
                 ]
                 for offset, index in enumerate(selected):
                     record = records[index]
+                    # How much the *predicted* class loses when the interior is
+                    # removed: the per-instance form of "did this prediction read
+                    # its context at all".
+                    predicted_class = int(causal_class[index])
+                    drop = float(
+                        base_logits[offset][predicted_class]
+                        - masked_logits[offset][predicted_class]
+                    )
+                    logit_drop[(record.head_id, record.tail_id)] = drop
                     traces[f"{doc.doc_id}::{record.head_id}::{record.tail_id}"] = {
                         "base": base_logits[offset].tolist(),
                         "masked": masked_logits[offset].tolist(),
                         "retained": retained_logits[offset].tolist(),
                         "revised_probabilities": revised_causal[offset].tolist(),
+                        "predicted_class": predicted_class,
+                        "predicted_logit_drop": drop,
                         "cited": list(record.cited(arm)),
+                        "necessity_scoreable": necessity_scoreable(record, arm=arm),
                     }
                 # The revised pass is the arm's prediction rule, so it replaces
                 # the base label rather than being reported beside it.
@@ -201,8 +215,8 @@ def main() -> int:
     )
     _write(args.evidence_output, evidence)
     _write(args.logits_output, traces)
-    mediator = unsupported_cross_sentence_causal(
-        mediator_records, predicted_causal, gold_causal
+    mediator = context_dependence_report(
+        mediator_records, predicted_causal, gold_causal, logit_drop=logit_drop
     )
     _write(
         args.output,
@@ -219,8 +233,10 @@ def main() -> int:
     )
     print(
         f"[a4-eval:{arm}] {len(docs)} docs, {candidates} candidates, "
-        f"{revised_rows} revised, unsupported_cross_fp="
-        f"{mediator['unsupported_cross_sentence_false_positives']}",
+        f"{revised_rows} revised, cross_fp={mediator['cross_sentence_false_positives']}, "
+        f"context_independent="
+        f"{mediator['context_independent_cross_sentence_false_positives']}"
+        f"/{mediator['measured_cross_sentence_false_positives']}",
         flush=True,
     )
     return 0
