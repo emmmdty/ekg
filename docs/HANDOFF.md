@@ -86,12 +86,17 @@ G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**�
 
 - 三个 gitignored JSON 已双端核对（`protocol.json` `f0b4702b…50829`、`t024_freeze.json` `9133a73c…587e7`、
   `cross_artifact_audit.json` `622d094b…f8467`；4090 旧档备份 `protocol.json.pre-e12-20260911`）；
-- **gpu-5090 的 cpolar 端口 2026-09-12 18:00 换了：`13850` → `12528`**（`~/.ssh/config` 已是新端口）。
-  新端口给出的指纹与作者确认过的**完全相同**（ED25519
-  `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`），即同一台机换了端口、不是新指纹，
-  故已把该确认过的 key 在新端口下写入 `known_hosts`，实测可连、卡空闲。
-  **端口还会再变**：下次若指纹与上面这串不一致，**停下问作者，不得自行 TOFU**；
-  一致则可照此在新端口下钉住；
+- ⚠️ **gpu-5090 / gpu-a6000 的 cpolar 端口每天都会变，这是常态，不是故障**。作者自己的
+  `~/.local/bin/cpolar-ssh-update` 由 systemd user timer（`cpolar-ssh-update.timer`，每日 00:00 +
+  开机后）登录 cpolar 面板抓新端口，**只重写 `~/.ssh/config` 里对应 Host 块的 `HostName` 与 `Port`
+  两行**，块内其他行原样保留。**不要把端口变化当异常去排查，也不要去改那个脚本。**
+- 2026-09-12 已一劳永逸修掉由此引起的 `Host key verification failed`：给 `Host gpu-5090` 加了
+  **`HostKeyAlias gpu-5090`**（`gpu-a6000` 块本来就有），host key 改按固定别名查找，端口再换也不影响，
+  **且校验一点没放弃**。别名下钉的就是作者确认过的那把 ED25519
+  `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，实测可连。
+  该行在 Host 块内且不是 `HostName`/`Port`，**不会被每日脚本覆盖**；改动前的 config 备份为
+  `~/.ssh/config.before-hostkeyalias-20260912`。
+  今后**只有指纹本身与上面这串不一致时才算异常**——那意味着隧道后面换了机器，**停下问作者，不得自行 TOFU**；
 - 两台机的 cpolar 隧道都会掉线。**ssh 失败 ≠ 远端进程死亡**，三态判活；长任务一律
   `setsid nohup` + `python -u` + 重定向 `logs/`，**一条 ssh 只发一个后台任务**。
   实测这样起的进程 PPID=1、独立 session，本机关机不影响。

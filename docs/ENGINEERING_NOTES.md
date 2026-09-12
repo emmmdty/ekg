@@ -5,6 +5,17 @@
 
 ## GPU / 服务器运维
 
+- **cpolar 端口每天变是常态，用 `HostKeyAlias` 一次性解决，别每天重新信任一次**（2026-09-12）。
+  作者的 `~/.local/bin/cpolar-ssh-update`（systemd user timer，每日 00:00）会抓新端口并**只重写
+  `~/.ssh/config` 对应 Host 块的 `HostName` / `Port` 两行**。端口一换，`known_hosts` 里按
+  `[主机]:端口` 记的条目就对不上，`ssh` 报 `Host key verification failed`——**这不是安全事件，
+  是寻址方式和信任方式不匹配**。修法是在 Host 块里加一行 `HostKeyAlias <固定别名>`：
+  host key 改按别名查找，端口/主机名怎么变都不影响，**校验一点不放弃**，而且该行不属于
+  `HostName`/`Port`，每日脚本不会覆盖它。反面做法是每天 TOFU 接受一次新端口的 key——
+  那等于把校验彻底关掉，而 cpolar 的端口是在账号之间复用的。
+  ⚠️ 加了别名之后，**指纹不一致才是真异常**（隧道后面换了机器），此时停下问作者。
+
+
 - **card 3 故障**，需 NVML shim：`CUDA_DEVICE_ORDER=PCI_BUS_ID LD_LIBRARY_PATH=/data/TJK/ekg/nvmlshim:$LD_LIBRARY_PATH`。card 0/2 常被用户 `Zhyw` 抢，**优先 card 1**。
 - **tmux/screen 不在非交互 ssh 的 PATH**。起任务用 `bash -lc` + 项目 `.venv/bin/python -u` +
   `setsid nohup` 或 `screen -dmS`；服务器禁止 `uv run`/`uv sync`。

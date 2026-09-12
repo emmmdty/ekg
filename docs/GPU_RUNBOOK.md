@@ -109,8 +109,13 @@ ssh gpu-4090 'bash -lc "cd /data/TJK/ekg && \
   4090 的隧道挂在第三个账号上 ⇒ `cpolar-ssh-update` 管不到它，也查不到它的状态。
   ⇒ 恢复要作者去 cpolar 控制台看那个账号的 `ssh` 隧道，或到机器本地重启 cpolar。
   </details>
-- ⚠️ **5090 是 cpolar 免费动态地址，host:port 会变**（症状：`Connection refused` /
-  `Host key verification failed` / `kex_exchange_identification: Connection reset`）。
+- ⚠️ **5090 是 cpolar 免费动态地址，host:port 每天都会变**（症状：`Connection refused` /
+  `kex_exchange_identification: Connection reset`）。
+  ✅ **`Host key verification failed` 这一项 2026-09-12 已根治**：`Host gpu-5090` 加了
+  `HostKeyAlias gpu-5090`（`gpu-a6000` 本来就有），host key 按固定别名查找，端口再换也不报错，
+  **校验没放弃**；该行不是 `HostName`/`Port`，每日脚本不会覆盖。此后**只有指纹与作者确认过的
+  `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY` 不一致才算异常**——那说明隧道后面换了机器，
+  停下问作者，**不得自行 TOFU**。
   **固定恢复顺序是先执行 `cpolar-ssh-update`，再重试 `ssh -o ConnectTimeout=15 gpu-5090 ...`**；
   不要对旧端口原样重连。换址后**先核对连上的是不是同一台机器**再操作：`whoami`（应为
   `tongjiakai`）+ `nvidia-smi` 名称 + 项目目录存在 + `git log -1`。4090 是 vip 固定域名，但同样会
