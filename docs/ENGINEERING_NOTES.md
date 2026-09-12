@@ -41,6 +41,21 @@
 
 ## 代码 / 评测
 
+- ⚠️ **P1 r15 的 `--validate-only` 从 2026-09-05 起就是失败的，没人发现**（2026-09-12 做 C-6 时撞到）。
+  r15（09-04 建）把 `scripts/train_supervised_relations.py` 与 `src/ekg/relations/extractor/supervised.py`
+  等 21 个文件钉进 `hashes.code`，而 **`d8fcd30 fix(protocol): decouple downstream trainer hashes`
+  (09-05) 改了那个 trainer** → 外部重哈希与记录值不再相等（记录 `704b5dd5…`，现盘 `5c513bdb…`）。
+  **记录的数字没受影响**（旧 bundle 钉的是它自己的哈希，代码按 commit 仍可取回），但交接文档里
+  「外部重哈希、`--validate-only` 与 registry 三方一致」这句**今天不成立**。
+  两条推论：① P1 **绑了下游 trainer 是过度绑定**，`d8fcd30` 的方向就是解耦，重建 P1 时别再绑；
+  ② 新阶段（D4/A4）的 preflight 必须像 `prepare_d4_typed_cue_preflight.py` 那样**绑自己的 `CODE_FILES`**，
+  绑 P1 的代码集会把别人的改动变成自己的 fail-fast。**不要为了让 r15 变绿去改 r15**——
+  那是改哈希让审计变绿，正是 E5 拒绝过的做法。
+- **改了 `src`/`tests`/`scripts` 任一 `.py` 就要重跑 `scripts/run_p1_local_gate.py`**：
+  `data/protocols/v6/local_gate.json`（gitignored）按 226 个文件记 `tested_tree_sha256`，
+  不重跑的话下一个 P1 bundle 动作会以「local gate did not cover current <file>」直接 fail-fast。
+  **「跑了三件套」不等于「过了本地 gate」**——gate 是那份记录，不是那三条命令。
+
 - ⚠️ **校验远端产物的脚本，测试必须钉住远端记录的真实身份，不能钉住脚本自己的算法**
   （2026-09-11，D4.1 preflight 连吃三次 fail-fast）。三条都是「本地三件套全绿、服务器上根本跑不起来」：
   ① 脚本自造了一种目录摘要去比 P1 注册的内容地址 `71be7419…c961ea9`，而**唯一的测试是拿脚本算法

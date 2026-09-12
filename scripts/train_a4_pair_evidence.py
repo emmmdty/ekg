@@ -239,11 +239,18 @@ def main() -> int:
         Gold positives join them at training time so the mechanism has gradient
         before the base pass predicts anything at all; the residual rule itself
         is identical to the one inference uses.
+
+        A pair that is unscoreable for causal (a TIMEX endpoint) is excluded on
+        both counts.  It has to be: the official protocol does not score it, so
+        supervising the causal head on it would train outside the reported
+        population -- and a step whose every selected row was unscoreable made
+        `cross_entropy` average over zero rows and return `nan`, which is how
+        this was found (the 2026-09-12 smoke, all three evidence arms).
         """
         causal = logits[CONSISTENCY_FAMILY].detach().argmax(dim=-1)
         target = targets[CONSISTENCY_FAMILY]
         eligible = [
-            bool(predicted != NONE_INDEX or (gold != IGNORE_INDEX and gold != NONE_INDEX))
+            bool(gold != IGNORE_INDEX and (predicted != NONE_INDEX or gold != NONE_INDEX))
             for predicted, gold in zip(causal.tolist(), target.tolist(), strict=True)
         ]
         return consistency_rows(records, eligible, arm=arm)
@@ -297,6 +304,7 @@ def main() -> int:
         )
         _write(destination / CONFIG_FILE, pair_evidence_config(arm))
 
+    epoch_losses: list[float] = []
     best_f1, best_epoch, best_by_family = -1.0, None, {}
     family_selection = {family: {"best_f1": -1.0, "best_epoch": None} for family in families}
     skipped_total = 0
@@ -341,6 +349,10 @@ def main() -> int:
                         base, masked, retained, target, scoreable=scoreable,
                         ignore_index=IGNORE_INDEX,
                     )
+            if not bool(torch.isfinite(loss)):
+                # Averaging a nan into the epoch mean hides which step produced
+                # it, and the checkpoint that follows would look trained.
+                raise ValueError(f"[a4:{arm}] non-finite loss on {doc_id}")
             running += float(loss.detach())
             (loss / args.accum_steps).backward()
             if seen % args.accum_steps == 0 or seen == len(order):
@@ -354,7 +366,8 @@ def main() -> int:
                     f"running_loss={running / seen:.4f}",
                     flush=True,
                 )
-        print(f"[a4:{arm}] epoch {epoch} mean_loss={running / max(1, len(order)):.4f}", flush=True)
+        epoch_losses.append(running / max(1, len(order)))
+        print(f"[a4:{arm}] epoch {epoch} mean_loss={epoch_losses[-1]:.4f}", flush=True)
         f1, by_family = dev_scores()
         detail = " ".join(f"{family[:4]}={value:.3f}" for family, value in by_family.items())
         better = f1 > best_f1
@@ -387,6 +400,7 @@ def main() -> int:
                 "best_by_family": best_by_family,
                 "family_checkpoints": family_selection,
             },
+            "epoch_mean_loss": epoch_losses,
             "consistency": {
                 "family": CONSISTENCY_FAMILY,
                 "pair_cap": CONSISTENCY_PAIR_CAP,

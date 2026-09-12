@@ -188,6 +188,13 @@ def run(args: argparse.Namespace) -> dict:
         for name in ARTIFACTS:
             _require((root / name).is_file(), f"{arm}: missing smoke output {name}")
 
+        metadata = _load(checkpoint / "run_metadata.json")
+        _require(metadata.get("status") == "complete", f"{arm}: training did not complete")
+        losses = metadata.get("epoch_mean_loss")
+        _require(
+            isinstance(losses, list) and len(losses) == args.epochs and _finite(losses),
+            f"{arm}: epoch losses are missing or non-finite: {losses}",
+        )
         report = _load(root / "report.json")
         evidence = _load(root / "evidence.json")
         traces = _load(root / "logits.json")
@@ -207,6 +214,7 @@ def run(args: argparse.Namespace) -> dict:
             "train_argv": train,
             "evaluate_argv": evaluate,
             "candidate_pairs": report["candidate_pairs"],
+            "epoch_mean_loss": losses,
             "revised_rows": report["revised_rows"],
             "predicted_edges": report["predicted_edges"],
             "mediator": report["mediator"],
