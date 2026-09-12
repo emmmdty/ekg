@@ -86,9 +86,12 @@ G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**�
 
 - 三个 gitignored JSON 已双端核对（`protocol.json` `f0b4702b…50829`、`t024_freeze.json` `9133a73c…587e7`、
   `cross_artifact_audit.json` `622d094b…f8467`；4090 旧档备份 `protocol.json.pre-e12-20260911`）；
-- gpu-5090 host key 在 `~/.ssh/known_hosts` 第 98 行，指纹
-  ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`，**作者确认是本人所加**；
-  仍不得自行 TOFU 接受**新**指纹（cpolar 端口复用）；
+- **gpu-5090 的 cpolar 端口 2026-09-12 18:00 换了：`13850` → `12528`**（`~/.ssh/config` 已是新端口）。
+  新端口给出的指纹与作者确认过的**完全相同**（ED25519
+  `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`），即同一台机换了端口、不是新指纹，
+  故已把该确认过的 key 在新端口下写入 `known_hosts`，实测可连、卡空闲。
+  **端口还会再变**：下次若指纹与上面这串不一致，**停下问作者，不得自行 TOFU**；
+  一致则可照此在新端口下钉住；
 - 两台机的 cpolar 隧道都会掉线。**ssh 失败 ≠ 远端进程死亡**，三态判活；长任务一律
   `setsid nohup` + `python -u` + 重定向 `logs/`，**一条 ssh 只发一个后台任务**。
   实测这样起的进程 PPID=1、独立 session，本机关机不影响。
