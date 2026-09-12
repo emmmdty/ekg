@@ -12,7 +12,7 @@
 | **⚠️ 这一轮最重要的一件事** | **Ch3（D4）的 typed-cue 家族已关闭**，以 `failed` 身份留档。full `.476515` 低于两个锚（`.553995` / `.545603`）**七倍地板**，消融 `.536788` 与负控 `.495260` **都赢过 full**，预注册中介**反向**，PS−/Uu 护栏双破。归因与「五维瓶颈」这个**未验证**的候选原因见 [`results/PHASE_D.md`](results/PHASE_D.md)；不可变 handoff `pilot/seed-13/status.json` `3b4dbba2…a46234`。 |
 | **论文结构** | 第3章 事实性检测（D4，**本轮失败**）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。**章节存废在 Gate 2 判，执行代理不得自行改成两方法章。** |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表与 §5 的 Gate；本文队列只是切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | **无。GPU 上没有任何我们的进程。** 新窗口从 §0.3 的队列开工——队首已推进到 **C-6b**（A4 入口脚本），C-6 的核心件 2026-09-12 已 done（`790c35a`）。 |
+| **活动任务** | **无。GPU 上没有任何我们的进程。** 新窗口从 §0.3 的队列开工——**C-6 与 C-6b 都已 done（2026-09-12）**，Ch4 的方法与五个入口脚本齐全并在 5090 冒烟通过；当前队首是 **C-5b**（C5 的四个入口脚本）。 |
 | ⚠️ **gpu-4090** | 驱动已修好（580.178.04，`torch.cuda.is_available()=True`，G-0 完成），但 **2026-09-12 19:0x 起四张卡被用户 `Zhyw` 的 vllm 占满**（各约 20–22 GB）。**再用必须先 `nvidia-smi` 核卡，不得挤占。** |
 | ✅ **gpu-5090** | 作者授权：**≤1 天的任务直接执行，不再逐次请示**（超过一天要问；拉模型/跨机搬运先问位置）。backbone 已就位 `2c7ff1f1…49736`（六件全部公开源）。硬边界：**EasyECR 跑不了**（torch 2.0.1 不支持 sm_120）。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
@@ -65,13 +65,13 @@ uv run python scripts/audit_r1_consistency.py \
 | 次序 | 主表 ID | 做什么 | 完成判据 |
 |---|---|---|---|
 | ~~**1**~~ | **C-6** | ✅ **2026-09-12 done**（`790c35a`）：`src/ekg/relations/pair_evidence.py` + `pair_evidence` 头，20 条 targeted tests，**578 passed / 28 skipped、ruff 0、smoke OK**，两条 torch 门在 gpu-5090 实跑过。**剩 C-6b**＝入口脚本（见新的次序 2） | 已达成 |
-| **2** | **C-6b** | **写 A4 的入口脚本**：契约点名的 `scripts/run_a4_pair_evidence.py`（pilot 驱动，反事实**前向**在这里接线）＋ preflight/smoke 入口。**主表里 G-4 的依赖只写 C-6**，所以 C-6 不留这个洞，G-4 才不会像 D4 那样白等一轮 | 契约的 GPU 命令能真的被执行；targeted tests + 三件套全绿 |
-| **3** | **C-5b** | C5 的四个入口脚本：`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_`（C5.0 核心件 `role_uncertainty.py` 已于 `fc25777` 交付） | 同上；**照 D4 的四件套形状写，并把 pilot 入口一起写掉** |
+| ~~**2**~~ | **C-6b** | ✅ **2026-09-12 done**（`65cf64b` + `0615596` + `6a5fabe`）：五个入口齐全，pilot 入口已进 preflight 的 `CODE_FILES`；44 条 targeted tests，**592 passed / 28 skipped、ruff 0、smoke OK**；5090 四臂开发冒烟 pass（**非结果**）。**A4.1 还差 4090 上的 encoder 与两条 baseline 预测** | 已达成 |
+| **3（当前队首）** | **C-5b** | C5 的四个入口脚本：`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_`（C5.0 核心件 `role_uncertainty.py` 已于 `fc25777` 交付） | 同上；**照 D4 的四件套形状写，并把 pilot 入口一起写掉** |
 | **4** | **C-9 的同类缺口** | 给 C5 写 pilot 入口 `run_c5_argument_uncertainty.py`（A4 的那半已并入上面的 C-6b） | 契约点名了它；D4 就是因为这个缺口白等了一轮 |
 | 5 | **C-7** | LLM 对照脚手架（三章各一个 CPU fixture） | 见主表 §4.1 |
 | 6 | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
 
-**GPU 泳道（等 2–4 做完，且核卡确认有空闲）**：G-4（A4.2 smoke → A4.3 pilot）、
+**GPU 泳道（等 3–4 做完，且核卡确认有空闲）**：G-4（A4.2 smoke → A4.3 pilot）、
 G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**。跑完这两个就到 **Gate 2**。
 
 #### C-6 落地时定下的两件事（不是契约条款，可被作者否掉，但否之前按这个执行）
@@ -85,6 +85,24 @@ G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**�
 2. **触发句是 protected**：它们锚定 pooling，永不 mask，因此同句对没有 necessity 项——这是如实的，
    同句 38.07 不是这一章要打的缺口（跨句占 75% 正例且落后约 11 点）。触发句里的线索词**单独记账**
    （`protected_cues`），所以「只有不可 mask 的线索」的对不会被中介算成 unsupported。
+
+#### A4.1 下次开工需要的两样东西（其余已就绪）
+
+preflight 脚本已写好并在本地验到能验的部分，`prepare_a4_pair_evidence_preflight.py` 的必填参数里
+**只有两项本地闭合不了**，都在 gpu-4090：
+
+1. `--model`：契约钉的内容寻址 encoder 目录（`71be7419…c961ea9`）。5090 上的公开 backbone 是
+   `2c7ff1f1…49736`，**digest 不同，脚本会 fail-fast，这是对的**——两条线的数字不混表；
+2. `--fallback-predictions` / `--taco-predictions`：A3 fallback（`rates_coref_family_selection`）与
+   taco 适配 `taco-s13-r3` 的**官方形状预测文件**。preflight 会用冻结的
+   `score_maven_ere_official.py` 重算它们的三族 P/R/F1（契约 A4.1 要求「独立重算」）。
+   路径要在 4090 的 `runs/stages/A3/a3-v6-recipe-accounting-r16/` 与 R1 的 taco namespace 下确认，
+   **别拿本地 `a3-v6-20260905-r17/predictions.jsonl` 当 fallback 预测顶替**，那是 handoff bundle 的
+   prediction 文件，先核对它的口径再决定能不能用。
+
+开发冒烟产物在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/A4/dev-smoke-20260912/`，
+`smoke.json` `61051b54a2169b90babbb1c840df98b7fc51ba4550befd8230d970717b55a77a`；
+**它不是 A4.2**（无 preflight 绑定、非冻结 backbone），A4.2 要带 `--contract` 重跑。
 
 #### 从 D4 这一轮学到、必须带进 A4/C5 的三件事
 

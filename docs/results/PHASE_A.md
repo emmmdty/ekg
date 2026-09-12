@@ -1306,3 +1306,41 @@ fallback 按既有 P1 规则取同协议 eligible arms 中 causal F1 最高者�
 `rates_coref_family_selection`，只供 R1 功效与新 A4 对照使用，不改变 A3 判定。四臂 checkpoint 均留在
 `gpu-4090:/data/TJK/ekg/runs/stages/A3/a3-v6-recipe-accounting-r16/`，未跨机搬运；本地仅同步官方预测、
 评分和元数据，40 个首批文件及 3 个 selection 文件均与远端 SHA-256 一致。
+
+## A4 pair-evidence 实现落地 + 开发冒烟（2026-09-12，5090；**不是结果**）
+
+C-6 与 C-6b。A4 的机制此前**一行代码都没有**，契约冻结的 GPU 入口
+`scripts/run_a4_pair_evidence.py` 也从未被写过（与 D4 白等一轮的缺口同型）。本轮落地：
+`src/ekg/relations/pair_evidence.py` + `pair_evidence` 头（零初始化证据残差）、
+`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_` / `run_` 五个入口、
+44 条 targeted tests；本地 **592 passed / 28 skipped、ruff 0、smoke OK**，local gate tree
+`f142b58abbb7f5d8b9a83820d06e1c4b9f6f7359da5f1c9d1557cc90f0d4e18e`。
+
+### 开发冒烟（`runs/stages/A4/dev-smoke-20260912/`，gpu-5090 GPU0）
+
+四臂 × 1 epoch × 10 train / 10 internal-dev 文档，**用的是 5090 上公开 `roberta-base` 缓存快照
+`e2da8e2f`，不是契约冻结的 `71be7419…c961ea9`**，也没有 preflight 绑定。
+`smoke.json` SHA-256 `61051b54a2169b90babbb1c840df98b7fc51ba4550befd8230d970717b55a77a`，
+`status=pass`：四臂各 9,546 个候选对**逐键相同**，反事实 logits 有限，
+新建头与复现基线 head 在 init 逐位相等（`full` 与 `remove_core` 的可比性由此成立）。
+
+⚠️ **这一格里没有任何可引用的数字**：1 epoch、10 篇、非冻结 backbone、非官方评测器，
+`epoch_mean_loss` 与 mediator 计数只用来证明「跑得起来」。A4 的主表数字要等 A4.1 preflight +
+A4.2 smoke + A4.3 seed-13 pilot（`docs/EXPERIMENT_PLAN.md` §4.2 的 G-4），在 gpu-4090 上按契约命令产出。
+
+### 冒烟抓到的一个真实缺陷（已修，`0615596`）
+
+第一次冒烟**四臂全绿而三个带证据流的臂 `mean_loss=nan`**，而冒烟仍然 PASS——它只检查了导出的
+logits 有限，没检查训练损失。根因：残差的适用行只看「base pass 判为 causal 正类或金标正类」，
+**没问这一对是否可被 causal 评分**；TIMEX 端点对 causal 是 `-100`，于是某一步选中的行全部不可评分时
+`cross_entropy` 在零行上求平均返回 nan（已直接复现：全 ignore 的 target → nan）。修法是把
+「causal 可评分」并入适用条件——这同时是口径上正确的：在官方评测器不评分的对上训练 causal 头，
+等于在报告口径之外训练。另外训练器现在**遇到非有限损失立刻 raise**，不再把 nan 平均进 epoch 均值
+并存下一个看起来训练过的 checkpoint；冒烟也开始断言 `run_metadata.json` 里的 `epoch_mean_loss` 有限。
+
+### A4.1 preflight 本地能验到哪一步
+
+R1 protocol `f0b4702b…50829`、t024 `9133a73c…587e7` 解析成功，relation phase contract 哈希校验通过；
+物化的 internal-dev gold **复算出契约钉的候选 digest `15a3b1a5…dac10910`**（291 篇 / 7,195 event
+mentions / 1,719 TIMEX / 234,870 对）。**尚不能在本地闭合的两项**：内容寻址 encoder 目录
+（`71be7419…c961ea9`，在 4090）与两条同协议 baseline 的官方预测文件（A3 fallback 与 taco 适配，也在 4090）。
