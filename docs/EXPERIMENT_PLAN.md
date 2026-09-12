@@ -286,7 +286,7 @@ gantt
 | **C-5** | C5.0 实现 + 本地 gate | 无（QR-001 修订后已解锁） | **2026-09-11 完成核心件**：`src/ekg/nodes/role_uncertainty.py`（sidecar / role 兼容性特征 / 分层 permutation / mediator 计数）+ `discriminative.py` 新增 `role_compatibility` 组件；15 条 targeted tests，**550 passed / 26 skipped、ruff 0、smoke OK**。bundle exporter 复用既有 `create_stage_bundle`（`protocol_extra` 足够挂 sidecar/mediator/fallback id），不另写。**剩余 C-5b**：train/evaluate/preflight/smoke 四个入口脚本 | 代码 + 测试 |
 | **C-6** | A4.0 实现 + 本地 gate | 无 | 同上 | 代码 + 测试 |
 | **C-7** | LLM 对照脚手架（提示模板、LoRA 配置、评分接线） | 无 | 三章各有一个 CPU fixture：给定 10 条固定输入产出**格式合法**的预测文件，且能被该章冻结的 evaluator 打分（分数高低不论）；提示模板与 LoRA 配置落 hash | 代码 + 测试 |
-| **C-9** | **写 D4.3 的 pilot 入口 `scripts/run_d4_typed_cue_oof.py`**（2026-09-12 新增：契约点名了它，仓库里没有；同类缺口 A4/C5 各自也有） | C-1 ✅ + G-1 ✅ | 按冻结契约驱动 5 折 × 3 臂，逐实例概率/cue/evidence/三级 logits/confusion 落盘，coverage 断言 2,913 篇 / 73,939 mentions 各恰好一次；targeted tests + 三件套全绿 | 代码 + 测试 |
+| **C-9** | ✅ **已完成 2026-09-12**（`a90df4e`，10 条 targeted tests，560 passed / ruff 0 / smoke OK；preflight 重建为 `preflight-r2` `dae0e0b4…e15c4`，`code_files=7`）。原文：**写 D4.3 的 pilot 入口 `scripts/run_d4_typed_cue_oof.py`**（2026-09-12 新增：契约点名了它，仓库里没有；同类缺口 A4/C5 各自也有） | C-1 ✅ + G-1 ✅ | 按冻结契约驱动 5 折 × 3 臂，逐实例概率/cue/evidence/三级 logits/confusion 落盘，coverage 断言 2,913 篇 / 73,939 mentions 各恰好一次；targeted tests + 三件套全绿 | 代码 + 测试 |
 | **C-8** | 第 2 章「统一评测协议」素材整理 | 无 | 产出一份 `docs/PROTOCOL_TABLE.md`：三章各自的 manifest SHA-256、文档/mention 计数、划分来源、evaluator SHA-256、指标定义、final-valid 封存状态，**每一格都能从 `results/` 或 `runs/` 反查到**；无空格、无「待补」 | `docs/PROTOCOL_TABLE.md` |
 
 CPU 泳道**全部 8 项都不依赖 GPU，现在就能做**，且彼此无强依赖，可任意顺序并行。
@@ -297,7 +297,7 @@ CPU 泳道**全部 8 项都不依赖 GPU，现在就能做**，且彼此无强�
 |---|---|---|---|---|
 | **G-0** | ~~修复 gpu-4090 驱动~~ → ✅ **已完成 2026-09-12**：驱动 580.178.04，`torch.cuda.is_available()=True`，4 张卡全空，CUDA 张量运算实测通过；中断期间的产物全部完好 | — | 已达成 | — |
 | **G-1** | ~~D4.2 CPU/CUDA smoke~~ → ✅ **完整通过**：CPU 半边 2026-09-11，CUDA 半边 2026-09-12（4090 GPU2，`smoke.json` `c4c90b1a…`），**三臂产物与 CPU 逐字节相同**。旧记录：**CPU 半边 2026-09-11 已过**（4090 无 CUDA 时自动落 CPU，契约绑定不变，`smoke.json` `d0003af5…97c75`）；**CUDA 半边仍欠**——5090 虽空闲但缺 `factuality_cv/` 且 backbone 闭合不了 pin（差 `pytorch_model.bin` vs `model.safetensors` 与 `tokenizer_config.json`），要么等 G-0，要么经作者同意搬 476 MB 目录 |
-| **G-2** | **D4.3 seed-13 五折 pilot（三臂）** ← 队首，但**被缺失的入口脚本挡住**：契约冻结的 `scripts/run_d4_typed_cue_oof.py` **从未被写过**（2026-09-12 发现）。先做 **C-9**，再谈授权 | **C-9** + G-1 ✅ + 作者授权长任务 | ~1.5 GPU·day（4 卡可按折并行） | 2,913 篇 / 73,939 mention 各恰好一次 OOF 预测；逐实例概率/cue/evidence/三级 logits/confusion 落盘 |
+| **G-2** | **D4.3 seed-13 五折 pilot（三臂）** —— 🏃 **2026-09-12 已启动**（4090，5 折铺 4 卡，预计 4–4.5 小时，收尾脚本自动汇总）。原注：队首，曾**被缺失的入口脚本挡住**：契约冻结的 `scripts/run_d4_typed_cue_oof.py` **从未被写过**（2026-09-12 发现）。先做 **C-9**，再谈授权 | **C-9** + G-1 ✅ + 作者授权长任务 | ~1.5 GPU·day（4 卡可按折并行） | 2,913 篇 / 73,939 mention 各恰好一次 OOF 预测；逐实例概率/cue/evidence/三级 logits/confusion 落盘 |
 | **G-3** | D4 supporting-word baseline 五折重建 | C-1 + G-0 | ~1 GPU·day | 先在官方划分复现官方数字（容差事前定 ±1.0 macro-F1）→ FR-016 状态 (a)；再转五折 OOF |
 | **G-4** | A4.2 smoke → **A4.3 seed-13 pilot（四臂）** | C-6 + G-0 + 授权 | ~2–3 GPU·day | 完整候选逐位不变；逐实例 evidence 与三种 counterfactual logits 落盘 |
 | **G-5** | C5.2 smoke → **C5.3 seed-13 pilot（三臂）** | C-5 + G-0 + 授权 | ~1 GPU·day | 291 篇 / 7,195 mention 全覆盖；false-merge 中介与 calibration 落盘 |
