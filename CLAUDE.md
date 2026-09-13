@@ -11,7 +11,7 @@ Claude 与 Codex **交替推进同一条队列**：开工前按 `HANDOFF.md` 任
 研究宪章 `.specify/memory/constitution.md`｜稳定需求 `docs/SPEC.md`｜可迭代设计 `docs/RESEARCH_PLAN.md`｜
 可执行任务 `docs/TASKS.md`｜**完整实验规划（防漂移主表）`docs/EXPERIMENT_PLAN.md`**｜**对手名册与复现保真度 `docs/BASELINE_ROSTER.md`**｜实时状态 `docs/TODO.md`｜**实测数字 `docs/results/`**｜
 baseline 与消融 `docs/EXPERIMENTS.md`｜工程坑 `docs/ENGINEERING_NOTES.md`｜
-服务器运维 `docs/GPU_RUNBOOK.md`｜三端流水线 `docs/PIPELINE.md`｜归档索引 `docs/ARCHIVE_INDEX.md`。
+服务器运维 `docs/GPU_RUNBOOK.md`｜三端流水线 `docs/PIPELINE.md`｜**统一评测协议 `docs/PROTOCOL_TABLE.md`**｜归档索引 `docs/ARCHIVE_INDEX.md`。
 
 **当前论文结构（2026-09-11 作者选定）**：第3章 事件事实性检测（D4）· 第4章 事件关系抽取（A4）·
 第5章 事件身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3，带公开对手的应用章）**。
@@ -26,8 +26,10 @@ frozen-vs-fine-tuned 同 backbone 对照**已撤销，不得恢复**。
 **实验质量的主要判据是证明方法有价值**（主表对手、消融、负控、误差分析），统计检验是锦上添花；
 不要先去调效应量门槛或 seed 数。
 旧 D3/C4 以及 A2/C3/D2/E2 禁止继续执行。
-> P1 唯一可信根：`runs/stages/P1/p1-v6-20260831-r12/`，其 `protocol.json` SHA-256 为
-> `0bd33e87e67c1e4b36afb335270cbd511377c412d16e87b835a3503f0aa58497`；A3 命令必须显式传入。
+> P1 可信根**当前是 `runs/stages/P1/p1-v6-20260904-r15/`**，其 `protocol.json` SHA-256 为
+> `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`——R1 的 `p1_binding` 与
+> A4/C5 preflight 钉的都是它。旧根 `p1-v6-20260831-r12`
+> （`0bd33e87…a58497`，**本地没有，在服务器上**）只供**历史 A3 结果**引用，不重绑、不用于新 phase。
 > ⚠️ **学位论文标尺**：Ch1–Ch3 必须在统一重跑的公开主指标上超过多个方法；低于 baseline 时方法章
 > 贡献为零。Ch4 使用公认 MRR/Hit@k 与配对统计，进入结论的消费者必须超过多个同协议对照，但
 > consumer×quality 效应允许为正、零或负。自造辅助指标只能诊断，不能代替主指标。
