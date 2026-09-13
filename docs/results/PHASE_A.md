@@ -1382,6 +1382,69 @@ R1 protocol `f0b4702b…50829`、t024 `9133a73c…587e7` 解析成功，relation
 mentions / 1,719 TIMEX / 234,870 对）。**尚不能在本地闭合的两项**：内容寻址 encoder 目录
 （`71be7419…c961ea9`，在 4090）与两条同协议 baseline 的官方预测文件（A3 fallback 与 taco 适配，也在 4090）。
 
+### DREEAM 可运行性静态核查：**not_runnable（贡献部分）**（2026-09-13，未训练、未占卡）
+
+问题：A4 的证据该不该改用 DocRED 线的可学证据（DREEAM），科研价值是否更高。按 E2/E10 的流程做静态核查。
+
+**仓库身份冻结**：`github.com/YoumiMa/dreeam`，commit `476a7004521d5f9b7bb3be66fc6678495b3cf291` /
+tree `612cfb116010a5b7f4e11e4824cef8637ba63189`，MIT，13 个 commit，最后推送 2024-03-13。
+**与 LLMERE / ACCI 不同，这个仓库是完整的**：`run.py`(13.8K) / `model.py`(12K) / `losses.py` /
+`prepro.py` / `evaluation.py` / `requirements.txt` + 全流程 shell 脚本。缺代码不是它的问题。
+
+**阻断点 1（决定性）：两条证据监督路径都要人工证据标注。** `model.py` 的分支只有两个——
+
+```text
+if sent_labels != None:      # 人工标注证据 → KLDiv(s_attn, 人工证据分布)
+elif teacher_attns != None:  # 自训练 → KLDiv(doc_attn, 教师注意力)
+```
+
+而 README 的弱监督流程是 **Step 1 在人工证据上训教师 → Step 2 教师在 distant 语料上产银标 →
+Step 3 学生自训练 → Step 4 再回人工标注数据微调**。所以摘要里那句
+"learn ER ... **without evidence annotations**" 指的是 *distant 那一段* 不需要标注，
+**整条流水线的两端都钉在人工证据上**。MAVEN-ERE **一处证据标注都没有**（记录只有
+tokens/sentences/events/TIMEX + 三张关系表，已核），教师无从产生。
+
+**阻断点 2：没有 distant 语料。** DocRED 有 `train_distant.json`（约 10 万篇）；
+我们 `data/processed/maven_ere/` 只有 train/valid/test_unlabeled，**不存在 MAVEN-ERE 的远监督语料**。
+
+**阻断点 3：它的评测增益依赖 dev 选阈值。** `isf_*.sh` 做 EIDER 的 inference-stage fusion 并把
+阈值写进 `${model_dir}/thresh`；`model.py` 另有 `evi_thresh=0.2`。A4 契约明写 **不扫 threshold**。
+
+**阻断点 4（次要）：** `requirements.txt` 钉 torch 1.11.0 / transformers 4.14.1，两台机都跑不了
+（4090 sm_89 与 5090 sm_120 都需要更新的 CUDA 栈）。这条只在「整体照跑」时成立，移植模块则不适用。
+
+#### 一手数字：即便能移植，这个机制在我们这个数据条件下值多少
+
+论文 Table 2（DocRED dev F1）分成 (a) 无 distant 数据 / (b) 有 distant 数据两块。**我们处在 (a)。**
+
+| 方法（BERT-base，dev F1） | (a) 无 distant 数据 |
+|---|---:|
+| ATLOP（DREEAM 自己的 backbone） | 61.09 |
+| **DREEAM (teacher)** | **61.42（+0.33）** |
+| EIDER | 62.48 |
+| SAIS | 62.96 |
+| DREEAM + inference-stage fusion（**dev 选阈值**） | 62.55 |
+
+RoBERTa-large 同构：ATLOP 63.18 → DREEAM teacher 63.49（**+0.31**），仍低于 EIDER 64.27 / SAIS 65.17。
+它的 headline SOTA 全部来自 (b)：student 65.30 / 67.09，**那是 10 万篇远监督语料 + 自训练买来的**。
+
+⇒ **「DREEAM 的证据监督被证明能抬主指标」这个说法，在我们的数据条件下缩水成 +0.33 F1**，
+而且它在同一格里还输给 EIDER 与 SAIS。**我上一轮把它排在前面，依据是检索摘要里的
+"state-of-the-art"——那句 SOTA 的来源是 (b) 的自训练阶段，不是证据机制本身。**
+这与本页 A4 节记的连接词错误是同一类：**拿论文的措辞当机制**。
+
+#### 裁决与它对 A4 的意义
+
+- **DREEAM 贡献部分 `not_runnable`**（缺人工证据标注 + 缺 distant 语料）；可移植的只有
+  `forward_evi()` 那 12 行「注意力按句求和」，而那是 **ATLOP 的 localized context pooling 读数**，
+  不是 DREEAM 的贡献，且在 MAVEN-ERE 上**没有任何标注可以验证它选得对不对**——
+  epistemically 与已被否掉的连接词表同一处境。
+- **同时这条核查把 A4 的立论变强了**：EIDER / SAIS / DREEAM **整个证据线都要证据标注**，
+  所以在 MAVEN-ERE 上这条路是封死的。我们的反事实（必要性/充分性）**正是在没有标注的条件下
+  取得证据式行为的那条路**，并且自带验证协议（去掉 interior 后 logit 掉幅）。
+  窄 delta 因此写得更干净：**「无证据标注 × 反事实验证 × 完整候选全集不弃答」**。
+- **A4 第一个周期维持 interior 定义式**（`f90c8cd` 起已是现状），不改。
+
 ### 仍待作者裁决的两处（不阻塞执行，按现状执行并可被否）
 
 1. **契约 A4.0 的字面是「实现 evidence selector」，本轮实现的是「按 span 定义的证据集」**，

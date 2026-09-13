@@ -94,6 +94,15 @@ G-5（C5.2 smoke → C5.3 pilot）。两者**写不同 namespace，可并卡**�
    第二段训练分布**一半金标正例 + 一半当前假正例**，否则它会一律说 NONE（实测过）。
 4. **触发句 protected**：同句/相邻对没有 necessity 项——这是如实的，短距离不是误差所在。
 
+**DREEAM 替代方案已核并否掉**（2026-09-13，静态核查，未训练未占卡，详见 `results/PHASE_A.md`）：
+仓库完整（`476a7004…f291`，MIT）但**两条证据监督路径都要人工证据标注**（`sent_labels` 或
+`teacher_attns`，而教师本身训在人工证据上），MAVEN-ERE 一处标注都没有，也没有 distant 语料；
+其评测增益还依赖 dev 选阈值（契约禁）。**一手数字**：在「无 distant 数据」这一格里，
+它比自己的 backbone ATLOP 只高 **+0.33 F1**，且低于 EIDER 与 SAIS；headline SOTA 来自
+10 万篇远监督自训练那一格。⇒ `not_runnable`，且**这条核查反过来把 A4 的立论写强了**：
+EIDER/SAIS/DREEAM 整条证据线都要标注，MAVEN-ERE 上封死，而反事实是**无标注条件下**
+取得证据式行为的路，自带验证协议。**A4 第一个周期维持 interior 定义式，不改。**
+
 **仍可被作者否掉的两点**（不阻塞，已按现状执行）：契约字面写「实现 evidence selector」而这里是
 按 span 定义的证据集（冻结因果链未动）；一致性项只跑 causal 族。
 
