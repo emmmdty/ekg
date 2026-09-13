@@ -147,3 +147,29 @@ def test_the_smoke_fixture_covers_the_shapes_the_contract_names() -> None:
     assert fixture["pairs"] == 5
     assert fixture["feature_width"] > 0
     assert fixture["mediator_on_all_singletons"]["merged"] == 0
+
+
+def test_the_smoke_hands_the_trainer_predictions_for_its_own_documents(tmp_path: Path) -> None:
+    """A subset corpus needs a subset artifact.
+
+    `apply_predicted_arguments` binds a prediction file that must cover its
+    corpus with nothing left over. The smoke subsets the documents, so passing
+    the whole-corpus artifact made every other mention an "extra" and the bind
+    failed before any arm trained -- which is exactly what happened on the 4090.
+    """
+    source = tmp_path / "predictions.jsonl"
+    source.write_text(
+        "\n".join(
+            json.dumps({"mention_id": f"m{i}", "doc_id": doc, "status": "empty"})
+            for i, doc in enumerate(("wanted", "wanted", "other", "other", "other"))
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    output = tmp_path / "subset.jsonl"
+    SMOKE._subset_predictions(source, ["wanted"], output)
+    rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
+    assert [row["mention_id"] for row in rows] == ["m0", "m1"]
+
+    with pytest.raises(SMOKE.SmokeError, match="cover none of"):
+        SMOKE._subset_predictions(source, ["absent"], tmp_path / "empty.jsonl")

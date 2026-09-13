@@ -86,6 +86,25 @@ def _subset(source: Path, ids: list[str], output: Path) -> None:
     output.write_text("\n".join(selected) + "\n", encoding="utf-8")
 
 
+def _subset_predictions(source: Path, ids: list[str], output: Path) -> None:
+    """Keep the argument predictions of exactly the wanted documents.
+
+    The trainer binds a prediction artifact that has to cover its corpus with no
+    mention left over, so subsetting the documents without subsetting their
+    predictions leaves every other mention an "extra" and fails the bind. That
+    guard is right for the pilot, which runs the whole corpus; the smoke is the
+    side that has to hand it a matching miniature.
+    """
+    wanted = set(ids)
+    selected = [
+        line
+        for line in source.read_text(encoding="utf-8").splitlines()
+        if line and json.loads(line).get("doc_id") in wanted
+    ]
+    _require(bool(selected), f"argument predictions cover none of {len(wanted)} smoke documents")
+    output.write_text("\n".join(selected) + "\n", encoding="utf-8")
+
+
 def _manifest(path: Path, ids: list[str]) -> Path:
     _write(path, {"schema_version": "ekg.c5_smoke_manifest.v1", "doc_ids": ids})
     return path
@@ -194,6 +213,8 @@ def run(args: argparse.Namespace) -> dict:
     dev_ids = load_manifest_ids(args.dev_manifest)[: args.docs]
     source = args.output / "smoke_source.jsonl"
     _subset(args.source, train_ids + dev_ids, source)
+    predictions = args.output / "smoke_argument_predictions.jsonl"
+    _subset_predictions(args.argument_predictions, train_ids + dev_ids, predictions)
     train_manifest = _manifest(args.output / "train_manifest.json", train_ids)
     dev_manifest = _manifest(args.output / "dev_manifest.json", dev_ids)
 
@@ -208,7 +229,7 @@ def run(args: argparse.Namespace) -> dict:
                 "--dev-manifest", str(dev_manifest),
                 "--model", args.model,
                 "--output", str(checkpoint),
-                "--argument-predictions", str(args.argument_predictions),
+                "--argument-predictions", str(predictions),
                 "--epochs", str(args.epochs),
                 "--lr", str(args.lr),
                 "--seed", "13",
@@ -248,6 +269,7 @@ def run(args: argparse.Namespace) -> dict:
         "documents": {"train": len(train_ids), "internal_dev": len(dev_ids)},
         "fixture": fixture,
         "arms": arms,
+        "argument_predictions_sha256": sha256_file(args.argument_predictions),
         "contract_sha256": sha256_file(args.contract) if args.contract else None,
         "contract_status": contract.get("status") if contract else "none",
     }
