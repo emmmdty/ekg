@@ -77,8 +77,8 @@ A4 的机制 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头 + 五个
 |---|---|---|---|
 | ~~1~~ | ~~**C-5b**~~ | ✅ **已完成 2026-09-13**（含原第 2 行的 pilot 入口）。缺口比这里原本写的小：`train_`（`train_coref_scorer.py`）、`evaluate_`（`score_maven_ere_official.py`）与预测器（`build_maven_ere_submission.py`）**本来就有**，只缺三个脚本加一个开关。执行中抓到三个真缺陷，其中一个是 A 类（permutation 臂训练/推理口径不成对）。详见 [`results/PHASE_C.md`](results/PHASE_C.md) | 608 passed / 28 skipped、ruff 0、smoke OK |
 | ~~2~~ | ~~C-9 同类缺口~~ | ✅ 并入上一行：`scripts/run_c5_argument_uncertainty.py` 已存在并进了 preflight 的 `CODE_FILES`（8 个文件） | — |
-| **3（当前队首）** | **C-7** | LLM 对照脚手架（三章各一个 CPU fixture） | 见主表 §4.1。⚠️ 开工先核：这三个 fixture 有多少已经躺在仓库里了——C-5b 与 A4.1 都是**把缺口估大了** |
-| **4** | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
+| ~~3~~ | ~~**C-7**~~ | ✅ **已完成 2026-09-13**。三章 CPU fixture 各自被**该章自己的 evaluator** 打出分；配置移进 `configs/`（`data/protocols` 是 gitignored，hash 在 git 外没有追溯价值）。详见主表 §4.1 |
+| **4（当前队首）** | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
 | **5** | **C-10** | **E3.0 冻结 Ch6 的 evaluation unit**（2026-09-13 进主表 §4.1） | 纯 CPU、零方法章依赖，是 G-11a 四个外部对手的**真正前置**——unit 没冻结就开对手，跑了也得重跑（A 类三轴一致性） |
 
 **GPU 泳道**：
