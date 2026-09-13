@@ -1,0 +1,9 @@
+{
+  "schema_version": "ekg.llm_baseline_fixture_responses.v1",
+  "note": "Recorded, deliberately imperfect answers. Each carries the failure modes a real run produces -- a missing mention, an invented label, an unknown id, a self-relation, a mention claimed by two clusters -- so the fixture proves the scaffolding records them rather than repairing them into a better score.",
+  "responses": {
+    "factuality": "Looking at each mention in turn, here are the labels:\n\n{\"m1\": \"CT+\", \"m2\": \"CT+\", \"m3\": \"CT-\", \"m4\": \"PS+\", \"m5\": \"CT+\", \"m6\": \"CT-\", \"m7\": \"CT+\", \"m8\": \"PROBABLY\", \"m10\": \"Uu\", \"m99\": \"CT+\"}\n\nNote that m9 was ambiguous so I left it out.",
+    "relation": "Here are the relations I can support from the text:\n{\"causal_relations\": {\"CAUSE\": [[\"m1\", \"m7\"], [\"m1\", \"m1\"]], \"PRECONDITION\": [[\"m1\", \"m4\"]], \"ENABLES\": [[\"m1\", \"m2\"]]}, \"temporal_relations\": {\"BEFORE\": [[\"m1\", \"m4\"], [\"m1\", \"mX\"]], \"OVERLAP\": [[\"m1\", \"m2\"]]}, \"subevent_relations\": [[\"m2\", \"m1\"]]}",
+    "identity": "{\"coreference\": [[\"m1\", \"m5\"], [\"m2\", \"m8\", \"m1\"], [\"m9\", \"m10\"], [\"m3\"], [\"m9\", \"mZ\"]]}"
+  }
+}
