@@ -210,8 +210,14 @@ gantt
 | 能在 5090 上跑 | 不能 |
 |---|---|
 | D4 / C5 / A4 的 **CPU/CUDA smoke**（RoBERTa-base 量级，显存需求小） | **EasyECR**：其栈是 `torch==2.0.1`，5090 是 Blackwell sm_120，**torch 2.0 不支持该架构**，只能等 4090 |
-| 小规模 preflight 里需要 CUDA 的片段 | **Qwen3-8B LoRA 的 LLM 对照**：卡上已有约 17 GB 的既有服务，余量约 15 GB，8B bf16 需约 16 GB，**装不下** |
+| 小规模 preflight 里需要 CUDA 的片段 | ~~**Qwen3-8B LoRA 的 LLM 对照**：卡上已有约 17 GB 的既有服务，余量约 15 GB，8B bf16 需约 16 GB，**装不下**~~ —— **2026-09-13 实测作废**，见下面的 ⚠️ |
 | 短时诊断、显存探测 | **任何长任务 pilot**（D4.3 / A4.3 / C5.3）：主体实验按作者要求留在 4090 |
+
+⚠️ **上表「装不下」那格已被实测推翻（2026-09-13）**：5090 显存 **209 MiB / 32,607 MiB，无任何计算进程**
+（那个约 17 GB 的 Qwen 服务早已不在，§3.5 的 ③ 在 09-11 就记了同样的读数，只是表没跟着改）。
+24 核 load 0.05，磁盘余 1,015 GB。**G-7 的「余量不够」这条阻塞理由不再成立**；真正的前置改成
+**5090 上只有 Qwen3-1.7B / 4B，没有 8B——拉模型仍须先问作者**。
+**结论：过期的能力记录会把可行的任务判成不可行。写进本表的资源读数必须带日期，用前重测。**
 
 **使用前置（按 2026-09-11 第二次裁决更新）**：① host key 已在 `known_hosts` 且**作者确认是本人所加**，
 指纹 ED25519 `SHA256:Jkfb9Tb14Z/SqsG6g9GedDjKZOcBl1DLW6zT0V1dkJY`；② **≤1 天的任务不再逐次请示**，
@@ -289,7 +295,19 @@ gantt
 | **C-9** | ✅ **已完成 2026-09-12**（`a90df4e`，10 条 targeted tests，560 passed / ruff 0 / smoke OK；preflight 重建为 `preflight-r2` `dae0e0b4…e15c4`，`code_files=7`）。原文：**写 D4.3 的 pilot 入口 `scripts/run_d4_typed_cue_oof.py`**（2026-09-12 新增：契约点名了它，仓库里没有；同类缺口 A4/C5 各自也有） | C-1 ✅ + G-1 ✅ | 按冻结契约驱动 5 折 × 3 臂，逐实例概率/cue/evidence/三级 logits/confusion 落盘，coverage 断言 2,913 篇 / 73,939 mentions 各恰好一次；targeted tests + 三件套全绿 | 代码 + 测试 |
 | **C-8** | 第 2 章「统一评测协议」素材整理 | 无 | 产出一份 `docs/PROTOCOL_TABLE.md`：三章各自的 manifest SHA-256、文档/mention 计数、划分来源、evaluator SHA-256、指标定义、final-valid 封存状态，**每一格都能从 `results/` 或 `runs/` 反查到**；无空格、无「待补」 | `docs/PROTOCOL_TABLE.md` |
 
-CPU 泳道**全部 8 项都不依赖 GPU，现在就能做**，且彼此无强依赖，可任意顺序并行。
+| **C-10** | **E3.0 冻结 Ch6 的不可变 evaluation unit**（2026-09-13 新增，理由见下） | 无 | 按 `phases/PHASE_E3_graph_application.md` E3.0 冻结完整 query/candidate manifest、seed、source/generator hashes、candidate-ID digest 与 population counts，明标「本地重建协议」；每个 query 固定 `instance_id/doc_id/anchor/gold/candidates/label` | `runs/stages/E3/` + 结果页 |
+
+CPU 泳道**全部 9 项都不依赖 GPU，现在就能做**，且彼此无强依赖，可任意顺序并行。
+
+**新增 C-10 的理由（2026-09-13）**：§3.4 推论 2 已经判定「第 6 章必须提前启动」，§3.2 依赖图里
+G-11a（4 个外部对手复现）也标了「提前启动」，但**它们全都要跑在同一个冻结的 evaluation unit 上**
+——unit 没冻结就开对手，是 A 类口径问题（三轴一致性），跑了也得重跑。E3.0 是纯 CPU、零方法章依赖，
+**是 G-11a 真正的前置**，却在主表里没有自己的行、被埋在 G-11 那一整行里。单列出来，
+G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
+
+**泳道归属的判据（吃了一次亏后补上）**：一项任务属于 GPU 泳道，当且仅当**它自己的代码路径需要 GPU**。
+「它读的文件在某台有 GPU 的机器上」不是 GPU 依赖——那是 scp 或 ssh 的事。A4.1 就是这样被误归了两天
+（详见 `results/PHASE_A.md` 的 A4.1 节）。**新任务进表时逐条问一句：它 import torch 吗？**
 
 ### 4.2 GPU 泳道（长任务阻断在 G-0；smoke 可走 5090，见 §3.5）
 
@@ -299,7 +317,7 @@ CPU 泳道**全部 8 项都不依赖 GPU，现在就能做**，且彼此无强�
 | **G-1** | ~~D4.2 CPU/CUDA smoke~~ → ✅ **完整通过**：CPU 半边 2026-09-11，CUDA 半边 2026-09-12（4090 GPU2，`smoke.json` `c4c90b1a…`），**三臂产物与 CPU 逐字节相同**。旧记录：**CPU 半边 2026-09-11 已过**（4090 无 CUDA 时自动落 CPU，契约绑定不变，`smoke.json` `d0003af5…97c75`）；**CUDA 半边仍欠**——5090 虽空闲但缺 `factuality_cv/` 且 backbone 闭合不了 pin（差 `pytorch_model.bin` vs `model.safetensors` 与 `tokenizer_config.json`），要么等 G-0，要么经作者同意搬 476 MB 目录 |
 | **G-2** | **D4.3 seed-13 五折 pilot（三臂）** —— ❌ **2026-09-12 跑完，机制失败**：full .476515 < remove-core .536788 < 两个锚；中介反向、PS−/Uu 护栏双破；负控也赢过 full。**typed-cue 家族第 1 个有效周期失败**，详见 `results/PHASE_D.md`。原注：**已启动**（4090，5 折铺 4 卡，预计 4–4.5 小时，收尾脚本自动汇总）。原注：队首，曾**被缺失的入口脚本挡住**：契约冻结的 `scripts/run_d4_typed_cue_oof.py` **从未被写过**（2026-09-12 发现）。先做 **C-9**，再谈授权 | **C-9** + G-1 ✅ + 作者授权长任务 | ~1.5 GPU·day（4 卡可按折并行） | 2,913 篇 / 73,939 mention 各恰好一次 OOF 预测；逐实例概率/cue/evidence/三级 logits/confusion 落盘 |
 | **G-3** | D4 supporting-word baseline 五折重建 | C-1 + G-0 | ~1 GPU·day | 先在官方划分复现官方数字（容差事前定 ±1.0 macro-F1）→ FR-016 状态 (a)；再转五折 OOF |
-| **G-4** | **A4.1 preflight → A4.2 smoke → A4.3 seed-13 pilot（四臂）** —— **C-6 已完成，这一行现在只等 4090 有空闲卡 + 作者授权长任务**。A4.1 需要 4090 上的两个文件：内容寻址 encoder（`71be7419…c961ea9`）与 A3 fallback / taco 适配的官方形状预测（供 preflight 独立重算）。2026-09-13 核卡：**四张卡仍被他人 vllm 占满（各约 18.6–20.5 GB / 24.5 GB）** | C-6 ✅ + G-0 ✅ + 4090 空卡 + 授权 | ~2–3 GPU·day | 完整候选逐位不变；逐实例 evidence 与三种 counterfactual logits 落盘 |
+| **G-4** | **~~A4.1 preflight~~ → A4.2 smoke → A4.3 seed-13 pilot（四臂）**。⚠️ **A4.1 从来不属于本泳道**：`prepare_a4_pair_evidence_preflight.py` 零 torch/cuda 引用，`--model` 只算目录内容摘要、不加载模型；它已于 **2026-09-13 在 4090 上纯 CPU 跑完并 PASS**（protocol `321309ac…d65451`，`code_files=7`，两条 baseline 独立重算与 §7.2 逐项吻合，见 `results/PHASE_A.md`）。原先写的「等 4090 空出卡」「卡在 4090 上的两个文件」**都不成立**——被占的是 GPU 不是文件系统，ssh 与 CPU 全程可用。**本行现在只剩 A4.2/A4.3，等空闲卡 + 授权长任务**；A4.2 可走 5090（§3.5）。2026-09-13 核卡：4090 四张仍被他人 vllm 占满（19.4–20.5 GB / 24.5 GB，89–99% util） | C-6 ✅ + **A4.1 ✅** + G-0 ✅ + 空闲卡 + 授权 | ~2–3 GPU·day | 完整候选逐位不变；逐实例 evidence 与三种 counterfactual logits 落盘 |
 | **G-5** | C5.2 smoke → **C5.3 seed-13 pilot（三臂）** | C-5 + G-0 + 授权 | ~1 GPU·day | 291 篇 / 7,195 mention 全覆盖；false-merge 中介与 calibration 落盘 |
 | **G-6** | EasyECR Global-Local Topic 复现 | C-2 判定可跑 + G-0 | ~1–2 GPU·day + 调试 | 若 KBP 2017 可得则先复现其发表数字（(a)）；否则直接跑 MAVEN-ERE 并标 (b) + 列差异 |
 | **G-7** | LLM 对照 ×3 章（Qwen3-8B LoRA） | C-7 + G-0 | ~1 GPU·day/章 | 三章主表各加 1–2 行；披露 backbone/revision/微调方式/提示模板 |
