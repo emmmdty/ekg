@@ -263,6 +263,10 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
             if ARGUMENT_POOLING_PREDICTED in self._components
             else "none"
         )
+        # The permutation arm trained on shuffled role vectors; scoring it on the
+        # real ones would be a different model than the one that was trained.
+        # The seed travels in the checkpoint so the shuffle is reproducible here.
+        self._role_permutation_seed = config.get("role_permutation_seed")
         declared_argument_source = config.get("argument_source", "none")
         if declared_argument_source != self._argument_source:
             raise ValueError(
@@ -363,15 +367,30 @@ class SupervisedCoreferenceScorer(CoreferenceScorer):
                     device=self._device,
                 )
                 contexts = triggers
+            pair_list = list(pairs)
+            role_features = None
+            if self._role_permutation_seed is not None:
+                from ekg.nodes.role_uncertainty import (
+                    batch_role_compatibility_features,
+                    permute_role_features,
+                )
+
+                role_features = permute_role_features(
+                    pair_list,
+                    nodes_by_id,
+                    batch_role_compatibility_features(pair_list, nodes_by_id),
+                    seed=self._role_permutation_seed,
+                )
             logits = self._head(
                 pair_head_inputs(
                     triggers,
                     contexts,
-                    list(pairs),
+                    pair_list,
                     nodes_by_id,
                     order,
                     components=self._components,
                     arguments=arguments,
+                    role_features=role_features,
                 )
             )
             probs = torch.softmax(logits, dim=-1)[:, 1]

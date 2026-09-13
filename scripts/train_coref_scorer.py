@@ -49,12 +49,17 @@ from ekg.nodes.discriminative import (
     CONFIG_FILE,
     CONTEXT_POOLING,
     FEATURE_NAMES,
+    ROLE_COMPATIBILITY,
     argument_spans_and_counts,
     context_ranges_for,
     head_input_dim,
     pair_head_inputs,
     pool_argument_features,
     validate_components,
+)
+from ekg.nodes.role_uncertainty import (
+    batch_role_compatibility_features,
+    permute_role_features,
 )
 from ekg.relations.data.maven_arg import ArgumentDocument, load_maven_arg
 from ekg.relations.data.maven_ere import load_maven_ere
@@ -124,6 +129,7 @@ def train(
     warmup_steps: int = 0,
     accum_steps: int = 1,
     components: tuple[str, ...] = (),
+    permute_roles: bool = False,
     dev_docs: Sequence[ArgumentDocument] = (),
     dev_pairs: dict[str, list[CorefPair]] | None = None,
     save_every_epoch: bool = False,
@@ -198,6 +204,7 @@ def train(
             json.dumps(
                 {
                     "components": list(components),
+                    "role_permutation_seed": seed if permute_roles else None,
                     "context_discriminative": context_discriminative,
                     "argument_source": (
                         "gold_event_level_oracle"
@@ -263,10 +270,22 @@ def train(
             contexts = triggers
         order = {node.event_id: i for i, node in enumerate(doc.nodes)}
         nodes_by_id = {node.event_id: node for node in doc.nodes}
+        pair_ids = [(p.head_id, p.tail_id) for p in pairs]
+        role_features = None
+        if permute_roles and ROLE_COMPATIBILITY in components:
+            # Negative control. Derived from `seed` alone, so a document gets the
+            # same shuffle on every epoch and at inference: the arm measures what
+            # the extra capacity buys, not what resampled noise averages out to.
+            role_features = permute_role_features(
+                pair_ids,
+                nodes_by_id,
+                batch_role_compatibility_features(pair_ids, nodes_by_id),
+                seed=seed,
+            )
         inputs = pair_head_inputs(
-            triggers, contexts, [(p.head_id, p.tail_id) for p in pairs],
+            triggers, contexts, pair_ids,
             nodes_by_id, order, components=components,
-            arguments=arguments,
+            arguments=arguments, role_features=role_features,
         )
         return head(inputs)
 
@@ -391,6 +410,15 @@ def main() -> int:
         help="mechanism components to enable; empty = trigger-only control",
     )
     parser.add_argument(
+        "--permute-role-features",
+        action="store_true",
+        help=(
+            "negative control for the role-compatibility arm: shuffle whole role vectors "
+            "within document x event type, keeping every marginal and destroying only the "
+            "link between a vector and its pair"
+        ),
+    )
+    parser.add_argument(
         "--argument-predictions",
         type=Path,
         help="complete mention-local prediction JSONL; switches --train to MAVEN-ERE",
@@ -407,16 +435,27 @@ def main() -> int:
     args = parser.parse_args()
 
     components = validate_components(args.components)
+    if args.permute_role_features and ROLE_COMPATIBILITY not in components:
+        # Silently running the control without the component it controls would
+        # produce a remove-core number wearing a negative-control label.
+        raise SystemExit(
+            "--permute-role-features requires --components role_compatibility"
+        )
+    # `--argument-predictions` picks the corpus as well as the annotation: with it
+    # the documents come from MAVEN-ERE, without it from MAVEN-Arg. C5's arms must
+    # share one pair population, so its remove-core arm passes the file to stay on
+    # the same corpus while enabling no component that reads it. The requirement
+    # therefore runs one way only: a component that consumes argument evidence
+    # needs the file; the file does not need a consumer.
     if args.argument_predictions:
-        if ARGUMENT_POOLING_PREDICTED not in components:
-            parser.error("--argument-predictions requires argument_pooling_predicted")
         from ekg.nodes.predicted_arguments import apply_predicted_arguments
 
         docs = list(load_maven_ere(args.train))
         apply_predicted_arguments(docs, args.argument_predictions)
     else:
-        if ARGUMENT_POOLING_PREDICTED in components:
-            parser.error("argument_pooling_predicted requires --argument-predictions")
+        for consumer in (ARGUMENT_POOLING_PREDICTED, ROLE_COMPATIBILITY):
+            if consumer in components:
+                parser.error(f"{consumer} requires --argument-predictions")
         docs = list(load_maven_arg(args.train))
     if args.limit:
         docs = docs[: args.limit]
@@ -467,6 +506,7 @@ def main() -> int:
         warmup_steps=args.warmup_steps,
         accum_steps=args.accum_steps,
         components=components,
+        permute_roles=args.permute_role_features,
         dev_docs=dev_docs,
         dev_pairs=build_eval_pairs(dev_docs) if dev_docs else None,
         save_every_epoch=args.save_every_epoch,
