@@ -87,6 +87,16 @@ A4 的机制 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头 + 五个
 （§7.5 下行情形里它照样成立），也是耗时最长的一项。Gate 2 判的是还剩几个方法章，判完之后再启动
 Ch6 就来不及了。C-8 是纯整理、随时可做，所以垫后。
 
+> ⚠️ **2026-09-13：CPU 队列已跑空。** 主表 §4.1 的九项 CPU 泳道任务全部 done（C-10 / C-4b /
+> C-8 三项在本轮完成，G-11a 的静态第一刀也做完了）。**剩下的每一件都要卡**：
+> ① **G-11a 第二刀**——按成本从低到高 SimKGC → CSProm-KG → BART contrastive，
+> 每个先在**它自己的原基准**上取 (a)，再写 CGEP 适配器打 `runs/stages/E3/e3-v61-20260913/queries.jsonl`；
+> MCPredictor 直接记 (b)（LDC2011T07 需许可）。前两个要先升 torch（版本墙见下）；
+> ② **A4.2 smoke → A4.3 pilot**（G-4 泳道）；③ **C5.1 preflight → C5.2 → C5.3**（G-5 泳道）。
+> 5090 现在被 A4 dry-run 占着；它一空，按 §0.3b 的判据挑「能减少正式跑白跑概率」的那一件先做。
+> **注意 mcnc 的 `torch==1.7.1` 与 CSProm-KG 的 `torch==1.11.0+cu113` 最高只到 sm_86，
+> 4090(sm_89) 与 5090(sm_120) 都跑不了**——这是和 EasyECR 同一堵墙，升版是透明补丁，要记前后 hash。
+
 ### 0.3a 正在跑的 A4 四臂 dry-run：怎么查、怎么收尾
 
 **它是什么**：在 gpu-5090 上用 **A4.3 那条正式命令**（`scripts/run_a4_pair_evidence.py --contract …`）
