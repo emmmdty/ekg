@@ -827,3 +827,69 @@ sha256 855906d39e71d5cef838c3a72515ef837803afd6a43c88e6879274bf72e7142a   73,939
 
 **C5.2 smoke（10 篇、单卡一次 forward/backward/export/reload）→ C5.3 seed-13 pilot**，两者都要卡。
 4090 四张卡仍被他人 vllm 占满；5090 正在跑 A4 四臂 dry-run。
+
+## ★ C5.2 smoke · **CPU 半边 PASS**（2026-09-13，gpu-4090，`CUDA_VISIBLE_DEVICES=` 强制 CPU）
+
+4090 四张卡仍被他人 vllm 占满，所以先跑契约点名的 **CPU 半边**（D4.2 的先例：CPU + CUDA 两半边，
+产物应逐字节相同）。**CUDA 半边仍欠一张卡。**
+
+### 冒烟抓到一个真缺陷（这正是它的用处）
+
+首跑在训练开始前就死了：
+
+```
+ValueError: missing predictions=0 extra predictions=73497
+```
+
+`apply_predicted_arguments` 要求预测文件**不多不少**覆盖它拿到的语料，而 smoke 会把文档
+subset 成 10 train + 10 internal-dev，却把**全语料**的论元预测原样递给 trainer——于是其余
+73,497 个 mention 全成了「extra」。
+
+**根因不在那个 guard**：对跑全语料的 pilot 来说，对不齐就是拿错了文件，这条 fail-fast 是对的。
+**subset 的那一方才该 subset 两个输入。** 修法是 `_subset_predictions`（按 `doc_id` 过滤，
+与既有 `_subset` 同形），并把全量产物的 sha256 记进 `smoke.json`，因为那才是契约钉住的身份。
+提交 `886a440`，配一条测试。
+
+### 第二个缺陷：改了被契约钉住的文件 ⇒ 必须重建 preflight，不覆盖旧的
+
+修完 smoke 脚本后再跑，立刻被自己的契约拦下：
+
+```
+SmokeError: bound code hash drift: scripts/smoke_c5_argument_uncertainty.py
+```
+
+`scripts/smoke_c5_argument_uncertainty.py` 在 preflight 的 `CODE_FILES`（8 个）里。按 D4 的先例
+**新建 `preflight-r2/`，旧的 `preflight/` 原样保留**：
+
+| | `preflight/` | `preflight-r2/` |
+|---|---|---|
+| `protocol.json` SHA-256 | `9402e880…e4319` | **`8a5ed864dea501a067339c3031bdcd750c598e900d54fdf9c2448ce13ccb7868`** |
+| 差异 | — | 只有 `code` 里 smoke 脚本一项，外加 `path` 字段 |
+| 两条 baseline 分数 | — | **逐项相同**（`official_joint` / `qwen3_argument_pooling` / `global_local_topic` 三项 `scores` 全等） |
+| internal-dev gold | `403b69a8…07e81` | **同哈希**，候选 digest 与 population counts 全等 |
+
+⇒ 重建 preflight 顺带给了一次**免费的可复现性检查**：换一个输出目录重跑，官方口径的两条 baseline
+分数一位不差。
+
+### 结果
+
+`gpu-4090:/data/TJK/ekg/runs/stages/C5/c5-v61-argument-uncertainty-r1/smoke-cpu/`
+
+| 项 | 值 |
+|---|---|
+| `smoke.json` SHA-256 | `30bae362ceabbab549f279876d5cb91f49ad132233e89ef68f43e9c4d64589b0` |
+| status / seed / final_valid_accessed | `pass` / 13 / **false** |
+| 绑定契约 | `8a5ed864…b7868`（`preflight-r2`），`contract_status=pass`，8 个 code 文件逐个重哈希 |
+| 论元产物 | `855906d3…7142a`（全量身份） |
+| 文档 | train 10 / internal-dev 10（按 manifest 顺序取前 10，trainer 自己的 split guard 照常生效） |
+| 三臂 config SHA-256 | full `1d3a4aab…` · remove_core `48a2481e…` · permutation `3b279b11…`，**两两不同** |
+| permutation 种子往返 | checkpoint 里 `role_permutation_seed=13`，full/remove_core 为 `None` ✅ |
+| CPU fixture | 四种形状（空角色 / 多 filler / 重复字符串 / 全 singleton）特征有限、宽度一致、全 singleton 时中介归零 |
+
+训练侧读数（**仅证明跑得通，不是结果**）：8/10 篇有对、245 个训练对（64 正 / 77 hard negative）；
+三臂各 1 epoch 均正常收敛并导出、重载。
+
+### 下一步
+
+**C5.2 的 CUDA 半边**（同命令去掉 `CUDA_VISIBLE_DEVICES=`，断言与 CPU 半边产物一致）→ **C5.3 pilot**。
+两者都要一张空闲卡。

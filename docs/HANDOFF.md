@@ -158,7 +158,14 @@ ssh gpu-5090 'cd /mnt/aidata/tongjiakai/ekg && tail -5 logs/a4_dryrun.log; \
   上一轮写的阻塞理由是**错的**：那份合并论元预测一直在 4090，只是**结果页只记了哈希没记路径**，
   实际位置是 `runs/stages/R1/r1-v61-baseline-closure-r3/ch1/qwen3-full-r3/merged/predictions.jsonl`
   （由注册对照 `metrics.json` 的 `scorer_path` 指出来）。本轮另把主锚与对照的预测 scp 到 4090 并双端核过。
-  **下一步 C5.2 smoke（10 篇，要卡）→ C5.3 pilot。**
+  ✅ **C5.2 的 CPU 半边也已 PASS**（4090，`CUDA_VISIBLE_DEVICES=`）：`smoke.json` `30bae362…89b0`，
+  三臂 config 两两不同、permutation 种子 13 往返 checkpoint 成功、四种 CPU fixture 形状全过。
+  冒烟抓到两个真缺陷：① smoke 只 subset 了语料没 subset 论元预测（`extra predictions=73497`），
+  已修（`886a440`，根因在 subset 的一方，**不是**去放宽 trainer 的 fail-fast）；
+  ② 改了被契约钉住的 smoke 脚本 ⇒ 按 D4 先例**新建 `preflight-r2/`**
+  （`8a5ed864dea501a067339c3031bdcd750c598e900d54fdf9c2448ce13ccb7868`），旧 `preflight/` 不覆盖；
+  重建顺带证明两条 baseline 分数逐项可复现。
+  **下一步：C5.2 的 CUDA 半边（去掉 `CUDA_VISIBLE_DEVICES=`，比对两半边产物）→ C5.3 pilot，都要一张空闲卡。**
 - 两者**写不同 namespace，可并卡**。跑完这两个就到 **Gate 2**。
 
 ### 0.4 Ch4（A4）现状：设计、缺陷、以及 A4.1 的收尾
