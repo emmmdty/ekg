@@ -1375,7 +1375,7 @@ self-training 变体记为**升级路径**，不是本轮方案。
    并写进 checkpoint 的 `revision_training_rows` 防漂移。冒烟新增两条断言：
    「被测 FP 数必须等于 FP 总数」与「带证据流的臂不得把 causal 正类抹光」。
 
-### A4.1 preflight 本地能验到哪一步
+### A4.1 preflight 本地能验到哪一步（**已被本页末尾的 A4.1 PASS 取代**，2026-09-13）
 
 R1 protocol `f0b4702b…50829`、t024 `9133a73c…587e7` 解析成功，relation phase contract 哈希校验通过；
 物化的 internal-dev gold **复算出契约钉的候选 digest `15a3b1a5…dac10910`**（291 篇 / 7,195 event
@@ -1452,3 +1452,78 @@ RoBERTa-large 同构：ATLOP 63.18 → DREEAM teacher 63.49（**+0.31**），仍
    （逐对反事实证据充分性+必要性 → 跨句 causal 误报 → 官方 causal micro-F1）**未改动**。
 2. **一致性项只跑 causal 族**（causal FP 占 causal 误差 83.6%，且 causal 是本章主指标；
    temporal 正例约 39 倍且在本章只是护栏）。
+
+## ★★★ A4.1 immutable preflight：**PASS**（2026-09-13，gpu-4090，**纯 CPU，未占任何 GPU**）
+
+`runs/stages/A4/a4-v61-pair-evidence-r1/preflight/protocol.json`
+SHA-256 **`321309ac48016722a34cc27a75eb1c1411be9c45294be8c8cd7419ffd9d65451`**，`code_files=7`
+（pilot 入口 `run_a4_pair_evidence.py` 在哈希集合内——D4 的教训已吸收）。
+
+### 先纠正一条把这一步挡了两天的误判
+
+`HANDOFF.md` §0.4 与 `EXPERIMENT_PLAN.md` §4.2 G-4 都写着「A4.1 卡在 4090 上的两个文件」，
+并把整行归入 **GPU 泳道**、注明「等 4090 空出卡」。**两条都不成立**：
+
+1. `scripts/prepare_a4_pair_evidence_preflight.py` **没有任何 torch / cuda 引用**。`--model` 只传给
+   `model_content_digest()`（`src/ekg/core/stage_bundle.py:62`，对目录内每个文件 sha256 后再 digest），
+   **从不加载模型**。整个脚本＝哈希校验 + 用官方 `evaluate.py` 重算两条 baseline。**它不是 GPU 任务。**
+2. 被占的是 4090 的 **GPU**，不是它的文件系统。ssh 全程正常，CPU 64 核 load 12.9（约 51 核空闲）、
+   内存 439 GB 可用。「GPU 被占」被当成了「文件拿不到」。
+
+⇒ **唯一实现完成、入口齐全、冒烟通过的方法章，被自己的交接文档判成了阻塞。**
+教训与 D4 的「契约点名的入口脚本从没被写过」同类：**阻塞理由要逐条验证到代码，不能靠转述**。
+
+### 执行记录
+
+4090 `git reset --hard origin/main` 至 `1761d47`（工作树原本干净，两个 untracked 目录
+`.cache/`、`.venv-llmere-causal-s13/` 未动）。11 项输入逐一核 SHA-256，**10 项在 4090 上原地匹配**：
+source `6a5519fe…`、train manifest `47d19cc9…`、internal-dev manifest `f5457b30…`、
+官方 evaluator `32919e86…`（＝`data/protocols/v6/tools/maven_ere_evaluate.py`，**不是**
+`scripts/score_maven_ere_official.py`）、P1 r15 `1e31a9ac…`、R1 protocol `f0b4702b…50829`、
+t024 `9133a73c…587e7`、encoder `71be7419…c961ea9`
+（`/data/TJK/models/local/roberta-base/71be7419…`，6 文件 501 MB）、A3 fallback 与 taco 官方预测。
+
+**唯一缺件**：A3 不可变失败交接 `a3-v6-20260905-r17/`（9.8 MB）4090 上没有，本地 `scp -r` 过去，
+双端 `protocol.json` SHA-256 均为 `c187bf03…9359e`。无 `--delete`，未覆盖任何既有产物；
+目标目录 `runs/stages/A4/` 执行前不存在。
+
+### 两条同协议 baseline 的独立重算（官方 `evaluate.py`，百分数）
+
+| baseline | causal P | causal R | **causal F1** | subevent F1 | temporal F1 |
+|---|---:|---:|---:|---:|---:|
+| A3.6 fallback `rates_coref_family_selection` seed-13 | 22.3468 | 56.9433 | **32.0973** | 29.6570 | 51.4672 |
+| TacoERE 适配 `taco-s13-r3` | 23.4847 | 50.2502 | **32.0096** | 28.7983 | 51.4843 |
+
+两者 population 逐位相同：291 篇 / 7,195 event mentions / 234,870 对 / 1,719 TIMEX，
+候选 digest `15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910`。
+**与本页 §A3.6 主表及 `EXPERIMENT_PLAN.md` §7.2 记录的 32.10 / 32.01 / 28.80 / 51.48 逐项吻合**
+——契约 A4.1 要的「独立重算」通过。
+
+### ⚠️ 这次重算让一条已知事实变得更该被正视：A4 的门要先补 1.07 的实现差距
+
+A4 的 seed-13 门是 causal F1 **严格高于**官方 joint 主锚 **33.17**。而本章自己这条复现线
+最好的一次（A3.6 四臂配方分账后）就是上表的 **32.0973**，**比主锚低 1.07**。
+
+**先排除一个错误的类比**：D4 失败的直接原因之一是自写 head 退化（`remove-core .536788` 比 CLS 锚
+`.553995` 低 `.0172`，机制上场前就已经输了）。**A4 没有这个风险**——已逐行核过
+`src/ekg/relations/pair_evidence.py:548-596`：`PairEvidenceClassifier.base` 就是
+`build_pair_head(LINEAR_HEAD, …)`，即 A3 线同一套 `PairClassifier`；`evidence` 残差
+`nn.init.zeros_` 且 `evidence_feats is None` 时 forward 原样返回 base 输出。
+**remove-core 臂跑的是与 A3 线逐参数相同的架构，不是新参数化。**
+
+所以 1.07 的性质是「**我们的复现线本来就低于官方 joint**」，不是「实现退化」。两者对后续动作的
+含义完全不同，不得混为一谈。
+
+**口径已核（避免第六次犯同一个错）**：§7.2 的确认门 `mean causal delta ≥ +.010` 是 0–1 尺度，
+＝ **+1.0 个 F1 点**，与护栏「causal recall 不低于 A3 fallback **1.0 个绝对 F1 点**」同尺度。
+确认门与过门实际需要的幅度**在同一量级，设计自洽**，不是矛盾。
+
+**建议（不改任何冻结的门，只加读数）**：A4.3 产物里把 remove-core 臂的官方三族指标与上表并列落盘。
+remove-core 的预期落点已知（≈32.10），偏离即说明训练配置有问题而非机制无效。
+**D4 是跑完 1.5 GPU·day 才把这两件事分开的**，A4 可以零成本地当场分开。
+
+### 下一步
+
+G-4 的 A4.1 已解除。A4.2 smoke 按契约需带 `--contract` 指向上面那个 protocol，
+`gpu-5090:runs/stages/A4/dev-smoke-20260912/` 的开发冒烟**不满足**该条件（无 preflight 绑定、
+非冻结 backbone、非官方评测器），仍**不是 A4.2**、表里无可引用数字。
