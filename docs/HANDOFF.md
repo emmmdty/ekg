@@ -151,9 +151,14 @@ ssh gpu-5090 'cd /mnt/aidata/tongjiakai/ekg && tail -5 logs/a4_dryrun.log; \
   `gpu-5090:runs/stages/A4/dev-smoke-20260912/` 那份开发冒烟**不算 A4.2**。
   ⚠️ 注意 5090 上 `r1-v61-20260904/protocol.json` 是 09-04 的旧档（`phase_contracts` 为空），
   preflight 产物本身在 4090，跨机跑 A4.2 前先想清楚契约文件从哪读。
-- **G-5（C5.2 smoke → C5.3 pilot）**：C-5b ✅ 已完成，入口齐全。C5.1 preflight 只差
-  `--argument-predictions` 指向的完整 mention-local 论元预测（合并产物 `855906d3…7142a`，在 4090）；
-  其余输入本地 sha256 全部匹配。之后等空闲卡 + 授权。
+- **G-5（C5.2 smoke → C5.3 pilot）**：✅ **C5.1 preflight 已 PASS（2026-09-13，4090，纯 CPU）**，
+  `protocol.json` **`9402e880…e4319`**、`code_files=8`、`final_valid_accessed=false`；两条 baseline 用官方
+  evaluator 独立重算得 **主锚 MUC 80.98472 / 注册对照 80.367586**，与 C-5b 的本地预验逐位一致。
+  ⚠️ **自物化的 internal-dev gold `403b69a8…` 与 A4.1 那份同哈希** ⇒ Ch4/Ch5 站在同一候选全集上。
+  上一轮写的阻塞理由是**错的**：那份合并论元预测一直在 4090，只是**结果页只记了哈希没记路径**，
+  实际位置是 `runs/stages/R1/r1-v61-baseline-closure-r3/ch1/qwen3-full-r3/merged/predictions.jsonl`
+  （由注册对照 `metrics.json` 的 `scorer_path` 指出来）。本轮另把主锚与对照的预测 scp 到 4090 并双端核过。
+  **下一步 C5.2 smoke（10 篇，要卡）→ C5.3 pilot。**
 - 两者**写不同 namespace，可并卡**。跑完这两个就到 **Gate 2**。
 
 ### 0.4 Ch4（A4）现状：设计、缺陷、以及 A4.1 的收尾

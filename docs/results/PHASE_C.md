@@ -757,3 +757,73 @@ threshold `.7`、band `0` 来自该次运行的 `metrics.json`。**没有一个�
 C5.1 preflight 还差一样东西：`--argument-predictions` 指向的**完整 mention-local 论元预测**
 （合并产物 SHA-256 `855906d3…7142a`，在 4090）。其余输入本地全部 sha256 匹配。
 C5.2 smoke 与 C5.3 pilot 需要 GPU 与授权。
+
+## ★ C5.1 immutable preflight —— **PASS**（2026-09-13，gpu-4090，**纯 CPU，未占任何 GPU**）
+
+### 开工自审
+
+1. **科研价值**：C5.1 是 G-5 泳道的门，卡着 C5.2 smoke 与 C5.3 pilot；跑不过它，Ch5 在 Gate 2
+   之前拿不出任何方法结果。对准 `EXPERIMENT_PLAN.md` §7.3 的表 5-3。
+2. **可行性**：`prepare_c5_argument_uncertainty_preflight.py` 及其 `ekg.*` 依赖**一处 torch / transformers
+   都不 import**（本轮用 AST 遍历实测，4 个文件），所以它和 A4.1 一样是 **CPU 任务**——4090 四张卡被
+   他人占满**不构成阻塞**。
+
+### 上一轮的阻塞判断是错的：那份产物一直在 4090
+
+交接与 `PHASE_R1.md` 只记了合并产物的 SHA-256，**没记路径**，于是「在 4090」被当成了线索。
+按文件名找 `*argument*` 全场落空（命中的全是无关的 DEE 项目），一度以为产物已丢。
+真正的位置由**注册负面对照自己的 `metrics.json`** 指出来——它的 `scorer_path` 写着
+`runs/stages/R1/r1-v61-baseline-closure-r3/ch1/...`，顺着那条线找到：
+
+```
+/data/TJK/ekg/runs/stages/R1/r1-v61-baseline-closure-r3/ch1/qwen3-full-r3/merged/predictions.jsonl
+sha256 855906d39e71d5cef838c3a72515ef837803afd6a43c88e6879274bf72e7142a   73,939 行   24,671,891 B
+```
+
+**与 `PHASE_R1.md` §7 记录的哈希逐位相同。** 带走的纪律：**产物只记哈希不记路径，等于没记**——
+下次写结果页时哈希与路径一起写。
+
+### 本轮补齐的两样输入（双端 sha256 一致）
+
+主锚与注册负面对照的预测此前只在**本地**，4090 上没有；已 `scp` 过去并双端核对：
+
+| 文件 | SHA-256 | 大小 |
+|---|---|---:|
+| `anchors/identity/official_joint_prediction.jsonl` | `66ff04bac5a11ab179ef50eeca51d56dbb613b7b04eaa04b749dd99ea82ffc42` | 7,274,278 B |
+| `baselines/identity/qwen3-argument-s13-r2/predictions.jsonl` | `87c089ca7b78383f0e83721671c02b7430fa28fae6a67ce1fe361dfdfe9e340c` | 108,540 B |
+
+### 结果
+
+`gpu-4090:/data/TJK/ekg/runs/stages/C5/c5-v61-argument-uncertainty-r1/preflight/`
+
+| 项 | 值 |
+|---|---|
+| `protocol.json` SHA-256 | **`9402e88000c84627cf3bfa2ac65cb39435364a5e012e07bf83264b06430e4319`** |
+| status / seed / final_valid_accessed | `pass` / 13 / **false** |
+| `code_files` | **8** |
+| 候选 digest | `15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910`（291 篇 / 7,195 mentions） |
+| 自物化 internal-dev gold | `403b69a8a9c83e2be41e0c366fed7edcd7e00796dbd14ec6f07df7e560507e81` |
+| 信任根 | P1 `1e31a9ac…f9655`（r15）· R1 `f0b4702b…50829` · t024 `9133a73c…587e7` · evaluator `32919e86…59598` |
+
+**两条 baseline 用冻结的官方 evaluator 独立重算**（不是抄来的）：
+
+| baseline | MUC F1 | B³ F1 | CEAFe F1 | BLANC F1 |
+|---|---:|---:|---:|---:|
+| MAVEN-ERE official joint（主锚） | **80.98472** | 98.039866 | 97.731576 | 89.880089 |
+| Qwen3 论元池化（注册负面对照） | **80.367586** | 97.951454 | 97.61658 | 89.801549 |
+
+- 与本文件上方 C-5b 的本地预验 **80.9847 / 80.3676 逐位一致**；
+- 与 `PHASE_R1.md` 的 BLANC 89.80 一致；
+- 契约断言「注册对照必须低于主锚」通过（80.3676 < 80.9847）。
+
+**自物化的 internal-dev gold `403b69a8…` 与 A4.1 那份是同一个哈希** ⇒ 第 4 章与第 5 章确实站在
+同一个候选全集上，口径三轴（manifest · 候选全集 · evaluator）跨章一致，不是各自声称的一致。
+
+`global_local_topic` 按 QR-001 v1.1.0 记为 `not_reproduced` 并写明障碍（EasyECR
+`conditionally_runnable`、KBP 2017 需 LDC 许可 → FR-016 (b)），**不静默省略**；C-2b 关掉后
+用 `--global-local-predictions` 补进来即可。
+
+### 下一步
+
+**C5.2 smoke（10 篇、单卡一次 forward/backward/export/reload）→ C5.3 seed-13 pilot**，两者都要卡。
+4090 四张卡仍被他人 vllm 占满；5090 正在跑 A4 四臂 dry-run。
