@@ -78,8 +78,8 @@ A4 的机制 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头 + 五个
 | ~~1~~ | ~~**C-5b**~~ | ✅ **已完成 2026-09-13**（含原第 2 行的 pilot 入口）。缺口比这里原本写的小：`train_`（`train_coref_scorer.py`）、`evaluate_`（`score_maven_ere_official.py`）与预测器（`build_maven_ere_submission.py`）**本来就有**，只缺三个脚本加一个开关。执行中抓到三个真缺陷，其中一个是 A 类（permutation 臂训练/推理口径不成对）。详见 [`results/PHASE_C.md`](results/PHASE_C.md) | 608 passed / 28 skipped、ruff 0、smoke OK |
 | ~~2~~ | ~~C-9 同类缺口~~ | ✅ 并入上一行：`scripts/run_c5_argument_uncertainty.py` 已存在并进了 preflight 的 `CODE_FILES`（8 个文件） | — |
 | ~~3~~ | ~~**C-7**~~ | ✅ **已完成 2026-09-13**。三章 CPU fixture 各自被**该章自己的 evaluator** 打出分；配置移进 `configs/`（`data/protocols` 是 gitignored，hash 在 git 外没有追溯价值）。详见主表 §4.1 |
-| **4（当前队首）** | **C-10** | **E3.0 冻结 Ch6 的 evaluation unit** | 纯 CPU、零方法章依赖。**提到队首是因为它卡着 Ch6 的整条线**：四个外部对手必须跑在同一个冻结 unit 上，unit 没冻结就开对手，跑了也得重跑（A 类三轴一致性） |
-| **5** | **C-4b** | CGEP-ESC 重建可行性裁决 + 切分口径确认 | 名册 §6.2 已点名已知坑：**ESC 的 19.6 依赖切分泄漏**（topic-CV .0599 vs doc-split .1802），重建前必须先确认原文用哪种切分，否则"复现出来的一致"是假的 |
+| ~~4~~ | ~~**C-10**~~ | ✅ **已完成 2026-09-13**（纯 CPU，2.6 s）。`runs/stages/E3/e3-v61-20260913/`：1,908 实例，`queries.jsonl` `e92629bd…5aecf`、candidate-ID digest `93915ae3…f27ee`、生成器 tree `588c02c0…8abf`。**n 与 2026-07-29 那批已发表数字一致**，G-11a 的四个对手现在有同一把尺可用。`--verify` 可随时重建三比对。详见 [`results/PHASE_E.md`](results/PHASE_E.md) |
+| **5（当前队首）** | **C-4b** | CGEP-ESC 重建可行性裁决 + 切分口径确认 | 名册 §6.2 已点名已知坑：**ESC 的 19.6 依赖切分泄漏**（topic-CV .0599 vs doc-split .1802），重建前必须先确认原文用哪种切分，否则"复现出来的一致"是假的 |
 | **6** | **G-11a** | **Ch6 四个外部对手复现（跑 5090）** | 四个仓库本地一个都没 clone。按 §3.1 基准率 1，**单这一项就要 3–4 周**，而 §3.4 推论 2 早就写了"必须提前启动"——现在开始才来得及 |
 | **7** | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
 

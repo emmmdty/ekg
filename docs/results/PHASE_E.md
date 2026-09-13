@@ -196,3 +196,67 @@ Phase E 此前的「修复 / 净化 / oracle 净化全在噪声内」有两个�
 在这批文档上（`protocol.json` 的 `historical_final_access_disclosed=true`），且本次是
 **冻结权重 + 固定三个臂**，**没有选择任何模型、epoch、阈值或结构**。
 按 A 类红线「final-valid 封存且不用于选模」，此次访问不构成选模。**在此显式记录。**
+
+## ★ v6.1 · E3.0 冻结 Ch6 的不可变 evaluation unit（C-10，2026-09-13，本地纯 CPU）
+
+### 开工自审（作者 2026-09-13 要求，先答再做）
+
+1. **科研价值**：对准的是 `EXPERIMENT_PLAN.md` §7.4 的**表 6-2**。那张表要把四个外部 CGEP 对手、
+   random/frequency 两个平凡对照、以及本文构建图（predicted / gold）**放在同一批 query 上**比较，
+   而这些臂之间隔着几周、跨两台机器。unit 不落成带 digest 的文件，就等于每个臂各自
+   `build_cgep()` 一次——一旦 query / candidate / label 漂移，先跑的臂全部作废
+   （`phases/PHASE_E3_graph_application.md` 的 stop condition 第 1 条，A 类三轴一致性）。
+   证据：本文件上方的 `.1802 / .1583 / .1185 / .0811` 全部测在这批 1,908 实例上，冻结让新对手的
+   数字**能和这几行并表**。理由不是「成本低」——它是 G-11a（四个对手复现，按 §3.1 基准率 3–4 周）
+   的真正前置。
+2. **可行性**：纯 CPU、**2.6 秒**、无授权项。源数据本地就有
+   （`data/processed/maven_ere/valid.jsonl`），生成器在仓库内，`build_cgep` 给定文档序与 seed
+   即确定。数据 / 协议 / 代码 / 算力 / 授权五条**没有一条不成立**。
+
+### 冻结产物
+
+`runs/stages/E3/e3-v61-20260913/`（`runs/` 是 gitignored，产物走 scp）：
+
+| 项 | 值 |
+|---|---|
+| `queries.jsonl` SHA-256 | `e92629bd84677e88549e6fbeeaf2e21afb0a8e050722bede45c19ccfa4b5aecf`（67,988,838 B） |
+| query-ID digest | `7b958d5d989b7d884d76ac31082aad715623edec593421837b084a156926cd9e` |
+| candidate-ID digest | `93915ae3d4a8d0205f45748cdd33ab455e0078d1067623cd1aab18cee83f27ee` |
+| source | `data/processed/maven_ere/valid.jsonl` `6faea0e4…c6153` |
+| generator tree | `588c02c05737a5245efcccdf62177b8221be5c8ef8cbd6fb0906e1953eb78abf`（3 个文件） |
+| 生成参数 | seed **209**（SeDGPL 的）· `min_nodes=4` · `include_subevent=true` · `n_candidates=512` |
+
+**population**：**1,908 实例** / 437 篇有实例（源 607 篇有事件图）/ 761 个 ECG /
+候选池 6,892 个事件节点 / 每实例 512 候选 / 平均可判别答案 358.56。
+**1,908 与本文件上方 2026-07-29 主结果的 n 一致**，即这次冻结的就是那批已发表数字所用的 unit，
+不是重新推导出来的另一批题。
+
+每行固定六个字段：`instance_id / doc_id / anchor / relation / gold / label / candidates`，
+且 `candidates[label] == gold`（有测试锁）。
+
+### 口径声明：这是**本地重建协议**，不是复现 SeDGPL 的 split
+
+`MAVENSubWoRe.npy` 从未发布，所以论文的 CGEP-MAVEN 数字（SeDGPL 27.9 等）**不得进表 6-2**，
+只能在正文作背景引用并写明不可比。这句话已写进 `manifest.json` 的 `protocol` 字段，
+不是只写在文档里。
+
+### 漂移怎么被发现
+
+`scripts/freeze_e3_evaluation_unit.py --verify <dir>` 从源数据重建一遍，比三件事：
+源 sha256、盘上 `queries.jsonl` 的 sha256、重建出来的 sha256。**实测 PASS**（2.3 s）。
+生成器文件变了单独报为 `provenance only`，**不判 FAIL**——生成器可以改注释，
+只要产出的 unit 逐字节不变；判 FAIL 的只有 unit 本身动了。
+实例数与 1,908 不符时 `freeze` 直接 `SystemExit`，要求先冻结并披露原因再往下走
+（E3.0 原文的要求）。
+
+### final-valid 访问披露
+
+unit 建在 MAVEN-ERE public valid 上，即 v6 协议的 final-valid——**与本文件 2026-08-30 那次同一个口子，
+不是新开的**。本次只读事件 mention、causal/subevent 金标边与文档文本来**定义题目**，
+没有训练、没有打分、没有选择任何模型/epoch/阈值。已写进 `manifest.json` 的 `final_valid_ledger`。
+
+### 本地闸门
+
+`631 passed / 28 skipped`、`ruff` 0、`ekg-smoke` OK。新增 4 条测试
+（`tests/scripts/test_freeze_e3_evaluation_unit.py`）：干净往返无漂移、六字段齐全且
+`candidates[label] == gold`、改一行候选顺序即被抓、源变了导致实例数不符则 fail-fast。
