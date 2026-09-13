@@ -1573,3 +1573,34 @@ subevent 偏低值得在 A4.3 出结果时回头看一眼，而不是等那时�
 于是报的是「carries a 'linear' head」——看起来像 checkpoint 丢了头身份的代码缺陷。
 实际 `by_family/causal/pair_head.json` 写的是 `pair_evidence`，一切正常。
 **一个"缺失即回退"的默认值，把 shell 引用错误伪装成了代码缺陷**；差一点就报成 A4 的问题。
+
+## A4.2 smoke · **CPU 半边跑不通，而且是按构造跑不通**（2026-09-13，gpu-4090，`CUDA_VISIBLE_DEVICES=`）
+
+4090 四张卡被他人 ms-swift 四卡训练占着，于是照 D4.2 的先例先跑 CPU 半边。**结论：A4.2 没有有意义的
+CPU 半边，它必须等一张卡。** 这不是缺陷，是这条断言在这个 regime 下不可能成立。
+
+实测（`--docs 10`、1 epoch、CPU）：
+
+```
+[dev:full] epoch 0 macro_f1=0.0000 (temp=0.000 caus=0.000 sube=0.000)
+[a4-eval:full] 10 docs, 9546 candidates, 0 revised, cross_fp=0, context_independent=0/0
+SmokeError: full: the evidence stream revised no row at all
+```
+
+**因果链**：A4 的推理时修正只作用于 **base 判正的行**（设计如此，见上方 A4 设计节）。CPU 上 1 个
+epoch、10 篇文档，base 头在三个族上一个正类都没判出来（macro_f1 三项全 0.000）⇒ 没有行可修 ⇒
+`revised_rows == 0` ⇒ 断言触发。**断言本身是对的**——它上一次就抓到过真缺陷（训练侧的 per-document
+cap 被误用到推理侧，当时读数是 0/0）。
+
+**为什么 D4.2 能有 CPU 半边而 A4.2 不能**：D4 是逐 mention 的五类分类器，**永远会输出些什么**，
+所以 CPU 与 CUDA 两半边可以逐字节比对；A4 的机制是**条件触发**的——没有 base 正类就没有反事实可测。
+⇒ **别把「D4 有 CPU 半边」推广成「每个 phase 都有 CPU 半边」。**
+
+**待办（下一个窗口，不阻塞）**：当前报错信息会误导——它说「证据流一行都没改」，读起来像机制失效，
+真正原因是「base 一个正类都没判出来」。建议把这两种情形分开报（先断言 base 正类数 > 0，
+并在为 0 时明说这一跑对该轴**无结论**，**不得改成 pass**）。⚠️ `scripts/smoke_a4_pair_evidence.py`
+在 A4.1 preflight 的 `CODE_FILES`（7 个）里，**改它就要按 D4/C5 的先例重建 preflight-r2**，
+所以这次没有顺手改。
+
+产物留在 `gpu-4090:runs/stages/A4/a4-v61-pair-evidence-r1/smoke-cpu/`（只有 `full` 臂的 checkpoint
+与评测产物；后三臂没跑到）。**A4.2 仍记为未完成。**
