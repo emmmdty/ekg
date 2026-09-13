@@ -60,7 +60,7 @@ MAVEN-ERE、MAVEN-Arg 和 MAVEN-FACT 的 train/valid doc-id 集合对齐，支�
 
 | 数据集 | 历史协议 |
 |---|---|
-| ESC | EventStoryLine topic 交叉验证；document split 只用于解释论文泄漏数字，不作主协议 |
+| ESC | EventStoryLine topic 交叉验证（SeDGPL 原文 §5.1 也是这一种）；document split 只作对照，不作主协议 |
 | CCKS-2021 | 7000 labeled train；seed-42 本地 5600/700/700；官方 eval 1000 无标签 |
 | ICEWS/FinDKG | 仅冻结旧线复现；保持 release split，不得为了好看重切 |
 

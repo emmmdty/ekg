@@ -260,3 +260,80 @@ unit 建在 MAVEN-ERE public valid 上，即 v6 协议的 final-valid——**与
 `631 passed / 28 skipped`、`ruff` 0、`ekg-smoke` OK。新增 4 条测试
 （`tests/scripts/test_freeze_e3_evaluation_unit.py`）：干净往返无漂移、六字段齐全且
 `candidates[label] == gold`、改一行候选顺序即被抓、源变了导致实例数不符则 fail-fast。
+
+## ★ v6.1 · C-4b：CGEP-ESC 重建可行性裁决与切分口径确认（2026-09-13，本地纯 CPU，未训练）
+
+### 开工自审
+
+1. **科研价值**：对准名册 §6.2 的 FR-016 判定。Ch6 主表的五个外部对手**默认全部落 (b)**
+   （原论文 CGEP-MAVEN 派生数据未发布）；唯一可能升到 (a) 的路是「在公开的 CGEP-ESC 上复现其
+   已发表数字」。这一条成不成立，直接决定 Ch6 主表有没有一个**自证正确**的复现锚点，
+   而不是一整列「透明适配」。证据要核到**机制本身**（原文 §5.1 与仓库代码），不是摘要措辞。
+2. **可行性**：纯 CPU、只读。`ESCSubWoRe.npy` 本地已有，SeDGPL 仓库公开可 clone，论文 PDF 公开。
+   五条（数据/协议/代码/算力/授权）没有一条不成立。
+
+### 一手证据（全部本机核实，不是转述）
+
+- 仓库 `zhanchuanhong/SeDGPL`，**全历史只有一个 commit** `265b19b69856428a63819c809572865b5faebf3f`
+  （"Add files via upload"）。
+- 仓库里的 `ESCSubWoRe.npy` 与我们本地 `data/raw/sedgpl_esc/ESCSubWoRe.npy`
+  **SHA-256 完全相同**：`8ec791fb609cadf2ba1c8589d3f18ce1fac95b50c57203f1b25472d8438e5026`。
+- 该文件结构：**22 个 topic → 244 篇文档 → 1,192 个实例**，候选集 256。论文 Table 1 报
+  **243 篇 / 1,191 实例 / 256 候选**——**各差 1**，即这份公开件就是论文那份 CGEP-ESC。
+- **没有 `train`/`valid`/`test` 键**；而 `load_data.py` 写死 `np.load('data/MAVENSubWoRe.npy')`
+  并取 `['train']/['valid']/['test']`。**仓库里没有 MAVENSubWoRe.npy，也没有任何 ESC 代码路径。**
+
+### ⚠️ 切分口径确认：原文写的是 **topic 级 5 折 CV**，不是文档切分
+
+论文 §5.1 原文（`aclanthology.org/2024.findings-emnlp.45.pdf`）：
+
+> "Following the standard data splitting of the underlying ESC (Caselli and Vossen, 2017) corpus,
+> we use the last two topics as development set and conduct **5-fold cross-validation on the
+> remaining 20 topics**. The average results of each fold are adopted as performance metrics."
+
+**这推翻了本项目此前的一条记载。** 名册 §6.2、`ENGINEERING_NOTES.md`、`DATASETS.md` 与
+`scripts/evaluate_cgep.py` 的 docstring 都写着「SeDGPL 公开的 19.6 就是泄漏值」——那是从
+**产物**（npy 没有切分键）反推出来的，原文其实**明确声明了不泄漏的那一种切分**。
+
+如实的表述应当是：
+
+- 原文声明 **topic 级 5 折 CV**（+ 最后两个 topic 作 dev），这是 ESC 的标准非泄漏口径；
+- **我们的复现在声明的口径下差得很远**：我们的 topic-CV 得 **MRR .0599 ± .0138**，
+  原文报 **.196**；只有换成文档切分才得到 **.1802 ± .0089**，接近其数字；
+- 因此这是**在声明口径下的复现缺口**，**不是**「作者用了泄漏切分」的证据。两者对 FR-016 的
+  后果完全不同：(a) 要求的正是「在声明口径下复现出它的数字」。
+- 另外，我们的 topic-CV **也不是它的 topic-CV**：`topic_folds` 对**全部 22 个 topic**做轮转 5 折，
+  **没有**把最后两个 topic 留作 dev，也就没有 dev 上的 epoch 选择。我们的 .0599 只能说是
+  *一种* topic-CV 的结果。
+
+同一节还确认了一件对 Ch4 有用的事——**SeDGPL 自己也拿 MAVEN-ERE 的 valid 当 test**：
+
+> "Since the underlying MAVEN-ERE corpus did not release the test set, following (Tao et al., 2023),
+> we use the original development set as our test set and sample 20% of the data from the original
+> training set to form the development set."
+
+⇒ 继 MAQInstruct 之后的**第二个先例**，且是 Ch6 基座论文本身。
+
+### 裁决：`conditionally_runnable`——能跑，但要三个透明补丁，且有两处未公开的自由度
+
+| # | 阻断点 | 一手依据 | 补法 |
+|---|---|---|---|
+| 1 | **无 ESC 代码路径**：loader 写死 MAVEN 且要 `train/valid/test` 键，ESC 件是 topic 键 | `load_data.py:13`；npy 22 topic 键 | 自写 loader + 按 §5.1 切分（**透明补丁**，口径有原文可依） |
+| 2 | **词表不覆盖 ESC**：公开 `reverse_event_dict.json` 4,307 条，只覆盖 ESC 998 个不同 mention 串的 **49.5%**（原样匹配 **0%**，因为 ESC 的 mention 带尾空格） | 本机实测 | 取消注释 `main.py:95` 的 `collect_mult_event`，用**它自己的代码**为 ESC 重建词表 |
+| 3 | **不覆盖时会静默错**：`util.py:98` 的 `assert data[i][5] in reverse_event_dict` **被注释掉**，改成 `if ... in`，未命中的 mention 原样留在句子里 | `util.py:96-107` | 必须把 assert 加回去；否则半数候选被静默错打分而不报错 |
+| — | 自由度 A：「最后两个 topic」是哪两个（npy 键序给出 `'37'`/`'41'`） | 原文未点名 | 按 npy 键序取，并在结果里写明 |
+| — | 自由度 B：剩下 20 个 topic 的**折分配**未发布（其代码 `random.seed(209)`） | `load_data.py:5` | 用 209 复现并声明 |
+
+**成本**：RoBERTa-base、`len_arg=200`、`batch_size=1`、ESC 上 15 epoch（`parameter.py` + 附录 B），
+全集只有 1,192 实例（每折 train ≈ 950），另加每折的 event-centric 预训练。量级是**小时**，不是天。
+
+### 建议（交作者裁决，不阻塞队列）
+
+**只为 SeDGPL 一个方法走 ESC 的 (a) 路，其余四个对手维持 (b) 并写明障碍。**
+理由：① SeDGPL 是 Ch6 的基座，也是唯一训练代码齐备的那个，它的数字最需要自证；
+② Table 2 虽然五个方法都有 ESC 列，但另外四个的 ESC 数字同样是 SeDGPL 作者做的适配，
+为它们各自再走一遍 ESC 复现，等于把 G-11a（已估 3–4 周）再翻一倍；
+③ QR-001 v1.1.0 已把 baseline 广度降为**报告要求**，(b) + 点名障碍是合规的。
+**若 SeDGPL 的 ESC 复现也对不上**（我们自己的重实现在声明口径下差 3 倍，这个风险是实的），
+则如实记 (b)，障碍写「原文声明 topic 级 5 折 CV，但公开件不含折分配与 dev topic 名单，
+按声明口径复现未达其报告值」——这依然是**有证据的** (b)，比现在这种从产物反推的说法结实得多。

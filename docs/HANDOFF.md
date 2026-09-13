@@ -79,8 +79,8 @@ A4 的机制 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头 + 五个
 | ~~2~~ | ~~C-9 同类缺口~~ | ✅ 并入上一行：`scripts/run_c5_argument_uncertainty.py` 已存在并进了 preflight 的 `CODE_FILES`（8 个文件） | — |
 | ~~3~~ | ~~**C-7**~~ | ✅ **已完成 2026-09-13**。三章 CPU fixture 各自被**该章自己的 evaluator** 打出分；配置移进 `configs/`（`data/protocols` 是 gitignored，hash 在 git 外没有追溯价值）。详见主表 §4.1 |
 | ~~4~~ | ~~**C-10**~~ | ✅ **已完成 2026-09-13**（纯 CPU，2.6 s）。`runs/stages/E3/e3-v61-20260913/`：1,908 实例，`queries.jsonl` `e92629bd…5aecf`、candidate-ID digest `93915ae3…f27ee`、生成器 tree `588c02c0…8abf`。**n 与 2026-07-29 那批已发表数字一致**，G-11a 的四个对手现在有同一把尺可用。`--verify` 可随时重建三比对。详见 [`results/PHASE_E.md`](results/PHASE_E.md) |
-| **5（当前队首）** | **C-4b** | CGEP-ESC 重建可行性裁决 + 切分口径确认 | 名册 §6.2 已点名已知坑：**ESC 的 19.6 依赖切分泄漏**（topic-CV .0599 vs doc-split .1802），重建前必须先确认原文用哪种切分，否则"复现出来的一致"是假的 |
-| **6** | **G-11a** | **Ch6 四个外部对手复现（跑 5090）** | 四个仓库本地一个都没 clone。按 §3.1 基准率 1，**单这一项就要 3–4 周**，而 §3.4 推论 2 早就写了"必须提前启动"——现在开始才来得及 |
+| ~~5~~ | ~~**C-4b**~~ | ✅ **已完成 2026-09-13**（一手核查，纯 CPU 未训练）。裁决 `conditionally_runnable`；**切分口径 = 原文 §5.1 声明的 topic 级 5 折 CV**（最后两 topic 作 dev），**不是**文档切分。⚠️ **推翻了「19.6 是泄漏值」这条记载**——原文声明的就是非泄漏口径，我们只是在该口径下复现不到（.0599 vs .196）。三个透明补丁（自写 loader / 用它自己的 `collect_mult_event` 重建 ESC 词表 / 把 `util.py` 被注释掉的 assert 加回去，否则半数候选静默错打分）与两处未公开自由度见 [`results/PHASE_E.md`](results/PHASE_E.md)。**建议只为 SeDGPL 走 (a)，其余四个维持 (b)** —— 待作者裁决，不阻塞 G-11a |
+| **6（当前队首）** | **G-11a** | **Ch6 四个外部对手复现（跑 5090）** | 四个仓库本地一个都没 clone。按 §3.1 基准率 1，**单这一项就要 3–4 周**，而 §3.4 推论 2 早就写了"必须提前启动"——现在开始才来得及 |
 | **7** | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
 
 **为什么这么排（不是按主表编号，是按"卡住谁"排）**：Ch6 是**唯一不依赖任何方法章成败的一章**

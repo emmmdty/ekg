@@ -32,7 +32,9 @@
 - **v6 主数据与切分以 `DATASETS.md`、`SPEC.md` 和当前 phase 为准**。`DATASET_SURVEY.md` 只是 v4
   资产快照，不能据此启动扩展数据实验。
 - **MAVEN 版 SeDGPL 数据未发布**（只发 `ESCSubWoRe.npy`）→ 论文 CGEP-MAVEN **27.9 不可比**；主表以自跑 SeDGPL 为准。
-- **ESC 必须 topic 交叉验证**；文档级切分泄漏同 topic 故事（SeDGPL 公开 19.6 就是泄漏值）。
+- **ESC 必须 topic 交叉验证**；文档级切分泄漏同 topic 故事。⚠️ 2026-09-13 更正：SeDGPL 原文 §5.1
+  **声明的就是 topic 级 5 折 CV**，所以 19.6 不能叫「泄漏值」——我们在声明口径下只得 .0599，
+  那是**复现缺口**。详见 `results/PHASE_E.md` 的 C-4b 节。
 - **ICEWS/FinDKG 只属冻结 TKG 线**；从 tag 复现时保持 release split，ICEWS 用 timestamps
   **计数切分**，结果不得混入 v6 主表。
 - **CGEP 词表须 transductive**（覆盖 train+test 的 `<a_i>` token；否则测试全编码失败）。只 token 清单跨切分，无标签/图/梯度泄漏。

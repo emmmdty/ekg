@@ -4,21 +4,26 @@
 ESC is evaluated by cross-validation over EventStoryLine *topics*, not documents:
 documents inside one topic narrate the same story, so a document split leaks the
 causal chain across train and test. SeDGPL's released `ESCSubWoRe.npy` carries no
-train/valid/test keys at all (its `load_data.py` expects some anyway), so which
-split produced its published ESC MRR of 19.6 was unknown.
+train/valid/test keys at all (its `load_data.py` expects some anyway), so the
+split behind its published ESC MRR of 19.6 cannot be read off the artifact.
 
-Measured here (5-fold), it was a leaky one. Our reimplementation scores MRR
-0.0599 +/- 0.0138 under topic CV and 0.1802 +/- 0.0089 on a document split -- the
-latter matching the published 0.196. Learning rate is not the cause (1e-6 -> 5e-6
-*lowers* topic-CV MRR to 0.0701) and neither is candidate difficulty (the
-`random` baseline is 0.0286 vs 0.0288 across the two splits). What moves is what a
-document split shares: the mention prior (`frequency` goes 0.0217 -> 0.0491) and
-the topic's causal chain. Report topic CV; keep `--split-mode document` for that
-comparison only.
+It can be read off the paper, and this docstring used to get it wrong. Section
+5.1 of Findings of EMNLP 2024 states the *non*-leaky protocol: "the last two
+topics as development set and ... 5-fold cross-validation on the remaining 20
+topics". So 19.6 is not a leaked figure -- what we have is a reproduction gap
+under the declared protocol. Our reimplementation scores MRR 0.0599 +/- 0.0138
+under topic CV (and 0.1802 +/- 0.0089 on a document split, which is the one that
+lands near 0.196). Learning rate is not the cause (1e-6 -> 5e-6 *lowers* topic-CV
+MRR to 0.0701) and neither is candidate difficulty (the `random` baseline is
+0.0286 vs 0.0288 across the two splits). What moves is what a document split
+shares: the mention prior (`frequency` goes 0.0217 -> 0.0491) and the topic's
+causal chain. Report topic CV; keep `--split-mode document` for that comparison
+only. Note our folds are not the paper's either: `topic_folds` rotates over all
+22 topics and holds none out as dev. See `docs/results/PHASE_E.md`, task C-4b.
 
 Both tie-break conventions are reported: `mrr` is SeDGPL's (ties go to gold),
 `mrr_strict` charges gold for every tie. The gap is not small -- 0.1802 vs 0.1204
-on the document split -- so the published figure is inflated twice over.
+on the document split.
 
     uv run python scripts/evaluate_cgep.py --dataset esc --predictor frequency
     uv run python scripts/evaluate_cgep.py --dataset maven --predictor frequency
