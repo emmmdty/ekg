@@ -327,6 +327,15 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **G-11** | Ch6：E3.0 → E3.1 → E3.2 → E3.3 → E3.4 → E3.5 | C-4 + 至少一章的 bundle/fallback + G-0 | ~1–2 GPU·day | 见 `phases/PHASE_E3_graph_application.md` 的 Done when |
 | **G-12** | H2 全篇复现验收（默认 CPU/cache） | G-11 | ~CPU | 见 `phases/PHASE_H2_thesis_acceptance.md` 七项审计 |
 
+| **G-13** | **A4 实现地板诊断（5090 探测，数字不进主表）** —— 2026-09-13 启动。只跑 `remove_core` 一臂 50 epochs，看它落在什么量级 | 5090 空闲 + ≤1 天授权 | **实测 1 epoch < 4 分钟 ⇒ 单臂约 3.5 小时** | 报出 causal F1 的量级；⚠️ backbone 是 5090 的公开件 `2c7ff1f1…`，**与主表 33.17 / 32.10 不相减、不混表** |
+
+**G-13 为什么值得占一次卡**：A4 的 `remove_core` 跑的是 A3 复现线**同一套参数化**
+（`pair_evidence.py:548-596`：`PairEvidenceClassifier.base` 就是 `build_pair_head(LINEAR_HEAD, …)`），
+所以它应该落在 A3 线的量级（那条线最好 causal **32.10**）。**若它塌到远低于此，问题在训练脚本而不在机制**
+——而这正是 **D4 花了 1.5 GPU·day 才分清的事**（`remove-core .536788` 低于 CLS 锚 `.553995`，
+机制上场前就已经输了）。5090 上 3.5 小时能提前拿到同一个信号，且不占 4090。
+**它诊断的是量级，不是 1 点以内的差异**——backbone 不同，精细比较无效。
+
 **GPU 预算粗估**：不含 matched seeds 约 **10–14 GPU·day**；三章都过门并跑 matched seeds + final-valid
 则合计约 **25–30 GPU·day**。两卡并行且 namespace 不重叠时可对半。
 
