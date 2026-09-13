@@ -337,3 +337,85 @@ unit 建在 MAVEN-ERE public valid 上，即 v6 协议的 final-valid——**与
 **若 SeDGPL 的 ESC 复现也对不上**（我们自己的重实现在声明口径下差 3 倍，这个风险是实的），
 则如实记 (b)，障碍写「原文声明 topic 级 5 折 CV，但公开件不含折分配与 dev topic 名单，
 按声明口径复现未达其报告值」——这依然是**有证据的** (b)，比现在这种从产物反推的说法结实得多。
+
+## ★ v6.1 · G-11a 第一刀：四个外部对手的可得性与可运行性（2026-09-13，本地纯 CPU，未训练）
+
+### 开工自审
+
+1. **科研价值**：表 6-2 要 ≥3 个公开对手带 FR-016 状态，四个仓库此前**一个都没 clone**，
+   按 §3.1 基准率整项 3–4 周。先做**静态可得性 + 可运行性**这一刀，是为了在花掉那几周之前
+   知道每条路的障碍在哪——EasyECR / DREEAM / LLMERE 三次都是这样在零 GPU 成本下拿到裁决的。
+2. **可行性**：clone + 读代码 + 用 python 重算已发布预测，纯 CPU、只读。
+
+### 五个仓库的一手清单（commit 与内容均本机核实）
+
+| 方法 | commit / 日期 | LICENSE | 训练码 | 原基准数据 | 依赖 pin | 关键障碍 |
+|---|---|---|---|---|---|---|
+| **SeDGPL**（基座） | `265b19b6…` 单 commit | **无** | ✅ | CGEP-MAVEN **未发布**；CGEP-ESC 已发布 | 未 pin torch | 无 ESC 代码路径，见 C-4b |
+| **BART contrastive**（`zhufq00/mcnc`） | `e895ed38…` 2023-12-25 | **无** | ✅ 两阶段 | ✅ NEEG MCNC **随仓库发布**（115 MB） | `torch==1.7.1` + **apex** | 版本墙（见下）+ 任务不同 |
+| **CSProm-KG** | `9a807295…` 2023-07-18 | **无** | ✅ | ✅ WN18RR/FB15k-237/ICEWS14/ICEWS05-15 **随仓库**，另有公开 checkpoint | `torch==1.11.0+cu113`、`pytorch_lightning==1.9.3` | 版本墙 + 任务不同 |
+| **MCPredictor** | `a3245516…` 2022-06-29 | **无** | ✅ | ❌ **只有一个 stopwords 文件**；需 **LDC2011T07 Gigaword**（许可）+ python2.7 预处理链（C&C / OpenNLP / Stanford postagger） | `transformers==3.5.1` | **数据不可得 → 原基准 (a) 封死** |
+| **SimKGC** | `97cc43e4…` 2022-12-24 | **无** | ✅ | ✅ WN18RR/FB15k237 随仓库 + **已发布预测** | `torch>=1.6`、`transformers>=4.15`（**无上限**） | 最友好 |
+
+**五个仓库没有一个带 LICENSE 文件**——与 LLMERE（MIT）、DREEAM（MIT）不同，这一条要在论文里如实写。
+
+### ⚠️ 结构性事实：四个对手**没有一个实现 CGEP**
+
+它们各自实现的是自己的原任务——mcnc / MCPredictor 是 **MCNC 五选一**，CSProm-KG / SimKGC 是
+**知识图谱补全**。名册 §6.1 早写了「它们的 CGEP 数字是 SeDGPL 作者自己做的适配」，而那份适配
+**从未发布**。⇒ **表 6-2 的每一行都要我们自写适配器**，四行在我们的重建协议上**注定是 (b) 透明适配**，
+与 TacoERE 同类。(a) 只能在**各自的原基准**上取得，用来证明「我们把它们的方法跑对了」。
+
+**由此得到的 FR-016 地图**（这是本刀最有用的产出）：
+
+| 方法 | 原基准 (a) 可达？ | 依据 |
+|---|---|---|
+| SimKGC | ✅ **最便宜** | 数据随仓库、预测与 metrics 已发布、依赖无上限 |
+| CSProm-KG | ✅ | 数据随仓库、有公开 checkpoint；需升 torch/lightning |
+| BART contrastive | ✅ 但最贵 | 数据随仓库，但要两阶段预训练 + 过 apex/torch 1.7.1 的版本墙 |
+| MCPredictor | ❌ → **(b)**，障碍=**LDC2011T07 需许可** | 与 EasyECR 的 KBP 2017 同类 |
+| SeDGPL | 只能走 ESC | 见 C-4b |
+
+⇒ **三个 (a) + 一个有名障碍的 (b)**，广度满足 QR-001 v1.1.0 的报告要求。
+
+### 版本墙：pin 的 torch 在我们两台卡上都跑不了
+
+`torch==1.7.1`（mcnc）与 `torch==1.11.0+cu113`（CSProm-KG）最高只到 **sm_86**；
+**4090 是 sm_89、5090 是 sm_120**，两台都不在范围内。这与 EasyECR 撞的是同一堵墙
+（`ENGINEERING_NOTES`：torch 2.0.1 不支持 sm_120）。⇒ 这两个复现**必须升 torch**，
+属于「为跑通做的透明补丁」，**必须记补丁与前后 hash**。SimKGC 的 pin 无上限，不受影响。
+
+### 实测：SimKGC 的已发布预测**不足以重算它的主指标**
+
+`predictions/README.md` 写明每行有 `rank` 字段，**实际文件里一行都没有**（四个文件的字段集
+恒为 `correct / head / pred_score / pred_tail / relation / tail / topk_score_info`）。
+`topk_score_info` 只给 top-3，所以 **MRR / H@3 / H@10 无法从已发布预测重算**，只有 Hit@1 能。
+
+能重算的那一个**逐位对上了**（本机 CPU 重算 vs 其 `metrics.json`）：
+
+| 数据集 | 方向 | n | 重算 Hit@1 | 其 metrics.json |
+|---|---|---:|---:|---:|
+| WN18RR | forward | 3,134 | **.6308** | .6308 |
+| WN18RR | backward | 3,134 | **.5421** | .5421 |
+| FB15k237 | forward | 20,466 | **.3373** | .3373 |
+| FB15k237 | backward | 20,466 | **.1609** | .1609 |
+
+而其 `metrics.json` 的 average 与**原文 Table 3 的 SimKGC_IB+PB+SN 行逐项吻合**
+（一手核到 `aclanthology.org/2022.acl-long.295.pdf` 的表，不是凭记忆）：
+
+| | MRR | H@1 | H@3 | H@10 |
+|---|---:|---:|---:|---:|
+| WN18RR 原文 | 66.6 | 58.7 | 71.7 | 80.0 |
+| WN18RR 其 metrics.json | 66.55 | 58.65 | 71.65 | 80.01 |
+| FB15k-237 原文 | 33.6 | 24.9 | 36.2 | 51.1 |
+| FB15k-237 其 metrics.json | 33.55 | 24.91 | 36.23 | 51.06 |
+
+⇒ **它的已发布件与它的论文自洽**，我们的评分轴读对了。但**这还不是 (a)**——
+(a) 要求我们自己跑它的代码复现出这四个数，而 `rank` 缺失意味着**那一步不能靠打分现成预测省掉**。
+
+### 下一步（G-11a 的第二刀，需要卡）
+
+按成本从低到高：**SimKGC →（原基准 (a)）→ CGEP 适配器 → 我们的冻结 unit**，
+再 CSProm-KG（先升 torch/lightning），再 BART contrastive（最贵），
+MCPredictor 直接进 (b) 并写明 LDC 障碍。四个适配器共用 `runs/stages/E3/e3-v61-20260913/queries.jsonl`
+（C-10 已冻结）作为唯一的题面。
