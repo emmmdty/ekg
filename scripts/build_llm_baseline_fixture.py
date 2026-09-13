@@ -14,7 +14,7 @@ fixture built on clean answers would prove only that the happy path parses; this
 one proves the scaffolding writes those failures down instead of repairing them
 into a score the model did not earn.
 
-The prompt templates and the LoRA budget live in `data/protocols/v6/llm_baseline.json`
+The prompt templates and the LoRA budget live in `configs/llm_baseline.json`
 and are hashed into the report, so a chapter's preflight can bind them the same
 way it binds an encoder.
 """
@@ -219,7 +219,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument(
-        "--config", type=Path, default=Path("data/protocols/v6/llm_baseline.json")
+        "--config", type=Path, default=Path("configs/llm_baseline.json")
     )
     parser.add_argument(
         "--document", type=Path, default=Path("data/fixtures/llm_baseline/document.jsonl")

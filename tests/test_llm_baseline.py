@@ -33,7 +33,7 @@ from ekg.llm_baseline import (
 )
 
 _ROOT = Path(__file__).resolve().parents[1]
-_CONFIG = _ROOT / "data/protocols/v6/llm_baseline.json"
+_CONFIG = _ROOT / "configs/llm_baseline.json"
 _IDS = [f"m{i}" for i in range(1, 6)]
 
 

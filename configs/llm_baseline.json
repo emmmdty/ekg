@@ -1,0 +1,57 @@
+{
+  "schema_version": "ekg.llm_baseline_config.v1",
+  "backbone": {
+    "model": "Qwen/Qwen3-8B",
+    "note": "revision and weight digests are bound by each chapter's preflight, not here; this file fixes the prompt and the adapter budget only"
+  },
+  "lora": {
+    "stage": "sft",
+    "finetuning_type": "lora",
+    "lora_rank": 64,
+    "lora_target": "all",
+    "template": "qwen",
+    "cutoff_len": 2048,
+    "bf16": true,
+    "seed": 13,
+    "learning_rate": 0.0001,
+    "num_train_epochs": 3,
+    "per_device_train_batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "lr_scheduler_type": "cosine",
+    "warmup_ratio": 0.03,
+    "disable_gradient_checkpointing": false,
+    "report_to": "none"
+  },
+  "decoding": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_new_tokens": 2048,
+    "enable_thinking": false
+  },
+  "chapters": {
+    "factuality": {
+      "task": "MAVEN-FACT event factuality detection",
+      "unit": "one document, every event mention in it",
+      "labels": ["CT+", "PS+", "CT-", "PS-", "Uu"],
+      "prompt_template": "You label event factuality. For every listed event mention in the document, decide whether the event is asserted as certain or possible, positive or negative, or unknown.\n\nLabels:\n- CT+ certainly happened\n- PS+ possibly happened\n- CT- certainly did not happen\n- PS- possibly did not happen\n- Uu the text does not commit either way\n\nDocument:\n{document}\n\nEvent mentions:\n{mentions}\n\nReturn one JSON object mapping every mention id to one label, and nothing else:\n{{\"<mention id>\": \"<label>\"}}",
+      "mention_line": "- {mention_id}: \"{trigger}\" (sentence {sent_id})"
+    },
+    "relation": {
+      "task": "MAVEN-ERE event relation extraction",
+      "unit": "one document, all ordered mention pairs",
+      "families": {
+        "causal": ["CAUSE", "PRECONDITION"],
+        "temporal": ["BEFORE", "OVERLAP", "CONTAINS", "SIMULTANEOUS", "ENDS-ON", "BEGINS-ON"],
+        "subevent": ["subevent"]
+      },
+      "prompt_template": "You extract event relations. Relations are directed: [A, B] means A stands in the relation to B.\n\nRelation types:\n- causal: CAUSE, PRECONDITION\n- temporal: BEFORE, OVERLAP, CONTAINS, SIMULTANEOUS, ENDS-ON, BEGINS-ON\n- subevent: subevent (A is a subevent of B)\n\nDocument:\n{document}\n\nEvent mentions:\n{mentions}\n\nReturn one JSON object and nothing else. Omit a type rather than inventing pairs; an empty list is a valid answer:\n{{\"causal_relations\": {{\"CAUSE\": [[\"<id>\", \"<id>\"]], \"PRECONDITION\": []}}, \"temporal_relations\": {{\"BEFORE\": []}}, \"subevent_relations\": []}}",
+      "mention_line": "- {mention_id}: \"{trigger}\" (sentence {sent_id})"
+    },
+    "identity": {
+      "task": "MAVEN-ERE event coreference",
+      "unit": "one document, all event mentions",
+      "prompt_template": "You group event mentions that refer to the same real-world event.\n\nTwo mentions corefer only when they describe one and the same occurrence, not merely the same kind of event. A mention that corefers with nothing forms no group.\n\nDocument:\n{document}\n\nEvent mentions:\n{mentions}\n\nReturn one JSON object and nothing else, listing only groups of two or more:\n{{\"coreference\": [[\"<id>\", \"<id>\"]]}}",
+      "mention_line": "- {mention_id}: \"{trigger}\" (sentence {sent_id})"
+    }
+  }
+}
