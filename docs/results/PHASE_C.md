@@ -667,3 +667,93 @@ SHA-256 分别为 `e66b14eb…3cb4` / `23fe74e9…3b3e`。远端四份训练日�
 `fb0d9396` / `ac0c7330` / `8ce6343c` / `924f85aa`；完整 checkpoint、逐 epoch 权重、阈值曲线和
 official metrics 留在 `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/C4/`
 `c4-v6-rootcause-r4/exploratory/2x2/`。
+
+## ★★ C-5b · C5 入口齐全：三个新脚本 + permutation 臂接线（2026-09-13，本地 CPU）
+
+**状态**：C5.0 的实现侧到此闭合。契约点名的 `scripts/run_c5_argument_uncertainty.py` 从**不存在**变为存在，
+另加 `prepare_c5_argument_uncertainty_preflight.py` 与 `smoke_c5_argument_uncertainty.py`，
+并把矩阵第 6 臂（permutation 负控）接进 trainer 与**推理侧**。
+三件套：**608 passed / 28 skipped、ruff 0、`ekg-smoke` OK**（前值 592/28）。
+
+### 先纠正缺口的规模：`train_` 与 `evaluate_` 本来就有
+
+`HANDOFF.md` §0.3 把 C-5b 写成「C5 的四个入口脚本：`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_`」。
+核到代码后**缺口只有三个脚本加一个开关**：
+
+| 契约要的 | 实况 |
+|---|---|
+| `train_` | ✅ **`scripts/train_coref_scorer.py` 已有**（478 行），`role_compatibility` 早已注册进 `discriminative.py` 的组件表，`--components role_compatibility` 即 full 臂。只缺 permutation 开关 |
+| `evaluate_` | ✅ **`scripts/score_maven_ere_official.py` 已有**，官方 `evaluate.py` 同时评 coreference 与 relations，`muc/b_cubed/ceaf/blanc` 的 P/R/F1 全部输出（A4.1 当天刚用过同一个包装） |
+| 预测器 | ✅ **`scripts/build_maven_ere_submission.py` 已有**，`--from-labeled` + `--relation-predictor none` 就是注册负面对照那条线用的路径 |
+| `prepare_*_preflight` / `smoke_` / `run_c5_*` | ❌ 三个都要新写 |
+
+**这与 A4.1 那次是同一类问题**：任务描述没有核到代码，于是把工作量与阻塞都估错了。
+**写进队列的缺口，开工第一件事是逐个去仓库里找一遍。**
+
+### 执行中抓到三个真缺陷（两个会让臂跑错，一个是 A 类）
+
+1. **`role_compatibility` 会被自己的参数校验挡住。** 它读 `node.argument_evidence` 与
+   `metadata["argument_prediction_status"]`，二者都由 `apply_predicted_arguments` 注入，所以 full 臂必须传
+   `--argument-predictions`；而原校验是 `--argument-predictions requires argument_pooling_predicted`，
+   full 臂**根本起不来**。
+2. **`--argument-predictions` 同时决定语料。** 传了走 `load_maven_ere`，不传走 `load_maven_arg`。
+   remove-core 若按「不需要论元就不传」来写，就会**换一个语料训练**，直接破坏契约的
+   「2 与 4–6 的 pair population 逐位一致」。
+   ⇒ 校验方向改成单向：**消费组件必须有预测文件，预测文件不要求有消费者**（remove-core 传它只为对齐语料）。
+3. **⚠️ A 类：训练与推理口径不成对。** permutation 臂训练在置换后的 role 向量上，但
+   `SupervisedCoreferenceScorer` 不知道这回事，推理会用**真实**向量——评的是一个从没被训练过的模型。
+   修法是让 seed 随 checkpoint 走：`coref_config.json` 记 `role_permutation_seed`，
+   `src/ekg/nodes/coref.py` 读到就在推理侧做同一置换（`random.Random(seed)` 独立实例，跨进程可复现）。
+   **因此 `coref.py` 进了 preflight 的 `CODE_FILES`**——置换发生在推理侧，它就是被冻结机制的一部分。
+
+另加一条 fail-fast：`--permute-role-features` 而组件里没有 `role_compatibility` 直接拒绝，
+否则跑出来的是一个**挂着负控标签的 remove-core 数字**。
+
+### 两条 baseline 的官方口径已实测（为 C5.1 预先验证，非新结果）
+
+C5.1 要用官方 evaluator 重算主锚与注册负面对照。写 preflight 前先手工验了一遍，
+用本地从 `manifest + source` 物化的 291 篇 internal-dev：
+
+| baseline | 官方 MUC F1 | B³ | CEAFe | BLANC | 来源 |
+|---|---:|---:|---:|---:|---|
+| MAVEN-ERE official joint（主锚） | **80.9847** | 98.0399 | 97.7316 | 89.8801 | `anchors/identity/official_joint_prediction.jsonl` |
+| Qwen3 论元池化（注册负面对照） | **80.3676** | 97.9515 | 97.6166 | 89.8015 | `baselines/identity/qwen3-argument-s13-r2/predictions.jsonl` |
+
+两点都对上了：主锚 `.809847` 与 `EXPERIMENT_PLAN.md` §7.3 一致；负面对照与
+`PHASE_R1.md` 那句「同次 cross-check 的 MUC 为 80.37」「BLANC 89.80」一致。
+
+⚠️ **顺带排掉一个口径陷阱**：`qwen3-argument-s13-r2/metrics.json` 是**内部 scorer**（`scorer: supervised`）
+写的，与主锚的官方 evaluator 不是一个东西。差点按「内部 vs 官方混表」报出去——
+结果页早已交叉核验过两者一致，**核到底才发现不是问题**。这正是 `ENGINEERING_NOTES` 那条
+「报差值前对齐评分器·文档集·校正三条轴」要防的。
+
+另一条实测：anchor 的分数是拿 `.../a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl`
+（SHA-256 `bb8c6b48…`）打的，而 preflight 会自己物化 internal-dev（A4.1 那份是 `403b69a8…`）。
+**两个文件 hash 不同**，所以不能假设同分——实测：自物化的 gold 打出 **80.9847**，与 anchor 记录**逐位相同**。
+
+### 冻结的训练预算来自对照本身，不是这里选的
+
+契约要求矩阵 4–6 与注册对照的预算逐位一致，所以 `FROZEN_TRAINING` 读自
+`gpu-4090:.../ch1/qwen3-argument-s13-r2/checkpoint/coref_config.json`：
+`lr 2e-5`、`head_lr 2e-5`、`warmup_steps 200`、`accum_steps 1`；epochs 10、固定 endpoint epoch 10、
+threshold `.7`、band `0` 来自该次运行的 `metrics.json`。**没有一个数字是本轮挑的。**
+
+### 产物
+
+- `scripts/run_c5_argument_uncertainty.py` —— 三臂驱动，`--arms` 可分卡、`--aggregate` 单独汇总；
+  coverage 直接对 gold 计数（官方 scorer 会静默补 singleton，丢 mention 会**得分**而不是失败），
+  gate 只**报告**不裁决；
+- `scripts/prepare_c5_argument_uncertainty_preflight.py` —— `CODE_FILES` **8 个**（含 `coref.py` 与
+  `build_maven_ere_submission.py`），断言注册对照必须低于主锚，Global-Local Topic 未复现时
+  写 `status: not_reproduced` + 障碍，**不静默省略**（QR-001 v1.1.0）；
+- `scripts/smoke_c5_argument_uncertainty.py` —— 契约点名的四种 fixture 形状（空角色 / 多 filler /
+  重复字符串 / 全 singleton）纯 CPU 实跑通过（5 对、13 维特征、全 singleton 时中介全零），
+  并做 **permutation seed 的 export→reload 往返断言**；
+- 16 条 targeted tests（`tests/scripts/test_train_coref_scorer_permutation.py` 5 条 +
+  `tests/scripts/test_c5_entrypoints.py` 11 条）。
+
+### 下一步
+
+C5.1 preflight 还差一样东西：`--argument-predictions` 指向的**完整 mention-local 论元预测**
+（合并产物 SHA-256 `855906d3…7142a`，在 4090）。其余输入本地全部 sha256 匹配。
+C5.2 smoke 与 C5.3 pilot 需要 GPU 与授权。

@@ -75,11 +75,10 @@ A4 的机制 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头 + 五个
 
 | 次序 | 主表 ID | 做什么 | 完成判据 |
 |---|---|---|---|
-| **1（当前队首）** | **C-5b** | C5 的四个入口脚本：`train_` / `evaluate_` / `prepare_*_preflight` / `smoke_`（C5.0 核心件 `role_uncertainty.py` 已于 `fc25777` 交付） | targeted tests + 三件套全绿；**照 A4 刚落地的五件套形状写**（`scripts/*_a4_pair_evidence.py` 是现成模板），**把 pilot 入口一起写掉** |
-| **2** | **C-9 的同类缺口** | 给 C5 写 pilot 入口 `run_c5_argument_uncertainty.py`（A4 的那半已并入 C-6b） | 契约点名了它；D4 就是因为这个缺口白等了一轮 |
-| **3** | **C-7** | LLM 对照脚手架（三章各一个 CPU fixture） | 见主表 §4.1 |
+| ~~1~~ | ~~**C-5b**~~ | ✅ **已完成 2026-09-13**（含原第 2 行的 pilot 入口）。缺口比这里原本写的小：`train_`（`train_coref_scorer.py`）、`evaluate_`（`score_maven_ere_official.py`）与预测器（`build_maven_ere_submission.py`）**本来就有**，只缺三个脚本加一个开关。执行中抓到三个真缺陷，其中一个是 A 类（permutation 臂训练/推理口径不成对）。详见 [`results/PHASE_C.md`](results/PHASE_C.md) | 608 passed / 28 skipped、ruff 0、smoke OK |
+| ~~2~~ | ~~C-9 同类缺口~~ | ✅ 并入上一行：`scripts/run_c5_argument_uncertainty.py` 已存在并进了 preflight 的 `CODE_FILES`（8 个文件） | — |
+| **3（当前队首）** | **C-7** | LLM 对照脚手架（三章各一个 CPU fixture） | 见主表 §4.1。⚠️ 开工先核：这三个 fixture 有多少已经躺在仓库里了——C-5b 与 A4.1 都是**把缺口估大了** |
 | **4** | **C-8** | 第 2 章统一评测协议素材 → `docs/PROTOCOL_TABLE.md` | 每一格都能从 `results/` 或 `runs/` 反查 |
-
 | **5** | **C-10** | **E3.0 冻结 Ch6 的 evaluation unit**（2026-09-13 进主表 §4.1） | 纯 CPU、零方法章依赖，是 G-11a 四个外部对手的**真正前置**——unit 没冻结就开对手，跑了也得重跑（A 类三轴一致性） |
 
 **GPU 泳道**：
@@ -90,7 +89,9 @@ A4 的机制 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头 + 五个
   `gpu-5090:runs/stages/A4/dev-smoke-20260912/` 那份开发冒烟**不算 A4.2**。
   ⚠️ 注意 5090 上 `r1-v61-20260904/protocol.json` 是 09-04 的旧档（`phase_contracts` 为空），
   preflight 产物本身在 4090，跨机跑 A4.2 前先想清楚契约文件从哪读。
-- **G-5（C5.2 smoke → C5.3 pilot）** 等 C-5b + 队列第 2 行。
+- **G-5（C5.2 smoke → C5.3 pilot）**：C-5b ✅ 已完成，入口齐全。C5.1 preflight 只差
+  `--argument-predictions` 指向的完整 mention-local 论元预测（合并产物 `855906d3…7142a`，在 4090）；
+  其余输入本地 sha256 全部匹配。之后等空闲卡 + 授权。
 - 两者**写不同 namespace，可并卡**。跑完这两个就到 **Gate 2**。
 
 ### 0.4 Ch4（A4）现状：设计、缺陷、以及 A4.1 的收尾
