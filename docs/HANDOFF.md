@@ -13,7 +13,7 @@
 | **上一轮最重要的一件事** | **Ch3（D4）的 typed-cue 家族已关闭**，以 `failed` 身份留档。full `.476515` 低于两个锚（`.553995` / `.545603`）**七倍地板**，消融 `.536788` 与负控 `.495260` **都赢过 full**，预注册中介**反向**，PS−/Uu 护栏双破。归因与「五维瓶颈」这个**未验证**的候选原因见 [`results/PHASE_D.md`](results/PHASE_D.md)；不可变 handoff `pilot/seed-13/status.json` `3b4dbba2…a46234`。 |
 | **论文结构** | 第3章 事实性检测（D4，**本轮失败**）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。**章节存废在 Gate 2 判，执行代理不得自行改成两方法章。** |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表与 §5 的 Gate；本文队列只是切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | 🔵 **两件**。① **gpu-5090：A4 四臂 dry-run**（2026-09-13 14:4x 起）。⚠️ **实测远超交接里写的「约 4–5 小时」**：契约预算是 **50 epoch × 4 臂**，实测 ~5.2 min/epoch，⇒ **单臂约 4.3 小时、整跑约 17 小时**（预计 2026-09-14 08:00 前后完成）。仍在作者的「≤1 天不必逐次请示」内，但**这同时就是 A4.3 正式跑的工期估计**，比 `EXPERIMENT_PLAN.md` §4.2 的 ~1 GPU·day 略紧。查活与收尾见 §0.3a。② ~~gpu-4090：A4.2 smoke 的 CPU 半边~~ → ❌ **按构造跑不通，已结束**：A4 的推理修正只作用于 base 判正的行，而 CPU 上 1 epoch × 10 篇 base 三族全 0 ⇒ `0 revised` ⇒ 断言触发。**断言是对的，regime 不对；A4.2 必须等卡。别把「D4.2 有 CPU 半边」推广到每个 phase。**详见 [`results/PHASE_A.md`](results/PHASE_A.md) 末节（含一条报错信息改进待办）。 |
+| **活动任务** | ⚪ **零件，两台机器都没有我们的任务在跑。** ① **gpu-5090 的 A4 四臂 dry-run 已于 2026-09-14 03:07:58 完成**（`DRYRUN_COMPLETE`，实际 **12.5 小时**，估的 17 小时偏高）。收尾结论见 §0.3a 与 [`results/PHASE_A.md`](results/PHASE_A.md) 末节：**pipeline 完整性 PASS，但按契约 Bundle 清单核出两个缺件**（checkpoint hashes / `fallback_component_bundle_id`），已修（`d595439`）。② ~~gpu-4090：A4.2 smoke 的 CPU 半边~~ → ❌ **按构造跑不通，已结束**：A4 的推理修正只作用于 base 判正的行，而 CPU 上 1 epoch × 10 篇 base 三族全 0 ⇒ `0 revised` ⇒ 断言触发。**断言是对的，regime 不对；A4.2 必须等卡。别把「D4.2 有 CPU 半边」推广到每个 phase。** |
 | **Ch4（A4）现状** | ✅ **方法、五个入口脚本、A4.1 preflight 全部就绪**。A4.1 **2026-09-13 PASS**（4090，**纯 CPU，未占任何 GPU**），protocol `321309ac…d65451`、`code_files=7`，两条同协议 baseline 独立重算与主表 §7.2 逐项吻合。数字见 [`results/PHASE_A.md`](results/PHASE_A.md)。**下一步是 A4.2 smoke**（带 `--contract`；可走 5090）。 |
 | **待作者裁决（2 项，已附分析与推荐）** | §0.5 按作者 2026-09-13 的要求重写：每项都给出**为什么要选、每条路的问题、对论文与实验各自的后果、同行怎么做、明确推荐**。① A4 决策 3 → **推荐维持 (A) 两段式**；② LLMERE 保真度路径 → **推荐记为 (b) Unverifiable**。两项都**不阻塞**当前队列。 |
 | **gpu-4090** | 四卡被他人 vllm 占满（09-10 起连续 4 天，09-13 复核 21–23.6 GB / 24.5 GB、99–100% util）。**这不是停工理由**——见 §0.3b 的方针：能在 5090 上先验的一律先验完，4090 一空就只剩「跑那一次正式的」。ssh 与 CPU 全程可用，**纯 CPU 任务照常在 4090 上跑**（A4.1 就是这么跑完的）。 |
@@ -87,6 +87,10 @@ A4 的机制 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头 + 五个
 （§7.5 下行情形里它照样成立），也是耗时最长的一项。Gate 2 判的是还剩几个方法章，判完之后再启动
 Ch6 就来不及了。C-8 是纯整理、随时可做，所以垫后。
 
+> ✅ **2026-09-14：A4 dry-run 已收尾**（见 §0.3a），修掉两个契约 Bundle 缺件（`d595439`）。
+> **队首现在是 `preflight-r2` 重建**（4090 纯 CPU），但**先取得 §0.3a 末尾那项裁决**
+> （A4.3 原样跑 vs 先修 recall 塌陷），否则可能重建两次。
+>
 > ⚠️ **2026-09-13：CPU 队列已跑空。** 主表 §4.1 的九项 CPU 泳道任务全部 done（C-10 / C-4b /
 > C-8 三项在本轮完成，G-11a 的静态第一刀也做完了）。**剩下的每一件都要卡**：
 > ① **G-11a 第二刀**——按成本从低到高 SimKGC → CSProm-KG → BART contrastive，
@@ -97,34 +101,45 @@ Ch6 就来不及了。C-8 是纯整理、随时可做，所以垫后。
 > **注意 mcnc 的 `torch==1.7.1` 与 CSProm-KG 的 `torch==1.11.0+cu113` 最高只到 sm_86，
 > 4090(sm_89) 与 5090(sm_120) 都跑不了**——这是和 EasyECR 同一堵墙，升版是透明补丁，要记前后 hash。
 
-### 0.3a 正在跑的 A4 四臂 dry-run：怎么查、怎么收尾
+### 0.3a A4 四臂 dry-run：**已完成并收尾**（2026-09-14 03:07:58）
 
-**它是什么**：在 gpu-5090 上用 **A4.3 那条正式命令**（`scripts/run_a4_pair_evidence.py --contract …`）
-把四臂 + `--aggregate` 完整走一遍。目的**不是**看机制效果，是回答一个问题：
-**4090 一空出来，那 2–3 GPU·day 会不会白跑。**
+**它回答的问题**（原样保留）：4090 一空出来，那 12–17 GPU·h 会不会白跑。
+**答案：不会，但按契约 Bundle 清单核下来少两样东西。** 全部记录见
+[`results/PHASE_A.md`](results/PHASE_A.md) 末节；下面只留结论与后续顺序。
 
-**为什么值得占一次 5090**：D4 是跑完 1.5 GPU·day 才发现契约点名的入口脚本从没被写过。
-A4.3 的 bundle 要求 evidence + 三种 counterfactual logits + 中介统计 + 护栏读数 + checkpoint hashes
-全部落盘，任何一样缺了，那一跑就得重来。这些**全都能在 5090 上提前验完**，且不需要看分数。
+| 项 | 结果 |
+|---|---|
+| 运行 | 50 epoch × 4 臂 + `--aggregate` 一次通过，**实际 12.5 小时**（估 17 小时偏高）。`pilot_summary.json` `status=pass` |
+| 契约隔离 | ✅ 守住：`contract_sha256 7731f0d1…`（`probe_contract.json`，含 `"probe": true`），**不是** A4.1 的 `321309ac…`；`baselines` 明写 probe 不重算。四臂 `final_valid_accessed: false`、seed 13、candidate digest 与 preflight 同为 `15a3b1a5…` |
+| Bundle 完整性 | ✅ predictions / evidence / **三种 counterfactual logits**（`[base, cited, masked]`）/ official metrics 全在 |
+| ❌ **缺件 1** | **checkpoint hashes**：`artifact_sha256` 只覆盖产物文件，不覆盖产出它们的权重 |
+| ❌ **缺件 2** | **`fallback_component_bundle_id`**：四份 phase 契约都点名，**全仓库从未实现**。E3 在 phase 交 `failed`/`blocked` 时读的就是它——D4 失败那次只能人工指路径 |
+| ⚠️ 命名不符 | 契约与本节原文写的 `pilot.json` / 各臂 `status.json`，实际是 **`pilot_summary.json` / `arm.json`**。内容齐全，**是文档写错了**，已在此更正 |
 
-⚠️ **与 A4.3 的界线（必须守住）**：backbone 是 5090 的公开件 `2c7ff1f1…`，契约 pin 是 `71be7419…`。
-产物在 `probe-5090-20260913/pilot-dryrun/`，契约是 `probe_contract.json`（内含 `"probe": true` 与
-`probe_note`）。**数字一律不进主表、不与 33.17 / 32.10 相减。** 正式 A4.3 仍在 4090 上重跑一次。
+**两个缺件已修**（`d595439`，`scripts/run_a4_pair_evidence.py`，635 passed / 28 skipped、ruff 0、smoke OK）。
 
-**查活**（三态判活，ssh 失败 ≠ 进程死亡）：
+⚠️ **代价与由此定下的顺序**：`run_a4_pair_evidence.py` 在 A4.1 preflight 的 `CODE_FILES`（7 个）里，
+改它就要按 D4/C5 先例**重建 `preflight-r2/`**（4090 纯 CPU），旧 `preflight/` 不覆盖。
+因此顺序是 **改代码 → 重建 preflight-r2 → A4.2 smoke → A4.3**，一次重建同时覆盖上一节记的
+smoke 报错信息待办（`smoke_a4_pair_evidence.py` 也在那 7 个文件里）。**重建前先把下面这项裁决拿到**，
+否则可能要重建两次。
 
-```bash
-ssh gpu-5090 'cd /mnt/aidata/tongjiakai/ekg && tail -5 logs/a4_dryrun.log; \
-  ps -eo etime,cmd | grep run_a4_pair | grep -v grep'
-```
+#### ⚠️ 交作者裁决：A4.3 原样跑，还是先修 recall 塌陷
 
-日志出现 `DRYRUN_COMPLETE` 即四臂与 aggregate 都过；出现 `DRYRUN_ARMS_FAILED` /
-`DRYRUN_AGGREGATE_FAILED` 就是抓到了本该在 4090 上才暴露的缺陷——**那正是这一跑的价值**，
-修掉它、把缺陷记进 `results/PHASE_A.md`，再重跑。
+dry-run 的四臂读数（**探测 backbone `2c7ff1f1…`，不进主表、不与 33.17 / 32.10 相减**）：
+`full` causal F1 **8.00**（P 37.26 / **R 4.48**）· `remove_core` **31.23** · `length_matched` 2.97 ·
+`no_constraint` 11.12。**消融臂高出 full 23 点，与 D4 的失败形态同构。**
 
-**收尾**：读 `pilot-dryrun/pilot.json` 与各臂 `status.json`，逐项核对契约 Bundle 清单
-（`phases/PHASE_A4_pair_evidence.md` 的 Bundle 节）少了什么，结论写进 `results/PHASE_A.md`。
-**只写"pipeline 完整性"结论，不写四臂分数的高下。**
+mediator 把机制讲清楚了：`remove_core` 不修正、causal FP 2,926；`full` 修 766 行把 FP 压到 362
+（降 87.6%），FP 的 logit 掉幅 4.168——**反事实信号是真在起作用**，但把正类一起压没了。
+这与 §0.7 记过、`323fd7a` 修过一次的「修正头把 causal 正类抹光」**是同一形态，说明没修够**。
+`no_constraint` 掉幅 **−0.002**（关掉约束信号即消失）说明四臂对照结构有效，不是四条随机线。
+
+**(甲) 原样跑 A4.3**，把这一形态作为第一个周期的如实结果交 Gate 2；
+**(乙) 先修 recall 塌陷再跑**——这属于实现缺陷而非设计变更，在 A4.3 出任何数字之前修，
+不违反「看到结果不改口径」。**推荐 (乙)**：dry-run 的价值就是在正式跑之前暴露这类问题，
+现在放过它等于自愿把 12–17 GPU·h 花在一个已知会塌的配置上。
+⚠️ **决策 3（两段式 vs 只作训练目标，§0.5 ①）不受此影响，仍推荐维持 (A)，且 A4.3 出数字后不再改。**
 
 ### 0.3b 方针：4090 占着的时候该做什么（作者 2026-09-13 定）
 
@@ -144,8 +159,11 @@ ssh gpu-5090 'cd /mnt/aidata/tongjiakai/ekg && tail -5 logs/a4_dryrun.log; \
 本次四臂 dry-run。**5090 单臂实测 56 分钟**，算力从来不是瓶颈。
 
 **GPU 泳道**：
-- **G-4：A4.1 ✅ 已 PASS（2026-09-13，纯 CPU）**，本行现在只剩 **A4.2 smoke → A4.3 pilot**，
-  等 ① 一张空闲卡 ② 作者授权长任务。**A4.2 可以现在就在 5090 上跑**（§3.5 授权 ≤1 天任务，
+- **G-4：A4.1 ✅ 已 PASS（2026-09-13，纯 CPU）**；**四臂 dry-run ✅ 已完成并收尾（2026-09-14，见 §0.3a）**。
+  本行现在是 **preflight-r2 重建（4090 纯 CPU，等裁决）→ A4.2 smoke → A4.3 pilot**，
+  后两者等 ① 一张空闲卡 ② 作者授权长任务。⚠️ **A4.2 必须带 `preflight-r2` 的 `protocol.json`**，
+  不是原 `preflight/`——`run_a4_pair_evidence.py` 与 `smoke_a4_pair_evidence.py` 都在那 7 个
+  `CODE_FILES` 里，`d595439` 改了前者。**A4.2 可以现在就在 5090 上跑**（§3.5 授权 ≤1 天任务，
   实测 5090 完全空闲：209 MiB / 32,607 MiB、24 核 load 0.05），**它不必等 4090**。
   A4.2 必须带 `--contract runs/stages/A4/a4-v61-pair-evidence-r1/preflight/protocol.json`；
   `gpu-5090:runs/stages/A4/dev-smoke-20260912/` 那份开发冒烟**不算 A4.2**。
