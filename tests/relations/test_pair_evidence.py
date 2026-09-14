@@ -410,17 +410,19 @@ def test_sufficiency_cannot_be_satisfied_by_degrading_the_full_context() -> None
     target = torch.tensor([1])
     scoreable = torch.tensor([False])  # adjacent triggers: no necessity term
     base = torch.tensor([[0.0, 5.0, 0.0]], requires_grad=True)
-    retained = torch.tensor([[0.0, 1.0, 0.0]])
+    retained = torch.tensor([[0.0, 1.0, 0.0]], requires_grad=True)
 
     loss = sufficiency_necessity_loss(
         base, base.detach(), retained, target, scoreable=scoreable
     )
     loss.backward()
 
-    # The gradient may push the retained logit up; it must never push the full
-    # context's gold logit down.
-    assert base.grad is not None
-    assert base.grad[0, 1].item() <= 0.0, (
-        f"sufficiency pushes gold_base down by {base.grad[0, 1].item()}; "
-        "a positive gradient here is the degenerate solution"
+    # The only way down is to raise the retained logit (negative gradient under
+    # `param -= lr * grad`), never to lower the full context's gold logit.
+    assert retained.grad is not None
+    assert retained.grad[0, 1].item() < 0.0, "sufficiency must reward a stronger span"
+    base_grad = 0.0 if base.grad is None else base.grad[0, 1].item()
+    assert base_grad == 0.0, (
+        f"sufficiency pushes gold_base by {base_grad}; "
+        "any gradient here is the degenerate solution"
     )
