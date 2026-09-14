@@ -10,14 +10,14 @@
 |---|---|
 | 正式阶段 | **方法实验期，Gate 1 已触发**。2026-09-12 跑完 v6.1 的**第一个真方法结果** D4.3，**失败**。按事先冻结的 Gate 1 分支：**不开第二个周期**，转去把 A4 与 C5 跑出来，到 Gate 2 再判还剩几个方法章。 |
 | **⚠️ 开工前必读** | **每个新任务先答「科研价值 / 可行性」两问**（作者 2026-09-13 定，全文见 `CLAUDE.md` 的「开工自审」节）。可行性不成立时**必须点名是数据 / 协议 / 代码 / 算力 / 授权哪一条**，附一手证据，然后**停下交作者裁决**，不得自己换题绕开。 |
-| **上一轮最重要的一件事** | **Ch3（D4）的 typed-cue 家族已关闭**，以 `failed` 身份留档。full `.476515` 低于两个锚（`.553995` / `.545603`）**七倍地板**，消融 `.536788` 与负控 `.495260` **都赢过 full**，预注册中介**反向**，PS−/Uu 护栏双破。归因与「五维瓶颈」这个**未验证**的候选原因见 [`results/PHASE_D.md`](results/PHASE_D.md)；不可变 handoff `pilot/seed-13/status.json` `3b4dbba2…a46234`。 |
+| **上一轮最重要的一件事** | **A4 的 dry-run 与一次失败的修复，合起来把 Ch4 的问题定位到了设计层。** 四臂 dry-run 完整跑通（pipeline PASS），但 `full` 臂 causal R **4.48** vs `remove_core` **29.80**。追因发现**塌陷在训练侧不在推理修正**（base 判正数 4,355→766，推理只砍 24.7%）；按此改梯度路径后**训练发散**（loss 5.49→2214，17 epoch 中止），⇒ 被摘掉的那个梯度**同时是损失的阻尼**。真正的失衡在 `sufficiency` 与 `necessity` **作用面不同**——短距离正例只受压低不受抬高。全部证据见 [`results/PHASE_A.md`](results/PHASE_A.md) 末三节。 |
 | **论文结构** | 第3章 事实性检测（D4，**本轮失败**）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。**章节存废在 Gate 2 判，执行代理不得自行改成两方法章。** |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表与 §5 的 Gate；本文队列只是切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | 🔵 **两件在跑（2026-09-14 18:2x 起）**。① **gpu-5090：A4 梯度修正验证跑**（`full` + `no_constraint` 两臂，约 2 小时）——验 `d595439`+`2b8bbdf` 两条根因修掉后，base 判正数能否从 766 / 1,385 回到 `remove_core` 的 4,355 量级。契约 `runs/stages/A4/probe-5090-20260914-gradfix/probe_contract.json`（`297b3228…`），日志 `logs/a4_gradfix.log`，查活见 §0.3a。② **本地→5090：SimKGC 搬运**（G-11a 第二刀，约 421 MB，作者 2026-09-14 批准）。⚠️ **两台机器都没有外网**，外部仓库与预训练权重只能本地下载后 scp。 |
-| **Ch4（A4）现状** | ✅ **方法、五个入口脚本、A4.1 preflight 全部就绪**。A4.1 **2026-09-13 PASS**（4090，**纯 CPU，未占任何 GPU**），protocol `321309ac…d65451`、`code_files=7`，两条同协议 baseline 独立重算与主表 §7.2 逐项吻合。数字见 [`results/PHASE_A.md`](results/PHASE_A.md)。**下一步是 A4.2 smoke**（带 `--contract`；可走 5090）。 |
-| **待作者裁决（2 项，已附分析与推荐）** | §0.5 按作者 2026-09-13 的要求重写：每项都给出**为什么要选、每条路的问题、对论文与实验各自的后果、同行怎么做、明确推荐**。① A4 决策 3 → **推荐维持 (A) 两段式**；② LLMERE 保真度路径 → **推荐记为 (b) Unverifiable**。两项都**不阻塞**当前队列。 |
+| **活动任务** | ⚪ **零件。两台机器都没有我们的任务在跑，5090 空闲。** 上一轮起过的两件都已结束：A4 梯度修正验证跑**失败并回滚**（`24b3924`），SimKGC 训练**卡在显存**（见 §0.3 队列 G-11a 行）。**开工前先看下面「待作者裁决」那一行。** |
+| **Ch4（A4）现状** | ✅ 方法、五个入口、A4.1 preflight 就绪（`321309ac…d65451`，2026-09-13 PASS）。⚠️ **但 A4.2 / A4.3 现在被两件事挡着**：① **必须先重建 `preflight-r2`**——`run_a4_pair_evidence.py`、`train_a4_pair_evidence.py`、`smoke_a4_pair_evidence.py`、`src/ekg/relations/pair_evidence.py` **四个被契约钉住的文件都改过了**（`d595439`/`2b8bbdf`/`24b3924`/`5b3fcb8`）；② **recall 塌陷的设计裁决未定**（见「待作者裁决」）。原样跑 A4.3 = 花 12–17 GPU·h 撞一个契约已明列为失败的形态。 |
+| **⚠️ 待作者裁决（5 项，编号以 §0.5 为准）** | **阻塞队列的两项**：**③ A4 的 recall 塌陷怎么办**——推荐 **(戊)** 把 `sufficiency` 也限制在 `positive & scoreable`，让它与 `necessity` 作用面一致（§0.3a）；另建议**先单跑一臂约 1 小时**隔离根因 A，那一步**不需要本裁决**。**④ Ch6 是否改先做 CSProm-KG**——SimKGC 训练要 4×32 GB（**硬件，补丁解决不了**），CSProm-KG 有公开 checkpoint、(a) 靠一次推理即可；推荐**改序**（§0.3 的 G-11a 行）。**不阻塞的三项**：① A4 决策 3 → 维持 (A) 两段式；② LLMERE → 记 (b) Unverifiable（§0.5）；⑤ 是否只为 SeDGPL 走 ESC 的 (a)、其余四个维持 (b)（C-4b，§0.3 队列第 5 行）。 |
 | **gpu-4090** | 四卡被他人 vllm 占满（09-10 起连续 4 天，09-13 复核 21–23.6 GB / 24.5 GB、99–100% util）。**这不是停工理由**——见 §0.3b 的方针：能在 5090 上先验的一律先验完，4090 一空就只剩「跑那一次正式的」。ssh 与 CPU 全程可用，**纯 CPU 任务照常在 4090 上跑**（A4.1 就是这么跑完的）。 |
-| ✅ **gpu-5090** | 作者授权：**≤1 天的任务直接执行，不再逐次请示**（超过一天要问；拉模型/跨机搬运先问位置）。backbone 已就位 `2c7ff1f1…49736`（六件全部公开源）。硬边界：**EasyECR 跑不了**（torch 2.0.1 不支持 sm_120）。 |
+| ✅ **gpu-5090** | ⚪ **当前完全空闲**（197 MiB / 32,607 MiB）。作者授权：**≤1 天的任务直接执行**（超过一天要问；拉模型/跨机搬运先问位置）。backbone `2c7ff1f1…49736`。⛔ **硬边界三条**：EasyECR 跑不了（torch 2.0.1 无 sm_120）；**没有外网**（见 §0.6）；**单卡 32 GB**——SimKGC 的 batch 1024 要 4×32 GB，装不下。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成。排期与估算基准率见 `EXPERIMENT_PLAN.md` §3：顺利情形 2027-01 底收口、2 月缓冲；**两个以上方法章需第二设计周期则缓冲清零**。 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改队列行状态与 commit → 推进队列 → commit + **push** |
 
@@ -80,53 +80,77 @@ A4 的机制 `src/ekg/relations/pair_evidence.py` + `pair_evidence` 头 + 五个
 | ~~3~~ | ~~**C-7**~~ | ✅ **已完成 2026-09-13**。三章 CPU fixture 各自被**该章自己的 evaluator** 打出分；配置移进 `configs/`（`data/protocols` 是 gitignored，hash 在 git 外没有追溯价值）。详见主表 §4.1 |
 | ~~4~~ | ~~**C-10**~~ | ✅ **已完成 2026-09-13**（纯 CPU，2.6 s）。`runs/stages/E3/e3-v61-20260913/`：1,908 实例，`queries.jsonl` `e92629bd…5aecf`、candidate-ID digest `93915ae3…f27ee`、生成器 tree `588c02c0…8abf`。**n 与 2026-07-29 那批已发表数字一致**，G-11a 的四个对手现在有同一把尺可用。`--verify` 可随时重建三比对。详见 [`results/PHASE_E.md`](results/PHASE_E.md) |
 | ~~5~~ | ~~**C-4b**~~ | ✅ **已完成 2026-09-13**（一手核查，纯 CPU 未训练）。裁决 `conditionally_runnable`；**切分口径 = 原文 §5.1 声明的 topic 级 5 折 CV**（最后两 topic 作 dev），**不是**文档切分。⚠️ **推翻了「19.6 是泄漏值」这条记载**——原文声明的就是非泄漏口径，我们只是在该口径下复现不到（.0599 vs .196）。三个透明补丁（自写 loader / 用它自己的 `collect_mult_event` 重建 ESC 词表 / 把 `util.py` 被注释掉的 assert 加回去，否则半数候选静默错打分）与两处未公开自由度见 [`results/PHASE_E.md`](results/PHASE_E.md)。**建议只为 SeDGPL 走 (a)，其余四个维持 (b)** —— 待作者裁决，不阻塞 G-11a |
-| **6（当前队首）** | **G-11a** | **Ch6 四个外部对手复现（跑 5090）** | ⏳ **第一刀已完成 2026-09-13**（纯 CPU）：四个仓库已 clone 并逐个核到 commit/数据/依赖。**结构性事实——四个对手没有一个实现 CGEP**，SeDGPL 作者做的适配从未发布 ⇒ 四行在我们的重建协议上注定 (b)，(a) 只能在各自原基准上取得。地图：SimKGC (a) 最便宜 / CSProm-KG (a) 但要升 torch / BART contrastive (a) 但最贵 / **MCPredictor 数据需 LDC2011T07 许可 → (b)**。⚠️ mcnc 的 `torch==1.7.1` 与 CSProm-KG 的 `torch==1.11.0+cu113` **最高 sm_86，两台卡都跑不了**，须升版并记补丁。SimKGC 已发布预测**缺 `rank`**，省不掉训练。详见 [`results/PHASE_E.md`](results/PHASE_E.md) 与名册 §6.2a。**第二刀（要卡）**：SimKGC → 原基准 (a) → CGEP 适配器 → 冻结 unit |
+| **6** | **G-11a** | **Ch6 四个外部对手复现（跑 5090）** | ⏳ **第一刀 done 2026-09-13**（纯 CPU）：四个仓库已 clone 并核到 commit/数据/依赖。**结构性事实——四个对手没有一个实现 CGEP**，SeDGPL 作者做的适配从未发布 ⇒ 四行在我们的重建协议上注定 (b)，(a) 只能在各自原基准上取得。**MCPredictor 数据需 LDC2011T07 许可 → (b)**。⏳ **第二刀 2026-09-14 起步即受阻**：SimKGC 已搬到 5090、环境无 torch 版本墙、预处理 PASS、AdamW 透明补丁已记 hash，**但训练要 4×32 GB，两台机器都装不下**（它自己 README 第 18/111/116 行）。⚠️ **第一刀把 SimKGC 排「最便宜」是漏算了训练显存**；建议改序先做 CSProm-KG（**有公开 checkpoint，(a) 靠一次推理**）——**等裁决 ④**。详见本节下方与 [`results/PHASE_E.md`](results/PHASE_E.md) |
 | ~~7~~ | ~~**C-8**~~ | ✅ **已完成 2026-09-13**：[`PROTOCOL_TABLE.md`](PROTOCOL_TABLE.md)，四章三轴 + 计数 + 指标定义 + final-valid 台账 + 信任根，每节带重算命令。本地重算核对：候选 digest `15a3b1a5…` 与 291/7,195/1,719/234,870 逐项吻合。⚠️ 顺带修掉 `CLAUDE.md`/`AGENTS.md` 里过期的 P1 可信根（r12 → **`p1-v6-20260904-r15` / `1e31a9ac…f9655`**） |
 
 **为什么这么排（不是按主表编号，是按"卡住谁"排）**：Ch6 是**唯一不依赖任何方法章成败的一章**
 （§7.5 下行情形里它照样成立），也是耗时最长的一项。Gate 2 判的是还剩几个方法章，判完之后再启动
 Ch6 就来不及了。C-8 是纯整理、随时可做，所以垫后。
 
-> ✅ **2026-09-14：A4 dry-run 已收尾**（见 §0.3a），修掉两个契约 Bundle 缺件（`d595439`）。
-> **队首现在是 `preflight-r2` 重建**（4090 纯 CPU），但**先取得 §0.3a 末尾那项裁决**
-> （A4.3 原样跑 vs 先修 recall 塌陷），否则可能重建两次。
+> ## ⚪ 2026-09-14 收盘：**队列全部停在裁决上，不是停在算力上**
 >
-> ⚠️ **2026-09-13：CPU 队列已跑空。** 主表 §4.1 的九项 CPU 泳道任务全部 done（C-10 / C-4b /
-> C-8 三项在本轮完成，G-11a 的静态第一刀也做完了）。**剩下的每一件都要卡**：
-> ① **G-11a 第二刀**——按成本从低到高 SimKGC → CSProm-KG → BART contrastive，
-> 每个先在**它自己的原基准**上取 (a)，再写 CGEP 适配器打 `runs/stages/E3/e3-v61-20260913/queries.jsonl`；
-> MCPredictor 直接记 (b)（LDC2011T07 需许可）。前两个要先升 torch（版本墙见下）；
-> ② **A4.2 smoke → A4.3 pilot**（G-4 泳道）；③ **C5.1 preflight → C5.2 → C5.3**（G-5 泳道）。
-> 5090 现在被 A4 dry-run 占着；它一空，按 §0.3b 的判据挑「能减少正式跑白跑概率」的那一件先做。
-> **注意 mcnc 的 `torch==1.7.1` 与 CSProm-KG 的 `torch==1.11.0+cu113` 最高只到 sm_86，
-> 4090(sm_89) 与 5090(sm_120) 都跑不了**——这是和 EasyECR 同一堵墙，升版是透明补丁，要记前后 hash。
+> 主表 §4.1 的九项 CPU 泳道任务早已全部 done。本轮又把三件不占卡的做完了
+> （dry-run 收尾、smoke 报错信息、SimKGC 搬运与预处理）。**现在剩下的每一件要么等卡、要么等裁决：**
+>
+> | 泳道 | 状态 | 挡住它的是什么 |
+> |---|---|---|
+> | **G-4（A4）** | ⛔ **等裁决** | recall 塌陷的设计选择（§0.3a）。**且无论选哪条，都要先重建 `preflight-r2`**——四个被契约钉住的文件都改过了。裁决前重建会重建两次 |
+> | **G-5（C5）** | 🟡 **等卡即可，无裁决阻塞** | C5.2 的 CUDA 半边 → C5.3 pilot。⚠️ 跨机契约问题：preflight 产物在 4090，5090 的 R1 protocol 是空 `phase_contracts` 旧档（§0.6） |
+> | **G-11a（Ch6）** | ⛔ **等裁决** | SimKGC 训练要 **4×32 GB**，5090 单卡装不下（**硬件，补丁解决不了**）。建议改序做 CSProm-KG——见下 |
+>
+> **5090 现在完全空闲。** 如果要在裁决之前用掉这张卡，**唯一不需要裁决的是 G-5 的 C5.2 CUDA 半边**；
+> 其次是 §0.3a 建议的**单跑一臂隔离根因 A**（约 1 小时，纯诊断，不改设计）。
 
-### 0.3a A4 四臂 dry-run：**已完成并收尾**（2026-09-14 03:07:58）
+#### G-11a 第二刀的进展与建议改序（2026-09-14）
 
-**它回答的问题**（原样保留）：4090 一空出来，那 12–17 GPU·h 会不会白跑。
-**答案：不会，但按契约 Bundle 清单核下来少两样东西。** 全部记录见
-[`results/PHASE_A.md`](results/PHASE_A.md) 末节；下面只留结论与后续顺序。
+**已完成、不必重做**：四个对手仓库的静态核查（第一刀）；**SimKGC 已搬到
+`gpu-5090:/mnt/aidata/tongjiakai/baselines/`**（ekg 仓库之外，不受远端 `git reset` 波及），
+双端 sha256 一致、commit `97cc43e488f19ca5…` 已复核；环境无 torch 版本墙；
+**WN18RR 预处理 PASS**（test n=**3,134**，与结果页此前重算其已发布预测的计数逐位一致）；
+**AdamW 透明补丁**已打并记前后 hash。
 
-| 项 | 结果 |
-|---|---|
-| 运行 | 50 epoch × 4 臂 + `--aggregate` 一次通过，**实际 12.5 小时**（估 17 小时偏高）。`pilot_summary.json` `status=pass` |
-| 契约隔离 | ✅ 守住：`contract_sha256 7731f0d1…`（`probe_contract.json`，含 `"probe": true`），**不是** A4.1 的 `321309ac…`；`baselines` 明写 probe 不重算。四臂 `final_valid_accessed: false`、seed 13、candidate digest 与 preflight 同为 `15a3b1a5…` |
-| Bundle 完整性 | ✅ predictions / evidence / **三种 counterfactual logits**（`[base, cited, masked]`）/ official metrics 全在 |
-| ❌ **缺件 1** | **checkpoint hashes**：`artifact_sha256` 只覆盖产物文件，不覆盖产出它们的权重 |
-| ❌ **缺件 2** | **`fallback_component_bundle_id`**：四份 phase 契约都点名，**全仓库从未实现**。E3 在 phase 交 `failed`/`blocked` 时读的就是它——D4 失败那次只能人工指路径 |
-| ⚠️ 命名不符 | 契约与本节原文写的 `pilot.json` / 各臂 `status.json`，实际是 **`pilot_summary.json` / `arm.json`**。内容齐全，**是文档写错了**，已在此更正 |
+⛔ **但 SimKGC 训练卡在「算力」**（一手证据是它自己的 README）：
+第 18 行 **"All experiments are run with 4 V100(32GB) GPUs"**，第 116 行**不支持 DDP**，
+第 111 行对 OOM 的回答就是「资源不够请减 batch」。冻结的 `--batch-size 1024` 要 **4×32 GB = 128 GB**；
+5090 单卡 32 GB、4090 四卡 96 GB **都不够**。
+**减 batch 不算绕开**——SimKGC 是对比学习，**batch size 就是 in-batch 负样本数**（名字里的 IB），
+减了按定义就复现不出 66.6。
 
-**两个缺件已修**（`d595439`，`scripts/run_a4_pair_evidence.py`，635 passed / 28 skipped、ruff 0、smoke OK）。
+**⇒ 建议改序：CSProm-KG 提到 SimKGC 之前。** 第一刀把 SimKGC 排「最便宜」，依据是
+数据随仓库 / 预测已发布 / 依赖无上限——**三条都对，但没有一条是显存**：
 
-⚠️ **代价与由此定下的顺序**：`run_a4_pair_evidence.py` 在 A4.1 preflight 的 `CODE_FILES`（7 个）里，
-改它就要按 D4/C5 先例**重建 `preflight-r2/`**（4090 纯 CPU），旧 `preflight/` 不覆盖。
-因此顺序是 **改代码 → 重建 preflight-r2 → A4.2 smoke → A4.3**，一次重建同时覆盖上一节记的
-smoke 报错信息待办（`smoke_a4_pair_evidence.py` 也在那 7 个文件里）。**重建前先把下面这项裁决拿到**，
-否则可能要重建两次。
+| 方法 | (a) 怎么取得 | 显存 | 版本墙 |
+|---|---|---|---|
+| **CSProm-KG** | **公开 checkpoint + 推理**（README §33） | `-batch_size 128`，**且只需推理** | 有（`torch==1.11.0+cu113`，升版=透明补丁） |
+| SimKGC | **必须训练**（已发布预测缺 `rank`，省不掉） | **4×32 GB** | 无 |
 
-#### ✅ 已裁决并执行：先修训练侧的 recall 塌陷（作者 2026-09-14 批准 (丙)+(乙)）
+**补丁能解决版本墙，解决不了硬件。** ⚠️ CSProm-KG 的 checkpoint 在 **Google Drive**，
+而两台服务器都没有外网（§0.6）⇒ 仍要本地下载后 scp。
 
-dry-run 的四臂读数（**探测 backbone `2c7ff1f1…`，不进主表、不与 33.17 / 32.10 相减**）：
+⚠️ **第三堵版本墙，形态与前两堵相反**：CSProm-KG / mcnc 是 `torch` **太旧**跑不了新卡（sm_86），
+SimKGC 是 `transformers` **太新**删掉了它用的 `AdamW`。名册 §6.2a 那句「SimKGC 依赖无上限、
+不受影响」**只对 torch 成立**。⇒ **核依赖不能只看下限，要核它用的符号在新版本里还在不在。**
+
+### 0.3a Ch4 现在卡在哪：一次 dry-run、一次失败的修复、一个待裁决的设计问题
+
+三件事按时间顺序，**证据全部在 [`results/PHASE_A.md`](results/PHASE_A.md) 末三节**，这里只留结论。
+
+#### ① 四臂 dry-run（2026-09-14 03:07 完成）：pipeline PASS，抓到两个 Bundle 缺件
+
+12.5 小时跑完 50 epoch × 4 臂 + aggregate，`status=pass`，契约隔离守住
+（`contract_sha256 7731f0d1…` 是 probe 契约，非 A4.1 的 `321309ac…`）。
+按契约 Bundle 清单逐项核，**少两样**，已补（`d595439`）：
+
+- **checkpoint hashes**——`artifact_sha256` 只覆盖产物、不覆盖产出它们的权重。现每臂带
+  `checkpoint_content_sha256`，`aggregate` 拒绝没有它的臂；
+- **`fallback_component_bundle_id`**——四份 phase 契约都点名，**全仓库从未实现**。现从契约的
+  `baselines.a3_fallback.predictions_sha256` 取，无 fallback 时显式 `null`。
+
+⚠️ **命名**：契约与本节原文写的 `pilot.json` / `status.json`，实际是 **`pilot_summary.json` / `arm.json`**。
+⚠️ **一个会骗人的计数**：顶层 `candidate_pairs` **348,632 不是**候选全集 **234,870**
+（前者含 TIMEX 参与的对）。**写表一律引 `mediator["pairs"]`**，已记进 `ENGINEERING_NOTES.md`。
+
+#### ② 四臂读数与真正的病灶（**探测 backbone，不进主表、不与 33.17 / 32.10 相减**）
 
 | 臂 | evidence_stream | consistency_loss | **base 判正** | 修正后 | causal R | causal F1 |
 |---|:--:|:--:|---:|---:|---:|---:|
@@ -135,32 +159,59 @@ dry-run 的四臂读数（**探测 backbone `2c7ff1f1…`，不进主表、不�
 | `full` | ✓ | ✓ | 766 | 577 | 4.48 | 8.00 |
 | `length_matched` | ✓ | ✓(+替代控制) | 179 | 125 | 1.52 | 2.97 |
 
-**⚠️ 第一版归因（「修正头把正类抹光」）是错的**，已更正：推理修正只砍掉 24.7%–34.4%，
-**base 判正数本身就差 5.7 倍**，塌陷在训练侧。两条根因与臂的阶梯逐级对应，全部证据见
-[`results/PHASE_A.md`](results/PHASE_A.md) 末节。
+**推理修正只砍掉 24.7%–34.4%，base 判正数本身差 5.7 倍** ⇒ **塌陷在训练侧**，
+且就算关掉推理修正，`full` 的 recall 上限也只有约 16%。
 
-**已修（`2b8bbdf`），两处都是梯度路径，不动四臂语义、不动任何超参、不动被评分的规则：**
+#### ③ 按此修梯度路径 → **训练发散，修复失败并回滚**（`24b3924`）
 
-- **根因 A**（−68%）：`cross_entropy(revised, target)` 的梯度经 `cf["retained"]` 回流 encoder
-  （`pair_counterfactual_embeddings` docstring 明写 "Gradient flows"）⇒ encoder 被要求在**只留
-  trigger span 的残缺输入**上判 causal，而这正是 A4 论证不可能的那件事。
-  **修法：`cf["retained"].detach()`。**
-  ⚠️ **这不是批准时字面写的「移进 `consistency_loss` 分支」**——第 8 臂的定义是「证据表示保留、
-  约束关闭」，revised CE 属于**证据表示**而非约束，移进去会改掉第 8 臂含义。detach 修掉同一个根因，
-  且冻结矩阵一个字不动。**作者若要按字面的 (乙) 走，说一声即可改回。**
-- **根因 B**（再 −45%）：`sufficiency = relu((gold_base − gold_retained) − slack)` 对 `gold_base`
-  的梯度是 +1 ⇒ 可以靠**压低完整上下文**来假装「span 足够」，与其语义相反；唯一的反向力
-  `necessity` 跳过所有相邻/同句对。**修法：该项内 `gold_base.detach()`，仅此一处。**
+| epoch | dry-run | 修改后 |
+|---:|---:|---:|
+| 0 | 2.6729 | **5.4948** |
+| 1 | 1.3228 | **15.27** |
+| 16 | — | **2213.87** |
 
-**验证跑进行中**（见顶部活动任务行）。⚠️ **本地 635 测试全绿不算数**——本地无 torch，新的梯度断言
-在本地是 skip 的，**第一次在 5090 上跑就 FAIL 了**（`element 0 of tensors does not require grad`，
-测试自身写错），修正见 `4e9b0bd`。5090 上现已 21/21 通过，全量仅剩 §0.6 记录的那条既有 FAIL
-（5090 的 R1 protocol 是空 `phase_contracts` 旧档，与本次改动无关）。
+`dev macro_f1` 17 个 epoch 恒为 `0.0000`，2h29m 后人工中止。
 
-⚠️ **preflight-r2 仍然必须重建**：`run_a4_pair_evidence.py`、`train_a4_pair_evidence.py`、
-`src/ekg/relations/pair_evidence.py` 三个文件的哈希都变了（其余 4 个 `CODE_FILES` 未变，
-已由重哈希脚本独立确认）。A4.2 / A4.3 必须带 preflight-r2 的 `protocol.json`。
-⚠️ 决策 3（两段式推理，§0.5 ①）不受影响，仍维持 (A)。
+**为什么失败**：`sufficiency` 对 `gold_base` 的 +1 梯度**确实是**退化解（「span 足够」可靠压低完整
+上下文满足），**但它同时是这个损失唯一的阻尼**——`necessity` 对 `gold_base` 是 −1，两者等大反向。
+摘掉压低那侧 ⇒ necessity 自由推高 `gold_base` ⇒ sufficiency 推高 `gold_retained` ⇒
+两者**共享 encoder 与 head 参数** ⇒ 正反馈无界。
+已把这次测量写进 `sufficiency_necessity_loss` 的注释与一条新测试（断言两项梯度等大反向），
+**免得下一个窗口再 detach 一次**。
+
+#### ⇒ 真正的问题（交裁决，不再自行打补丁）
+
+base 判正塌陷**不是退化解污染训练**，而是这对约束的**平衡点偏保守**，原因是**两项作用面不同**：
+
+| | 作用面 | 对 `gold_base` |
+|---|---|---|
+| `necessity` | 仅 `positive & scoreable`（两触发句之间**有 interior** 的行） | 推高 |
+| `sufficiency` | **所有** `positive` 行 | 压低 |
+
+⇒ **相邻句与同句正例只有压低的力**。这是「触发句 protected、短距离不是误差所在」那条设计决定的
+直接后果——短距离对被排除出 necessity，**却没有被排除出 sufficiency**。
+
+| | 做什么 | 风险 |
+|---|---|---|
+| **(戊) 推荐** | 把 `sufficiency` 也限制在 `positive & scoreable` | 最小改动、恢复每行上的制衡；但缩小作用面，机制强度未知 |
+| (己) | 给短距离正例补对称项 | 等于新增机制，要重新论证 |
+| (甲) | 原样跑 A4.3，如实交 Gate 2 | 契约已预判失败（recall collapse 是明列 stop condition） |
+
+⚠️ **根因 A 仍无结论**：失败那跑**同时带着 A 和 B**，把发散归给 B 是数学推理不是实测。
+A（`cf["retained"].detach()`，阻止 encoder 被残缺输入训练）**仍在代码里、未回滚**。
+**建议先单跑一臂 `full` 约 1 小时**，一次回答两件事：不带 B 会不会发散、A 单独能否把 766 抬起来。
+命令与 ② 的 dry-run 同形，只需 `--arms full` 与一个新 probe 契约（重哈希脚本见下）。
+
+#### 重跑前必须知道的两件事
+
+1. **改了被契约钉住的代码就必须重建契约。** 那四个文件都在 `CODE_FILES`（7 个）里，
+   probe 契约同样钉它们——第一次启动被
+   `PilotError: bound code hash drift: scripts/run_a4_pair_evidence.py` 挡下，**这是对的，别绕**。
+   探测用的重哈希脚本已验证可用（只改 `code` 与 `probe_note`，其余原样）；
+   **正式的 `preflight-r2` 仍要在 4090 上用 `prepare_a4_pair_evidence_preflight.py` 重建。**
+2. ⚠️ **本地三件套全绿不代表能跑。** 本地无 torch ⇒ 新的梯度断言在本地是 `skip`，
+   **第一次上 5090 就 FAIL**（测试自身写错，`4e9b0bd` 修）。**任何 torch 相关改动，
+   推之前先 ssh 到 5090 跑一次那个测试文件。**
 
 ### 0.3b 方针：4090 占着的时候该做什么（作者 2026-09-13 定）
 
@@ -238,10 +289,28 @@ dry-run 的四臂读数（**探测 backbone `2c7ff1f1…`，不进主表、不�
 EIDER/SAIS/DREEAM 整条证据线都要标注，MAVEN-ERE 上封死，而反事实是**无标注条件下**
 取得证据式行为的路，自带验证协议。**A4 第一个周期维持 interior 定义式，不改。**
 
-### 0.5 待作者裁决的两项：分析、业界做法、明确推荐
+### 0.5 待作者裁决：两项新的（阻塞）+ 两项旧的（不阻塞）
 
 > 写法要求（作者 2026-09-13）：**不要只说「需要裁决」。** 每一项都要说清为什么要在这里做选择、
 > 每条路各自的问题、对**论文**和对**实验**分别是什么后果、以及**同行是怎么做的**，然后给出推荐。
+
+#### ⚠️ ③（**阻塞 G-4**，2026-09-14 新增）：A4 的 recall 塌陷怎么办
+
+**完整分析在 §0.3a**，此处只留一句：塌陷是 `sufficiency` 与 `necessity` **作用面不同**导致的
+平衡点偏移，不是 bug；已经试过改梯度路径，**训练发散**。
+**推荐 (戊)**——把 `sufficiency` 也限制在 `positive & scoreable`，与 `necessity` 作用面对齐。
+**并建议先花 1 小时单跑一臂隔离根因 A**（纯诊断、不改设计、不需要这项裁决就能做）。
+
+#### ⚠️ ④（**阻塞 G-11a**，2026-09-14 新增）：Ch6 是否改先做 CSProm-KG
+
+**完整分析在 §0.3 的 G-11a 行**。SimKGC 训练要 **4×32 GB**，两台机器都装不下，
+**减 batch 会按定义复现不出它的数**（batch size 就是它的 in-batch 负样本数）。
+CSProm-KG 有**公开 checkpoint**，(a) 靠一次推理即可。**推荐改序。**
+若作者仍要先做 SimKGC，那就只能走 **(A) 减 batch + 如实标注**，该行落 **(b) 透明适配**，
+障碍写「原配置需 4×32 GB」。
+
+#### ①②：以下两项是旧的，**不阻塞任何队列**
+（⑤ 在 §0.3 队列第 5 行：是否只为 SeDGPL 走 ESC 的 (a)，其余四个维持 (b)。同样不阻塞。）
 
 #### 决策 ①：A4 推理时机制动不动手（决策 3）
 
@@ -386,6 +455,28 @@ CPU 64 核 load 12.9、内存 439 GB 可用。「GPU 被占」被当成了「文
 - 两台机的 cpolar 隧道都会掉线。**ssh 失败 ≠ 远端进程死亡**，三态判活；长任务一律
   `setsid nohup` + `python -u` + 重定向 `logs/`，**一条 ssh 只发一个后台任务**。
   实测这样起的进程 PPID=1、独立 session，本机关机不影响。
+
+### 0.7a 2026-09-14 这一轮做完了什么（记录，不用再做）
+
+| 做了什么 | 结果 | commit |
+|---|---|---|
+| **A4 四臂 dry-run 收尾** | pipeline PASS；按契约 Bundle 清单核出**两个缺件**（checkpoint hashes、`fallback_component_bundle_id`——后者四份契约都点名却**从未实现**），均已补 | `d595439` |
+| **口径陷阱入账** | 顶层 `candidate_pairs` 348,632 **≠** 候选全集 234,870（前者含 TIMEX 对）。写表引 `mediator["pairs"]` | `d595439` |
+| **recall 塌陷追因** | 推翻第一版归因：**不在推理修正，在训练侧**（base 判正 4,355→766，推理只砍 24.7%） | `8bddb73` |
+| **梯度修正 → 失败** | 训练发散（5.49→2214，17 epoch 中止），⇒ 被摘的梯度**同时是阻尼**；已回滚并把测量写进代码注释与新测试 | `2b8bbdf` → `24b3924` |
+| **smoke 报错信息** | 「证据流一行都没改」读起来像机制失效，实为 base 没判出正类；改文案并写明**不得放宽成 pass** | `5b3fcb8` |
+| **SimKGC 搬到 5090** | 双端 sha256 一致、commit 已复核、预处理 PASS（test n=3,134 与结果页此前计数吻合）、AdamW 透明补丁记 hash | `f88cc76` |
+| **SimKGC 训练受阻** | **算力**：要 4×32 GB。顺带发现第一刀的成本排序漏算显存，建议改序 CSProm-KG | `c18fa8f` |
+| — | ⚠️ **两台服务器都没有外网**（实测），已提升到 §0.6 环境既成事实 | `5b3fcb8` |
+
+**这一轮最该带走的三条纪律：**
+
+1. **两个计数并排放才看得出归因错没错。** 只看 `causal F1` 会把塌陷归给推理修正；
+   把 `revised_rows` 与 `predicted_causal` 并排，病灶立刻换了位置。
+2. **一个"退化解"可能同时是稳定机制。** 摘掉它之前先问：**是什么在平衡它？**
+   这次没问，代价是 2.5 小时 GPU 和一次回滚。
+3. **核依赖不能只看下限。** `transformers>=4.15` 没有上限，但 4.53 删掉了它用的 `AdamW`——
+   **第三堵版本墙，是依赖太新而不是太旧。**
 
 ### 0.7 2026-09-11~13 这三轮做完了什么（记录，不用再做）
 
