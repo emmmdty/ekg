@@ -218,8 +218,17 @@ def run(args: argparse.Namespace) -> dict:
                 f"{arm}: {mediator['cross_sentence_false_positives']} cross-sentence false "
                 f"positives but {mediator['measured_cross_sentence_false_positives']} measured",
             )
+            # `revised_rows` *is* the count of base-predicted positives, so a
+            # zero here says the base pass produced nothing to revise -- not
+            # that the mechanism failed. Measured 2026-09-13: CPU, 1 epoch, 10
+            # documents gives macro_f1 0.000 on all three families, so this
+            # assertion fires by construction in that regime.
             _require(
-                report["revised_rows"] > 0, f"{arm}: the evidence stream revised no row at all"
+                report["revised_rows"] > 0,
+                f"{arm}: the base pass predicted no causal positive, so the evidence "
+                f"stream had nothing to revise. This run is inconclusive about the "
+                f"mechanism -- wrong regime, not a defect. Run it on a card. Do NOT "
+                f"relax this into a pass.",
             )
             # The revision may suppress an unsupported positive; it may not
             # suppress the class. Annihilating it is the contract's own recall

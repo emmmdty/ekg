@@ -357,6 +357,12 @@ CPU 64 核 load 12.9、内存 439 GB 可用。「GPU 被占」被当成了「文
 
 #### 环境既成事实（不用再查）
 
+- ⛔ **gpu-4090 与 gpu-5090 都没有外网**（2026-09-14 实测：`curl`/`wget`/`git` 都在，
+  对 `huggingface.co` 与 `github.com` 全部 timeout；同一时刻本地对同一 URL 返回 200）。
+  ⇒ **外部仓库、预训练权重、公开 checkpoint 一律本地下载后 `scp`**，没有第二条路。
+  实测带宽约 **0.4 MB/s**（50 MB > 2 分钟）——`CLAUDE.md` 那句「单程约 70 分钟」就是这么来的。
+  这条影响**每一个**外部对手复现（CSProm-KG 的公开 checkpoint、BART contrastive 的 NEEG 数据同理），
+  排期时先把搬运算进去。**不要再在服务器上试 `git clone` 或 `from_pretrained` 拉模型。**
 - 三个 gitignored JSON 已双端核对（`protocol.json` `f0b4702b…50829`、`t024_freeze.json` `9133a73c…587e7`、
   `cross_artifact_audit.json` `622d094b…f8467`；4090 旧档备份 `protocol.json.pre-e12-20260911`）；
 - ⚠️ **gpu-5090 / gpu-a6000 的 cpolar 端口每天都会变，这是常态，不是故障**。作者自己的
