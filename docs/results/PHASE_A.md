@@ -1751,3 +1751,78 @@ collapse：机制失败**」。`full` 的 recall 4.48 按契约字面即失败�
 （四臂 checkpoint 各约 500 MB）。日志 `logs/a4_dryrun.log`（176 KB，3,114 行）。
 每臂目录：`arm.json` · `checkpoint/`（含 `by_family/`）· `edge_predictions.jsonl` ·
 `official_predictions.jsonl` · `official_metrics.json` · 三族各 `edges.jsonl`/`evidence.json`/`logits.json`/`report.json`。
+
+## ❌ 梯度修正验证跑：**失败，且推翻了根因 B 的分析**（2026-09-14，gpu-5090 探测）
+
+作者当日批准「先修再跑」后，`2b8bbdf` 改了两处梯度路径，在 5090 上跑 `full` + `no_constraint`
+两臂验证。**`full` 臂 17 个 epoch 后单调发散，人工中止。**
+
+| epoch | dry-run `mean_loss` | 梯度修正后 |
+|---:|---:|---:|
+| 0 | 2.6729 | **5.4948** |
+| 1 | 1.3228 | **15.2747** |
+| 5 | — | 775.99 |
+| 10 | — | 893.98 |
+| 16 | — | **2213.87** |
+
+`dev macro_f1` 在 17 个 epoch 里几乎恒为 `0.0000`（dry-run 在 epoch 1 已达 `.1263`）。
+**从 epoch 0 就没收敛过**：dry-run 的 epoch 0 从 running_loss 5.54 收到 mean 2.67，
+这一跑起点相同（5.5437 vs 5.5435，零初始化残差保证了这一点）却收在 5.49。
+
+### 根因 B 的分析错在哪
+
+`sufficiency` 对 `gold_base` 的 +1 梯度**确实是**一个退化解——「span 足够」可以靠**压低完整
+上下文**来满足，这一点数学上没说错。**错在只看到了这一面。** 它同时是这个损失唯一的阻尼：
+
+- `necessity = relu(margin − (gold_base − gold_masked))` 对 `gold_base` 的梯度是 **−1**（推高）；
+- `sufficiency = relu((gold_base − gold_retained) − slack)` 对 `gold_base` 是 **+1**（压低）；
+- 两者大小相等、方向相反，**互相制衡**。
+
+detach 掉压低的一侧之后：necessity 自由推高 `gold_base` → `(gold_base − gold_retained)` 变大
+→ sufficiency 推高 `gold_retained` → 而 `gold_retained` 与 `gold_base` **共享 encoder 与 head 参数**
+→ 推高前者连带推高后者 → **正反馈，无界**。实测就是上表那条曲线。
+
+已回滚（`24b3924`），并把这次测量写进 `sufficiency_necessity_loss` 的注释与一条新测试
+（断言两项在 `gold_base` 上的梯度等大反向），**免得下一个窗口再 detach 一次**。
+
+### ⇒ 这同时改变了对原塌陷的理解（比修复失败更重要）
+
+base 判正数 4,355 → 766 **不是「退化解污染训练」**。这对约束本来就是自洽的闭环，
+问题在于**它的平衡点偏保守**，而偏保守的原因是**两项的作用面不一样**：
+
+| | 作用面 | 对 `gold_base` |
+|---|---|---|
+| `necessity` | 仅 `positive & scoreable`——**两触发句之间有 interior 的行** | 推高 |
+| `sufficiency` | **所有** `positive` 行 | 压低 |
+
+⇒ **相邻句与同句的正例只有压低的力，没有抬高的力。** 平衡点自然落在「少判正类」。
+这是「触发句 protected、短距离不是误差所在」那条设计决定的直接后果：
+短距离对被排除出 necessity，却没有被排除出 sufficiency。
+
+**这是设计层面的，不是梯度路径的 bug**，因此不再自行修改，交作者裁决。可考虑的方向（未实施）：
+
+| | 做什么 | 风险 |
+|---|---|---|
+| **(戊)** | 把 `sufficiency` 也限制在 `positive & scoreable`，让两项作用面一致 | 最小改动、方向明确，恢复每一行上的制衡；但缩小了 sufficiency 的作用面，机制强度未知 |
+| **(己)** | 给短距离正例补一个对称项 | 等于新增机制，要重新论证 |
+| **(甲)** | 原样跑 A4.3，如实交 Gate 2 | 契约已预判为失败（recall collapse 是明列的 stop condition） |
+
+### 根因 A 仍未被独立验证
+
+这一跑**同时带着 A 和 B 两处改动**，所以「A 有没有效」这个问题**没有答案**——
+把发散归给 B 是推理（数学上确凿），不是实测。A（`cf["retained"].detach()`，阻止 encoder 被
+残缺输入训练）**仍在代码里且未回滚**，它不涉及 sufficiency/necessity 的平衡。
+**要判 A 需要单跑一臂 `full` 约 1 小时**，同时回答两件事：不带 B 会不会发散、A 单独能否把
+base 判正数从 766 抬起来。
+
+### 成本与产物
+
+5090 单卡 2 小时 29 分（17 epoch，人工 `pkill` 中止）。
+产物 `gpu-5090:runs/stages/A4/probe-5090-20260914-gradfix/`，
+probe 契约 `297b3228f8cc7f12290e8596035a702f8bbc1e9822c9adce623c6bc8a282ce66`
+（重哈希时独立确认：只有被改的三个文件哈希变了，其余 4 个 `CODE_FILES` 原样）。
+**发散档不保留权重，只留这张表。** 日志 `logs/a4_gradfix.log`。
+
+⚠️ **fail-fast 在这一跑里起了作用**：第一次启动被契约拒绝（`bound code hash drift:
+scripts/run_a4_pair_evidence.py`），因为 probe 契约钉着旧代码哈希。**这是对的**，绕过它就等于
+让一次跑说不清自己跑的是什么代码。
