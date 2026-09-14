@@ -13,7 +13,7 @@
 | **上一轮最重要的一件事** | **Ch3（D4）的 typed-cue 家族已关闭**，以 `failed` 身份留档。full `.476515` 低于两个锚（`.553995` / `.545603`）**七倍地板**，消融 `.536788` 与负控 `.495260` **都赢过 full**，预注册中介**反向**，PS−/Uu 护栏双破。归因与「五维瓶颈」这个**未验证**的候选原因见 [`results/PHASE_D.md`](results/PHASE_D.md)；不可变 handoff `pilot/seed-13/status.json` `3b4dbba2…a46234`。 |
 | **论文结构** | 第3章 事实性检测（D4，**本轮失败**）· 第4章 关系抽取（A4）· 第5章 身份消解（C5）· **第6章 事件图谱构建与下游事件预测应用（E3）**。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。**章节存废在 Gate 2 判，执行代理不得自行改成两方法章。** |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)**。可执行实验只认它的 §4 主表与 §5 的 Gate；本文队列只是切片，**不得出现主表以外的新任务**。要偏离顺序**先改主表**。 |
-| **活动任务** | ⚪ **零件，两台机器都没有我们的任务在跑。** ① **gpu-5090 的 A4 四臂 dry-run 已于 2026-09-14 03:07:58 完成**（`DRYRUN_COMPLETE`，实际 **12.5 小时**，估的 17 小时偏高）。收尾结论见 §0.3a 与 [`results/PHASE_A.md`](results/PHASE_A.md) 末节：**pipeline 完整性 PASS，但按契约 Bundle 清单核出两个缺件**（checkpoint hashes / `fallback_component_bundle_id`），已修（`d595439`）。② ~~gpu-4090：A4.2 smoke 的 CPU 半边~~ → ❌ **按构造跑不通，已结束**：A4 的推理修正只作用于 base 判正的行，而 CPU 上 1 epoch × 10 篇 base 三族全 0 ⇒ `0 revised` ⇒ 断言触发。**断言是对的，regime 不对；A4.2 必须等卡。别把「D4.2 有 CPU 半边」推广到每个 phase。** |
+| **活动任务** | 🔵 **两件在跑（2026-09-14 18:2x 起）**。① **gpu-5090：A4 梯度修正验证跑**（`full` + `no_constraint` 两臂，约 2 小时）——验 `d595439`+`2b8bbdf` 两条根因修掉后，base 判正数能否从 766 / 1,385 回到 `remove_core` 的 4,355 量级。契约 `runs/stages/A4/probe-5090-20260914-gradfix/probe_contract.json`（`297b3228…`），日志 `logs/a4_gradfix.log`，查活见 §0.3a。② **本地→5090：SimKGC 搬运**（G-11a 第二刀，约 421 MB，作者 2026-09-14 批准）。⚠️ **两台机器都没有外网**，外部仓库与预训练权重只能本地下载后 scp。 |
 | **Ch4（A4）现状** | ✅ **方法、五个入口脚本、A4.1 preflight 全部就绪**。A4.1 **2026-09-13 PASS**（4090，**纯 CPU，未占任何 GPU**），protocol `321309ac…d65451`、`code_files=7`，两条同协议 baseline 独立重算与主表 §7.2 逐项吻合。数字见 [`results/PHASE_A.md`](results/PHASE_A.md)。**下一步是 A4.2 smoke**（带 `--contract`；可走 5090）。 |
 | **待作者裁决（2 项，已附分析与推荐）** | §0.5 按作者 2026-09-13 的要求重写：每项都给出**为什么要选、每条路的问题、对论文与实验各自的后果、同行怎么做、明确推荐**。① A4 决策 3 → **推荐维持 (A) 两段式**；② LLMERE 保真度路径 → **推荐记为 (b) Unverifiable**。两项都**不阻塞**当前队列。 |
 | **gpu-4090** | 四卡被他人 vllm 占满（09-10 起连续 4 天，09-13 复核 21–23.6 GB / 24.5 GB、99–100% util）。**这不是停工理由**——见 §0.3b 的方针：能在 5090 上先验的一律先验完，4090 一空就只剩「跑那一次正式的」。ssh 与 CPU 全程可用，**纯 CPU 任务照常在 4090 上跑**（A4.1 就是这么跑完的）。 |
@@ -124,7 +124,7 @@ Ch6 就来不及了。C-8 是纯整理、随时可做，所以垫后。
 smoke 报错信息待办（`smoke_a4_pair_evidence.py` 也在那 7 个文件里）。**重建前先把下面这项裁决拿到**，
 否则可能要重建两次。
 
-#### ⚠️ 交作者裁决：A4.3 原样跑，还是先修训练侧的 recall 塌陷
+#### ✅ 已裁决并执行：先修训练侧的 recall 塌陷（作者 2026-09-14 批准 (丙)+(乙)）
 
 dry-run 的四臂读数（**探测 backbone `2c7ff1f1…`，不进主表、不与 33.17 / 32.10 相减**）：
 
@@ -135,32 +135,32 @@ dry-run 的四臂读数（**探测 backbone `2c7ff1f1…`，不进主表、不�
 | `full` | ✓ | ✓ | 766 | 577 | 4.48 | 8.00 |
 | `length_matched` | ✓ | ✓(+替代控制) | 179 | 125 | 1.52 | 2.97 |
 
-**⚠️ 第一版归因（「修正头把正类抹光」）是错的，已在结果页更正。** 推理修正只砍掉 24.7%–34.4%，
-**base 判正数本身就差 5.7 倍**；就算把推理修正全关掉，`full` 的 recall 上限也只有约 16%。
-**塌陷在训练侧。** 两条根因与臂的阶梯逐级对应（`4,355 → 1,385 → 766 → 179`，每降一级多开一个开关）：
+**⚠️ 第一版归因（「修正头把正类抹光」）是错的**，已更正：推理修正只砍掉 24.7%–34.4%，
+**base 判正数本身就差 5.7 倍**，塌陷在训练侧。两条根因与臂的阶梯逐级对应，全部证据见
+[`results/PHASE_A.md`](results/PHASE_A.md) 末节。
 
-- **根因 A**（−68%）：`train_a4_pair_evidence.py:340-343` 的 `cross_entropy(revised, target)`
-  **写在 `if flags.consistency_loss:` 之外**，梯度经 `cf["retained"]` 回流 encoder
+**已修（`2b8bbdf`），两处都是梯度路径，不动四臂语义、不动任何超参、不动被评分的规则：**
+
+- **根因 A**（−68%）：`cross_entropy(revised, target)` 的梯度经 `cf["retained"]` 回流 encoder
   （`pair_counterfactual_embeddings` docstring 明写 "Gradient flows"）⇒ encoder 被要求在**只留
-  trigger span 的残缺输入**上做 causal 分类，而「causal 依赖 span 以外的上下文」正是 A4 自己的立论。
-  ⇒ 第 8 臂 `no_constraint`（「证据表示保留、约束关闭」）**并没有把约束关干净**。
-- **根因 B**（再 −45%）：`pair_evidence.py:678` 的
-  `sufficiency = relu((gold_base − gold_retained) − slack)` **对 `gold_base` 的梯度是 +1**，
-  直接压低正例在完整上下文下的 logit；唯一的反向力 `necessity` 只作用在有 interior 的行，
-  **同句与相邻句正例只受单向压制**。这是「触发句 protected」那条决定的副作用：
-  短距离对被排除出 necessity，却没被排除出 sufficiency。
+  trigger span 的残缺输入**上判 causal，而这正是 A4 论证不可能的那件事。
+  **修法：`cf["retained"].detach()`。**
+  ⚠️ **这不是批准时字面写的「移进 `consistency_loss` 分支」**——第 8 臂的定义是「证据表示保留、
+  约束关闭」，revised CE 属于**证据表示**而非约束，移进去会改掉第 8 臂含义。detach 修掉同一个根因，
+  且冻结矩阵一个字不动。**作者若要按字面的 (乙) 走，说一声即可改回。**
+- **根因 B**（再 −45%）：`sufficiency = relu((gold_base − gold_retained) − slack)` 对 `gold_base`
+  的梯度是 +1 ⇒ 可以靠**压低完整上下文**来假装「span 足够」，与其语义相反；唯一的反向力
+  `necessity` 跳过所有相邻/同句对。**修法：该项内 `gold_base.detach()`，仅此一处。**
 
-**契约已经把这个形态判死**：Promotion gate 要求「causal recall 不低于 A3 fallback 1.0 个绝对 F1 点」，
-Stop conditions 写「增益只来自 recall collapse：机制失败」。**原样跑 = 花 12–17 GPU·h 确认已知结论。**
+**验证跑进行中**（见顶部活动任务行）。⚠️ **本地 635 测试全绿不算数**——本地无 torch，新的梯度断言
+在本地是 skip 的，**第一次在 5090 上跑就 FAIL 了**（`element 0 of tensors does not require grad`，
+测试自身写错），修正见 `4e9b0bd`。5090 上现已 21/21 通过，全量仅剩 §0.6 记录的那条既有 FAIL
+（5090 的 R1 protocol 是空 `phase_contracts` 旧档，与本次改动无关）。
 
-四条路与推荐见 [`results/PHASE_A.md`](results/PHASE_A.md) 末节的表。
-**推荐 (丙)+(乙)**：(丙) 让 sufficiency 不能靠压低 `gold_base` 满足——那是个与其语义相反的退化解，
-属目标函数写错而非设计选择；(乙) 把 revised CE 移进 `consistency_loss` 分支，让第 8 臂名副其实。
-两者都在 A4.3 出任何数字**之前**，不违反「看到结果不改口径」。
-**验证成本约 2 小时**（5090 重跑 `full` + `no_constraint` 两臂，看 base 判正数是否回到 4,000 量级），
-远低于在 4090 上撞墙的 12–17 GPU·h；**5090 当前完全空闲**。
-⚠️ 决策 3（两段式推理，§0.5 ①）与此无关，仍推荐维持 (A)。
-⛔ **执行代理不得自行改这两处**——它们触及冻结的四臂矩阵语义，属 A 类边界。
+⚠️ **preflight-r2 仍然必须重建**：`run_a4_pair_evidence.py`、`train_a4_pair_evidence.py`、
+`src/ekg/relations/pair_evidence.py` 三个文件的哈希都变了（其余 4 个 `CODE_FILES` 未变，
+已由重哈希脚本独立确认）。A4.2 / A4.3 必须带 preflight-r2 的 `protocol.json`。
+⚠️ 决策 3（两段式推理，§0.5 ①）不受影响，仍维持 (A)。
 
 ### 0.3b 方针：4090 占着的时候该做什么（作者 2026-09-13 定）
 
