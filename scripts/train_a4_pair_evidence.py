@@ -337,7 +337,16 @@ def main() -> int:
                 cf = counterfactual_features(doc_id, records, selected)
                 picked = torch.tensor(selected, device=device)
                 target = targets[CONSISTENCY_FAMILY][picked]
-                revised = heads(feats[picked], dist_ids[picked], cf["retained"])
+                # The residual is trained on the retained view, but that view
+                # must not train the *encoder*: back-propagating this term
+                # through cf["retained"] asks the encoder to classify causality
+                # from the trigger spans alone -- the task A4 argues is
+                # impossible without the surrounding context. Measured on the
+                # 2026-09-14 dry-run: base-predicted causal positives fell
+                # 4,355 -> 1,385 in every arm carrying the evidence stream,
+                # before any consistency term was switched on. feats keeps its
+                # gradient; it is the same full-context path the base loss uses.
+                revised = heads(feats[picked], dist_ids[picked], cf["retained"].detach())
                 loss = loss + torch.nn.functional.cross_entropy(
                     revised[CONSISTENCY_FAMILY], target, ignore_index=IGNORE_INDEX
                 )

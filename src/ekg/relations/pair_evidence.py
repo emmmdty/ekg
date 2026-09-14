@@ -676,7 +676,14 @@ try:  # pragma: no cover - exercised on a GPU host
         if not torch.any(positive):
             return base.new_zeros(())
         index = target[positive].unsqueeze(1)
-        gold_base = base[positive].gather(1, index).squeeze(1)
+        # `gold_base` is detached here and only here.  The term reads "the span
+        # alone holds the logit", and a live gradient on `gold_base` lets the
+        # model satisfy it by making the *full* context worse -- the opposite
+        # claim.  Necessity is the only force pushing `gold_base` back up and it
+        # skips every pair whose triggers are adjacent or in one sentence, so on
+        # those rows the pressure was one-way.  Detached, the only way to lower
+        # this term is to raise `gold_retained`, which is what it asserts.
+        gold_base = base[positive].gather(1, index).squeeze(1).detach()
         gold_retained = retained[positive].gather(1, index).squeeze(1)
         sufficiency = torch.relu((gold_base - gold_retained) - slack).mean()
 

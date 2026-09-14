@@ -390,3 +390,37 @@ def test_the_consistency_terms_score_only_supported_positives() -> None:
         base, base, base - 0.25, target, scoreable=torch.tensor([False, True, True])
     )
     assert partial.item() == 0.0
+
+
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")
+def test_sufficiency_cannot_be_satisfied_by_degrading_the_full_context() -> None:
+    """The 2026-09-14 dry-run's root cause B, as an assertion.
+
+    `relu((gold_base - gold_retained) - slack)` also falls when `gold_base`
+    falls, so a model can satisfy "the span alone is enough" by making the full
+    context worse — the opposite of what sufficiency claims. Necessity is the
+    only force pushing `gold_base` back up and it skips every pair whose
+    triggers are adjacent or in one sentence, so on those rows the pressure is
+    one-way. Measured: base-predicted causal positives fell 4,355 -> 766.
+    """
+    import torch
+
+    from ekg.relations.pair_evidence import sufficiency_necessity_loss
+
+    target = torch.tensor([1])
+    scoreable = torch.tensor([False])  # adjacent triggers: no necessity term
+    base = torch.tensor([[0.0, 5.0, 0.0]], requires_grad=True)
+    retained = torch.tensor([[0.0, 1.0, 0.0]])
+
+    loss = sufficiency_necessity_loss(
+        base, base.detach(), retained, target, scoreable=scoreable
+    )
+    loss.backward()
+
+    # The gradient may push the retained logit up; it must never push the full
+    # context's gold logit down.
+    assert base.grad is not None
+    assert base.grad[0, 1].item() <= 0.0, (
+        f"sufficiency pushes gold_base down by {base.grad[0, 1].item()}; "
+        "a positive gradient here is the degenerate solution"
+    )
