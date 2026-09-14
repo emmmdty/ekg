@@ -419,3 +419,89 @@ unit 建在 MAVEN-ERE public valid 上，即 v6 协议的 final-valid——**与
 再 CSProm-KG（先升 torch/lightning），再 BART contrastive（最贵），
 MCPredictor 直接进 (b) 并写明 LDC 障碍。四个适配器共用 `runs/stages/E3/e3-v61-20260913/queries.jsonl`
 （C-10 已冻结）作为唯一的题面。
+
+## G-11a 第二刀 · SimKGC：搬运、环境与预处理（2026-09-14，gpu-5090）
+
+### 开工自审
+
+1. **科研价值**：表 6-2 要 ≥3 个公开对手在冻结的同一把尺（`e3-v61-20260913/queries.jsonl`，1,908 实例）
+   上出数，且带 FR-016 状态。第一刀已把地图画清：**SimKGC 是四个对手里唯一依赖无版本墙、
+   数据随仓库、原基准 (a) 最便宜的那个**。Ch6 是唯一不依赖任何方法章成败的一章，
+   也是耗时最长的一项——Gate 2 判完再启动就来不及（`HANDOFF` §0.3 的排序理由）。
+2. **可行性**：五条（数据/协议/代码/算力/授权）逐条核过，**卡在「数据」的一个变体上并已解除**：
+   见下。
+
+### ⚠️ 新的既成事实：**两台服务器都没有外网**
+
+实测（`curl`/`wget`/`git` 都在，连接超时；本地 `python urllib` 对同一 URL 返回 200）：
+
+| 机器 | huggingface.co | github.com |
+|---|---|---|
+| gpu-5090 | ❌ timeout | ❌ timeout |
+| gpu-4090 | ❌ timeout | ❌ timeout |
+| 本地 | ✅ 200 | ✅ 200 |
+
+⇒ **外部仓库与预训练权重只能本地下载再 scp**，没有第二条路。这条此前没有记在任何文档里，
+而它影响**每一个**外部对手复现（CSProm-KG 的公开 checkpoint、BART contrastive 的 NEEG 数据同理）。
+实测带宽约 **0.4 MB/s**（50 MB 传输 > 2 分钟），这正是 `CLAUDE.md` 那句「单程约 70 分钟」的来源。
+
+### 搬运（作者 2026-09-14 批准）
+
+| 件 | 大小 | 本地 sha256 | 5090 sha256 |
+|---|---:|---|---|
+| `SimKGC.tar.gz` | 32 MB | `7dcc7586…2d93da` | **逐位一致** |
+| `bert.tar.gz` | 389 MB | `f6988623…a8c4e0` | **逐位一致** |
+
+落地 `gpu-5090:/mnt/aidata/tongjiakai/baselines/`（**ekg 仓库之外**，不受远端 `git reset --hard` 波及）：
+`SimKGC/` 85 MB、`bert-base-uncased/` 421 MB。
+远端复核 `git -C SimKGC rev-parse HEAD` = **`97cc43e488f19ca5b0f6fbf60ffefd2ee56c0693`**，与名册 §6.2a 记的
+`97cc43e4…` 一致。`bert-base-uncased` 只取 5 个必需文件（config / vocab / tokenizer×2 / model.safetensors），
+**未取 tf / flax / rust 权重**，省约 1 GB。
+
+### 环境：无版本墙，确认
+
+`torch 2.8.0+cu128`、`transformers 4.53.3`，`torch.cuda.is_available() = True`。
+SimKGC 的 pin 是 `torch>=1.6` / `transformers>=4.15`（**无上限**），⇒ **不需要任何版本补丁**
+——与 CSProm-KG（`torch==1.11.0+cu113`）和 mcnc（`torch==1.7.1`）那堵 sm_86 的墙不同。
+
+⚠️ **一个 import 形态要记下来**：`config.py` 在 **import 时**就解析 argparse 并 assert，
+所以 `import models` 之类的裸 import 必然报
+`AssertionError: One of args.model_dir and args.eval_model_path should be valid path`。
+**这不是缺陷，是它的全局 args 设计**——冒烟只能通过真实入口（`preprocess.py` / `main.py`）做。
+
+### 预处理：PASS（纯 CPU）
+
+```bash
+cd /mnt/aidata/tongjiakai/baselines/SimKGC
+/mnt/aidata/tongjiakai/ekg/.venv/bin/python -u preprocess.py --task WN18RR \
+  --train-path ./data/WN18RR/train.txt --valid-path ./data/WN18RR/valid.txt \
+  --test-path ./data/WN18RR/test.txt
+```
+
+（唯一的偏离是解释器：`scripts/preprocess.sh` 写死 `python3`，而 5090 的系统 python3 没有 torch；
+换用 `.venv/bin/python` 调同一个脚本、同样参数，**不改仓库一个字节**。）
+
+产出 40,943 实体 / 11 关系 / train **86,835** · valid **3,034** · test **3,134**。
+⇒ **test 3,134 与本页上一节记的「WN18RR forward n=3,134」逐位一致**，
+独立印证我们重算其已发布预测时读的就是同一份 test split。
+
+### 下一步：训练（等 GPU）
+
+5090 当前在跑 A4 的梯度修正验证跑（见 `results/PHASE_A.md`），单卡，SimKGC 训练排在其后。
+目标是复现原文 Table 3 的 **MRR 66.6 / H@1 58.7 / H@3 71.7 / H@10 80.0**；README 写 < 3 小时。
+冻结命令（`scripts/train_wn.sh` 的参数，两处透明替换：解释器 + 本地权重路径）：
+
+```bash
+cd /mnt/aidata/tongjiakai/baselines/SimKGC
+setsid nohup /mnt/aidata/tongjiakai/ekg/.venv/bin/python -u main.py \
+  --model-dir ./checkpoint/wn18rr/ \
+  --pretrained-model /mnt/aidata/tongjiakai/baselines/bert-base-uncased \
+  --pooling mean --lr 5e-5 --use-link-graph \
+  --train-path ./data/WN18RR/train.txt.json --valid-path ./data/WN18RR/valid.txt.json \
+  --task WN18RR --batch-size 1024 --print-freq 20 --additive-margin 0.02 \
+  --use-amp --use-self-negative --pre-batch 0 --finetune-t \
+  --epochs 50 --workers 4 --max-to-keep 3 > logs/simkgc_wn18rr.log 2>&1 &
+```
+
+**取得 (a) 之后**才写 CGEP 适配器打我们的 `queries.jsonl`；两步不可颠倒——
+先证明「我们把它跑对了」，再谈「它在我们协议上是多少」。
