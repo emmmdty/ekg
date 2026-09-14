@@ -676,14 +676,19 @@ try:  # pragma: no cover - exercised on a GPU host
         if not torch.any(positive):
             return base.new_zeros(())
         index = target[positive].unsqueeze(1)
-        # `gold_base` is detached here and only here.  The term reads "the span
-        # alone holds the logit", and a live gradient on `gold_base` lets the
-        # model satisfy it by making the *full* context worse -- the opposite
-        # claim.  Necessity is the only force pushing `gold_base` back up and it
-        # skips every pair whose triggers are adjacent or in one sentence, so on
-        # those rows the pressure was one-way.  Detached, the only way to lower
-        # this term is to raise `gold_retained`, which is what it asserts.
-        gold_base = base[positive].gather(1, index).squeeze(1).detach()
+        # The +1 gradient this puts on `gold_base` is two things at once, and
+        # 2026-09-14 cost a run to learn the second.  It *is* a degenerate
+        # solution -- "the span is enough" can be satisfied by making the full
+        # context worse -- but it is also the only force opposing `necessity`,
+        # which pushes `gold_base` up.  Detaching it (measured, seed 13, 17
+        # epochs) removed the damping and the loss diverged monotonically:
+        # 5.49 -> 15.3 -> 776 -> 2214, with dev macro-F1 pinned at 0.000.
+        # `gold_retained` shares the encoder and head with `gold_base`, so
+        # raising one raises the other and the pair runs away.  Do not detach
+        # either side in isolation; the imbalance is in where the two terms
+        # *apply* (necessity skips adjacent and same-sentence pairs, sufficiency
+        # does not), not in their gradients.
+        gold_base = base[positive].gather(1, index).squeeze(1)
         gold_retained = retained[positive].gather(1, index).squeeze(1)
         sufficiency = torch.relu((gold_base - gold_retained) - slack).mean()
 

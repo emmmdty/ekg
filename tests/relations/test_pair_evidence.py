@@ -393,36 +393,44 @@ def test_the_consistency_terms_score_only_supported_positives() -> None:
 
 
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="needs torch")
-def test_sufficiency_cannot_be_satisfied_by_degrading_the_full_context() -> None:
-    """The 2026-09-14 dry-run's root cause B, as an assertion.
+def test_the_two_consistency_terms_pull_gold_base_in_opposite_directions() -> None:
+    """Why neither side may be detached, measured the expensive way.
 
-    `relu((gold_base - gold_retained) - slack)` also falls when `gold_base`
-    falls, so a model can satisfy "the span alone is enough" by making the full
-    context worse — the opposite of what sufficiency claims. Necessity is the
-    only force pushing `gold_base` back up and it skips every pair whose
-    triggers are adjacent or in one sentence, so on those rows the pressure is
-    one-way. Measured: base-predicted causal positives fell 4,355 -> 766.
+    `sufficiency` puts +1 on `gold_base` and `necessity` puts -1 on it, so the
+    pair is self-damping. On 2026-09-14 the +1 was read as nothing but a
+    degenerate solution ("the span is enough" can be satisfied by making the
+    full context worse) and detached; the loss then diverged monotonically over
+    17 epochs -- 5.49 -> 15.3 -> 776 -> 2214 -- with dev macro-F1 at 0.000,
+    because `gold_retained` shares its parameters with `gold_base` and the two
+    terms drove each other up. The real imbalance is in where they apply:
+    necessity skips every pair whose triggers are adjacent or in one sentence,
+    sufficiency applies to all of them.
     """
     import torch
 
     from ekg.relations.pair_evidence import sufficiency_necessity_loss
 
     target = torch.tensor([1])
-    scoreable = torch.tensor([False])  # adjacent triggers: no necessity term
+
+    # Sufficiency alone (no interior to remove, so no necessity term).
     base = torch.tensor([[0.0, 5.0, 0.0]], requires_grad=True)
-    retained = torch.tensor([[0.0, 1.0, 0.0]], requires_grad=True)
+    sufficiency_necessity_loss(
+        base, base.detach(), torch.tensor([[0.0, 1.0, 0.0]]), target,
+        scoreable=torch.tensor([False]),
+    ).backward()
+    sufficiency_grad = base.grad[0, 1].item()
 
-    loss = sufficiency_necessity_loss(
-        base, base.detach(), retained, target, scoreable=scoreable
-    )
-    loss.backward()
+    # Necessity alone (the span already holds the logit, so sufficiency is 0).
+    base = torch.tensor([[0.0, 5.0, 0.0]], requires_grad=True)
+    sufficiency_necessity_loss(
+        base, torch.tensor([[0.0, 5.0, 0.0]]), torch.tensor([[0.0, 5.0, 0.0]]), target,
+        scoreable=torch.tensor([True]),
+    ).backward()
+    necessity_grad = base.grad[0, 1].item()
 
-    # The only way down is to raise the retained logit (negative gradient under
-    # `param -= lr * grad`), never to lower the full context's gold logit.
-    assert retained.grad is not None
-    assert retained.grad[0, 1].item() < 0.0, "sufficiency must reward a stronger span"
-    base_grad = 0.0 if base.grad is None else base.grad[0, 1].item()
-    assert base_grad == 0.0, (
-        f"sufficiency pushes gold_base by {base_grad}; "
-        "any gradient here is the degenerate solution"
+    assert sufficiency_grad > 0, "sufficiency must push gold_base down"
+    assert necessity_grad < 0, "necessity must push gold_base up"
+    assert sufficiency_grad == pytest.approx(-necessity_grad), (
+        "the two terms damp each other on gold_base; detaching either side "
+        "removes the damping and the loss diverges (measured 2026-09-14)"
     )
