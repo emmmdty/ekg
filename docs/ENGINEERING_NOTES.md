@@ -251,3 +251,20 @@ run-dir、不同的进程、固定的 seed、只读的数据，彼此没有任�
 顺带记一个估算教训：我按预热期速度外推 `official_joint` 要 9 小时，实际快得多
 （早期 5.5 分钟/epoch 是 warmup + 首次验证的开销，稳定后远快于此）。
 **用前几个 epoch 的速度外推长任务会系统性高估**，报预计耗时前先看稳定段。
+
+### 同名不同量：`candidate_pairs` 与候选全集（2026-09-14，A4 dry-run 收尾）
+
+A4 的 `pilot_summary.json` 顶层写 `candidate_pairs: 348632`，而 `PROTOCOL_TABLE.md` 与 A4.1
+preflight 记的候选全集是 **234,870**。**同一个 digest、两个计数，两者都没错**：
+
+- `348,632` = `evaluate_a4_pair_evidence.py` 对 `pair_examples(doc, expand_event_relations=True)`
+  的行数累加，**含 TIMEX 节点参与的对**；
+- `234,870` = `mediator["pairs"]`，只计 causal 族可评的行。`pairs.py:243-245` 对 TIMEX 触及的对
+  把 causal/subevent 标进 `ignored_families`（只留 temporal），差额 113,762 全是这些对。
+
+`aggregate` 拿顶层那个数做臂间一致性检查是对的用法（同一个量跨臂必须相等）。
+**但写任何表之前，引 `mediator["pairs"]`，不引顶层 `candidate_pairs`。**
+
+教训与「口径三轴」同源，只是更隐蔽一层：三轴对齐查的是**评分器 · 文档集 · 校正**，
+这里三轴全对齐了，**错在两个字段共用一个名字**。
+⇒ 报任何计数前，先问「这个键在代码里数的是哪一集合」，别靠键名推断。

@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from run_a3_baseline import normalize_predictions  # noqa: E402
 
-from ekg.core.stage_bundle import sha256_file  # noqa: E402
+from ekg.core.stage_bundle import model_content_digest, sha256_file  # noqa: E402
 from ekg.relations.pair_evidence import A4_ARMS  # noqa: E402
 
 FAMILIES = ("causal", "subevent", "temporal")
@@ -176,6 +176,9 @@ def run_arm(repo: Path, contract: dict, arm: str, output: Path, contract_sha256:
         "revised_rows": reports["causal"]["revised_rows"],
         "candidate_pairs": reports["causal"]["candidate_pairs"],
         "train_argv": train,
+        # The contract's Bundle list names checkpoint hashes, and a table that
+        # cannot be traced back to the weights that produced it is not traceable.
+        "checkpoint_content_sha256": model_content_digest(output / "checkpoint"),
         "artifact_sha256": {
             "edge_predictions.jsonl": sha256_file(merged),
             "official_predictions.jsonl": sha256_file(official),
@@ -244,6 +247,10 @@ def aggregate(contract: dict, output: Path) -> dict:
             == contract["internal_dev_gold"]["candidate_id_digest"],
             f"{arm} scored another candidate population",
         )
+        _require(
+            bool(state.get("checkpoint_content_sha256")),
+            f"{arm} carries no checkpoint hash; re-run it under the current driver",
+        )
         arms[arm] = state
     populations = {arm: state["candidate_pairs"] for arm, state in arms.items()}
     _require(len(set(populations.values())) == 1, f"candidate counts differ: {populations}")
@@ -256,6 +263,15 @@ def aggregate(contract: dict, output: Path) -> dict:
         "candidate_pairs": populations[A4_ARMS[0]],
         "contract_sha256": arms[A4_ARMS[0]]["contract_sha256"],
         "baselines": contract["baselines"],
+        # E3 reads this when a phase hands off `failed` or `blocked`; the A3
+        # fallback predictions are content-addressed, so their hash is the id.
+        # Explicitly null when the contract registers no fallback (P1 §Bundle).
+        "fallback_component_bundle_id": contract["baselines"]
+        .get("a3_fallback", {})
+        .get("predictions_sha256"),
+        "checkpoint_content_sha256": {
+            arm: state["checkpoint_content_sha256"] for arm, state in arms.items()
+        },
         "arms": {
             arm: {
                 "official_scores": state["official_scores"],

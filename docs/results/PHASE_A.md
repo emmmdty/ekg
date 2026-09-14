@@ -1604,3 +1604,103 @@ cap 被误用到推理侧，当时读数是 0/0）。
 
 产物留在 `gpu-4090:runs/stages/A4/a4-v61-pair-evidence-r1/smoke-cpu/`（只有 `full` 臂的 checkpoint
 与评测产物；后三臂没跑到）。**A4.2 仍记为未完成。**
+
+## ★★★ A4 四臂 dry-run 收尾：**pipeline 完整性 PASS，抓到两个 Bundle 缺件**（2026-09-14，gpu-5090 探测，**数字不进主表**）
+
+**这一跑要回答的问题**（§0.3a）：4090 一空出来，那 12–17 GPU·h 会不会白跑。
+**答案：不会——但它按契约清单核下来少两样东西，正式跑之前必须补。** 这就是 dry-run 的全部价值。
+
+**运行事实**：2026-09-13 14:4x 起，**2026-09-14 03:07:58 结束，实际约 12.5 小时**（交接里估 17 小时，
+按 5090 单臂实测 56 分钟外推时估高了）。50 epoch × 4 臂 + `--aggregate` 全程一次通过，
+日志末行 `DRYRUN_COMPLETE`，`pilot_summary.json` `status=pass`。
+
+**契约隔离守住了**（这是 dry-run 不污染主表的前提）：
+`contract_sha256 = 7731f0d19ef49d091b42911b37c105972d2811864f5f61efa5d1e23c03a155d4`（`probe_contract.json`，
+内含 `"probe": true` 与 `probe_note`），**不是** A4.1 preflight 的 `321309ac…d65451`；
+`baselines` 字段明写 `"probe: baselines are not replayed here; A4.1 on the 4090 owns that"`；
+四臂 `final_valid_accessed: false`、`seed: 13`、`candidate_id_digest` 与 preflight 同为 `15a3b1a5…dac10910`。
+
+### 逐项核对契约 Bundle 清单（`phases/PHASE_A4_pair_evidence.md` §Bundle）
+
+| 契约要求 | dry-run 实际产出 | 判定 |
+|---|---|---|
+| `protocol.json` | probe 走 `probe_contract.json`；正式跑读 preflight 的 `protocol.json` | ✅ 结构成立 |
+| 完整 candidate predictions | `official_predictions.jsonl` + `edge_predictions.jsonl` | ✅ |
+| evidence | `{causal,subevent,temporal}/evidence.json` | ✅ |
+| **三种 counterfactual logits** | `logits.json` 每对给 `[base, cited, masked]` 三个值 + `necessity_scoreable` + `predicted_class` | ✅ 三种齐 |
+| raw official metrics | `official_metrics.json`（每臂 + 每族） | ✅ |
+| error / paired statistics | `mediator` 八个计数 + 两个 logit-drop 均值 | ⚠️ error 统计有，**paired 统计没有**（四臂配对比较在 Gate 2 才做，不在本 bundle 内） |
+| **checkpoint hashes** | `artifact_sha256` 只覆盖产物文件，**checkpoint 一个 hash 都没有** | ❌ **缺** |
+| `status.json` | 实际叫 `arm.json`（每臂）/ `pilot_summary.json`（汇总） | ⚠️ 内容齐全，**文件名与契约和 `HANDOFF` §0.3a 都不符** |
+| `fallback_component_bundle_id` | **整个仓库从未实现过这个字段**（grep 只在四份 phase 契约的正文里出现） | ❌ **缺** |
+
+**两个缺件已修**（`scripts/run_a4_pair_evidence.py`，三件套全绿 **635 passed / 28 skipped、ruff 0、smoke OK**）：
+
+1. 每臂 `arm.json` 增 `checkpoint_content_sha256`，复用既有的 `model_content_digest()`
+   （递归整个 checkpoint 目录，含 `by_family/`），`aggregate` 同时汇总到 summary；
+   缺这个 hash 的臂在 `aggregate` 里 **fail-fast**，不再静默通过。
+   理由是 B 类（可追溯）：**论文表格反查不到产出它的权重，就不叫可追溯**。
+2. summary 增 `fallback_component_bundle_id`，取契约 `baselines.a3_fallback.predictions_sha256`
+   （内容寻址，hash 即 id）；契约未注册 fallback 时**显式 `null`**，依 `PHASE_P1` §Bundle 的措辞。
+   E3 在 phase 交 `failed`/`blocked` 时读的就是它——D4 失败那次没有它，只能靠人工指路径。
+
+⚠️ **代价：`run_a4_pair_evidence.py` 在 A4.1 preflight 的 `CODE_FILES`（7 个）里，改了它就要按 D4/C5 的
+先例重建 `preflight-r2/`，旧 `preflight/` 不覆盖。** 这笔代价是划算的：重建是 4090 上的纯 CPU 任务，
+而缺件要等正式跑完 12–17 GPU·h 才会暴露，那时就得整跑重来。**顺序因此定为：改代码 → 重建
+preflight-r2 → A4.2 smoke → A4.3**，一次重建覆盖两件事（另一件是上一节记的 smoke 报错信息待办）。
+
+### ⚠️ 一个会骗人的计数：`candidate_pairs` 348,632 **不是**候选全集 234,870
+
+`pilot_summary.json` 顶层写 `candidate_pairs: 348632`，而 `PROTOCOL_TABLE.md` 与 A4.1 preflight 记的
+候选全集是 **234,870 对**（291 篇 / 7,195 mentions）。两个数 digest 相同、计数不同，**核到代码后确认
+不是缺陷，是两个量**：
+
+- `348,632` = `evaluate_a4_pair_evidence.py:103` 对 `pair_examples(doc, expand_event_relations=True)`
+  的行数累加，**含 TIMEX 节点参与的对**；
+- `234,870` = `mediator["pairs"]`，只计 `CONSISTENCY_FAMILY="causal"` 不在 `ignored_families` 的行。
+  `pairs.py:243-245` 把 TIMEX 触及的对对 causal/subevent 两族标为 ignored（只留 temporal），
+  所以 causal 可评的对数正是候选全集。差额 113,762 全部是 TIMEX 触及的对。
+
+`aggregate` 用顶层这个数做臂间一致性检查（同一个量跨臂相等），那个用法是对的。
+**但它的键名会让人拿去和 234,870 比** —— 这正是本项目犯过五次的「口径三轴」那个错的形状。
+**写表时一律引 `mediator["pairs"]`，不引顶层 `candidate_pairs`。** 已记进 `ENGINEERING_NOTES.md`。
+
+### 四臂读数与 mediator（**探测 backbone `2c7ff1f1…`，一律不进主表、不与 33.17 / 32.10 相减**）
+
+按 §0.3a，这一跑「只写 pipeline 完整性结论」。以下读数记在这里的唯一理由是 §0.3b 明确把
+**实现地板诊断**列为 5090 上该做的事，而它给出的信号需要作者在 4090 空出来之前看到。
+
+| 臂 | causal F1 | causal P / R | `revised_rows` | causal FP | 平均 FP logit 掉幅 |
+|---|---:|---:|---:|---:|---:|
+| **full** | **8.00** | 37.26 / 4.48 | 766 | 362 | 4.168 |
+| **remove_core** | **31.23** | — | **0** | 2,926 | 0（不做修正） |
+| length_matched | 2.97 | — | 179 | 52 | 2.856 |
+| no_constraint | 11.12 | — | 1,385 | 591 | −0.002 |
+
+**机制在做什么，mediator 讲得很清楚**：`remove_core` 不修正、causal FP 2,926；`full` 修了 766 行、
+把 FP 压到 362（降 87.6%），**假正例的 logit 掉幅 4.168 说明反事实信号是真的在起作用**。
+**但 precision 37.26 / recall 4.48** —— 压 FP 的同时把正类一起压没了。
+
+这与 §0.7 记过、`323fd7a` 修过一次的「修正头把 causal 正类抹光」是**同一个形态，说明那次没修够**。
+与 D4 的失败形态（消融臂赢过 full）也同构。
+
+⚠️ **这三件事必须同时说清楚**，缺一条都会把这段读成结论：
+① backbone 不是契约那份，绝对值不可比，可比的只有同一跑内的臂间关系；
+② `no_constraint` 的 FP logit 掉幅 **−0.002**，即关掉一致性约束后反事实信号完全消失——
+这说明四臂的对照结构是有效的，**不是四条随机线**；
+③ 但 8.00 vs 31.23 这个差距远超任何噪声地板，**用契约 backbone 重跑不会改变这个方向**。
+
+**⇒ 交作者裁决的一项（不阻塞 preflight-r2 与 A4.2）**：正式 A4.3 要在 4090 上花 12–17 GPU·h。
+按现状原样跑，`full` 臂大概率重演 D4。执行代理**不自行改设计**（§0.5 决策 ① 的推荐仍是维持 (A)
+两段式，且 A4.3 出数字后不得再改口径）。两条路：
+**(甲) 原样跑 A4.3**，把这一形态作为第一个周期的如实结果交 Gate 2；
+**(乙) 先修 recall 塌陷再跑**——修正头当前对 base 正类的处理过于激进，这属于实现缺陷而非设计变更，
+在 A4.3 出任何数字之前修不违反「看到结果不改口径」。**推荐 (乙)**：dry-run 的价值就是在正式跑之前
+暴露这类问题，现在放过它，等于自愿把 12–17 GPU·h 花在一个已知会塌的配置上。
+
+### 产物
+
+`gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/A4/probe-5090-20260913/pilot-dryrun/`，未跨机搬运
+（四臂 checkpoint 各约 500 MB）。日志 `logs/a4_dryrun.log`（176 KB，3,114 行）。
+每臂目录：`arm.json` · `checkpoint/`（含 `by_family/`）· `edge_predictions.jsonl` ·
+`official_predictions.jsonl` · `official_metrics.json` · 三族各 `edges.jsonl`/`evidence.json`/`logits.json`/`report.json`。

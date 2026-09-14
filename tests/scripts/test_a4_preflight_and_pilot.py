@@ -189,3 +189,55 @@ def _preflight_args(tmp_path: Path, **overrides):
     }
     values.update(overrides)
     return argparse.Namespace(**values)
+
+
+def _arm_state(**overrides) -> dict:
+    state = {
+        "status": "complete",
+        "seed": 13,
+        "final_valid_accessed": False,
+        "candidate_id_digest": "digest",
+        "candidate_pairs": 7,
+        "contract_sha256": "contract",
+        "checkpoint_content_sha256": "weights",
+        "official_scores": {},
+        "mediator": {},
+        "revised_rows": 0,
+        "artifact_sha256": {},
+    }
+    state.update(overrides)
+    return state
+
+
+def _write_arms(root: Path, **overrides) -> dict:
+    """Four finished arms plus the contract that binds them."""
+    for arm in pilot.A4_ARMS:
+        (root / arm).mkdir(parents=True, exist_ok=True)
+        (root / arm / "arm.json").write_text(
+            json.dumps(_arm_state(**overrides.get(arm, {}))), encoding="utf-8"
+        )
+    return {
+        "seed": 13,
+        "internal_dev_gold": {"candidate_id_digest": "digest"},
+        "baselines": {"a3_fallback": {"predictions_sha256": "fallback-bundle"}},
+    }
+
+
+def test_the_pooled_summary_carries_the_weights_and_the_fallback_id(tmp_path: Path) -> None:
+    """A table that cannot be traced to its weights is not traceable (Bundle)."""
+    contract = _write_arms(tmp_path)
+    summary = pilot.aggregate(contract, tmp_path)
+    assert summary["checkpoint_content_sha256"] == {arm: "weights" for arm in pilot.A4_ARMS}
+    assert summary["fallback_component_bundle_id"] == "fallback-bundle"
+
+
+def test_a_contract_without_a_registered_fallback_says_so_explicitly(tmp_path: Path) -> None:
+    contract = _write_arms(tmp_path)
+    contract["baselines"] = {"note": "probe: baselines are not replayed here"}
+    assert pilot.aggregate(contract, tmp_path)["fallback_component_bundle_id"] is None
+
+
+def test_an_arm_without_a_checkpoint_hash_is_refused(tmp_path: Path) -> None:
+    contract = _write_arms(tmp_path, full={"checkpoint_content_sha256": None})
+    with pytest.raises(pilot.PilotError, match="carries no checkpoint hash"):
+        pilot.aggregate(contract, tmp_path)
