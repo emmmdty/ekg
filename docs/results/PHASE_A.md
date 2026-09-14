@@ -1677,26 +1677,73 @@ preflight-r2 → A4.2 smoke → A4.3**，一次重建覆盖两件事（另一件
 | length_matched | 2.97 | — | 179 | 52 | 2.856 |
 | no_constraint | 11.12 | — | 1,385 | 591 | −0.002 |
 
-**机制在做什么，mediator 讲得很清楚**：`remove_core` 不修正、causal FP 2,926；`full` 修了 766 行、
-把 FP 压到 362（降 87.6%），**假正例的 logit 掉幅 4.168 说明反事实信号是真的在起作用**。
-**但 precision 37.26 / recall 4.48** —— 压 FP 的同时把正类一起压没了。
+**⚠️ 下面这段归因在 2026-09-14 当天被自己的数据推翻过一次，保留更正过程作记录。**
+初稿写的是「修正头把 causal 正类抹光，属于实现缺陷，修它即可」。**错了。**
+把 `revised_rows`（推理时 base 判正、进修正流程的行数）与 `predicted_causal` 并排放，塌陷的位置就变了：
 
-这与 §0.7 记过、`323fd7a` 修过一次的「修正头把 causal 正类抹光」是**同一个形态，说明那次没修够**。
-与 D4 的失败形态（消融臂赢过 full）也同构。
+| 臂 | evidence_stream | consistency_loss | **base 判正**(`revised_rows`) | 修正后 | 修正砍掉 | causal P | causal R | causal F1 |
+|---|:--:|:--:|---:|---:|---:|---:|---:|---:|
+| `remove_core` | ✗ | ✗ | — (不修正) | **4,355** | — | 32.81 | 29.80 | **31.23** |
+| `no_constraint` | ✓ | ✗ | **1,385** | 908 | 34.4% | 34.91 | 6.61 | 11.12 |
+| `full` | ✓ | ✓ | **766** | 577 | 24.7% | 37.26 | 4.48 | 8.00 |
+| `length_matched` | ✓ | ✓(+替代控制) | **179** | 125 | 30.2% | 58.40 | 1.52 | 2.97 |
 
-⚠️ **这三件事必须同时说清楚**，缺一条都会把这段读成结论：
-① backbone 不是契约那份，绝对值不可比，可比的只有同一跑内的臂间关系；
-② `no_constraint` 的 FP logit 掉幅 **−0.002**，即关掉一致性约束后反事实信号完全消失——
-这说明四臂的对照结构是有效的，**不是四条随机线**；
-③ 但 8.00 vs 31.23 这个差距远超任何噪声地板，**用契约 backbone 重跑不会改变这个方向**。
+**推理修正只砍掉 24.7%–34.4%；base 判正数本身就差 5.7 倍。** 就算把推理修正整个关掉，
+`full` 的 causal recall 上限也只有 766/4,799 ≈ **16%**（gold causal 正例由 TP/R 反推约 4,799，四臂一致）。
+⇒ **塌陷在训练侧，不在推理修正。** 「修正头太激进」这条归因是错的，按它去修不会改变任何东西。
 
-**⇒ 交作者裁决的一项（不阻塞 preflight-r2 与 A4.2）**：正式 A4.3 要在 4090 上花 12–17 GPU·h。
-按现状原样跑，`full` 臂大概率重演 D4。执行代理**不自行改设计**（§0.5 决策 ① 的推荐仍是维持 (A)
-两段式，且 A4.3 出数字后不得再改口径）。两条路：
-**(甲) 原样跑 A4.3**，把这一形态作为第一个周期的如实结果交 Gate 2；
-**(乙) 先修 recall 塌陷再跑**——修正头当前对 base 正类的处理过于激进，这属于实现缺陷而非设计变更，
-在 A4.3 出任何数字之前修不违反「看到结果不改口径」。**推荐 (乙)**：dry-run 的价值就是在正式跑之前
-暴露这类问题，现在放过它，等于自愿把 12–17 GPU·h 花在一个已知会塌的配置上。
+### 根因：两条，与四臂的阶梯逐级对应
+
+臂的阶梯本身就是证据——`4,355 → 1,385 → 766 → 179`，每降一级恰好多开一个训练侧开关：
+
+**根因 A（证据流一开就生效，解释 4,355 → 1,385，−68%）**
+`train_a4_pair_evidence.py:340-343` 的 `cross_entropy(revised[CONSISTENCY_FAMILY], target)`
+**写在 `if flags.consistency_loss:` 之外**，所以 `evidence_stream=True` 的三臂全都吃它。
+它的梯度经 `cf["retained"]` 回流 encoder——`pair_counterfactual_embeddings` 的 docstring 明写
+**"Gradient flows"**。于是 encoder 每步都被要求在**只留 trigger span 的残缺输入**上做 causal 分类。
+那是一个信息严重不足的任务，**而「causal 判定依赖 span 以外的上下文」正是 A4 自己的立论前提**。
+encoder 为压低这个不可能任务的损失，把整体表示推向保守。
+⇒ `no_constraint` 臂（按 §0.5 的表述是「证据表示保留、约束关闭」）**并没有真的把约束关干净**，
+它仍在训练 revised pass。这是四臂矩阵的语义问题，不是纯实现细节。
+
+**根因 B（一致性损失再叠一层，解释 1,385 → 766，−45%）**
+`pair_evidence.py:678` 的 `sufficiency = relu((gold_base - gold_retained) - slack)`，
+**对 `gold_base` 的梯度是 +1**——它直接压低正例在**完整上下文**下的 gold logit。
+唯一把 `gold_base` 往上推的是 `necessity = relu(margin - (gold_base - gold_masked))`，
+而 necessity 只作用在 `positive & scoreable`，即**两触发句之间有 interior 的行**。
+**同句与相邻句的正例没有 interior ⇒ 没有 necessity 项 ⇒ 只受 sufficiency 单向压制，无任何补偿。**
+这正是设计文档里「触发句 protected，短距离不是误差所在」那条决定的副作用：
+短距离对被排除在 necessity 之外，却没有被排除在 sufficiency 之外。
+
+**旁证（负控是有效的，不是四条随机线）**：`no_constraint` 的 FP logit 掉幅 **−0.002**、TP 掉幅 0.057
+——关掉一致性约束后反事实信号完全消失，符合预期；`length_matched` 的 TP 掉幅 **1.0005**，
+恰好卡在 `NECESSITY_MARGIN = 1.0` 上，说明 necessity 项确实在按其定义起作用。
+对照结构本身没有问题。
+
+### ⇒ 停下交作者裁决（不自行修改）
+
+**契约已经把这个形态判死了**：`phases/PHASE_A4_pair_evidence.md` 的 Promotion gate 要求
+「causal recall 不低于 A3 fallback 1.0 个绝对 F1 点」，Stop conditions 写「**增益只来自 recall
+collapse：机制失败**」。`full` 的 recall 4.48 按契约字面即失败。**原样跑 A4.3 等于花 12–17 GPU·h
+确认一件已知的事。**
+
+但两条根因的修法都触及**冻结的四臂矩阵语义**，属 A 类边界，执行代理不自行决定：
+
+| | 改什么 | 代价 / 风险 |
+|---|---|---|
+| **(甲) 原样跑 A4.3** | 不改 | 12–17 GPU·h 换一个契约已预判为失败的结果。唯一价值是「如实交 Gate 2」 |
+| **(乙) 把 revised CE 移进 `consistency_loss` 分支** | 根因 A。`no_constraint` 变成真正的「只有证据表示、零约束」 | 改的是第 8 臂语义。**好处**：第 8 臂恢复它在归因上的本职（分离修正头与一致性各自的贡献）；**风险**：需要重新论证第 8 臂定义，且不能事后改 |
+| **(丙) 给 sufficiency 加 detach 或只作用于 `gold_retained`** | 根因 B。让 sufficiency 只能靠抬高 `gold_retained` 满足，不能靠压低 `gold_base` | 改的是损失形式，不是扫参（契约禁的是扫参）。**这条在数学上更像修 bug**：压低 `gold_base` 满足「span 足够」是退化解，与 sufficiency 的语义相反 |
+| **(丁) 把非 scoreable 的正例排除出 sufficiency** | 根因 B 的另一种修法，与「触发句 protected」的既有决定对齐 | 减少 sufficiency 的作用面，可能削弱机制 |
+
+**推荐 (丙) + (乙) 一起做，然后重跑 dry-run 验证 base 判正数恢复到 4,000 量级，再跑 A4.3。**
+理由：(丙) 修的是一个退化解——`relu((gold_base - gold_retained) - slack)` 允许模型通过「让完整
+上下文也变差」来假装「span 已经够了」，这与 sufficiency 要表达的意思相反，属于目标函数写错而非设计选择；
+(乙) 让第 8 臂名副其实。两者都在 A4.3 出任何数字**之前**，不违反「看到结果不改口径」。
+⚠️ **决策 3（两段式推理，§0.5 ①）与此无关，仍推荐维持 (A)。**
+
+⚠️ **验证成本**：5090 单臂 56 分钟，验证只需重跑 `full` + `no_constraint` 两臂 ≈ 2 小时，
+远低于在 4090 上花 12–17 GPU·h 撞墙。**5090 当前完全空闲**（215 MiB / 32,607 MiB，0% util）。
 
 ### 产物
 

@@ -124,22 +124,43 @@ Ch6 就来不及了。C-8 是纯整理、随时可做，所以垫后。
 smoke 报错信息待办（`smoke_a4_pair_evidence.py` 也在那 7 个文件里）。**重建前先把下面这项裁决拿到**，
 否则可能要重建两次。
 
-#### ⚠️ 交作者裁决：A4.3 原样跑，还是先修 recall 塌陷
+#### ⚠️ 交作者裁决：A4.3 原样跑，还是先修训练侧的 recall 塌陷
 
 dry-run 的四臂读数（**探测 backbone `2c7ff1f1…`，不进主表、不与 33.17 / 32.10 相减**）：
-`full` causal F1 **8.00**（P 37.26 / **R 4.48**）· `remove_core` **31.23** · `length_matched` 2.97 ·
-`no_constraint` 11.12。**消融臂高出 full 23 点，与 D4 的失败形态同构。**
 
-mediator 把机制讲清楚了：`remove_core` 不修正、causal FP 2,926；`full` 修 766 行把 FP 压到 362
-（降 87.6%），FP 的 logit 掉幅 4.168——**反事实信号是真在起作用**，但把正类一起压没了。
-这与 §0.7 记过、`323fd7a` 修过一次的「修正头把 causal 正类抹光」**是同一形态，说明没修够**。
-`no_constraint` 掉幅 **−0.002**（关掉约束信号即消失）说明四臂对照结构有效，不是四条随机线。
+| 臂 | evidence_stream | consistency_loss | **base 判正** | 修正后 | causal R | causal F1 |
+|---|:--:|:--:|---:|---:|---:|---:|
+| `remove_core` | ✗ | ✗ | — | **4,355** | 29.80 | **31.23** |
+| `no_constraint` | ✓ | ✗ | 1,385 | 908 | 6.61 | 11.12 |
+| `full` | ✓ | ✓ | 766 | 577 | 4.48 | 8.00 |
+| `length_matched` | ✓ | ✓(+替代控制) | 179 | 125 | 1.52 | 2.97 |
 
-**(甲) 原样跑 A4.3**，把这一形态作为第一个周期的如实结果交 Gate 2；
-**(乙) 先修 recall 塌陷再跑**——这属于实现缺陷而非设计变更，在 A4.3 出任何数字之前修，
-不违反「看到结果不改口径」。**推荐 (乙)**：dry-run 的价值就是在正式跑之前暴露这类问题，
-现在放过它等于自愿把 12–17 GPU·h 花在一个已知会塌的配置上。
-⚠️ **决策 3（两段式 vs 只作训练目标，§0.5 ①）不受此影响，仍推荐维持 (A)，且 A4.3 出数字后不再改。**
+**⚠️ 第一版归因（「修正头把正类抹光」）是错的，已在结果页更正。** 推理修正只砍掉 24.7%–34.4%，
+**base 判正数本身就差 5.7 倍**；就算把推理修正全关掉，`full` 的 recall 上限也只有约 16%。
+**塌陷在训练侧。** 两条根因与臂的阶梯逐级对应（`4,355 → 1,385 → 766 → 179`，每降一级多开一个开关）：
+
+- **根因 A**（−68%）：`train_a4_pair_evidence.py:340-343` 的 `cross_entropy(revised, target)`
+  **写在 `if flags.consistency_loss:` 之外**，梯度经 `cf["retained"]` 回流 encoder
+  （`pair_counterfactual_embeddings` docstring 明写 "Gradient flows"）⇒ encoder 被要求在**只留
+  trigger span 的残缺输入**上做 causal 分类，而「causal 依赖 span 以外的上下文」正是 A4 自己的立论。
+  ⇒ 第 8 臂 `no_constraint`（「证据表示保留、约束关闭」）**并没有把约束关干净**。
+- **根因 B**（再 −45%）：`pair_evidence.py:678` 的
+  `sufficiency = relu((gold_base − gold_retained) − slack)` **对 `gold_base` 的梯度是 +1**，
+  直接压低正例在完整上下文下的 logit；唯一的反向力 `necessity` 只作用在有 interior 的行，
+  **同句与相邻句正例只受单向压制**。这是「触发句 protected」那条决定的副作用：
+  短距离对被排除出 necessity，却没被排除出 sufficiency。
+
+**契约已经把这个形态判死**：Promotion gate 要求「causal recall 不低于 A3 fallback 1.0 个绝对 F1 点」，
+Stop conditions 写「增益只来自 recall collapse：机制失败」。**原样跑 = 花 12–17 GPU·h 确认已知结论。**
+
+四条路与推荐见 [`results/PHASE_A.md`](results/PHASE_A.md) 末节的表。
+**推荐 (丙)+(乙)**：(丙) 让 sufficiency 不能靠压低 `gold_base` 满足——那是个与其语义相反的退化解，
+属目标函数写错而非设计选择；(乙) 把 revised CE 移进 `consistency_loss` 分支，让第 8 臂名副其实。
+两者都在 A4.3 出任何数字**之前**，不违反「看到结果不改口径」。
+**验证成本约 2 小时**（5090 重跑 `full` + `no_constraint` 两臂，看 base 判正数是否回到 4,000 量级），
+远低于在 4090 上撞墙的 12–17 GPU·h；**5090 当前完全空闲**。
+⚠️ 决策 3（两段式推理，§0.5 ①）与此无关，仍推荐维持 (A)。
+⛔ **执行代理不得自行改这两处**——它们触及冻结的四臂矩阵语义，属 A 类边界。
 
 ### 0.3b 方针：4090 占着的时候该做什么（作者 2026-09-13 定）
 
