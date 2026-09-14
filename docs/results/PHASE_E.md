@@ -505,3 +505,71 @@ setsid nohup /mnt/aidata/tongjiakai/ekg/.venv/bin/python -u main.py \
 
 **取得 (a) 之后**才写 CGEP 适配器打我们的 `queries.jsonl`；两步不可颠倒——
 先证明「我们把它跑对了」，再谈「它在我们协议上是多少」。
+
+### ⛔ SimKGC 训练：**「算力」不可行**（2026-09-14 实测，停下交裁决）
+
+透明补丁打完、数据就绪后启动训练，**OOM**：
+
+```
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 76.00 MiB.
+GPU 0 has a total capacity of 31.35 GiB of which 32.06 MiB is free.
+```
+
+**一手证据（它自己的 README，不是推断）**：
+
+- 第 18 行：**"All experiments are run with 4 V100(32GB) GPUs."**
+- 第 111 行（FAQ「我遇到 CUDA OOM」）：**"We run experiments with 4 V100(32GB) GPUs,
+  please reduce the batch size if you don't have enough resources."**
+- 第 116 行：**不支持 DDP**——"Some input masks require access to batch data on all GPUs"；
+  `trainer.py:197` 用的是 `torch.nn.DataParallel`。
+
+⇒ `train_wn.sh` 冻结的 `--batch-size 1024` 需要 **4×32 GB = 128 GB**。我们有
+**5090 单卡 32 GB**；4090 是 4×24 = 96 GB，**仍然不够**，且已被他人占 5 天。
+
+**为什么不能直接减 batch**：SimKGC 是对比学习，**batch size 就是 in-batch 负样本数**
+（`IB` 正是它命名里的那一项）。把 1024 减到单卡装得下的量级，改的是方法的核心超参，
+**跑出来的数按定义就不是它发表的那个数**，(a) 也就不成立。README 自己把减 batch 写成
+「资源不够时」的退路，而 66.6 是 1024 下的结果。
+
+⇒ 按 `CLAUDE.md` 开工自审表格，这卡在**算力**一条。**不自行换题，交作者裁决。**
+
+### 由此发现：第一刀的成本排序把训练显存漏掉了
+
+本页上一节把 SimKGC 排为「最便宜」，依据是**数据随仓库 / 预测已发布 / 依赖无版本墙**——
+三条都对，**但没有一条是显存**。把显存算进去，排序变了：
+
+| 方法 | (a) 怎么取得 | 显存 | 版本墙 |
+|---|---|---|---|
+| **CSProm-KG** | **公开 checkpoint + 推理**（README §33「Pretrained Checkpoint」，下载到 `./checkpoint/` 跑 evaluation） | WN18RR/FB15k-237 `-batch_size 128`，**且只需推理** | 有（`torch==1.11.0+cu113`，须升版并记补丁） |
+| SimKGC | **必须训练**（已发布预测缺 `rank`，省不掉） | **4×32 GB** | 无 |
+
+⇒ **建议把 CSProm-KG 提到 SimKGC 之前**：用公开 checkpoint 取 (a) 只要一次推理，
+**不需要 128 GB，也不需要等 4090**。它的版本墙是升 torch，属于已经做过多次的透明补丁；
+而 SimKGC 的障碍是硬件，补丁解决不了。
+⚠️ 其 checkpoint 在 **Google Drive**，而两台服务器都没有外网 ⇒ 仍要本地下载后 scp（见本节开头）。
+
+### SimKGC 三条可选路（未实施，等裁决）
+
+| | 做什么 | 后果 |
+|---|---|---|
+| **(A)** | 单卡减 batch（1024 → 单卡装得下的量），如实标注偏离 | 拿不到 (a)；该行落 **(b) 透明适配**，障碍写「原配置需 4×32 GB」。**成本约 3 小时** |
+| **(B)** | 等 4090 四卡（96 GB） | 仍 < 128 GB，还是要减 batch；且要等一张被占 5 天的卡 |
+| **(C)** | **先做 CSProm-KG 的 checkpoint 推理**，SimKGC 推迟到 4090 可用时再议 | **推荐**。用一次推理换一个 (a)，不赌硬件 |
+
+### 已完成的部分（不必重做）
+
+搬运、环境、预处理、透明补丁均已落地，**SimKGC 随时可训**，只差显存或一个减 batch 的裁决。
+
+**透明补丁 1**（`trainer.py`，2026-09-14）：`transformers 4.53.3` 已移除 `AdamW`
+（`ImportError: cannot import name 'AdamW' from 'transformers'`）。改为 `torch.optim.AdamW`，
+并在调用处**显式钉 `eps=1e-6`**——torch 的默认是 `1e-8`，而 `transformers.AdamW` 是 `1e-6`，
+原调用只传了 `lr` 与 `weight_decay`，不钉就会静默换掉一个优化器超参。
+
+| | sha256 |
+|---|---|
+| `trainer.py` 补丁前 | `570383f3ba98af2d0fd986d71babb178a8038e4e0efa92730d9566c78c07f7d2` |
+| `trainer.py` 补丁后 | `cf856dc302e9a4069b9fed6111fb7b194e68a2a37dad398319b83f77f15978c9` |
+
+⚠️ **这是第三堵版本墙，形态与前两堵不同**：CSProm-KG / mcnc 撞的是 `torch` 太旧跑不了新卡（sm_86），
+SimKGC 撞的是 **`transformers` 太新删掉了旧 API**。名册 §6.2a 记的「SimKGC 依赖无上限、不受影响」
+**只对 torch 成立，对 transformers 不成立**——`transformers>=4.15` 没有上限，但 4.53 移除了它用的符号。
