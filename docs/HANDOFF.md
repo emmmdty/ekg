@@ -498,6 +498,19 @@ CPU 64 核 load 12.9、内存 439 GB 可用。「GPU 被占」被当成了「文
   排期时先把搬运算进去。**不要再在服务器上试 `git clone` 或 `from_pretrained` 拉模型。**
 - 三个 gitignored JSON 已双端核对（`protocol.json` `f0b4702b…50829`、`t024_freeze.json` `9133a73c…587e7`、
   `cross_artifact_audit.json` `622d094b…f8467`；4090 旧档备份 `protocol.json.pre-e12-20260911`）；
+- ⚠️ **2026-09-15 新增：cpolar 有两种不同的失效，别用同一套动作去修。**
+  作者的 `~/.local/bin/cpolar-ssh-update` 只能治第一种：
+
+  | 症状 | 更新脚本的输出 | 该做什么 |
+  |---|---|---|
+  | **端口变了**（常态） | `matched: tcp://…` 然后改写 `HostName`/`Port` | 跑一次脚本即可 |
+  | **通道整个下线** | `ERROR [gpu-5090] no tunnel named 'ssh' and none with local='127.0.0.1:22'` | **脚本无能为力**——面板上那条隧道不在了。只能等它回来，**期间按三态判活，不得判定远端进程已死** |
+
+  2026-09-15 12:5x 就是第二种：`Connection refused` + 上面那条 ERROR，同一时刻 `gpu-a6000` 的隧道正常。
+  **当时 5090 上正跑着 A4 探测（`setsid nohup`、PPID=1、独立 session），按记录它不受本机断连影响。**
+  一次 1.69 GB 的 rsync 在 34 分钟后被这次断连打断（`Broken pipe`）——**所以大文件一律带 `--partial`**，
+  回来续传而不是重头再来。
+
 - ⚠️ **gpu-5090 / gpu-a6000 的 cpolar 端口每天都会变，这是常态，不是故障**。作者自己的
   `~/.local/bin/cpolar-ssh-update` 由 systemd user timer（`cpolar-ssh-update.timer`，每日 00:00 +
   开机后）登录 cpolar 面板抓新端口，**只重写 `~/.ssh/config` 里对应 Host 块的 `HostName` 与 `Port`
