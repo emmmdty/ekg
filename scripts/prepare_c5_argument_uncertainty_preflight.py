@@ -47,7 +47,16 @@ EXPECTED_CANDIDATE_DIGEST = "15a3b1a548625624642130190b39411e6346866ff8594c2af20
 EXPECTED_EVALUATOR_SHA256 = (
     "32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598"
 )
-EXPECTED_MODEL_SHA256 = "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+# C5 runs on the gpu-5090 line (author, 2026-09-15): the 4090's four cards have
+# been someone else's for a week and Gate 2 waits on this phase.  The move is
+# clean for C5 specifically because both of its baselines are prediction files
+# scored by the organisers' evaluator, so neither anchor depends on our encoder;
+# all three arms then share one machine, one backbone and one manifest.  The
+# 5090 pin carries the same roberta-base weights as the 4090's (five of six
+# files byte-identical, `pytorch_model.bin` included) but a different
+# `tokenizer_config.json`, which is why it is a different content address and
+# must be pinned rather than assumed equal.  4090 line: 71be7419a60dcce0.
+EXPECTED_MODEL_SHA256 = "2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736"
 
 # Read off gpu-4090's `.../ch1/qwen3-argument-s13-r2/checkpoint/coref_config.json`
 # plus that run's fixed endpoint epoch.  The contract requires arms 4-6 to match
