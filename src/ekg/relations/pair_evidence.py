@@ -664,40 +664,37 @@ try:  # pragma: no cover - exercised on a GPU host
         margin: float = NECESSITY_MARGIN,
         slack: float = 0.5,
     ) -> torch.Tensor:
-        """Both consistency terms for one relation family, on positive rows only.
+        """Both consistency terms for one relation family, on supported positives.
 
         Necessity: removing the interior must cost the gold subtype at least
         `margin` of logit.  Sufficiency: the span alone must hold it within
         `slack` of the full context.  Negative rows are excluded — the claim is
         about what supports a positive, and asking a NONE row to lose logit when
-        its context is removed is a claim about nothing.
+        its context is removed is a claim about nothing.  Pairs whose triggers
+        are adjacent or share a sentence are excluded too: they have no interior,
+        so neither term has anything to measure on them.
         """
-        positive = (target != ignore_index) & (target != 0)
-        if not torch.any(positive):
+        supported = (target != ignore_index) & (target != 0) & scoreable
+        if not torch.any(supported):
             return base.new_zeros(())
-        index = target[positive].unsqueeze(1)
-        # The +1 gradient this puts on `gold_base` is two things at once, and
-        # 2026-09-14 cost a run to learn the second.  It *is* a degenerate
-        # solution -- "the span is enough" can be satisfied by making the full
-        # context worse -- but it is also the only force opposing `necessity`,
-        # which pushes `gold_base` up.  Detaching it (measured, seed 13, 17
-        # epochs) removed the damping and the loss diverged monotonically:
-        # 5.49 -> 15.3 -> 776 -> 2214, with dev macro-F1 pinned at 0.000.
-        # `gold_retained` shares the encoder and head with `gold_base`, so
-        # raising one raises the other and the pair runs away.  Do not detach
-        # either side in isolation; the imbalance is in where the two terms
-        # *apply* (necessity skips adjacent and same-sentence pairs, sufficiency
-        # does not), not in their gradients.
-        gold_base = base[positive].gather(1, index).squeeze(1)
-        gold_retained = retained[positive].gather(1, index).squeeze(1)
+        index = target[supported].unsqueeze(1)
+        gold_base = base[supported].gather(1, index).squeeze(1)
+        gold_masked = masked[supported].gather(1, index).squeeze(1)
+        gold_retained = retained[supported].gather(1, index).squeeze(1)
+        # The two terms are equal and opposite on `gold_base`, and that is the
+        # only thing damping either of them.  2026-09-14 read the +1 from
+        # sufficiency as nothing but a degenerate solution ("the span is enough"
+        # can be satisfied by making the full context worse) and detached it;
+        # the loss then diverged monotonically over 17 epochs -- 5.49 -> 15.3 ->
+        # 776 -> 2214, dev macro-F1 pinned at 0.000 -- because `gold_retained`
+        # shares the encoder and head with `gold_base`.  Do not detach either
+        # side.  What collapsed the base-positive rows (4,355 -> 766) was the
+        # *domain*, not the gradients: necessity skipped adjacent and
+        # same-sentence pairs while sufficiency did not, so short-distance
+        # positives felt only the force pushing them down.  Both terms now apply
+        # to exactly the rows the mechanism makes a claim about (author,
+        # 2026-09-15).
         sufficiency = torch.relu((gold_base - gold_retained) - slack).mean()
-
-        necessary = positive & scoreable
-        if not torch.any(necessary):
-            return sufficiency
-        index = target[necessary].unsqueeze(1)
-        gold_base = base[necessary].gather(1, index).squeeze(1)
-        gold_masked = masked[necessary].gather(1, index).squeeze(1)
         necessity = torch.relu(margin - (gold_base - gold_masked)).mean()
         return sufficiency + necessity
 

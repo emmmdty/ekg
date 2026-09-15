@@ -384,10 +384,11 @@ def test_the_consistency_terms_score_only_supported_positives() -> None:
     )
     assert empty.item() == 0.0
 
-    # A pair with an empty interior keeps the sufficiency term and drops the
-    # necessity term rather than absorbing a constant margin.
+    # A pair with an empty interior drops *both* terms.  It used to keep
+    # sufficiency, which is the asymmetry that collapsed the base-positive rows
+    # on 2026-09-14: the same tensors that score 3.5 above score nothing here.
     partial = sufficiency_necessity_loss(
-        base, base, base - 0.25, target, scoreable=torch.tensor([False, True, True])
+        base, base, base - 3.0, target, scoreable=torch.tensor([False, True, True])
     )
     assert partial.item() == 0.0
 
@@ -402,21 +403,24 @@ def test_the_two_consistency_terms_pull_gold_base_in_opposite_directions() -> No
     full context worse) and detached; the loss then diverged monotonically over
     17 epochs -- 5.49 -> 15.3 -> 776 -> 2214 -- with dev macro-F1 at 0.000,
     because `gold_retained` shares its parameters with `gold_base` and the two
-    terms drove each other up. The real imbalance is in where they apply:
-    necessity skips every pair whose triggers are adjacent or in one sentence,
-    sufficiency applies to all of them.
+    terms drove each other up. The real imbalance was in where they applied:
+    necessity skipped every pair whose triggers are adjacent or in one sentence
+    and sufficiency did not, so those rows felt only the downward force. Both
+    now apply to the same rows, which is what keeps the damping on every row.
     """
     import torch
 
     from ekg.relations.pair_evidence import sufficiency_necessity_loss
 
     target = torch.tensor([1])
+    scoreable = torch.tensor([True])
 
-    # Sufficiency alone (no interior to remove, so no necessity term).
+    # Sufficiency alone: removing the interior already costs more than the
+    # margin, so necessity is 0 and only the span term fires.
     base = torch.tensor([[0.0, 5.0, 0.0]], requires_grad=True)
     sufficiency_necessity_loss(
-        base, base.detach(), torch.tensor([[0.0, 1.0, 0.0]]), target,
-        scoreable=torch.tensor([False]),
+        base, torch.tensor([[0.0, 3.0, 0.0]]), torch.tensor([[0.0, 1.0, 0.0]]),
+        target, scoreable=scoreable,
     ).backward()
     sufficiency_grad = base.grad[0, 1].item()
 
@@ -424,7 +428,7 @@ def test_the_two_consistency_terms_pull_gold_base_in_opposite_directions() -> No
     base = torch.tensor([[0.0, 5.0, 0.0]], requires_grad=True)
     sufficiency_necessity_loss(
         base, torch.tensor([[0.0, 5.0, 0.0]]), torch.tensor([[0.0, 5.0, 0.0]]), target,
-        scoreable=torch.tensor([True]),
+        scoreable=scoreable,
     ).backward()
     necessity_grad = base.grad[0, 1].item()
 
