@@ -337,16 +337,20 @@ def main() -> int:
                 cf = counterfactual_features(doc_id, records, selected)
                 picked = torch.tensor(selected, device=device)
                 target = targets[CONSISTENCY_FAMILY][picked]
-                # The residual is trained on the retained view, but that view
-                # must not train the *encoder*: back-propagating this term
-                # through cf["retained"] asks the encoder to classify causality
-                # from the trigger spans alone -- the task A4 argues is
-                # impossible without the surrounding context. Measured on the
-                # 2026-09-14 dry-run: base-predicted causal positives fell
-                # 4,355 -> 1,385 in every arm carrying the evidence stream,
-                # before any consistency term was switched on. feats keeps its
-                # gradient; it is the same full-context path the base loss uses.
-                revised = heads(feats[picked], dist_ids[picked], cf["retained"].detach())
+                # This gradient path was detached on 2026-09-14 on the argument
+                # that back-propagating through cf["retained"] asks the encoder
+                # to classify causality from the trigger spans alone.  The
+                # argument still looks right, but it was never measured on its
+                # own: the run that carried it also carried a second change and
+                # diverged, and the 2026-09-15 probe carried it alongside the
+                # sufficiency-domain fix and lost subevent entirely (official
+                # F1 23.05 -> 0.00) while causal rose 8.00 -> 12.51.  Both
+                # changes touch only the causal family, so subevent can only
+                # have died through the shared encoder, and two changes cannot
+                # be attributed at once.  Restored to the dry-run path so the
+                # next probe varies one thing.  Do not detach it again without
+                # a measurement that isolates it.
+                revised = heads(feats[picked], dist_ids[picked], cf["retained"])
                 loss = loss + torch.nn.functional.cross_entropy(
                     revised[CONSISTENCY_FAMILY], target, ignore_index=IGNORE_INDEX
                 )
