@@ -611,3 +611,36 @@ FB15k-237 那份单文件就 617 MB，而两台服务器都要经本地中转。
 
 四个对手在**我们的重建协议**上仍然注定 **(b)**——它们没有一个实现 CGEP，SeDGPL 作者的适配从未发布。
 CSProm-KG 的 (a) 只在 **WN18RR** 上取得。**改序不减少主表内容，只是把「能自证的那个」先拿到手。**
+
+### CSProm-KG 的 (a) 验证：**容差事前登记（2026-09-15，跑之前写死）**
+
+复现目标取自仓库 README 的「Pretrained Checkpoint」表（与论文 Table 2 同源），**WN18RR 一个基准**：
+
+| 指标 | 原文/README 值 | 事前容差 | 判据 |
+|---|---:|---|---|
+| MRR | **0.572660** | **±0.005 绝对** | 超出 ⇒ 不给 (a)，按差异排查并如实记 |
+| Hit@1 | 52.06% | ±0.5 点 | 同上 |
+| Hit@3 | 59.00% | ±0.5 点 | 同上 |
+| Hit@10 | 67.79% | ±0.5 点 | 同上 |
+
+**为什么这条容差比 D4 的 ±1.0 紧**：这是**纯推理重放公开 checkpoint**，没有训练方差，
+唯一的误差源是库版本差异。**松容差在这里是给自己留后门。**
+checkpoint `WN18RR-epoch=425-val_mrr=0.5664.ckpt`，1,689,462,973 B，
+sha256 `27e40718319480e9601ae695…`（本地下载后 rsync 到 5090，双端核对）。
+
+### 透明补丁清单（环境侧，2026-09-15）
+
+原 pin `torch==1.11.0+cu113` 最高 sm_86，5090 是 sm_120 ⇒ **必须升版**。独立 venv 建在
+`gpu-5090:/mnt/aidata/tongjiakai/baselines/CSProm-KG/.venv`（**不碰 ekg 的 venv**，那个 venv 里
+连 pip 都没有、且此刻正跑着 A4 探测），装包走**清华 PyPI 镜像**：
+
+| 包 | 原 pin | 实装 | 备注 |
+|---|---|---|---|
+| torch | `1.11.0` | **2.8.0** | 项目统一栈，sm_120 必需 |
+| pytorch_lightning | `1.9.3` | **2.6.6** | 代码用的是 `devices`/`accelerator` 写法，PL 2.x 认；`ModelCheckpoint`/`load_from_checkpoint`/`trainer.test` API 未变 |
+| transformers | `4.16.2` | **5.17.0** | 只用 `BertTokenizer`/`BertModel` |
+| numpy / pandas / nltk / tqdm | 1.21.5 / 1.4.3 / 3.7 / 4.64.0 | 2.5.3 / 3.0.5 / 3.10.3 / 4.70.1 | py3.12 上旧版装不了（服务器只有 python3.12，且无 root 装 `python3.12-venv`，venv 由 `uv venv` 建） |
+
+backbone `bert-large-uncased` **直接在 5090 上从 ModelScope 下载**（`AI-ModelScope/bert-large-uncased`，
+1,344,997,306 B，sha256 `be24b235c46198938ac26993…`），**没走隧道**——这一条就是「优先下载、
+用镜像」的实际收益：1.3 GB 本地中转要约 3 小时，服务器直下是分钟级。
