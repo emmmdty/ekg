@@ -573,3 +573,41 @@ GPU 0 has a total capacity of 31.35 GiB of which 32.06 MiB is free.
 ⚠️ **这是第三堵版本墙，形态与前两堵不同**：CSProm-KG / mcnc 撞的是 `torch` 太旧跑不了新卡（sm_86），
 SimKGC 撞的是 **`transformers` 太新删掉了旧 API**。名册 §6.2a 记的「SimKGC 依赖无上限、不受影响」
 **只对 torch 成立，对 transformers 不成立**——`transformers>=4.15` 没有上限，但 4.53 移除了它用的符号。
+
+## ★ G-11a 第三刀：改序执行，CSProm-KG 就位（2026-09-15）
+
+### 作者裁决（2026-09-15）
+
+批准 §「SimKGC 三条可选路」的 **(C)**：**先做 CSProm-KG**，SimKGC 落 **(b) 透明适配**、
+障碍写「原配置需 4×32 GB，减 batch 会改变其 in-batch 负样本定义」。
+另批「优先下载而不是跨 GPU 搬运，网络有问题时用镜像或替补方法」。
+
+### 本轮把网络的真实形状测清楚了（此前只记了「两台机都没有外网」，那句话太粗）
+
+| 目标 | gpu-5090 | 说明 |
+|---|---|---|
+| `github.com` 直连 | ❌ | 与 09-14 记录一致 |
+| **`gh-proxy.com` 镜像** | ✅ **增量 `git fetch` 可用** | ekg 仓库本轮就是这样从 `4297fdb` 同步到 `45c2bbf` 的 |
+| 同一镜像上 **完整 `git clone`** | ❌ | 两次都断在 `fetch-pack: unexpected disconnect`（含 `--depth 200`） |
+| **`pypi.tuna.tsinghua.edu.cn`** | ✅ **HTTP 200** | ⇒ **服务器能装包**。CSProm-KG 要升 `torch`、EasyECR 的 C-2b 活体 venv 都因此可行，不必本地下 wheel 再搬 |
+| `drive.google.com` | ❌ 超时 | ⇒ 公开 checkpoint 只能本地下载后 scp |
+
+**带走的纪律**：「没有外网」是个太粗的判断，它把**能装包**和**能拉 checkpoint** 混成了一件事。
+按目标域名逐个测，结论才有用——这一条直接改变了 C-2b 与 CSProm-KG 两项的可行性判定。
+
+### 已落地的产物
+
+| 项 | 值 |
+|---|---|
+| 仓库 commit | `9a8072951beda3e5c609bd121c900b153466ca28`（与名册 §6.2a 记录一致） |
+| 本地 clone | 132 MB（`.git` 28 MB + `data/` 104 MB） |
+| 传输形态 | `tar czf` → **53.6 MB**，scp 到 `gpu-5090:/mnt/aidata/tongjiakai/baselines/`（**ekg 仓库之外**，不受远端 `git reset --hard` 波及） |
+| 公开 checkpoint | Google Drive 文件夹共 4 个（FB15k-237 / ICEWS14 / ICEWS05-15 / **WN18RR**）；**只取 WN18RR** 一个（`WN18RR-epoch=425-val_mrr=0.5664.ckpt`，file id `1o6jxtFya6cl8pbeVW5uHy4O06CxiXpkW`） |
+
+**为什么只取 WN18RR**：(a) 的作用是自证「我们把别人的代码跑对了」，一个基准足够；
+FB15k-237 那份单文件就 617 MB，而两台服务器都要经本地中转。
+
+### ⚠️ 不变的结构性事实（改序没有改变它）
+
+四个对手在**我们的重建协议**上仍然注定 **(b)**——它们没有一个实现 CGEP，SeDGPL 作者的适配从未发布。
+CSProm-KG 的 (a) 只在 **WN18RR** 上取得。**改序不减少主表内容，只是把「能自证的那个」先拿到手。**

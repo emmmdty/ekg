@@ -893,3 +893,82 @@ SmokeError: bound code hash drift: scripts/smoke_c5_argument_uncertainty.py
 
 **C5.2 的 CUDA 半边**（同命令去掉 `CUDA_VISIBLE_DEVICES=`，断言与 CPU 半边产物一致）→ **C5.3 pilot**。
 两者都要一张空闲卡。
+
+## ★★★ C5 改走 gpu-5090 线：preflight 与 CPU/CUDA 双半边全部 PASS（2026-09-15）
+
+### 开工自审
+
+1. **科研价值**：C5.3 是 Gate 2 要等的两跑之一（另一跑是 A4.3），对准 `EXPERIMENT_PLAN.md` §7.3
+   的表 5-3。4090 四张卡自 2026-09-10 起被他人 vllm 占满，到本日已第 6 天，Gate 2 再等就滑出排期。
+2. **可行性**：成立，且**只对 C5 成立**——它的两条 baseline 是**预测文件 + 官方 evaluator 打分**
+   （主锚 MUC 80.98472 / 注册对照 80.367586），**与我们的 encoder 无关**；换到 5090 后三臂同机、
+   同 backbone、同 manifest，口径三轴天然一致。**A4 不能这样搬**：它的判定线含 A3 fallback 32.10，
+   那是在 4090 pin 上训出来的（G-13 实测同一臂在 5090 backbone 上 31.13），换机就引入混淆。
+
+### 作者裁决（2026-09-15）
+
+> 「按照你的推荐进行，允许使用 5090。后续 4090 可以补，现在先在能使用的 GPU 上进行后续的任务，
+> 不要因为 4090 拖慢进度。」
+
+### backbone pin 的更换（`45c2bbf`）
+
+`prepare_c5_argument_uncertainty_preflight.py` 的 `EXPECTED_MODEL_SHA256`
+由 4090 线 `71be7419a60dcce0…` 改为 5090 线
+`2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736`。
+
+⚠️ **两个 pin 装的是同一份权重**：5090 的六个文件里五个与 4090 pin 逐字节相同（含 476 MB 的
+`pytorch_model.bin`），只有 `tokenizer_config.json` 不同（公网三个源都不提供 4090 那份）。
+**同权重、不同内容地址 ⇒ 必须 pin，不能假定相等。** 4090 的 preflight（protocol `9402e880…e4319`）
+保持不变、仍然有效，本轮**另建**一份，不覆盖。
+
+### 搬到 5090 的输入（双端 sha256 全部一致）
+
+| 文件 | SHA-256（前 20） | 大小 | 来源 |
+|---|---|---:|---|
+| `runs/stages/R1/r1-v61-20260904/protocol.json` | `f0b4702b258ef612` | 8,792 B | 本地（5090 旧档 `67a36354…` 已备份为 `protocol.json.pre-c5-20260915`） |
+| `…/phase_contracts/t024_freeze.json` | `9133a73c46d7e277` | 3,499 B | 本地（5090 原本没有） |
+| `…/baselines/identity/qwen3-argument-s13-r2/predictions.jsonl` | `87c089ca7b78383f` | 108,540 B | 本地 |
+| `runs/stages/P1/p1-v6-20260904-r15/protocol.json` | `1e31a9acef39261f` | 8,545 B | 本地（5090 只有 r13/r14） |
+| `…/qwen3-full-r3/merged/predictions.jsonl` | `855906d39e71d5cef838` | 24,671,891 B / **73,939 行** | **gpu-4090**（全项目唯一副本），经本地中转 |
+
+`anchors/identity/official_joint_prediction.jsonl`（`66ff04ba…`）与 evaluator（`32919e86…`）5090 上
+本来就有且哈希一致，未重传。合并论元预测单程实测 **3 分 10 秒 / 24.7 MB ≈ 130 KB/s**。
+
+### C5.1 preflight（5090 线）
+
+| 项 | 值 |
+|---|---|
+| `protocol.json` SHA-256 | **`a3f21f971caec14f39338b649fd586df1604f3ea46c887d83f68315fcb148141`** |
+| 位置 | `gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/preflight/` |
+| status / seed / `final_valid_accessed` | `pass` / 13 / **false** |
+| `code_files` | 8 |
+| 候选 digest | `15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910` |
+| backbone | `2c7ff1f10496f2df…`（5090 线） |
+
+**两条 baseline 在 5090 上用同一个冻结 evaluator 独立重算，与 4090 线逐位相同**：
+
+| baseline | MUC F1 | B³ F1 | CEAFe F1 | BLANC F1 |
+|---|---:|---:|---:|---:|
+| MAVEN-ERE official joint（主锚） | **80.98471986417657** | 98.03986586953673 | 97.7315760306983 | 89.88008897647808 |
+
+⇒ **这组数与 backbone 无关这件事，从论证变成了实测**。`global_local_topic` 仍记
+`not_reproduced` 并带障碍文本（EasyECR `conditionally_runnable`、KBP 2017 需 LDC 许可 → FR-016 (b)）。
+
+### C5.2 CPU / CUDA 双半边：都 PASS
+
+| 半边 | 产物 | 三臂 best dev pair-F1（10 篇 / 1 epoch） |
+|---|---|---|
+| CPU（`CUDA_VISIBLE_DEVICES=`） | `…/smoke-cpu` | full 0.2222 → permutation 0.2469 |
+| CUDA | `…/smoke-cuda` | permutation 0.2273 |
+
+契约（`phases/PHASE_C5_argument_uncertainty.md` §C5.2）要求的四条断言两边都过：logits/loss/uncertainty
+有限、每个 mention 恰好一个 cluster、完整候选未变、gold argument 未被读取。
+⚠️ **契约没有要求 CPU 与 CUDA 产物逐字节相同**（那是 D4 的形态），本轮也**确实不同**——
+10 篇 / 1 epoch 下 permutation 臂 CPU .2469 vs CUDA .2273。**如实记，不当缺陷处理**；
+这两个数是冒烟的健康指示，不是结果。
+
+### 下一步
+
+**C5.3 seed-13 pilot（三臂）**，命令只需 `--contract …/preflight/protocol.json` 与 `--output`，
+其余参数全部来自契约。按 A4 单臂实测速度（2,622 篇 × 6 分钟/epoch）粗估 3 臂 × 10 epoch ≈ 3–6 小时，
+在 5090 的「≤1 天」授权内。
