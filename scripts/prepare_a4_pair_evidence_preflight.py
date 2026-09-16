@@ -43,7 +43,18 @@ EXPECTED_CANDIDATE_DIGEST = "15a3b1a548625624642130190b39411e6346866ff8594c2af20
 EXPECTED_EVALUATOR_SHA256 = (
     "32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598"
 )
-EXPECTED_MODEL_SHA256 = "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+# A4 moves to the gpu-5090 line (author, 2026-09-16: "4090 不可行就使用 5090").  The 4090's
+# four cards have been another group's vllm job since 2026-09-10 and A4.3 is the last
+# input Gate 2 waits on.  The 5090 pin carries the same roberta-base weights as the
+# 4090's -- five of six files byte-identical, `pytorch_model.bin` included -- and differs
+# only in `tokenizer_config.json`, so it is a different content address and is pinned
+# rather than assumed equal.  4090 line: 71be7419a60dcce0.
+# ⚠️ Unlike C5, this move is NOT free: all three of A4's judgement numbers (anchor 33.17,
+# A3 fallback 32.10, TacoERE 32.01) came from models we trained on the 4090, so the four
+# arms compare cleanly to each other but cross a machine boundary against those three.
+# G-13 measured that offset at about one causal F1 point on one arm.  It is a stated
+# limitation of the run, never an arithmetic correction.
+EXPECTED_MODEL_SHA256 = "2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736"
 
 # Frozen by A4.3; the preflight refuses anything else so a pilot cannot be
 # launched under a budget the contract never approved.
