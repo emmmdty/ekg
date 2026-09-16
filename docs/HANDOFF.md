@@ -10,8 +10,9 @@
 |---|---|
 | 正式阶段 | **方法实验期**。Gate 1 已判「不过」（D4 typed-cue 家族 2026-09-12 失败关闭，**不开第二周期**）。**Gate 2 等 A4.3 与 C5.3 两跑**，判还剩几个方法章。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问（`CLAUDE.md`「开工自审」节）。不可行**必须点名是数据 / 协议 / 代码 / 算力 / 授权哪一条**，附一手证据，**停下交作者裁决**，不得自行换题绕开。 |
-| **活动任务** | 🟢 **A4.3 四臂 pilot 在 5090 上跑**（`a4-v61-pair-evidence-5090-r1/pilot/`，契约 `11e4343a…490c`，约 4–5 小时）。当天已跑完 **C5.3 pilot-r2** 与 **CSProm-KG WN18RR 推理**。4090 仍被他人占满（第 7 天）。 |
-| **今天两件结果** | ① **C5.3 跑完**：`full` MUC **79.90115** > `remove_core` **79.15966** > 负控 **78.83333**（**臂序第一次是对的**，MUC 与 BLANC 同向），**但比主锚 80.98472 低 1.08、比注册对照 80.36759 低 0.47 ⇒ 门没过**（`results/PHASE_C.md`）。② **CSProm-KG 复现成功**：WN18RR MRR **0.572682** vs 公布 0.572660，四项全在事前登记容差内 ⇒ **名册第一个 FR-016 (a)**（`results/PHASE_E.md`）。 |
+| **活动任务** | 🟢 **A4.3 四臂 pilot 在 5090 上跑**（2026-09-16 11:02 起，`a4-v61-pair-evidence-5090-r1/pilot/`，契约 `11e4343a…490c`）。**实测 10–13 小时**（不是早先写的 4–5 小时），预计 09-16 深夜至 09-17 凌晨收尾。**新窗口第一件事 = §0.3.1 的收口清单。** 当天已跑完 C5.3 pilot-r2 与 CSProm-KG WN18RR 推理。4090 仍被他人占满（第 7 天）。 |
+| ⛔ **A4.3 跑完前的红线** | **不要改 A4 契约钉住的 7 个文件**（`run_/train_/evaluate_/smoke_/prepare_a4_pair_evidence*.py`、`src/ekg/relations/pair_evidence.py`、`pair_heads.py`）。`--aggregate` 会**重新校验这 7 个哈希**，改了就当场失配，四臂白跑。要改先等 `pilot_summary.json` 落地。 |
+| **2026-09-16 的两件结果** | ① **C5.3 跑完**：`full` MUC **79.90115** > `remove_core` **79.15966** > 负控 **78.83333**（**臂序第一次是对的**，MUC 与 BLANC 同向），**但比主锚 80.98472 低 1.08、比注册对照 80.36759 低 0.47 ⇒ 门没过**（`results/PHASE_C.md`）。② **CSProm-KG 复现成功**：WN18RR MRR **0.572682** vs 公布 0.572660，四项全在事前登记容差内 ⇒ **名册第一个 FR-016 (a)**（`results/PHASE_E.md`）。 |
 | **最重要的一件事** | **A4 三臂把 subevent 塌陷归因干净了**：塌的是那个 `retained` detach（根因 A），**不是 (戊)**。(戊) 单独三族全部持平或上升；**但 `full` causal F1 9.77 仍低于同 backbone 的 `remove_core` 31.13 约 21 点** ⇒ 机制层面的问题没解决。**已停下交裁决（§0.5b），不打第三次补丁。** 数字见 §0.4a 与 [`results/PHASE_A.md`](results/PHASE_A.md)。 |
 | **第二重要的一件事** | ✅ **C5.3 的根因已修并已重跑**（`a1e1509`+`a65f456`）：提交脚本加 `--argument-predictions`、冒烟补上推理路径、`predicted_arguments.py` 进 `CODE_FILES`（8→9）、**preflight-r2 `7a56e451…b6b0`** 重建。修复先用首跑遗留的 `full` checkpoint 在真实 291 篇上重放 predict 验过（291/291，251 簇）。详见 [`results/PHASE_C.md`](results/PHASE_C.md)。 |
 | **待作者裁决** | ⚪ **无**。§0.5b 已由作者 2026-09-16 裁定 **(甲) 维持现状、原样跑 A4.3**；此后 A4.3 出数字前不再接受变更。 |
@@ -41,6 +42,8 @@ uv run python scripts/audit_r1_consistency.py \
 
 工作树若出现未说明改动，**先查来源，不覆盖、不清理**。
 
+> **2026-09-17 的新窗口**：A4.3 昨晚在跑，**先做 §0.3.1 的收口清单**，再按下面的顺序补读。
+
 ### 0.2 按顺序读这三份（够了，不要重读整个仓库）
 
 1. **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** —— 唯一权威计划。§4 主表挑任务，§3 看排期与
@@ -63,12 +66,100 @@ uv run python scripts/audit_r1_consistency.py \
 | ✅ | **G-5** | ~~修 C5 推理侧口径 → 重建 `preflight-r2`~~ → **已完成 2026-09-16**（§0.4b） | — |
 | ✅ | **G-5** | ~~C5.3 pilot-r2 三臂~~ → **2026-09-16 跑完并聚合**，门未过，数字见 `results/PHASE_C.md` | — |
 | ✅ | **G-11a** | ~~CSProm-KG WN18RR 推理~~ → **(a) 已取得**，四项全在容差内，见 `results/PHASE_E.md` | — |
-| **1** | G-4 | **A4.3 四臂 pilot**（裁决 **(甲)**：代码原样，戊 in / A out）→ 跑完 `--aggregate` → 写 `results/PHASE_A.md` → **Gate 2** | 🟢 **在跑**（**5090 线**，契约 `11e4343a…490c`）。⚠️ 读数时必看 `results/PHASE_A.md` 的机器偏移限制：四臂互比干净，与 33.17 / 32.10 / 32.01 的比较跨机器（G-13 实测约 1 个 causal F1 点），**只陈述、不相减** |
+| **1** | G-4 | **A4.3 收口**：判活 → `--aggregate` → 写 `results/PHASE_A.md` → **Gate 2**。**照 §0.3.1 走** | 🟢 跑完即可做（**5090 线**，契约 `11e4343a…490c`）。⚠️ 读数时必看机器偏移限制：四臂互比干净，与 33.17 / 32.10 / 32.01 的比较跨机器（G-13 实测约 1 个 causal F1 点），**只陈述、不相减** |
 | 2 | G-11a | SimKGC / BART contrastive / MCPredictor 维持 (b)，按名册写障碍即可，不再投入复现 | 不阻塞 |
 | 4 | G-4 | A4 第二设计周期（**仅当** Gate 2 判它继续） | 不在本轮范围，Gate 2 之前不启动 |
 
 **⛔ 一律不做**：D4 第二个周期、调 threshold、扫 epoch、换 split、加大 backbone、用 seed 17/42
 去捞 D4、把探测数字写进主表或与 33.17 / 32.10 相减、为了让 C5.3 跑通去放宽那条 fail-fast。
+
+### 0.3.1 A4.3 跑完后怎么收口（新窗口的第一件事，照顺序做）
+
+> 2026-09-16 离线前写好。这一跑是 **Gate 2 的最后一个输入**，收口的每一步都在这里，
+> 不必回聊天记录。⛔ **在 `pilot_summary.json` 落地之前，不要碰 A4 契约钉住的 7 个文件。**
+
+#### 第 1 步 · 判活（三态，ssh 失败 ≠ 进程死亡）
+
+```bash
+ssh gpu-5090 'ps -eo pid,etime,cmd | grep "[r]un_a4_pair_evidence" | grep -v "bash -c"'
+ssh gpu-5090 'ls /mnt/aidata/tongjiakai/ekg/runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/'
+```
+
+- 有进程 ⇒ **ALIVE**，等；四个臂目录各有 `arm.json` ⇒ **跑完**；
+- 无进程且缺 `arm.json` ⇒ **中途死了**，看日志尾部定位（⚠️ `logs/a4_pilot_5090.log` **前段被截断过**，
+  原因见 `results/PHASE_A.md`；权威产物是各臂 `arm.json`，不受影响）；
+- ssh 连不上 ⇒ **只是隧道**，重试，**不得判进程已死**。
+
+#### 第 2 步 · 断了就只补没跑完的臂（不要重跑全部）
+
+驱动器拒绝覆盖已存在的臂目录，所以补跑要点名：
+
+```bash
+ssh gpu-5090 'cd /mnt/aidata/tongjiakai/ekg && setsid nohup .venv/bin/python -u \
+  scripts/run_a4_pair_evidence.py \
+  --contract runs/stages/A4/a4-v61-pair-evidence-5090-r1/preflight/protocol.json \
+  --output runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot \
+  --arms length_matched,no_constraint \
+  > logs/a4_pilot_5090_resume.log 2>&1 < /dev/null &'
+```
+
+⚠️ **启动类命令不要套 `for … && break` 重试循环**——ssh 后台启动返回非零码，重试会把同一条命令
+发第二次；第二条虽被守卫挡住，但**会截断第一条的日志**（2026-09-16 连犯两次）。
+
+#### 第 3 步 · 聚合（这一步会重新校验 7 个代码哈希）
+
+```bash
+ssh gpu-5090 'cd /mnt/aidata/tongjiakai/ekg && .venv/bin/python -u \
+  scripts/run_a4_pair_evidence.py \
+  --contract runs/stages/A4/a4-v61-pair-evidence-5090-r1/preflight/protocol.json \
+  --output runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot --aggregate'
+```
+
+通过即写出 `pilot_summary.json` 并打印四臂官方 causal F1。它同时断言：四臂 `status=complete`、
+同 seed、`final_valid_accessed=false`、同 candidate digest、候选对数完全相同、每臂都带 checkpoint 哈希。
+
+#### 第 4 步 · 对着这张表读数（**预期已经知道，偏离才是信号**）
+
+`full` 臂几乎肯定复现 09-15 (戊) 探测的形态——本跑 dev 轨迹与探测**逐点重合**（`results/PHASE_A.md`
+的「在跑中的三项核查」）。探测的官方分是 causal **9.77** / subevent **23.55** / temporal **52.08**。
+
+| 判据 | 线 | 探测所在位置 |
+|---|---|---|
+| causal（主指标） | 须**严格超过** 33.17 / 32.10 / 32.01 | 9.77 ⇒ **差约 22 点** |
+| subevent 护栏 | ≥ **28.75** | 23.55 ⇒ **破** |
+| temporal 护栏 | ≥ **50.63** | 52.08 ⇒ 过 |
+| `remove_core`（同机无机制参照） | — | G-13 实测 **31.13** |
+
+⇒ **预期结论：A4 第一个设计周期失败**，且失败形态是「机制比自己的消融臂低约 21 点」。
+**若实际数字与上面相差很远（比如 causal 突然 30+），先怀疑跑错了契约或选错了 checkpoint，
+不要先相信它。**
+
+⛔ 读数纪律：**四臂互比干净**（同机、同 backbone、同候选全集、同 evaluator、同 seed）；
+与 33.17 / 32.10 / 32.01 的比较**跨机器**（那三条线训在 4090 backbone 上，G-13 实测偏移约 1 个
+causal F1 点）⇒ **只陈述限制，不做算术校正**。
+
+#### 第 5 步 · 写回（五步回填见 §6）
+
+1. 数字写 [`results/PHASE_A.md`](results/PHASE_A.md)（**唯一权威**），带契约 `11e4343a…490c`、
+   四臂官方分、mediator、`revised_rows`、各 checkpoint 哈希、**机器偏移限制**；
+2. 主表 `EXPERIMENT_PLAN.md` 的 **G-4 行**改状态；`HANDOFF.md` 首表与 §0.3 队列改状态；
+3. `TODO.md` 同步；commit + **push**。
+
+#### 第 6 步 · Gate 2（两个输入齐了才判）
+
+| 输入 | 状态 |
+|---|---|
+| C5.3 | ✅ 2026-09-16：`full` MUC **79.90115**，臂序对但**低于主锚 1.08** ⇒ **门未过** |
+| A4.3 | ⏳ 本跑 |
+
+判法见 [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md) §5。**先把两条事实摆清楚再判**：
+
+- ⚠️ 「**3 章过**」分支在 Gate 1 判不过那天就已失效（D4 已关闭），最多只剩 2 个方法章；
+- C5 门未过；A4 预期门未过 ⇒ **现实区间是「1 章过甚至 0 章过」**。
+
+⛔ **Gate 2 上执行代理不得自行做的事**：降级论文结构、开新机制家族、启动第二设计周期、
+调门槛或护栏、跑未授权的 seed 17/42。**「≤1 章过」的分支写得很死：与导师共同决定改纲。**
+把两页结果摆给作者，等裁决。
 
 ### 0.4 三章现状
 
