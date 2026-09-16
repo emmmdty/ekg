@@ -82,6 +82,9 @@ CODE_FILES = (
     # Turns a checkpoint into official-shape coreference predictions, so it fixes
     # the inference protocol the arms are scored under.
     "scripts/build_maven_ere_submission.py",
+    # Decides which argument state each mention carries on both sides of the
+    # calibration, so the arms' features are only pinned if it is.
+    "src/ekg/nodes/predicted_arguments.py",
     "scripts/prepare_c5_argument_uncertainty_preflight.py",
     "scripts/smoke_c5_argument_uncertainty.py",
     # The pilot driver runs under this contract, so it belongs inside the hash
