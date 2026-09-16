@@ -173,3 +173,56 @@ def test_the_smoke_hands_the_trainer_predictions_for_its_own_documents(tmp_path:
 
     with pytest.raises(SMOKE.SmokeError, match="cover none of"):
         SMOKE._subset_predictions(source, ["absent"], tmp_path / "empty.jsonl")
+
+
+SUBMISSION = _module("build_maven_ere_submission")
+
+_CONTRACT = {
+    "seed": 13,
+    "source": {"path": "data/train.jsonl"},
+    "model": {"path": "models/roberta"},
+    "evaluator": {"path": "evaluate.py"},
+    "argument_predictions": {"path": "runs/arguments/merged.jsonl"},
+    "internal_dev_gold": {"path": "runs/gold/internal_dev.jsonl"},
+    "manifests": {
+        "train": {"path": "runs/manifests/train.json"},
+        "internal_dev": {"path": "runs/manifests/internal_dev.json"},
+    },
+    "training": {
+        "epochs": 10, "lr": 2e-5, "head_lr": 2e-5, "warmup_steps": 200,
+        "accum_steps": 1, "max_length": 512, "threshold": 0.7, "band": 0.1,
+        "endpoint_epoch": 10,
+    },
+}
+
+
+def _flag(command: list[str], name: str) -> str | None:
+    return command[command.index(name) + 1] if name in command else None
+
+
+def test_both_halves_of_an_arm_read_the_same_argument_artifact() -> None:
+    """The defect that cost C5.3 its first run, priced at one unit test.
+
+    The pilot trained with `--argument-predictions` and predicted without it, so
+    `role_compatibility` met mentions with no argument state and the contract's
+    fail-fast fired -- after the arm had trained for hours. Training and
+    inference are one calibration, so they are asserted against one artifact.
+    """
+    train = PILOT.train_command(_CONTRACT, "full", Path("out/full/checkpoint"))
+    predict = PILOT.predict_command(_CONTRACT, Path("out/full/checkpoint/epochs/epoch-10"),
+                                    Path("out/full/predictions.jsonl"))
+
+    artifact = _CONTRACT["argument_predictions"]["path"]
+    assert _flag(train, "--argument-predictions") == artifact
+    assert _flag(predict, "--argument-predictions") == artifact
+
+
+def test_the_submission_builder_accepts_every_flag_the_pilot_hands_it() -> None:
+    """`--argument-predictions` did not exist on the builder; nothing caught it."""
+    predict = PILOT.predict_command(_CONTRACT, Path("out/endpoint"), Path("out/pred.jsonl"))
+
+    parsed = SUBMISSION.build_parser().parse_args(predict[3:])  # drop python -u <script>
+
+    assert parsed.argument_predictions == Path(_CONTRACT["argument_predictions"]["path"])
+    assert parsed.coref_checkpoint == "out/endpoint"
+    assert parsed.relation_predictor == "none"

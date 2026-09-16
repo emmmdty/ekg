@@ -147,13 +147,10 @@ def _coverage(gold: Path, predictions: Path) -> dict:
     }
 
 
-def run_arm(repo: Path, contract: dict, arm: str, output: Path, contract_sha256: str) -> dict:
-    _require(not output.exists(), f"refusing to overwrite arm output: {output}")
+def train_command(contract: dict, arm: str, checkpoint: Path) -> list[str]:
+    """The training half of one arm; the arm flags are its whole difference."""
     training = contract["training"]
-    gold = Path(contract["internal_dev_gold"]["path"])
-    output.mkdir(parents=True)
-    checkpoint = output / "checkpoint"
-    train = [
+    return [
         sys.executable, "-u", "scripts/train_coref_scorer.py",
         "--train", str(Path(contract["source"]["path"])),
         "--train-manifest", str(Path(contract["manifests"]["train"]["path"])),
@@ -171,7 +168,39 @@ def run_arm(repo: Path, contract: dict, arm: str, output: Path, contract_sha256:
         "--save-every-epoch",
         *ARM_FLAGS[arm],
     ]
-    subprocess.run(train, cwd=repo, check=True)
+
+
+def predict_command(contract: dict, endpoint: Path, predictions: Path) -> list[str]:
+    """The inference half, which has to read the *same* argument artifact.
+
+    C5.3's first run trained with `--argument-predictions` and predicted without
+    it -- the flag did not exist on the submission builder -- so
+    `role_compatibility` met mentions carrying no argument state and the
+    contract's fail-fast fired after the arm had already trained.  Both halves
+    are built here, side by side, so the pairing is checkable without a GPU.
+    """
+    training = contract["training"]
+    return [
+        sys.executable, "-u", "scripts/build_maven_ere_submission.py",
+        "--test", str(Path(contract["internal_dev_gold"]["path"])),
+        "--from-labeled",
+        "--coref-predictor", "supervised",
+        "--coref-checkpoint", str(endpoint),
+        "--coref-threshold", str(training["threshold"]),
+        "--coref-band", str(training["band"]),
+        "--relation-predictor", "none",
+        "--argument-predictions", str(Path(contract["argument_predictions"]["path"])),
+        "--output", str(predictions),
+    ]
+
+
+def run_arm(repo: Path, contract: dict, arm: str, output: Path, contract_sha256: str) -> dict:
+    _require(not output.exists(), f"refusing to overwrite arm output: {output}")
+    training = contract["training"]
+    gold = Path(contract["internal_dev_gold"]["path"])
+    output.mkdir(parents=True)
+    checkpoint = output / "checkpoint"
+    subprocess.run(train_command(contract, arm, checkpoint), cwd=repo, check=True)
 
     # Fixed endpoint epoch, as the contract froze it: no epoch is selected on
     # internal-dev, so the arms cannot be compared at different budgets.
@@ -179,18 +208,7 @@ def run_arm(repo: Path, contract: dict, arm: str, output: Path, contract_sha256:
     _require(endpoint.is_dir(), f"{arm}: missing frozen endpoint checkpoint {endpoint}")
 
     predictions = output / "predictions.jsonl"
-    predict = [
-        sys.executable, "-u", "scripts/build_maven_ere_submission.py",
-        "--test", str(gold),
-        "--from-labeled",
-        "--coref-predictor", "supervised",
-        "--coref-checkpoint", str(endpoint),
-        "--coref-threshold", str(training["threshold"]),
-        "--coref-band", str(training["band"]),
-        "--relation-predictor", "none",
-        "--output", str(predictions),
-    ]
-    subprocess.run(predict, cwd=repo, check=True)
+    subprocess.run(predict_command(contract, endpoint, predictions), cwd=repo, check=True)
     _require(predictions.is_file(), f"{arm}: predictions were not written")
     coverage = _coverage(gold, predictions)
 

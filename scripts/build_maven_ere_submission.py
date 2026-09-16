@@ -44,6 +44,7 @@ from ekg.core.io import read_jsonl
 from ekg.core.schema import RelationEdge, RelationType
 from ekg.nodes.canonical import canonicalize
 from ekg.nodes.coref import candidate_coref_pairs
+from ekg.nodes.predicted_arguments import apply_predicted_arguments
 from ekg.relations.data.maven_ere import RelationDocument, _parse_unlabeled
 
 # Every key the scorer looks up must exist, empty or not: a missing key is read
@@ -205,7 +206,13 @@ def enforce_no_skipped_relations(
         )
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """The CLI, separate from `main` so a caller's argv can be checked cheaply.
+
+    C5's pilot passed a flag this builder did not have, and nothing failed until
+    a pilot arm had finished training; the pilot's own tests now parse their
+    command here instead of discovering it on the GPU.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--test", type=Path,
@@ -224,6 +231,11 @@ def main() -> int:
         help="Phase C's selected operating point; do not retune on test",
     )
     parser.add_argument("--coref-band", type=float, default=0.1)
+    parser.add_argument(
+        "--argument-predictions", type=Path,
+        help="the mention-local prediction JSONL the coreference checkpoint was trained "
+             "with; a checkpoint whose components read argument state needs it here too",
+    )
     parser.add_argument(
         "--relation-predictor", default="supervised", choices=("supervised", "none")
     )
@@ -252,7 +264,11 @@ def main() -> int:
                         default=Path("runs/submission/test_prediction.jsonl"))
     parser.add_argument("--zip", dest="make_zip", action="store_true",
                         help="also write submission.zip next to the output")
-    args = parser.parse_args()
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
 
     scorer = _build_scorer(args.coref_predictor, args.coref_checkpoint)
     extractor = _build_extractor(args.relation_predictor, args.relation_checkpoint)
@@ -271,11 +287,19 @@ def main() -> int:
         print(f"[submission] shard {k}/{n}: {len(records)} documents")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    docs = [_parse_unlabeled(record)[0] for record in records]
+    if args.argument_predictions:
+        # A checkpoint trained with role compatibility reads each mention's
+        # argument state at inference too, so that layer has to come from the
+        # same artifact training bound -- meeting a mention with no state
+        # recorded is fail-fast, and that is how C5.3's first run died after the
+        # arm had already trained. The artifact covers the whole corpus while a
+        # pass covers a split or a shard of it, so the rest is legitimately extra.
+        apply_predicted_arguments(docs, args.argument_predictions, allow_extra=True)
     n_clusters = n_rel = 0
     failed: list[tuple[str, str]] = []
     with args.output.open("w", encoding="utf-8") as fh:
-        for index, record in enumerate(records, start=1):
-            doc, _ = _parse_unlabeled(record)
+        for index, (record, doc) in enumerate(zip(records, docs, strict=True), start=1):
             clusters = predict_coreference(
                 doc, scorer, threshold=args.coref_threshold, band=args.coref_band
             )

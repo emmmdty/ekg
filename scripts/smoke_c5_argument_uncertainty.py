@@ -213,6 +213,11 @@ def run(args: argparse.Namespace) -> dict:
     dev_ids = load_manifest_ids(args.dev_manifest)[: args.docs]
     source = args.output / "smoke_source.jsonl"
     _subset(args.source, train_ids + dev_ids, source)
+    # Inference runs over the dev documents alone while the prediction artifact
+    # covers both halves, which is the pilot's own shape: the submission builder
+    # has to accept an artifact wider than the pass it is annotating.
+    dev_source = args.output / "smoke_dev_source.jsonl"
+    _subset(args.source, dev_ids, dev_source)
     predictions = args.output / "smoke_argument_predictions.jsonl"
     _subset_predictions(args.argument_predictions, train_ids + dev_ids, predictions)
     train_manifest = _manifest(args.output / "train_manifest.json", train_ids)
@@ -244,10 +249,35 @@ def run(args: argparse.Namespace) -> dict:
             seed == expected,
             f"{arm}: checkpoint declares role_permutation_seed={seed!r}, expected {expected!r}",
         )
+        # The inference path, which the smoke used to skip entirely: it trained,
+        # exported and reloaded, but never ran the submission builder, so C5.3
+        # failed there after a full pilot arm had already trained.  Predicting
+        # here costs seconds and covers the one command the pilot runs next.
+        predicted = args.output / arm / "predictions.jsonl"
+        subprocess.run(
+            [
+                sys.executable, "-u", "scripts/build_maven_ere_submission.py",
+                "--test", str(dev_source),
+                "--from-labeled",
+                "--coref-predictor", "supervised",
+                "--coref-checkpoint", str(checkpoint),
+                "--relation-predictor", "none",
+                "--argument-predictions", str(predictions),
+                "--output", str(predicted),
+            ],
+            cwd=args.repo,
+            check=True,
+        )
+        written = [line for line in predicted.read_text(encoding="utf-8").splitlines() if line]
+        _require(
+            len(written) == len(dev_ids),
+            f"{arm}: predicted {len(written)} of {len(dev_ids)} internal-dev documents",
+        )
         arms[arm] = {
             "checkpoint": str(checkpoint),
             "role_permutation_seed": seed,
             "config_sha256": sha256_file(checkpoint / "coref_config.json"),
+            "predicted_documents": len(written),
         }
 
     # The arms must differ where they are declared to differ and nowhere else:

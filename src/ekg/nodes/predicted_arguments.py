@@ -12,8 +12,18 @@ _ROLES = {"participant", "place"}
 _STATUSES = {"ok", "empty", "partial", "rejected"}
 
 
-def apply_predicted_arguments(docs: Sequence, path: str | Path) -> None:
-    """Apply a complete JSONL prediction artifact, rejecting ID or offset drift."""
+def apply_predicted_arguments(
+    docs: Sequence, path: str | Path, *, allow_extra: bool = False
+) -> None:
+    """Apply a complete JSONL prediction artifact, rejecting ID or offset drift.
+
+    `allow_extra` keeps the missing half of that guard and drops only the other,
+    for the side that annotates a subset of the corpus the artifact covers: C5
+    predicts the 291 internal-dev documents from the file that annotated all
+    2,913. Subsetting the file to silence those extras would hand training and
+    inference two different artifacts -- the mismatch this binding exists to
+    prevent -- so the subset is declared here instead.
+    """
     lines = Path(path).read_text(encoding="utf-8").splitlines()
     rows = [json.loads(line) for line in lines if line]
     by_id = {}
@@ -25,7 +35,7 @@ def apply_predicted_arguments(docs: Sequence, path: str | Path) -> None:
 
     expected = {node.event_id for doc in docs for node in doc.nodes}
     missing, extra = expected - by_id.keys(), by_id.keys() - expected
-    if missing or extra:
+    if missing or (extra and not allow_extra):
         raise ValueError(
             f"missing predictions={len(missing)} extra predictions={len(extra)}"
         )
