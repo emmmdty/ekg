@@ -972,3 +972,121 @@ SmokeError: bound code hash drift: scripts/smoke_c5_argument_uncertainty.py
 **C5.3 seed-13 pilot（三臂）**，命令只需 `--contract …/preflight/protocol.json` 与 `--output`，
 其余参数全部来自契约。按 A4 单臂实测速度（2,622 篇 × 6 分钟/epoch）粗估 3 臂 × 10 epoch ≈ 3–6 小时，
 在 5090 的「≤1 天」授权内。
+
+## ★ C5.3 首跑失败 → 根因修复 → preflight-r2 → 重跑（2026-09-16，gpu-5090）
+
+### 首跑怎么死的
+
+`full` 臂**训练跑完 10 epoch**，倒在 predict 步：
+
+```
+ValueError: 7028d05b…::bbbd0de0…: argument state is None, expected one of ('ok','empty','partial','rejected')
+  role_uncertainty.py:69 mention_argument_state
+  ← discriminative.py:253 pair_head_inputs ← coref.py:385 score
+  ← build_maven_ere_submission.py:112 predict_coreference
+```
+
+逐层核到的事实（数据一侧全部清白）：
+
+| 核查点 | 结论 |
+|---|---|
+| 论元预测文件 | ✅ 73,939 条**全部**带 `status`，取值就是契约要的四种（ok 72,183 / empty 1,123 / partial 591 / rejected 42） |
+| `mention_argument_state()` | 读 `node.metadata["argument_prediction_status"]`（`role_uncertainty.py:47,67`） |
+| 谁写这个键 | 只有 `predicted_arguments.py`，而**推理路径从没调过它** |
+| pilot 的两条命令 | 训练带 `--argument-predictions`，predict **不带** |
+| `build_maven_ere_submission.py` | **CLI 里根本没有这个选项** ⇒ 推理侧物理上拿不到论元层 |
+| 冒烟为什么没抓到 | 它 train/export/reload 全做，**从不运行 `build_maven_ere_submission.py`** |
+
+**与 C5.2 冒烟抓到的 A 类缺陷同族**（「训练/推理口径不成对」），换了条路径复发。
+
+### 修法（`a1e1509` + `a65f456`）
+
+- 提交脚本加 `--argument-predictions`，在遍历前一次性绑定；
+- `apply_predicted_arguments` 加 `allow_extra`：推理只标注 2,913 篇里的 291 篇，**missing 仍然致命**，
+  只放开 extra。⚠️ 反过来做（把文件裁到 291 篇）会让训练与推理拿到**两个不同的产物**——正是这条绑定
+  要防的东西；
+- pilot 的两条命令改由 `train_command` / `predict_command` 生成，**配对关系无需 GPU 即可断言**；
+- **冒烟补上推理路径**（每臂训完跑一次提交脚本，且故意让预测文件宽于被标注的文档集）；
+- ⛔ fail-fast **原样未动**：没有默认 state，没有放宽断言。
+
+**4 条新 targeted tests，639 passed / 29 skipped（原 635）、ruff 0、`ekg-smoke` OK。**
+
+### 修复验证：用首跑遗留的 `full` checkpoint 重放 predict（先冒烟再训练）
+
+不重训，直接拿 `pilot/full/checkpoint/epochs/epoch-10` 跑那条**原样失败过**的命令 + 新选项：
+
+```
+291/291 documents, 251 non-singleton clusters, exit 0
+runs/scratch/c5_predict_fixcheck/predictions.jsonl
+```
+
+⇒ 修的是对的那处，且在真实的 291 篇 / 7,195 mention 规模上验过，**不是靠推理**。
+这份产物只用于验证，**不进任何表**。
+
+### preflight-r2（旧 `preflight/` 不覆盖）
+
+改了 3 个被契约钉住的文件，按 D4/C5 先例重建；同时补上一个真缺口——
+`src/ekg/nodes/predicted_arguments.py` **决定每个 mention 拿到什么 argument state，却没被哈希钉住**，
+现已进 `CODE_FILES`（8 → 9）。
+
+| 项 | 值 |
+|---|---|
+| `protocol.json` SHA-256 | **`7a56e451d45436d3160488bc301fe244384332a423131b5b2ccb93cd6c75b6b0`** |
+| `code_files` | **9**（旧 r1 = 8） |
+| status / seed / `final_valid_accessed` | `pass` / 13 / **false** |
+| 候选 digest | `15a3b1a5…dac10910`（与 r1 同） |
+| 自物化 internal-dev gold | 与 r1 **同哈希** |
+| 两条 baseline 独立重算 | MUC **80.98471986417657** / **80.36758563074353**，与 r1、与 4090 线**逐位相同** |
+
+（中途踩了一个小坑：`--output` 是 **protocol.json 的文件路径**，不是目录；第一次传成目录名，
+把 `baselines/`、`data/` 写到了 stage 根下。误写的三样当场删除，`preflight/` 与 `pilot/` 未被触碰。）
+
+### 重跑
+
+`runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/`，契约 `7a56e451…b6b0`，
+三臂全部重训——**不复用 r1 契约下训出来的 `full` checkpoint**：一个产物只挂一个契约，
+省那一小时不值得在结果页上加一条例外脚注。
+
+## ★★★ C5.3 seed-13 pilot-r2（三臂）：**机制方向对了，但整条 head 仍低于主锚**（2026-09-16，gpu-5090）
+
+产物 `gpu-5090:…/c5-v61-argument-uncertainty-5090-r1/pilot-r2/`，契约
+**`7a56e451d45436d3160488bc301fe244384332a423131b5b2ccb93cd6c75b6b0`**（preflight-r2，`code_files=9`），
+seed 13，`final_valid_accessed=false`。覆盖断言三臂全过：**291 篇 / 8,914 gold mention，
+重复 0、陌生 0**（8,0xx 个是合法单例——官方 scorer 自动补单例，所以覆盖按 gold population 数，
+不从指标反推）。
+
+### 主表（官方 evaluator，internal-dev 291 篇）
+
+| 臂 | **MUC F1** | vs 主锚 `80.98472` | vs 注册对照 `80.36759` | B³ F1 | CEAFe F1 | BLANC F1 | 入簇 mention |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **full**（role-compatibility 残差） | **79.90115** | **−1.084** | **−0.466** | 97.9177 | 97.5374 | **90.2893** | 891 |
+| remove_core（无残差，同语料同预算） | 79.15966 | −1.825 | −1.208 | 97.9034 | 97.4814 | 89.6895 | 856 |
+| permutation（负控，文档×事件类型内打乱） | 78.83333 | −2.151 | −1.534 | 97.8301 | 97.4640 | 89.5839 | 879 |
+
+**`gate.above_anchor=false`、`gate.above_registered_control=false`**（driver 只报不判，判在这一页）。
+
+### 三条读法
+
+1. **臂序第一次是对的**：`full` > `remove_core` > `permutation`，**MUC 与 BLANC 两个指标同向**
+   （+0.742 / +1.068 与 +0.600 / +0.706）。这是本项目 7 个机制里**第一个负控最低、消融居中的**
+   ——D4 是负控赢过 full，A4 是消融赢过 full 21 点。**机制本身不是噪声或反向。**
+2. ⚠️ **但门没过**：`full` 比冻结主锚低 **1.08** MUC，比注册负面对照也低 **0.47**。
+   Ch5 的成功条件是「在统一公开主指标上超过冻结主锚」，**seed 13 上没有做到**。
+3. **B³ / CEAFe 三臂几乎不动**（97.83–97.92 / 97.46–97.54）：8,914 个 mention 里 8,0xx 是单例，
+   这两个指标被单例主导，**区分度在 MUC 与 BLANC 上**。报 Ch5 时别拿 B³ 的「三臂都 97.9」当稳健性证据。
+
+⚠️ **+0.742 这个差先别当效应**：本 split / 本指标的**可复现地板还没量过**（D4 的 ±.01 是
+macro-F1 的地板，不能搬过来）。要把臂序写成结论，得先有 MUC 的噪声地板或配对统计——
+**这属于 Gate 2 之后的事，本轮不据此改设计**。
+
+### 与 D4 的对照：同一个形状，不同的位置
+
+D4 的 `remove_core .536788` 就已经低于锚 `.553995` ⇒ **整个 head 低于基线**，机制上场前已经输了。
+C5 是同一形状：`remove_core 79.16` 低于锚 **1.83**，机制把它抬回 **79.90**，**抬了但没抬过线**。
+⇒ 差距的主要来源不是「role-compatibility 有没有用」，而是**我们这条监督共指 head 本身比官方 joint 低**。
+这条留给 Gate 2，**不在本轮改**（改了就是看到分数再改设计）。
+
+### 下一步
+
+Gate 2 的两个输入现在到了一个（C5.3 ✅ / A4.3 仍等 4090 空卡）。**Gate 2 之前不启动 C5 第二周期**，
+也不跑 seed 17/42（未授权，且 `gate` 两项皆 false 本就不满足 matched-seeds 的前置）。

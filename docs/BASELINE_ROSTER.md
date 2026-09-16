@@ -181,7 +181,7 @@ FR-016 判定：
 | 方法 | FR-016 状态 | 障碍原文 |
 |---|---|---|
 | **SeDGPL**（基座） | **(b)** | 「原论文 CGEP-MAVEN 派生数据未发布；其 CGEP-ESC 一列按原文 §5.1 声明的 topic 级 5 折 CV 复现只得 MRR .0599 vs 原文 .196，公开件不含折分配与 dev topic 名单，另有两处未公开自由度」 |
-| **CSProm-KG** | **(a) 在 WN18RR 上取得**（推理重放公开 checkpoint，容差事前登记见 `results/PHASE_E.md`），在我们的重建协议上仍是 **(b)** | 「未实现 CGEP；SeDGPL 作者的适配未发布」 |
+| **CSProm-KG** | ✅ **(a) 已实测取得（2026-09-16）**：WN18RR **MRR 0.572682** vs 公布 0.572660（容差 ±0.005），H@1/3/10 = 52.06 / 59.03 / 67.77 vs 52.06 / 59.00 / 67.79（各 ±0.5），**四项全落容差内**；数字、五处透明补丁与前后 hash 见 [`results/PHASE_E.md`](results/PHASE_E.md)。⚠️ 在我们的重建协议上**仍是 (b)** | 「未实现 CGEP；SeDGPL 作者的适配未发布」 |
 | **SimKGC** | **(b)** | 「原配置 `--batch-size 1024` 需 4×32 GB（其 README 第 18/111/116 行），5090 单卡 32 GB、4090 四卡 96 GB 均不足；减 batch 会改变其 in-batch 负样本数，按定义即非其发表设置」 |
 | **BART contrastive** | **(b)** | 「`torch==1.7.1` + apex 版本墙；另需两阶段预训练」 |
 | **MCPredictor** | **(b)** | 「需 LDC2011T07 Gigaword 许可 + python2.7 预处理链」 |

@@ -644,3 +644,60 @@ sha256 `27e40718319480e9601ae695…`（本地下载后 rsync 到 5090，双端�
 backbone `bert-large-uncased` **直接在 5090 上从 ModelScope 下载**（`AI-ModelScope/bert-large-uncased`，
 1,344,997,306 B，sha256 `be24b235c46198938ac26993…`），**没走隧道**——这一条就是「优先下载、
 用镜像」的实际收益：1.3 GB 本地中转要约 3 小时，服务器直下是分钟级。
+
+## ★★★ G-11a 收口 · CSProm-KG WN18RR **复现成功，落 FR-016 (a)**（2026-09-16，gpu-5090）
+
+### 开工自审
+
+1. **科研价值**：Ch6 主表（`EXPERIMENT_PLAN.md` §7.4）要求带公开对手；CSProm-KG 是四个对手里
+   **唯一有公开 checkpoint**的，(a) 只需一次纯推理。证据是它 README 的 Pretrained Checkpoint 表
+   （MRR 0.572660 / H@1 52.06 / H@3 59.00 / H@10 67.79），容差 **09-15 事前登记**为
+   MRR ±0.005、H@k ±0.5 点（紧于 D4 的 ±1.0，因为纯推理重放没有训练方差）。
+2. **可行性**：仓库、独立 venv、backbone、checkpoint 四样 09-15 已就位且双端 sha256 一致；
+   单卡推理，与 C5.3 并卡（C5.3 只吃 3.4 GB）。
+
+### 结果：四项全部落在事前登记的容差内
+
+| | 本次实测（5090） | README 公布 | 差 | 容差 | 判定 |
+|---|---:|---:|---:|---|---|
+| **MRR** | **0.572682** | 0.572660 | **+0.000022** | ±0.005 | ✅ |
+| H@1 | 52.06% | 52.06% | 0.00 | ±0.5 | ✅ |
+| H@3 | 59.03% | 59.00% | +0.03 | ±0.5 | ✅ |
+| H@10 | 67.77% | 67.79% | −0.02 | ±0.5 | ✅ |
+
+分向明细（论文只给 mean 一行，这里一并留档）：
+
+| 方向 | MRR | MR | H@1 | H@3 | H@10 |
+|---|---:|---:|---:|---:|---:|
+| tail ranking | 0.658188 | 287.046267 | 59.80% | 68.41% | 77.73% |
+| head ranking | 0.487176 | 630.361838 | 44.32% | 49.65% | 57.82% |
+| **mean** | **0.572682** | 458.704052 | **52.06%** | **59.03%** | **67.77%** |
+
+⇒ **CSProm-KG 在其原始基准上的 FR-016 状态由 (b) 升为 (a)**，是名册里第一个 (a)。
+⚠️ **这不改变它在我们重建协议上的状态**：它没有实现 CGEP，进 Ch6 主表时仍是 (b)，
+`BASELINE_ROSTER.md` §6.2b 逐行分开记。
+
+推理耗时 **9 秒 / 25 batch**（40,943 实体 × 11 关系，batch 128）；总墙钟时间几乎全在数据预处理与
+排障上。产物：`gpu-5090:/mnt/aidata/tongjiakai/baselines/CSProm-KG/logs/csprom_wn18rr_eval.log`。
+
+### 五处透明补丁（前后 hash 全记，`-n_lar 8` 等超参一个没动）
+
+⚠️ **上一节「transformers 5.17.0 只用 BertTokenizer/BertModel」这句话是错的**——作者自写的
+`BertModelForLayerwise` 继承 transformers 的 BertModel 并调 `get_extended_attention_mask`，
+**5.x 把它删了**。教训与 C-4b 那条同源：**只看 import 不看子类实现，会把「能跑」判早**。
+
+| # | 文件 / 环境 | 症状 | 补丁 | before → after sha256 |
+|---|---|---|---|---|
+| 1 | `helper.py` | `nltk.download('stopwords')` 在无外网的机器上**永久挂起**（ESTAB 到 raw.githubusercontent，不返回） | 语料经 gh-proxy 预装到 `~/nltk_data`（`stopwords.zip` sha256 `48c0e52d…946b`，english 198 词），`download` 改为**仅在 `nltk.data.find` 失败时**调用 | `e4f5c20d…1863` → `ece65eb8…6daa` |
+| 2 | `main.py` | checkpoint 存自 **CUDA device 5**，本机单卡，torch 拒绝反序列化 | `load_from_checkpoint(..., map_location='cpu')`，PL 随后自行搬到 trainer 设备 | `48f62ed6…0242` → `d801ac93…d1a8` |
+| 3 | `main.py` | torch ≥ 2.6 默认 `weights_only=True`，checkpoint 里有 `argparse.Namespace` / `collections.defaultdict` | 模块层 `add_safe_globals([...])`（**保留 `weights_only=True`**，不是全局关掉校验） | → `102e2acc…cc96` |
+| 4 | `models/P_model.py` | PL ≥ 2.0 删了 `validation_epoch_end` / `test_epoch_end`，且**定义了就拒绝运行**；又要求那个参数**名叫** `dataloader_idx` | 逐批 ranks 改在 `validation_step` 里累积，指标计算仍是作者原方法（改名 `_ekg_epoch_end`）；参数改名，函数体内保留作者原变量名 | `18dcab1d…d429` → `7ff9426a…51bb` |
+| 5 | `helper.py` | `np.float` 在 numpy 2 已删（作者 pin 1.21.5） | 换成内建 `float`（numpy 自己的 removal note 说是同一语义） | → `2e409e71…6b3b` |
+
+另加一处**环境**改动：该 venv 的 `transformers` **5.17.0 → 4.57.6**（作者原 pin 4.16.2；
+4.16.2 在 py3.12 上装不了，4.57.6 是仍保留 `get_extended_attention_mask` 的最后一条 4.x 线）。
+torch 2.8.0 / PL 2.6.6 **不动**（sm_120 必需）。
+
+**载入完整性**：`strict=False` 下唯一的多余键是 `plm.embeddings.position_ids`
+（新版 transformers 去掉的 buffer），**没有任何 missing key** ⇒ 没有哪一层是随机初始化的。
+这一条要和分数一起看：数字对得上，且不是靠半个随机模型对上的。

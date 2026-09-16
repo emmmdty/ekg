@@ -317,12 +317,13 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **G-2** | **D4.3 seed-13 五折 pilot（三臂）** —— ❌ **2026-09-12 跑完，机制失败**：full .476515 < remove-core .536788 < 两个锚；中介反向、PS−/Uu 护栏双破；负控也赢过 full。**typed-cue 家族第 1 个有效周期失败**，详见 `results/PHASE_D.md`。原注：**已启动**（4090，5 折铺 4 卡，预计 4–4.5 小时，收尾脚本自动汇总）。原注：队首，曾**被缺失的入口脚本挡住**：契约冻结的 `scripts/run_d4_typed_cue_oof.py` **从未被写过**（2026-09-12 发现）。先做 **C-9**，再谈授权 | **C-9** + G-1 ✅ + 作者授权长任务 | ~1.5 GPU·day（4 卡可按折并行） | 2,913 篇 / 73,939 mention 各恰好一次 OOF 预测；逐实例概率/cue/evidence/三级 logits/confusion 落盘 |
 | **G-3** | D4 supporting-word baseline 五折重建 | C-1 + G-0 | ~1 GPU·day | 先在官方划分复现官方数字（容差事前定 ±1.0 macro-F1）→ FR-016 状态 (a)；再转五折 OOF |
 | **G-4** | **~~A4.1 preflight~~ → A4.2 smoke → A4.3 seed-13 pilot（四臂）**。⚠️ **A4.1 从来不属于本泳道**：`prepare_a4_pair_evidence_preflight.py` 零 torch/cuda 引用，`--model` 只算目录内容摘要、不加载模型；它已于 **2026-09-13 在 4090 上纯 CPU 跑完并 PASS**（protocol `321309ac…d65451`，`code_files=7`，两条 baseline 独立重算与 §7.2 逐项吻合，见 `results/PHASE_A.md`）。原先写的「等 4090 空出卡」「卡在 4090 上的两个文件」**都不成立**——被占的是 GPU 不是文件系统，ssh 与 CPU 全程可用。**本行现在只剩 A4.2/A4.3，等空闲卡 + 授权长任务**；A4.2 可走 5090（§3.5）。2026-09-13 核卡：4090 四张仍被他人 vllm 占满（19.4–20.5 GB / 24.5 GB，89–99% util） | C-6 ✅ + **A4.1 ✅** + G-0 ✅ + 空闲卡 + 授权 | ~2–3 GPU·day | 完整候选逐位不变；逐实例 evidence 与三种 counterfactual logits 落盘 |
-| **G-5** | C5.2 smoke → **C5.3 seed-13 pilot（三臂）** | C-5 + G-0 + 授权；**C5.1 preflight ✅ PASS 2026-09-13**（4090 纯 CPU，`protocol.json` `9402e880…e4319`、`code_files=8`、主锚 MUC 80.98472 / 注册对照 80.367586 独立重算一致、internal-dev gold `403b69a8…` 与 A4.1 同哈希） | ~1 GPU·day | 291 篇 / 7,195 mention 全覆盖；false-merge 中介与 calibration 落盘 |
+| **G-5** | ~~C5.2 smoke → C5.3 seed-13 pilot（三臂）~~ → ✅ **2026-09-16 跑完（5090）**：`full` MUC **79.90115** > `remove_core` **79.15966** > 负控 **78.83333**——**臂序第一次是对的**，但 `full` 比主锚 80.98472 低 **1.08**、比注册对照低 **0.47** ⇒ **门未过**，`gate.above_anchor=false`。契约 preflight-r2 `7a56e451…b6b0`（`code_files=9`）；首跑因「推理侧没有 `--argument-predictions`」失败，已修并补进冒烟。详见 `results/PHASE_C.md`。原注：C5.2 smoke → C5.3 seed-13 pilot（三臂） | C-5 + G-0 + 授权；**C5.1 preflight ✅ PASS 2026-09-13**（4090 纯 CPU，`protocol.json` `9402e880…e4319`、`code_files=8`、主锚 MUC 80.98472 / 注册对照 80.367586 独立重算一致、internal-dev gold `403b69a8…` 与 A4.1 同哈希） | ~1 GPU·day | 291 篇 / 7,195 mention 全覆盖；false-merge 中介与 calibration 落盘 |
 | **G-6** | EasyECR Global-Local Topic 复现 | C-2 判定可跑 + G-0 | ~1–2 GPU·day + 调试 | 若 KBP 2017 可得则先复现其发表数字（(a)）；否则直接跑 MAVEN-ERE 并标 (b) + 列差异 |
 | **G-7** | LLM 对照 ×3 章（Qwen3-8B LoRA） | C-7 + G-0 | ~1 GPU·day/章 | 三章主表各加 1–2 行；披露 backbone/revision/微调方式/提示模板 |
 | **G-8** | E8.2 LLMERE 全量重生成 + 官方评分 | C-3 + **作者明确授权** | 42 GPU·h（批量化后 3–5 h） | 11,149 条同一规则重生成；官方 evaluator 打分；或如实记为不可评分失败 |
 | **G-9** | matched seeds 13/17/42（**仅对已过 seed-13 门的章**） | G-2/G-4/G-5 过门 + **逐次授权** | 各 ~2× pilot | mean delta、2/3 为正、10,000 次配对 bootstrap CI 下界 > 0 |
 | **G-10** | sealed final-valid ×1（**仅对已过 confirmation 的章**） | G-9 + 配置完全冻结 | 小时级 | 一次性评测，写入 final-valid ledger |
+| **G-11a** | ~~4 个外部对手复现~~ → **CSProm-KG ✅ 2026-09-16 取得 (a)**（WN18RR MRR 0.572682 vs 0.572660，四项全在事前登记容差内；五处透明补丁与前后 hash 见 `results/PHASE_E.md`）。SimKGC / BART contrastive / MCPredictor 维持 **(b)** 并写障碍，**不再投入复现** | C-10 ✅ | 已达成（CSProm-KG 部分） | 名册 §6.2b |
 | **G-11** | Ch6：E3.0 → E3.1 → E3.2 → E3.3 → E3.4 → E3.5 | C-4 + 至少一章的 bundle/fallback + G-0 | ~1–2 GPU·day | 见 `phases/PHASE_E3_graph_application.md` 的 Done when |
 | **G-12** | H2 全篇复现验收（默认 CPU/cache） | G-11 | ~CPU | 见 `phases/PHASE_H2_thesis_acceptance.md` 七项审计 |
 
@@ -357,7 +358,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | Gate | 触发时点 | 要判什么 | 分支 |
 |---|---|---|---|
 | ~~**Gate 1**~~ | ~~G-2（D4.3）出结果~~ | **2026-09-12 已判定：不过。** full `.476515` 低于两个锚；full 相对 remove-core `.536788` **抬高**了注册 confusion；permutation `.495260` 也赢过 full。三项全败，无一含糊 | **已走「不过」分支**：typed-cue 家族关闭，**不启动第二个周期**，转 G-4/G-5，到 Gate 2 判结构。详见 `results/PHASE_D.md` |
-| **Gate 2** | G-4 与 G-5 都出结果 | 还剩几个方法章 | **3 章过** → 博士量级，按原结构写。**2 章过** → 正好是领域硕士标准形态（2 方法章 + 1 应用章），按此写。**≤1 章过** → 与导师共同决定改纲，**不得**自行降级或再开新机制家族 |
+| **Gate 2** | G-4 与 G-5 都出结果（**G-5 已到，2026-09-16；只差 G-4**） | 还剩几个方法章 | ~~**3 章过** → 博士量级~~ ⚠️ **这条分支在 Gate 1 判「不过」那天就已失效**：D4 已关闭，剩下的方法章最多 2 个。**2 章过** → 领域硕士标准形态（2 方法章 + 1 应用章），按此写。**≤1 章过** → 与导师共同决定改纲，**不得**自行降级或再开新机制家族。⚠️ 当前实测：C5 门未过（低于主锚 1.08），A4 探测显示 `full` 低于自身消融 21 点 ⇒ **「1 章过甚至 0 章过」是现实区间，写进 Gate 2 的准备里，但不得在 A4.3 出数字前提前宣判** |
 | ~~**Gate 3**~~ | ~~C-4 冻结~~ | ~~Ch6 能否凑够 ≥3 个公开对手~~ | **2026-09-11 已判定：能。** 五个对手全部有公开训练代码，Ch6 按 E3.3 做带对手的应用章。遗留问题移入 C-4b：原论文 CGEP-MAVEN 派生数据未发布，故对手默认落 FR-016 状态 (b)，能否经 CGEP-ESC 升到 (a) 待验 |
 
 Gate 之外不重排计划。Gate 上的裁决必须写回本文件与 `HANDOFF.md`。

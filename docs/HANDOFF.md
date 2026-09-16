@@ -10,10 +10,11 @@
 |---|---|
 | 正式阶段 | **方法实验期**。Gate 1 已判「不过」（D4 typed-cue 家族 2026-09-12 失败关闭，**不开第二周期**）。**Gate 2 等 A4.3 与 C5.3 两跑**，判还剩几个方法章。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问（`CLAUDE.md`「开工自审」节）。不可行**必须点名是数据 / 协议 / 代码 / 算力 / 授权哪一条**，附一手证据，**停下交作者裁决**，不得自行换题绕开。 |
-| **活动任务** | ⚪ **零件**。两台机器都没有我们的任务在跑（2026-09-16 07:56 复核：5090 197 MiB / 32,607 MiB）。 |
+| **活动任务** | ⚪ **零件**（2026-09-16 收工）。当天在 5090 上跑完两件：**C5.3 pilot-r2 三臂**与 **CSProm-KG WN18RR 推理**，结果都已落结果页。4090 仍被他人占满（第 7 天）。 |
+| **今天两件结果** | ① **C5.3 跑完**：`full` MUC **79.90115** > `remove_core` **79.15966** > 负控 **78.83333**（**臂序第一次是对的**，MUC 与 BLANC 同向），**但比主锚 80.98472 低 1.08、比注册对照 80.36759 低 0.47 ⇒ 门没过**（`results/PHASE_C.md`）。② **CSProm-KG 复现成功**：WN18RR MRR **0.572682** vs 公布 0.572660，四项全在事前登记容差内 ⇒ **名册第一个 FR-016 (a)**（`results/PHASE_E.md`）。 |
 | **最重要的一件事** | **A4 三臂把 subevent 塌陷归因干净了**：塌的是那个 `retained` detach（根因 A），**不是 (戊)**。(戊) 单独三族全部持平或上升；**但 `full` causal F1 9.77 仍低于同 backbone 的 `remove_core` 31.13 约 21 点** ⇒ 机制层面的问题没解决。**已停下交裁决（§0.5b），不打第三次补丁。** 数字见 §0.4a 与 [`results/PHASE_A.md`](results/PHASE_A.md)。 |
-| **第二重要的一件事** | **C5.3 首跑失败，根因定位到一行**：训练侧传了 `--argument-predictions`，**推理侧根本没有这个选项** ⇒ `role_compatibility` 在推理时读不到 `argument_prediction_status`，fail-fast 触发。**数据没问题**（73,939 条全带 `status`）。这是 C5.2 冒烟抓过的「训练/推理口径不成对」的**同一族缺陷**，换了个路径复发。修法与代价见 §0.4b。 |
-| **待作者裁决** | **1 项**（§0.5b）：A4 第一个周期就这么原样跑 A4.3 交 Gate 2，还是先动第 8 臂语义（乙）。**我的推荐是原样跑**，理由见该节。 |
+| **第二重要的一件事** | ✅ **C5.3 的根因已修并已重跑**（`a1e1509`+`a65f456`）：提交脚本加 `--argument-predictions`、冒烟补上推理路径、`predicted_arguments.py` 进 `CODE_FILES`（8→9）、**preflight-r2 `7a56e451…b6b0`** 重建。修复先用首跑遗留的 `full` checkpoint 在真实 291 篇上重放 predict 验过（291/291，251 簇）。详见 [`results/PHASE_C.md`](results/PHASE_C.md)。 |
+| **待作者裁决** | ⚪ **无**。§0.5b 已由作者 2026-09-16 裁定 **(甲) 维持现状、原样跑 A4.3**；此后 A4.3 出数字前不再接受变更。 |
 | 论文结构 | 第3章 D4 事实性（**本轮失败**）· 第4章 A4 关系 · 第5章 C5 身份 · 第6章 E3 图谱构建与下游应用。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。**章节存废在 Gate 2 判，执行代理不得自行改成两方法章。** |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文队列只是当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。 |
 | **gpu-4090** | ⛔ 四卡自 09-10 起被他人 vllm 占满（09-15 复核 19,25x / 24,564 MiB），已第 6 天。**ssh 与 CPU 全程可用，纯 CPU 任务照常跑。** 作者 2026-09-15：**不要因为 4090 拖慢进度，先在能用的卡上推进，4090 以后再补。** |
@@ -59,9 +60,11 @@ uv run python scripts/audit_r1_consistency.py \
 
 | 次序 | 主表 ID | 做什么 | 卡在什么 |
 |---|---|---|---|
-| **1** | **G-5** | **修 C5 推理侧口径**（§0.4b）→ 重建 `preflight-r2` → **重跑 C5.3** | ⚪ **不卡**。改代码 + 纯 CPU 重建 + 5090 空闲，**队首** |
-| 2 | G-11a | **CSProm-KG WN18RR 推理取 (a)**（§0.4c） | ⚪ 四样东西已齐，只要一张卡；与 C5.3 可并卡（C5.3 实测仅 3.4 GB） |
-| 3 | G-4 | A4.2 smoke → **A4.3 四臂 pilot** | ⛔ 等 §0.5b 裁决 + **必须在 4090**（backbone pin，§0.4a）+ 先重建 `preflight-r2` |
+| ✅ | **G-5** | ~~修 C5 推理侧口径 → 重建 `preflight-r2`~~ → **已完成 2026-09-16**（§0.4b） | — |
+| ✅ | **G-5** | ~~C5.3 pilot-r2 三臂~~ → **2026-09-16 跑完并聚合**，门未过，数字见 `results/PHASE_C.md` | — |
+| ✅ | **G-11a** | ~~CSProm-KG WN18RR 推理~~ → **(a) 已取得**，四项全在容差内，见 `results/PHASE_E.md` | — |
+| **1** | G-4 | A4.2 smoke → **A4.3 四臂 pilot**（裁决 **(甲)**：代码原样，戊 in / A out） | ⛔ **只卡一张 4090 空卡**（backbone pin，§0.4a）+ 上卡前先重建 A4 的 `preflight-r2`。**这是 Gate 2 唯一还缺的输入** |
+| 2 | G-11a | SimKGC / BART contrastive / MCPredictor 维持 (b)，按名册写障碍即可，不再投入复现 | 不阻塞 |
 | 4 | G-4 | A4 第二设计周期（**仅当** Gate 2 判它继续） | 不在本轮范围，Gate 2 之前不启动 |
 
 **⛔ 一律不做**：D4 第二个周期、调 threshold、扫 epoch、换 split、加大 backbone、用 seed 17/42
@@ -100,7 +103,7 @@ G-13 实测同一臂在 5090 backbone 上是 **31.13** ⇒ 换机就引入混淆
 另外 `run_a4_pair_evidence.py` 等 4 个被契约钉住的文件都改过，**A4.2 之前必须重建 `preflight-r2`**
 （4090 纯 CPU），旧 `preflight/` 不覆盖。
 
-#### 0.4b Ch5（C5 argument uncertainty）：5090 线已建好，pilot 首跑失败且根因已定位
+#### 0.4b Ch5（C5 argument uncertainty）：5090 线已建好，首跑的缺陷已修，pilot-r2 在跑
 
 **已成立**（详见 [`results/PHASE_C.md`](results/PHASE_C.md)）：
 
@@ -110,34 +113,46 @@ G-13 实测同一臂在 5090 backbone 上是 **31.13** ⇒ 换机就引入混淆
   ⇒「这组 baseline 与 backbone 无关」从论证变成实测，这也正是 **C5 可以搬而 A4 不可以**的依据；
 - **C5.2 CPU / CUDA 双半边 PASS**（契约四条断言两边都过）。
 
-**C5.3 首跑失败**（`full` 臂训练完成，倒在 predict 步）：
+**C5.3 首跑失败 → 已修复并重跑**（2026-09-16）。失败是 `full` 臂训练跑完、倒在 predict 步：
+`role_compatibility` 在推理时读不到 `argument_prediction_status`，fail-fast 触发。
+**数据一侧清白**（73,939 条全带 `status`）；根因是 `build_maven_ere_submission.py` 的 CLI
+**根本没有 `--argument-predictions`**，推理侧物理上拿不到论元层——与 C5.2 冒烟抓到的
+「训练/推理口径不成对」**同族**，换了条路径复发。逐层核查表见 [`results/PHASE_C.md`](results/PHASE_C.md)。
 
-```
-ValueError: <doc>::<mention>: argument state is None, expected one of ('ok','empty','partial','rejected')
-```
+修了四处，**fail-fast 一字未动**（没有默认 state、没有放宽断言）：
 
-逐层核到的事实：
-
-| 核查点 | 结论 |
+| 改动 | 为什么 |
 |---|---|
-| 数据 | ✅ **没问题**。合并论元预测 73,939 条**全部**带 `status`，取值就是契约要的四种（ok 72,183 / empty 1,123 / partial 591 / rejected 42） |
-| `mention_argument_state()` | 读 `node.metadata["argument_prediction_status"]`（`role_uncertainty.py:47,67`） |
-| 谁写这个键 | 只有 `predicted_arguments.py:75`，**推理路径从没调过它** |
-| pilot 的命令 | 训练命令带 `--argument-predictions`，**predict 命令不带** |
-| `build_maven_ere_submission.py` | **CLI 里根本没有这个选项** ⇒ 推理侧物理上拿不到论元预测 |
-| 冒烟为什么没抓到 | 它只做 forward/backward/export/reload，**从不跑 `build_maven_ere_submission.py`** |
+| 提交脚本加 `--argument-predictions` | 推理读训练绑的**同一个产物** |
+| `apply_predicted_arguments` 加 `allow_extra` | 推理只标注 2,913 篇里的 291 篇；**missing 仍致命**，只放开 extra。⚠️ 反过来裁文件会让两侧拿到**不同产物** |
+| pilot 两条命令改走 `train_command` / `predict_command` | 配对关系**无需 GPU 即可断言**（新增 targeted test） |
+| 冒烟补上推理路径 | 它从不跑提交脚本，所以抓不到；现在每臂训完跑一次，且故意让预测文件**宽于**被标注的文档集 |
 
-**这与 C5.2 冒烟抓到的 A 类缺陷是同一族**（「permutation 臂训练/推理口径不成对」），换了条路径复发。
+**先验证再重训**：拿首跑遗留的 `full` checkpoint 重放那条原样失败过的命令 ——
+**291/291 篇、251 个非平凡簇、exit 0**，在真实规模上验过，不是靠推理。该产物只做验证、不进表。
 
-**修法（队首，§0.3 第 1 行）**：给 `build_maven_ere_submission.py` 加 `--argument-predictions`，
-经 `predicted_arguments.py` 把预测挂到节点上；pilot 的 predict 命令传**与训练同一个文件**；
-**并把这条路径补进冒烟**，否则下次还是抓不到。
-⛔ **不得**为了跑通去放宽那条 fail-fast 或给 state 加默认值——契约要求 291 篇 / 7,195 mention
-全量显式 `ok/empty/partial/rejected`，**静默丢弃直接失败**是这条断言存在的理由。
-**代价**：这两个脚本都在 C5 preflight 的 8 个 `CODE_FILES` 里 ⇒ 按 D4/C5 先例**重建 `preflight-r2`**
-（5090 纯 CPU，分钟级），旧 `preflight/` 不覆盖。
+**preflight-r2**（旧 `preflight/` 不覆盖）：`protocol.json` **`7a56e451…b6b0`**，`code_files` **9**
+（补钉 `src/ekg/nodes/predicted_arguments.py`——它决定每个 mention 拿到什么 argument state，
+此前没被哈希钉住），候选 digest 与 gold 与 r1 同哈希，两条 baseline 重算仍是
+**80.98471986417657 / 80.36758563074353**。
 
-#### 0.4c Ch6（E3 / G-11a）：CSProm-KG 四样齐了，只差一次推理
+**重跑结果（2026-09-16 当天跑完）**：`pilot-r2/`，三臂全部重训（不复用 r1 契约下的 checkpoint——
+一个产物只挂一个契约）。**291 篇 / 8,914 mention 全覆盖，重复 0、陌生 0。**
+
+| 臂 | MUC F1 | vs 主锚 80.98472 | vs 注册对照 80.36759 | BLANC F1 |
+|---|---:|---:|---:|---:|
+| **full** | **79.90115** | **−1.084** | **−0.466** | 90.2893 |
+| remove_core | 79.15966 | −1.825 | −1.208 | 89.6895 |
+| permutation（负控） | 78.83333 | −2.151 | −1.534 | 89.5839 |
+
+**臂序第一次是对的**（full > 消融 > 负控，MUC 与 BLANC 同向）——7 个机制里第一个。
+**但门没过**：`gate.above_anchor=false`、`above_registered_control=false`。
+根子和 D4 同形：`remove_core` 本身就比锚低 1.83，**我们这条监督共指 head 整体低于官方 joint**，
+机制把它抬了 0.74 但没抬过线。⚠️ **+0.742 先别当效应**——这个 split/指标的噪声地板还没量过。
+⛔ 不跑 seed 17/42（未授权，且两项 gate 皆 false 本就不满足前置）。详见
+[`results/PHASE_C.md`](results/PHASE_C.md)。
+
+#### 0.4c Ch6（E3 / G-11a）：CSProm-KG **已复现，落 (a)**
 
 | 项 | 值 |
 |---|---|
@@ -148,8 +163,20 @@ ValueError: <doc>::<mention>: argument state is None, expected one of ('ok','emp
 | checkpoint | `checkpoint/WN18RR/WN18RR-epoch=425-val_mrr=0.5664.ckpt`，1,689,462,973 B，sha256 `27e40718…e695`，**双端核对一致** |
 | **(a) 容差已事前登记** | WN18RR **MRR 0.572660 ±0.005**、H@1/3/10 各 ±0.5 点（README 的 Pretrained Checkpoint 表）。紧于 D4 的 ±1.0，因为**纯推理重放没有训练方差** |
 
-**剩下的就是跑一次 `main.py -dataset WN18RR … -model_path <ckpt>`**（只推理、不训练）。
-⚠️ 四个对手在**我们的重建协议**上仍注定 **(b)**——它们没有一个实现 CGEP；(a) 只在各自原基准上取得。
+✅ **2026-09-16 跑完**（纯推理 9 秒 / 25 batch，墙钟时间全花在排障上）：
+
+| | 实测 | 公布 | 容差 |
+|---|---:|---:|---|
+| **MRR** | **0.572682** | 0.572660 | ±0.005 ✅ |
+| H@1 / H@3 / H@10 | 52.06 / 59.03 / 67.77 | 52.06 / 59.00 / 67.79 | 各 ±0.5 ✅ |
+
+⇒ **名册里第一个 FR-016 (a)**。为跑通打了**五处透明补丁**（nltk 离线、checkpoint `map_location`、
+`add_safe_globals`、PL2 钩子迁移、`np.float`）并把该 venv 的 transformers 降到 **4.57.6**——
+⚠️ 上一版交接写的「transformers 5.x 只用 BertTokenizer/BertModel 所以没问题」**是错的**，
+作者自写的 `BertModelForLayerwise` 要 4.x 的 `get_extended_attention_mask`。
+前后 hash 全在 [`results/PHASE_E.md`](results/PHASE_E.md)。
+
+⚠️ **四个对手在我们的重建协议上仍是 (b)**——它们没有一个实现 CGEP；(a) 只在各自原基准上成立。
 保真度逐行状态见 [`BASELINE_ROSTER.md`](BASELINE_ROSTER.md) §6.2b。
 
 ### 0.5a ✅ 作者裁决（2026-09-15）：五项全部裁定，队列解锁
@@ -188,7 +215,7 @@ ValueError: <doc>::<mention>: argument state is None, expected one of ('ok','emp
 ⇒ 根因 A 的 detach 仍在，本跑测的是 **A+戊**）。
 **第二臂（戊-only，撤掉 A）用来隔离根因 A，排在 C5.3 之后**——A4.3 反正要等 4090，不急。
 
-### 0.5b ⚠️ 待作者裁决（1 项）：A4 第一个周期怎么收口
+### 0.5b ✅ 作者裁决（2026-09-16）：A4 第一个周期取 (甲)，原样跑 A4.3
 
 **为什么要在这里做选择**：§0.4a 的三臂已经证明 `full`（证据流 + 一致性）在同 backbone 下
 比消融臂 `remove_core` 低约 **21** 个 causal F1 点，而压住它的是**证据流本身**那条 revised CE
@@ -202,11 +229,15 @@ ValueError: <doc>::<mention>: argument state is None, expected one of ('ok','emp
 | (乙) | 把 revised CE 移进 `if flags.consistency_loss:` 分支 | ⚠️ **它救不了 `full`**——`full` 的 `consistency_loss=True`，那条 CE 照样在。它只让第 8 臂 `no_constraint` 名副其实（「只有证据表示、零约束」），**改的是归因臂的语义** | 需要重新论证第 8 臂定义，且不能事后改 |
 | (丙) | 现在就判 A4 第一周期失败，省下那 12–17 GPU·h | 省算力 | ⚠️ **拿探测数字给 phase 判死刑**，与 D4 的先例不一致，Gate 2 上站不住 |
 
-**推荐 (甲)**，两条理由：① (乙) 不改变 `full` 的命运，只改归因臂，**这一轮花在它上面不值**；
+**推荐 (甲)** 的两条理由：① (乙) 不改变 `full` 的命运，只改归因臂，**这一轮花在它上面不值**；
 ② 探测是探测，**契约那一跑才有资格判 phase 成败**。若 Gate 2 判 A4 继续，第二设计周期再动
 证据流的训练目标（届时要按新家族重新过文献、因果链与功效）。
 
-**若作者选 (乙) 或 (丙)，必须在 A4.3 出任何数字之前说**，此后不再接受变更。
+> **作者 2026-09-16 裁定：按推荐执行 ⇒ (甲)。** 代码维持「戊 in / A out」（`5cfbeff`），
+> 四臂按契约在 4090 跑完，如实交 Gate 2。**变更窗口到此关闭**：A4.3 出任何数字之后不再接受
+> (乙)/(丙)，执行代理也不得以「探测分数不好看」为由提前宣布 A4 失败。
+> 上卡前仍要做的两件事：重建 A4 的 `preflight-r2`（4 个被钉文件都改过，4090 纯 CPU），
+> 以及核到一张真正空闲的 4090 卡。
 
 ### 0.6 从 D4 学到、必须带进 C5（以及任何新机制）的三件事
 
