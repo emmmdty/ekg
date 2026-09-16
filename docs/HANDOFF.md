@@ -63,7 +63,7 @@ uv run python scripts/audit_r1_consistency.py \
 | ✅ | **G-5** | ~~修 C5 推理侧口径 → 重建 `preflight-r2`~~ → **已完成 2026-09-16**（§0.4b） | — |
 | ✅ | **G-5** | ~~C5.3 pilot-r2 三臂~~ → **2026-09-16 跑完并聚合**，门未过，数字见 `results/PHASE_C.md` | — |
 | ✅ | **G-11a** | ~~CSProm-KG WN18RR 推理~~ → **(a) 已取得**，四项全在容差内，见 `results/PHASE_E.md` | — |
-| **1** | G-4 | A4.2 smoke → **A4.3 四臂 pilot**（裁决 **(甲)**：代码原样，戊 in / A out） | ⛔ **只卡一张 4090 空卡**（backbone pin，§0.4a）+ 上卡前先重建 A4 的 `preflight-r2`。**这是 Gate 2 唯一还缺的输入** |
+| **1** | G-4 | **A4.3 四臂 pilot**（裁决 **(甲)**：代码原样，戊 in / A out）。`preflight-r2` **已建好**：`a3cc6c44…f73c`，`code_files=7`，两条 baseline 重算逐位不变（判定线 **32.097314450255624**） | ⛔ **只卡一张 4090 空卡**（backbone pin，§0.4a）。**这是 Gate 2 唯一还缺的输入**。⚠️ **A4 没有 CPU 半边冒烟**——那条断言按设计在 CPU 规模下判 inconclusive（`results/PHASE_A.md`）；卡上的路径已由 09-15 三臂探测走通，不必再补冒烟 |
 | 2 | G-11a | SimKGC / BART contrastive / MCPredictor 维持 (b)，按名册写障碍即可，不再投入复现 | 不阻塞 |
 | 4 | G-4 | A4 第二设计周期（**仅当** Gate 2 判它继续） | 不在本轮范围，Gate 2 之前不启动 |
 

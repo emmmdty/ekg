@@ -1884,3 +1884,35 @@ scripts/run_a4_pair_evidence.py`），因为 probe 契约钉着旧代码哈希�
 |---|---|---|
 | 回到 20+ | 塌陷是**根因 A** 干的，A 永久撤除 | (戊) 带着 recall 增益进 A4.2/A4.3（4090） |
 | 仍是 0.00 | 塌陷是 **(戊)** 干的，即「把 causal 约束加强到这个程度」会挤掉 subevent | 这是机制的代价，按契约如实交 Gate 2；不再打补丁 |
+
+## ★ A4.2 的 CPU 半边**按设计就跑不出结论**（2026-09-16，gpu-4090 纯 CPU）
+
+C5 与 D4 都有「CPU 半边 / CUDA 半边」两段冒烟，A4 照做时撞上一条**故意写死的断言**：
+
+```
+SmokeError: full: the base pass predicted no causal positive, so the evidence stream had
+nothing to revise. This run is inconclusive about the mechanism -- wrong regime, not a
+defect. Run it on a card. Do NOT relax this into a pass.
+```
+
+10 篇 / 1 epoch 的 CPU 规模下，base 一个 causal 正例都不出（`[a4-eval:full] 10 docs,
+9546 candidates, 0 revised, cross_fp=0`），证据流没有可修正的对象 ⇒ **这一跑对机制什么也没说**。
+断言自己把话讲死了：**不得放宽成 pass**。
+
+⇒ **A4 没有「CPU 半边」这回事**，别照 D4/C5 的形状去补一个。A4.2 只能在卡上跑。
+好消息是这条路径**已经在卡上跑过**：09-15 的三臂探测（5090）走的就是完整训练 + 评测路径，
+比冒烟强。所以 **A4.3 真正缺的只有一张 4090 空卡**。
+
+产物 `gpu-4090:…/a4-v61-pair-evidence-r1/smoke-cpu-r2/`（只有 `full` 一臂、无 `smoke.json`）
+**保留但不可引用**——它是一次 inconclusive 的跑，不是失败的机制。
+
+**A4 preflight-r2 已就绪**（2026-09-16，4090 纯 CPU）：`protocol.json`
+**`a3cc6c442edc94fa6fb08b1883359c235246197cd59d3a168e7e5b8df429f73c`**，`code_files=7`，
+`status=pass`、`seed=13`、`final_valid_accessed=false`，internal-dev gold 与 r1 同哈希，
+两条 baseline 独立重算**逐位不变**（A3 fallback causal F1 **32.097314450255624** = 判定线 32.10，
+taco 32.00956302297782）。改动的 4 个被钉文件是探测期的那 4 个。**一有空卡即可上 A4.3。**
+
+⚠️ **操作教训**：这次因为 ssh 在 banner 阶段断开，我把同一条后台命令发了两次——第二次被
+「refusing to overwrite」挡住（守卫是对的），但它的 stderr **把第一次的日志截断了**。
+`GPU_RUNBOOK` 那条「一条 ssh 只发一个后台任务」还要加半句：**重发前先核一次产物目录，
+ssh 失败不等于命令没执行**。
