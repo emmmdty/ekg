@@ -1916,3 +1916,65 @@ taco 32.00956302297782）。改动的 4 个被钉文件是探测期的那 4 个�
 「refusing to overwrite」挡住（守卫是对的），但它的 stderr **把第一次的日志截断了**。
 `GPU_RUNBOOK` 那条「一条 ssh 只发一个后台任务」还要加半句：**重发前先核一次产物目录，
 ssh 失败不等于命令没执行**。
+
+## ★★★ A4 改走 gpu-5090 线（作者 2026-09-16 裁定）：契约已建，A4.3 四臂在跑
+
+### 裁定与它的代价
+
+> 作者原话：**「4090 不可行就使用 5090，这我之前说过。」**（呼应 09-15 的「不要因为 4090 拖慢进度」）
+
+4090 四卡被他人 vllm 占满已第 7 天，而 A4.3 是 **Gate 2 唯一还缺的输入**。搬。
+但必须把代价写在前面——**这次搬家不像 C5 那样免费**：
+
+| | C5 搬家 | **A4 搬家** |
+|---|---|---|
+| 判定线怎么来的 | 两条 baseline 都是**预测文件 + 官方 evaluator**，与我们的 encoder 无关 | **三条判定线（主锚 33.17 / A3 fallback 32.10 / TacoERE 32.01）全部来自我们自己在 4090 backbone 上训的模型** |
+| 搬家后 | 主锚在 5090 重算**逐位相同** ⇒ 从论证变实测 | 预测文件重算当然一致（32.097314 / 32.009563），但**产生它们的训练跑在另一台机器上** |
+| 结论 | 无损 | **四臂之间的比较干净；与那三条线的比较跨了机器** |
+
+**机器偏移有实测量级**：G-13 在 5090 上跑同一个 `remove_core` 臂得 **31.13**，而 A3 线同类臂在
+4090 上是 **32.10**——约 **1 个 causal F1 点**，方向对我们不利。
+⛔ **这个偏移只作为限制陈述，绝不拿来做算术校正**（跨轴相减是本项目明令禁止的）。
+
+**所以 A4.3 出来之后能说什么、不能说什么**：
+
+- ✅ 能说：`full` vs `remove_core` / `length_matched` / `no_constraint`——同机、同 backbone、
+  同 manifest、同候选全集、同 evaluator、同 seed，**表 4-4 的消融与负控完全成立**；
+- ⚠️ 谨慎说：`full` vs 33.17 / 32.10 / 32.01——**必须带机器偏移的限制说明**；
+- ⛔ 不能说：把 5090 的 `full` 与 4090 的判定线相减后宣布「超过/未超过」多少点。
+
+### 5090 线的输入（三个文件从 4090 经本地 scp，双端 sha256 一致）
+
+| 文件 | SHA-256 | 用途 |
+|---|---|---|
+| `runs/stages/A3/a3-v6-20260905-r17/predictions.jsonl` | `c61b3ea4992d2a8baaade19e3cb942e62ee24fac36f07fa4d924723f97813688` | A3 fallback 判定线 |
+| `runs/stages/A3/a3-v6-20260905-r17/protocol.json` | `c187bf03978674edd29ac209658ccb62d457b744a209e864a0fef0e9eee9359e` | A3 信任根 |
+| `…/ch2/taco-s13-r3/official_predictions.jsonl` | `d410fdeb3b3308f7b8bb682eff5a1effefb24da6d6571e31f782a3f72a1ed911` | TacoERE 判定线 |
+
+源 `data/processed/maven_ere/train.jsonl` 在 5090 上已有，sha256 `6a5519fe…638b7` 与 4090 的
+`data/raw/maven_ere/train.jsonl` **相同**（路径不同、内容相同）。
+
+### A4 preflight（5090 线）
+
+| 项 | 值 |
+|---|---|
+| `protocol.json` SHA-256 | **`11e4343af0560e8621f6eacd333dc3fdc28110879afb3755363bff79eb05490c`** |
+| `code_files` | 7 |
+| status / seed / `final_valid_accessed` | `pass` / 13 / **false** |
+| backbone pin | **`2c7ff1f10496f2df…`**（5090 线；4090 线是 `71be7419…`，权重同、`tokenizer_config.json` 不同 ⇒ 不同内容地址，**钉住而不是假定相等**） |
+| 自物化 internal-dev gold | `403b69a8a9c83e2b…`，**与 4090 线、与 C5 同哈希** ⇒ 三章站在同一候选全集上 |
+| 候选 digest | `15a3b1a5…dac10910`（291 篇 / 7,195 mention / 1,719 TIMEX / 234,870 对） |
+| 两条判定线独立重算 | a3_fallback causal **32.097314** / subevent 29.656953 / temporal 51.467168；taco causal **32.009563** / 28.798318 / 51.484278 |
+| 四臂 | `full` / `remove_core` / `length_matched` / `no_constraint` |
+
+**4090 线的 `preflight-r2`（`a3cc6c44…f73c`）保持有效且不可变**，将来 4090 空出来要补跑时直接用它。
+
+### A4.3 在跑
+
+`gpu-5090:…/a4-v61-pair-evidence-5090-r1/pilot/`，四臂顺序执行，单臂实测约 56 分钟 ⇒ 粗估 4–5 小时。
+代码是裁决 **(甲)** 的原样：**戊 in / A out**（`5cfbeff`），四臂矩阵语义未动。
+
+⚠️ **操作复发**：ssh 后台启动返回非零码，我的重试循环把同一条命令发了两次——第二条被
+「refusing to overwrite arm output」挡住（守卫是对的），但它的 stderr **又一次截断了日志**。
+`logs/a4_pilot_5090.log` 前半段因此缺失；权威产物是各臂 `status.json` 与 `pilot.json`，不受影响。
+**启动类命令不要套重试循环**，这条要进 `GPU_RUNBOOK`。
