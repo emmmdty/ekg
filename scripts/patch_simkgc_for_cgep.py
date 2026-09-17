@@ -29,10 +29,14 @@ import argparse
 import hashlib
 from pathlib import Path
 
+# Each sentinel must be text that ONLY its own edit introduces. The dump edit's
+# body contains `_CGEP_STATE['active']`, so using that as the arm edit's sentinel
+# made the arm look already-applied the moment the dump landed.
 SENTINELS = {
     "config": "cgep_scores",
-    "dump": "_CGEP_STATE",
-    "arm": "_CGEP_STATE['active']",
+    "state": "module state so the dump needs no signature change",
+    "dump": "'row': start + _idx",
+    "arm": "arm the dump for the forward direction only",
 }
 
 CONFIG_ANCHOR = (
@@ -127,8 +131,8 @@ def main() -> int:
             (ARGS_ANCHOR, ARGS_PATCH, SENTINELS["config"]),
         ],
         "evaluate.py": [
-            (STATE_ANCHOR, STATE_PATCH, SENTINELS["dump"]),
-            (DUMP_ANCHOR, DUMP_PATCH, "'row': start + _idx"),
+            (STATE_ANCHOR, STATE_PATCH, SENTINELS["state"]),
+            (DUMP_ANCHOR, DUMP_PATCH, SENTINELS["dump"]),
             (ARM_ANCHOR, ARM_PATCH, SENTINELS["arm"]),
         ],
     }
