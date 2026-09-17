@@ -48,8 +48,21 @@ BART contrastive）**没有一个实现 CGEP**，适配代码要我们自己写 
   不动模型 / 损失 / 优化器 / 指标，前后 hash 已记；
 - `scripts/score_kgc_opponent.py` —— 用**我们自己的** evaluator 打分（表 6-2 其余四行同一把尺）。
 
-CSProm-KG 源码 + 数据已落 `gpu-4090:/data/TJK/baselines/`（双端 sha256 已核）。
-**剩下 = 建独立 venv → 冒烟 → 训练**；4090 隧道 20:09 掉线，等它回来。
+**🟢 21:2x 起两个对手在 4090 上并行训练**（各自 namespace，共用一个独立 venv，**没碰 ekg 的 venv**）：
+
+| 卡 | 对手 | 设置 | 预计 |
+|---|---|---|---|
+| card 0 | **CSProm-KG** | `-epoch 60`，其余与 README 的 WN18RR 命令逐字相同 | 约 5.7 GPU·h |
+| card 1 | **SimKGC** | `--batch-size 256`（1024/512 实测都 OOM），其余与 `train_wn.sh` 逐字相同 | 约 1.3 GPU·h |
+
+端到端冒烟已过：训练 → 按 dev 切片选 checkpoint → test → **dump 恰好 1,908 行** →
+`score_kgc_opponent.py` 用我们自己的 evaluator 收下。
+backbone 走 **`hf-mirror.com`** 直接拉（推翻「权重只能本地下了再 scp」，见 `HANDOFF.md` §0.6）。
+
+**跑完三步收口**：打分 → 数字连同两条解释写进 `results/PHASE_E.md`（金标 0/1,908 有边；
+SimKGC batch 1024→256）→ 回填 `EXPERIMENT_PLAN.md` §7.4。
+SimKGC 评测**跑两遍**（`--neighbor-weight 0.05` 进主表 / `0.0` 作消融），
+把「编码器免疫、重排不免疫」这个变量单独测出来。
 
 ⚠️ **实测出一条决定这两行怎么读的事实**：CGEP 的金标后继在训练图里 **0/1,908 有边**，
 干扰项 **4,863/6,892** 有 ⇒ CSProm-KG（按实体嵌入表打分）被系统性推离正确答案，
