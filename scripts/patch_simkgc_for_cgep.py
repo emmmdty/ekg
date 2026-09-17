@@ -95,12 +95,18 @@ ARM_PATCH = """    # ekg patch (CGEP) 2026-09-17: arm the dump for the forward d
 
     hr_tensor, _ = predictor.predict_by_examples(examples)"""
 
-STATE_ANCHOR = """def compute_metrics(hr_tensor: torch.tensor,"""
+# The anchor has to include the decorator: `def compute_metrics` is preceded by
+# `@torch.no_grad()`, and inserting between a decorator and its def is a syntax
+# error -- which python only reports when the module is imported, i.e. after the
+# training run that produced the checkpoint.
+STATE_ANCHOR = """@torch.no_grad()
+def compute_metrics(hr_tensor: torch.tensor,"""
 STATE_PATCH = """# ekg patch (CGEP) 2026-09-17: module state so the dump needs no signature change
 # on functions the rest of the repo calls.
 _CGEP_STATE = {'active': False, 'scores': '', 'candidates': []}
 
 
+@torch.no_grad()
 def compute_metrics(hr_tensor: torch.tensor,"""
 
 
