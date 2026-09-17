@@ -17,14 +17,14 @@
 |---|---|
 | 正式阶段 | **三个方法章的第一个设计周期全部跑完，Gate 2 实测 0 章过门**（不变）。Gate 1 已判不过（D4，09-12 关闭）；C5 低于主锚 1.08 MUC；A4 低于自身消融臂 23.72 causal F1。⇒ 落 `EXPERIMENT_PLAN.md` §5 的 **「≤1 章过」** 分支。**裁决 ① 已定：改纲推迟到 Ch6 主表有数字之后再定**——取 (乙) 后 Ch6 全线解锁，没有任何可执行任务被 ① 阻塞，而改哪一种形态取决于 Ch6 交出什么。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问（`CLAUDE.md`「开工自审」节）。不可行**必须点名是数据 / 协议 / 代码 / 算力 / 授权哪一条**，附一手证据，**停下交作者裁决**，不得自行换题绕开。 |
-| **活动任务** | 🟡 **G-11a 已开工**（09-17 晚）：CGEP 适配层（导出 / 补丁 / 打分器）已落地并 push，CSProm-KG 已落到 4090。**剩下 = 建 venv → 冒烟 → 训练**。详见 §0.3。 |
+| **活动任务** | 🟢 **G-11a 两个对手在 4090 上并行训练**（09-17 21:2x 起）：card 0 = CSProm-KG（约 5.7 GPU·h），card 1 = SimKGC（约 1.3 GPU·h）。适配层（导出 / 两个补丁器 / 打分器）已落地并 push，端到端冒烟已过。**跑完按 §0.3 的三步收口。** |
 | ✅ **三项裁决已落地（2026-09-17）** | **① Gate 2 改纲 → 推迟到 Ch6 主表有数字之后**（不是停等，理由见上一行）。**② Ch6 上游身份 → 取 (乙)**：`predicted` 沿用 v5 判别式抽取器在 valid 上的产物，表头标明上游身份。**③ C-3 / G-8 → 维持 (甲) 不执行**：它是 Ch4 主表的一行，Ch4 存废未定之前 `< 1 GPU·h` 也没有去处。⚠️ 三项都写进了 `EXPERIMENT_PLAN.md`（Gate 2 行 / G-11 行 / C-3 行）与 `results/PHASE_E.md`。 |
 | **三章终态**（数字唯一权威在 `results/`） | **D4**（Ch3）：full `.476515` < remove_core `.536788` < 两锚，负控也赢过 full ⇒ Gate 1 关闭，不开第二周期。**C5**（Ch5）：full MUC `79.90115` > remove_core `79.15966` > 负控 `78.83333`，**臂序第一次是对的**，但低于主锚 `80.98472` 达 1.08 ⇒ 门未过。**A4**（Ch4）：full causal `7.507508` 低于同机消融臂 `31.224848` 达 23.72，四臂阶梯与设计意图相反 ⇒ 门未过。 |
 | **两章的归因已做完**（09-17） | **C5**：那 1.83 里**误合并占 72.7%、漏合并占 26.4%**；`full` 的 MUC recall `0.846422` **已超过主锚** `0.832461`，剩下的 1.084 **100% 在 precision** ⇒ 该压的是误合并（`results/PHASE_C.md`）。**A4**：**坍塌是无差别的，不是「先丢难例」**——`full` 丢掉的 1,344 对 = `remove_core` 答对集合的 88.8%，距离分布与被保留的、与 gold 全体几乎逐格相同；损失集中在 PRECONDITION（占 gold 76.8%，召回只保留 7.9%）（`results/PHASE_A.md`）。 |
 | **Ch6 已推进一轮**（09-17 晚） | **E3.1 ✅ 三层上游接口闭合**（`upstream_registry.json`，`status=closed`）；**E3.2 ✅ 描述性画像**；**表 6-2 四行到手**：random `.0143` / frequency `.0378` / predicted `.1583` / gold `.1802`，Hit@1/3/10/20/50 全列（`.1802` 与 `.1583` 逐位复现 2026-07-29）。⚠️ 过程中修掉冻结 unit 的 **68 个 `instance_id` 撞号**，重新冻结为 **`e3-v61-20260917`（`f75e7e87…`）**，逐行零差异。**新证据：R2 query F1 只有 .0795 而下游 MRR 只掉 12.2% ⇒ R2↔MRR 又是一对不对齐。** 数字全在 `results/PHASE_E.md` 最后一节。 |
 | 论文结构 | 第3章 D4 事实性 · 第4章 A4 关系 · 第5章 C5 身份 · 第6章 E3 图谱构建与下游应用。原 24 条件 factorial / Holm / frozen-vs-finetuned **已撤销，不得恢复**。**章节存废在 Gate 2 判，执行代理不得自行改成两方法章**；裁决 ① 已把这件事排到 Ch6 主表之后。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文队列只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **gpu-4090** | 🔴 **隧道 09-17 20:09 掉线**（`banner exchange` 超时），作者的 cpolar 更新脚本**管不了这台**（不在其 tunnels.conf 里）——只能等它回来，期间按三态判活。掉线时无任务在跑。此前实测**四张卡全空**。当晚已用 card 0 跑过表 6-2 的自有两行（冻结权重 `--load-model`，分钟级）。⚠️ **E3 相关的大件产物只在 4090 上**：`runs/factuality/predicted_edges_valid.jsonl`（133 MB，`.1583` 的真上游）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）。本地那份 `runs/relations/supervised_dump.jsonl` 是**另一份** dump，别拿它当上游。 |
+| **gpu-4090** | 🟢 card 0/1 在跑 G-11a 的两个对手，card 2/3 空。⚠️ 隧道**反复掉线**（`banner exchange` / `kex_exchange`），作者的 cpolar 更新脚本**管不了这台**（不在其 tunnels.conf 里）；两个任务都是 `setsid nohup`、PPID=1，断连不影响。当晚已用 card 0 跑过表 6-2 的自有两行（冻结权重 `--load-model`，分钟级）。⚠️ **E3 相关的大件产物只在 4090 上**：`runs/factuality/predicted_edges_valid.jsonl`（133 MB，`.1583` 的真上游）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）。本地那份 `runs/relations/supervised_dump.jsonl` 是**另一份** dump，别拿它当上游。 |
 | **gpu-5090** | 🟢 可用。C5 整条、A4 全部探测都在这台机上。⛔ 硬边界：EasyECR 的 torch 2.0.1 无 sm_120；SimKGC 的 batch 1024 要 4×32 GB 装不下；**外网是分域的**（§0.6 的表）。 |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与估算基准率见 `EXPERIMENT_PLAN.md` §3。 |
 | 完成后必须做什么 | 按 §6 五步回填：产物落地 → 写结果页 → 改队列行状态与 commit → 推进队列 → commit + **push** |
@@ -89,14 +89,33 @@ uv run python scripts/audit_r1_consistency.py \
 | **CSProm-KG 源码 + 09-16 五处环境补丁 + 第 6 处 CGEP 补丁** | `gpu-4090:/data/TJK/baselines/CSProm-KG`，三个 tar 的双端 sha256 与三处前后 hash 都在 `results/PHASE_E.md` |
 | **对手打分器** | `scripts/score_kgc_opponent.py` —— 用 **我们自己的** `succession/metrics.py`（表 6-2 其余四行同一把尺），拒绝行号错位 / 候选漂移 / 分母变小 |
 
-**⛔ 还没做**：4090 上的独立 venv（**别动 ekg 的 venv**）、冒烟、训练。
-版本照 5090 那套实测可用的 **torch 2.8.0+cu128 / transformers 4.57.6 / pytorch_lightning 2.6.6 /
-numpy 2.5.3 / nltk 3.10.3**（`requirements.txt` 写的 torch 1.11 在 sm_89 上跑不了）。
-4090 实测 `pypi.tuna.tsinghua.edu.cn` 返回 200，装得了包。
+**🟢 两个对手 2026-09-17 21:2x 起在 4090 上并行训练**（各自 namespace，互不写）：
 
-⚠️ **4090 隧道 2026-09-17 20:09 掉线**（`Connection timed out during banner exchange`）。
-作者的 `cpolar-ssh-update` **管不了这台**——它的 tunnels.conf 只有 `gpu-5090` 与 `gpu-a6000`，
-4090 在另一个 cpolar 主机上。掉线时 4090 上**没有任务在跑**，补丁已落盘，没有东西处于风险中。
+| 卡 | 对手 | 命令要点 | 预计 | 产物 |
+|---|---|---|---|---|
+| **card 0** | **CSProm-KG** | `-epoch 60`，其余与 README 的 WN18RR 命令**逐字相同** | 约 **5.7 GPU·h**（5.7 min/epoch） | `CSProm-KG/logs/cgep_r1/scores.jsonl` |
+| **card 1** | **SimKGC** | `--batch-size 256`（见下），其余与 `scripts/train_wn.sh` **逐字相同** | 约 **1.3 GPU·h**（1.7 min/epoch） | 训练完后另跑 `evaluate.py --valid-path .../test.txt.json --cgep-*` |
+
+**环境**：两者共用 `gpu-4090:/data/TJK/baselines/CSProm-KG/.venv`（python 3.12.13，
+torch 2.8.0+cu128 / transformers 4.57.6 / PL 2.6.6 / numpy 2.5.3 / nltk 3.10.3）。
+**⛔ 没碰 ekg 的 venv，也没跑 `uv run` / `uv sync`**（venv 是用 uv 已下好的解释器建的）。
+backbone 走 `hf-mirror.com` 直接拉（见 §0.6 的新表）。
+
+**跑完之后要做的三步**（两条线各一次）：
+1. `scripts/score_kgc_opponent.py --scores <dump> --export <数据目录> --name <方法> --output ...`
+   ——它会拒绝行号错位 / 候选漂移 / 分母变小；
+2. 数字写进 `results/PHASE_E.md`，**必须连着那两条解释一起写**（金标 0/1,908 有边；
+   SimKGC 的 batch 1024→256）；
+3. 回填 `EXPERIMENT_PLAN.md` §7.4 表 6-2 的对应行。
+
+⚠️ **SimKGC 的 batch 是实测降的，不是选的**：单张 4090（23.52 GiB）上 **1024 OOM、512 也 OOM、
+256 稳定**（19.9 GB）。in-batch 负样本 1024→256 ⇒ **那一行是 SimKGC 的下界，不是它的发表设置**。
+
+⚠️ **4090 隧道会反复掉线**（`banner exchange` 超时 / `kex_exchange` reset），
+作者的 `cpolar-ssh-update` **管不了这台**——它的 tunnels.conf 只有 `gpu-5090` 与 `gpu-a6000`。
+按三态判活；两个任务都是 `setsid nohup`、PPID=1，**本机断连不影响它们**。
+⚠️ **ssh 重试封装只能套只读/幂等命令**：隧道常在远端**已经执行完**之后才断，重试会再跑一遍
+（本轮就这样把一个补丁脚本跑了两次）。
 
 ⚠️ **先读这一条再看数字**：CGEP 的 query edge 要求尾节点 outdeg 0 / indeg 1，
 所以**金标后继在训练图里 0/1,908 有边，而干扰项 4,863/6,892 有**。
