@@ -168,3 +168,40 @@ def test_real_fixture_parses_through_the_loader(fixtures_dir):
         assert all(node.trigger for node in graph.nodes)
         assert all(0 <= h < len(graph.nodes) and 0 <= t < len(graph.nodes)
                    for h, _, t in graph.edges)
+
+
+def test_two_ecgs_in_one_document_get_distinct_instance_ids():
+    """Node indices are per-ECG, so index-based ids collided across components.
+
+    68 of the frozen Ch6 unit's 1,908 queries shared an id with a *different*
+    query under the old scheme, which anything joining per-instance results
+    across arms would have merged without complaint.
+    """
+    keys = [f"m{i}" for i in range(1, 9)]
+    triggers = ["attack", "riot", "march", "arrest", "flood", "evacuate", "rescue", "inquiry"]
+    nodes = [_node("docC", k, t, i) for i, (k, t) in enumerate(zip(keys, triggers, strict=True))]
+    edges = [
+        # Two disjoint 4-event components with the identical internal shape.
+        _edge("docC", "m1", "m2", RelationType.CAUSAL, "CAUSE"),
+        _edge("docC", "m2", "m3", RelationType.CAUSAL, "CAUSE"),
+        _edge("docC", "m2", "m4", RelationType.CAUSAL, "PRECONDITION"),
+        _edge("docC", "m5", "m6", RelationType.CAUSAL, "CAUSE"),
+        _edge("docC", "m6", "m7", RelationType.CAUSAL, "CAUSE"),
+        _edge("docC", "m6", "m8", RelationType.CAUSAL, "PRECONDITION"),
+    ]
+    doc = RelationDocument(
+        doc_id="docC",
+        nodes=nodes,
+        gold_edges=edges,
+        doc_text="\n".join(f"sentence {i} mentions {t}" for i, t in enumerate(triggers)),
+        representative={f"E{i}": n.event_id for i, n in enumerate(nodes)},
+    )
+    instances, stats = build_cgep([doc], min_nodes=4, n_candidates=4)
+    assert stats["ecgs"] == 2.0
+    ids = [i.instance_id for i in instances]
+    assert len(ids) == len(set(ids)), f"colliding instance ids: {ids}"
+    for instance in instances:
+        head, subtype, tail = instance.query_edge
+        assert instance.instance_id == (
+            f"{instance.nodes[head].node_id}-{subtype}->{instance.nodes[tail].node_id}"
+        )

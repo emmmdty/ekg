@@ -384,7 +384,15 @@ def build_cgep(
                 continue
             instances.append(
                 CgepInstance(
-                    instance_id=f"{ecg.doc_id}::{query[0]}-{query[2]}",
+                    # Node ids, not indices into this ECG. Indices are per-ECG, so two
+                    # ECGs of one document collided: 68 of the frozen unit's 1,908
+                    # queries shared an id with a different query (different anchor,
+                    # relation, gold and candidates). Anything keyed by instance_id --
+                    # a per-arm rank join, `predictor.py`'s deterministic random hash --
+                    # silently merged them. The query edge names itself instead.
+                    instance_id=(
+                        f"{ecg.nodes[query[0]].node_id}-{query[1]}->{ecg.nodes[query[2]].node_id}"
+                    ),
                     doc_id=ecg.doc_id,
                     nodes=ecg.nodes,
                     edges=(*template, query),
