@@ -1056,7 +1056,62 @@ filtered-ranking mask **之前**，把那 512 个候选的原始分数写出来�
 `scripts/score_kgc_opponent.py`，走的是 gold / predicted / random / frequency 同一个 evaluator。
 该脚本拒绝任何对不上的 dump：行号错位、候选集漂移、分母变小（漏打分的 query 是错误，不是可丢的行）。
 
-### 状态：环境未建，**训练未开始**
+### 环境已建、冒烟已过、正式跑已起（gpu-4090 card 0）
+
+**环境**（独立 venv，**没碰 ekg 的 venv**）：`gpu-4090:/data/TJK/baselines/CSProm-KG/.venv`，
+python **3.12.13**（用 uv 已下好的解释器建 venv，**没有跑 `uv run` / `uv sync`**），
+装的是 5090 上那套实测可用的 **torch 2.8.0+cu128 / transformers 4.57.6 / pytorch_lightning 2.6.6 /
+numpy 2.5.3 / nltk 3.10.3**。`torch.cuda.is_available()=True`，RTX 4090，矩阵乘实测通过。
+nltk stopwords 走 gh-proxy 装到 `~/nltk_data`，sha256 `48c0e52d…946b` **与 09-16 那次逐位相同**。
+
+⚠️ **backbone 直接从 `hf-mirror.com` 拉下来**（`bert-large-uncased`，1,344,951,957 字节，
+24 层 / hidden 1024，实测 `AutoConfig` 能载）。**这推翻了「公开 checkpoint 只能本地下载后 scp」**
+——旧结论测的是 `huggingface.co` 与 `drive.google.com`，**没人测过镜像**。
+同一个教训第二次：**按域名测，别按感觉写**。已写进 `CLAUDE.md` / `AGENTS.md` 与 `HANDOFF.md` §0.6。
+
+#### 第 7 处补丁：LAR 的 margin loss **在新 torch 上从来没跑过**
+
+09-16 那次 (a) 是**纯推理**，所以 `-n_lar 8` 这条训练路径一次都没被执行过。第一个 training step 就炸：
+
+```
+File ".../torch/nn/functional.py", line 5503, in triplet_margin_with_distance_loss
+    p_dim = positive.ndim
+AttributeError: 'tuple' object has no attribute 'ndim'
+```
+
+作者把 `(embedding, bias)` 元组当 `positive`/`negative` 传给 `nn.TripletMarginWithDistanceLoss`，
+由他们自己的 `distance_function=lambda x, y: score_fn(x, y[0], y[1])` 拆包；
+**新版 torch 在调 distance_function 之前先校验 `positive.ndim`**。
+补丁把 `TripletMarginWithDistanceLoss` **自己的公式**写开——
+`relu(d(a,p) − d(a,n) + margin).mean()`，reduction `mean`、`swap=False`——
+用的是**他们的** distance_function 与**他们的** margin（`configs.gamma`），**损失是同一个量**。
+`models/P_model.py` `f137f34c…0096` → **`8da3ac0310eece26b8052cbd060ba1257ec875e140ab6e27f1b396d7c189e2be`**。
+
+⚠️ 顺带修掉自己的一个洞：dump 必须 `self.trainer.testing` 才写。
+`val_dataloader` 喂的是 **dev** 三元组、`test_dataloader` 才是 CGEP query，而 `test_step` 委托给
+`validation_step` ⇒ 不加这个 guard 就会**拿 test 的行号去索引 dev 的行**，每条分数都配错 query。
+打分器的 gold 校验会抓到，但要等训练跑完才抓到。
+
+#### 冒烟：端到端通了
+
+`-epoch 1` 全流程：`trainer.fit` → 按 `val_mrr` 选 checkpoint → `trainer.test` →
+**dump 恰好 1,908 行** → `scripts/score_kgc_opponent.py` 用**我们自己的 evaluator** 收下。
+1 epoch 的数字 **MRR 0.0066 / H@1 0.0010**（`runs/cgep/e3_csprom_smoke.json`）——
+**这不是结果**，是「管道通了」的证据；模型基本没训。
+⚠️ 确认了一条 A 类事实：`ModelCheckpoint(monitor='val_mrr')` 选的是 **dev 切片**，
+**1,908 个 CGEP query 不参与选 checkpoint**。
+
+#### 正式跑（进行中）
+
+`-epoch 60 -check_val_every_n_epoch 3`，其余超参**与 README 的 WN18RR 命令逐字相同**
+（batch 128 / bert-large / desc 40 / lr 5e-4 / prompt 10 / alpha 0.1 / n_lar 8 /
+label_smoothing 0.1 / embed_dim 144 / k_w 12 / k_h 12 / alpha_step 1e-5）。
+**只有 epoch 数不是 WN18RR 的**：WN18RR 用默认 500（实测 721 step/epoch、约 5.7 分钟/epoch
+⇒ 约 52 小时），我们取 **60**——那是**作者自己给 FB15k-237 的 epoch 数**，
+不是我们在本任务上调出来的。约 **5.7 GPU·h**，记为第 6 条差异。
+日志 `logs/cgep_r1.log`，产物 `logs/cgep_r1/scores.jsonl`。
+
+### 上一版状态（已被上面取代）：环境未建，**训练未开始**
 
 4090 的 cpolar 隧道 2026-09-17 20:09 左右掉线（`Connection timed out during banner exchange`）。
 作者的 `cpolar-ssh-update` **管不了这台**——它的 tunnels.conf 只有 `gpu-5090` 与 `gpu-a6000`，

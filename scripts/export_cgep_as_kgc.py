@@ -269,6 +269,9 @@ def main() -> int:
             "id over a vocabulary built across train and test",
             "the KGC dev set is a seeded slice of the training triples; the 1,908 CGEP "
             "queries are never used for checkpoint selection",
+            "epoch budget: 60, which is the authors' own count for FB15k-237, not a "
+            "value tuned on this task. Their WN18RR command keeps the default 500, "
+            "measured here at ~5.7 minutes per epoch (~52 hours)",
         ],
         "digests": {
             "test_query_ids": id_digest(row["instance_id"] for row in queries),
