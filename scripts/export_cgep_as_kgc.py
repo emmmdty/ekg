@@ -85,7 +85,7 @@ def _collect(paths: list[Path], min_nodes: int) -> tuple[dict[str, object], list
     return nodes, triples
 
 
-def _write_simkgc(out: Path, nodes, train, dev, test, queries) -> None:
+def _write_simkgc(out: Path, nodes, train, dev, test, queries, *, describe=True) -> None:
     """SimKGC reads `entities.json` plus one `*.txt.json` per split, both flat JSON.
 
     It is a text bi-encoder, so an entity it never saw in training still gets a
@@ -99,7 +99,7 @@ def _write_simkgc(out: Path, nodes, train, dev, test, queries) -> None:
                 {
                     "entity_id": node_id,
                     "entity": nodes[node_id].trigger,
-                    "entity_desc": nodes[node_id].sentence,
+                    "entity_desc": nodes[node_id].sentence if describe else "",
                 }
                 for node_id in sorted(nodes)
             ],
@@ -148,6 +148,12 @@ def main() -> int:
         help="also write SimKGC's processed format here. Written directly rather than "
              "through their preprocess.py, whose text rules are per-task and would need "
              "a CGEP branch -- that is a listed difference, not a shortcut",
+    )
+    parser.add_argument(
+        "--simkgc-nodesc", type=Path,
+        help="a second SimKGC export with every description blanked. The description "
+             "is the trigger's sentence, and the gold successor always shares a document "
+             "with the anchor, so this separates event prediction from document matching",
     )
     args = parser.parse_args()
 
@@ -238,6 +244,10 @@ def main() -> int:
     if args.simkgc:
         _write_simkgc(args.simkgc, nodes, train_triples, dev_triples, test_rows, queries)
         print(f"[kgc] wrote {args.simkgc} (SimKGC format)")
+    if args.simkgc_nodesc:
+        _write_simkgc(args.simkgc_nodesc, nodes, train_triples, dev_triples, test_rows,
+                      queries, describe=False)
+        print(f"[kgc] wrote {args.simkgc_nodesc} (SimKGC format, descriptions blanked)")
 
     report = {
         "schema_version": SCHEMA_VERSION,
@@ -269,6 +279,11 @@ def main() -> int:
             "id over a vocabulary built across train and test",
             "the KGC dev set is a seeded slice of the training triples; the 1,908 CGEP "
             "queries are never used for checkpoint selection",
+            "the same_document control scores MRR .8041 / Hit@10 1.000 on this unit: "
+            "negatives are drawn corpus-wide while an ECG never crosses a document, so "
+            "only ~2 of 512 candidates share the anchor's document and the gold always "
+            "does. Any method reading candidate text can use that; a mention-token "
+            "scorer like SeDGPL cannot",
             "epoch budget: 60, which is the authors' own count for FB15k-237, not a "
             "value tuned on this task. Their WN18RR command keeps the default 500, "
             "measured here at ~5.7 minutes per epoch (~52 hours)",

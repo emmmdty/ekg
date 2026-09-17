@@ -407,7 +407,7 @@ def main() -> int:
     parser.add_argument("--factuality-gold", type=Path,
                         help="MAVEN-FACT valid jsonl, for the oracle purification ceiling")
     parser.add_argument("--predictor", default="sedgpl",
-                        choices=("random", "frequency", "sedgpl"))
+                        choices=("random", "frequency", "same_document", "sedgpl"))
     parser.add_argument("--model-path", help="roberta-base checkpoint, for sedgpl")
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--sample-rate", type=float, default=0.8)

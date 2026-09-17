@@ -105,6 +105,42 @@ class RandomSuccessorPredictor(SuccessorPredictor):
         return scores
 
 
+@successor_predictors.register("same_document")
+class SameDocumentSuccessorPredictor(SuccessorPredictor):
+    """Rank a candidate by whether it comes from the anchor's document. Nothing else.
+
+    Not a straw man -- it is the control that says how much of this unit is
+    answerable without reading anything. ``build_cgep`` draws negatives from the
+    corpus-wide pool while an ECG never crosses a document, so the gold successor
+    is always in the anchor's document and only ~2 of 512 candidates are. On the
+    frozen Ch6 unit this rule alone reaches MRR ~.80 and Hit@10 = 1.000.
+
+    Any method that reads candidate *text* can pick this up for free; SeDGPL and
+    anything else scoring by mention token id cannot, because the document never
+    reaches the prompt. So this row has to sit next to a text-based opponent's or
+    the two are not being compared on event prediction at all.
+
+    Ties are broken by the same seeded trigger hash `random` uses, so duplicate
+    triggers stay tied and the ranks remain comparable.
+    """
+
+    def __init__(self, seed: int = 209) -> None:
+        self.seed = seed
+        self._tiebreak = RandomSuccessorPredictor(seed)
+
+    def fit(self, instances: Sequence[CgepInstance]) -> None:
+        """Nothing to learn."""
+
+    def score(self, instance: CgepInstance) -> list[float]:
+        doc = instance.doc_id
+        return [
+            (1.0 if candidate.node_id.split("::", 1)[0] == doc else 0.0) + tie
+            for candidate, tie in zip(
+                instance.candidates, self._tiebreak.score(instance), strict=True
+            )
+        ]
+
+
 @dataclass(frozen=True)
 class RankedInstances:
     """Gold's rank per instance under both tie-break conventions, plus failures.

@@ -120,7 +120,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", default="esc", choices=("esc", "maven"))
     parser.add_argument("--predictor", default="frequency",
-                        choices=("random", "frequency", "sedgpl"))
+                        choices=("random", "frequency", "same_document", "sedgpl"))
     parser.add_argument("--folds", type=int, default=5, help="ESC topic folds")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--model-path", help="roberta-base checkpoint, for sedgpl")
