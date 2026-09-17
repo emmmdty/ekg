@@ -59,6 +59,7 @@ def export(tmp_path: Path) -> Path:
     argv = [
         "export_cgep_as_kgc", "--unit", str(tmp_path / "unit"),
         "--train", str(train), "--valid", str(valid), "--output", str(out),
+        "--simkgc", str(tmp_path / "CGEP-MAVEN-simkgc"),
     ]
     old, sys.argv = sys.argv, argv
     try:
@@ -116,3 +117,21 @@ def test_a_drifted_unit_is_refused(export: Path) -> None:
             exporter.main()
     finally:
         sys.argv = old
+
+
+def test_both_formats_describe_the_same_queries_in_the_same_order(export: Path) -> None:
+    """Two opponents, one question set -- or their two rows are not comparable."""
+    simkgc = export.parent / "CGEP-MAVEN-simkgc"
+    entity_id = dict(line.split("\t") for line in _numbered(export / "entity2id.txt"))
+    csprom = [line.split() for line in _numbered(export / "test2id.txt")]
+    other = json.loads((simkgc / "test.txt.json").read_text(encoding="utf-8"))
+    assert len(other) == len(csprom)
+    for (head, tail, _), row in zip(csprom, other, strict=True):
+        assert entity_id[row["head_id"]] == head
+        assert entity_id[row["tail_id"]] == tail
+
+    pools = json.loads((simkgc / "test_candidates.json").read_text(encoding="utf-8"))
+    mirrored = [set(line.split()) for line in _numbered(export / "test_candidates.txt")]
+    assert len(pools) == len(mirrored)
+    for pool, expected in zip(pools, mirrored, strict=True):
+        assert {entity_id[c] for c in pool} == expected

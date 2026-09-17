@@ -85,6 +85,53 @@ def _collect(paths: list[Path], min_nodes: int) -> tuple[dict[str, object], list
     return nodes, triples
 
 
+def _write_simkgc(out: Path, nodes, train, dev, test, queries) -> None:
+    """SimKGC reads `entities.json` plus one `*.txt.json` per split, both flat JSON.
+
+    It is a text bi-encoder, so an entity it never saw in training still gets a
+    real representation from its name and description -- which is why the leaf
+    problem that cripples an embedding-table scorer barely touches it.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "entities.json").write_text(
+        json.dumps(
+            [
+                {
+                    "entity_id": node_id,
+                    "entity": nodes[node_id].trigger,
+                    "entity_desc": nodes[node_id].sentence,
+                }
+                for node_id in sorted(nodes)
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    for stem, rows in (("train", train), ("valid", dev), ("test", test)):
+        (out / f"{stem}.txt.json").write_text(
+            json.dumps(
+                [
+                    {
+                        "head_id": h,
+                        "head": nodes[h].trigger,
+                        "relation": RELATION_NAMES[r],
+                        "tail_id": t,
+                        "tail": nodes[t].trigger,
+                    }
+                    for h, r, t in rows
+                ],
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        (out / f"{stem}.txt").write_text(
+            "".join(f"{h}\t{r}\t{t}\n" for h, r, t in rows), encoding="utf-8"
+        )
+    (out / "test_candidates.json").write_text(
+        json.dumps([row["candidates"] for row in queries], ensure_ascii=False), encoding="utf-8"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--unit", type=Path, default=Path("runs/stages/E3/e3-v61-20260917"))
@@ -96,6 +143,12 @@ def main() -> int:
                              "Never the test queries: their trainer selects a checkpoint on it")
     parser.add_argument("--seed", type=int, default=209)
     parser.add_argument("--output", type=Path, default=Path("runs/stages/E3/kgc/CGEP-MAVEN"))
+    parser.add_argument(
+        "--simkgc", type=Path,
+        help="also write SimKGC's processed format here. Written directly rather than "
+             "through their preprocess.py, whose text rules are per-task and would need "
+             "a CGEP branch -- that is a listed difference, not a shortcut",
+    )
     args = parser.parse_args()
 
     manifest = json.loads((args.unit / "manifest.json").read_text(encoding="utf-8"))
@@ -181,6 +234,10 @@ def main() -> int:
         "candidate_pool": len(pool),
         "candidate_pool_in_training_graph": len(pool & in_graph),
     }
+
+    if args.simkgc:
+        _write_simkgc(args.simkgc, nodes, train_triples, dev_triples, test_rows, queries)
+        print(f"[kgc] wrote {args.simkgc} (SimKGC format)")
 
     report = {
         "schema_version": SCHEMA_VERSION,
