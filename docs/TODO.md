@@ -38,9 +38,22 @@
 - **表 6-2 四行**：random `.0143` / frequency `.0378` / **predicted `.1583`** / gold `.1802`，
   Hit@1/3/10/20/50 全列。`.1802` 与 `.1583` 逐位复现 2026-07-29。
 
-**队首 = G-11a**：四个公开对手（SimKGC / MCPredictor / CSProm-KG / BART contrastive）
-**没有一个实现 CGEP**，适配代码要我们自己写 ⇒ 在我们的重建协议上注定是 **(b) 透明适配**，
-按基准率 **3–4 周**。四个的障碍各不相同，**逐个答可行性两问**（见 `HANDOFF.md` §0.3 的表）。
+**队首 = G-11a，2026-09-17 晚已开工**：四个公开对手（SimKGC / MCPredictor / CSProm-KG /
+BART contrastive）**没有一个实现 CGEP**，适配代码要我们自己写 ⇒ 注定是 **(b) 透明适配**，
+按基准率 **3–4 周**。当晚落地的适配层：
+
+- `scripts/export_cgep_as_kgc.py` —— 冻结 unit → KGC 数据集（33,017 实体 / train 46,100 /
+  test 1,908 + 每题 512 候选），**任何一条 query edge 漏进训练图就 fail-fast**；
+- `scripts/patch_csprom_kg_for_cgep.py` —— CSProm-KG 第 6 处补丁，**只 dump 候选分数**，
+  不动模型 / 损失 / 优化器 / 指标，前后 hash 已记；
+- `scripts/score_kgc_opponent.py` —— 用**我们自己的** evaluator 打分（表 6-2 其余四行同一把尺）。
+
+CSProm-KG 源码 + 数据已落 `gpu-4090:/data/TJK/baselines/`（双端 sha256 已核）。
+**剩下 = 建独立 venv → 冒烟 → 训练**；4090 隧道 20:09 掉线，等它回来。
+
+⚠️ **实测出一条决定这两行怎么读的事实**：CGEP 的金标后继在训练图里 **0/1,908 有边**，
+干扰项 **4,863/6,892** 有 ⇒ CSProm-KG（按实体嵌入表打分）被系统性推离正确答案，
+SimKGC（文本双编码器）几乎不受影响。**数字照报、解释照写，不换映射凑分。**
 
 **2026-09-17 当周完成的五项**（结论都已写进 `results/` 并 push）：
 

@@ -978,3 +978,100 @@ frequency `.0124`、random `.0122`。
 从未发布 ⇒ 这四行在我们的重建协议上注定是 **(b) 透明适配**，适配代码要我们自己写。
 CSProm-KG 已在 WN18RR 上取得 (a)（本页上方），那证明的是「我们把它跑对了」，不是它在 CGEP 上的分。
 按 §3.1 基准率这是 3–4 周量级的 G-11a，**不是本轮能收口的**。
+
+---
+
+## ★ G-11a 第一个对手：CSProm-KG 的 CGEP 适配（2026-09-17 晚，本地 CPU + gpu-4090 落地）
+
+### 开工自审
+
+1. **科研价值**：表 6-2 的 §Baselines 第 1 类要求**不少于 3 个公开方法**，现在是 **0 个**
+   （四行全是「待测」）。CSProm-KG 是名册里唯一取得 FR-016 **(a)** 的对手
+   （WN18RR MRR 0.572682 vs 公布 0.572660），也是四个里与 CGEP 映射最短的一个——
+   CGEP 的 query 就是 KGC 的 `predict_tail`。做成了就是表 6-2 的第一行外部对手。
+2. **可行性**：五条逐个查。**数据**＝冻结 unit + train 图，都在；**协议**＝冻结 unit，在；
+   **代码**＝仓库在 5090（含我们 09-16 的五处环境补丁），可搬；
+   **算力**＝4090 四张卡空闲；**授权**＝`CLAUDE.md`「4090 有空即可自用」，本地三件套全绿。
+   ⇒ 没有一条不成立。
+
+### ⚠️ 先量出来一条决定「这一行该怎么读」的事实
+
+CGEP 的 query edge 规则是**尾节点 outdeg 0、indeg 1**（`query_edge_indices`），
+也就是说**金标后继在自己的 ECG 里只有这一条边**。而任何 triple 级切分都必须把这 1,908 条
+query edge 从训练图里拿掉 ⇒ **金标后继在训练图里全部变成孤立点**。实测：
+
+| | 数量 | 在训练图里有边的 |
+|---|---:|---:|
+| anchors | 593 | 484 |
+| **golds（正确答案）** | **1,908** | **0** |
+| 候选池（干扰项） | 6,892 | **4,863** |
+
+**这不是我们这一版映射的毛病，是 CGEP 任务与 KGC 模型的结构性错配**：CSProm-KG 的输出层就是
+实体嵌入表，**每一个正确答案的嵌入都没被训练过，而 70.6% 的干扰项被训练过** ⇒ 结构那一半
+系统性地把概率推离正确答案。SeDGPL 不吃这个亏——它按 **token id** 打分，词表跨 train/test 建。
+
+⇒ **这一行的数字低不等于 CSProm-KG 弱**，写进表时必须带这条解释；同时也不能因为「不好看」
+就换一个映射去凑分数。数字照报，解释照写。
+
+### 已落地的东西
+
+**数据导出** `scripts/export_cgep_as_kgc.py`（本地 CPU，可重跑）：
+`runs/stages/E3/kgc/CGEP-MAVEN/`，**33,017 实体 / 3 关系 / train 46,100 / dev 1,425 / test 1,908**，
+候选文件 `test_candidates.txt` 每行 512 个实体 id。
+dev 是**训练三元组的种子切片**，1,908 个 CGEP query **从不参与选 checkpoint**（A 类）。
+
+**训练图怎么定的**：SeDGPL 看到的是每个实例自己的 gold ECG **减掉那一条 query edge**，
+所以 valid 侧 gold 结构在本协议下对消费者是可见的；静态 KG 的等价物就是把它们放进图里，
+**然后 1,908 条 query edge 必须全部拿掉**——同一个 ECG 里，A 实例的 query edge 就是 B 实例的
+上下文，单张静态图做不到逐实例排除。导出时有断言：任何一条 query edge 漏进训练图就 fail-fast。
+
+**逐条列出的差异**（FR-016 (b) 要求，已写进 `export_manifest.json`）：
+
+1. 对手的已发表任务是 KGC 不是 CGEP，这套映射是我们做的；
+2. valid 侧上下文边会**训练** KGC 嵌入，而 SeDGPL 只在推理时读它们——**这一条对对手有利**；
+3. 没进任何训练三元组的 valid 实体保持初始化嵌入，只有文本那一半替它说话；
+4. 打分被 mask 到每个 query 的 512 个具名候选，而不是整张实体表；
+5. KGC 的 dev 是训练三元组的种子切片。
+
+**代码搬运**：5090 的工作副本按 `git archive HEAD` + `git diff` 搬（只带源码与补丁，不带
+6.6 GB 的 venv 与 1.6 GB checkpoint）。双端 sha256 已核：
+`csprom_src.tgz` `b303620d…44a8`、`csprom_patches.diff` `017ea3c8…bd37`、
+`cgep_kgc.tgz` `840c2332…a316f`。落点 `gpu-4090:/data/TJK/baselines/CSProm-KG`。
+上游 commit `9a80729`，09-16 的五处环境补丁（numpy 2 的 `np.float`、nltk 离线、
+torch≥2.6 的 `weights_only`、checkpoint 的 `map_location`、PL≥2.0 的 hook 改名）原样重放。
+
+**第 6 处补丁（CGEP）** `scripts/patch_csprom_kg_for_cgep.py`，**不动模型、损失、优化器与指标**，
+只加一个 dump。前后 sha256：
+
+| 文件 | before | after |
+|---|---|---|
+| `main.py`（两个新选项） | `102e2acc…cc96` | `f5f29b8f…afdc`（`f5f29b8f4728e024170cd86d4b672ff0019cc624e047c0a97c2c3685ab0afd2c`） |
+| `models/P_model.py`（读候选 + 每轮清空 dump） | `7ff9426a…51bb` | `8f01b996…fd8ce`（`8f01b996e7b623ad88dd39cb3a38066ec1cb9cdcb99975d60d3976a7963ff5ce`） |
+| `models/P_model.py`（写候选分数） | `8f01b996…fd8ce` | `26cd8e54…d97c`（`26cd8e54e4d101c961eb5f68fa8a6df089473da70349cb91615af94c41e9d97c`） |
+
+**为什么只 dump 分数、不要它的指标**：`docs/PROTOCOL_TABLE.md` 把 Ch6 的 evaluator 钉死在
+`succession/metrics.py`。对手自带的 `get_performance` 把 head prediction 一起平均、并且用的是
+另一套平局约定，**两样 CGEP 都不要**。所以补丁只在 `logits.detach()` 之后、在作者自己的
+filtered-ranking mask **之前**，把那 512 个候选的原始分数写出来；排序、平局与 Hit@k 交给
+`scripts/score_kgc_opponent.py`，走的是 gold / predicted / random / frequency 同一个 evaluator。
+该脚本拒绝任何对不上的 dump：行号错位、候选集漂移、分母变小（漏打分的 query 是错误，不是可丢的行）。
+
+### 状态：环境未建，**训练未开始**
+
+4090 的 cpolar 隧道 2026-09-17 20:09 左右掉线（`Connection timed out during banner exchange`）。
+作者的 `cpolar-ssh-update` **管不了这台**——它的 tunnels.conf 只有 `gpu-5090` 与 `gpu-a6000`，
+4090 在另一个 cpolar 主机（`18.tcp.vip.cpolar.cn`）上。按三态判活，**这只是 ssh 失败**；
+当时 4090 上没有任何任务在跑，补丁已落盘，**没有东西处于风险中**。
+
+隧道回来之后的下一步，按顺序：
+
+1. 建独立 venv（**不要动 ekg 的 venv**）：目标版本照 5090 那套实测可用的
+   **torch 2.8.0+cu128 / transformers 4.57.6 / pytorch_lightning 2.6.6 / numpy 2.5.3 / nltk 3.10.3**
+   （`requirements.txt` 写的 torch 1.11 + numpy 1.21.5 在 sm_89 上跑不了，这正是那五处补丁的由来）；
+   4090 实测 `pypi.tuna.tsinghua.edu.cn` 返回 200，装得了包；
+2. 先用 `-dataset CGEP-MAVEN` 跑一次**小步冒烟**（几十步 + 一次 test），确认 dump 行数 = 1,908
+   且 `score_kgc_opponent.py` 能收下；
+3. 再正式训练 + `trainer.test`，产出 `csprom_scores.jsonl` → 我们的 evaluator → 表 6-2 那一行。
+
+⚠️ **`-cgep_scores` 的 dump 只在 `dataloader_idx == 0`（predict_tail）写**，predict_head 不是
+CGEP 的问题，原样放过。
