@@ -54,7 +54,7 @@ START_PATCH = """    def on_validation_epoch_start(self):
                 lines = fh.read().strip('\\n').split('\\n')
             assert int(lines[0]) == len(lines) - 1, 'candidate file count line disagrees'
             self._cgep_candidates = [[int(x) for x in line.split()] for line in lines[1:]]
-        if getattr(self.configs, 'cgep_scores', ''):
+        if getattr(self.configs, 'cgep_scores', '') and self.trainer.testing:
             open(self.configs.cgep_scores, 'w', encoding='utf-8').close()"""
 
 DUMP_ANCHOR = """        logits, _ = self(ent_rel, src_ids, src_mask)
@@ -63,9 +63,17 @@ DUMP_PATCH = """        logits, _ = self(ent_rel, src_ids, src_mask)
         logits = logits.detach()
         # ekg patch (CGEP) 2026-09-17: dump the raw candidate scores *before* the
         # authors' filtered-ranking masking, so our scorer sees exactly what the
-        # model said. dataloader 0 is predict_tail, which is the CGEP direction;
-        # predict_head is not a CGEP question and is left alone.
-        if dataset_idx == 0 and getattr(self, '_cgep_candidates', None) is not None \\
+        # model said. Three guards, each load-bearing:
+        #   * self.trainer.testing -- val_dataloader serves the *dev* triples and
+        #     test_dataloader the CGEP queries, and test_step delegates here, so
+        #     without this the candidate lookup would index dev rows by test row id;
+        #   * dataloader 0 is predict_tail, the CGEP direction (predict_head is not
+        #     a CGEP question and is left alone);
+        #   * both loaders are shuffle=False, which is what makes the row index
+        #     batch_idx * val_batch_size + i correct -- the authors' own log_ranks
+        #     already relies on that.
+        if dataset_idx == 0 and self.trainer.testing \\
+                and getattr(self, '_cgep_candidates', None) is not None \\
                 and getattr(self.configs, 'cgep_scores', ''):
             import json as _json
             base = batch_idx * self.configs.val_batch_size
