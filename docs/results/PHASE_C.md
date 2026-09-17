@@ -1090,3 +1090,109 @@ C5 是同一形状：`remove_core 79.16` 低于锚 **1.83**，机制把它抬回
 
 Gate 2 的两个输入现在到了一个（C5.3 ✅ / A4.3 仍等 4090 空卡）。**Gate 2 之前不启动 C5 第二周期**，
 也不跑 seed 17/42（未授权，且 `gate` 两项皆 false 本就不满足 matched-seeds 的前置）。
+
+---
+
+## ★★ G-5b C5 差距归因：**那 1.83 的主体是误合并，不是漏合并**（2026-09-17，本地纯 CPU，未训练、未占卡）
+
+### 开工自审
+
+1. **科研价值**：C5.3 判出「`remove_core` 本身就比主锚低 1.83 ⇒ 输的是主干不是机制」，但**没说清
+   这 1.83 是什么错误**。不拆开，Gate 2 的改纲裁决就只有一个「低了 1.83」的标量；拆开之后，
+   「C5 该不该有第二周期、第二周期该改什么」才有事实依据。对准的是 `EXPERIMENT_PLAN.md` §5 Gate 2
+   的「≤1 章过」分支与 §7.3 的表 5-3。证据来源是本页 C5.3 节那三行数字 + 契约登记的主锚预测。
+2. **可行性**：三臂预测、主锚预测、gold、官方 evaluator **全部已存在且哈希已登记**；
+   工具 `scripts/report_coref_error_profile.py` 仓库里**本来就有**（它正是为「MUC 只给三个比率、
+   不给两个方向各自多少个决策」写的）。纯 CPU、分钟级、不训练、不改代码 ⇒ **五个方面全部可行**。
+
+⛔ **这不是 C5 的第二设计周期**：没有改代码、没有重训、没有调任何阈值，只读已冻结的产物。
+
+### 怎么算的（四条命令，可重跑）
+
+工具复用 `scripts/report_coref_error_profile.py`（未改动）。它把错误质量拆成两个方向、两种货币，
+并且**在打印任何数字之前先用官方 `evaluate.py` 交叉验证一遍**——四个系统的交叉验证分依次是
+**80.98 / 79.90 / 79.16 / 78.83**，与本页 C5.3 主表和契约 `baselines.official_joint.scores`
+**逐位相同**，所以这一节的分解与主表口径同轴。
+
+```bash
+R=runs/stages/C5/c5-v61-argument-uncertainty-5090-r1
+for pred in $R/pilot-r2/full $R/pilot-r2/remove_core $R/pilot-r2/permutation; do
+  uv run python scripts/report_coref_error_profile.py \
+    --evaluator data/protocols/v6/tools/maven_ere_evaluate.py \
+    --gold $R/preflight-r2/data/MAVEN_ERE/internal-dev.jsonl \
+    --pred $pred/predictions.jsonl --output $R/gap-analysis-20260917/$(basename $pred).json
+done
+# 主锚（本地早有，见本页「本轮补齐的两样输入」）
+uv run python scripts/report_coref_error_profile.py \
+  --evaluator data/protocols/v6/tools/maven_ere_evaluate.py \
+  --gold $R/preflight-r2/data/MAVEN_ERE/internal-dev.jsonl \
+  --pred runs/stages/R1/r1-v61-20260904/anchors/identity/official_joint_prediction.jsonl \
+  --output $R/gap-analysis-20260917/official_joint.json
+```
+
+**输入哈希（本地 ⇄ 5090 双端一致，本轮 rsync 回本地时重核）**：
+契约 `7a56e451…b6b0`、gold `internal-dev.jsonl` `403b69a8…07e81`（= 契约 `internal_dev_gold.sha256`）、
+evaluator `32919e86…59598`（= 契约 `evaluator.sha256`）、主锚预测 `66ff04ba…7f642`（= 契约
+`baselines.official_joint.predictions_sha256`）。产物落 `$R/gap-analysis-20260917/`（`runs/` 不进 git）。
+
+### 主表：四个系统的错误方向（官方 MUC 口径，291 篇 / 7,195 gold mention）
+
+| 系统 | MUC F1 | MUC P | MUC R | **漏合并**（missing links） | **误合并**（spurious links） | 被完全打散的 gold 簇 | 预测多 mention 簇 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **主锚 official_joint** | 80.98472 | **0.788430** | 0.832461 | **96** | **128** | 55 | 225 |
+| **full**（机制） | 79.90115 | 0.756630 | **0.846422** | **88** | 156 | **49** | 250 |
+| remove_core | 79.15966 | 0.763371 | 0.821990 | 102 | 146 | 56 | 239 |
+| permutation（负控） | 78.83333 | 0.754386 | 0.825480 | 100 | 154 | 51 | 252 |
+
+pairwise 口径（pair 分类器实际训练的货币）同向：误合并 394 / 419 / 398 / 397，漏合并 222 / 184 / 229 / 235。
+
+### 1.825 拆到哪里去了（反事实分解：只把一个分量搬到主锚水平）
+
+| 反事实 | MUC F1 | 相对 `remove_core` | 占那 1.825 的 |
+|---|---:|---:|---:|
+| `remove_core` 实测 | 79.15966 | — | — |
+| **只把 precision 搬到主锚水平**（误合并 146 → 128） | **80.48600** | **+1.326** | **72.7%** |
+| 只把 recall 搬到主锚水平（漏合并 102 → 96） | 79.64204 | +0.482 | 26.4% |
+| 主锚实测 | 80.98472 | +1.825 | 100% |
+
+⇒ **我们这条监督共指主干输给官方 joint，主要是「把不该合并的合并了」，不是「该合并的没合并」。**
+误合并多 18 条链（146 vs 128，+14%），漏合并只多 6 条（102 vs 96，+6%）。
+
+### 机制（`full`）实际做的事，与它剩下的 1.084 在哪
+
+机制换来的是 **漏合并 102 → 88（−14）**，付出的是 **误合并 146 → 156（+10）**——
+买 recall、卖 precision，净 +0.742 MUC。两个副作用与之一致：被完全打散的 gold 簇 56 → **49**
+（**比主锚的 55 还少**），预测多 mention 簇 239 → 250。
+
+由此得到本节最要紧的一条：
+
+> **`full` 的 MUC recall 0.846422 已经超过主锚的 0.832461（+0.0140）。
+> 它与主锚剩下的 1.084，100% 落在 precision 上（0.756630 vs 0.788430，−0.0318）。**
+
+反事实推算：若 `full` 的误合并率压到主锚水平而 recall 不变，MUC F1 为 **81.640**，**超锚 +0.655**。
+⚠️ **这是算术推演，不是实测，不得当作结果引用**；它的用处只是给出一个有量纲的靶子。
+
+### 可检验的假设（供 Gate 2 裁决参考，本轮不执行）
+
+**H1｜误合并集中在「trigger 长得像」的跨句对上，而这正是 role-compatibility 本该拦住的一类。**
+`full` 的 419 个误合并 pair 里 trigger 相似度 ≥0.8 的占 **58.0%**（243 个），主锚只占 **51.5%**；
+跨句比例两边都在 88–91%。即：机制在表面相似度高的对上**没有起到抑制作用**，甚至被带偏。
+可检验方式：按 trigger 相似度分层报 `full` 与 `remove_core` 的误合并增量，若增量集中在 ≥0.8 桶，
+H1 成立，则第二周期该改的是**把角色相容性接到抑制侧**（当前它只作为正残差抬分），而不是继续加 recall。
+
+**H2｜B³/CEAFe 在本 split 上无鉴别力，别拿它们写稳健性。** 7,195 个 gold mention 里
+**6,386 个是单例簇**（88.8%），只有 236 个多 mention 簇。已在 C5.3 节写过，这里给出计数依据。
+
+### 限制（三条，都要随结论一起报）
+
+1. **+0.742 仍不是已确证的效应**——本 split / 本指标的噪声地板**至今没量过**（D4 的 ±.01 是
+   macro-F1 的地板，不能搬）。本节只解释差距的**构成**，不把臂序升格为结论；
+2. 反事实分解是 **F1 对 P/R 的代数分解**，假设搬动一个分量时另一个不变。真实系统上压误合并
+   通常会同时掉一点 recall ⇒ 上表的 72.7% / 26.4% 是**归因权重，不是可兑现的增益**；
+3. 单例由官方 scorer 自动补齐，本节所有计数都在官方 mention population 上算，与主表同轴。
+
+### 下一步
+
+本节**不触发**任何执行动作：C5 第二设计周期是否开、以什么形态开，属于 Gate 2 的改纲裁决。
+H1 的分层验证若获批，是纯离线分析（现有四份 `gap-analysis-20260917/*.json` 已含相似度桶，
+逐对清单需要小改脚本输出）。
