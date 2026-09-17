@@ -1130,3 +1130,69 @@ label_smoothing 0.1 / embed_dim 144 / k_w 12 / k_h 12 / alpha_step 1e-5）。
 
 ⚠️ **`-cgep_scores` 的 dump 只在 `dataloader_idx == 0`（predict_tail）写**，predict_head 不是
 CGEP 的问题，原样放过。
+
+### 第二个对手 SimKGC 也已上卡（gpu-4090 card 1，与 CSProm-KG 并行）
+
+**为什么值得跑，尽管它的已发表 CGEP 数字最低（9.3）**：见名册 §6.2c——它是**文本双编码器**，
+实体表示由名字与描述文本编码而来，对未见实体是**归纳式**的，因此上面那条
+「金标后继在训练图里 0/1,908 有边」几乎伤不到它，而 CSProm-KG 的实体嵌入表正面吃这一刀。
+**两个对手放在一起，正好把「输出层依不依赖已训练的实体嵌入」这个变量单独测出来。**
+
+搬运与补丁同 CSProm-KG 一路：`git archive HEAD` + `git diff` 从 5090 搬，双端 sha256 已核
+（`simkgc_src.tgz` `850f9c3a…d6b0`、`simkgc_patches.diff` `a4391579…afcbc`、
+`cgep_simkgc.tgz` `7b598cee…e4ab`）；上游 commit `97cc43e`，09-14 的一处环境补丁
+（`transformers>=4.40` 删了 `AdamW`，改用 `torch.optim.AdamW` 并**显式钉 `eps=1e-6`**，
+因为 transformers 的默认是 1e-6 而 torch 是 1e-8）原样重放。
+
+**CGEP 补丁**（`scripts/patch_simkgc_for_cgep.py`，**不动模型、损失、打分函数**）：
+
+| 文件 | before | after |
+|---|---|---|
+| `config.py`（task 白名单加 `cgep-maven` + 两个 dump 选项） | `ce6bf58a…28dd` | `3d273304c51b10266fdce82d57a86cf6b3a3d85bc0a59d502e15a6c5b2853c9d` |
+| `evaluate.py`（模块状态 + dump + 只在 forward 方向装弹） | `bd423034…a98f` | `080c0e5524a7093e4ab9e6591026b84ea64e2dcf52b4a3b67dc92c9811c8f695` |
+
+- `task` 字符串只到两个地方（`doc._parse_entity_name` 的 WordNet 后缀剥离、`rerank` 里一条
+  wiki5m 断言），所以 `cgep-maven` 走的是**通用分支**——对我们的纯触发词正是对的那条；
+- dump 放在 `rerank_by_graph` **之后**（那是 SimKGC 的方法组成部分）、known-triplet 过滤
+  **之前**（那是 KGC 的 filtered 协议，CGEP 不用，我们的打分器也不需要）；
+- **只在 forward 方向装弹**：backward 问的是「哪个头能解释这个尾」，不是 CGEP 的问题，
+  而且它的行号会和 forward 的撞在同一个 dump 里。
+
+#### ⚠️ batch 1024 实测装不下，**512 也装不下**
+
+名册 §6.2b 记的障碍是「原配置 `--batch-size 1024` 需 4×32 GB」——那是从 README 推的。
+现在有本机实测了（单张 4090，23.52 GiB）：
+
+| batch | 结果 |
+|---:|---|
+| 1024 | **OOM**（差 300 MiB；加 `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` 再试，仍 OOM） |
+| 512 | **OOM**（第一个 forward 就炸，差 38 MiB） |
+| **256** | ✅ 稳定，实测 **19.9 GB**，360 step/epoch、约 3.8 step/s |
+
+⇒ **取 256**，其余超参与 `scripts/train_wn.sh` 逐字相同（bert-base-uncased / pooling mean /
+lr 5e-5 / additive-margin 0.02 / use-amp / use-self-negative / pre-batch 0 / finetune-t /
+epochs 50 / use-link-graph）。
+⚠️ **这一条必须和分数一起写**：in-batch 负样本从 1024 降到 256，**而对比学习的增益正是从负样本量来的**
+⇒ **表 6-2 的 SimKGC 行是它的下界，不是它的发表设置**。不得用这一行说「SimKGC 弱」。
+
+Epoch 0 结束时 dev（我们的训练三元组切片）`Acc@1 67.6 / Acc@3 85.5` ⇒ 训练本身是健康的。
+
+#### 并行状态（两张卡，各自 namespace，不互相写）
+
+| 卡 | 任务 | 进度（记录时） |
+|---|---|---|
+| card 0 | CSProm-KG `-epoch 60` | epoch 4/60，约 5.7 min/epoch ⇒ 约 5.7 GPU·h |
+| card 1 | SimKGC `--epochs 50 --batch-size 256` | epoch 1/50，约 1.6 min/epoch ⇒ 约 1.3 GPU·h |
+| card 2 / 3 | 空 | — |
+
+评测是**另一次调用**（`evaluate.py --valid-path .../test.txt.json --cgep-*`），
+所以训练期间 checkpoint 只按 dev 切片选，**1,908 个 CGEP query 全程不参与选模**。
+
+#### 顺手买到的两条纪律
+
+1. **重试封装不能套在非幂等命令上**。隧道会在远端**已经执行完**之后才断，
+   重试于是把同一条命令又跑了一遍——这一轮就这样让一个补丁脚本跑了两次，
+   第二次报「已应用」，把我引去查一个不存在的 anchor 问题。**重试只给只读/幂等命令用。**
+2. **哨兵字符串必须是「只有这一处改动才会引入」的文本**。CSProm 那边用共享 marker，
+   第二处改动一落地第三处就被判成「已应用」；SimKGC 这边用 `_CGEP_STATE['active']` 当哨兵，
+   而它正是上一处改动写进去的。**同一个形状的错，隔一个文件又犯一次。**
