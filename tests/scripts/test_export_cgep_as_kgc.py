@@ -135,3 +135,23 @@ def test_both_formats_describe_the_same_queries_in_the_same_order(export: Path) 
     assert len(pools) == len(mirrored)
     for pool, expected in zip(pools, mirrored, strict=True):
         assert {entity_id[c] for c in pool} == expected
+
+
+def test_the_two_formats_number_entities_identically(export: Path) -> None:
+    """The scorer checks a SimKGC dump against the CSProm export's ids.
+
+    SimKGC's EntityDict numbers entities by their position in entities.json and
+    dumps those indices; the CSProm side numbers them in entity2id.txt. Both come
+    off the same sorted node list here, so the indices coincide -- but that is an
+    assumption the whole SimKGC row rests on, so it is asserted rather than
+    noticed later in a row-by-row gold mismatch.
+    """
+    simkgc = export.parent / "CGEP-MAVEN-simkgc"
+    by_position = [
+        row["entity_id"]
+        for row in json.loads((simkgc / "entities.json").read_text(encoding="utf-8"))
+    ]
+    entity_id = dict(line.split("\t") for line in _numbered(export / "entity2id.txt"))
+    assert len(by_position) == len(entity_id)
+    for index, node in enumerate(by_position):
+        assert entity_id[node] == str(index)
