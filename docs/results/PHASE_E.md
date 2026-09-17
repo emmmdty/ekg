@@ -745,7 +745,10 @@ torch 2.8.0 / PL 2.6.6 **不动**（sm_120 必需）。
 登记动作属于 E3.1 本身（「闭合三类真实上游输入接口」），**不是**对已冻结 phase 产物的回填——
 已冻结的 summary 一个字节都不动。
 
-三份 fallback 的**候选身份已经查好，含 content hash，E3.1 开工直接用**：
+三份 fallback 的候选身份与 content hash 如下。
+⚠️ **但「E3.1 开工直接用」这句话已被同日下午的实测否掉**——三者的文档集与 E3 unit **交集为 0**，
+见本页下一节《E3.1 实测阻塞》。下表只保留「哪个 id 是合规的 fallback 身份」这一层结论，
+**不再表示它们能直接喂给 E3.1**：
 
 | 上游 | 可用 fallback | content-addressed id（= 契约登记的 hash） | 出处 |
 |---|---|---|---|
@@ -768,3 +771,70 @@ torch 2.8.0 / PL 2.6.6 **不动**（sm_120 必需）。
 
 不触发执行。本节的产出是 **E3.1 的前置条件收紧了**：它必须自带 fallback 登记步骤。
 G-11 排期时把这一步算进去（纯 CPU，小时级以内）。
+
+---
+
+## 🔴 E3.1 实测阻塞：**三个方法章的产物与 E3 evaluation unit 文档集交集为 0**（2026-09-17，本地纯 CPU）
+
+### 开工自审
+
+1. **科研价值**：4090 空出来后，唯一不依赖 Gate 2 改纲结果的活线是 Ch6（`EXPERIMENT_PLAN.md` §7.5
+   明写「Ch6 的构建损失、图依赖正控与不对齐发现**不依赖任何方法章成功**」）。要把 4090 用在 Ch6 上，
+   路径是 E3.1 → E3.2（契约写明都是 CPU）→ E3.3（GPU 主表）。本节做的是 E3.1 的第一项断言。
+2. **可行性**：纯 CPU、读已冻结产物 ⇒ 本节本身可行。**但它测出 E3.1 后续步骤不可行，见下。**
+
+### 实测：五个文档集两两对照（全部现算，不是推断）
+
+E3 unit（`runs/stages/E3/e3-v61-20260913/queries.jsonl`，1,908 实例）覆盖 **437 篇**文档、6,892 个节点 id。
+节点 id 形如 `<doc_id>::<mention_id>`。
+
+| 产物 | 文档集 | 与 E3 unit 437 篇的交集 |
+|---|---:|---:|
+| **C5** `pilot-r2/full/predictions.jsonl` | 291 篇 | **0** |
+| **A4** `pilot/full/edge_predictions.jsonl` | 291 篇 | **0** |
+| **D4** OOF 语料 `maven_fact/train.jsonl` | 2,913 篇 | **0** |
+| `maven_ere/train.jsonl`（C5/A4 的 internal-dev 从这里切） | 2,913 篇 | **0** |
+| `maven_ere/valid.jsonl`（E3 unit 的源） | 710 篇 | **437（全覆盖）** |
+| `maven_fact/valid.jsonl` | 710 篇 | **437（全覆盖）** |
+
+⇒ **E3 unit 建在 valid 上，三个方法章全部跑在 train 的切片上（291 / 291 / 2,913 篇），
+没有一个 doc_id 能对上。** 这不是 id 命名口径不一致，是**文档集本身不相交**。
+
+### 因此 E3 契约的 fallback 机制在这里闭合不了
+
+`phases/PHASE_E3_graph_application.md` 的 Inputs 假设：phase `failed`/`blocked` 时读它
+**显式的 `fallback_component_bundle_id`**，就能拿到该类上游。但三个已登记的 fallback
+（identity=official_joint 预测、relation=A3 fallback 预测、factuality=`cls` OOF labels）
+**全部是"另一个 split 上的预测文件"，不是能在 valid 上再推理一次的模型**。
+把它们搬到 E3 unit 上没有任何映射可走——目标文档根本不在它们的覆盖里。
+
+⚠️ 顺带确认历史 `predicted` 档的真实来源：`scripts/evaluate_cgep_propagation.py:14` 的注释写着
+`predicted` is our **Phase A extractor's**——2026-07-29 那批 `.1802 / .1583` 用的上游是
+**v5 时代的判别式抽取器在 valid 上的产出**，本来就不是 C5/A4/D4。
+
+### 可行性判定：卡在【数据】与【协议】两条
+
+- **数据**：E3 unit 需要的是 valid 437 篇上的 identity / relation / factuality 预测。
+  三个 fallback 覆盖的是 train 的切片，**实测交集 0**，拿不到；
+- **协议**：E3 契约把 fallback 定义成「可直接读的 component bundle」，而 P1/A4/C5/D4 四份契约实际
+  登记的 fallback 都是「某个 split 上的预测产物」。两边对 fallback 是什么东西的假设不一致，
+  **这个缺口在契约层，执行代理不能自行选一个补法**。
+
+⛔ 按 `CLAUDE.md` 的开工自审规则，**停在这里交作者裁决，不自行换题绕开**。
+
+### 三个替代，附推荐
+
+| | 做法 | 代价 | 风险 |
+|---|---|---|---|
+| **(乙) 推荐** | **沿用历史 `predicted` 图**（Phase A 抽取器在 valid 上的产物，`.1583` 已发表），表 6-2 的表头**标明上游身份 = v5 判别式抽取器，不是 C5/A4/D4** | **零**——产物已在，`ch4_sedgpl.pt` 实测 load 后复现 `.1583` 逐位一致 | Ch6 的构建层与三个方法章脱钩。但 E3 契约本就不要求 Ch6 胜过方法章，§7.5 也明写 Ch6 的发现不依赖方法章成功 |
+| (甲) | 用 C5/A4/D4 的 checkpoint 在 valid 710 篇上**重新推理**，产出新的 predicted 层 | GPU 小时级（4090 可做）+ 要先裁决**取哪个臂**（`full` 是没过门的机制臂，`remove_core` 是无机制臂）；D4 是五折 OOF，valid 上没有对应的单一模型，还要再定一个口径 | ⚠️ **让 Ch6 的构建层挂在三个没过门的机制上**——反而削弱当前唯一的活线 |
+| (丙) | 把 E3 unit 重建到 internal-dev 上 | 违反 E3.0 冻结（1,908 实例已冻结） | **丢掉与 `.1802 / .1583` 并表的能力**，不可取 |
+
+**推荐 (乙)** 的理由：① 它是唯一零成本且不依赖任何失败机制的路径；② Ch6 现在是唯一能产正结果的章，
+把它的构建层绑到三个刚失败的机制上，是拿活线去赌已经判负的东西；③ 表头如实标明上游身份，
+本来就是 E3 契约 Inputs 的要求（「**并在表头标明该臂的上游方法身份**」），(乙) 满足它。
+
+### 这一节没有改变的东西
+
+E3.0 冻结的 unit 一个字节没动；三个 phase 的产物只读未写；没有训练、没有占卡。
+`EXPERIMENT_PLAN.md` 的 G-11 行已写死这条前置，改纲裁决与本项**互不阻塞**。

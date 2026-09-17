@@ -29,6 +29,12 @@
 3. **LLMERE 恢复方案审查**（C-3，纯文档只读，主表排 09-17 起 3 天）；
 4. **A4 误差分析**（G-4b）：四臂召回坍塌砍掉了哪些 causal 类型、砍的是不是难例，写回 `results/PHASE_A.md`。
 
+🔴 **2026-09-17 下午新增一项待裁决：Ch6 的上游身份。** 实测三个方法章的产物与 E3 evaluation unit
+**文档集交集为 0**（unit 在 valid 437 篇，C5/A4 在 train 切出的 291 篇，D4 在 maven_fact train 2,913 篇），
+三份 fallback 全是「另一个 split 上的预测文件」⇒ **E3 契约的 fallback 机制闭合不了**，卡在【数据】+【协议】。
+**推荐 (乙)：沿用历史 `predicted` 图**（Phase A 抽取器在 valid 上的产物，零成本、不依赖任何失败机制，
+表头标明上游身份）。三个替代见 `results/PHASE_E.md`。**在这一项裁决之前，Ch6 上不了 4090。**
+
 另外 **E3.1 的前置条件 2026-09-17 收紧了**：C5/D4 的 `fallback_component_bundle_id`
 **补不回去**（两个 runner 都被契约的 `code` 哈希钉住，pilot 又已收口，改了就得重训）
 ⇒ **E3.1 必须自带 fallback 登记步骤**，三份 fallback 的 id 与 hash 已查好写进 `results/PHASE_E.md`。
