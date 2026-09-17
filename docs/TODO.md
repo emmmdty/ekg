@@ -59,10 +59,18 @@ BART contrastive）**没有一个实现 CGEP**，适配代码要我们自己写 
 `score_kgc_opponent.py` 用我们自己的 evaluator 收下。
 backbone 走 **`hf-mirror.com`** 直接拉（推翻「权重只能本地下了再 scp」，见 `HANDOFF.md` §0.6）。
 
-**跑完三步收口**：打分 → 数字连同两条解释写进 `results/PHASE_E.md`（金标 0/1,908 有边；
-SimKGC batch 1024→256）→ 回填 `EXPERIMENT_PLAN.md` §7.4。
-SimKGC 评测**跑两遍**（`--neighbor-weight 0.05` 进主表 / `0.0` 作消融），
-把「编码器免疫、重排不免疫」这个变量单独测出来。
+**SimKGC ✅ 已收口（三档）**，CSProm-KG 训到 32/60。
+
+🔴 **收口时量出一条关于评测单元本身的事实**：候选全语料采、ECG 不跨文档 ⇒
+**只看文档归属就有 MRR `.8041` / Hit@10 `1.0000`**（`same_document` 对照已进 registry 与主表）。
+description 消融把它量到底：SimKGC 带候选句 `.6373` → 清空 `.0563`（塌 11.3 倍），
+top-1 同篇率 78.20% → 18.50%（均匀乱选 0.41%）⇒ **它 91% 的分数是文档匹配，不是事件预测**。
+
+⇒ 主行取无 description 档。**在两边都读不到文档身份的那条轴上，本文构建图 `.1583`
+是 SimKGC `.0563` 的 2.8 倍。** ⚠️ 单 seed + SimKGC batch 被显存压到 256 ⇒ 那一行是下界。
+
+**CSProm-KG 跑完的三步收口**：`score_kgc_opponent.py` 打分 → 写 `results/PHASE_E.md` →
+回填 `EXPERIMENT_PLAN.md` §7.4。
 
 ⚠️ **实测出一条决定这两行怎么读的事实**：CGEP 的金标后继在训练图里 **0/1,908 有边**，
 干扰项 **4,863/6,892** 有 ⇒ CSProm-KG（按实体嵌入表打分）被系统性推离正确答案，
