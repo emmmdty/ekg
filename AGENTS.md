@@ -128,5 +128,7 @@ GitHub 上已有且可运行的实现**直接用**（官方 baseline 代码、�
 - **ssh 失败 ≠ 远端进程死亡**（cpolar 隧道会掉线）：三态判活 ALIVE / GONE / ssh 失败，
   只有成功 ssh 读到进程 GONE 才算结束。判活看 `ps -eo etime` 或 `nvidia-smi`，别靠对时间的感觉。
 - 代码走 git（远端 `git fetch && git reset --hard origin/main`），**数据/产物走 `scp`/`rsync` + 双端 `sha256`**。
+- **预训练权重先试服务器上的镜像**：`hf-mirror.com` 两台都通且实测能拉权重（2026-09-17），
+  比 0.4 MB/s 的隧道 scp 快一个数量级；`huggingface.co` / `drive.google.com` / `github.com` 仍不通。
 - 长任务用 `setsid nohup` + `python -u`，输出重定向 `logs/`；**一条 ssh 只发一个后台任务**。
 - 非交互 ssh 里 `python`/`jq`/`rg`/`tmux` 可能不在 PATH，用绝对路径或 `bash -lc`。

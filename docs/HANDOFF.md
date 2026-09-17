@@ -257,6 +257,19 @@ temporal 52.457177 过。**四臂阶梯与设计意图完全相反。**
   | `github.com` / `huggingface.co` 直连 | ❌ | 与 09-14 记录一致 |
   | `drive.google.com` | ❌ | 公开 checkpoint 只能本地下载后 scp |
 
+  ⚠️ **2026-09-17 又测出一条，同一个教训第二次**（gpu-4090）：
+
+  | 目标 | 结果 | 影响 |
+  |---|---|---|
+  | **`hf-mirror.com`**（HuggingFace 镜像） | ✅ **200，且实测能拉权重**（`bert-large-uncased/model.safetensors` 直接下完） | **推翻「公开 checkpoint 只能本地下载后 scp」**——那条结论来自测 `huggingface.co` 与 `drive.google.com`，**没人测过镜像** |
+  | `aliendao.cn` | ✅ 200 | 备选 |
+  | `modelscope.cn` | ✅ 302 | 备选 |
+  | `pypi.tuna.tsinghua.edu.cn` | ✅ | 4090 同样能装包 |
+  | `github.com` / `huggingface.co` | ❌ | 与 5090 一致 |
+
+  ⇒ **预训练权重优先在服务器上从 `hf-mirror.com` 直接拉**，别再默认 70 分钟的 scp。
+  仓库代码仍走本地 clone → tar → scp（gh-proxy 的完整 clone 会断）。
+
   **带走的纪律**：粗粒度的「没外网」把**能装包**和**能拉 checkpoint** 混成了一件事，
   直接影响了两项任务的可行性判定。按域名测，别按感觉写。
   ⇒ **外部仓库、预训练权重、公开 checkpoint 一律本地下载后 `scp`**，没有第二条路。
