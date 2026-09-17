@@ -838,3 +838,143 @@ E3 unit（`runs/stages/E3/e3-v61-20260913/queries.jsonl`，1,908 实例）覆盖
 
 E3.0 冻结的 unit 一个字节没动；三个 phase 的产物只读未写；没有训练、没有占卡。
 `EXPERIMENT_PLAN.md` 的 G-11 行已写死这条前置，改纲裁决与本项**互不阻塞**。
+
+---
+
+## ★★ 裁决落地 + E3.1 / E3.2 完成 + 表 6-2 四行到手（2026-09-17，本地 CPU + gpu-4090 card 0）
+
+### 开工自审
+
+1. **科研价值**：对准 `EXPERIMENT_PLAN.md` §7.4 的**表 6-2**。Gate 2 实测 0 章过门后，
+   Ch6 是唯一还能产正结果的章（§7.5 明写它的发现不依赖任何方法章成功），而它整章卡在
+   E3.1 的契约缺口上。裁完缺口 → E3.1 → E3.2 → 表 6-2 的自有行，是唯一一条不依赖
+   任何已判负机制的推进路径。证据：本页上方 `.1802 / .1583 / .1185 / .0811` 四行已在这批
+   1,908 实例上测过，缺的是 Hit@k 全列与两个平凡对照。
+2. **可行性**：五条全部成立。数据在本地与 4090；协议就是已冻结的 unit；代码在仓库内；
+   算力＝4090 四张卡全空且 `--load-model` 只需分钟级；授权＝CLAUDE.md「4090 有空即可自用」，
+   本地三件套已全绿（644 passed / 29 skipped、ruff 0、smoke OK）。
+
+### 裁决：三项按推荐落地
+
+| 裁决 | 落点 | 依据 |
+|---|---|---|
+| ② **Ch6 上游身份** | **取 (乙)**：`predicted` 条件沿用 v5 判别式抽取器在 valid 上的产物 | 零成本、不依赖任何判负机制，且表头标明上游身份本就是 E3 契约 Inputs 的要求 |
+| ① **Gate 2 改纲** | **推迟到 Ch6 主表有数字之后再定**，不是「停等」 | 取 (乙) 之后 Ch6 全线解锁，**没有任何可执行任务被 ① 阻塞**；而改纲该选哪一种形态，取决于 Ch6 交出什么。在 Ch6 数字之前定稿是用更少的信息做更大的决定 |
+| ③ **C-3 / G-8** | **维持 (甲) 不执行** | 它是 Ch4 主表的一行；Ch4 存废未定之前，`< 1 GPU·h` 也没有去处 |
+
+### ⚠️ 先抓到一个缺陷：冻结 unit 里有 68 个 `instance_id` 撞号
+
+`e3-v61-20260913/queries.jsonl` 1,908 行里只有 **1,840 个不同的 `instance_id`**。
+根因在 `cgep.py`：id 是 `{doc_id}::{head_idx}-{tail_idx}`，而**节点下标是每个 ECG 各自的**，
+同一篇文档的两个 ECG 于是撞号——撞的两条是**完全不同的 query**（anchor、relation、gold、
+候选集全不同）。没有任何地方报错。
+
+- **影响面**：任何按 `instance_id` 做的逐实例跨臂 join 会静默合并它们；
+  `predictor.py:102` 已经拿它当 `random` 基线的确定性哈希键 ⇒ **表 6-2 的 random 行受影响**；
+- **不影响已发表数字**：`.1802 / .1583 / .1185 / .0811` 用的是 sedgpl 预测器，且 ranks 是**按位置**
+  存的（`ch4_propagation_ranks.json` 是列表不是字典）；
+- **修法**：query edge 自己命名自己（`{head_node_id}-{SUBTYPE}->{tail_node_id}`），`ab4ace0`，
+  实测 1,908/1,908 唯一，并留了一条双 ECG 文档的回归测试。
+
+**重新冻结为 `runs/stages/E3/e3-v61-20260917/`**（旧目录一个字节没动，保留）。
+按 E3.0「若重建校验导致变化，须在看任何 consumer 结果前冻结并披露原因」——本次正是那个窗口。
+
+| 轴 | 20260913 | 20260917 |
+|---|---|---|
+| instances / documents / ecgs / candidate_pool | 1908 / 437 / 761 / 6892 | **完全相同** |
+| `candidate_id_digest` | `93915ae3…f27ee` | **完全相同** |
+| `source.sha256` | `6faea0e4…6153` | **完全相同** |
+| 逐行比对（doc_id / anchor / relation / gold / label / candidates） | — | **1,908 行零差异** |
+| `query_id_digest` | `7b958d5d…6cd9e` | `3b700acc…15f6d` |
+| `unit.sha256` | `e92629bd…5aecf` | **`f75e7e87272d718d68cb408163314519e906c50e90b3ba3a829a241a6baa11e6`** |
+
+⇒ **只有 id 字符串变了**，与 `.1802 / .1583` 并表的能力一点没丢。
+4090 上独立重建得到同一个 `f75e7e87…`（跨机复现），`--verify` PASS。
+
+### E3.1 ✅ 三类上游接口已闭合（gpu-4090，纯 CPU）
+
+`scripts/close_e3_upstream_inputs.py`。它**登记并校验，不复制**——消费者已经从 `--dump` 读那份边，
+再落一份就是两个要同步的文件。断言两种静默失败：层没覆盖到的文档、落在 unit 节点框架外的端点。
+
+| 层 | `gold` | `predicted`（上游身份 = v5 判别式抽取器） |
+|---|---|---|
+| identity | MAVEN-ERE released coref，**14,736 簇** | **16,104 个单例**——抽取器在 valid 上**没有预测任何共指**（`valid_prediction_sup.jsonl` 710 篇全是 `coreference: []`，dump metrics `n_pred=0`）。这是关于 v5 抽取器的事实，如实登记而不是就地补一个没人训练过的第四个方法 |
+| relation | 119,831 条 | **217,694 条**，源 `runs/factuality/predicted_edges_valid.jsonl`（`77dd9acc…177e`） |
+| factuality | MAVEN-FACT valid，16,104 条标签 | Phase D 检测器 `predicted_labels_valid.json`（`b5fd0bc9…ebdc`） |
+
+⚠️ **`--relation-dump` 故意没有默认值**：本地 `runs/relations/supervised_dump.jsonl`
+（`f0a73e8c…f31ff`，65 MB）与 `.1583` 背后那份 `predicted_edges_valid.jsonl`（133 MB）**是两份不同的
+dump**（同一天、不同时刻），边数 228,305 vs 217,694。留默认值等于静默登记错上游。
+
+产物 `runs/stages/E3/e3-v61-20260917/upstream_registry.json`（`f2685e10…6e9e`），`status=closed`。
+
+### E3.2 ✅ 两个条件的描述性画像（gpu-4090，纯 CPU，无新依赖）
+
+`scripts/report_e3_graph_profile.py`，607 篇（unit 候选池覆盖的全部文档）：
+
+| | 节点 | 总边 | 拓扑边(causal+subevent) | 连通分量 | 平均拓扑度 | **R1 可达率** | **R2 query F1** |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **gold** | 16,104 | 119,831 | 12,115 | 8,888 | 1.5046 | 1.0000 | 1.0000 |
+| **predicted** | 16,104 | 217,694 | **41,218** | 4,120 | **4.7455** | **0.7018** | **0.0795** |
+
+边的细分（coreference 只有 gold 侧有，见上）：
+
+| | causal/CAUSE | causal/PRECONDITION | subevent/SUBEVENT_OF | coreference |
+|---|---:|---:|---:|---:|
+| gold | 1,584 | 7,746 | 2,785 | 3,773 |
+| predicted | 7,749 | 19,864 | 13,605 | **0** |
+
+事实性分布（五类）：
+
+| | CT+ | CT− | PS+ | PS− | Uu |
+|---|---:|---:|---:|---:|---:|
+| gold | 15,299 | 339 | 401 | 48 | 17 |
+| predicted（Phase D 检测器） | 14,709 | 403 | 908 | 59 | 25 |
+
+**★ 一条新的不对齐证据**：`predicted` 的 **R2 query F1 只有 .0795**，而它的下游 MRR 是
+`.1583`，只比 gold 的 `.1802` 低 **12.2%**。结构侧「几乎全错」与下游「只掉一成」同时成立
+⇒ 本页此前 causal_scc–R1 的 ρ=−0.064 那条不对齐，现在多了 **R2↔MRR** 这一对。
+机制上说得通：拓扑边多了 3.4 倍而模板预算只有 20 条（实测 `tmpl` gold 15.9 → predicted 24.0），
+消费者读到的是被预算截断后的一小撮，R2 那种逐边精确匹配的严苛度传不到下游。
+
+子图图示：`runs/cgep/e3_graph_profile_1398d109_{gold,predicted}.dot`（Graphviz DOT，6 节点框架，
+不引入绘图依赖）。
+
+### 表 6-2 · 已到手的四行（冻结 unit `f75e7e87…`，n=1,908，**本地重建协议**）
+
+平凡对照本地 CPU（`scripts/evaluate_cgep.py --dataset maven`，torch-free）；
+自有两行 gpu-4090 card 0，**冻结权重 `ch4_sedgpl.pt` + `--load-model`，不重训、不选任何东西**，
+canonical 模板序，seed 209。
+
+| 方法 | MRR | Hit@1 | Hit@3 | Hit@10 | Hit@20 | Hit@50 |
+|---|---:|---:|---:|---:|---:|---:|
+| random | .0143 | .0021 | .0089 | .0241 | .0414 | .0891 |
+| frequency | .0378 | .0267 | .0273 | .0372 | .0718 | .1509 |
+| **本文构建图（predicted 上游 = v5 判别式抽取器）** | **.1583** | .1038 | .1530 | .2563 | .3580 | .5126 |
+| 本文构建图（gold 上游，**上界**） | .1802 | .1143 | .1782 | .3124 | .4114 | .5823 |
+
+严格口径（ties 全部判负）同表并存于产物：gold `mrr_strict .1252`、predicted `.1089`、
+frequency `.0124`、random `.0122`。
+
+- **`gold .1802` 与 `predicted .1583` 逐位复现** 2026-07-29 的两行 ⇒ 权重、词表与重新冻结的 unit
+  三者对齐无误；本次新增的是 Hit@3/20/50 三列（原表是「待测」）；
+- **任务不平凡**：`.1802 ≫ .0378 ≫ .0143`，两个平凡对照相差一个数量级以上；
+- **`n_unscorable=1`**：1,908 里有 1 个实例 sedgpl 侧无法打分，两臂同一个，已随产物记录。
+
+产物（双端 sha256 已核，本地与 4090 一致）：`runs/cgep/e3_main_ours.json`（`74b9273d…2aa7`）、
+`e3_main_ours_ranks.json`（`99fb8ed1…83fe`，逐实例 rank + reachability，现在按唯一 id 键得住）、
+`e3_graph_profile.json`（`2f4a6b5b…5227`）、两个 `.dot`、`upstream_registry.json`。
+
+### ⚠️ final-valid 访问披露
+
+与 2026-08-30 那次同性质：跑在 710 篇（v6 协议的 final-valid）上，**冻结权重 + 固定两个臂，
+没有选择任何模型、epoch、阈值或结构**；平凡对照更是 torch-free 的确定性打分。
+按 A 类红线不构成选模。**在此显式记录。**
+
+### 表 6-2 还缺什么
+
+四个公开对手行（SimKGC / MCPredictor / CSProm-KG / BART contrastive）。
+`BASELINE_ROSTER.md` §6.2a 的结构性事实没有变：**它们没有一个实现 CGEP**，SeDGPL 作者的适配
+从未发布 ⇒ 这四行在我们的重建协议上注定是 **(b) 透明适配**，适配代码要我们自己写。
+CSProm-KG 已在 WN18RR 上取得 (a)（本页上方），那证明的是「我们把它跑对了」，不是它在 CGEP 上的分。
+按 §3.1 基准率这是 3–4 周量级的 G-11a，**不是本轮能收口的**。

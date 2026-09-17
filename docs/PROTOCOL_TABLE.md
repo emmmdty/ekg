@@ -100,9 +100,10 @@ PY
 
 | 项 | 值 | 反查 |
 |---|---|---|
-| 评测单元 | **冻结的 1,908 个实例**（437 篇有实例 / 761 个 ECG / 候选池 6,892 节点 / 每题 512 候选） | `runs/stages/E3/e3-v61-20260913/manifest.json` |
-| `queries.jsonl` | `e92629bd84677e88549e6fbeeaf2e21afb0a8e050722bede45c19ccfa4b5aecf` | 同上 `unit.sha256` |
-| query-ID / candidate-ID digest | `7b958d5d…6cd9e` / `93915ae3…f27ee` | 同上 |
+| 评测单元 | **冻结的 1,908 个实例**（437 篇有实例 / 761 个 ECG / 候选池 6,892 节点，分布在 607 篇 / 每题 512 候选） | `runs/stages/E3/e3-v61-20260917/manifest.json` |
+| `queries.jsonl` | `f75e7e87272d718d68cb408163314519e906c50e90b3ba3a829a241a6baa11e6` | 同上 `unit.sha256` |
+| ⚠️ 重新冻结 | 旧 `e3-v61-20260913`（`e92629bd…5aecf`）有 **68 个 `instance_id` 撞号**（`cgep.py` 的 id 用了每个 ECG 各自的节点下标），2026-09-17 修复并重新冻结。**逐行零差异**、`candidate_id_digest` 与源 sha256 均不变 ⇒ 与 `.1802/.1583` 并表的能力未丢 | `results/PHASE_E.md` |
+| query-ID / candidate-ID digest | `3b700acc…15f6d` / `93915ae3…f27ee`（candidate 与旧 unit **相同**） | 同上 |
 | 生成参数 | seed **209**（SeDGPL 的）· `min_nodes=4` · 含 subevent · 512 候选 | 同上 `generator.params` |
 | 源 | `data/processed/maven_ere/valid.jsonl` `6faea0e4…c6153`（即 final-valid） | 同上 `source` |
 | 主指标 | **MRR 与 Hit@1/3/10/20/50**，两种并列口径：`mrr`（SeDGPL 的，平局判给金标）与 `mrr_strict`（平局全算错） | `src/ekg/succession/predictor.py::evaluate` |
@@ -110,10 +111,11 @@ PY
 | 无法打分的实例 | 计为最差名次并记入 `n_unscorable`，**永不从分母里删** | 同上函数 docstring |
 | 边序 | 主表**一律 canonical 序**；source 序只用于锚定已发表基线 | `results/PHASE_E.md`（纯重新序列化能造出 p=.02 的假效应） |
 | 口径声明 | **本地重建协议**；SeDGPL 的 `MAVENSubWoRe.npy` 从未发布，其 CGEP-MAVEN 数字**不可同表** | `manifest.json` 的 `protocol` 字段 |
+| **上游身份** | `gold` = MAVEN 发布标注；`predicted` = **v5 判别式抽取器在 valid 上的产物**（裁决 ② 取 (乙)，2026-09-17），**不是 C5/A4/D4**——那三章跑在 train 的切片上，与本 unit 文档集交集实测为 0。**表头必须写明** | `runs/stages/E3/e3-v61-20260917/upstream_registry.json` |
 | final-valid | 建在公开 valid 上，**只用来定义题目**，不训练、不选模 | `manifest.json` 的 `final_valid_ledger` |
 
 ```bash
-uv run python scripts/freeze_e3_evaluation_unit.py --verify runs/stages/E3/e3-v61-20260913
+uv run python scripts/freeze_e3_evaluation_unit.py --verify runs/stages/E3/e3-v61-20260917
 # 从源数据重建并比三件：源 sha256 / 盘上 queries.jsonl / 重建结果。期望 PASS
 ```
 

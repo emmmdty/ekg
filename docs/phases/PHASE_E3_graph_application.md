@@ -26,9 +26,17 @@ SC-005–SC-007。
 ## Inputs
 
 - P1 冻结的 ID namespace、query 生成器版本/来源 hash 与目标 schema；
-- C5 cluster / A4 relation / D4 factuality 的 immutable bundle 及各自 status；
-  任一 phase `failed` 或 `blocked` 时读取其显式 `fallback_component_bundle_id`，
-  **并在表头标明该臂的上游方法身份**；
+- ⚠️ **2026-09-17 裁决 ② 修订本条（取 (乙)）**。原文假设 phase `failed`/`blocked` 时可以读它显式的
+  `fallback_component_bundle_id` 拿到该类上游。**实测这条闭合不了**：E3 unit 建在 valid 上，
+  C5/A4 跑在 train 切出的 291 篇、D4 跑在 maven_fact train 的 2,913 篇，**与 unit 的文档交集为 0**，
+  而三份已登记的 fallback 全是「另一个 split 上的预测文件」，不是能在 valid 上重放的模型。
+  ⇒ **`predicted` 条件的上游身份改为 v5 判别式抽取器在 valid 上的产物**（即产出已发表 `.1583` 的
+  那一套），三层接口由 `scripts/close_e3_upstream_inputs.py`（E3.1）登记并校验，
+  产物 `runs/stages/E3/<unit>/upstream_registry.json`。
+  **表头必须标明该臂的上游方法身份**——这条不变，且 (乙) 正是靠它才成立。
+  证据与三个替代见 [`../results/PHASE_E.md`](../results/PHASE_E.md)；
+- （历史）C5 cluster / A4 relation / D4 factuality 的 immutable bundle 及各自 status；
+  任一 phase `failed` 或 `blocked` 时读取其显式 `fallback_component_bundle_id`；
 - 4090 上的 SeDGPL 权重 `ch4_sedgpl.pt`（1.5G，`--load-model` 可复用，实测 load 后
   `predicted` 复现 .1583 逐位一致）、random/frequency 与历史 paired-rank caches；
 - MAVEN valid gold 仅作 reference，不得冒充 predicted arm。
@@ -73,9 +81,19 @@ consumer 结果前冻结并披露原因。
 先做 20-query CPU fixture，断言 gold 与 predicted 两套条件的 ID 集完全一致、无重复/缺失。
 **只需 gold / predicted 两档**（原 24 条件 factorial 已撤销）。
 
+✅ **已完成 2026-09-17**（gpu-4090，纯 CPU）：`scripts/close_e3_upstream_inputs.py`，
+`--fixture 20` 与全量两种模式，`status=closed`。它**登记并校验，不复制**——消费者已经从
+`--dump` 读那份边。两种静默失败被判死：层没覆盖到的文档、落在 unit 节点框架外的端点。
+⚠️ `--relation-dump` **故意没有默认值**：本地 `runs/relations/supervised_dump.jsonl` 与
+`.1583` 背后那份 `runs/factuality/predicted_edges_valid.jsonl` 是两份不同的 dump。
+
 ### E3.2 图谱构建流程、统计与可视化
 
-串联 C5 → A4 → D4 产出完整事件图谱，记录：节点数、各类型边数、事实性分布、
+✅ **已完成 2026-09-17**：`scripts/report_e3_graph_profile.py`，数字见
+[`../results/PHASE_E.md`](../results/PHASE_E.md)。⚠️ 按裁决 ② 串的**不是** C5 → A4 → D4
+（那三章与 unit 无交集），而是 (乙) 的 v5 上游。可视化是 Graphviz DOT，不引绘图依赖。
+
+原文：串联 C5 → A4 → D4 产出完整事件图谱，记录：节点数、各类型边数、事实性分布、
 连通分量、平均度、可达率。产出一张可读的子图可视化（工具不限，Neo4j 非强制）。
 本节是**描述性**的，不承担任何胜出论断。
 

@@ -287,7 +287,7 @@ gantt
 |---|---|---|---|---|
 | **C-1** | ~~D4.1 immutable preflight~~ → **已完成 2026-09-11**（`93f59f1`）：`status=pass`，两条 accepted OOF baseline 逐字段重算一致（CLS .553995 / DMRoBERTa .545603），preflight protocol SHA-256 `9429c5a8…5025e`。执行中修掉三个让它在服务器上跑不起来的缺陷，见 `results/PHASE_D.md` | 无 | 已达成 | `gpu-4090:.../runs/stages/D4/d4-v61-typed-cues-r1/preflight/` |
 | **C-2** | EasyECR 可运行性实跑核查（不训练） | 无 | **静态裁决 2026-09-11 已出：`conditionally_runnable`**，6 条阻断全部点名（`PHASE_R1.md` §22），KBP 2017 不可得 → **FR-016 (b)**。**剩余 C-2b**：4090 隧道恢复后建独立 venv 做活体 import 冒烟 | 名册 §1.1 + `PHASE_R1.md` §22 |
-| **C-3** | ~~E8.1 LLMERE 恢复方案冻结~~ → ✅ **已完成 2026-09-17**（本地 + 只读 ssh，未训练未占卡，`results/PHASE_R1.md` §23）。四条验收全部满足。**核查改写了根因**：重扫 11,149 条确认 95 条数字无误，但 **全部 11,149 条都在退化重复**（输出中位 1,755 字符 vs 训练 target 98 字符，最短 613，99.65% 超 1,000 字符）⇒ 根因是**生成侧没有终止语义**，95 条只是污染落进了第一行、其余 11,054 条污染落在第一个换行之后被转换器切掉，**同一缺陷的两种表现**；与 C5.3 首跑同族（训练/推理口径不成对，两个月内第二次）。**成本重估：42 GPU·h → < 1 GPU·h**（有用内容中位仅约 10 token，当前 97% 解码算力花在退化重复上；线性外推，上卡前先跑 100 条校准）。方案＝①终止条件 ②第一行约束解码（`prefix_allowed_tokens_fn`，无新依赖，不动两个 pinned 上游）③全量重生成 ④原始输出保留，建议两阶段执行。🔴 **裁决点：推荐 (甲) 等 Gate 2 改纲后再决定**——成本已不是障碍，但执行价值取决于 Ch4 存废 | 结果页 §23 |
+| **C-3** | ~~E8.1 LLMERE 恢复方案冻结~~ → ✅ **已完成 2026-09-17**（本地 + 只读 ssh，未训练未占卡，`results/PHASE_R1.md` §23）。四条验收全部满足。**核查改写了根因**：重扫 11,149 条确认 95 条数字无误，但 **全部 11,149 条都在退化重复**（输出中位 1,755 字符 vs 训练 target 98 字符，最短 613，99.65% 超 1,000 字符）⇒ 根因是**生成侧没有终止语义**，95 条只是污染落进了第一行、其余 11,054 条污染落在第一个换行之后被转换器切掉，**同一缺陷的两种表现**；与 C5.3 首跑同族（训练/推理口径不成对，两个月内第二次）。**成本重估：42 GPU·h → < 1 GPU·h**（有用内容中位仅约 10 token，当前 97% 解码算力花在退化重复上；线性外推，上卡前先跑 100 条校准）。方案＝①终止条件 ②第一行约束解码（`prefix_allowed_tokens_fn`，无新依赖，不动两个 pinned 上游）③全量重生成 ④原始输出保留，建议两阶段执行。✅ **2026-09-17 裁决 ③：维持 (甲)，不执行。** 它是 Ch4 主表的一行；Ch4 存废未定之前，`< 1 GPU·h` 也没有去处。成本不是障碍，去处才是 | 结果页 §23 |
 | **C-4** | ~~Ch6 对手名册调研~~ → **已完成 2026-09-11**：SeDGPL 及其四个 CGEP 对手（BART contrastive / CSProm-KG / MCPredictor / SimKGC）全部有公开训练代码，**Gate 3 过**。**C-4b ✅ 已完成 2026-09-13**（一手核查，纯 CPU 未训练）：裁决 `conditionally_runnable`。**切分口径确认——原文 §5.1 声明的是 topic 级 5 折 CV**（最后两 topic 作 dev，其余 20 个 5 折），**不是**文档切分；⚠️ 由此推翻本项目此前「19.6 是泄漏值」的记载，真实情况是**我们在声明口径下复现不到它**（我们的 topic-CV .0599 vs 原文 .196）。公开 `ESCSubWoRe.npy`（与本地同一 SHA-256 `8ec791fb…5026`）就是论文那份数据（22 topic / 244 篇 / 1,192 实例 vs Table 1 的 243 / 1,191），但仓库**没有任何 ESC 代码路径**（`load_data.py` 写死 MAVEN 且要 `train/valid/test` 键）、公开词表只覆盖 ESC mention 的 **49.5%**，且 `util.py` 的 assert **被注释掉**故未命中会**静默错打分**。成本是小时级（RoBERTa-base / 1,192 实例 / 15 epoch）。**建议只为 SeDGPL 走 ESC 的 (a) 路，其余四个维持 (b)**（待作者裁决，不阻塞）。详见 `results/PHASE_E.md` | 无 | 已达成 | 名册 §6 + `results/PHASE_E.md` |
 | **C-5** | C5.0 实现 + 本地 gate | 无（QR-001 修订后已解锁） | **2026-09-11 完成核心件**：`src/ekg/nodes/role_uncertainty.py`（sidecar / role 兼容性特征 / 分层 permutation / mediator 计数）+ `discriminative.py` 新增 `role_compatibility` 组件；15 条 targeted tests，**550 passed / 26 skipped、ruff 0、smoke OK**。bundle exporter 复用既有 `create_stage_bundle`（`protocol_extra` 足够挂 sidecar/mediator/fallback id），不另写。**C-5b ✅ 已完成 2026-09-13**：核到代码后缺口只有**三个脚本加一个开关**——`train_coref_scorer.py`、`score_maven_ere_official.py`（官方评测器同时出 `muc/b_cubed/ceaf/blanc`）与 `build_maven_ere_submission.py`（预测器）**本来就有**。新写 `prepare_c5_argument_uncertainty_preflight.py` / `smoke_c5_argument_uncertainty.py` / `run_c5_argument_uncertainty.py`（契约点名的 pilot 入口，已进 `CODE_FILES` 的 8 个文件），并把 permutation 负控接进 trainer **与推理侧**。抓到三个真缺陷：`role_compatibility` 被参数校验挡住、`--argument-predictions` 同时决定语料（remove-core 不传就换了语料）、**permutation 臂训练/推理口径不成对（A 类）**。608 passed / 28 skipped、ruff 0、smoke OK。两条 baseline 官方口径已预验（主锚 MUC 80.9847 / 注册对照 80.3676）。详见 `results/PHASE_C.md` | 代码 + 测试 |
 | **C-6** | A4.0 实现 + 本地 gate | 无 | ✅ **2026-09-12/13 完成（含 C-6b 入口脚本）**：`src/ekg/relations/pair_evidence.py` + `pair_heads.py` 注册 `pair_evidence` 头（零初始化证据残差，四臂同参数、init 基础 logits 相同）＋ 五个入口 `train_` / `evaluate_` / `prepare_*_preflight` / `smoke_` / `run_a4_pair_evidence.py`（pilot 入口已进 preflight 的 `CODE_FILES`，7 个文件）；**44 条 targeted tests**，本地 **592 passed / 28 skipped、ruff 0、smoke OK**，5090 四臂开发冒烟 pass（**非结果**）。**证据＝两触发句之间的 interior（定义，不是选择）**：不排序、不打分、无预算、无阈值；necessity 去掉 interior、sufficiency 只留 span；注册中介仍是 `cross_sentence_false_positives`，细分改为行为量（logit 掉幅 < 冻结 margin）并自带被测分母。⚠️ **初版的连接词词表选择器已被本项目自己的测量否掉**（`f90c8cd`：分层 recall 只差 .008/.064，补测 109,234 对中 79.3% 被判「有线索」）；**DREEAM 替代方案静态核查 `not_runnable`**（`b52d506`：两条证据监督路径都要人工标注、无 distant 语料、增益靠 dev 选阈值；其证据机制在「无 distant 数据」格只值 +0.33 F1）。冒烟另抓修三个真缺陷。bundle exporter 复用 `create_stage_bundle`。详见 `results/PHASE_A.md` | 代码 + 测试 |
@@ -324,7 +324,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **G-9** | matched seeds 13/17/42（**仅对已过 seed-13 门的章**） | G-2/G-4/G-5 过门 + **逐次授权** | 各 ~2× pilot | mean delta、2/3 为正、10,000 次配对 bootstrap CI 下界 > 0 |
 | **G-10** | sealed final-valid ×1（**仅对已过 confirmation 的章**） | G-9 + 配置完全冻结 | 小时级 | 一次性评测，写入 final-valid ledger |
 | **G-11a** | ~~4 个外部对手复现~~ → **CSProm-KG ✅ 2026-09-16 取得 (a)**（WN18RR MRR 0.572682 vs 0.572660，四项全在事前登记容差内；五处透明补丁与前后 hash 见 `results/PHASE_E.md`）。SimKGC / BART contrastive / MCPredictor 维持 **(b)** 并写障碍，**不再投入复现** | C-10 ✅ | 已达成（CSProm-KG 部分） | 名册 §6.2b |
-| **G-11** | Ch6：E3.0 → E3.1 → E3.2 → E3.3 → E3.4 → E3.5。⚠️ **E3.1 的前置 2026-09-17 收紧**：C5/D4 的 `fallback_component_bundle_id` **补不回去**（两个 runner 都在各自契约的 `code` 哈希集合里，pilot 又已收口 ⇒ 改代码必重建 preflight，而各臂钉的是旧契约、`aggregate` 会拒绝；只能重训才落地）⇒ **E3.1 必须自带 fallback 登记步骤**，不得指望从 phase summary 统一读到该字段。🔴 **同日下午实测又发现更硬的一条：三个方法章的产物与 E3 unit 文档集交集为 0**（E3 unit 建在 valid 的 437 篇上，C5/A4 跑在 train 切出的 291 篇、D4 跑在 maven_fact train 的 2,913 篇）⇒ 三份已登记的 fallback **全是「另一个 split 上的预测文件」，搬不到 E3 unit 上**，E3 契约的 fallback 机制在这里闭合不了。**卡在【数据】与【协议】两条，已停下交作者裁决**；推荐 (乙) 沿用历史 `predicted` 图（Phase A 抽取器在 valid 上的产物，零成本、不依赖任何失败机制，表头标明上游身份）。三个替代与实测表见 `results/PHASE_E.md` | C-4 + 至少一章的 bundle/fallback + G-0 | ~1–2 GPU·day | 见 `phases/PHASE_E3_graph_application.md` 的 Done when |
+| **G-11** | Ch6：E3.0 ✅ → **E3.1 ✅ / E3.2 ✅（2026-09-17）** → E3.3（剩四个对手行）→ E3.4 ✅（已完成，见 §7.4 表 6-4）→ E3.5。**裁决 ② 已取 (乙)**：`predicted` 条件沿用 v5 判别式抽取器在 valid 上的产物，表头标明上游身份。E3.1 的三层接口已闭合（`upstream_registry.json` `f2685e10…6e9e`，`status=closed`）；E3.2 画像已出（gold 拓扑边 12,115 / R2 1.0 vs predicted 41,218 / R2 **.0795**，而下游 MRR 只差 12.2% ⇒ **R2↔MRR 又是一对不对齐**）；表 6-2 的四行（random / frequency / predicted / gold）已到手。**本行剩余 = G-11a 的四个对手行**。⚠️ 顺带修掉一个缺陷：冻结 unit 有 68 个 `instance_id` 撞号（`cgep.py` 用的是每个 ECG 各自的节点下标），已重新冻结为 `e3-v61-20260917`（逐行零差异，只有 id 字符串变），详见 `results/PHASE_E.md`。原注：**E3.1 的前置 2026-09-17 收紧**：C5/D4 的 `fallback_component_bundle_id` **补不回去**（两个 runner 都在各自契约的 `code` 哈希集合里，pilot 又已收口 ⇒ 改代码必重建 preflight，而各臂钉的是旧契约、`aggregate` 会拒绝；只能重训才落地）⇒ **E3.1 必须自带 fallback 登记步骤**，不得指望从 phase summary 统一读到该字段。🔴 **同日下午实测又发现更硬的一条：三个方法章的产物与 E3 unit 文档集交集为 0**（E3 unit 建在 valid 的 437 篇上，C5/A4 跑在 train 切出的 291 篇、D4 跑在 maven_fact train 的 2,913 篇）⇒ 三份已登记的 fallback **全是「另一个 split 上的预测文件」，搬不到 E3 unit 上**，E3 契约的 fallback 机制在这里闭合不了。**卡在【数据】与【协议】两条，已停下交作者裁决**；推荐 (乙) 沿用历史 `predicted` 图（Phase A 抽取器在 valid 上的产物，零成本、不依赖任何失败机制，表头标明上游身份）。三个替代与实测表见 `results/PHASE_E.md` | C-4 + 至少一章的 bundle/fallback + G-0 | ~1–2 GPU·day | 见 `phases/PHASE_E3_graph_application.md` 的 Done when |
 | **G-12** | H2 全篇复现验收（默认 CPU/cache） | G-11 | ~CPU | 见 `phases/PHASE_H2_thesis_acceptance.md` 七项审计 |
 
 | **G-13** | ~~A4 实现地板诊断（5090 探测）~~ → ✅ **已完成 2026-09-13**：`remove_core` 官方口径 **causal F1 31.13**（subevent 27.41 / temporal 52.66），**落在 A3 线 32.10 的量级，没有塌** ⇒ A4.3 若失败不会是「实现退化」这个原因。实测训练 **56 分钟**（非预估的 3.5 小时）。详见 `results/PHASE_A.md` | 已达成 | 实测 56 分钟 / 单臂 | 已达成；⚠️ backbone `2c7ff1f1…`，**与主表 33.17 / 32.10 不相减、不混表** |
@@ -358,7 +358,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | Gate | 触发时点 | 要判什么 | 分支 |
 |---|---|---|---|
 | ~~**Gate 1**~~ | ~~G-2（D4.3）出结果~~ | **2026-09-12 已判定：不过。** full `.476515` 低于两个锚；full 相对 remove-core `.536788` **抬高**了注册 confusion；permutation `.495260` 也赢过 full。三项全败，无一含糊 | **已走「不过」分支**：typed-cue 家族关闭，**不启动第二个周期**，转 G-4/G-5，到 Gate 2 判结构。详见 `results/PHASE_D.md` |
-| **Gate 2** | ✅ **两个输入 2026-09-17 到齐**（G-5 C5.3 09-16 · G-4 A4.3 09-17） | 还剩几个方法章 ⇒ **实测 0 个方法章过门**：D4 已于 Gate 1 关闭；C5 `full` MUC 79.90115 低于主锚 80.98472 达 1.08；A4 `full` causal 7.507508 低于三条判定线约 25 点、低于自身消融臂 23.72 点 | ~~**3 章过** → 博士量级~~ ⚠️ **这条分支在 Gate 1 判「不过」那天就已失效**：D4 已关闭，剩下的方法章最多 2 个。**2 章过** → 领域硕士标准形态（2 方法章 + 1 应用章），按此写。**≤1 章过** → 与导师共同决定改纲，**不得**自行降级或再开新机制家族。⚠️ **2026-09-17 实际落点：0 章过**（C5 −1.08、A4 −25，两者都是契约级正式跑，非探测）⇒ **走「≤1 章过」分支：改纲与否由作者裁决**（导师只看结果，论文结构是我们自己定的）。执行代理**已停在此处**，不自行降级结构、不开新机制家族、不启动第二设计周期、不调门槛护栏、不跑未授权 seed 17/42；两页结果（`results/PHASE_A.md` · `results/PHASE_C.md`）已摆好，等作者与导师裁决 |
+| **Gate 2** | ✅ **两个输入 2026-09-17 到齐**（G-5 C5.3 09-16 · G-4 A4.3 09-17） | 还剩几个方法章 ⇒ **实测 0 个方法章过门**：D4 已于 Gate 1 关闭；C5 `full` MUC 79.90115 低于主锚 80.98472 达 1.08；A4 `full` causal 7.507508 低于三条判定线约 25 点、低于自身消融臂 23.72 点 | ~~**3 章过** → 博士量级~~ ⚠️ **这条分支在 Gate 1 判「不过」那天就已失效**：D4 已关闭，剩下的方法章最多 2 个。**2 章过** → 领域硕士标准形态（2 方法章 + 1 应用章），按此写。**≤1 章过** → 与导师共同决定改纲，**不得**自行降级或再开新机制家族。⚠️ **2026-09-17 实际落点：0 章过**（C5 −1.08、A4 −25，两者都是契约级正式跑，非探测）⇒ **走「≤1 章过」分支：改纲与否由作者裁决**（导师只看结果，论文结构是我们自己定的）。**2026-09-17 裁决 ①：改纲推迟到 Ch6 主表有数字之后再定，不是停等。** 理由：裁决 ② 取 (乙) 之后 Ch6 全线解锁，**没有任何可执行任务被 ① 阻塞**；而改哪一种形态取决于 Ch6 交出什么，在 Ch6 数字之前定稿是用更少的信息做更大的决定。期间**仍然**不自行降级结构、不开新机制家族、不启动第二设计周期、不调门槛护栏、不跑未授权 seed 17/42；两页结果（`results/PHASE_A.md` · `results/PHASE_C.md`）已摆好 |
 | ~~**Gate 3**~~ | ~~C-4 冻结~~ | ~~Ch6 能否凑够 ≥3 个公开对手~~ | **2026-09-11 已判定：能。** 五个对手全部有公开训练代码，Ch6 按 E3.3 做带对手的应用章。遗留问题移入 C-4b：原论文 CGEP-MAVEN 派生数据未发布，故对手默认落 FR-016 状态 (b)，能否经 CGEP-ESC 升到 (a) 待验 |
 
 Gate 之外不重排计划。Gate 上的裁决必须写回本文件与 `HANDOFF.md`。
@@ -468,17 +468,26 @@ MAVEN-ARG event-level gold 论元仅列 **non-deployable oracle**，不参与胜
 
 数据：**本地重建 CGEP-MAVEN 协议**（1,908 实例）。表头必须写明「本地重建」。
 
+冻结 unit **`f75e7e87…`**（`runs/stages/E3/e3-v61-20260917/`，1,908 实例；旧 `e92629bd…` 因
+68 个 `instance_id` 撞号于 2026-09-17 重新冻结，逐行零差异，见 `results/PHASE_E.md`）。
+
 | 方法 | MRR | Hit@1 | Hit@3 | Hit@10 | Hit@20 | Hit@50 |
 |---|---:|---:|---:|---:|---:|---:|
-| random | 待测 | 待测 | 待测 | 待测 | 待测 | 待测 |
-| frequency | 待测 | 待测 | 待测 | 待测 | 待测 | 待测 |
+| random | **.0143** | .0021 | .0089 | .0241 | .0414 | .0891 |
+| frequency | **.0378** | .0267 | .0273 | .0372 | .0718 | .1509 |
 | SimKGC[Wang+ 2022]（(b) 适配） | 待测 | 待测 | 待测 | 待测 | 待测 | 待测 |
 | MCPredictor[Bai+ 2021]（(b) 适配） | 待测 | 待测 | 待测 | 待测 | 待测 | 待测 |
 | CSProm-KG[Chen+ 2023]（(b) 适配） | 待测 | 待测 | 待测 | 待测 | 待测 | 待测 |
 | BART contrastive[Zhu+ 2023]（(b) 适配） | 待测 | 待测 | 待测 | 待测 | 待测 | 待测 |
 | SeDGPL[Zhan+ 2024]（基座，本项目自跑） | 待重报 | 待测 | 待测 | 待测 | 待测 | 待测 |
-| **本文构建图（predicted 上游）** | **.1583** | 待测 | 待测 | 待测 | 待测 | 待测 |
-| 本文构建图（gold 上游，**上界**） | .1802 | .1143 | 待测 | .3124 | 待测 | 待测 |
+| **本文构建图（predicted 上游 = v5 判别式抽取器）** | **.1583** | **.1038** | **.1530** | **.2563** | **.3580** | **.5126** |
+| 本文构建图（gold 上游，**上界**） | **.1802** | .1143 | **.1782** | .3124 | **.4114** | **.5823** |
+
+⚠️ **predicted 行的上游身份必须写进表头**：是 v5 判别式抽取器在 valid 上的产物，**不是 C5/A4/D4**
+——那三章跑在 train 的切片上，与本 unit 的文档交集实测为 0（2026-09-17 裁决 ②，取 (乙)）。
+四行已于 2026-09-17 测得（平凡对照本地 CPU；自有两行 gpu-4090 冻结权重 `--load-model`，
+`.1802/.1583` 逐位复现 2026-07-29）。**剩下四个公开对手行是 G-11a**，它们没有一个实现 CGEP，
+适配要我们自己写，按基准率 3–4 周。
 
 ⚠️ **原论文的 CGEP-MAVEN 数字（SeDGPL 27.9 / BART 24.7 / CSProm-KG 22.3 / MCPredictor 18.1 /
 SimKGC 9.3）不得填进本表**——它们用的是 512 候选的派生数据，**从未发布**；我们是 1,908 实例的本地
