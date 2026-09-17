@@ -31,6 +31,7 @@ SENTINELS = {
     "args": "-cgep_candidates",
     "start": "_cgep_candidates = None",
     "dump": "'scores': [float(logits[_i, _c]) for _c in _cands]",
+    "lar": "TripletMarginWithDistanceLoss's own formula",
 }
 
 ARGS_ANCHOR = """    parser.add_argument('-use_log_ranks', action='store_true', help='')"""
@@ -88,6 +89,30 @@ DUMP_PATCH = """        logits, _ = self(ent_rel, src_ids, src_mask)
                     }) + '\\n')"""
 
 
+LAR_ANCHOR = (
+    "            lar_loss = self.lar_loss_fn(anchor=pred, "
+    "positive=(pos, pos_bias), negative=(lar, lar_bias))"
+)
+LAR_PATCH = """            # ekg patch (CGEP) 2026-09-17: torch >= 2.x validates
+            # positive.ndim before it will call a custom distance_function, and
+            # the authors pass an
+            # (embedding, bias) tuple that only their score_fn understands, so
+            # the module raises AttributeError on the first training step. Their
+            # published numbers are inference-only, so this path had never run on
+            # a modern torch. Written out below is
+            # TripletMarginWithDistanceLoss's own formula --
+            # relu(d(a, p) - d(a, n) + margin), reduction 'mean', swap=False --
+            # with *their* distance_function and *their* margin (configs.gamma),
+            # so the loss is the same quantity, not a reinterpretation of it.
+            def _lar_distance(_anchor, _pair):
+                return self.graph_model.score_fn(_anchor, _pair[0], _pair[1])
+            lar_loss = torch.relu(
+                _lar_distance(pred, (pos, pos_bias))
+                - _lar_distance(pred, (lar, lar_bias))
+                + self.configs.gamma
+            ).mean()"""
+
+
 def _apply(path: Path, anchor: str, patched: str, sentinel: str) -> tuple[str, str]:
     before = path.read_text(encoding="utf-8")
     if sentinel in before:
@@ -111,6 +136,7 @@ def main() -> int:
         ("main.py", ARGS_ANCHOR, ARGS_PATCH, "args"),
         ("models/P_model.py", START_ANCHOR, START_PATCH, "start"),
         ("models/P_model.py", DUMP_ANCHOR, DUMP_PATCH, "dump"),
+        ("models/P_model.py", LAR_ANCHOR, LAR_PATCH, "lar"),
     ):
         before, after = _apply(args.repo / name, anchor, patched, SENTINELS[key])
         print(f"[patch] {name}\n          before {before}\n          after  {after}")
