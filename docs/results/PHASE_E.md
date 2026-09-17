@@ -701,3 +701,70 @@ torch 2.8.0 / PL 2.6.6 **不动**（sm_120 必需）。
 **载入完整性**：`strict=False` 下唯一的多余键是 `plm.embeddings.position_ids`
 （新版 transformers 去掉的 buffer），**没有任何 missing key** ⇒ 没有哪一层是随机初始化的。
 这一条要和分数一起看：数字对得上，且不是靠半个随机模型对上的。
+
+---
+
+## ★★ E3.1 前置核查：**三个上游 phase 里两个没有 `fallback_component_bundle_id`，而且补不回去**（2026-09-17，本地 + 只读 ssh，未训练、未占卡）
+
+### 开工自审
+
+1. **科研价值**：`phases/PHASE_E3_graph_application.md` 的 Inputs 与 Done when 都写死了同一条——
+   identity/relation/factuality 三类上游「读真实 bundle，**或读其显式 `fallback_component_bundle_id`
+   并在表头标明身份**」；Stop conditions 更写明「任一 blocked phase 既无 bundle 也无可校验 fallback
+   component bundle：**该 predicted arm 不成立**」。Gate 2 之后 D4 已关闭、C5/A4 门未过，
+   三类上游**全部要走 fallback 路径**。Ch6 是当前唯一还能产正结果的章（`EXPERIMENT_PLAN.md` §7.5 下行情形），
+   这个字段缺失会直接让 E3.3 的 predicted arm 不成立。
+2. **可行性**：纯读——读三份冻结契约与三份 pilot summary，本地 + 只读 ssh，分钟级 ⇒ 可行。
+
+### 实测结论（这一条推翻了本轮开工时的判断）
+
+开工时以为这是「给两个 runner 各补一个字段」的小改。**核完代码与契约，不是。**
+
+| phase | 状态 | pilot summary 里有 `fallback_component_bundle_id` 吗 | 产出它的 runner 在契约 `code` 哈希集合里吗 |
+|---|---|---|---|
+| **A4**（relation） | 门未过 | ✅ **有**（`d595439` 在 A4.3 上卡**之前**补的，取 `baselines.a3_fallback.predictions_sha256`） | 是（7 个文件之一） |
+| **C5**（identity） | 门未过 | ❌ **无**（`pilot-r2/pilot.json` 无此键） | **是**——`scripts/run_c5_argument_uncertainty.py`，9 个文件之一 |
+| **D4**（factuality） | Gate 1 关闭 | ❌ **无**（`pilot/seed-13/pilot_summary.json` 无此键） | **是**——`scripts/run_d4_typed_cue_oof.py`，7 个文件之一 |
+
+**为什么改 runner 补不回来**（三步都堵死，任一步都够）：
+
+1. 这个字段只在 `--aggregate` 那一步写进 summary，而 C5/D4 的 pilot **都已经收口了**；
+2. 两个 runner **都在各自契约的 `code` 哈希集合里** ⇒ 一改，契约立即失效，按纪律必须重建 preflight
+   （`HANDOFF.md` §0.7 第 6 条），旧的不覆盖；
+3. 就算重建成 preflight-r3，各臂 `status.json` / `fold.json` 里钉的 `contract_sha256` 仍是 r2，
+   `aggregate()` 的 `_require`（C5: "arms ran under different contracts"；D4: 逐折 `contract_sha256`）
+   **会直接拒绝**。要让新字段落地只能重跑 pilot = **重训**（C5 ~1 GPU·day、D4 ~1.5 GPU·day）+ 逐次授权，
+   而 Gate 2 之前不启动任何重跑。
+
+⇒ **A4 那条路（先改 runner、再重建 preflight、再跑 pilot）对 C5/D4 已经关闭**，它当初能走通，
+只因为 `d595439` 落在 A4.3 上卡之前。**顺序决定了可行性**，这是本次最该带走的一条。
+
+### 因此 E3.1 的前置约束改成这样（不是本轮执行，是写死给 E3.1）
+
+**E3.1 必须自己登记这三个 fallback 身份，不得指望从 phase summary 里读到统一字段。**
+登记动作属于 E3.1 本身（「闭合三类真实上游输入接口」），**不是**对已冻结 phase 产物的回填——
+已冻结的 summary 一个字节都不动。
+
+三份 fallback 的**候选身份已经查好，含 content hash，E3.1 开工直接用**：
+
+| 上游 | 可用 fallback | content-addressed id（= 契约登记的 hash） | 出处 |
+|---|---|---|---|
+| **identity**（C5） | MAVEN-ERE **official joint** 共指预测 | `66ff04bac5a11ab179ef50eeca51d56dbb613b7b04eaa04b749dd99ea82ffc42` | C5 契约 `baselines.official_joint.predictions_sha256`；文件 `runs/stages/R1/r1-v61-20260904/anchors/identity/official_joint_prediction.jsonl`（7,274,278 B，本地与 5090 双端一致） |
+| **relation**（A4） | A3 fallback 预测 | A4 `pilot_summary.json` 的 `fallback_component_bundle_id`（取自契约 `baselines.a3_fallback.predictions_sha256`） | 已由 A4.3 aggregate 写出，**直接读** |
+| **factuality**（D4） | `cls` OOF labels（macro-F1 **0.5539953**，D4 的主锚） | `f375e8a58c21c22cc0cc4b7d968df4c75fe1458f083814859bb66d7d1f4e9737` | D4 契约 `accepted_oof.baselines.cls.labels_sha256`；文件 `gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-factuality-oof-r2/cls_oof_labels.json` |
+
+⚠️ **identity 的 fallback 不得取 `qwen3_argument_pooling`**（`87c089ca…e340f`）：它是 C5 契约登记的
+**负面对照**，`PHASE_C5` 的 Stop conditions 明文禁止把它冒充公开方法族。
+⚠️ **factuality 备选**是 `dynamic_multi`（`1aeb8ec6…ff33c`，macro-F1 0.545603），比 `cls` 低，
+只在 `cls` 不可用时取，且**取哪个必须在表头标明**（E3 Inputs 的硬要求）。
+
+### 限制
+
+- 本节**只登记身份，不代表 E3.1 已做**：三份 fallback 的 ID 对齐（E3 的 1,908 实例 ⇄ 各 fallback 的
+  mention/doc 命名空间）**尚未验证**，那是 E3.1 的第一项工作，缺失即 fail-fast（A 类：跨章 ID 对齐）；
+- D4 的 `cls_oof_labels.json` 目前**只在 4090 上**，本地与 5090 都没有；E3.1 若在 5090 跑要先 scp + 双端核 hash。
+
+### 下一步
+
+不触发执行。本节的产出是 **E3.1 的前置条件收紧了**：它必须自带 fallback 登记步骤。
+G-11 排期时把这一步算进去（纯 CPU，小时级以内）。
