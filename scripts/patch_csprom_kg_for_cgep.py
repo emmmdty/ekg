@@ -24,7 +24,14 @@ import argparse
 import hashlib
 from pathlib import Path
 
-MARKER = "ekg patch (CGEP)"
+# One sentinel per edit: after the first edit lands, a shared marker would make the
+# next edit look already-applied, and its anchor is shared text that is legitimately
+# still there.
+SENTINELS = {
+    "args": "-cgep_candidates",
+    "start": "_cgep_candidates = None",
+    "dump": "'scores': [float(logits[_i, _c]) for _c in _cands]",
+}
 
 ARGS_ANCHOR = """    parser.add_argument('-use_log_ranks', action='store_true', help='')"""
 ARGS_PATCH = """    parser.add_argument('-use_log_ranks', action='store_true', help='')
@@ -73,10 +80,10 @@ DUMP_PATCH = """        logits, _ = self(ent_rel, src_ids, src_mask)
                     }) + '\\n')"""
 
 
-def _apply(path: Path, anchor: str, patched: str) -> tuple[str, str]:
+def _apply(path: Path, anchor: str, patched: str, sentinel: str) -> tuple[str, str]:
     before = path.read_text(encoding="utf-8")
-    if MARKER in before and patched.split("\n")[1].strip() in before:
-        raise SystemExit(f"{path.name}: this patch is already applied")
+    if sentinel in before:
+        raise SystemExit(f"{path.name}: the {sentinel!r} edit is already applied")
     if anchor not in before:
         raise SystemExit(f"{path.name}: anchor not found -- upstream moved, do not force it")
     after = before.replace(anchor, patched, 1)
@@ -92,12 +99,12 @@ def main() -> int:
     parser.add_argument("--repo", type=Path, required=True)
     args = parser.parse_args()
 
-    for name, anchor, patched in (
-        ("main.py", ARGS_ANCHOR, ARGS_PATCH),
-        ("models/P_model.py", START_ANCHOR, START_PATCH),
-        ("models/P_model.py", DUMP_ANCHOR, DUMP_PATCH),
+    for name, anchor, patched, key in (
+        ("main.py", ARGS_ANCHOR, ARGS_PATCH, "args"),
+        ("models/P_model.py", START_ANCHOR, START_PATCH, "start"),
+        ("models/P_model.py", DUMP_ANCHOR, DUMP_PATCH, "dump"),
     ):
-        before, after = _apply(args.repo / name, anchor, patched)
+        before, after = _apply(args.repo / name, anchor, patched, SENTINELS[key])
         print(f"[patch] {name}\n          before {before}\n          after  {after}")
     return 0
 
