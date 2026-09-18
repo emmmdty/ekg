@@ -13,6 +13,7 @@ git 历史中最后一次含正文的提交是 `3390363`，可用 `git show 3390
 | `phase_handoffs_20260729/` | Phase B/C/D/E 的四份交接稿（682 行）；实测数字已进 `docs/results/`，交接稿只是当时的一次性冷启动材料 |
 | `docs_archive/` | 下表全部 `.md` + `specs/`（三份历史设计稿） |
 | `docs_archive_large/` | `midterm/`（中期报告 38M）· `patent/`（旧专利交底书）· `chapter1/`（SARGE 图表证据）· `projects/`（答辩 PPT 工程 79M） |
+| `handoff_appendix_20260918/` | **`HANDOFF.md` 的历史附录**（1,166 行，2026-09-07 → 09-18 的过程记录）：历次队列 E.1/E.2/E.2a/E.2b、已裁定的决策菜单与推导、三章在跑时的状态、A4.3 收口清单、逐轮做了什么。**仍适用的结论移出前已逐条上提**（作者 09-13 的「先验能先验的」方针 → `HANDOFF.md` §E.3a；两批裁决的结论与约束 → §0.5；三章终态 → §0.4 与 `results/`）。 |
 | `docs_orphans/` | `事件图谱构建研究进展.md`（v3「两章」时代综述，与 v4 四章冲突）· `OVERVIEW.html`（课题总览，内容与 SPEC 重叠） |
 
 ## 归档清单与理由
