@@ -1370,3 +1370,26 @@ uv run python scripts/estimate_role_suppression_signal.py \
 - **(乙)** 走新信号源的立项流程（回 R1），代价是一个完整的设计周期。
 
 ⛔ 在裁决之前不启动任何训练、不申请 GPU、不开新机制家族。
+
+### ✅ 裁决 ④（作者，2026-09-18 晚）：取 **(甲)**，H1 这条接法就此收
+
+Ch5 并入「负结果与归因」章，论文形态定稿为 **「Ch6 承重 + 一章负结果归因」**。
+同时作者给了方向性指示：**不再在应用章上加动作，三个方法章要整体提高**，
+且**多种子现在不做**（「还没到最终结果」）。
+
+⚠️ **收口的是 H1，不是 C5 那 1.825**。按这条指示做的立项分析在
+`../EXPERIMENT_PLAN.md` **§10**，它指出的是本页已有数字的另一种读法：
+
+- 本页 C5.3 的 `remove_core` `79.15966` 比主锚 `80.98472` 低 **1.825**，而 G-5b 已量出
+  `full` 的缺口 **100% 在 precision**（`.7566` vs 锚 `.7884`），recall `.8464` 反而**超**锚 `.8325`；
+- `scripts/train_coref_scorer.py:388` 的 `--neg-ratio` 默认 **10.0**，同文件 `:72` 的 docstring
+  自己写着「a sampled negative set makes precision look better than it is on the real（population）」
+  ⇒ **训练负例分布 ≠ 推理负例分布**，与上面那个 precision 缺口逐字对应；
+- Ch4 是同一形状（`results/PHASE_R1.md` §8.4：锚 P `34.37` / R `32.05`，我们 P `23.48` / R `50.25`）。
+
+**算术**：base 若达到锚，加上本页已实测已登记的 `+0.742`，就越过 `80.98472`——**不需要新机制**。
+🔴 **卡在协议**：本章契约 `../phases/PHASE_C5_argument_uncertainty.md:93/:121` 写「不扫 threshold/epoch」。
+`--neg-ratio` 不是 threshold（它是训练数据构造），但动它要重建 preflight；推理侧的解析先验修正
+字面上贴着那条红线，**且当前不是零 GPU**——`pilot-r2/*/predictions.jsonl` 只有簇级输出，
+本地 `pilot-r2/*/checkpoint/epochs/*` 全是空目录（48K），权重只在 5090。
+⇒ **两条路分别交作者裁决**，裁决前不上卡。事前判据见 `../EXPERIMENT_PLAN.md` §10.5。
