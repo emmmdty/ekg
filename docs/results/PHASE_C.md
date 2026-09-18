@@ -1388,8 +1388,11 @@ Ch5 并入「负结果与归因」章，论文形态定稿为 **「Ch6 承重 + 
 - Ch4 是同一形状（`results/PHASE_R1.md` §8.4：锚 P `34.37` / R `32.05`，我们 P `23.48` / R `50.25`）。
 
 **算术**：base 若达到锚，加上本页已实测已登记的 `+0.742`，就越过 `80.98472`——**不需要新机制**。
-🔴 **卡在协议**：本章契约 `../phases/PHASE_C5_argument_uncertainty.md:93/:121` 写「不扫 threshold/epoch」。
-`--neg-ratio` 不是 threshold（它是训练数据构造），但动它要重建 preflight；推理侧的解析先验修正
-字面上贴着那条红线，**且当前不是零 GPU**——`pilot-r2/*/predictions.jsonl` 只有簇级输出，
-本地 `pilot-r2/*/checkpoint/epochs/*` 全是空目录（48K），权重只在 5090。
-⇒ **两条路分别交作者裁决**，裁决前不上卡。事前判据见 `../EXPERIMENT_PLAN.md` §10.5。
+🔴 **卡在「授权」，不是「协议」**（逐条核过）：契约 `:93/:121` 禁的是
+threshold/epoch sweep、更大 backbone、换 split、oracle argument——`--neg-ratio` **不在其中**，
+动它只需重建 preflight。真贴红线的是**推理侧解析先验修正**（那就是在平移判决阈值），
+**按默认不做**；它当前也不是零 GPU——`pilot-r2/*/predictions.jsonl` 只有簇级输出，
+`pilot-r2/*/checkpoint/epochs/*` 在本地全是空目录（48K），权重只在 5090。
+挡路的是周期授权：契约 `:119` 的「两个有效周期后封存」按字面还留一格（H1 从未进 pilot），
+**但裁决 ④ 刚收了第二周期，且主表 §5 明文禁止执行代理引用较宽松的那条给自己加一次机会**
+⇒ **这一格只能由作者给**。事前判据见 `../EXPERIMENT_PLAN.md` §10.5。
