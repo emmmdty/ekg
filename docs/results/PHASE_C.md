@@ -1396,3 +1396,85 @@ threshold/epoch sweep、更大 backbone、换 split、oracle argument——`--ne
 挡路的是周期授权：契约 `:119` 的「两个有效周期后封存」按字面还留一格（H1 从未进 pilot），
 **但裁决 ④ 刚收了第二周期，且主表 §5 明文禁止执行代理引用较宽松的那条给自己加一次机会**
 ⇒ **这一格只能由作者给**。事前判据见 `../EXPERIMENT_PLAN.md` §10.5。
+
+## ★ C5 第二设计周期 · pilot-r3（单变量＝负例分布，2026-09-18 晚起跑，gpu-4090 卡 0/1/2 并行）
+
+> 本节在**跑之前**写，判据也在跑之前登记。数字栏留空，回填时只填实测值。
+
+### 开工自审
+
+1. **科研价值**：对准 `../EXPERIMENT_PLAN.md` §7.3 的表 5-3 主锚行。证据是本页已有的两组数——
+   C5.3 的 `remove_core` `79.15966` 低于主锚 `80.98472` 达 **1.825**，而 G-5b 量出 `full` 的缺口
+   **100% 在 precision**（`.7566` vs 锚 `.7884`），recall `.8464` 反而**超**锚 `.8325`。
+   若 base 达到锚，加上本页已登记的 `+0.742`，就越过锚——**不需要新机制**。
+2. **可行性**：数据 / 代码 / 算力 / 授权四条成立（零新代码，两个旋钮是现成 flag，4090 四卡当时全空，
+   作者 2026-09-18 晚批了一格有效周期）；**协议**一条查出边界，见下。
+
+### 单变量是什么
+
+第一个周期的负采样器是 `train_coref_scorer.py` 的**静默默认值**——它不在任何契约里，
+所以臂的训练分布不受任何东西约束。本轮把三个旋钮显式钉进 `FROZEN_TRAINING`，
+其中两个保持历史默认，**只翻一个**：
+
+| 旋钮 | 第一周期 | 本轮 | 变了吗 |
+|---|---|---|---|
+| `neg_ratio` | 10.0（默认，未钉） | 10.0（已钉） | 否 |
+| `hard_fraction` | 0.5（默认，未钉） | 0.5（已钉） | 否 |
+| **`include_negative_only_docs`** | **False**（默认，未钉） | **True**（已钉） | **是——本轮唯一变量** |
+
+理由是 `build_training_pairs` 自己的 docstring：丢掉全 singleton 文档会造成
+「a measured train/test prior mismatch **in exactly the false-merge direction**」，
+而本页 G-5b 量出的缺口正是误合并（占 72.7%）。它是**布尔开关，没有值可挑**，因此不会变成 sweep。
+
+**开关在真实数据上确实生效**（`logs/c5_r3_full.log` 第一条统计行）：
+`2511/2622 documents contribute pairs (1573 contain positives); 59109 training pairs`
+——第一周期只有 **1573/2622** 篇进训练，本轮多进 **938 篇**全 singleton 文档。
+
+### 协议边界（跑之前查出，本周期范围因此收窄）
+
+契约 `../phases/PHASE_C5_argument_uncertainty.md:65` 要求**臂 2（Qwen3 注册负面对照）与臂 4–6**
+的 **pair population 逐位一致**，而任何采样旋钮都改 pair population。补训臂 2 超出本次授权
+⇒ **本周期只判主锚那半条门**，`:104` 的后半条（须高于注册对照 `80.36759`）
+**如实标为「本周期无法评定」**，不猜、不外推。登记在 `../EXPERIMENT_PLAN.md` §10.5b。
+
+### 事前判据（跑完不许改）
+
+- **主判据**：`remove_core` 的 MUC precision 是否从 `.7566` 量级回到主锚 `.7884` 量级，
+  且 `full` 的 MUC F1 是否 **> `80.98472`**；
+- **否证分支**：MUC 不动 ⇒ H2 被否证，C5 就此定稿进「负结果与归因」章，**不再申请第三格**；
+- 臂序仍须 `full > remove_core > permutation`，否则机制 claim 独立失败（与 H2 无关）。
+
+### 这一跑钉住了什么
+
+| 项 | 值 |
+|---|---|
+| preflight | `runs/stages/C5/c5-v61-argument-uncertainty-r1/preflight-r3/`，`status=pass`，`code_files=9` |
+| `protocol.json` SHA-256 | `1a4e857d7497b742c47b568d753f40bc9a2a4204c8fea37a8cda162321404252` |
+| 候选 digest | `15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910`（与第一周期同一冻结值） |
+| backbone | `2c7ff1f10496f2df…`（**与第一周期同一 pin**，见下） |
+| 机器 / 卡 | gpu-4090，三臂并行于卡 0 / 1 / 2 |
+| 冒烟 | `smoke-cuda-r3` PASS（三臂，10 篇 / 1 epoch）。⚠️ 冒烟走自己的 CLI、**不带新开关**，故新开关的真实验证点是上面那条 `2511/2622` 统计行 |
+
+### ⚠️ 顺带修掉一个坏掉的 pin（4090 上的 backbone）
+
+`EXPECTED_MODEL_SHA256` 自 `45c2bbf` 起指向 5090 线的 `2c7ff1f1…`，而 4090 上只有 `71be7419…`。
+核对两者唯一不同的那个 145 字节文件时发现：**4090 那份 `tokenizer_config.json` 根本不是配置，
+是镜像返回的错误页**——
+
+```json
+{"Code":10990101007,"Message":"获取模型文件失败，文件内容为空","RequestId":"…","Success":false}
+```
+
+（5090 那份是正确的 `{"model_max_length": 512}`。）因此**没有改 pin**，而是在 4090 上按内容寻址
+重建了 `2c7ff1f1…` 目录：5 个文件从 `71be7419…` 硬链接（含 476 MB 的 `pytorch_model.bin`，
+两边逐字节相同），`tokenizer_config.json` 写入正确内容，再用项目自己的 `model_content_digest`
+**逐位复核为 `2c7ff1f1…`**。⇒ 本周期与第一周期用的是**同一个 backbone**，且 4090 线以后不再
+携带那个错误页。旧目录 `71be7419…` 未删、未改。
+
+### 实测结果（回填）
+
+| 臂 | MUC F1 | MUC P | MUC R | vs 主锚 `80.98472` | B³ F1 | CEAFe F1 | BLANC F1 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| full | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 |
+| remove_core | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 |
+| permutation | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 |
