@@ -236,6 +236,15 @@ def test_both_halves_of_an_arm_read_the_same_argument_artifact() -> None:
     assert _flag(predict, "--argument-predictions") == artifact
 
 
+def test_every_frozen_field_has_a_flag_the_preflight_can_check_it_with() -> None:
+    """`prepare()` re-checks each frozen field against the CLI arg of the same
+    name, so a field added without its flag raises AttributeError -- on the
+    server, after the operator has typed the whole command."""
+    parser = PREFLIGHT.build_parser()
+    known = {action.dest for action in parser._actions}
+    assert set(PREFLIGHT.FROZEN_TRAINING) - {"arms"} <= known
+
+
 def test_the_sampler_the_contract_pins_is_the_sampler_the_trainer_gets() -> None:
     """The first cycle's negative sampler was a trainer default in no contract.
 

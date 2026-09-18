@@ -341,7 +341,13 @@ def prepare(args: argparse.Namespace) -> dict:
     return protocol
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """Separate so a test can check every frozen field has a flag to check it.
+
+    `prepare()` re-reads each `FROZEN_TRAINING` key off the namespace, so a
+    field added without its flag fails with AttributeError on the server rather
+    than here.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--source", required=True, type=Path)
@@ -378,7 +384,20 @@ def main() -> int:
     parser.add_argument("--head-lr", type=float, default=FROZEN_TRAINING["head_lr"])
     parser.add_argument("--accum-steps", type=int, default=FROZEN_TRAINING["accum_steps"])
     parser.add_argument("--max-length", type=int, default=FROZEN_TRAINING["max_length"])
-    args = parser.parse_args()
+    parser.add_argument("--neg-ratio", type=float, default=FROZEN_TRAINING["neg_ratio"])
+    parser.add_argument(
+        "--hard-fraction", type=float, default=FROZEN_TRAINING["hard_fraction"]
+    )
+    parser.add_argument(
+        "--include-negative-only-docs",
+        action=argparse.BooleanOptionalAction,
+        default=FROZEN_TRAINING["include_negative_only_docs"],
+    )
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
     args.repo = args.repo.resolve()
     for name in (
         "source", "train_manifest", "dev_manifest", "p1_protocol", "r1_protocol",
