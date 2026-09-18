@@ -68,6 +68,17 @@ FROZEN_TRAINING = {
     "head_lr": 2e-5,
     "accum_steps": 1,
     "max_length": 512,
+    # The negative sampler was a silent trainer default through the first cycle:
+    # it appeared in no contract, so the arms' training distribution was not
+    # pinned by anything.  It is pinned here.  `include_negative_only_docs` is
+    # the second cycle's single variable -- the first cycle dropped every
+    # all-singleton document from training while inference sees them all, and
+    # C5.3's gap against the anchor is 100% precision (`docs/results/PHASE_C.md`
+    # G-5b), which is the direction that mismatch predicts.  The other two are
+    # pinned at the historical defaults so exactly one thing changes.
+    "neg_ratio": 10.0,
+    "hard_fraction": 0.5,
+    "include_negative_only_docs": True,
 }
 # Inference side of the same pairing. The contract forbids sweeping either.
 FROZEN_INFERENCE = {"threshold": 0.7, "band": 0.0, "endpoint_epoch": 10}

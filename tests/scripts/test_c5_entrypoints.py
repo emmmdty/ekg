@@ -128,14 +128,35 @@ def test_coverage_refuses_a_mention_gold_never_had(tmp_path: Path) -> None:
 
 
 def test_the_frozen_budget_matches_the_registered_control() -> None:
-    """Arms 4-6 must run the control's budget bit for bit, per the contract."""
-    assert PREFLIGHT.FROZEN_TRAINING == {
+    """Arms 4-6 must run the control's budget bit for bit, per the contract.
+
+    Second cycle: the optimiser half still matches bit for bit.  The negative
+    sampler does not, and that is the cycle's single declared variable -- the
+    first cycle dropped every all-singleton document from training while
+    inference sees them all.  Contract line 65 requires arm 2 (the registered
+    Qwen3 control, trained under the historical sampler) to share the arms'
+    pair population, so this deviation means the `:104` gate can only be judged
+    against the anchor this cycle; `docs/EXPERIMENT_PLAN.md` §10.5b registers
+    that narrowing.  The two untouched knobs are asserted at their historical
+    defaults so the deviation cannot quietly widen to three.
+    """
+    budget = dict(PREFLIGHT.FROZEN_TRAINING)
+    sampler = {
+        key: budget.pop(key)
+        for key in ("neg_ratio", "hard_fraction", "include_negative_only_docs")
+    }
+    assert budget == {
         "epochs": 10,
         "warmup_steps": 200,
         "lr": 2e-5,
         "head_lr": 2e-5,
         "accum_steps": 1,
         "max_length": 512,
+    }
+    assert sampler == {
+        "neg_ratio": 10.0,
+        "hard_fraction": 0.5,
+        "include_negative_only_docs": True,
     }
     assert PREFLIGHT.FROZEN_INFERENCE["threshold"] == 0.7
     assert PREFLIGHT.FROZEN_INFERENCE["endpoint_epoch"] == 10
@@ -188,11 +209,9 @@ _CONTRACT = {
         "train": {"path": "runs/manifests/train.json"},
         "internal_dev": {"path": "runs/manifests/internal_dev.json"},
     },
-    "training": {
-        "epochs": 10, "lr": 2e-5, "head_lr": 2e-5, "warmup_steps": 200,
-        "accum_steps": 1, "max_length": 512, "threshold": 0.7, "band": 0.1,
-        "endpoint_epoch": 10,
-    },
+    # Derived, not retyped: a hand-copied budget here drifts from the one the
+    # preflight freezes, and then these commands stop being the real commands.
+    "training": {**PREFLIGHT.FROZEN_TRAINING, **PREFLIGHT.FROZEN_INFERENCE},
 }
 
 
@@ -215,6 +234,19 @@ def test_both_halves_of_an_arm_read_the_same_argument_artifact() -> None:
     artifact = _CONTRACT["argument_predictions"]["path"]
     assert _flag(train, "--argument-predictions") == artifact
     assert _flag(predict, "--argument-predictions") == artifact
+
+
+def test_the_sampler_the_contract_pins_is_the_sampler_the_trainer_gets() -> None:
+    """The first cycle's negative sampler was a trainer default in no contract.
+
+    Pinning it is only worth anything if the pinned value actually reaches the
+    command line, so the plumbing is asserted rather than assumed.
+    """
+    train = PILOT.train_command(_CONTRACT, "full", Path("out/full/checkpoint"))
+    frozen = PREFLIGHT.FROZEN_TRAINING
+    assert _flag(train, "--neg-ratio") == str(frozen["neg_ratio"])
+    assert _flag(train, "--hard-fraction") == str(frozen["hard_fraction"])
+    assert ("--include-negative-only-docs" in train) is frozen["include_negative_only_docs"]
 
 
 def test_the_submission_builder_accepts_every_flag_the_pilot_hands_it() -> None:

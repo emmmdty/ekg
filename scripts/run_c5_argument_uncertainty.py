@@ -164,8 +164,11 @@ def train_command(contract: dict, arm: str, checkpoint: Path) -> list[str]:
         "--warmup-steps", str(training["warmup_steps"]),
         "--accum-steps", str(training["accum_steps"]),
         "--max-length", str(training["max_length"]),
+        "--neg-ratio", str(training["neg_ratio"]),
+        "--hard-fraction", str(training["hard_fraction"]),
         "--seed", str(contract["seed"]),
         "--save-every-epoch",
+        *(["--include-negative-only-docs"] if training["include_negative_only_docs"] else []),
         *ARM_FLAGS[arm],
     ]
 
