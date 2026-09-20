@@ -1670,6 +1670,7 @@ F1 掩盖概率质量。若 S2 失败，修的是 relation input；不得把结�
 | 把首个机制失败写成整章“止损” | 混淆“封存一个机制家族”和“取消研究目标” | 每个新家族仍先做 R1；seed-13 失败进入错误归因与第二个实质设计周期，不用换名/扫参复活旧家族 |
 | 把两项一致性诊断称为“论文两条规则” | 一手正文和代码没有这个指标，属于错误归因 | 改为 project-defined mediator，并在结果页给出精确定义 |
 | G-15 的 `--help` 预检在服务器挂起 | 冒烟入口在参数解析前导入关系数据依赖，使轻量预检进入不必要的重初始化，既拖慢排障，也可能被误判为 CUDA 任务已经启动 | 将关系数据与候选对导入移入 `smoke_contract()`；`--help` 不再加载训练依赖，真正执行时的口径不变 |
+| 修复后 dry-run 仍在 `smoke_contract()` 超时 | 只需冻结文档 ID 和候选对数，却经 `ekg.relations` 包入口加载整条关系流水线；这把纯计数错误地绑定到服务器重依赖初始化 | 合约改为直接读冻结 JSONL，以每篇事件 mention 数计算 `n(n-1)`；与既有 loader 交叉核验为相同 5 篇、**5,198** 对，并新增精确回归断言 |
 | 现成 held-out relation 只有 291/2,913 篇却准备训练 D4 | 90% evaluation 文档没有 deployable structure，任何结果都不完整 | C-17 五折计划 + C-19 posterior API；S2 明确要求全覆盖 |
 | `train_supervised_relations.py` 只接受旧 P1 train/dev | 直接传 D4 fold 会被拒；绕过校验又会丢失 A 类口径约束 | 新增独立 D4 binding：只物化 train+selection-dev，逐记录与注册源比对，evaluation 只交给 dumper |
 | 有 posterior dumper 但没有 train→select→dump runner | “代码能导出”被误写成“输入快好了”，实际无法稳定执行五折 | `run_d4_relation_crossfit.py` 冻结配方、checkpoint 选择、命令和产物哈希 |

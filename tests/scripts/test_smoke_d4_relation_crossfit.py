@@ -27,7 +27,14 @@ def test_smoke_contract_and_commands_are_bounded(tmp_path: Path) -> None:
     train, dump = smoke.commands(args, contract, manifest)
 
     assert contract["documents"] == 5
-    assert contract["ordered_mention_pairs"] > 0
+    assert contract["doc_ids"] == [
+        "39c2db9e18cd4a02b9aa8c1a3c58aab7",
+        "ab70a3e49966caa8c35f8b27fabea3ad",
+        "6e8b453609327248f8613f78763dd02c",
+        "79e2767b814f136745e35123957316b3",
+        "9ee922c5c1afb72c9b49b057edc379a9",
+    ]
+    assert contract["ordered_mention_pairs"] == 5_198
     assert train[train.index("--epochs") + 1] == "1"
     assert train[train.index("--dev-docs") + 1] == "5"
     assert "--save-best-by-family" in train

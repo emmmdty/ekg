@@ -33,18 +33,28 @@ def _load(path: Path) -> dict:
 
 
 def smoke_contract(source: Path, *, seed: int = 13, dev_docs: int = 5) -> dict:
-    from ekg.relations.data.maven_ere import load_maven_ere
-    from ekg.relations.pairs import candidate_pairs
-
-    docs = list(load_maven_ere(source))
-    shuffled = list(docs)
+    records = [
+        json.loads(line)
+        for line in source.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    shuffled = list(records)
     random.Random(seed).shuffle(shuffled)
     selected = shuffled[:dev_docs]
     _require(len(selected) == dev_docs, "smoke source has too few documents")
+
+    def mention_count(record: dict) -> int:
+        return sum(
+            len(event.get("mention") or event.get("mentions") or [])
+            for event in record.get("events", [])
+        )
+
     return {
-        "doc_ids": [doc.doc_id for doc in selected],
+        "doc_ids": [str(record.get("id", record.get("doc_id", ""))) for record in selected],
         "documents": len(selected),
-        "ordered_mention_pairs": sum(len(candidate_pairs(doc)) for doc in selected),
+        "ordered_mention_pairs": sum(
+            mention_count(record) * (mention_count(record) - 1) for record in selected
+        ),
     }
 
 
