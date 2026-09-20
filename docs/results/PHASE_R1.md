@@ -1685,8 +1685,12 @@ official-joint 配方；完成后只使用 selection-dev 选出的 causal-family
 本地完整门：**699 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；R1 v6.2 一致性审计
 **PASS（36/36 requirements，41 个 referenced tasks，0 finding）**。代码 SHA-256：trainer
 `4165d51a…c0ed`，cross-fit runner `b19c8dce…f731`，两份测试分别
-`b770ebd1…f11c` / `2825cdea…b536`。CUDA smoke runner/test 分别为 `b10aed6a…ba01` /
-`fed9d709…a7e6`；它固定 30-doc fixture、1 epoch、5-doc/5,198-pair posterior，分数不进入选模或主表。
+`b770ebd1…f11c` / `2825cdea…b536`。CUDA smoke runner/test 分别为 `cba7dc83…0e94` /
+`7def7bd4…a865`；它固定 30-doc fixture、1 epoch、5-doc/5,198-pair posterior，分数不进入选模或主表。
 修订后的 design brief SHA-256 `fa972c13…a8b1`。
 
-下一项只有 **G-15 单折 CUDA 冒烟**；通过后立即运行 G-16 五折，不再转去 Ch6/C5 做旁支分析。
+4090 端 `c75afdd` 的 dry-run 已在 **1.40 秒**返回同一 5 篇文档与 5,198 对，且输出目录、日志均不存在；
+因此还没有训练或伪造阶段结果。2026-09-20 核卡时四张 4090 各有两个他人进程，使用约 11.4/24.6 GiB、
+利用率 95–100%，不满足“不挤占”的操作门；5090 被他人常驻 vLLM 占 26.8/32.6 GiB，也不是可行替代。
+下一项仍只有 **G-15 单折 CUDA 冒烟**；空闲卡出现即按已披露命令启动，通过后立即运行 G-16 五折，
+不转去 Ch6/C5 做旁支分析。
