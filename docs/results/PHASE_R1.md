@@ -1639,7 +1639,7 @@ causal posterior 能通过可归因的 uncertainty-gated residual，实质提高
 | 阶段 | 中间产物 | 必达指标 | 当前状态 |
 |---|---|---|---|
 | S0 目标/文献闭合 | 本节、设计 brief 修订、执行主表 | exact-task 证据核到正文+代码；目标/负控/止损先于实验结果 | **完成** |
-| S1 输入执行链 | D4 hash binding + one-fold runner | evaluation 不出现在 trainer argv；official-joint recipe 任一漂移都在 CUDA 前拒绝；旧 P1 binding 不变 | **完成：698 passed / 29 skipped、ruff 0、smoke OK** |
+| S1 输入执行链 | D4 hash binding + one-fold runner | evaluation 不出现在 trainer argv；official-joint recipe 任一漂移都在 CUDA 前拒绝；旧 P1 binding 不变 | **完成：699 passed / 29 skipped、ruff 0、smoke OK** |
 | S2 真实结构输入 | 五折 posterior + 质量报告 | 2,913 docs / 73,939 mentions / 2,532,394 pairs 恰好一次；causal positive F1 ≥ `.300`；三类 Brier 优于 evaluation-prevalence no-skill | **0/5 folds，下一步是 CUDA smoke** |
 | S3 方法可执行 | immutable contract + full/base/rewired | 无边或低置信度时 residual 趋零；三臂只差注册变量；单折 CUDA 闭环 | 未开始，依赖 S2 |
 | S4 阶段结果 | seed-13 五折三臂结果 | §25.1 五项一次判定；不达目标则做错误归因并进入第二个**实质不同**设计周期 | 未开始，依赖 S3 |
@@ -1680,9 +1680,11 @@ F1 掩盖概率质量。若 S2 失败，修的是 relation input；不得把结�
 official-joint 配方；完成后只使用 selection-dev 选出的 causal-family checkpoint，导出 evaluation 的完整
 三类 posterior。定向测试覆盖了 evaluation 泄漏、记录漂移、recipe/命令隔离与原子 posterior 输出。
 
-本地完整门：**698 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；R1 v6.2 一致性审计
+本地完整门：**699 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；R1 v6.2 一致性审计
 **PASS（36/36 requirements，41 个 referenced tasks，0 finding）**。代码 SHA-256：trainer
 `4165d51a…c0ed`，cross-fit runner `b19c8dce…f731`，两份测试分别
-`b770ebd1…f11c` / `2825cdea…b536`。修订后的 design brief SHA-256 `fa972c13…a8b1`。
+`b770ebd1…f11c` / `2825cdea…b536`。CUDA smoke runner/test 分别为 `b10aed6a…ba01` /
+`fed9d709…a7e6`；它固定 30-doc fixture、1 epoch、5-doc/5,198-pair posterior，分数不进入选模或主表。
+修订后的 design brief SHA-256 `fa972c13…a8b1`。
 
 下一项只有 **G-15 单折 CUDA 冒烟**；通过后立即运行 G-16 五折，不再转去 Ch6/C5 做旁支分析。
