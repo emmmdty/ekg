@@ -1,47 +1,45 @@
 # EKG 实时状态
 
-> 更新于 **2026-09-18**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-09-20**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
 
-**方法实验期的第一个周期全部跑完。Gate 2 的两个输入 2026-09-17 到齐，实测 0 个方法章过门。**
+**2026-09-20 裁决 ⑤ 已把重心重新放回三个方法章，但只放开 R1 准入，不等于直接上卡。**
+旧 typed cues / pair evidence / role compatibility 三个失败家族继续封存；本轮从论文机制、数据、协议、代码和
+power 重新筛选实质不同的方案。权威数字与完整证据见 `results/PHASE_R1.md` §24。
 
-| 章 | 机制 | seed-13 契约跑的结果 | 判 |
-|---|---|---|---|
-| Ch3 · D4 | typed cues | full `.476515` < remove-core `.536788` < 两条锚；负控也赢过 full | ❌ Gate 1，家族已关闭（09-12） |
-| Ch5 · C5 | role-compatibility 残差 | full MUC **79.90115**，臂序对（> 消融 > 负控），但低于主锚 **1.08** | ❌ 门未过（09-16） |
-| Ch4 · A4 | pair evidence + 一致性约束 | full causal **7.507508**，低于三条判定线约 25 点，**低于自身消融臂 23.72 点** | ❌ 门未过（09-17） |
+| 章 | R1 v6.2 结论 | 当前门 |
+|---|---|---|
+| Ch3 · D4 | **有条件保留** predicted causal uncertainty residual | C-19 posterior adapter 已完成；仍缺五折真实 predicted posterior，禁止用 gold 替代 |
+| Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
+| Ch5 · C5 | **有条件保留** document-complete asymmetric shortcut invariance | generator/100 requests/runner 已冻；4090 当前非空闲且路径复核中断，实际生成未启动 |
 
-⇒ 按 `EXPERIMENT_PLAN.md` §5，落 **「≤1 章过」** 分支。
-✅ **2026-09-18 裁决 ① 落地（作者取建议 A）**：**C5 获批第二设计周期**（H1，角色相容性改接**抑制侧**，
-同一家族不是新家族）· **Ch6 提为承重章** · **D4/A4 合并为一章「负结果与归因」**；
-C5 二周期再不过 ⇒ 定稿为 **Ch6 承重 + 一章负结果归因**。已写回主表 §1 / §5 / §7.5。
-⛔ 执行代理**不得**自行降级论文结构、开新机制家族、启动第二设计周期、调门槛护栏或跑 seed 17/42。
+## ✅ 已完成：C-13–C-21（2026-09-20，本地文献/CPU/代码）
 
-## ✅ 已完成：**主表 C-11 · H1 抑制上界**（2026-09-18，本地纯 CPU）
+- **C-13**：一手论文与官方代码矩阵完成；A4 被新颖性证据淘汰，D4/C5 保留为条件路线；
+- **C-14**：FACT↔ERE 的 2,913 篇 / 73,939 mentions 对齐；现成 held-out relation prediction 只覆盖
+  291 篇，且 causal-only incidence 是 5,270/7,195=73.25%，不是合并关系族的 95.57%；
+- **C-15**：纠正 LLMERE k=30 的旧判断——direct pair 覆盖 48,562/48,562，受损的是 two-hop support
+  （8,826/11,231 保留）；但 A4 因新颖性不足仍不准入；
+- **C-16**：C5 同时量出 912/213 个高相似 false-merge 桶和 540/73 个低相似 gold/missed 方向；训练池
+  17,014 + 4,430，`.233553 → .415` 的 exact test 在 n=42 时 power `.82012`；
+- **C-17/C-18**：D4 五折 cross-fit 计划与 C5 100 条盲审 rubric 冻结，尚无真实模型输出；
+- **C-19**：全候选 causal posterior adapter 完成；
+- **C-20**：一次性请求构建、严格输出校验、classifier-blind review template 与冻结阈值评分器完成；
+- **C-21**：generator config 固定到既有内容寻址 `Qwen/Qwen3-8B`，100 条 requests
+  （SHA `74a23bf8…4f2fd`）和 no-repair GPU runner 冻结；当前完整门
+  **694 passed / 29 skipped、ruff 0、smoke OK**。
 
-**H1 成立，但结论有两半**（数字在 `results/PHASE_C.md` 末节）：
+## 下一步
 
-- ✅ **上界够得到主锚**：完美抑制 ≥0.8 跨句桶里的 213 个误合并对，`full` 由 79.90115 → **84.64223**（比主锚高 3.658）；
-- 🔴 **桶本身不是信号**：桶内 213 错 / 699 对，基率仅 **23.36%**；blind 全否决 MUC recall .846422 → .568935、F1 → 66.06。
-  **验收线＝桶内精度 ≥ 213/513 = 41.5%（约基率 1.8 倍）才仅仅追平主锚**，且已假设 oracle 召回；
-- **集中不是机制造成的**：`remove_core` 59.8% ≈ `full` 58.0%，低的是主锚 51.5%。
+1. D4：在创建五折任务前，冻结 run contract、确切命令、checkpoint/output hash 与单折 CUDA 冒烟；
+2. C5：等待 4090 空闲并复核 snapshot 路径，再事前披露 exact command 后一次性生成 100 条；当前四卡
+   5,716–5,719 MiB、28–32% util，随后 ssh reset，所以 C-22 未启动；
+3. A4：不创建实现或 GPU 任务；只有出现能越过现有论文覆盖的新命题才可回 R1。
 
-## ✅ 已完成：**主表 C-12 · 桶内判别力** ⇒ 🔴 **H1 被证伪**
-
-现有角色相容性特征（`full` 臂已训过的那套）当抑制器用在那 912 个桶内对上，**不训练不调阈值**：
-所有操作点桶内精度 **.2330–.2900**，基率 **.2336**，验收线 **.415** ⇒ **没有一档跑赢 `full` 自己**
-（最好 79.56811，−0.333）。注册中介规则 `incompatible` 触发 **618/912** 次而精度低于基率。
-
-⇒ **问题在信号源，不在接法**。C-11 证抑制侧有 4.74 分空间，C-12 证这套特征填不满。
-
-## 🔴 下一步：停下交裁决
-
-裁决 ① 批准的是 **H1 这一条接法**，它已走完。**换信号源＝新机制家族，须回 R1 立项**，不在本轮授权内。
-两个选项（详见 `results/PHASE_C.md` 末节）：**(甲) 建议**——C5 第二周期就此收，Ch5 并入「负结果与归因」章，
-落裁决 ① 的兜底形态「Ch6 承重 + 一章负结果归因」；**(乙)** 走新信号源立项，代价一个完整设计周期。
-⛔ 裁决前不启动训练、不申请 GPU、不开新机制家族。
+⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
+backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。
 
 ## 已完成：**G-11a · 表 6-2 的公开对手行**（2026-09-18 收口）
 
@@ -128,15 +126,15 @@ Done-when 逐条核对——**只差 matched seeds**（须逐次授权，表 6-2
 5. **E3.1 前置核查**：三个方法章的产物与 E3 unit 交集为 0 ⇒ 裁决 ②（`c2f0cbc`）；
    另 **G-11a** 核实为早已完成（障碍原文一直在 `BASELINE_ROSTER.md` §6.2b）。
 
-**2026-09-18 三件套**（含 C-11/C-12 的 10 条新测试）：**665 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；
-`HEAD` = `origin/main` = `04e86e3`，已 push。
+**2026-09-20 三件套**（含 R1 v6.2 审计、C-19 posterior adapter 与 C-20/C-21 generation harness）：
+**694 passed / 29 skipped、ruff 0、`ekg-smoke` OK**。
 
 实验截止 **2027-02**；排期与估算基准率见主表 §3。
 
 ## 当前三端
 
-- **local**：`main` 与 `origin/main` 同步、工作树干净；三件套 **639 passed / 29 skipped**、ruff 0、
-  `ekg-smoke` OK；审计 `PASS` / 36 requirements。P1 r15 `1e31a9ac…f9655`；
+- **local**：三件套 **694 passed / 29 skipped**、ruff 0、`ekg-smoke` OK；P1 r15
+  `1e31a9ac…f9655`。`docs/HANDOFF.md` 有本轮开始前已存在的用户编辑，不纳入本轮提交；
 - **gpu-4090**：GPU 已修好（580.178.04），但**四卡自 09-10 起被他人 vllm 占满**（09-16 复核
   19,15x MiB / 24,564 MiB，35–63% util），已第 8 天；**09-17 隧道 `Connection refused`，状态未知**。
   **作者 2026-09-15：不要因为它拖慢进度**；

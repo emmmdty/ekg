@@ -657,8 +657,10 @@ Ch2 的近期方法逐个核过：RESIJ 无公开代码、2025 two-stage（RepL4
 | 排程 | **与文档队列并行，不排在 A4 pilot 前面**。pilot 只吃一张卡而 4090 有四张；第二 baseline 只在**确认性 promotion** 时才生效 |
 | 对 T024 的影响 | A4 契约**照常冻结**：roster 里 LLMERE-causal 已被完整指名与规格化（upstream commit、converter 身份、backbone、LoRA 配置、评分口径），**只有它的数字 pending**。这不违反 T024 的"baselines 必须 exact"——主锚的数字同样先于契约存在 |
 
-**必须披露的天花板**：LLMERE 的 k=30 事件分区使**跨分区的对按构造不可能被生成**。这些对在评分时计为漏报，
-因此比较仍然公平，但天花板落在 baseline 自己身上，不是落在评测上。这条要写进它的每一次报告。
+**2026-09-20 C-15 更正（不回写冻结旧产物）**：上面关于 k=30 的直接 pair 天花板判断是错的。
+官方 converter 会把 query anchor 重复放进每一个 partition，所以训练集的 **48,562/48,562 个 direct causal
+mention pair 都可达**。分区真正隐藏的是中间节点：11,231 个有 two-hop support 的 direct pair 中，
+8,826 个保留了该 support（78.59%）。后续报告不得再写「跨分区 direct pair 按构造不可生成」。
 
 ### 13.3 接受的风险与明确不做的事
 
@@ -1439,3 +1441,168 @@ Relevant reasoning information: none
 
 原始 `predict/generated_predictions.jsonl`、adapter、两个 pinned 上游仓库**一个字节没动**；
 未训练、未占卡、未改代码。`EXPERIMENT_PLAN.md` 的 C-3 行与 G-8 行据此回填。
+
+## 24. 裁决⑤ · R1 v6.2 新家族准入（2026-09-20）
+
+### 24.1 开工自审与证据边界
+
+**科研价值**：本轮不是为了给失败实验换名字，而是检验三个可证伪问题：D4 能否用 deployable 的
+predicted causal uncertainty 改善五类 factuality；A4 的 rationale / graph / counterfactual 组合是否还存在
+可主张的新颖性；C5 能否用 document-complete 的非对称 shortcut invariance 同时处理「高相似误合并」和
+「低相似漏合并」。它们分别对准表 3-3、表 4-3、表 5-3 的公开主指标门。
+
+**可行性**：先核数据、协议、代码、算力和授权。本节只做一手论文/官方代码核查、CPU 静态审计、power 与
+前置计划；没有训练、没有 GPU、没有访问 final-valid 指标，也没有把 gold 关系当 deployable 输入。
+
+文献矩阵：`runs/stages/R1/r1-v62-20260920/literature_refresh.json`，SHA-256
+`e9b105acc2fa12ed32a21d310f5eb2610407568b911d362f72f49275a3a2e26e`。下表的论文数字只用于机制与
+新颖性判断，**不是本项目同协议结果**。
+
+| 方向 | 一手证据 | 机制核查后的结论 |
+|---|---|---|
+| D4 | [MAVEN-FACT](https://aclanthology.org/2024.findings-emnlp.651/) Table 6：DMRoBERTa 47.1，+relation 49.1，+argument 49.3，+both 45.6；正文/代码表明 relation arm 使用 annotated causal relations 聚合 relation token | gold causal structure 有信息，但 relation+argument 并非单调增益；只准入 relation-only predicted uncertainty，禁止把 gold 增益当项目结果 |
+| A4 | [LLMERE](https://aclanthology.org/2025.coling-main.500/) 已在 MAVEN-ERE 做 rationale；[IJCNN 2024](https://arxiv.org/abs/2403.11129) 已组合 rationale 与 linearized coref/causal graph；[MRPD](https://doi.org/10.1016/j.eswa.2025.130284) 和 [CRECE](https://doi.org/10.1109/BigDIA68682.2025.11383282) 已覆盖多路/反事实 reasoning | 泛化的 rationale + graph + counterfactual 命题已被近邻工作覆盖；仅换 backbone、形式化理由或保留全候选不足以构成新方法 |
+| C5 | [LLM-RCDA](https://aclanthology.org/2024.naacl-long.63/) 已做 KNN cross-document counterfactual augmentation；[ACCI](https://www.nature.com/articles/s41598-025-32765-6) 已做 trigger masking / argument fusion / counterfactual ECR | plain counterfactual port 不算创新；仅保留它们未覆盖的 within-document 全候选、双方向非对称 invariance，并要求 data-only arm 与 pairing-shuffle 负控 |
+
+### 24.2 C-14 · D4 structural input 审计
+
+FACT 与 ERE 的训练集合 **2,913 篇 / 73,939 mentions 全量一一对齐**。真正阻断 D4 的不是数据缺失，
+而是 deployable input：现有 held-out relation predictions 只覆盖 P1 internal-dev 的 **291/2,913 篇**，
+还缺 2,622 篇。那 291 篇里，任意 relation family 合并后的 incident rate 是 6,876/7,195=95.57%，
+但 MAVEN-FACT 论文能支持的 **causal-only** 输入只有 5,270/7,195=73.25%；不能拿 temporal/subevent 合并
+覆盖率掩盖 causal 输入门。
+
+gold causal 也只用于诊断上界：CT+ 35,221/69,782=50.47%，CT− 405/1,492=27.14%，
+PS+ 936/2,262=41.38%，PS− 75/285=26.32%，Uu 19/118=16.10%。因此结构对稀有类并非普遍存在，
+缺边必须作为不确定性处理，不能默认为负证据。
+
+产物 `d4_structural_input_audit.json`，SHA-256
+`4d735530a1848ad0902d4d170c5978355378e1bd0d574e0396900081fd191d09`；裁决
+`conditional_input_prerequisite`。
+
+### 24.3 C-15 · A4 资产可行，但新颖性不准入
+
+训练集有 2,622 篇 / 66,744 mentions / 2,297,524 ordered candidate pairs；其中 48,562 个 direct causal
+pairs、11,231 个有 two-hop support、7,620 mentions 有 coreference rationale。源码核查同时纠正了 §13.2：
+official converter 的 query anchor 会进入每个 k=30 partition，故 direct pair 覆盖是 **100%**；分区只把
+two-hop support 的保留率降为 8,826/11,231=78.59%。
+
+所以 A4 **不是卡数据或协议，而是卡科研新颖性**。在上述近邻工作已经覆盖宽命题后，本轮不生成 A4 trainer、
+phase contract 或 GPU 任务。资产产物 `a4_rationale_asset_audit.json`，SHA-256
+`f2912358a16c8d1f95e05a650ed17389edaa0c952a14a505ec7479daa2d9beb1`；最终裁决
+`rejected_novelty_blocked`。
+
+### 24.4 C-16 · C5 双方向 shortcut 与 power
+
+失败 full 在 cross-sentence predicted bucket 有 1,533 对 / 367 错；其中高相似桶 912 对 / 213 错，覆盖
+58.04% 的 false merge。反方向也存在：1,342 个 cross-sentence gold coreferent pairs 中有 540 个 trigger
+similarity < .8，full 漏 73 个，占其 176 个 cross-sentence missed gold pairs 的 41.48%。因此只抑制高相似
+预测对会再犯单边修补，候选机制必须同时保护低相似真共指。
+
+训练源不是瓶颈：1,148,762 全部 pairs、1,070,293 cross-sentence pairs、17,014 hard non-coreferent、
+4,430 divergent coreferent（另有 12,244 exact-trigger non-coreferent）。对冻结 912-pair 桶，从 null precision
+`.2335526` 检验到最低有用 `.415`，单侧 exact binomial 在 n=42、critical successes=15 时实际
+alpha `.04819`、power `.82012`，超过 80% 目标。
+
+产物 `c5_counterfactual_feasibility_audit.json`，SHA-256
+`27d72b9331d53e38dd00d38058e72de048c75c1e80f54672448f11a97b45a864`。准入状态是
+`accepted_pending_generation_quality_gate`，**不是已证明有效**。
+
+### 24.5 C-17/C-18 · 两条保留路线的前置计划
+
+| 任务 | 已冻结的内容 | 仍缺什么 | SHA-256 |
+|---|---|---|---|
+| C-17 · D4 cross-fit | 五折 train / selection / evaluation 两两互斥；2,913 evaluation docs 每篇恰好一次；预期输出合计 73,939 mentions / 2,532,394 ordered pairs；每对必须给 `p_none/p_cause/p_precondition` 且和为 1 | posterior dump adapter、CPU/CUDA smoke、五折真实 predicted posterior；当前状态 `plan_frozen_predictions_missing` | `d8399cd47d43cd4343d1bd70973a42b642b5ae481af6c41be297e0b9191678b3` |
+| C-18 · C5 generation audit | seed `260920`；hard non-coref / divergent coref 各 50 条，合并后随机盲排；总体 label preservation ≥`.95`、每层 ≥`.90`、fluency ≥`.95`、single-variable ≥`.90`；评审不可见 classifier score | 披露 generator 后对这 100 条一次性生成和盲审；同一批失败后不得修 prompt 重审 | `60b6e76334352e86e7c8f7835bde3ff382e87d4683f2b252ab5725c2eaaefbe5` |
+
+### 24.6 当前裁决
+
+- **D4：有条件保留。** 科研命题有 exact-task 依据，但真实 cross-fit predicted input 尚不存在；不得用 gold
+  或 291-doc 局部结果替代。
+- **A4：本方向停止。** 原因是新颖性，不是“结果差所以收口”；除非出现能明确越过现有 rationale / graph /
+  counterfactual 工作的新命题与单变量证伪，否则不再投入训练。
+- **C5：有条件保留。** 数据与 power 已过，生成质量门未过；在 100 条冻结盲审产物出现前，不创建 classifier
+  训练任务。
+
+本轮结论是**淘汰一条缺科研差异的路线，推进两条仍可证伪的路线到下一个真实输入门**。没有方法指标改善，
+也没有实验“收口”。
+
+### 24.7 C-19 · D4 posterior adapter 代码门
+
+新增 `SupervisedRelationExtractor.predict_family_posteriors`，不再从只保留 non-NONE edge 的普通抽取输出
+反推结构概率；它直接保留每个 ordered pair 的三类 softmax。`src/ekg/relations/posteriors.py` 固定并验证
+`p_none/p_cause/p_precondition` schema，`scripts/dump_relation_causal_posteriors.py` 绑定显式 manifest，按
+manifest 顺序逐文档导出，并在全部校验通过前不发布目标文件。
+
+已验证的拒绝条件：manifest/source ID 缺失或重复、candidate self/duplicate、posterior 缺/多 pair、缺 causal
+head、类别数不是 3、概率非有限/越界/和偏离 1、文档或 pair 总数不等于 C-17 预期、目标输出已存在。
+相邻 metadata 哈希 data、manifest 和 checkpoint 下的每个文件，并显式写 `gold_fields_present=false`。
+
+代码 SHA-256：posterior validator `5b857320…b43007`；dumper `0a8eabd8…f60960c`；更新后的 supervised
+extractor `560d838a…22376`。本地全门：**685 passed / 29 skipped、ruff 0、`ekg-smoke` OK**。
+
+本节只证明“能完整且可追溯地导出”；没有 relation checkpoint 被训练，也没有五折 dump 被生成。因此 D4
+仍是 `plan_frozen_predictions_missing`，不能把 C-19 当成结构输入已经闭合，更不能当成 factuality 增益。
+
+### 24.8 当前计划一致性审计
+
+完整审计第一次运行时正确报出：冻结 v6.1 audit 仍引用作者已经撤销的 T040–T044 consumer factorial，
+而当前 `TASKS.md` 已改为应用章 T054–T058。没有篡改 `protocol.json` 钉住的 v6.1 audit
+（`a1d99a7f…7a65ca`）；新增 `scripts/audit_r1_v62_consistency.py` 作为显式 amendment，更新受裁决影响的
+consumer task traceability，并把 T048–T053/T059–T061 与 8 个 v6.2 artifacts 纳入检查；其他 36 条
+requirement、证据、phase contract 与 trust-root 检查全部复用冻结审计。
+
+修订脚本 SHA-256 `ab6ab6e0df1996a33f1377190a58659120a5fda722ebcff4415b1fd6ac5d064c`。实跑结果：
+**PASS，36/36 requirements mapped，32 个 referenced tasks，9 个 v6.2 task 全部完成、8 个 v6.2 artifact
+齐全、0 finding**。这证明当前任务表没有把撤销的
+factorial 暗中恢复；它不提供任何方法有效性证据。C-20 后更新的 `status.json` SHA-256 见下一节。
+
+### 24.9 C-20 · C5 generation audit harness 代码门
+
+新增 `scripts/run_c5_generation_audit.py`，包含四个彼此分离的动作：
+
+1. `requests`：读取 C-18 的 100 条冻结 item；generator config 必须逐项披露 model、revision、provider、
+   license、`do_sample/temperature/top_p/max_new_tokens/seed`，输出 JSON-only 请求且拒绝覆盖；
+2. generation validation：要求五个冻结字段恰好出现、item ID 100/100 无缺失/重复/额外、两个 edited
+   target trigger 仍出现在 edited context；它只做结构检查，不声称语义正确；
+3. `review-template`：并列原文/编辑文与 required relation，留下三个空二值判断；不含 classifier score、
+   prediction 或 promotion outcome；
+4. `score`：要求 100/100 人工记录与真实 boolean，按 C-18 的 overall/each-stratum 四条门逐项判定。
+   测试证明 `.95/.90/.95/.90` **恰好边界通过**，少一条即失败。报告固定
+   `classifier_training_authorized=false`，避免工具自己越过后续 phase-contract/授权门。
+
+脚本当前 SHA-256 `32b046cd0f4824ccff05411bebc836ddaef16f45aad98036ae9832f26c446fc9`；6 条 targeted tests，
+完整本地门 **691 passed / 29 skipped、ruff 0、`ekg-smoke` OK**。本节没有选择 generator、没有调用模型，
+也没有产生或人工评审任何一条 edit；C5 状态仍是 `rubric_and_sample_frozen_generation_missing`。更新后的
+`status.json` SHA-256 由 C-21 的最终状态更新，见下一节。
+
+### 24.10 C-21 · generator 与一次性 run contract
+
+**选型理由不是“便宜”**：generator 不作为本文方法贡献，只是制造受控训练 intervention。固定项目此前已经
+内容寻址并实际跑过 73,939 mentions 的 `Qwen/Qwen3-8B`，可以避免再引入闭源 API、不可核权重或更大模型
+这个混杂。[官方 model card](https://huggingface.co/Qwen/Qwen3-8B) 标明 Apache-2.0，
+[官方 Qwen3 文档](https://github.com/QwenLM/Qwen3/blob/main/README.md) 也明确 open-weight models 使用
+Apache 2.0，并给出 Transformers 本地推理路径。模型仍只是**透明替换** LLM-RCDA 的 GPT-3.5 generator，不能继承其
+论文效果，也不能把 Qwen 本身写成方法创新。
+
+冻结身份与解码：config revision `8188480f040c5f1606a1bb3556abf14b31975155`、weight revision
+`7c9709d23bd2136dac1d6ea1fe30f4107d681cd6`、greedy、`enable_thinking=false`、seed `260920`、
+`max_new_tokens=1536`。后者覆盖冻结样本最大 3,492 字符上下文的完整 JSON 回写，且不生成多个候选供挑选。
+
+| 产物 | SHA-256 |
+|---|---|
+| `configs/c5_generation_audit_qwen3_8b.json` | `d91254442df600f16fda193736c1f3a2387e9445bcfbe17cef6b61098c8f625a` |
+| `c5_generation/requests.jsonl`（100 行，generator identity 唯一） | `74a23bf8adf6b0b97c35a695f98d0fce84fc03f8a8338d94d6937cdac694f2fd` |
+| `scripts/generate_c5_audit_edits.py` | `e057a48cdd3c36bf2f49d5352664360a6bd2f59ffedee83ab953afe20fa2fa22` |
+
+runner 会先按既有 `QWEN3_FILES` 对 8 个 config/tokenizer/weight 文件逐个核 size+SHA，再逐条保留 raw
+response。只接受一个 bare JSON object；markdown fence、字段增减、item ID 错配均记失败，不 salvage。
+只有 100/100 严格解析且 C-20 validator 再通过时才发布 parsed output；无论成功失败，报告固定
+`classifier_training_authorized=false`。3 条 runner targeted tests 后，完整本地门为
+**694 passed / 29 skipped、ruff 0、`ekg-smoke` OK**。
+
+**C-22 没有启动。** 只读 `nvidia-smi` 成功时四张 4090 分别占 5,716–5,719 / 24,564 MiB，GPU util
+28–32%，不能判空闲；随后只读查 snapshot 路径时 ssh `Connection reset by peer`。按三态规则，这只说明
+连接失败，不能推断权重不存在或远端状态改变。当前卡【算力/路径】：等 4090 空闲且路径复核成功后，必须
+先披露 exact command；不得自行转用需逐次授权的 5090。当前 `status.json` SHA-256
+`4ac2d94715065bcbc4487b21d28f15f9912366c64e9bc7fba8da5d7711d943d9`。

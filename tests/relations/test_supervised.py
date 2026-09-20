@@ -146,6 +146,37 @@ def test_extract_no_prediction_yields_no_edge(monkeypatch):
     assert ex.extract([_node("a", 0, 0), _node("b", 1, 0)]) == []
 
 
+def test_family_posteriors_keep_none_and_reject_missing_head(monkeypatch) -> None:
+    class FakeTensor:
+        def detach(self):
+            return self
+
+        def float(self):
+            return self
+
+        def cpu(self):
+            return self
+
+        def tolist(self):
+            return [[0.8, 0.1, 0.1], [0.2, 0.7, 0.1]]
+
+    ex = relation_extractors.create("supervised")
+    nodes = [_node("a", 0, 0), _node("b", 1, 0)]
+    monkeypatch.setattr(
+        ex,
+        "_pair_probability_tensors",
+        lambda ns, pairs, context: {"causal": FakeTensor()},
+    )
+    assert ex.predict_family_posteriors(nodes, None, family="causal") == {
+        ("a", "b"): (0.8, 0.1, 0.1),
+        ("b", "a"): (0.2, 0.7, 0.1),
+    }
+
+    monkeypatch.setattr(ex, "_pair_probability_tensors", lambda ns, pairs, context: {})
+    with pytest.raises(ValueError, match="no active 'causal' head"):
+        ex.predict_family_posteriors(nodes, None, family="causal")
+
+
 def test_pair_classifier_and_features_shapes():
     torch = pytest.importorskip("torch")
     from ekg.relations.extractor.supervised import PairClassifier, _pair_features

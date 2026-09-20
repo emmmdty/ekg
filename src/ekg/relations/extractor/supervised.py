@@ -468,6 +468,33 @@ class SupervisedRelationExtractor(RelationExtractor):
                 )
         return edges
 
+    def predict_family_posteriors(
+        self,
+        nodes: list[EventNode],
+        context: ExtractionContext | None,
+        *,
+        family: str,
+    ) -> dict[tuple[str, str], tuple[float, ...]]:
+        """Return every class probability for every document-level candidate pair.
+
+        Edge extraction drops NONE predictions by design, which makes its output
+        unusable as a structural uncertainty input. This method preserves the full
+        candidate universe and exposes only model probabilities, never gold labels.
+        """
+        if family not in FAMILY_SUBTYPES:
+            raise ValueError(f"unknown relation family {family!r}")
+        pairs = self._candidate_pairs(nodes)
+        if not pairs:
+            return {}
+        probabilities = self._pair_probability_tensors(nodes, pairs, context)
+        if family not in probabilities:
+            raise ValueError(f"checkpoint has no active {family!r} head")
+        rows = probabilities[family].detach().float().cpu().tolist()
+        return {
+            pair: tuple(float(value) for value in row)
+            for pair, row in zip(pairs, rows, strict=True)
+        }
+
     # ---- torch-backed scoring (lazy) ------------------------------------- #
 
     def _ensure_model(self) -> None:
@@ -513,6 +540,28 @@ class SupervisedRelationExtractor(RelationExtractor):
         context: ExtractionContext | None,
     ) -> dict[tuple[str, str], dict[str, tuple[str, float]]]:
         """Per non-NONE family, the (subtype, prob) each candidate pair is assigned."""
+        probabilities = self._pair_probability_tensors(nodes, pairs, context)
+        timex_ids = {n.event_id for n in nodes if n.event_type == TIMEX_EVENT_TYPE}
+        result: dict[tuple[str, str], dict[str, tuple[str, float]]] = {}
+        for family, probs in probabilities.items():
+            subtypes = FAMILY_SUBTYPES[family]
+            conf, idx = probs.max(dim=-1)
+            scoreable = family == "temporal" or not timex_ids
+            for pair, i, c in zip(pairs, idx.tolist(), conf.tolist(), strict=True):
+                if i == 0:  # NONE
+                    continue
+                if not scoreable and (pair[0] in timex_ids or pair[1] in timex_ids):
+                    continue
+                result.setdefault(pair, {})[family] = (subtypes[i], float(c))
+        return result
+
+    def _pair_probability_tensors(
+        self,
+        nodes: list[EventNode],
+        pairs: list[tuple[str, str]],
+        context: ExtractionContext | None,
+    ) -> dict[str, object]:
+        """Score a fixed pair list once and retain NONE probabilities."""
         self._ensure_model()
         doc_text = context.doc_text.get(nodes[0].doc_id, "") if context and nodes else ""
         if not doc_text:
@@ -537,21 +586,7 @@ class SupervisedRelationExtractor(RelationExtractor):
         )
         with torch.no_grad():
             logits = self._model(_pair_features(head_emb, tail_emb), dist_ids)
-        # Official MAVEN-ERE scores only temporal on TIMEX endpoints
-        # (`ignore_timex=True` for causal/subevent). Emitting a causal edge onto a
-        # TIMEX would be an unknown endpoint to the official scorer, and it is a
-        # pair the model was never trained on: those targets are -100 in training.
-        timex_ids = {n.event_id for n in nodes if n.event_type == TIMEX_EVENT_TYPE}
-        result: dict[tuple[str, str], dict[str, tuple[str, float]]] = {}
-        for family in self._active_families:
-            subtypes = FAMILY_SUBTYPES[family]
-            probs = torch.softmax(logits[family], dim=-1)
-            conf, idx = probs.max(dim=-1)
-            scoreable = family == "temporal" or not timex_ids
-            for pair, i, c in zip(pairs, idx.tolist(), conf.tolist(), strict=True):
-                if i == 0:  # NONE
-                    continue
-                if not scoreable and (pair[0] in timex_ids or pair[1] in timex_ids):
-                    continue
-                result.setdefault(pair, {})[family] = (subtypes[i], float(c))
-        return result
+        return {
+            family: torch.softmax(logits[family], dim=-1)
+            for family in self._active_families
+        }
