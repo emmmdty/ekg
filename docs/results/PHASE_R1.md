@@ -1671,6 +1671,7 @@ F1 掩盖概率质量。若 S2 失败，修的是 relation input；不得把结�
 | 把两项一致性诊断称为“论文两条规则” | 一手正文和代码没有这个指标，属于错误归因 | 改为 project-defined mediator，并在结果页给出精确定义 |
 | G-15 的 `--help` 预检在服务器挂起 | 冒烟入口在参数解析前导入关系数据依赖，使轻量预检进入不必要的重初始化，既拖慢排障，也可能被误判为 CUDA 任务已经启动 | 将关系数据与候选对导入移入 `smoke_contract()`；`--help` 不再加载训练依赖，真正执行时的口径不变 |
 | 修复后 dry-run 仍在 `smoke_contract()` 超时 | 只需冻结文档 ID 和候选对数，却经 `ekg.relations` 包入口加载整条关系流水线；这把纯计数错误地绑定到服务器重依赖初始化 | 合约改为直接读冻结 JSONL，以每篇事件 mention 数计算 `n(n-1)`；与既有 loader 交叉核验为相同 5 篇、**5,198** 对，并新增精确回归断言 |
+| 4090 的 T064/T065 定向测试缺少 `d4_crossfit_plan.json` | 计划位于 gitignored `runs/`，代码经 git 同步不等于运行资产已同步；若只等空卡，G-16 会在训练前直接 `FileNotFoundError` | 枚举计划引用的两份语料、CV 总表与 15 个 manifest，确认本地/4090 SHA-256 全部一致；只补传计划文件并双端核为 `d8399cd4…1678b3`，4090 端 CPU 定向测试 **20/20 passed** |
 | 现成 held-out relation 只有 291/2,913 篇却准备训练 D4 | 90% evaluation 文档没有 deployable structure，任何结果都不完整 | C-17 五折计划 + C-19 posterior API；S2 明确要求全覆盖 |
 | `train_supervised_relations.py` 只接受旧 P1 train/dev | 直接传 D4 fold 会被拒；绕过校验又会丢失 A 类口径约束 | 新增独立 D4 binding：只物化 train+selection-dev，逐记录与注册源比对，evaluation 只交给 dumper |
 | 有 posterior dumper 但没有 train→select→dump runner | “代码能导出”被误写成“输入快好了”，实际无法稳定执行五折 | `run_d4_relation_crossfit.py` 冻结配方、checkpoint 选择、命令和产物哈希 |
@@ -1692,5 +1693,8 @@ official-joint 配方；完成后只使用 selection-dev 选出的 causal-family
 4090 端 `c75afdd` 的 dry-run 已在 **1.40 秒**返回同一 5 篇文档与 5,198 对，且输出目录、日志均不存在；
 因此还没有训练或伪造阶段结果。2026-09-20 核卡时四张 4090 各有两个他人进程，使用约 11.4/24.6 GiB、
 利用率 95–100%，不满足“不挤占”的操作门；5090 被他人常驻 vLLM 占 26.8/32.6 GiB，也不是可行替代。
+补齐 gitignored cross-fit plan 后，4090 端三份定向测试 **20/20 passed**；五折只读命令审计逐折通过，
+evaluation 只进入 dumper，五折预期计数分别为 505,156 / 511,286 / 511,878 / 506,416 / 497,658 对，
+合计仍为 2,913 篇 / 2,532,394 对。
 下一项仍只有 **G-15 单折 CUDA 冒烟**；空闲卡出现即按已披露命令启动，通过后立即运行 G-16 五折，
 不转去 Ch6/C5 做旁支分析。
