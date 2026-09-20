@@ -337,10 +337,15 @@ gantt
 | **C-20** | ✅ **已完成 2026-09-20**：把 C-18 的 100 条冻结样本转成不可覆盖的 JSON-only 请求；generator 配置必须披露 model/revision/provider/license 与完整 decoding。输出必须 100/100、字段严格、两个 target trigger 仍在 edited context；盲审表不含 classifier/promotion 信息，评分器逐项执行总体与分层阈值，恰好边界通过、低一条失败。报告永远不自动授权 classifier training。完整门 **691 passed / 29 skipped、ruff 0、smoke OK**；未调用 generator | C-18 ✅ | ✅ harness 代码门关闭；实际 100 条生成与人工盲审仍未发生 | `scripts/run_c5_generation_audit.py` + tests |
 | **C-21** | ✅ **已完成 2026-09-20**：唯一 generator 冻结为项目已内容寻址且跑过 73,939 mentions 的 `Qwen/Qwen3-8B`（config `8188480f…5155` / weights `7c9709d2…cd6`，Apache-2.0）；greedy、thinking off、seed `260920`、max new 1,536。100 条 requests SHA `74a23bf8…4f2fd`；GPU runner 先核 8 个模型文件，逐条保留 raw，只接受 bare exact JSON，100/100 全过才发布 parsed output。完整门 **694 passed / 29 skipped、ruff 0、smoke OK**；未调用模型 | C-20 ✅ | ✅ config/request/runner hashes + tests；不以生成器本身主张创新 | 代码 + R1 request artifacts |
 | **C-22** | ⏸️ **C5 冻结 100 条一次性生成（4090，未启动）**：2026-09-20 只读核卡成功，四卡均 5,716–5,719 MiB / 24,564 MiB、28–32% util，不能判空闲；随后只读查权重路径时 ssh reset，按三态规则是连接失败，不是“权重不存在”。未调用模型、无 raw/output | C-21 ✅ + 空闲 4090 + 权重路径复核 + 远端命令事前披露 | **卡【算力/路径】**；100/100 raw 后 parsed 成功或失败均封存；无 prompt repair/rerun；人工盲审仍是独立门 | R1 generation/raw/report |
+| **C-23** | **D4 第一性原理目标树与阶段门冻结**：本轮只推进 Ch3；C5 的 C-22 暂停排队但不取消。当前最低过线是严格超过同协议最强锚，论文有效目标是达到预注册最小有意义增益，并随新增同协议公开对手自动抬高 | 作者 2026-09-20 “一次只做一个章节、小步推进” | `results/PHASE_R1.md` §25 列出最终目标、必须条件、输入/机制/结果四级中间指标、失败日志；纠正“论文两条 causal rule”的错误归属 | `results/PHASE_R1.md` §25 |
+| **C-24** | **D4 五折关系输入执行链**：给关系训练器增加独立的 D4 哈希绑定；每折只物化 train+selection-dev，evaluation 不进入训练源；冻结 official-joint 配方并从 causal-family checkpoint 导出全候选 posterior | C-17/C-19 + C-23 | targeted tests、三件套全绿；旧 P1 绑定测试不变；dry-run 命令中 evaluation manifest 只出现在 posterior dump，不出现在 trainer | `scripts/run_d4_relation_crossfit.py` + protocol tests |
+| **C-25** | **D4 五折 posterior 汇总与输入质量门**：合并 G-16 五折并独立重算关系质量与校准 | G-16 | 2,913 docs / 73,939 mentions / 2,532,394 ordered pairs 恰好一次；无 gold 字段；causal 正类 F1 ≥`.300` 且三类 Brier 优于 evaluation prevalence no-skill；否则停在输入层，不把垃圾图归因给 D4 机制 | aggregate posterior + input-quality report |
+| **C-26** | **D4 predicted-causal phase contract**：把两项一致性中介、三臂唯一差异、稀有类护栏、配对 bootstrap 和停止条件冻结 | C-25 | full / unchanged full-context base / degree+direction+subtype+confidence-preserving rewiring 三臂；目标与 §25 逐项一致；不读方法结果后改门 | 新 D4 phase contract + preflight |
+| **C-27** | **D4 uncertainty-gated residual 实现与本地门** | C-26 | 无边/低置信度时残差严格趋零；三臂参数与预算一致；ID/schema/置换/梯度/聚合测试通过，三件套全绿 | code + tests + CPU smoke |
 
-裁决 ⑤ 的 CPU 准入队列 **C-13 → C-21 已完成**；C-22 因 4090 占用与权重路径复核中断而未启动。
-D4 仍等待真实 cross-fit posterior，C5 仍等待冻结盲审集上的生成质量结果；A4 因新颖性阻断而不立项。
-两条保留路线在真实输入存在前都不得创建方法训练任务。
+作者已把活动队列改为 **D4 单章：C-23 → C-24 → G-15 → G-16 → C-25 → C-26 → C-27 →
+G-17 → G-18**。C-22 暂停排队但不取消；A4 仍因新颖性阻断。D4 在真实输入和 C-26 phase contract
+存在前不得创建方法训练任务。
 
 **新增 C-10 的理由（2026-09-13）**：§3.4 推论 2 已经判定「第 6 章必须提前启动」，§3.2 依赖图里
 G-11a（4 个外部对手复现）也标了「提前启动」，但**它们全都要跑在同一个冻结的 evaluation unit 上**
@@ -381,6 +386,10 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 **它诊断的是量级，不是 1 点以内的差异**——backbone 不同，精细比较无效。
 
 | **G-14** | **A4 四臂 dry-run（5090 探测，数字不进主表）** —— 2026-09-13 启动。用 A4.3 那条正式命令跑满四臂 + `--aggregate`，验证产物清单、中介统计与聚合断言 | 5090 空闲 + ≤1 天授权 | 约 4–5 小时（单臂实测 56 分钟） | `DRYRUN_COMPLETE`；或抓到缺陷并记进 `results/PHASE_A.md`——**抓到就是赚到，那本该是 4090 上 2–3 GPU·day 之后才暴露的** |
+| **G-15** | **D4 relation cross-fit 单折 CUDA 冒烟**：用冻结 runner 在小数据路径验证 encoder/head 反传、causal-family checkpoint 载入和 posterior dump；不得以 smoke 分数选配方 | C-24 + 空闲 4090；事前披露 exact command | ≤30 分钟 | `device=cuda`；checkpoint/posterior metadata 完整；失败写根因后修代码，不改科研目标 |
+| **G-16** | **D4 五折真实 predicted causal posterior**：seed 13；不同 fold 可占不同空闲卡并行，不是多种子 | G-15 | 约 1.5–2 GPU·day；四卡约半天 | 五折各自 `status=complete`，evaluation 从未参与训练/选模；交 C-25 做全量覆盖与质量判定 |
+| **G-17** | **D4 新机制单折 CUDA 冒烟** | C-27 + 空闲 4090 | ≤1 小时 | 三臂均走真实 posterior；前向/反向/评测/中介产物闭环；不进主表 |
+| **G-18** | **D4 seed-13 五折三臂正式实验** | G-17 + C-26 immutable contract | 约 1.5 GPU·day | pooled OOF 主指标、五类分项、配对 bootstrap、两项一致性中介和 rewiring 负控全部落盘；按 §25 一次判定，不达标则进入第二个实质设计周期而非“全部止损” |
 
 **G-13 / G-14 共同确立的方针（作者 2026-09-13）**：4090 被占不是停工理由。
 判断一件事该不该先在 5090 上做，只问**它能不能减少那一次正式跑白跑的概率**。
@@ -767,7 +776,7 @@ A4 是 **−23.72**，都远大于 base 欠额本身。**要不要继续投，�
 
 | 章 | 新的可证伪论断 | 对准的主表/门 | 已有证据 | 与已失败家族的边界 |
 |---|---|---|---|---|
-| **D4** | **有条件保留**：预测 causal edge 的不确定性消息能否在不用 gold 图的前提下提高五类 macro-F1，并减少论文两条 causal factuality rule 的违反 | 表 3-3；五类 macro-F1 主锚 `.553995` | MAVEN-FACT 的 DMRoBERTa `47.1→49.1` 只证明 gold causal relation 有信息；本项目必须先造 2,913 篇 leakage-free posterior | 不定位 supporting word/typed cue；显式建模 predicted-edge uncertainty；rewiring 负控 |
+| **D4** | **有条件保留**：预测 causal edge 的不确定性消息能否在不用 gold 图的前提下提高五类 macro-F1，并减少按 CAUSE/PRECONDITION 语义事前定义的两项一致性违反 | 表 3-3；五类 macro-F1 主锚 `.553995` | MAVEN-FACT 的 DMRoBERTa `47.1→49.1` 只证明 gold causal relation 有信息；本项目必须先造 2,913 篇 leakage-free posterior。⚠️ 两项一致性诊断是本项目中介，不是原论文指标 | 不定位 supporting word/typed cue；显式建模 predicted-edge uncertainty；rewiring 负控 |
 | **A4** | **不立项** | — | LLMERE 已做 exact-task rationale；IJCNN 2024 已做 rationale+coref/causal graph；MRPD/CRECE 已做 counterfactual causality | 换小 backbone、把文本理由改成形式标签或保留全候选，都不足以形成实质新命题 |
 | **C5** | **有条件保留**：全候选 listwise 非对称 invariance，能否同时推开高相似非共指对并拉近低相似共指对 | 表 5-3；912-pair `.415` 精度线 + 540-pair 低相似 recall 护栏 | LLM-RCDA/ACCI 已证明 counterfactual/trigger bias 的问题；本文只主张它们没做的 within-document 全候选双向约束与 pairing-shuffle 证伪 | 不用 role residual；也不把 plain counterfactual augmentation 当创新，`data_only` 必须单列 |
 

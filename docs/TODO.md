@@ -5,15 +5,26 @@
 
 ## 当前正式活动阶段
 
-**2026-09-20 裁决 ⑤ 已把重心重新放回三个方法章，但只放开 R1 准入，不等于直接上卡。**
-旧 typed cues / pair evidence / role compatibility 三个失败家族继续封存；本轮从论文机制、数据、协议、代码和
-power 重新筛选实质不同的方案。权威数字与完整证据见 `results/PHASE_R1.md` §24。
+**活动队列只剩 Ch3/D4。** 作者要求按第一性原理拆到最终目标、必达门和中间指标，一次只推进一个章节。
+目标树与阶段结果在 `results/PHASE_R1.md` §25；执行顺序是
+`C-23 → C-24 → G-15 → G-16 → C-25 → C-26 → C-27 → G-17 → G-18`。
+旧 typed cues 继续封存；失败的是机制家族，不是 D4 整章。
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **有条件保留** predicted causal uncertainty residual | C-19 posterior adapter 已完成；仍缺五折真实 predicted posterior，禁止用 gold 替代 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-23 目标树与 C-24 五折 runner 已落地；下一步 G-15 单折 CUDA 冒烟，真实 posterior 仍为 0/5 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
-| Ch5 · C5 | **有条件保留** document-complete asymmetric shortcut invariance | generator/100 requests/runner 已冻；4090 当前非空闲且路径复核中断，实际生成未启动 |
+| Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
+
+## D4 目标与当前阶段结果
+
+- 最低过线：pooled five-class macro-F1 严格高于 `.553995`；
+- 论文有效目标：当前 **≥ `.583995`**，且 full 同时超过 base/rewired、配对 bootstrap CI 下界 `>0`；
+- 稀有类护栏：PS− F1 ≥ `.352456`，Uu F1 ≥ `.166850`；
+- 输入门：2,913 docs / 2,532,394 ordered pairs 恰好一次，causal F1 ≥ `.300`，Brier 优于 no-skill；
+- 阶段成果：S0 目标/文献闭合；S1 hash-bound train→causal-checkpoint→posterior runner 已完成并通过
+  **698 passed / 29 skipped、ruff 0、smoke OK**；
+  S2 真实五折输入 **0/5**，所以尚无新方法分数。
 
 ## ✅ 已完成：C-13–C-21（2026-09-20，本地文献/CPU/代码）
 
@@ -33,10 +44,9 @@ power 重新筛选实质不同的方案。权威数字与完整证据见 `result
 
 ## 下一步
 
-1. D4：在创建五折任务前，冻结 run contract、确切命令、checkpoint/output hash 与单折 CUDA 冒烟；
-2. C5：等待 4090 空闲并复核 snapshot 路径，再事前披露 exact command 后一次性生成 100 条；当前四卡
-   5,716–5,719 MiB、28–32% util，随后 ssh reset，所以 C-22 未启动；
-3. A4：不创建实现或 GPU 任务；只有出现能越过现有论文覆盖的新命题才可回 R1。
+1. 只读核查 4090 实时卡与模型 pin；事前披露 G-15 的 exact command、cwd、预期产物；
+2. G-15 通过后直接运行 G-16 五折，再由 C-25 给出第一份真实输入质量结果；
+3. C5/A4/Ch6 本轮不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
 backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。

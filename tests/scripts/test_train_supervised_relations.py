@@ -293,3 +293,141 @@ def test_v6_protocol_binding_rejects_recomputed_label_drift(
             protocol_root=protocol,
             expected_p1_protocol_sha256=_TEST_P1_HASH,
         )
+
+
+def _d4_fixture(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> tuple[Path, Path, Path, Path]:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    source = repo / "source.jsonl"
+    records = [{"id": f"d{index}", "value": index} for index in range(1, 4)]
+    source.write_text(
+        "\n".join(json.dumps(record) for record in records) + "\n",
+        encoding="utf-8",
+    )
+    cv = repo / "cv.json"
+    cv.write_text("{}\n", encoding="utf-8")
+    manifests = {}
+    for role, ids in {
+        "train": ["d1"],
+        "selection_dev": ["d2"],
+        "evaluation": ["d3"],
+    }.items():
+        path = repo / f"{role}.json"
+        path.write_text(
+            json.dumps({"doc_count": len(ids), "doc_ids": ids}) + "\n",
+            encoding="utf-8",
+        )
+        manifests[role] = path
+    plan = repo / "plan.json"
+    plan.write_text(
+        json.dumps(
+            {
+                "schema_version": "r1-v62-d4-crossfit-plan-v1",
+                "inputs": {
+                    "ere_train": {
+                        "path": "source.jsonl",
+                        "sha256": tr.sha256_file(source),
+                    },
+                    "factuality_cv": {
+                        "path": "cv.json",
+                        "sha256": tr.sha256_file(cv),
+                    },
+                },
+                "folds": [
+                    {
+                        "fold": 1,
+                        "seed": 13,
+                        "manifests": {
+                            role: {
+                                "path": path.name,
+                                "sha256": tr.sha256_file(path),
+                                "documents": 1,
+                            }
+                            for role, path in manifests.items()
+                        },
+                    }
+                ],
+                "decision": {"protocol_design_closed": True},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    materialized = repo / "training_source.jsonl"
+    materialized.write_text(
+        "\n".join(json.dumps(record) for record in records[:2]) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(tr, "_D4_CROSSFIT_PLAN", Path("plan.json"))
+    monkeypatch.setattr(
+        tr,
+        "frozen_candidate_protocol",
+        lambda selected: {"documents": [record["id"] for record in selected]},
+    )
+    return repo, plan, materialized, manifests["evaluation"]
+
+
+def test_d4_binding_excludes_evaluation_and_binds_materialized_source(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    repo, plan, materialized, _ = _d4_fixture(monkeypatch, tmp_path)
+
+    binding = tr.validate_d4_crossfit_inputs(
+        repo_root=repo,
+        train_path=materialized,
+        train_manifest=repo / "train.json",
+        dev_manifest=repo / "selection_dev.json",
+        plan_path=plan,
+        fold=1,
+    )
+
+    assert binding["schema_version"] == "ekg.d4_relation_crossfit_binding.v1"
+    assert binding["split_counts"] == {"train": 1, "selection_dev": 1, "evaluation": 1}
+    assert binding["evaluation_used_for_training"] is False
+
+
+def test_d4_binding_rejects_evaluation_leakage_and_record_drift(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    repo, plan, materialized, _ = _d4_fixture(monkeypatch, tmp_path)
+    materialized.write_text(
+        '\n'.join(
+            json.dumps(record)
+            for record in (
+                {"id": "d1", "value": 1},
+                {"id": "d2", "value": 999},
+                {"id": "d3", "value": 3},
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match=r"does not equal train \+ selection-dev"):
+        tr.validate_d4_crossfit_inputs(
+            repo_root=repo,
+            train_path=materialized,
+            train_manifest=repo / "train.json",
+            dev_manifest=repo / "selection_dev.json",
+            plan_path=plan,
+            fold=1,
+        )
+
+    materialized.write_text(
+        json.dumps({"id": "d1", "value": 1})
+        + "\n"
+        + json.dumps({"id": "d2", "value": 999})
+        + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="drifted documents"):
+        tr.validate_d4_crossfit_inputs(
+            repo_root=repo,
+            train_path=materialized,
+            train_manifest=repo / "train.json",
+            dev_manifest=repo / "selection_dev.json",
+            plan_path=plan,
+            fold=1,
+        )

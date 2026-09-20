@@ -1606,3 +1606,83 @@ response。只接受一个 bare JSON object；markdown fence、字段增减、it
 连接失败，不能推断权重不存在或远端状态改变。当前卡【算力/路径】：等 4090 空闲且路径复核成功后，必须
 先披露 exact command；不得自行转用需逐次授权的 5090。当前 `status.json` SHA-256
 `4ac2d94715065bcbc4487b21d28f15f9912366c64e9bc7fba8da5d7711d943d9`。
+
+## 25. D4 单章目标树与执行起点（2026-09-20）
+
+作者要求停止“结果低就收口”的工作方式，改为**一次只推进一个章节**，先定最终目标和逐级指标，再持续
+实验。本节因此只处理 Ch3/D4；C5 的 C-22 暂停排队但没有取消，A4 不重开。
+
+### 25.1 第一性原理目标
+
+D4 的论文贡献不是“接入一张图”，而是证明：**在不读取 gold 关系的部署条件下，泄漏隔离的 predicted
+causal posterior 能通过可归因的 uncertainty-gated residual，实质提高五类事件事实性检测。** 最终验收按
+下列顺序，前一层不过不能拿后一层的漂亮诊断替代：
+
+| 层级 | 必须达到的目标 | 数值/判据 |
+|---|---|---|
+| 论文有效性 | 超过多个同协议公开方法，并超过当前最强冻结锚 | 动态目标 `max(.583995, 新增最强同协议公开对手 + ε)`；当前即 **macro-F1 ≥ .583995**。`.553995` 只是“赢 CLS”的最低过线，不是研究完成 |
+| 主效果 | full 的增益来自 predicted causal residual | `full > base` 且 `full > rewired`；同一 2,913-doc OOF unit 上 document-cluster paired bootstrap 的 95% CI 下界均 `> 0` |
+| 稀有类 | 不用多数类掩盖 macro-F1 | PS− F1 **≥ .352456**，Uu F1 **≥ .166850**（各为 CLS 锚减 `.030`）；五类均不得塌为 0 |
+| 机制归因 | 改善 causal/precondition 语义一致性，rewiring 消掉改善 | full 对下述两项 project-defined violation 均低于 base；rewired 不保留该改善。主分数升但中介不成立，只能写预测改进，不能写机制成立 |
+| 部署性 | 方法输入不含 gold edge、gold factuality 或 final-valid 反馈 | 五折每篇 evaluation 文档不在该折 train/selection-dev；推理输入只有文本、mention 与 predicted posterior |
+
+`.583995 = .553995 + .030`，其中 `.030` 是 R1 事前登记的 minimum meaningful effect；不是看到新方法结果
+后补出的门。若后续同协议公开对手超过它，目标自动抬高而不降低。
+
+两项机制诊断按关系子类型分别计算，**不是 MAVEN-FACT 论文指标**：在 gold-expanded relation pairs 上，
+若 target 被预测为正发生（`CT+`/`PS+`）而其 source 被预测为负发生（`CT-`/`PS-`），分别记一次
+`CAUSE` violation 或 `PRECONDITION` violation；含 `Uu` 的 pair 不进入分母。gold 关系只用于评测中介，
+绝不进入模型。这个定义会在 C-26 phase contract 中连同分母、聚合和 bootstrap 一起冻结。
+
+### 25.2 从最终目标倒推的阶段门
+
+| 阶段 | 中间产物 | 必达指标 | 当前状态 |
+|---|---|---|---|
+| S0 目标/文献闭合 | 本节、设计 brief 修订、执行主表 | exact-task 证据核到正文+代码；目标/负控/止损先于实验结果 | **完成** |
+| S1 输入执行链 | D4 hash binding + one-fold runner | evaluation 不出现在 trainer argv；official-joint recipe 任一漂移都在 CUDA 前拒绝；旧 P1 binding 不变 | **完成：698 passed / 29 skipped、ruff 0、smoke OK** |
+| S2 真实结构输入 | 五折 posterior + 质量报告 | 2,913 docs / 73,939 mentions / 2,532,394 pairs 恰好一次；causal positive F1 ≥ `.300`；三类 Brier 优于 evaluation-prevalence no-skill | **0/5 folds，下一步是 CUDA smoke** |
+| S3 方法可执行 | immutable contract + full/base/rewired | 无边或低置信度时 residual 趋零；三臂只差注册变量；单折 CUDA 闭环 | 未开始，依赖 S2 |
+| S4 阶段结果 | seed-13 五折三臂结果 | §25.1 五项一次判定；不达目标则做错误归因并进入第二个**实质不同**设计周期 | 未开始，依赖 S3 |
+| S5 确证结果 | 额外 seeds + sealed final-valid | 仅在 S4 全过且作者逐次授权后执行；mean delta、2/3 positive、CI 下界 `>0` | 未授权 |
+
+S2 的 `.300` 是输入质量止损线：本项目同协议 causal fallback 为 `.320973`，容许跨折约 2.1 个百分点，
+但不接受接近无判别力的 posterior。Brier 必须优于按 evaluation 类别比例恒定预测的 no-skill，防止一个硬标签
+F1 掩盖概率质量。若 S2 失败，修的是 relation input；不得把结果算作 D4 方法失败。
+
+### 25.3 一手文献与本项目增量
+
+- [MAVEN-FACT 正文](https://aclanthology.org/2024.findings-emnlp.651/) Table 6 的同任务证据是
+  DMRoBERTa `47.1 → 49.1`（+relation），但 +relation 使用标注关系；+argument 为 `49.3`，两者同时加入
+  反降到 `45.6`。所以本周期只做 relation，不在首轮堆 argument。
+- [官方代码](https://github.com/THU-KEG/MAVEN-FACT) commit
+  `67544719c60c6eb7587ed00a3e59df83822f6847` 的 `trainEFD/data.py` 只收集指向当前 event 的
+  `CAUSE/PRECONDITION` 前驱句，`model.py` 分别编码后拼接到 factuality representation。它证明的是
+  **gold predecessor text 有信息**，不是“预测图已经有效”，也没有定义上节两项 violation。
+- [ULGN](https://aclanthology.org/2021.emnlp-main.207/) 提供“局部不确定性 + 全局聚合”的机制先例，但任务是
+  其他数据上的 document-level same-event aggregation，不能把其分数移进 MAVEN-FACT 主表。
+- 本项目的可证伪增量是：**五折 OOF predicted CAUSE/PRECONDITION posterior + 显式 NONE/uncertainty gate +
+  保方向/子类/度/置信度多重集的 rewiring 负控**。gold relation injection 只可作 oracle，不是 deployable arm。
+
+### 25.4 已发现错误与修复
+
+| 错误 | 为什么会让结论/进度出错 | 本轮修复 |
+|---|---|---|
+| 把首个机制失败写成整章“止损” | 混淆“封存一个机制家族”和“取消研究目标” | 每个新家族仍先做 R1；seed-13 失败进入错误归因与第二个实质设计周期，不用换名/扫参复活旧家族 |
+| 把两项一致性诊断称为“论文两条规则” | 一手正文和代码没有这个指标，属于错误归因 | 改为 project-defined mediator，并在结果页给出精确定义 |
+| 现成 held-out relation 只有 291/2,913 篇却准备训练 D4 | 90% evaluation 文档没有 deployable structure，任何结果都不完整 | C-17 五折计划 + C-19 posterior API；S2 明确要求全覆盖 |
+| `train_supervised_relations.py` 只接受旧 P1 train/dev | 直接传 D4 fold 会被拒；绕过校验又会丢失 A 类口径约束 | 新增独立 D4 binding：只物化 train+selection-dev，逐记录与注册源比对，evaluation 只交给 dumper |
+| 有 posterior dumper 但没有 train→select→dump runner | “代码能导出”被误写成“输入快好了”，实际无法稳定执行五折 | `run_d4_relation_crossfit.py` 冻结配方、checkpoint 选择、命令和产物哈希 |
+
+### 25.5 当前阶段成果
+
+当前不是方法分数，而是 **S0 已完成、S1 代码闭环已建立**：新 runner 把 evaluation manifest 从训练命令中
+物理隔离；训练器会核对 cross-fit plan、原始 ERE source、三个 manifest、物化 source 的逐文档内容和固定
+official-joint 配方；完成后只使用 selection-dev 选出的 causal-family checkpoint，导出 evaluation 的完整
+三类 posterior。定向测试覆盖了 evaluation 泄漏、记录漂移、recipe/命令隔离与原子 posterior 输出。
+
+本地完整门：**698 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；R1 v6.2 一致性审计
+**PASS（36/36 requirements，41 个 referenced tasks，0 finding）**。代码 SHA-256：trainer
+`4165d51a…c0ed`，cross-fit runner `b19c8dce…f731`，两份测试分别
+`b770ebd1…f11c` / `2825cdea…b536`。修订后的 design brief SHA-256 `fa972c13…a8b1`。
+
+下一项只有 **G-15 单折 CUDA 冒烟**；通过后立即运行 G-16 五折，不再转去 Ch6/C5 做旁支分析。

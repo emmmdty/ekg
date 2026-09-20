@@ -117,6 +117,39 @@ closing their data/protocol/code/power prerequisites before any new GPU experime
 T059 only closes a code prerequisite; D4 remains input-blocked until five real evaluation dumps exist. T060/T061
 likewise cannot pass C5's generation-quality gate without T062's 100 actual edits and human blind-review decisions.
 
+## Phase 3c — D4 single-chapter execution queue
+
+**Purpose**: Follow the author's first-principles, one-chapter-at-a-time instruction. C5 T062 remains pending but is
+not active while this queue advances.
+
+- [x] **T063 [P] [RS-003]** Freeze D4's final target, mandatory conditions, intermediate metrics and error log →
+  `results/PHASE_R1.md` §25 distinguishes the minimum baseline win from the +.030 meaningful target and corrects the
+  unsupported attribution of two project diagnostics to the MAVEN-FACT paper.
+- [x] **T064 [RS-003]** Implement a hash-bound D4 relation cross-fit runner without weakening the P1 trainer binding →
+  train+selection-dev are the only materialized training records, evaluation appears only in posterior inference,
+  official-joint recipe drift fails before CUDA, and targeted plus complete local gates pass.
+- [ ] **T065 [RS-003]** Disclose and run one bounded 4090 CUDA smoke for the cross-fit train→causal checkpoint→posterior
+  path → metadata says CUDA, required artifacts exist, and no smoke score is used for recipe selection.
+- [ ] **T066 [RS-003]** Generate all five seed-13 relation cross-fit posterior dumps → each evaluation document is
+  untouched by its model's training/selection and all five immutable run records complete.
+- [ ] **T067 [RS-003]** Aggregate and quality-check the five posterior dumps → exact 2,913-document/2,532,394-pair
+  coverage, no gold fields, causal positive F1 ≥.300, and multiclass Brier beats the evaluation-prevalence no-skill
+  predictor; a failure stops at the input layer rather than being misreported as a D4 mechanism result.
+- [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067 passes → exact three arms,
+  project-defined consistency mediators, rare-class floors, bootstrap inference and stop/second-cycle branches are
+  fixed before method results exist.
+- [ ] **T069 [RS-003]** Implement the uncertainty-gated causal residual and rewiring control → no/low-confidence edges
+  drive the residual to zero, all arms keep identical base/budget, and the complete local gate passes.
+- [ ] **T070 [RS-003]** Run a bounded one-fold CUDA smoke of all three D4 arms → forward/backward/evaluator/mediator
+  outputs close without entering the thesis table.
+- [ ] **T071 [RS-003]** Run and score the five-fold, three-arm, seed-13 D4 experiment → pooled five-class macro-F1,
+  per-class guardrails, paired document bootstrap, semantic consistency mediator and rewiring falsification are all
+  published to the D4 result page; a failed first cycle triggers a materially new second design cycle, not chapter-wide
+  abandonment.
+
+**Checkpoint**: T071 is the first new D4 method-effectiveness result. Extra seeds remain separately authorized and
+cannot start merely because the cross-fit folds ran in parallel.
+
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 
 - [x] **T025 [RS-001]** Implement the C5 posterior/uncertainty sidecar, role-alignment residual, registered mediator,
@@ -189,7 +222,7 @@ This matrix records coverage without pretending that future implementation detai
 |---|---|---|
 | RS-001; SC-002 | T013, T016, T017, T020, T023–T029, T048, T051, T053, T060–T062 | C5 |
 | RS-002; SC-003 | T001–T011, T014, T018, T021, T023–T024, T030–T034, T048, T050 | A4 |
-| RS-003; SC-004 | T015, T019, T022–T024, T035–T039, T048–T049, T052, T059 | D4 |
+| RS-003; SC-004 | T015, T019, T022–T024, T035–T039, T048–T049, T052, T059, T063–T071 | D4 |
 | RS-004; SC-005 | T023–T024, T054–T058 | E3 |
 | FR-001–FR-005; SC-001 | T020–T039, T048–T058 | C5/A4/D4/E3 |
 | FR-006, FR-012 | T013–T015, T020–T024, T026, T031, T036 | Baseline fidelity |
@@ -214,8 +247,8 @@ coverage, but they cannot be checked complete until the corresponding executable
 - T023 depends on T012–T022; each T024 contract depends on T023 and that method's prerequisites, not on a fixed chapter
   order.
 - T025–T039 are completed historical failures and are not runnable; C-13–C-18/T048–T053 supersede their design queue.
-- T048–T053 and T059–T061 are complete; T062 has not started. Neither code task authorizes GPU
-  execution. Any later D4/C5 task must first be added to `EXPERIMENT_PLAN.md`; A4 currently has no such task.
+- T048–T053, T059–T061 and T063–T064 are complete; T062 has not started and is inactive while D4 is the sole
+  chapter queue. T065–T071 are declared in `EXPERIMENT_PLAN.md`; only T065 is next. A4 has no executable task.
 - T054–T057 are complete; T058 waits for explicit matched-seed authorization. T045 waits for the intended final E3
   identity, not for the withdrawn factorial.
 - Within method phases, baseline reproduction and engineering tests may run in parallel only when they do not

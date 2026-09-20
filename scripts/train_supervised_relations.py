@@ -83,6 +83,7 @@ _P1_VALIDITY_HASH_CATEGORIES = {
     "evaluator",
     "manifests",
 }
+_D4_CROSSFIT_PLAN = Path("runs/stages/R1/r1-v62-20260920/d4_crossfit_plan.json")
 
 
 def _load_json(path: Path) -> dict:
@@ -236,6 +237,174 @@ def validate_v6_protocol_inputs(
         },
         "final_valid_accessed": False,
     }
+
+
+def _records_by_document(path: Path) -> dict[str, dict]:
+    records: dict[str, dict] = {}
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line:
+            continue
+        record = json.loads(line)
+        doc_id = record.get("id")
+        if not isinstance(doc_id, str):
+            raise ValueError(f"{path}:{line_number} has no string id")
+        if doc_id in records:
+            raise ValueError(f"{path} contains duplicate document id {doc_id}")
+        records[doc_id] = record
+    if not records:
+        raise ValueError(f"{path} contains no documents")
+    return records
+
+
+def validate_d4_crossfit_inputs(
+    *,
+    repo_root: Path,
+    train_path: Path,
+    train_manifest: Path,
+    dev_manifest: Path,
+    plan_path: Path,
+    fold: int,
+) -> dict:
+    """Bind relation training to one frozen D4 cross-fit fold.
+
+    The trainer receives a materialized source containing only train and
+    selection-dev documents.  This validator proves that every materialized
+    record is byte-semantically identical to the registered MAVEN-ERE source and
+    that the omitted documents are exactly the evaluation fold.  Evaluation
+    labels therefore never enter training or checkpoint selection.
+    """
+    repo_root = repo_root.resolve()
+    train_path = train_path.resolve()
+    train_manifest = train_manifest.resolve()
+    dev_manifest = dev_manifest.resolve()
+    plan_path = plan_path.resolve()
+    expected_plan = (repo_root / _D4_CROSSFIT_PLAN).resolve()
+    if plan_path != expected_plan:
+        raise ValueError(f"D4 cross-fit plan must be {expected_plan}")
+    plan = _load_json(plan_path)
+    if plan.get("schema_version") != "r1-v62-d4-crossfit-plan-v1":
+        raise ValueError("D4 cross-fit plan schema mismatch")
+    if plan.get("decision", {}).get("protocol_design_closed") is not True:
+        raise ValueError("D4 cross-fit protocol is not closed")
+
+    inputs = plan.get("inputs", {})
+    ere_entry = inputs.get("ere_train", {})
+    source_path = (repo_root / ere_entry.get("path", "")).resolve()
+    if not source_path.is_file():
+        raise ValueError("registered D4 MAVEN-ERE source is missing")
+    if sha256_file(source_path) != ere_entry.get("sha256"):
+        raise ValueError("registered D4 MAVEN-ERE source hash mismatch")
+    cv_entry = inputs.get("factuality_cv", {})
+    cv_path = (repo_root / cv_entry.get("path", "")).resolve()
+    if not cv_path.is_file() or sha256_file(cv_path) != cv_entry.get("sha256"):
+        raise ValueError("registered D4 factuality CV hash mismatch")
+
+    rows = {int(row["fold"]): row for row in plan.get("folds", [])}
+    if fold not in rows:
+        raise ValueError(f"D4 cross-fit plan has no fold {fold}")
+    row = rows[fold]
+    role_paths: dict[str, Path] = {}
+    role_ids: dict[str, list[str]] = {}
+    for role in ("train", "selection_dev", "evaluation"):
+        entry = row["manifests"][role]
+        path = (repo_root / entry["path"]).resolve()
+        if not path.is_file():
+            raise ValueError(f"D4 fold {fold} {role} manifest is missing")
+        if sha256_file(path) != entry["sha256"]:
+            raise ValueError(f"D4 fold {fold} {role} manifest hash mismatch")
+        ids = load_manifest_ids(path)
+        if len(ids) != entry["documents"]:
+            raise ValueError(f"D4 fold {fold} {role} document count mismatch")
+        role_paths[role] = path
+        role_ids[role] = ids
+    if train_manifest != role_paths["train"]:
+        raise ValueError("D4 train manifest does not match the registered fold")
+    if dev_manifest != role_paths["selection_dev"]:
+        raise ValueError("D4 selection-dev manifest does not match the registered fold")
+
+    role_sets = {role: set(ids) for role, ids in role_ids.items()}
+    roles = tuple(role_sets)
+    for index, left in enumerate(roles):
+        for right in roles[index + 1 :]:
+            overlap = role_sets[left] & role_sets[right]
+            if overlap:
+                raise ValueError(
+                    f"D4 fold {fold} {left}/{right} overlap on {len(overlap)} documents"
+                )
+    original = _records_by_document(source_path)
+    if set().union(*role_sets.values()) != set(original):
+        raise ValueError(f"D4 fold {fold} manifests do not partition the source")
+
+    materialized = _records_by_document(train_path)
+    selected = role_sets["train"] | role_sets["selection_dev"]
+    if set(materialized) != selected:
+        raise ValueError("D4 materialized training source does not equal train + selection-dev")
+    drifted = [doc_id for doc_id in selected if materialized[doc_id] != original[doc_id]]
+    if drifted:
+        raise ValueError(
+            f"D4 materialized training source has {len(drifted)} drifted documents"
+        )
+
+    summaries = {
+        role: frozen_candidate_protocol(original[doc_id] for doc_id in role_ids[role])
+        for role in ("train", "selection_dev")
+    }
+    return {
+        "schema_version": "ekg.d4_relation_crossfit_binding.v1",
+        "fold": fold,
+        "plan_sha256": sha256_file(plan_path),
+        "factuality_cv_sha256": sha256_file(cv_path),
+        "hashes": {
+            "registered_source": sha256_file(source_path),
+            "materialized_training_source": sha256_file(train_path),
+            "train_manifest": sha256_file(role_paths["train"]),
+            "selection_dev_manifest": sha256_file(role_paths["selection_dev"]),
+            "evaluation_manifest": sha256_file(role_paths["evaluation"]),
+            "trainer": sha256_file(Path(__file__).resolve()),
+        },
+        "candidate_summaries": summaries,
+        "split_counts": {role: len(ids) for role, ids in role_ids.items()},
+        "evaluation_used_for_training": False,
+        "final_valid_accessed": False,
+    }
+
+
+def validate_d4_crossfit_recipe(args: argparse.Namespace, fold_seed: int) -> None:
+    """Reject recipe drift before a D4 cross-fit run spends GPU time."""
+    expected = {
+        "epochs": 50,
+        "lr": 1e-5,
+        "head_lr": 1e-4,
+        "warmup_steps": 200,
+        "accum_steps": 8,
+        "weight_alpha": "0.5",
+        "dev_metric": "macro",
+        "seed": fold_seed,
+        "family_loss_rates": "temporal=2,causal=4,subevent=4",
+        "coref_aux_rate": 0.4,
+        "save_best_by_family": True,
+        "relation_objective": CROSS_ENTROPY_OBJECTIVE,
+        "pair_head": LINEAR_HEAD,
+        "context_mode": "document",
+        "max_distance": None,
+        "max_length": 512,
+    }
+    drift = {
+        name: {"expected": value, "actual": getattr(args, name)}
+        for name, value in expected.items()
+        if getattr(args, name) != value
+    }
+    if not math.isinf(args.neg_ratio):
+        drift["neg_ratio"] = {"expected": "inf", "actual": args.neg_ratio}
+    if args.balance_components:
+        drift["balance_components"] = {"expected": [], "actual": args.balance_components}
+    if set(args.families) != {"causal", "subevent", "temporal"}:
+        drift["families"] = {
+            "expected": ["causal", "subevent", "temporal"],
+            "actual": args.families,
+        }
+    if drift:
+        raise ValueError(f"D4 cross-fit recipe drift: {drift}")
 
 
 def _checkpoint_hashes(output: Path) -> dict[str, str]:
@@ -494,6 +663,16 @@ def main() -> int:
         help="external trust-root hash for the registry-selected P1 protocol.json",
     )
     parser.add_argument(
+        "--d4-crossfit-plan",
+        type=Path,
+        help="frozen D4 relation cross-fit plan; mutually exclusive with P1 binding",
+    )
+    parser.add_argument(
+        "--d4-crossfit-fold",
+        type=int,
+        help="fold registered by --d4-crossfit-plan",
+    )
+    parser.add_argument(
         "--official-mention-expansion",
         action="store_true",
         help="expand event-level relations across all cluster mention pairs, matching "
@@ -577,10 +756,18 @@ def main() -> int:
         parser.error("--train-manifest and --dev-manifest must be provided together")
     if args.train_manifest and args.dev_docs:
         parser.error("--dev-docs cannot be combined with explicit manifests")
-    if bool(args.protocol_root) != bool(args.train_manifest):
-        parser.error("--protocol-root and both manifests must be provided together")
-    if bool(args.p1_protocol_sha256) != bool(args.train_manifest):
-        parser.error("--p1-protocol-sha256 and both manifests must be provided together")
+    p1_binding_requested = bool(args.protocol_root or args.p1_protocol_sha256)
+    d4_binding_requested = bool(args.d4_crossfit_plan or args.d4_crossfit_fold)
+    if bool(args.protocol_root) != bool(args.p1_protocol_sha256):
+        parser.error("--protocol-root and --p1-protocol-sha256 must be provided together")
+    if bool(args.d4_crossfit_plan) != bool(args.d4_crossfit_fold):
+        parser.error("--d4-crossfit-plan and --d4-crossfit-fold must be provided together")
+    if p1_binding_requested and d4_binding_requested:
+        parser.error("P1 and D4 protocol bindings are mutually exclusive")
+    if args.train_manifest and not (p1_binding_requested or d4_binding_requested):
+        parser.error("explicit manifests require either the P1 or D4 protocol binding")
+    if (p1_binding_requested or d4_binding_requested) and not args.train_manifest:
+        parser.error("a protocol binding requires both explicit manifests")
     if args.train_manifest and not args.official_mention_expansion:
         parser.error("v6 manifest runs require --official-mention-expansion")
 
@@ -594,26 +781,51 @@ def main() -> int:
     protocol_binding = None
     if args.train_manifest:
         try:
-            protocol_binding = validate_v6_protocol_inputs(
-                repo_root=args.repo_root,
-                train_path=args.train,
-                train_manifest=args.train_manifest,
-                dev_manifest=args.dev_manifest,
-                protocol_root=args.protocol_root,
-                expected_p1_protocol_sha256=args.p1_protocol_sha256,
-            )
+            if d4_binding_requested:
+                plan = _load_json(args.d4_crossfit_plan)
+                fold_rows = {
+                    int(row["fold"]): row for row in plan.get("folds", [])
+                }
+                if args.d4_crossfit_fold not in fold_rows:
+                    raise ValueError(
+                        f"D4 cross-fit plan has no fold {args.d4_crossfit_fold}"
+                    )
+                validate_d4_crossfit_recipe(
+                    args,
+                    int(fold_rows[args.d4_crossfit_fold]["seed"]),
+                )
+                protocol_binding = validate_d4_crossfit_inputs(
+                    repo_root=args.repo_root,
+                    train_path=args.train,
+                    train_manifest=args.train_manifest,
+                    dev_manifest=args.dev_manifest,
+                    plan_path=args.d4_crossfit_plan,
+                    fold=args.d4_crossfit_fold,
+                )
+            else:
+                protocol_binding = validate_v6_protocol_inputs(
+                    repo_root=args.repo_root,
+                    train_path=args.train,
+                    train_manifest=args.train_manifest,
+                    dev_manifest=args.dev_manifest,
+                    protocol_root=args.protocol_root,
+                    expected_p1_protocol_sha256=args.p1_protocol_sha256,
+                )
         except ValueError as exc:
             parser.error(str(exc))
         if args.output.exists() and any(args.output.iterdir()):
             parser.error(
-                f"v6 confirmation output directory is not empty: {args.output}; "
+                f"protocol-bound output directory is not empty: {args.output}; "
                 "use a new immutable run directory"
             )
 
     run_metadata = {
         "schema_version": "ekg.relation_training_run.v1",
         "status": "incomplete",
-        "confirmation_eligible": protocol_binding is not None,
+        "confirmation_eligible": (
+            protocol_binding is not None
+            and protocol_binding.get("schema_version") == "ekg.a3_protocol_binding.v1"
+        ),
         "command_argv": list(sys.argv),
         "working_directory": str(Path.cwd().resolve()),
         "protocol_binding": protocol_binding,
