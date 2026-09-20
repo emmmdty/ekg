@@ -17,8 +17,6 @@ import sys
 from pathlib import Path
 
 from ekg.core.stage_bundle import sha256_file
-from ekg.relations.data.maven_ere import load_maven_ere
-from ekg.relations.pairs import candidate_pairs
 
 
 class D4SmokeError(ValueError):
@@ -35,6 +33,9 @@ def _load(path: Path) -> dict:
 
 
 def smoke_contract(source: Path, *, seed: int = 13, dev_docs: int = 5) -> dict:
+    from ekg.relations.data.maven_ere import load_maven_ere
+    from ekg.relations.pairs import candidate_pairs
+
     docs = list(load_maven_ere(source))
     shuffled = list(docs)
     random.Random(seed).shuffle(shuffled)
