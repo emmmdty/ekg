@@ -1717,3 +1717,12 @@ SHA-256 `7bc1335a…85f6`。causal selection 的 smoke dev F1 为 0，按事前�
 fold 1/2/3/4，四折已全部越过 hash/泄漏/配方绑定并进入真实训练。当前只能声称“运行中”；在
 `status=complete` 和 posterior 独立覆盖/概率复核之前，不计为折完成，也没有 S2 分数。fold 5 在第一张卡释放后
 接续，然后立即执行 C-25 全量输入质量门；不转去 Ch6/C5 做旁支分析。
+
+为防止看到五折分数后再改尺度，C-25 汇总器已在 G-16 运行期间事前固定：每对以三类 argmax 决定硬标签；
+causal positive F1 是 CAUSE/PRECONDITION **精确子类**的 micro-F1（错子类同时计 FP+FN）；
+multiclass Brier 是每对 `sum_k (p_k-y_k)^2` 再对全体 OOF pair 取均值，no-skill 是用同一 evaluation
+总体三类比例作恒定预测。结构漂移、非冻结 seed、训练命令读到 evaluation、行中出现 gold 字段或
+候选顺序/概率不合法均 fail-fast；质量指标未过则仍原子写出 `quality_gate_failed`，不伪装成运行错误。
+新增 4 条定向测试后完整本地门为 **707 passed / 29 skipped、ruff 0、`ekg-smoke` OK**，R1 v6.2 审计
+仍 **36/36 PASS**。汇总器/测试 SHA-256 分别为 `a6fd1e5e…e2951` / `55e443e0…ef2da`；它们尚未对
+正式 posterior 运行，因此没有提前制造 C-25 结果。

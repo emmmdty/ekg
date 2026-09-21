@@ -23,7 +23,8 @@
 - 稀有类护栏：PS− F1 ≥ `.352456`，Uu F1 ≥ `.166850`；
 - 输入门：2,913 docs / 2,532,394 ordered pairs 恰好一次，causal F1 ≥ `.300`，Brier 优于 no-skill；
 - 阶段成果：S0 目标/文献闭合；S1 hash-bound train→causal-checkpoint→posterior runner 已完成并通过
-  **703 passed / 29 skipped、ruff 0、smoke OK**；
+  **703 passed / 29 skipped、ruff 0、smoke OK**；C-25 汇总器已在看到五折分数前冻结，当前全门
+  **707 passed / 29 skipped、ruff 0、smoke OK**；
   S2 真实五折输入 **0/5 完成（fold 1–4 运行中）**，所以尚无新方法分数。
 
 ## ✅ 已完成：C-13–C-21（2026-09-20，本地文献/CPU/代码）
