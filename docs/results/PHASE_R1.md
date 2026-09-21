@@ -1799,3 +1799,28 @@ logits/labels 后只用 LBFGS 更新一个 temperature。这里的 selection-dev
 
 这一步能支撑的论断仅是“部署 posterior 的全局置信度尺度已/未修复”，不是 D4 方法有效。只有它过门，
 C-26 才能把概率作为 uncertainty gate 的输入。
+
+### 25.8 C-25R 实现与 selection 输入阶段成果
+
+校准实现已提交为 `078fe00`：`src/ekg/relations/calibration.py` 用 inverse-temperature 上单调的 NLL
+导数做确定性凸二分，不依赖优化器版本；`scripts/calibrate_d4_relation_posteriors.py` 绑定同折 checkpoint、
+selection manifest、raw evaluation posterior 与全部 SHA，逐行断言 argmax 不变并原子发布新 sidecar；
+`aggregate_d4_relation_crossfit.py --calibrated` 在读 evaluation gold 前验证 calibration provenance、原始 C-25
+失败报告与 prediction-count invariance。实现没有 epsilon/fallback，不覆盖原始 posterior。新增 8 条定向测试，
+本地完整门为 **715 passed / 29 skipped、ruff 0、`ekg-smoke` OK**，R1 审计仍为 **36/36 PASS**。
+
+4090 四卡空闲时并行导出 fold 1–4、随后在 GPU0 导出 fold 5；五份均为相应 checkpoint 的完整
+selection-dev candidate universe，未写 gold 字段：
+
+| fold | selection docs | ordered pairs | posterior SHA-256 | metadata SHA-256 |
+|---:|---:|---:|---|---|
+| 1 | 583 | 511,286 | `1e68f122…f95db5` | `18d98780…b2ac8` |
+| 2 | 583 | 511,878 | `a6910777…4e548` | `7fbfe2ef…0c1d4` |
+| 3 | 582 | 506,416 | `173466a1…49ccc` | `8eef262c…48fe9` |
+| 4 | 582 | 497,658 | `d11eb6cd…ec8df` | `c3704083…5ff38d` |
+| 5 | 583 | 505,156 | `c0c3370c…69990` | `d880f17d…09f28` |
+
+执行中的错误如实保留：代码 push 后，4090 首次 `git fetch` 因 `gh-proxy.com` DNS 解析失败；随后 cpolar
+SSH 在 banner 前连续超时。按三态规则这不表示服务器或上述产物消失。为保持代码必须来自 git 的绑定，
+尚未手工散拷脚本、尚未拟合任何 `T`、也尚未读取 calibrated evaluation 指标；恢复后先确认远端 HEAD
+等于 `078fe00`，再执行五折校准。

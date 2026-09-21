@@ -12,7 +12,7 @@
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | G-16 五折已完成；C-25 为 hard-label pass / probability-quality fail。当前只做 C-25R：selection-dev-only 校准修复，C-26 仍冻结 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-25R 方法/代码已冻结，五折 selection posterior 已完成；待 4090 隧道恢复后拟合 `T` 并一次性复核 Brier，C-26 仍冻结 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -46,8 +46,8 @@
 
 ## 下一步
 
-1. 实现已冻结的 per-fold scalar temperature：selection-dev unweighted NLL 拟合，evaluation 只变换概率；
-2. 生成各折 selection-dev posterior，拟合校准器并对封存 evaluation posterior 做一次变换与质量复核；
+1. 4090 隧道恢复后先把远端 HEAD 同步到校准实现提交 `078fe00`；
+2. 对已完成的五折 selection posterior 拟合 `T`，再对封存 evaluation posterior 做一次变换与质量复核；
 3. 只有 recalibrated Brier `< .0414265581` 且 causal F1 仍 ≥`.300` 才解锁 C-26；C5/A4/Ch6 不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
