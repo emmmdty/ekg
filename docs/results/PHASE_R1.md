@@ -2080,3 +2080,36 @@ cost-aware 判正边为 `68,821 / 65,626 / 61,763 / 69,985 / 78,994`，占各折
 
 ⇒ C-27b 完成。C-27 的实现现在有三份可用的结构输入（train / selection-dev / evaluation），
 全部来自冻结 map，全部不含 gold 字段。
+
+### 25.16 C-27 实现完成 + 两条「在方法结果之前」的实测（2026-09-22）
+
+实现（`17af438` / `5018d3d` / `f8e...` 见 git）：`src/ekg/factuality/causal_residual.py` 是三臂共用的
+机制层；`scripts/train_d4_predicted_causal.py`（训练，evaluation manifest **不进 argv**）、
+`evaluate_d4_predicted_causal.py`（独立进程只载入已完成 checkpoint 打分 + 两项中介）、
+`run_d4_predicted_causal.py`（复用 `run_r1_factuality_oof` 的 fold 校验，另验三份 sidecar 出自
+**同一张冻结 Dirichlet map**）、`smoke_d4_predicted_causal.py`（不加载 torch 的全链路 CPU 冒烟）。
+本地 pytest 全绿 / 29 skipped、ruff 0、`ekg-smoke` OK；4090 端 23/23 定向测试通过（含两条只有装了
+torch 才跑得到的零极限与梯度断言）。
+
+**批处理口径的唯一偏离，先说清楚。** 冻结 CLS 锚把全部 mention 打散成一条流按 32 条成批；
+residual 需要 in-neighbour 与目标 mention 同处一步，所以这里改为**按文档打包到同样 32 条 mention
+的预算**。这是与锚**唯一**的配方差异，`epochs/lr/alpha/max_length/seed` 全部沿用，且 **base 臂
+照付同样的代价**，所以三臂之间仍是单变量对照；base 与锚 `.553995` 的任何差距要如实报，不得
+拿来抵消机制的增量。
+
+**实测一：CPU 冒烟在真实数据上打穿了第一版负控。** fold-1 文档 `002383d0…dac3` 让
+out-stub/in-stub 重配对连续 1,000 次都撞上自环或重复边。改为 **double-edge swap** 后按构造保度、
+必然终止。这条正是「本地全绿不代表能跑」的又一例——它只有在真实 sidecar 上才暴露。
+
+**实测二（两条必须写进契约的参照线，都在任何方法数字之前）。** fold 1 全 583 篇：
+
+| 量 | 实测 | 读法 |
+|---|---|---|
+| rewiring 混合上限 | 预算 10×\|E\| 时 **40.53%** 边保持同一 `(head,tail,subtype)`；50× **40.98%**、200× **41.27%** | **链已混匀，~41% 是度序列逼出来的**；`rewired` 是**保守**负控，最多打散约 59% 的边。`full > rewired` 不显著也可能是控制臂太像 full |
+| 中介的 gold 地板 | 把 gold factuality 代入同一计数器：CAUSE **`.003602`**（11/3,054）、PRECONDITION **`.007744`**（59/7,619） | 约束**不是恒真但接近恒真** ⇒ 中介应读作「离地板多远」；⚠️ 也因此**中介与预测错误率高度相关，不是独立于主指标的第二条证据** |
+
+顺带记下 fold-1 evaluation 的标签分布：CT+ 13,947 / PS+ 453 / CT− 299 / PS− 57 / **Uu 24**（共 14,780）。
+**Uu 在单折只有 24 个实例**，其 F1 的逐折方差必然很大，这是护栏 `Uu ≥ .166850` 只在 pooled 上判的原因。
+
+⇒ C-27 完成。两条参照线已写进 `docs/phases/PHASE_D4_predicted_causal_residual.md`，
+下一步是 G-17 单折三臂 CUDA 冒烟。
