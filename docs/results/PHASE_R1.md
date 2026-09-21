@@ -1726,3 +1726,6 @@ multiclass Brier 是每对 `sum_k (p_k-y_k)^2` 再对全体 OOF pair 取均值�
 新增 4 条定向测试后完整本地门为 **707 passed / 29 skipped、ruff 0、`ekg-smoke` OK**，R1 v6.2 审计
 仍 **36/36 PASS**。汇总器/测试 SHA-256 分别为 `a6fd1e5e…e2951` / `55e443e0…ef2da`；它们尚未对
 正式 posterior 运行，因此没有提前制造 C-25 结果。
+冻结 gold 总体经独立两条路（loader 的 official mention expansion 与 candidate-protocol summary）
+交叉核对为 NONE **2,479,036** / CAUSE **14,289** / PRECONDITION **39,069**；因此事前 no-skill
+multiclass Brier 是 **0.0414265581**。这是从冻结 gold 计算的评测尺度，不是模型结果。
