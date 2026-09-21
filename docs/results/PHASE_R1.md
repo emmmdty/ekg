@@ -1729,3 +1729,17 @@ multiclass Brier 是每对 `sum_k (p_k-y_k)^2` 再对全体 OOF pair 取均值�
 冻结 gold 总体经独立两条路（loader 的 official mention expansion 与 candidate-protocol summary）
 交叉核对为 NONE **2,479,036** / CAUSE **14,289** / PRECONDITION **39,069**；因此事前 no-skill
 multiclass Brier 是 **0.0414265581**。这是从冻结 gold 计算的评测尺度，不是模型结果。
+
+2026-09-21 11:02–11:10，fold 1–4 依次完成；重新流式读取每个 posterior 后独立核对为：
+
+| fold | documents | ordered pairs | causal selection-dev best (epoch) | posterior SHA-256 |
+|---:|---:|---:|---:|---|
+| 1 | 583 | 505,156 | .320918 (47) | `7746f3a4…0844e` |
+| 2 | 583 | 511,286 | .310070 (34) | `1ce6d1b3…f78f6` |
+| 3 | 583 | 511,878 | .288650 (44) | `efedfe88…dacbb` |
+| 4 | 582 | 506,416 | .307318 (22) | `3959df80…81c02` |
+
+四折均为 `status=complete`，共 **2,331 篇 / 2,034,736 对**，实算 SHA 与 run metadata 逐折相符。
+selection-dev 数字只是冻结 checkpoint 选择记录，不是 OOF S2 质量分；特别是 fold 3 低于 `.300`，
+不做隐藏或单折补救。13:58 已在 GPU1 用同一冻结命令启动 fold 5；当前 G-16 **4/5**，
+C-25 仍未运行。
