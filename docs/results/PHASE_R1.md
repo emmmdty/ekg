@@ -2050,3 +2050,33 @@ ESC `19.6` 那次切分泄漏完全相同，按 A 类口径处理，不按「影
 再用**同一张已冻结的 fold map** 做 Dirichlet 变换。selection-dev 侧的 posterior 已存在（C-25R 阶段产出，
 同一 checkpoint），无需重跑。这一步不训练任何模型、不读 evaluation、不改 map 参数，
 沿用 `dump_relation_causal_posteriors.py` 与 `formalize_d4_dirichlet_posteriors.py` 原样调用。
+
+### 25.15 C-27b 结构输入补齐完成（2026-09-22）
+
+按 §25.14 的裁定，用**每折自己的** causal checkpoint（与 evaluation sidecar 同一份，hash 逐项一致）
+在该折 `train.json` 上 dump raw posterior，再用**同一张已冻结的 fold map** 做 Dirichlet 变换；
+selection-dev 侧沿用 C-25R 阶段已有的 raw posterior，只补做变换。四卡并行，五折 dump 合计约
+**2 分钟**（00:55:19–00:57:21），变换为纯 CPU。
+
+| fold | train docs | train ordered pairs | train sidecar SHA-256 | selection sidecar SHA-256 |
+|---:|---:|---:|---|---|
+| 1 | 1,747 | 1,515,952 | `34994dcb…3082d9` | `5c999b0f…8c6f39` |
+| 2 | 1,747 | 1,509,230 | `7adbfcdf…62fa33` | `22810075…8abe50` |
+| 3 | 1,748 | 1,514,100 | `94bef68e…ec9bee` | `79f05967…39a861` |
+| 4 | 1,749 | 1,528,320 | `17aeb36e…74cae3` | `3827dfe4…ad777f` |
+| 5 | 1,748 | 1,529,580 | `d3f4a4f8…11abeb` | `73ad35ff…8cc7e6` |
+
+**逐折核对：三个 target 的 map 参数（coefficients / intercept / iterations）与 §25.13 已封存的
+evaluation map 逐位相同**，所以三份 sidecar 出自同一张冻结映射，不是三次拟合。
+
+顺带量到一条对 §25.14 的 in-sample 乐观有用的事实：**边率几乎没有被 in-sample 抬高**。train 侧
+cost-aware 判正边为 `68,821 / 65,626 / 61,763 / 69,985 / 78,994`，占各折候选的
+`4.54% / 4.35% / 4.08% / 4.58% / 5.16%`；evaluation 侧同口径是 `4.52% / 4.53% / 4.08% / 4.53% / 4.96%`。
+⇒ in-sample 的差异不体现在**边的数量**上，只可能体现在**边的准确率**上；这一条在 G-18 结果里
+必须和下游分数一起读，不能据此声称「不存在 in-sample 乐观」。
+
+跨章 ID 对齐也已实测：MAVEN-ERE 与 MAVEN-FACT 的 **2,913 篇文档 mention ID 集合逐篇完全相同
+（0 篇不一致）**，所以 sidecar 的边可以直接落到 factuality mention 上，无需任何映射或回退。
+
+⇒ C-27b 完成。C-27 的实现现在有三份可用的结构输入（train / selection-dev / evaluation），
+全部来自冻结 map，全部不含 gold 字段。
