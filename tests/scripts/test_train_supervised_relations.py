@@ -385,7 +385,7 @@ def test_d4_binding_excludes_evaluation_and_binds_materialized_source(
         train_path=materialized,
         train_manifest=repo / "train.json",
         dev_manifest=repo / "selection_dev.json",
-        model_path=repo / "model",
+        model_path=str(repo / "model"),
         plan_path=plan,
         fold=1,
     )
@@ -418,7 +418,7 @@ def test_d4_binding_rejects_evaluation_leakage_and_record_drift(
             train_path=materialized,
             train_manifest=repo / "train.json",
             dev_manifest=repo / "selection_dev.json",
-            model_path=repo / "model",
+            model_path=str(repo / "model"),
             plan_path=plan,
             fold=1,
         )
@@ -436,7 +436,7 @@ def test_d4_binding_rejects_evaluation_leakage_and_record_drift(
             train_path=materialized,
             train_manifest=repo / "train.json",
             dev_manifest=repo / "selection_dev.json",
-            model_path=repo / "model",
+            model_path=str(repo / "model"),
             plan_path=plan,
             fold=1,
         )
@@ -454,7 +454,7 @@ def test_d4_binding_rejects_relation_model_drift(
             train_path=materialized,
             train_manifest=repo / "train.json",
             dev_manifest=repo / "selection_dev.json",
-            model_path=repo / "model",
+            model_path=str(repo / "model"),
             plan_path=plan,
             fold=1,
         )

@@ -1673,6 +1673,7 @@ F1 掩盖概率质量。若 S2 失败，修的是 relation input；不得把结�
 | 修复后 dry-run 仍在 `smoke_contract()` 超时 | 只需冻结文档 ID 和候选对数，却经 `ekg.relations` 包入口加载整条关系流水线；这把纯计数错误地绑定到服务器重依赖初始化 | 合约改为直接读冻结 JSONL，以每篇事件 mention 数计算 `n(n-1)`；与既有 loader 交叉核验为相同 5 篇、**5,198** 对，并新增精确回归断言 |
 | 4090 的 T064/T065 定向测试缺少 `d4_crossfit_plan.json` | 计划位于 gitignored `runs/`，代码经 git 同步不等于运行资产已同步；若只等空卡，G-16 会在训练前直接 `FileNotFoundError` | 枚举计划引用的两份语料、CV 总表与 15 个 manifest，确认本地/4090 SHA-256 全部一致；只补传计划文件并双端核为 `d8399cd4…1678b3`，4090 端 CPU 定向测试 **20/20 passed** |
 | 正式 cross-fit 只记录模型文件哈希，不拒绝错误 backbone | 事后知道“用了另一个模型”不能挽救五折 posterior；模型身份漂移会污染全部 S2 输入和后续 D4 因果归因 | 新增 v2 计划，事前绑定 `71be7419…c961ea9`；runner、trainer、G-15 smoke 三个入口都用规范内容摘要 fail-fast。4090 六文件实算命中该 pin，定向测试 **30/30 passed** |
+| G-16 fold 1/2 首启在训练前报 `str.is_dir` | 新 validator 的单测只传 `Path`，但 trainer CLI 的 `--model` 是字符串；G-15 又不走 D4 trainer binding，所以两层检查都漏掉真实 CLI 类型边界 | validator 入口统一转成 resolved `Path`，回归测试改传字符串；失败发生在 CUDA 分配前，目录/日志归档为 `failed-model-path-type` 后用同一冻结命令重跑 |
 | 现成 held-out relation 只有 291/2,913 篇却准备训练 D4 | 90% evaluation 文档没有 deployable structure，任何结果都不完整 | C-17 五折计划 + C-19 posterior API；S2 明确要求全覆盖 |
 | `train_supervised_relations.py` 只接受旧 P1 train/dev | 直接传 D4 fold 会被拒；绕过校验又会丢失 A 类口径约束 | 新增独立 D4 binding：只物化 train+selection-dev，逐记录与注册源比对，evaluation 只交给 dumper |
 | 有 posterior dumper 但没有 train→select→dump runner | “代码能导出”被误写成“输入快好了”，实际无法稳定执行五折 | `run_d4_relation_crossfit.py` 冻结配方、checkpoint 选择、命令和产物哈希 |
@@ -1686,8 +1687,8 @@ official-joint 配方；完成后只使用 selection-dev 选出的 causal-family
 
 本地完整门：**703 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；R1 v6.2 一致性审计
 **PASS（36/36 requirements，41 个 referenced tasks，0 finding）**。代码 SHA-256：trainer
-`6dc0cd76…1dd3`，cross-fit runner `ea888752…9218`，两份测试分别
-`589bbce6…6fc2` / `b6f66804…e589`。CUDA smoke runner/test 分别为 `6ba85e40…8957` /
+`d0028ead…6175`，cross-fit runner `ea888752…9218`，两份测试分别
+`cacc079e…d98e` / `b6f66804…e589`。CUDA smoke runner/test 分别为 `6ba85e40…8957` /
 `58e7f5ca…1e44`；它固定 30-doc fixture、1 epoch、5-doc/5,198-pair posterior，分数不进入选模或主表。
 修订后的 design brief SHA-256 `fa972c13…a8b1`。
 

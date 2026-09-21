@@ -263,7 +263,7 @@ def validate_d4_crossfit_inputs(
     train_path: Path,
     train_manifest: Path,
     dev_manifest: Path,
-    model_path: Path,
+    model_path: Path | str,
     plan_path: Path,
     fold: int,
 ) -> dict:
@@ -279,6 +279,7 @@ def validate_d4_crossfit_inputs(
     train_path = train_path.resolve()
     train_manifest = train_manifest.resolve()
     dev_manifest = dev_manifest.resolve()
+    model_path = Path(model_path).resolve()
     plan_path = plan_path.resolve()
     expected_plan = (repo_root / _D4_CROSSFIT_PLAN).resolve()
     if plan_path != expected_plan:
