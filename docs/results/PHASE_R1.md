@@ -1640,7 +1640,7 @@ causal posterior 能通过可归因的 uncertainty-gated residual，实质提高
 |---|---|---|---|
 | S0 目标/文献闭合 | 本节、设计 brief 修订、执行主表 | exact-task 证据核到正文+代码；目标/负控/止损先于实验结果 | **完成** |
 | S1 输入执行链 | D4 hash binding + one-fold runner | evaluation 不出现在 trainer argv；official-joint recipe 任一漂移都在 CUDA 前拒绝；旧 P1 binding 不变 | **完成：703 passed / 29 skipped、ruff 0、smoke OK** |
-| S2 真实结构输入 | 五折 posterior + 质量报告 | 2,913 docs / 73,939 mentions / 2,532,394 pairs 恰好一次；causal positive F1 ≥ `.300`；三类 Brier 优于 evaluation-prevalence no-skill | **0/5 folds，下一步是 CUDA smoke** |
+| S2 真实结构输入 | 五折 posterior + 质量报告 | 2,913 docs / 73,939 mentions / 2,532,394 pairs 恰好一次；causal positive F1 ≥ `.300`；三类 Brier 优于 evaluation-prevalence no-skill | **G-15 CUDA smoke 完成；真实 folds 0/5，下一步 G-16** |
 | S3 方法可执行 | immutable contract + full/base/rewired | 无边或低置信度时 residual 趋零；三臂只差注册变量；单折 CUDA 闭环 | 未开始，依赖 S2 |
 | S4 阶段结果 | seed-13 五折三臂结果 | §25.1 五项一次判定；不达目标则做错误归因并进入第二个**实质不同**设计周期 | 未开始，依赖 S3 |
 | S5 确证结果 | 额外 seeds + sealed final-valid | 仅在 S4 全过且作者逐次授权后执行；mean delta、2/3 positive、CI 下界 `>0` | 未授权 |
@@ -1699,5 +1699,11 @@ evaluation 只进入 dumper，五折预期计数分别为 505,156 / 511,286 / 51
 合计仍为 2,913 篇 / 2,532,394 对。随后发现 v1 未绑定 backbone，故在任何预测产生前修订为 v2
 （`c3b4bc47…b32d3`）；旧 v1（`d8399cd4…1678b3`）保留归档。4090 实算模型内容摘要命中
 `71be7419…c961ea9`。
-下一项仍只有 **G-15 单折 CUDA 冒烟**；空闲卡出现即按已披露命令启动，通过后立即运行 G-16 五折，
-不转去 Ch6/C5 做旁支分析。
+
+**G-15 已于 2026-09-21 在 gpu-4090 GPU1 完成**（08:58:41–08:59:13，约 32 秒）：真实 CUDA
+前向/反向、causal-family checkpoint 保存/重载和 posterior dump 闭环；`smoke.json` 为
+`status=complete`、`device=cuda`、`scientific_result=false`，SHA-256
+`068e71a7e47c5e8d6c9d4d060054b7096b6d6ae59a0e71d5ea95fef17386e564`。独立重算确认 posterior
+恰为 5 篇 / 5,198 行 / 5,198 个唯一有序对，三类概率有限、范围合法且和误差 ≤`1e-6`；posterior
+SHA-256 `7bc1335a…85f6`。causal selection 的 smoke dev F1 为 0，按事前契约**不用于选配方、不过门判定或
+论文主表**。下一项只有 **G-16 五折真实 posterior**，不转去 Ch6/C5 做旁支分析。

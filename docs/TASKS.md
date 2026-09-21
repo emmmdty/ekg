@@ -128,8 +128,9 @@ not active while this queue advances.
 - [x] **T064 [RS-003]** Implement a hash-bound D4 relation cross-fit runner without weakening the P1 trainer binding →
   train+selection-dev are the only materialized training records, evaluation appears only in posterior inference,
   official-joint recipe or `71be7419…` backbone drift fails before CUDA, and targeted plus complete local gates pass.
-- [ ] **T065 [RS-003]** Disclose and run one bounded 4090 CUDA smoke for the cross-fit train→causal checkpoint→posterior
-  path → metadata says CUDA, required artifacts exist, and no smoke score is used for recipe selection.
+- [x] **T065 [RS-003]** Disclose and run one bounded 4090 CUDA smoke for the cross-fit train→causal checkpoint→posterior
+  path → gpu-4090 GPU1 completed in about 32 seconds; metadata says CUDA, 5,198 exhaustive posterior rows and all
+  required artifacts independently rehash, and the smoke score is explicitly excluded from recipe selection.
 - [ ] **T066 [RS-003]** Generate all five seed-13 relation cross-fit posterior dumps → each evaluation document is
   untouched by its model's training/selection and all five immutable run records complete.
 - [ ] **T067 [RS-003]** Aggregate and quality-check the five posterior dumps → exact 2,913-document/2,532,394-pair

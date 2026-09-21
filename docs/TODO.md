@@ -12,7 +12,7 @@
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-23 目标树与 C-24 五折 runner 已落地；cross-fit v2 已绑定 `71be7419…c961ea9` 并在 4090 实算通过；下一步 G-15 单折 CUDA 冒烟，真实 posterior 仍为 0/5 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-23/C-24 与 G-15 CUDA smoke 已完成；cross-fit v2 绑定 `71be7419…c961ea9`；下一步 G-16 五折真实 posterior，当前 0/5 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -44,8 +44,8 @@
 
 ## 下一步
 
-1. 只读核查 4090 实时卡与模型 pin；事前披露 G-15 的 exact command、cwd、预期产物；
-2. G-15 通过后直接运行 G-16 五折，再由 C-25 给出第一份真实输入质量结果；
+1. 只读核查 4090 实时卡；事前披露每个 G-16 fold 的 exact command、cwd、预期产物；
+2. G-15 已通过；在不同空闲卡运行 G-16 folds，再由 C-25 给出第一份真实输入质量结果；
 3. C5/A4/Ch6 本轮不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
