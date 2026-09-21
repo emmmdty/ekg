@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import math
+import warnings
 from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import LogisticRegression
 
 
 @dataclass(frozen=True)
@@ -17,6 +20,15 @@ class TemperatureFit:
     inverse_temperature: float
     iterations: int
     gradient: float
+
+
+@dataclass(frozen=True)
+class DirichletFit:
+    """Parameters of ``softmax(W log(p) + b)`` multiclass calibration."""
+
+    coefficients: NDArray[np.float64]
+    intercept: NDArray[np.float64]
+    iterations: int
 
 
 def validate_probabilities(probabilities: NDArray[np.float64]) -> None:
@@ -88,6 +100,80 @@ def correct_class_weights(
         raise ValueError("class weights must be finite and positive")
     corrected = probabilities / class_weights
     return corrected / corrected.sum(axis=1, keepdims=True)
+
+
+def fit_dirichlet_calibration(
+    probabilities: NDArray[np.float64],
+    labels: NDArray[np.int64],
+    *,
+    tolerance: float = 1e-10,
+    maximum_iterations: int = 1000,
+) -> DirichletFit:
+    """Fit the full Dirichlet map with unweighted multinomial log loss."""
+    validate_probabilities(probabilities)
+    rows, classes = probabilities.shape
+    _validate_labels(labels, rows, classes)
+    if not math.isfinite(tolerance) or tolerance <= 0.0:
+        raise ValueError("tolerance must be finite and positive")
+    if maximum_iterations <= 0:
+        raise ValueError("maximum iterations must be positive")
+    if not np.array_equal(np.unique(labels), np.arange(classes)):
+        raise ValueError("Dirichlet calibration requires every class in the calibration set")
+
+    estimator = LogisticRegression(
+        penalty=None,
+        solver="lbfgs",
+        tol=tolerance,
+        max_iter=maximum_iterations,
+        fit_intercept=True,
+    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ConvergenceWarning)
+        try:
+            estimator.fit(np.log(probabilities), labels)
+        except ConvergenceWarning as exc:
+            raise ValueError("Dirichlet calibration did not converge") from exc
+    if not np.array_equal(estimator.classes_, np.arange(classes)):
+        raise ValueError("Dirichlet calibrator class order drifted")
+    coefficients = np.asarray(estimator.coef_, dtype=np.float64)
+    intercept = np.asarray(estimator.intercept_, dtype=np.float64)
+    if coefficients.shape != (classes, classes) or intercept.shape != (classes,):
+        raise ValueError("Dirichlet calibrator parameter shape drifted")
+    if not np.isfinite(coefficients).all() or not np.isfinite(intercept).all():
+        raise ValueError("Dirichlet calibrator produced non-finite parameters")
+    return DirichletFit(
+        coefficients=coefficients,
+        intercept=intercept,
+        iterations=int(estimator.n_iter_[0]),
+    )
+
+
+def dirichlet_calibrate(
+    probabilities: NDArray[np.float64], fit: DirichletFit
+) -> NDArray[np.float64]:
+    """Apply a fitted full Dirichlet calibration map."""
+    validate_probabilities(probabilities)
+    classes = probabilities.shape[1]
+    if fit.coefficients.shape != (classes, classes):
+        raise ValueError("Dirichlet coefficient shape does not match probabilities")
+    if fit.intercept.shape != (classes,):
+        raise ValueError("Dirichlet intercept shape does not match probabilities")
+    if not np.isfinite(fit.coefficients).all() or not np.isfinite(fit.intercept).all():
+        raise ValueError("Dirichlet parameters must be finite")
+    logits = np.log(probabilities) @ fit.coefficients.T + fit.intercept
+    return _softmax(logits)
+
+
+def cost_sensitive_predictions(
+    probabilities: NDArray[np.float64], class_weights: NDArray[np.float64]
+) -> NDArray[np.int64]:
+    """Apply the frozen weighted Bayes decision rule to natural probabilities."""
+    validate_probabilities(probabilities)
+    if class_weights.shape != (probabilities.shape[1],):
+        raise ValueError("class weights must have shape (classes,)")
+    if not np.isfinite(class_weights).all() or not (class_weights > 0.0).all():
+        raise ValueError("class weights must be finite and positive")
+    return np.asarray((probabilities * class_weights).argmax(axis=1), dtype=np.int64)
 
 
 def multiclass_nll(

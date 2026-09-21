@@ -3,6 +3,9 @@ import pytest
 
 from ekg.relations.calibration import (
     correct_class_weights,
+    cost_sensitive_predictions,
+    dirichlet_calibrate,
+    fit_dirichlet_calibration,
     fit_temperature,
     multiclass_nll,
     temperature_scale,
@@ -83,3 +86,45 @@ def test_class_weight_correction_rejects_invalid_weights() -> None:
 
     with pytest.raises(ValueError, match="finite and positive"):
         correct_class_weights(probabilities, np.asarray([1.0, 0.0, 2.0]))
+
+
+def test_dirichlet_calibration_recovers_multiclass_probability_distortion() -> None:
+    natural_rows = np.asarray(
+        [[0.7, 0.2, 0.1], [0.2, 0.6, 0.2], [0.1, 0.2, 0.7]],
+        dtype=np.float64,
+    )
+    raw_rows = np.square(natural_rows)
+    raw_rows /= raw_rows.sum(axis=1, keepdims=True)
+    probabilities = np.repeat(raw_rows, 100, axis=0)
+    labels = np.concatenate(
+        [
+            np.repeat(np.arange(3), (70, 20, 10)),
+            np.repeat(np.arange(3), (20, 60, 20)),
+            np.repeat(np.arange(3), (10, 20, 70)),
+        ]
+    )
+
+    fit = fit_dirichlet_calibration(probabilities, labels)
+    calibrated = dirichlet_calibrate(probabilities, fit)
+
+    assert fit.iterations < 1000
+    assert multiclass_nll(calibrated, labels) < multiclass_nll(probabilities, labels)
+    np.testing.assert_allclose(calibrated[::100], natural_rows, atol=1e-4)
+
+
+def test_dirichlet_calibration_requires_every_class() -> None:
+    probabilities = np.asarray([[0.8, 0.1, 0.1], [0.2, 0.7, 0.1]])
+    labels = np.asarray([0, 1])
+
+    with pytest.raises(ValueError, match="every class"):
+        fit_dirichlet_calibration(probabilities, labels)
+
+
+def test_cost_sensitive_predictions_are_separate_from_natural_argmax() -> None:
+    probabilities = np.asarray([[0.8, 0.15, 0.05], [0.6, 0.3, 0.1]])
+    weights = np.asarray([0.5, 4.0, 2.0])
+
+    predictions = cost_sensitive_predictions(probabilities, weights)
+
+    np.testing.assert_array_equal(probabilities.argmax(axis=1), [0, 0])
+    np.testing.assert_array_equal(predictions, [1, 1])
