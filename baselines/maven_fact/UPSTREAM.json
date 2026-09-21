@@ -1,0 +1,17 @@
+{
+  "patches": [],
+  "schema_version": "ekg.vendored_baseline.v1",
+  "upstream": {
+    "commit": "67544719c60c6eb7587ed00a3e59df83822f6847",
+    "paper": "https://aclanthology.org/2024.findings-emnlp.651/",
+    "repository": "https://github.com/THU-KEG/MAVEN-FACT"
+  },
+  "verbatim_sha256": {
+    "requirements.txt": "ff1823983527c8d9a135f9c62dabd17e269891a48712548c2f3e80a2cdc1eb00",
+    "trainEFD/README.md": "80ee83c59e224f6389312c51e123fa52747e75efc3736861c133aa04f6a4759c",
+    "trainEFD/data.py": "f7282caa8775b82b2e5a9859c27eff7ad3377102616a2110f5d89ce76b4969ed",
+    "trainEFD/model.py": "8695931b5d51589a0219c6d058c73fc0c07cc0d36364db46ab1ae877b8335402",
+    "trainEFD/train.py": "68bfcbd1102a2c721ebc6cb8f00b9b4dd3746dea865634868f6399bb433e2313"
+  },
+  "why_vendored": "gpu-4090 cannot resolve github.com, and the project rule is that code reaches the server through git. Vendoring the three files the EFD experiment needs makes every later patch a reviewable diff instead of an untracked edit on the server."
+}
