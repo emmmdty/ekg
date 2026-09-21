@@ -2471,3 +2471,39 @@ C-26 契约要求周期失败后做错误归因。归因报告
 
 ⚠️ 按 C-26 契约，oracle **不设臂**，上表只作 `results/` 里的 non-deployable 诊断行，
 **不得进主表任何通过门**，也不得与 `.583995` 相减。
+
+### 25.26 C-28 官方 EFD 代码的透明适配与启动（2026-09-22）
+
+官方实现已 vendored 进 `baselines/maven_fact/`（上游 `THU-KEG/MAVEN-FACT` `6754471`，
+逐文件原样 SHA-256 在 `UPSTREAM.json`），**为的就是让之后每一处补丁都是可审阅的 diff，
+而不是服务器上的未追踪改动**（4090 解析不了 `github.com`）。
+
+**只打了一个补丁**（`trainEFD/train.py`，`68bfcbd1…33e2313 → 362146f4…27d61a79`，CRLF 行尾保留）：
+上游每个 epoch 在 `--test_data` 上评测并报**历轮 test macro-F1 的最大值**（它保存 checkpoint 那行是
+注释掉的），这是在评测集上选模。补丁加一个**必填的** `--dev_data`，按 dev 选 epoch 并报该轮 test
+指标，同时**仍报上游那个逐轮最大值**，让两套口径的差别看得见。模型结构、分词器、特殊 token、
+优化器、损失与全部默认超参未动，`EFDDataset` 与关系/论元特征构造未动。
+
+**两行只差结构来源**，其余逐位一致：
+
+| 行 | `causal_relation` 来自 | 部署性 |
+|---|---|---|
+| `gold` | 文档自带的人工标注（论文设定） | **不可部署** |
+| `predicted` | 我们冻结的五折后验，按 mention 对提升到 event 簇对 | 可部署 |
+
+predicted 一侧**只读本折自己的**三份 sidecar（它们已覆盖全部 2,913 篇 = 1,747+583+583），
+去拿别折的 OOF 后验正是 §25.14 拒绝的那条泄漏路径——这条在适配器里是 fail-fast 的。
+fold 1 的簇级关系数：gold `1,438 CAUSE / 5,637 PRECONDITION`（evaluation），
+predicted `4,628 / 12,314`——predicted 多 2.4 倍，与 mention 级 precision `.2243` / recall `.4813` 一致。
+
+一处踩到的接口差异已修并加测试：**我们的 loader 把 mention id 命名成 `<doc>::<mention>`，
+官方 jsonl 用裸 id**，簇提升时直接 `KeyError`；现在剥前缀并校验前缀确实属于该文档。
+
+1 epoch 冒烟（fold 1 predicted）跑通：dev `.429186` / test `.429223`（两个划分确实不同，
+逐类 F1 不一样，macro 只是碰巧四位小数相同），预测 14,780 条与 fold-1 mention 数一致。
+⚠️ 冒烟里 PS− 与 Uu 都是 0——**官方用的是无类别加权的交叉熵**，而我们的锚用 `alpha=.5` 加权；
+这意味着官方两行与我们的锚**在稀有类上本就不可比**，这是它自己的配方，我们不改。
+
+正式 10 个 run（2 结构 × 5 折，`--epochs 10 --lr 1e-5 --batch_size 16 --max_length 160 --seed 13`，
+backbone 用与我们锚相同的 roberta-base pin 而非它默认的 roberta-large——这处偏离也记在这里）
+于 **07:46:20** 启动，4090 卡 0/1/2。**FR-016 状态只能是 (b)**：官方数字所在的 test 划分拿不到。
