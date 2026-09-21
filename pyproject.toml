@@ -119,6 +119,9 @@ target-version = "py310"
 src = ["src", "tests"]
 extend-exclude = [
     "data/raw",
+    # Vendored upstream code: reformatting it would destroy the verbatim SHA-256
+    # recorded in baselines/*/UPSTREAM.json, which is what makes each patch reviewable.
+    "baselines",
 ]
 
 [tool.ruff.lint]
