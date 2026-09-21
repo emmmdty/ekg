@@ -165,6 +165,12 @@ not active while this queue advances.
   `-.002495` (CI `[-.015608, +.010516]`) and `full - rewired` at `+.008080` with a CI crossing zero, so four of the
   five necessary gates failed and the mechanism is not effective. Coverage hit 2,913 documents / 73,939 mentions
   exactly and no gold edge reached a model arm.
+- [x] **T071b [RS-003]** Re-run the same three arms with the document-packing rule repaired → the repair's own
+  rationale is falsified: base moved by `.000028` (`.543166` -> `.543138`) across 910 and 1,248 optimiser steps per
+  epoch, so the step count is not the source of its `.010829` gap to the anchor. `full` rose to `.549878`, but the
+  configuration change alone moved it `+.009207` — more than the `+.006740` full-minus-base effect in the better of
+  the two runs — so the effect sits below the configuration noise floor. Both runs leave the registered consistency
+  mediators pointing the wrong way, and G-18 remains the registered result.
 
 **Checkpoint**: T071 is the first new D4 method-effectiveness result. Extra seeds remain separately authorized and
 cannot start merely because the cross-fit folds ran in parallel.
