@@ -346,6 +346,7 @@ gantt
 | **C-25R3F** | ✅ **D4 Dirichlet formal input gate 三项全过（2026-09-22）**：覆盖精确 2,913 docs / 73,939 mentions / 2,532,394 pairs；natural Brier `.035135` 比 no-skill `.041427` 低 `.006291`（门 `.0027`）且远优于 raw `.068750`；cost-aware exact-subtype F1 `.306023` 过 `.300`。⚠️ 硬判别力未提高——比 raw argmax `.308141` **低 `.002117`**，本门只证「概率可用且判别力未被牺牲」，不是 D4 机制有效；plain argmax 消融塌到 `.079122` 证明决策分离必要；fold 4 `.294609` 仍低于 `.300` | C-25R3 | 报告 SHA `fea7d3ed…1b54d4`，commit `0bd11b2`；五折 sidecar 先于 gold 封存，`gold_accessed=false`；map/权重/阈值自此冻结，不得回改 | R1 `relation_crossfit/dirichlet_quality_report.json` |
 | **C-26** | ✅ **D4 predicted-causal phase contract 已冻结（2026-09-22）**：`docs/phases/PHASE_D4_predicted_causal_residual.md`，在任何方法数字之前定死三臂（full / base / 保度·方向·子类·置信度多重集的 rewired）、边构造（`argmax w_k p_k` + 置信度即自然后验，零边零残差）、两项 project-defined 中介的分子/分母/聚合、稀有类护栏（PS− ≥`.352456`、Uu ≥`.166850`）、10,000 次 document-cluster paired bootstrap 与停止条件 | C-25R3F pass | 契约不因方法结果修改；要改先改本主表且只能在看到结果之前；oracle 不设臂 | `docs/phases/PHASE_D4_predicted_causal_residual.md` |
 | **C-27** | ✅ **D4 uncertainty-gated residual 实现与本地门完成（2026-09-22）**：机制层 + 三臂 trainer/evaluator/runner + 无 torch 的全链路 CPU 冒烟；本地三件套全绿、4090 端 23/23。**两条方法结果之前的实测已进契约**：rewiring 混合上限 ~41% 同边（预算 10×/50×/200× 分别 40.53%/40.98%/41.27%，链已混匀 ⇒ 负控偏保守）、中介 gold 地板 CAUSE `.003602` / PRECONDITION `.007744`（⇒ 中介与错误率高度相关，不算独立第二证据）| C-26 ✅ | 唯一配方偏离是按文档打包到同样 32 mention 预算，base 照付；evaluation manifest 不进 trainer argv | `src/ekg/factuality/causal_residual.py` + 四个 `*_d4_predicted_causal.py`（`results/PHASE_R1.md` §25.16）|
+| **C-28** | **用官方代码把「加关系涨 2 分」这条已发表结论在 gold 与 predicted 两种结构下各跑一次**（`THU-KEG/MAVEN-FACT` `6754471` 的 `trainEFD/train.py --add_relation`，零新机制代码）。**科研价值**：本轮只证明了「*我们的*机制在预测关系上无效」；这一条要回答的是「**领域那条结论本身**在预测关系下还成不成立」——若 gold 行复现出 `+2` 而 predicted 行归零，负结果归因章就从「我们没做成」升级为「这条路在部署条件下不成立」，对准表 3-3 与表 3-5。**可行性**：代码可运行、数据（我们的 MAVEN-FACT + 已冻结五折 sidecar）齐备、4090 空闲、无需授权。⚠️ 两处必须透明披露的适配：官方脚本在 **test 上选 epoch**（`train.py:207`，改为 dev 选模）；官方数字所在的 test 划分拿不到（FR-016 只能到 **(b)**，见 `BASELINE_ROSTER.md` §3） | G-18 判定完成 ✅ | gold 行与 predicted 行**只差结构来源**，其余逐位一致；不调它的超参、不换映射；结果只进 `results/PHASE_R1.md` 与表 3-3/3-5 | 官方代码两行 + 适配差异清单 |
 | **C-27b** | ✅ **D4 训练/选择文档的结构输入已补齐（2026-09-22）**：五折 train dump 合计 **7,597,182** ordered pairs（四卡并行约 2 分钟），train/selection-dev/evaluation 三个 target 的 map 参数**逐位相同**；边率 in-sample 4.08–5.16% vs evaluation 4.08–4.96%，说明 in-sample 乐观不在边数上；MAVEN-ERE↔MAVEN-FACT 的 2,913 篇 mention ID 集合逐篇相同（0 不一致）| C-26 ✅ | 起因是 §25.14 的泄漏路径裁定；不训练模型、不读 evaluation、不改 map | R1 `fold-*/train_dirichlet_*`、`fold-*/selection_dirichlet_*`（`results/PHASE_R1.md` §25.15）|
 
 作者已把活动队列改为 **D4 单章：C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-25R2 → C-25R3 → C-26 → C-27 →
@@ -652,13 +653,8 @@ temporal_closure_gap–R1 ρ = −0.163，拓扑边数–R1 ρ = −0.008；而 
   未获批准前不进主表、不上卡。Ch3 的五维瓶颈（`typed_cues.py:345–356`）是同一批里
   **独立**的一条，同样等裁决。
 
-- **H3（2026-09-22，G-3 前期核实产生）**：官方 `trainEFD/train.py --add_relation` 是**与我们机制最贴近的
-  已发表系统**——它把指向当前 event 的 CAUSE/PRECONDITION 前驱句拼进 factuality 表示，论文
-  Table 6 的 DMRoBERTa `47.1 → 49.1` 就是它。**同一份官方代码跑两次、只换结构来源**（gold 关系 =
-  论文设定、不可部署的 oracle 行；我们的 predicted 边 = 可部署行），会是 D4 主表上最强的一组对照，
-  且不需要任何新代码。⛔ 但它是 Gate 之间产生的想法，**不插队**：G-18 判定之后再决定是否进主表。
-  前置事实已核实：官方 test 拿不到 ⇒ 只能在 valid / 五折 OOF 上做 (b)；且官方脚本在 test 上选 epoch，
-  重跑必须改成 dev 选模并披露（见 `BASELINE_ROSTER.md` §3）。
+- ~~**H3（2026-09-22，G-3 前期核实产生）**~~ ✅ **2026-09-22 已出列，进主表 C-28**：G-18 判定完成，
+  按候补区规则可以议了；裁定与依据见 `results/PHASE_R1.md` §25.24。
 
 ## 9. 不做的事
 
