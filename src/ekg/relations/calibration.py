@@ -77,6 +77,19 @@ def scale_probability_tuple(
     return tuple(value / total for value in exponentials)
 
 
+def correct_class_weights(
+    probabilities: NDArray[np.float64], class_weights: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """Invert class-weighted categorical cross-entropy scores analytically."""
+    validate_probabilities(probabilities)
+    if class_weights.shape != (probabilities.shape[1],):
+        raise ValueError("class weights must have shape (classes,)")
+    if not np.isfinite(class_weights).all() or not (class_weights > 0.0).all():
+        raise ValueError("class weights must be finite and positive")
+    corrected = probabilities / class_weights
+    return corrected / corrected.sum(axis=1, keepdims=True)
+
+
 def multiclass_nll(
     probabilities: NDArray[np.float64], labels: NDArray[np.int64]
 ) -> float:

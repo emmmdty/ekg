@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from ekg.relations.calibration import (
+    correct_class_weights,
     fit_temperature,
     multiclass_nll,
     temperature_scale,
@@ -64,3 +65,21 @@ def test_temperature_scaling_rejects_invalid_probabilities(
 ) -> None:
     with pytest.raises(ValueError):
         temperature_scale(probabilities, inverse_temperature=1.0)
+
+
+def test_class_weight_correction_inverts_weighted_categorical_scores() -> None:
+    posterior = np.asarray([[0.90, 0.07, 0.03], [0.30, 0.20, 0.50]])
+    weights = np.asarray([0.5, 4.0, 2.0])
+    weighted = posterior * weights
+    weighted /= weighted.sum(axis=1, keepdims=True)
+
+    corrected = correct_class_weights(weighted, weights)
+
+    np.testing.assert_allclose(corrected, posterior, rtol=0.0, atol=1e-12)
+
+
+def test_class_weight_correction_rejects_invalid_weights() -> None:
+    probabilities = np.asarray([[0.8, 0.1, 0.1]])
+
+    with pytest.raises(ValueError, match="finite and positive"):
+        correct_class_weights(probabilities, np.asarray([1.0, 0.0, 2.0]))
