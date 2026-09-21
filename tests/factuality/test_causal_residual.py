@@ -81,10 +81,8 @@ def test_rewiring_preserves_degrees_and_payload_multiset() -> None:
     rewired = rewire_edges(original, fold=1, doc_id="d1")
 
     report = rewiring_diagnostics(original, rewired)
-    assert report["out_degree_preserved"] is True
-    assert report["in_degree_preserved"] is True
-    assert report["payload_multiset_preserved"] is True
-    assert report["edges"] == len(original)
+    assert report.structure_preserved is True
+    assert report.edges == len(original)
     assert all(e.head_mention_id != e.tail_mention_id for e in rewired)
 
 

@@ -43,6 +43,7 @@ __all__ = [
     "PROBABILITY_FIELDS",
     "REWIRE_NAMESPACE",
     "CausalEdge",
+    "RewiringReport",
     "build_causal_residual",
     "consistency_violations",
     "decide_edges",
@@ -193,9 +194,28 @@ def rewire_edges(edges: Sequence[CausalEdge], *, fold: int, doc_id: str) -> list
     )
 
 
+@dataclass(frozen=True)
+class RewiringReport:
+    """What the bundle has to show about one document's negative control."""
+
+    edges: int
+    out_degree_preserved: bool
+    in_degree_preserved: bool
+    payload_multiset_preserved: bool
+    identical_edges: int
+
+    @property
+    def structure_preserved(self) -> bool:
+        return (
+            self.out_degree_preserved
+            and self.in_degree_preserved
+            and self.payload_multiset_preserved
+        )
+
+
 def rewiring_diagnostics(
     original: Sequence[CausalEdge], rewired: Sequence[CausalEdge]
-) -> dict[str, object]:
+) -> RewiringReport:
     """What the bundle has to show: the control really is structure-matched.
 
     ``identical_edges`` is not a defect — a small graph can only be rewired onto
@@ -218,14 +238,14 @@ def rewiring_diagnostics(
         {(e.head_mention_id, e.tail_mention_id, e.subtype) for e in original}
         & {(e.head_mention_id, e.tail_mention_id, e.subtype) for e in rewired}
     )
-    return {
-        "edges": len(original),
-        "out_degree_preserved": original_out == rewired_out,
-        "in_degree_preserved": original_in == rewired_in,
-        "payload_multiset_preserved": payloads
+    return RewiringReport(
+        edges=len(original),
+        out_degree_preserved=original_out == rewired_out,
+        in_degree_preserved=original_in == rewired_in,
+        payload_multiset_preserved=payloads
         == sorted((e.subtype, e.confidence) for e in rewired),
-        "identical_edges": identical,
-    }
+        identical_edges=identical,
+    )
 
 
 def residual_inputs(
