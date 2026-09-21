@@ -1,5 +1,13 @@
 #!/usr/bin/env python
-"""Refit one D4 Dirichlet map on full selection and transform evaluation without gold."""
+"""Refit one D4 Dirichlet map on full selection and transform a target split without gold.
+
+The default target is the fold's evaluation split — that is the C-25R3F formal
+gate. The detector in C-27 also needs the *same frozen map* applied to its own
+train and selection-dev documents, so ``--target-role`` names which split is
+being transformed. Only ``evaluation`` may not reuse the selection manifest;
+for the other two roles the in-sample optimism is the point and is disclosed in
+``docs/results/PHASE_R1.md`` §25.14, not silently allowed.
+"""
 
 from __future__ import annotations
 
@@ -35,6 +43,8 @@ from ekg.relations.calibration import (
     dirichlet_calibrate,
     fit_dirichlet_calibration,
 )
+
+TARGET_ROLES = ("evaluation", "train", "selection_dev")
 
 
 def _flush_rows(
@@ -76,7 +86,10 @@ def formalize_fold(
     expected_selection_documents: int,
     expected_selection_pairs: int,
     expected_evaluation_pairs: int,
+    target_role: str = "evaluation",
 ) -> dict:
+    if target_role not in TARGET_ROLES:
+        raise ValueError(f"unknown target role {target_role!r}, expected {TARGET_ROLES}")
     paths = [
         source_path,
         selection_manifest_path,
@@ -121,7 +134,9 @@ def formalize_fold(
     evaluation_manifest_hash = (
         evaluation_metadata.get("inputs", {}).get("manifest", {}).get("sha256")
     )
-    if evaluation_manifest_hash == sha256_file(selection_manifest_path):
+    if target_role == "evaluation" and evaluation_manifest_hash == sha256_file(
+        selection_manifest_path
+    ):
         raise ValueError("selection and evaluation manifests must differ")
 
     selection_probabilities, labels = _load_selection(
@@ -204,6 +219,9 @@ def formalize_fold(
     metadata = {
         "schema_version": "ekg.d4_dirichlet_calibration.v1",
         "fold": fold,
+        # Kept under "evaluation" whatever the role is: the aggregator's frozen
+        # provenance check reads that key, and the formal sidecars are published.
+        "target_role": target_role,
         "method": {
             "name": "full_dirichlet_natural_posterior_with_cost_aware_decision",
             "posterior_formula": "softmax(W log(q) + b)",
@@ -292,6 +310,7 @@ def main() -> int:
     parser.add_argument("--expected-selection-documents", required=True, type=int)
     parser.add_argument("--expected-selection-pairs", required=True, type=int)
     parser.add_argument("--expected-evaluation-pairs", required=True, type=int)
+    parser.add_argument("--target-role", default="evaluation", choices=TARGET_ROLES)
     args = parser.parse_args()
     metadata = formalize_fold(
         fold=args.fold,
@@ -307,6 +326,7 @@ def main() -> int:
         expected_selection_documents=args.expected_selection_documents,
         expected_selection_pairs=args.expected_selection_pairs,
         expected_evaluation_pairs=args.expected_evaluation_pairs,
+        target_role=args.target_role,
     )
     print(
         json.dumps(
