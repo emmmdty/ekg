@@ -308,6 +308,9 @@ def _d4_fixture(
     )
     cv = repo / "cv.json"
     cv.write_text("{}\n", encoding="utf-8")
+    model = repo / "model"
+    model.mkdir()
+    (model / "config.json").write_text("frozen", encoding="utf-8")
     manifests = {}
     for role, ids in {
         "train": ["d1"],
@@ -324,7 +327,7 @@ def _d4_fixture(
     plan.write_text(
         json.dumps(
             {
-                "schema_version": "r1-v62-d4-crossfit-plan-v1",
+                "schema_version": "r1-v62-d4-crossfit-plan-v2",
                 "inputs": {
                     "ere_train": {
                         "path": "source.jsonl",
@@ -333,6 +336,9 @@ def _d4_fixture(
                     "factuality_cv": {
                         "path": "cv.json",
                         "sha256": tr.sha256_file(cv),
+                    },
+                    "relation_model": {
+                        "content_sha256": tr.model_content_digest(model),
                     },
                 },
                 "folds": [
@@ -379,11 +385,12 @@ def test_d4_binding_excludes_evaluation_and_binds_materialized_source(
         train_path=materialized,
         train_manifest=repo / "train.json",
         dev_manifest=repo / "selection_dev.json",
+        model_path=repo / "model",
         plan_path=plan,
         fold=1,
     )
 
-    assert binding["schema_version"] == "ekg.d4_relation_crossfit_binding.v1"
+    assert binding["schema_version"] == "ekg.d4_relation_crossfit_binding.v2"
     assert binding["split_counts"] == {"train": 1, "selection_dev": 1, "evaluation": 1}
     assert binding["evaluation_used_for_training"] is False
 
@@ -411,6 +418,7 @@ def test_d4_binding_rejects_evaluation_leakage_and_record_drift(
             train_path=materialized,
             train_manifest=repo / "train.json",
             dev_manifest=repo / "selection_dev.json",
+            model_path=repo / "model",
             plan_path=plan,
             fold=1,
         )
@@ -428,6 +436,25 @@ def test_d4_binding_rejects_evaluation_leakage_and_record_drift(
             train_path=materialized,
             train_manifest=repo / "train.json",
             dev_manifest=repo / "selection_dev.json",
+            model_path=repo / "model",
+            plan_path=plan,
+            fold=1,
+        )
+
+
+def test_d4_binding_rejects_relation_model_drift(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    repo, plan, materialized, _ = _d4_fixture(monkeypatch, tmp_path)
+    (repo / "model/config.json").write_text("drifted", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="relation model content hash mismatch"):
+        tr.validate_d4_crossfit_inputs(
+            repo_root=repo,
+            train_path=materialized,
+            train_manifest=repo / "train.json",
+            dev_manifest=repo / "selection_dev.json",
+            model_path=repo / "model",
             plan_path=plan,
             fold=1,
         )

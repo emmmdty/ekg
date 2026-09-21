@@ -16,7 +16,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ekg.core.stage_bundle import sha256_file
+from ekg.core.stage_bundle import model_content_digest, sha256_file
 
 
 class D4SmokeError(ValueError):
@@ -56,6 +56,20 @@ def smoke_contract(source: Path, *, seed: int = 13, dev_docs: int = 5) -> dict:
             mention_count(record) * (mention_count(record) - 1) for record in selected
         ),
     }
+
+
+def validate_model(plan_path: Path, model: Path) -> str:
+    plan = _load(plan_path)
+    _require(
+        plan.get("schema_version") == "r1-v62-d4-crossfit-plan-v2",
+        "D4 cross-fit plan schema mismatch",
+    )
+    expected = plan.get("inputs", {}).get("relation_model", {}).get("content_sha256")
+    _require(isinstance(expected, str) and len(expected) == 64, "model pin is missing")
+    _require(model.is_dir(), f"model directory is missing: {model}")
+    actual = model_content_digest(model)
+    _require(actual == expected, "model content hash mismatch")
+    return actual
 
 
 def commands(
@@ -127,9 +141,8 @@ def commands(
     return train, dump
 
 
-def execute(args: argparse.Namespace, contract: dict) -> None:
+def execute(args: argparse.Namespace, contract: dict, model_digest: str) -> None:
     _require(not args.output.exists(), f"refusing to overwrite smoke: {args.output}")
-    _require(args.model.is_dir(), f"model directory is missing: {args.model}")
     args.output.mkdir(parents=True)
     manifest = args.output / "evaluation_manifest.json"
     manifest.write_text(
@@ -154,6 +167,7 @@ def execute(args: argparse.Namespace, contract: dict) -> None:
         "scientific_result": False,
         "source_sha256": sha256_file(args.source),
         "manifest_sha256": sha256_file(manifest),
+        "model_content_sha256": model_digest,
         "train_argv": train,
         "dump_argv": dump,
     }
@@ -212,20 +226,27 @@ def main() -> int:
         default=Path("data/processed/maven_ere/train_smoke.jsonl"),
     )
     parser.add_argument("--model", required=True, type=Path)
+    parser.add_argument(
+        "--plan",
+        type=Path,
+        default=Path("runs/stages/R1/r1-v62-20260920/d4_crossfit_plan.json"),
+    )
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
     args.repo = args.repo.resolve()
     args.source = args.source.resolve()
     args.model = args.model.resolve()
+    args.plan = args.plan.resolve()
     args.output = args.output.resolve()
+    model_digest = validate_model(args.plan, args.model)
     contract = smoke_contract(args.source)
     manifest = args.output / "evaluation_manifest.json"
     train, dump = commands(args, contract, manifest)
     if not args.execute:
         print(json.dumps({"contract": contract, "train_argv": train, "dump_argv": dump}, indent=2))
         return 0
-    execute(args, contract)
+    execute(args, contract, model_digest)
     print("[d4-relation-crossfit-smoke] complete")
     return 0
 

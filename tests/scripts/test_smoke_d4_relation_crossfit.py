@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
 from pathlib import Path
+
+import pytest
+
+from ekg.core.stage_bundle import model_content_digest
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
@@ -40,3 +45,29 @@ def test_smoke_contract_and_commands_are_bounded(tmp_path: Path) -> None:
     assert "--save-best-by-family" in train
     assert dump[dump.index("--checkpoint") + 1].endswith("by_family/causal")
     assert dump[dump.index("--expected-documents") + 1] == "5"
+
+
+def test_smoke_validates_the_frozen_relation_backbone(tmp_path: Path) -> None:
+    model = tmp_path / "model"
+    model.mkdir()
+    config = model / "config.json"
+    config.write_text("frozen", encoding="utf-8")
+    plan = tmp_path / "plan.json"
+    plan.write_text(
+        json.dumps(
+            {
+                "schema_version": "r1-v62-d4-crossfit-plan-v2",
+                "inputs": {
+                    "relation_model": {
+                        "content_sha256": model_content_digest(model),
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert smoke.validate_model(plan, model) == model_content_digest(model)
+    config.write_text("drifted", encoding="utf-8")
+    with pytest.raises(smoke.D4SmokeError, match="model content hash mismatch"):
+        smoke.validate_model(plan, model)

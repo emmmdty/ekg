@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 from ekg.core.protocol import load_manifest_ids
-from ekg.core.stage_bundle import sha256_file
+from ekg.core.stage_bundle import model_content_digest, sha256_file
 
 
 class D4CrossfitError(ValueError):
@@ -38,7 +38,7 @@ def _require(condition: bool, message: str) -> None:
 def validate_fold(repo: Path, plan_path: Path, fold: int) -> dict:
     plan = _load(plan_path)
     _require(
-        plan.get("schema_version") == "r1-v62-d4-crossfit-plan-v1",
+        plan.get("schema_version") == "r1-v62-d4-crossfit-plan-v2",
         "D4 cross-fit plan schema mismatch",
     )
     _require(
@@ -84,6 +84,15 @@ def validate_fold(repo: Path, plan_path: Path, fold: int) -> dict:
         "D4 cross-fit seed drifted from the single authorized seed",
     )
     return {"plan": plan, "row": row, "source": source, "manifests": paths}
+
+
+def validate_model(plan: dict, model: Path) -> str:
+    _require(model.is_dir(), f"model directory is missing: {model}")
+    expected = plan.get("inputs", {}).get("relation_model", {}).get("content_sha256")
+    _require(isinstance(expected, str) and len(expected) == 64, "model pin is missing")
+    actual = model_content_digest(model)
+    _require(actual == expected, "model content hash mismatch")
+    return actual
 
 
 def commands(
@@ -206,7 +215,7 @@ def _materialize_training_source(
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def execute(args: argparse.Namespace, fold_data: dict) -> None:
+def execute(args: argparse.Namespace, fold_data: dict, model_digest: str) -> None:
     _require(not args.output.exists(), f"refusing to overwrite run: {args.output}")
     args.output.mkdir(parents=True)
     training_source = args.output / "training_source.jsonl"
@@ -230,6 +239,7 @@ def execute(args: argparse.Namespace, fold_data: dict) -> None:
         "manifest_sha256": {
             role: sha256_file(path) for role, path in manifests.items()
         },
+        "model_content_sha256": model_digest,
         "model_files_sha256": _tree_hashes(args.model),
         "train_argv": train,
         "dump_argv": dump,
@@ -292,12 +302,13 @@ def main() -> int:
     args.model = args.model.resolve()
     args.output = args.output.resolve()
     fold_data = validate_fold(args.repo, args.plan, args.fold)
+    model_digest = validate_model(fold_data["plan"], args.model)
     training_source = args.output / "training_source.jsonl"
     train, dump = commands(args, fold_data, training_source)
     if not args.execute:
         print(json.dumps({"train_argv": train, "dump_argv": dump}, indent=2))
         return 0
-    execute(args, fold_data)
+    execute(args, fold_data, model_digest)
     print(f"[d4-relation-crossfit] complete: fold {args.fold}")
     return 0
 

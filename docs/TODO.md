@@ -12,7 +12,7 @@
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-23 目标树与 C-24 五折 runner 已落地；下一步 G-15 单折 CUDA 冒烟，真实 posterior 仍为 0/5 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-23 目标树与 C-24 五折 runner 已落地；cross-fit v2 已绑定 `71be7419…c961ea9` 并在 4090 实算通过；下一步 G-15 单折 CUDA 冒烟，真实 posterior 仍为 0/5 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -23,7 +23,7 @@
 - 稀有类护栏：PS− F1 ≥ `.352456`，Uu F1 ≥ `.166850`；
 - 输入门：2,913 docs / 2,532,394 ordered pairs 恰好一次，causal F1 ≥ `.300`，Brier 优于 no-skill；
 - 阶段成果：S0 目标/文献闭合；S1 hash-bound train→causal-checkpoint→posterior runner 已完成并通过
-  **699 passed / 29 skipped、ruff 0、smoke OK**；
+  **703 passed / 29 skipped、ruff 0、smoke OK**；
   S2 真实五折输入 **0/5**，所以尚无新方法分数。
 
 ## ✅ 已完成：C-13–C-21（2026-09-20，本地文献/CPU/代码）

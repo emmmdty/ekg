@@ -5,6 +5,10 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
+from ekg.core.stage_bundle import model_content_digest
+
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location(
     "run_d4_relation_crossfit", ROOT / "scripts/run_d4_relation_crossfit.py"
@@ -57,3 +61,22 @@ def test_materialized_source_contains_only_train_and_selection(tmp_path: Path) -
 
     ids = [json.loads(line)["id"] for line in output.read_text().splitlines()]
     assert ids == ["a", "b"]
+
+
+def test_relation_backbone_pin_rejects_content_drift(tmp_path: Path) -> None:
+    model = tmp_path / "model"
+    model.mkdir()
+    config = model / "config.json"
+    config.write_text("frozen", encoding="utf-8")
+    plan = {
+        "inputs": {
+            "relation_model": {
+                "content_sha256": model_content_digest(model),
+            }
+        }
+    }
+
+    assert crossfit.validate_model(plan, model) == model_content_digest(model)
+    config.write_text("drifted", encoding="utf-8")
+    with pytest.raises(crossfit.D4CrossfitError, match="model content hash mismatch"):
+        crossfit.validate_model(plan, model)

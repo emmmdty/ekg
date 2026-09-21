@@ -127,7 +127,7 @@ not active while this queue advances.
   unsupported attribution of two project diagnostics to the MAVEN-FACT paper.
 - [x] **T064 [RS-003]** Implement a hash-bound D4 relation cross-fit runner without weakening the P1 trainer binding →
   train+selection-dev are the only materialized training records, evaluation appears only in posterior inference,
-  official-joint recipe drift fails before CUDA, and targeted plus complete local gates pass.
+  official-joint recipe or `71be7419…` backbone drift fails before CUDA, and targeted plus complete local gates pass.
 - [ ] **T065 [RS-003]** Disclose and run one bounded 4090 CUDA smoke for the cross-fit train→causal checkpoint→posterior
   path → metadata says CUDA, required artifacts exist, and no smoke score is used for recipe selection.
 - [ ] **T066 [RS-003]** Generate all five seed-13 relation cross-fit posterior dumps → each evaluation document is

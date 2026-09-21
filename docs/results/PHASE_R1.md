@@ -1512,7 +1512,7 @@ alpha `.04819`、power `.82012`，超过 80% 目标。
 
 | 任务 | 已冻结的内容 | 仍缺什么 | SHA-256 |
 |---|---|---|---|
-| C-17 · D4 cross-fit | 五折 train / selection / evaluation 两两互斥；2,913 evaluation docs 每篇恰好一次；预期输出合计 73,939 mentions / 2,532,394 ordered pairs；每对必须给 `p_none/p_cause/p_precondition` 且和为 1 | posterior dump adapter、CPU/CUDA smoke、五折真实 predicted posterior；当前状态 `plan_frozen_predictions_missing` | `d8399cd47d43cd4343d1bd70973a42b642b5ae481af6c41be297e0b9191678b3` |
+| C-17 · D4 cross-fit | 五折 train / selection / evaluation 两两互斥；2,913 evaluation docs 每篇恰好一次；预期输出合计 73,939 mentions / 2,532,394 ordered pairs；每对必须给 `p_none/p_cause/p_precondition` 且和为 1；v2 另绑定 relation backbone `71be7419…c961ea9` | posterior dump adapter、CPU/CUDA smoke、五折真实 predicted posterior；当前状态 `plan_frozen_predictions_missing` | v2 `c3b4bc47b2d1047c4ebf5c579265ad7bdbc84f103b351986d6c5a17ffe3b32d3`（v1 `d8399cd4…1678b3` 已归档，未产生预测） |
 | C-18 · C5 generation audit | seed `260920`；hard non-coref / divergent coref 各 50 条，合并后随机盲排；总体 label preservation ≥`.95`、每层 ≥`.90`、fluency ≥`.95`、single-variable ≥`.90`；评审不可见 classifier score | 披露 generator 后对这 100 条一次性生成和盲审；同一批失败后不得修 prompt 重审 | `60b6e76334352e86e7c8f7835bde3ff382e87d4683f2b252ab5725c2eaaefbe5` |
 
 ### 24.6 当前裁决
@@ -1639,7 +1639,7 @@ causal posterior 能通过可归因的 uncertainty-gated residual，实质提高
 | 阶段 | 中间产物 | 必达指标 | 当前状态 |
 |---|---|---|---|
 | S0 目标/文献闭合 | 本节、设计 brief 修订、执行主表 | exact-task 证据核到正文+代码；目标/负控/止损先于实验结果 | **完成** |
-| S1 输入执行链 | D4 hash binding + one-fold runner | evaluation 不出现在 trainer argv；official-joint recipe 任一漂移都在 CUDA 前拒绝；旧 P1 binding 不变 | **完成：699 passed / 29 skipped、ruff 0、smoke OK** |
+| S1 输入执行链 | D4 hash binding + one-fold runner | evaluation 不出现在 trainer argv；official-joint recipe 任一漂移都在 CUDA 前拒绝；旧 P1 binding 不变 | **完成：703 passed / 29 skipped、ruff 0、smoke OK** |
 | S2 真实结构输入 | 五折 posterior + 质量报告 | 2,913 docs / 73,939 mentions / 2,532,394 pairs 恰好一次；causal positive F1 ≥ `.300`；三类 Brier 优于 evaluation-prevalence no-skill | **0/5 folds，下一步是 CUDA smoke** |
 | S3 方法可执行 | immutable contract + full/base/rewired | 无边或低置信度时 residual 趋零；三臂只差注册变量；单折 CUDA 闭环 | 未开始，依赖 S2 |
 | S4 阶段结果 | seed-13 五折三臂结果 | §25.1 五项一次判定；不达目标则做错误归因并进入第二个**实质不同**设计周期 | 未开始，依赖 S3 |
@@ -1672,6 +1672,7 @@ F1 掩盖概率质量。若 S2 失败，修的是 relation input；不得把结�
 | G-15 的 `--help` 预检在服务器挂起 | 冒烟入口在参数解析前导入关系数据依赖，使轻量预检进入不必要的重初始化，既拖慢排障，也可能被误判为 CUDA 任务已经启动 | 将关系数据与候选对导入移入 `smoke_contract()`；`--help` 不再加载训练依赖，真正执行时的口径不变 |
 | 修复后 dry-run 仍在 `smoke_contract()` 超时 | 只需冻结文档 ID 和候选对数，却经 `ekg.relations` 包入口加载整条关系流水线；这把纯计数错误地绑定到服务器重依赖初始化 | 合约改为直接读冻结 JSONL，以每篇事件 mention 数计算 `n(n-1)`；与既有 loader 交叉核验为相同 5 篇、**5,198** 对，并新增精确回归断言 |
 | 4090 的 T064/T065 定向测试缺少 `d4_crossfit_plan.json` | 计划位于 gitignored `runs/`，代码经 git 同步不等于运行资产已同步；若只等空卡，G-16 会在训练前直接 `FileNotFoundError` | 枚举计划引用的两份语料、CV 总表与 15 个 manifest，确认本地/4090 SHA-256 全部一致；只补传计划文件并双端核为 `d8399cd4…1678b3`，4090 端 CPU 定向测试 **20/20 passed** |
+| 正式 cross-fit 只记录模型文件哈希，不拒绝错误 backbone | 事后知道“用了另一个模型”不能挽救五折 posterior；模型身份漂移会污染全部 S2 输入和后续 D4 因果归因 | 新增 v2 计划，事前绑定 `71be7419…c961ea9`；runner、trainer、G-15 smoke 三个入口都用规范内容摘要 fail-fast。4090 六文件实算命中该 pin，定向测试 **30/30 passed** |
 | 现成 held-out relation 只有 291/2,913 篇却准备训练 D4 | 90% evaluation 文档没有 deployable structure，任何结果都不完整 | C-17 五折计划 + C-19 posterior API；S2 明确要求全覆盖 |
 | `train_supervised_relations.py` 只接受旧 P1 train/dev | 直接传 D4 fold 会被拒；绕过校验又会丢失 A 类口径约束 | 新增独立 D4 binding：只物化 train+selection-dev，逐记录与注册源比对，evaluation 只交给 dumper |
 | 有 posterior dumper 但没有 train→select→dump runner | “代码能导出”被误写成“输入快好了”，实际无法稳定执行五折 | `run_d4_relation_crossfit.py` 冻结配方、checkpoint 选择、命令和产物哈希 |
@@ -1683,11 +1684,11 @@ F1 掩盖概率质量。若 S2 失败，修的是 relation input；不得把结�
 official-joint 配方；完成后只使用 selection-dev 选出的 causal-family checkpoint，导出 evaluation 的完整
 三类 posterior。定向测试覆盖了 evaluation 泄漏、记录漂移、recipe/命令隔离与原子 posterior 输出。
 
-本地完整门：**699 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；R1 v6.2 一致性审计
+本地完整门：**703 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；R1 v6.2 一致性审计
 **PASS（36/36 requirements，41 个 referenced tasks，0 finding）**。代码 SHA-256：trainer
-`4165d51a…c0ed`，cross-fit runner `b19c8dce…f731`，两份测试分别
-`b770ebd1…f11c` / `2825cdea…b536`。CUDA smoke runner/test 分别为 `cba7dc83…0e94` /
-`7def7bd4…a865`；它固定 30-doc fixture、1 epoch、5-doc/5,198-pair posterior，分数不进入选模或主表。
+`6dc0cd76…1dd3`，cross-fit runner `ea888752…9218`，两份测试分别
+`589bbce6…6fc2` / `b6f66804…e589`。CUDA smoke runner/test 分别为 `6ba85e40…8957` /
+`58e7f5ca…1e44`；它固定 30-doc fixture、1 epoch、5-doc/5,198-pair posterior，分数不进入选模或主表。
 修订后的 design brief SHA-256 `fa972c13…a8b1`。
 
 4090 端 `c75afdd` 的 dry-run 已在 **1.40 秒**返回同一 5 篇文档与 5,198 对，且输出目录、日志均不存在；
@@ -1695,6 +1696,8 @@ official-joint 配方；完成后只使用 selection-dev 选出的 causal-family
 利用率 95–100%，不满足“不挤占”的操作门；5090 被他人常驻 vLLM 占 26.8/32.6 GiB，也不是可行替代。
 补齐 gitignored cross-fit plan 后，4090 端三份定向测试 **20/20 passed**；五折只读命令审计逐折通过，
 evaluation 只进入 dumper，五折预期计数分别为 505,156 / 511,286 / 511,878 / 506,416 / 497,658 对，
-合计仍为 2,913 篇 / 2,532,394 对。
+合计仍为 2,913 篇 / 2,532,394 对。随后发现 v1 未绑定 backbone，故在任何预测产生前修订为 v2
+（`c3b4bc47…b32d3`）；旧 v1（`d8399cd4…1678b3`）保留归档。4090 实算模型内容摘要命中
+`71be7419…c961ea9`。
 下一项仍只有 **G-15 单折 CUDA 冒烟**；空闲卡出现即按已披露命令启动，通过后立即运行 G-16 五折，
 不转去 Ch6/C5 做旁支分析。

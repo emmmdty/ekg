@@ -33,6 +33,10 @@ from report_coref_error_profile import official_clusterings  # noqa: E402
 
 from ekg.nodes.coref import trigger_similarity  # noqa: E402
 
+D4_RELATION_MODEL_CONTENT_SHA256 = (
+    "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+)
+
 
 def _require(condition: bool, message: str) -> None:
     if not condition:
@@ -676,6 +680,14 @@ def _validate_partition(
 
 
 def audit_d4_crossfit_plan(args: argparse.Namespace) -> dict:
+    _require(
+        len(args.relation_model_content_sha256) == 64
+        and all(
+            character in "0123456789abcdef"
+            for character in args.relation_model_content_sha256
+        ),
+        "relation model content digest must be lowercase SHA-256",
+    )
     fact = _by_id(args.fact_train)
     ere = _by_id(args.ere_train)
     universe = set(fact)
@@ -748,13 +760,17 @@ def audit_d4_crossfit_plan(args: argparse.Namespace) -> dict:
         f"evaluation membership is not exactly once for {len(duplicates)} docs",
     )
     return {
-        "schema_version": "r1-v62-d4-crossfit-plan-v1",
+        "schema_version": "r1-v62-d4-crossfit-plan-v2",
         "inputs": {
             "fact_train": {"path": str(args.fact_train), "sha256": _sha256(args.fact_train)},
             "ere_train": {"path": str(args.ere_train), "sha256": _sha256(args.ere_train)},
             "factuality_cv": {
                 "path": str(args.factuality_cv),
                 "sha256": _sha256(args.factuality_cv),
+            },
+            "relation_model": {
+                "name": "roberta-base",
+                "content_sha256": args.relation_model_content_sha256,
             },
         },
         "identity": {
@@ -1017,6 +1033,10 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path("runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json"),
     )
     d4_plan.add_argument("--seed", type=int, default=13)
+    d4_plan.add_argument(
+        "--relation-model-content-sha256",
+        default=D4_RELATION_MODEL_CONTENT_SHA256,
+    )
     d4_plan.add_argument("--output", required=True, type=Path)
 
     c5_plan = subparsers.add_parser("c5-plan")

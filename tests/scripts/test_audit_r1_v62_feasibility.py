@@ -71,6 +71,16 @@ def test_crossfit_partition_rejects_leakage() -> None:
         audit._validate_partition({"a", "c"}, {"b"}, {"c"}, {"a", "b", "c"}, name="bad")
 
 
+def test_d4_crossfit_plan_defaults_to_frozen_relation_backbone() -> None:
+    args = audit.build_parser().parse_args(["d4-plan", "--output", "plan.json"])
+
+    assert (
+        args.relation_model_content_sha256
+        == audit.D4_RELATION_MODEL_CONTENT_SHA256
+        == "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+    )
+
+
 def test_generation_sample_is_balanced_and_deterministic() -> None:
     candidates = {
         "hard_noncoreferent": [

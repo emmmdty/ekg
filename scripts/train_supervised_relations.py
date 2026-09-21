@@ -33,6 +33,7 @@ from ekg.core.protocol import load_manifest_ids, split_docs_by_manifests
 from ekg.core.stage_bundle import (
     StageBundleError,
     is_sha256,
+    model_content_digest,
     sha256_file,
     validate_stage_bundle,
 )
@@ -262,6 +263,7 @@ def validate_d4_crossfit_inputs(
     train_path: Path,
     train_manifest: Path,
     dev_manifest: Path,
+    model_path: Path,
     plan_path: Path,
     fold: int,
 ) -> dict:
@@ -282,12 +284,19 @@ def validate_d4_crossfit_inputs(
     if plan_path != expected_plan:
         raise ValueError(f"D4 cross-fit plan must be {expected_plan}")
     plan = _load_json(plan_path)
-    if plan.get("schema_version") != "r1-v62-d4-crossfit-plan-v1":
+    if plan.get("schema_version") != "r1-v62-d4-crossfit-plan-v2":
         raise ValueError("D4 cross-fit plan schema mismatch")
     if plan.get("decision", {}).get("protocol_design_closed") is not True:
         raise ValueError("D4 cross-fit protocol is not closed")
 
     inputs = plan.get("inputs", {})
+    model_entry = inputs.get("relation_model", {})
+    expected_model_digest = model_entry.get("content_sha256")
+    if not model_path.is_dir():
+        raise ValueError("registered D4 relation model directory is missing")
+    actual_model_digest = model_content_digest(model_path)
+    if actual_model_digest != expected_model_digest:
+        raise ValueError("registered D4 relation model content hash mismatch")
     ere_entry = inputs.get("ere_train", {})
     source_path = (repo_root / ere_entry.get("path", "")).resolve()
     if not source_path.is_file():
@@ -350,7 +359,7 @@ def validate_d4_crossfit_inputs(
         for role in ("train", "selection_dev")
     }
     return {
-        "schema_version": "ekg.d4_relation_crossfit_binding.v1",
+        "schema_version": "ekg.d4_relation_crossfit_binding.v2",
         "fold": fold,
         "plan_sha256": sha256_file(plan_path),
         "factuality_cv_sha256": sha256_file(cv_path),
@@ -360,6 +369,7 @@ def validate_d4_crossfit_inputs(
             "train_manifest": sha256_file(role_paths["train"]),
             "selection_dev_manifest": sha256_file(role_paths["selection_dev"]),
             "evaluation_manifest": sha256_file(role_paths["evaluation"]),
+            "relation_model_content": actual_model_digest,
             "trainer": sha256_file(Path(__file__).resolve()),
         },
         "candidate_summaries": summaries,
@@ -799,6 +809,7 @@ def main() -> int:
                     train_path=args.train,
                     train_manifest=args.train_manifest,
                     dev_manifest=args.dev_manifest,
+                    model_path=args.model,
                     plan_path=args.d4_crossfit_plan,
                     fold=args.d4_crossfit_fold,
                 )
