@@ -113,10 +113,18 @@ FR-016 要求验证复现正确性。LLMERE **发布了自己在 official valid 
 |---|---|---|---|---|---|
 | 1 | RoBERTa+CLS（主锚） | MAVEN-FACT | ✅ | 已在预冻结五折 OOF 上验收（80 产物重哈希、折隔离、覆盖核对） | 已完成 |
 | 2 | DMRoBERTa dynamic-multi | MAVEN-FACT | ✅ | 同上 | 已完成 |
-| 3 | **MAVEN-FACT supporting-word pipeline** | MAVEN-FACT 官方划分 | ✅ `THU-KEG/MAVEN-FACT` | **可验证**：先在官方划分上复现官方论文数字（容差事前定 ±1.0 macro-F1），再转本项目五折 OOF | **(a) 可达，待做** |
+| 3 | **MAVEN-FACT 官方 EFD pipeline**（`trainEFD`，含 `--add_relation`） | MAVEN-FACT 官方划分 | ✅ `THU-KEG/MAVEN-FACT` `6754471` | ⚠️ **(a) 已核实不可达**：官方论文数字在 **test** 划分上，而 test 只经 `drive.google.com` 分发（两台服务器均不通），HF 上唯一镜像 `upasanachatterjee/maven-fact` **只有 train + validation**。⇒ 走 **(b) 透明适配**：在我们能拿到的 valid / 五折 OOF 上同码重跑，逐条列差异 | **(b)，障碍＝数据获取渠道** |
 | 4 | LLM 对照 | MAVEN-FACT 论文自带 LLM 结果 | 自建 | 可与论文 LLM 行对读 | 待建 |
 
-Ch3 是三章里保真度最容易做实的一章：官方仓库、官方划分、官方数字三者齐备。
+~~Ch3 是三章里保真度最容易做实的一章：官方仓库、官方划分、官方数字三者齐备。~~
+⚠️ **2026-09-22 一手核实推翻了这句**：官方仓库有、官方代码能跑，但**官方数字所在的 test 划分拿不到**
+（Google Drive 不通；HF 镜像只有 train+validation）。三者只齐了两者，所以 Ch3 的外部对手一律是
+**(b) 透明适配**，不是 (a)。
+
+另有一条必须在任何重跑前披露的代码级事实：官方 `trainEFD/train.py:207` 用
+**test 集的 macro-F1 选最优 epoch**（`if tst_macro_f1 > best_tst_macro_f1`）。这是在评测集上选模。
+我们同码重跑时**必须改成在 dev 上选模并明写这处改动**，也不得拿它的论文数字与我们「在 dev 上选模」
+的数字直接相减。
 
 ## 4. LLM 对照的定位（作者 2026-09-11 授权）
 

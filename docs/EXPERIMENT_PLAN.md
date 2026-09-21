@@ -628,6 +628,14 @@ temporal_closure_gap–R1 ρ = −0.163，拓扑边数–R1 ρ = −0.008；而 
   未获批准前不进主表、不上卡。Ch3 的五维瓶颈（`typed_cues.py:345–356`）是同一批里
   **独立**的一条，同样等裁决。
 
+- **H3（2026-09-22，G-3 前期核实产生）**：官方 `trainEFD/train.py --add_relation` 是**与我们机制最贴近的
+  已发表系统**——它把指向当前 event 的 CAUSE/PRECONDITION 前驱句拼进 factuality 表示，论文
+  Table 6 的 DMRoBERTa `47.1 → 49.1` 就是它。**同一份官方代码跑两次、只换结构来源**（gold 关系 =
+  论文设定、不可部署的 oracle 行；我们的 predicted 边 = 可部署行），会是 D4 主表上最强的一组对照，
+  且不需要任何新代码。⛔ 但它是 Gate 之间产生的想法，**不插队**：G-18 判定之后再决定是否进主表。
+  前置事实已核实：官方 test 拿不到 ⇒ 只能在 valid / 五折 OOF 上做 (b)；且官方脚本在 test 上选 epoch，
+  重跑必须改成 dev 选模并披露（见 `BASELINE_ROSTER.md` §3）。
+
 ## 9. 不做的事
 
 - 不恢复 24 条件 factorial、Holm 校正家族、frozen-vs-fine-tuned 同 backbone 对照；
