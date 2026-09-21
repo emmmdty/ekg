@@ -12,7 +12,7 @@
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | ✅ C-25R3F 正式输入门已过（Brier `.035135 < .041427`，低 `.006291`；cost-aware F1 `.306023`）⇒ **C-26 解锁**，当前活动小步是冻结 phase contract；输入概率 map/权重/阈值自此不得再改 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | 🟡 **G-18 五折三臂在跑**（09-22 01:23 起，4090 卡 0/1/2）。✅ C-25R3F 正式输入门已过（Brier `.035135 < .041427`，低 `.006291`；cost-aware F1 `.306023`）⇒ **C-26 解锁**，当前活动小步是冻结 phase contract；输入概率 map/权重/阈值自此不得再改 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -53,9 +53,12 @@
    还低 `.002117`**，不能写成 D4 机制有效；
 2. ✅ C-26 已冻结：`docs/phases/PHASE_D4_predicted_causal_residual.md`（三臂唯一差异、边构造、
    两项中介的分子/分母、稀有类护栏、10,000 次配对 bootstrap、停止条件），在任何方法数字之前定死；
-3. 当前活动小步是 **C-27**：实现 uncertainty-gated residual 与 rewiring 负控 + 本地门
-   （零边严格零残差、三臂逐位同预算、ID/schema/置换/梯度/聚合测试、三件套全绿）；
-4. 之后 G-17 单折 CUDA 冒烟 → G-18 五折三臂正式实验。C5/A4/Ch6 不插队。
+3. ✅ C-27b（训练侧结构输入）/ C-27（实现与本地门）/ G-17（单折三臂 CUDA 冒烟）均已完成；
+4. 🟡 **G-18 在跑**：五折三臂（full/base/rewired × fold 1–5，seed 13，12 epochs），
+   2026-09-22 01:23 起占 4090 卡 0/1/2。⛔ 它跑完前不要在 4090 上 `git reset --hard`；
+5. 跑完用 `scripts/aggregate_d4_predicted_causal.py` 一次判定（门常数已从契约抄进代码并有测试核对），
+   结果写 `results/PHASE_R1.md`。不达标就做错误归因 + 回 R1 立第二个实质周期，
+   **不得**改门、扫参、换 backbone 或启动未授权多种子。C5/A4/Ch6 不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
 backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。
