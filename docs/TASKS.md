@@ -150,9 +150,12 @@ not active while this queue advances.
   2,913 docs / 2,532,394 pairs: Brier `.03513538` beat no-skill `.04142656` by `.00629118` and cost-aware F1
   `.30602311` cleared `.300`, so the gate passed; hard F1 did not improve over raw `.30814055` (−`.00211744`),
   and the plain-argmax ablation collapsed to `.07912232`. Maps, weights and thresholds are frozen from here.
-- [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067d passes → exact three arms,
-  project-defined consistency mediators, rare-class floors, bootstrap inference and stop/second-cycle branches are
-  fixed before method results exist.
+- [x] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067d passes →
+  `docs/phases/PHASE_D4_predicted_causal_residual.md` fixes the three arms (full / base / degree-, direction-,
+  subtype- and confidence-preserving rewiring), the frozen edge construction (`argmax w_k p_k`, confidence is the
+  natural posterior, zero edges imply an exactly zero residual), both project-defined mediators with numerator,
+  denominator and aggregation, the rare-class floors (PS− ≥`.352456`, Uu ≥`.166850`), 10,000 document-cluster
+  paired bootstrap resamples and the stop/second-cycle branches — all before any method result exists.
 - [ ] **T069 [RS-003]** Implement the uncertainty-gated causal residual and rewiring control → no/low-confidence edges
   drive the residual to zero, all arms keep identical base/budget, and the complete local gate passes.
 - [ ] **T070 [RS-003]** Run a bounded one-fold CUDA smoke of all three D4 arms → forward/backward/evaluator/mediator

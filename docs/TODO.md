@@ -51,9 +51,11 @@
 1. ✅ C-25R3F 正式输入门 2026-09-22 通过，报告 SHA `fea7d3ed…1b54d4`；五折 natural-posterior sidecar
    已封存，evaluation gold 只读了一次。⚠️ 它只说明概率可用，**cost-aware F1 `.306023` 比 raw `.308141`
    还低 `.002117`**，不能写成 D4 机制有效；
-2. 当前活动小步是 **C-26**：冻结 D4 predicted-causal phase contract（三臂唯一差异、两项一致性中介、
-   稀有类护栏、配对 bootstrap、停止条件），在任何方法结果之前定死；
-3. 之后 C-27 实现 + 本地门 → G-17 单折 CUDA 冒烟 → G-18 五折三臂正式实验。C5/A4/Ch6 不插队。
+2. ✅ C-26 已冻结：`docs/phases/PHASE_D4_predicted_causal_residual.md`（三臂唯一差异、边构造、
+   两项中介的分子/分母、稀有类护栏、10,000 次配对 bootstrap、停止条件），在任何方法数字之前定死；
+3. 当前活动小步是 **C-27**：实现 uncertainty-gated residual 与 rewiring 负控 + 本地门
+   （零边严格零残差、三臂逐位同预算、ID/schema/置换/梯度/聚合测试、三件套全绿）；
+4. 之后 G-17 单折 CUDA 冒烟 → G-18 五折三臂正式实验。C5/A4/Ch6 不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
 backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。

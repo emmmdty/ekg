@@ -28,7 +28,8 @@ ID 审计、CPU smoke 也可并行。每个 phase 仍须交付 `pass|failed|bloc
 | **R1** | 三方法章的文献、ID、因果链、power 与 protocol 审查 | A4/D4 已由 T024 冻结；C5 仍等作者名单，proposed pilot 尚未启动 | CPU；baseline smoke 可用 GPU | [`PHASE_R1_method_design_freeze.md`](PHASE_R1_method_design_freeze.md) |
 | **C5** | mention-local 论元后验与不确定性感知身份消解 | BLOCKED / NOT FROZEN；ACCI 不可运行，等作者指定第二方法族 | 不得使用 | [`PHASE_C5_argument_uncertainty.md`](PHASE_C5_argument_uncertainty.md) |
 | **A4** | 完整候选上的 pair evidence 充分性/必要性 | FROZEN / NOT STARTED；仅 seed 13 已预注册 | 4090 | [`PHASE_A4_pair_evidence.md`](PHASE_A4_pair_evidence.md) |
-| **D4** | typed cue 与分解式事实性决策 | FROZEN / NOT STARTED；仅 seed 13 已预注册 | 4090 | [`PHASE_D4_typed_cue_factuality.md`](PHASE_D4_typed_cue_factuality.md) |
+| **D4** | typed cue 与分解式事实性决策 | **SEALED / FAILED**（typed-cue 家族两轮止损，见 `../results/PHASE_D.md`） | 4090 | [`PHASE_D4_typed_cue_factuality.md`](PHASE_D4_typed_cue_factuality.md) |
+| **D4（v6.2）** | predicted-causal uncertainty-gated residual（另一个机制家族） | **FROZEN / NOT STARTED（2026-09-22，C-26）**；上游输入门 C-25R3F 已过；仅 seed 13 | 4090 | [`PHASE_D4_predicted_causal_residual.md`](PHASE_D4_predicted_causal_residual.md) |
 | **D3/C4** | v6 旧方法契约 | **SUPERSEDED FOR FUTURE EXECUTION**；历史结果仍有效 | 不再执行 | [`PHASE_D3_evidence_conditioned.md`](PHASE_D3_evidence_conditioned.md)、[`PHASE_C4_context_identity.md`](PHASE_C4_context_identity.md) |
 | **E3** | 事件图谱构建与下游事件预测应用（带公开对手；factorial 已撤销） | 需 C5/A4/D4 的 bundle 或其 fallback | 4090；5090 逐次授权 | [`PHASE_E3_graph_application.md`](PHASE_E3_graph_application.md) |
 | **H2** | 汇总三种子、消融、复现与论文表格反查 | BLOCKED BY E3 | 视缺口 | [`PHASE_H2_thesis_acceptance.md`](PHASE_H2_thesis_acceptance.md) |
