@@ -119,7 +119,9 @@ def test_rewired_arm_changes_the_edges_but_not_their_count(tmp_path: Path) -> No
     assert 0.0 <= pooled["identical_edge_fraction"] <= 1.0
 
 
-def test_packed_batches_hit_the_mention_budget_and_keep_documents_whole() -> None:
+def test_packed_batches_close_on_the_boundary_nearest_the_budget() -> None:
+    # 20 is 12 under the budget and 40 is 8 over, so "a" alone is the nearer cut
+    # only once a second 20-mention document would overshoot further than that.
     docs = [
         _Doc("a", tuple(_Mention(f"a{i}", "CT+") for i in range(20))),
         _Doc("b", tuple(_Mention(f"b{i}", "CT+") for i in range(20))),
@@ -129,6 +131,17 @@ def test_packed_batches_hit_the_mention_budget_and_keep_documents_whole() -> Non
     batches = train._packed_batches(docs, 32)
 
     assert [[doc.doc_id for doc in batch] for batch in batches] == [["a", "b"], ["c"]]
+
+
+def test_packed_batches_stop_overshooting_when_documents_are_small() -> None:
+    # The old "at least 32" rule swallowed a whole extra document here and ran
+    # at 50 mentions a step; closing on the nearer boundary keeps it at 30.
+    docs = [_Doc(f"d{i}", tuple(_Mention(f"d{i}m{j}", "CT+") for j in range(10))) for i in range(6)]
+
+    batches = train._packed_batches(docs, 32)
+
+    assert [len(batch) for batch in batches] == [3, 3]
+    assert all(sum(len(doc.mentions) for doc in batch) == 30 for batch in batches)
 
 
 def test_class_weights_match_the_anchor_formula() -> None:

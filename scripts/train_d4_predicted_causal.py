@@ -154,15 +154,26 @@ def _forward(
 def _packed_batches(
     docs: Sequence[FactualityDocument], budget: int
 ) -> list[list[FactualityDocument]]:
+    """Whole documents packed to the batch whose size is closest to `budget`.
+
+    The first rule here cut as soon as the batch reached `budget`. A MAVEN-FACT
+    document carries 25.4 mentions on average, so "at least 32" almost always
+    swallowed a second document: fold 1 ran at 48.8 mentions over 910 steps per
+    epoch against the frozen anchor's 32 over 1,387 — a third of the optimiser
+    steps gone at the same learning rate, which is the measured candidate cause
+    of the base arm's -.042 gap to that anchor (`results/PHASE_R1.md` §25.19).
+    Closing on whichever boundary is nearer the budget gives 1,248 steps at 35.6.
+    """
     batches: list[list[FactualityDocument]] = []
     current: list[FactualityDocument] = []
     mentions = 0
     for doc in docs:
-        current.append(doc)
-        mentions += len(doc.mentions)
-        if mentions >= budget:
+        size = len(doc.mentions)
+        if current and abs(mentions - budget) <= abs(mentions + size - budget):
             batches.append(current)
             current, mentions = [], 0
+        current.append(doc)
+        mentions += size
     if current:
         batches.append(current)
     return batches
