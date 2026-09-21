@@ -1,6 +1,6 @@
 # EKG 实时状态
 
-> 更新于 **2026-09-20**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-09-21**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
@@ -12,7 +12,7 @@
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-23/C-24 与 G-15 CUDA smoke 已完成；cross-fit v2 绑定 `71be7419…c961ea9`；下一步 G-16 五折真实 posterior，当前 0/5 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-23/C-24 与 G-15 CUDA smoke 已完成；cross-fit v2 绑定 `71be7419…c961ea9`；G-16 fold 1–4 已在四张 4090 上训练，当前完成 0/5 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -24,7 +24,7 @@
 - 输入门：2,913 docs / 2,532,394 ordered pairs 恰好一次，causal F1 ≥ `.300`，Brier 优于 no-skill；
 - 阶段成果：S0 目标/文献闭合；S1 hash-bound train→causal-checkpoint→posterior runner 已完成并通过
   **703 passed / 29 skipped、ruff 0、smoke OK**；
-  S2 真实五折输入 **0/5**，所以尚无新方法分数。
+  S2 真实五折输入 **0/5 完成（fold 1–4 运行中）**，所以尚无新方法分数。
 
 ## ✅ 已完成：C-13–C-21（2026-09-20，本地文献/CPU/代码）
 
@@ -44,8 +44,8 @@
 
 ## 下一步
 
-1. 只读核查 4090 实时卡；事前披露每个 G-16 fold 的 exact command、cwd、预期产物；
-2. G-15 已通过；在不同空闲卡运行 G-16 folds，再由 C-25 给出第一份真实输入质量结果；
+1. 持续监控 G-16 fold 1–4；任一卡释放后用同一冻结 seed/配方接续 fold 5；
+2. 五折全部 `status=complete` 后，立即由 C-25 给出第一份真实输入质量结果；
 3. C5/A4/Ch6 本轮不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大

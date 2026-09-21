@@ -387,7 +387,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 
 | **G-14** | **A4 四臂 dry-run（5090 探测，数字不进主表）** —— 2026-09-13 启动。用 A4.3 那条正式命令跑满四臂 + `--aggregate`，验证产物清单、中介统计与聚合断言 | 5090 空闲 + ≤1 天授权 | 约 4–5 小时（单臂实测 56 分钟） | `DRYRUN_COMPLETE`；或抓到缺陷并记进 `results/PHASE_A.md`——**抓到就是赚到，那本该是 4090 上 2–3 GPU·day 之后才暴露的** |
 | **G-15** | ✅ **D4 relation cross-fit 单折 CUDA 冒烟完成（2026-09-21，gpu-4090 GPU1）**：约 32 秒，真实 encoder/head 反传、causal-family checkpoint 重载和 posterior dump 闭环；`smoke.json` `068e71a7…e564`，`status=complete` / `device=cuda` / `scientific_result=false`；独立重算 5 篇 / 5,198 行且概率契约全过。smoke causal F1=0 不用于选配方或主表 | C-24 + 空闲 4090；事前已披露 exact command | 实测约 32 秒 | ✅ 达成；下一步 G-16 |
-| **G-16** | **D4 五折真实 predicted causal posterior**：seed 13；不同 fold 可占不同空闲卡并行，不是多种子 | G-15 | 约 1.5–2 GPU·day；四卡约半天 | 五折各自 `status=complete`，evaluation 从未参与训练/选模；交 C-25 做全量覆盖与质量判定 |
+| **G-16** | **D4 五折真实 predicted causal posterior（运行中，完成 0/5）**：seed 13；2026-09-21 已在 gpu-4090 GPU1/3/0/2 分别启动 fold 1/2/3/4，四折均越过输入绑定并进入真实训练；不同 fold 并行不是多种子 | G-15 | 约 1.5–2 GPU·day；四卡约半天 | 五折各自 `status=complete`，evaluation 从未参与训练/选模；交 C-25 做全量覆盖与质量判定 |
 | **G-17** | **D4 新机制单折 CUDA 冒烟** | C-27 + 空闲 4090 | ≤1 小时 | 三臂均走真实 posterior；前向/反向/评测/中介产物闭环；不进主表 |
 | **G-18** | **D4 seed-13 五折三臂正式实验** | G-17 + C-26 immutable contract | 约 1.5 GPU·day | pooled OOF 主指标、五类分项、配对 bootstrap、两项一致性中介和 rewiring 负控全部落盘；按 §25 一次判定，不达标则进入第二个实质设计周期而非“全部止损” |
 

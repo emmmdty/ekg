@@ -1707,4 +1707,13 @@ evaluation 只进入 dumper，五折预期计数分别为 505,156 / 511,286 / 51
 `068e71a7e47c5e8d6c9d4d060054b7096b6d6ae59a0e71d5ea95fef17386e564`。独立重算确认 posterior
 恰为 5 篇 / 5,198 行 / 5,198 个唯一有序对，三类概率有限、范围合法且和误差 ≤`1e-6`；posterior
 SHA-256 `7bc1335a…85f6`。causal selection 的 smoke dev F1 为 0，按事前契约**不用于选配方、不过门判定或
-论文主表**。下一项只有 **G-16 五折真实 posterior**，不转去 Ch6/C5 做旁支分析。
+论文主表**。
+
+**G-16 已于 2026-09-21 09:08–09:10 开始正式五折输入生成，当前完成 0/5。** 首次启动 fold 1/2
+在 CUDA 分配前因 trainer CLI 把 `--model` 传为字符串、新 validator 却调用 `str.is_dir()` 失败；
+失败目录和日志已分别封存为 `fold-{1,2}-failed-model-path-type`，没有删除。修复后完整本地门仍为
+**703 passed / 29 skipped、ruff 0、`ekg-smoke` OK**；4090 上真实 CLI 形状的定向回归 **23/23 passed**。
+提交 `b7cfa1c` 后用同一 v2 计划、backbone、seed 13 和 official-joint 配方重启；GPU1/3/0/2 分别运行
+fold 1/2/3/4，四折已全部越过 hash/泄漏/配方绑定并进入真实训练。当前只能声称“运行中”；在
+`status=complete` 和 posterior 独立覆盖/概率复核之前，不计为折完成，也没有 S2 分数。fold 5 在第一张卡释放后
+接续，然后立即执行 C-25 全量输入质量门；不转去 Ch6/C5 做旁支分析。
