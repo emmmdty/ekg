@@ -339,11 +339,12 @@ gantt
 | **C-22** | ⏸️ **C5 冻结 100 条一次性生成（4090，未启动）**：2026-09-20 只读核卡成功，四卡均 5,716–5,719 MiB / 24,564 MiB、28–32% util，不能判空闲；随后只读查权重路径时 ssh reset，按三态规则是连接失败，不是“权重不存在”。未调用模型、无 raw/output | C-21 ✅ + 空闲 4090 + 权重路径复核 + 远端命令事前披露 | **卡【算力/路径】**；100/100 raw 后 parsed 成功或失败均封存；无 prompt repair/rerun；人工盲审仍是独立门 | R1 generation/raw/report |
 | **C-23** | **D4 第一性原理目标树与阶段门冻结**：本轮只推进 Ch3；C5 的 C-22 暂停排队但不取消。当前最低过线是严格超过同协议最强锚，论文有效目标是达到预注册最小有意义增益，并随新增同协议公开对手自动抬高 | 作者 2026-09-20 “一次只做一个章节、小步推进” | `results/PHASE_R1.md` §25 列出最终目标、必须条件、输入/机制/结果四级中间指标、失败日志；纠正“论文两条 causal rule”的错误归属 | `results/PHASE_R1.md` §25 |
 | **C-24** | ✅ **D4 五折关系输入执行链完成**：关系训练器使用独立 D4 哈希绑定；每折只物化 train+selection-dev，evaluation 不进入训练源；冻结 official-joint 配方与 backbone pin，并从 causal-family checkpoint 导出全候选 posterior。4090 缺失的 gitignored plan 已补齐，模型六文件内容摘要实算通过 | C-17/C-19 + C-23 | 本地定向 **30/30 passed**；4090 三份定向 **20/20 passed**；五折 dry-run 中 evaluation manifest 只出现在 posterior dump，不出现在 trainer；错误模型在 CUDA 前拒绝 | `scripts/run_d4_relation_crossfit.py` + protocol tests |
-| **C-25** | **D4 五折 posterior 汇总与输入质量门（评测器已事前冻结，未运行正式数字）**：合并 G-16 五折并独立重算关系质量与校准 | G-16 | 2,913 docs / 73,939 mentions / 2,532,394 ordered pairs 恰好一次；无 gold 字段；causal 正类 F1 ≥`.300` 且三类 Brier 优于 evaluation prevalence no-skill；否则停在输入层，不把垃圾图归因给 D4 机制 | aggregate posterior + input-quality report |
-| **C-26** | **D4 predicted-causal phase contract**：把两项一致性中介、三臂唯一差异、稀有类护栏、配对 bootstrap 和停止条件冻结 | C-25 | full / unchanged full-context base / degree+direction+subtype+confidence-preserving rewiring 三臂；目标与 §25 逐项一致；不读方法结果后改门 | 新 D4 phase contract + preflight |
+| **C-25** | ✅ **D4 五折 posterior 汇总与输入质量门完成，判 `quality_gate_failed`**：覆盖/无 gold 全过，pooled causal exact-subtype micro-F1 `.308141` 过 `.300`；但 multiclass Brier `.068750` 劣于 evaluation-prevalence no-skill `.041427`（差 `+.027324`），故只判输入概率校准失败，不判 D4 机制失败 | G-16 | 报告 SHA-256 `22750975…5074`；原始 posterior 保持封存，C-26 不解锁 | R1 `relation_crossfit/quality_report.json` |
+| **C-25R** | **D4 posterior 校准修复（唯一活动小步）**：先核一手论文/代码，冻结只用各折 selection-dev 拟合的校准变换与 provenance；evaluation label 只在冻结后作一次质量复核 | C-25 | 原始 sidecar 不覆盖；五折模型身份/候选顺序/覆盖不变；causal F1 ≥`.300` 且 recalibrated multiclass Brier `< .0414265581`；失败保留并进入实质不同的第二个校准周期，不扫 evaluation 参数 | calibration contract + calibrated sidecars + quality report |
+| **C-26** | **D4 predicted-causal phase contract**：把两项一致性中介、三臂唯一差异、稀有类护栏、配对 bootstrap 和停止条件冻结 | C-25R | full / unchanged full-context base / degree+direction+subtype+confidence-preserving rewiring 三臂；目标与 §25 逐项一致；不读方法结果后改门 | 新 D4 phase contract + preflight |
 | **C-27** | **D4 uncertainty-gated residual 实现与本地门** | C-26 | 无边/低置信度时残差严格趋零；三臂参数与预算一致；ID/schema/置换/梯度/聚合测试通过，三件套全绿 | code + tests + CPU smoke |
 
-作者已把活动队列改为 **D4 单章：C-23 → C-24 → G-15 → G-16 → C-25 → C-26 → C-27 →
+作者已把活动队列改为 **D4 单章：C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-26 → C-27 →
 G-17 → G-18**。C-22 暂停排队但不取消；A4 仍因新颖性阻断。D4 在真实输入和 C-26 phase contract
 存在前不得创建方法训练任务。
 
@@ -387,7 +388,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 
 | **G-14** | **A4 四臂 dry-run（5090 探测，数字不进主表）** —— 2026-09-13 启动。用 A4.3 那条正式命令跑满四臂 + `--aggregate`，验证产物清单、中介统计与聚合断言 | 5090 空闲 + ≤1 天授权 | 约 4–5 小时（单臂实测 56 分钟） | `DRYRUN_COMPLETE`；或抓到缺陷并记进 `results/PHASE_A.md`——**抓到就是赚到，那本该是 4090 上 2–3 GPU·day 之后才暴露的** |
 | **G-15** | ✅ **D4 relation cross-fit 单折 CUDA 冒烟完成（2026-09-21，gpu-4090 GPU1）**：约 32 秒，真实 encoder/head 反传、causal-family checkpoint 重载和 posterior dump 闭环；`smoke.json` `068e71a7…e564`，`status=complete` / `device=cuda` / `scientific_result=false`；独立重算 5 篇 / 5,198 行且概率契约全过。smoke causal F1=0 不用于选配方或主表 | C-24 + 空闲 4090；事前已披露 exact command | 实测约 32 秒 | ✅ 达成；下一步 G-16 |
-| **G-16** | **D4 五折真实 predicted causal posterior（运行中，完成 4/5）**：seed 13；2026-09-21 fold 1–4 均已 `status=complete` 且独立重算文档/行数与 SHA 全部匹配，fold 5 已在 gpu-4090 GPU1 接续；不同 fold 并行不是多种子 | G-15 | 约 1.5–2 GPU·day；四卡约半天 | 五折各自 `status=complete`，evaluation 从未参与训练/选模；交 C-25 做全量覆盖与质量判定 |
+| **G-16** | ✅ **D4 五折真实 predicted causal posterior 完成（2026-09-21）**：seed 13；五折均 `status=complete`，独立重算合计 2,913 docs / 73,939 mentions / 2,532,394 pairs 与逐折 SHA 全部匹配；evaluation 从未参与训练/选模；不同 fold 并行不是多种子 | G-15 | 09:08–15:53 墙钟（含 fold 5 启动前空档） | ✅ 达成；C-25 已如实判出 hard-label pass / probability-quality fail |
 | **G-17** | **D4 新机制单折 CUDA 冒烟** | C-27 + 空闲 4090 | ≤1 小时 | 三臂均走真实 posterior；前向/反向/评测/中介产物闭环；不进主表 |
 | **G-18** | **D4 seed-13 五折三臂正式实验** | G-17 + C-26 immutable contract | 约 1.5 GPU·day | pooled OOF 主指标、五类分项、配对 bootstrap、两项一致性中介和 rewiring 负控全部落盘；按 §25 一次判定，不达标则进入第二个实质设计周期而非“全部止损” |
 

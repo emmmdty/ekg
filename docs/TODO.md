@@ -7,12 +7,12 @@
 
 **活动队列只剩 Ch3/D4。** 作者要求按第一性原理拆到最终目标、必达门和中间指标，一次只推进一个章节。
 目标树与阶段结果在 `results/PHASE_R1.md` §25；执行顺序是
-`C-23 → C-24 → G-15 → G-16 → C-25 → C-26 → C-27 → G-17 → G-18`。
+`C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-26 → C-27 → G-17 → G-18`。
 旧 typed cues 继续封存；失败的是机制家族，不是 D4 整章。
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-23/C-24 与 G-15 CUDA smoke 已完成；cross-fit v2 绑定 `71be7419…c961ea9`；G-16 fold 1–4 已完成并独立复核，fold 5 运行中，当前 4/5 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | G-16 五折已完成；C-25 为 hard-label pass / probability-quality fail。当前只做 C-25R：selection-dev-only 校准修复，C-26 仍冻结 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -25,8 +25,8 @@
 - 阶段成果：S0 目标/文献闭合；S1 hash-bound train→causal-checkpoint→posterior runner 已完成并通过
   **703 passed / 29 skipped、ruff 0、smoke OK**；C-25 汇总器已在看到五折分数前冻结，当前全门
   **707 passed / 29 skipped、ruff 0、smoke OK**；
-  S2 真实五折输入 **4/5 完成（fold 5 运行中）**；C-25 必须等第五折后才给数，
-  所以尚无聚合输入门结果或新方法分数。
+  S2 原始五折输入已完成并由 C-25 判定：coverage 全过，causal F1 **`.308141`** 过线；但 Brier
+  **`.068750`** 劣于 no-skill **`.041427`**，故当前是概率校准修复阶段，仍没有 D4 新方法分数。
 
 ## ✅ 已完成：C-13–C-21（2026-09-20，本地文献/CPU/代码）
 
@@ -46,9 +46,9 @@
 
 ## 下一步
 
-1. 持续监控已在 GPU1 运行的 G-16 fold 5；fold 1–4 保持封存，不重跑；
-2. fold 5 `status=complete` 后，立即由 C-25 给出第一份真实输入质量结果；
-3. C5/A4/Ch6 本轮不插队。
+1. 核到校准机制的一手论文与官方实现，先冻结 C-25R 的 selection-dev-only 变换、输入/输出哈希和验收线；
+2. 生成各折 selection-dev posterior，拟合校准器并对封存 evaluation posterior 做一次变换与质量复核；
+3. 只有 recalibrated Brier `< .0414265581` 且 causal F1 仍 ≥`.300` 才解锁 C-26；C5/A4/Ch6 不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
 backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。

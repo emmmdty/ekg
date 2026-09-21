@@ -131,12 +131,15 @@ not active while this queue advances.
 - [x] **T065 [RS-003]** Disclose and run one bounded 4090 CUDA smoke for the cross-fit train→causal checkpoint→posterior
   path → gpu-4090 GPU1 completed in about 32 seconds; metadata says CUDA, 5,198 exhaustive posterior rows and all
   required artifacts independently rehash, and the smoke score is explicitly excluded from recipe selection.
-- [ ] **T066 [RS-003]** Generate all five seed-13 relation cross-fit posterior dumps → each evaluation document is
-  untouched by its model's training/selection and all five immutable run records complete.
-- [ ] **T067 [RS-003]** Aggregate and quality-check the five posterior dumps → exact 2,913-document/2,532,394-pair
-  coverage, no gold fields, causal positive F1 ≥.300, and multiclass Brier beats the evaluation-prevalence no-skill
-  predictor; a failure stops at the input layer rather than being misreported as a D4 mechanism result.
-- [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067 passes → exact three arms,
+- [x] **T066 [RS-003]** Generate all five seed-13 relation cross-fit posterior dumps → all five immutable run
+  records completed with exact 2,913-document/2,532,394-pair coverage and independently verified artifact hashes.
+- [x] **T067 [RS-003]** Aggregate and quality-check the five posterior dumps → coverage/no-gold and pooled causal
+  F1 `.308141` passed, but multiclass Brier `.068750` was worse than the evaluation-prevalence no-skill `.041427`;
+  status is `quality_gate_failed` at the input-probability layer, not a D4 mechanism result.
+- [ ] **T067a [RS-003]** Repair posterior calibration without reading evaluation labels → verify the mechanism against
+  primary paper/code, freeze a selection-dev-only calibration contract, preserve the raw sidecars, and require the
+  recalibrated five-fold OOF posterior to retain causal F1 ≥`.300` while beating no-skill Brier.
+- [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067a passes → exact three arms,
   project-defined consistency mediators, rare-class floors, bootstrap inference and stop/second-cycle branches are
   fixed before method results exist.
 - [ ] **T069 [RS-003]** Implement the uncertainty-gated causal residual and rewiring control → no/low-confidence edges

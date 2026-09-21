@@ -1640,7 +1640,7 @@ causal posterior 能通过可归因的 uncertainty-gated residual，实质提高
 |---|---|---|---|
 | S0 目标/文献闭合 | 本节、设计 brief 修订、执行主表 | exact-task 证据核到正文+代码；目标/负控/止损先于实验结果 | **完成** |
 | S1 输入执行链 | D4 hash binding + one-fold runner | evaluation 不出现在 trainer argv；official-joint recipe 任一漂移都在 CUDA 前拒绝；旧 P1 binding 不变 | **完成：703 passed / 29 skipped、ruff 0、smoke OK** |
-| S2 真实结构输入 | 五折 posterior + 质量报告 | 2,913 docs / 73,939 mentions / 2,532,394 pairs 恰好一次；causal positive F1 ≥ `.300`；三类 Brier 优于 evaluation-prevalence no-skill | **G-15 CUDA smoke 完成；真实 folds 0/5，下一步 G-16** |
+| S2 真实结构输入 | 五折 posterior + 质量报告 | 2,913 docs / 73,939 mentions / 2,532,394 pairs 恰好一次；causal positive F1 ≥ `.300`；三类 Brier 优于 evaluation-prevalence no-skill | **原始 posterior：覆盖与 F1 `.308141` 通过，Brier `.068750 > .041427` 失败；C-25R 校准修复中** |
 | S3 方法可执行 | immutable contract + full/base/rewired | 无边或低置信度时 residual 趋零；三臂只差注册变量；单折 CUDA 闭环 | 未开始，依赖 S2 |
 | S4 阶段结果 | seed-13 五折三臂结果 | §25.1 五项一次判定；不达目标则做错误归因并进入第二个**实质不同**设计周期 | 未开始，依赖 S3 |
 | S5 确证结果 | 额外 seeds + sealed final-valid | 仅在 S4 全过且作者逐次授权后执行；mean delta、2/3 positive、CI 下界 `>0` | 未授权 |
@@ -1738,8 +1738,32 @@ multiclass Brier 是 **0.0414265581**。这是从冻结 gold 计算的评测尺�
 | 2 | 583 | 511,286 | .310070 (34) | `1ce6d1b3…f78f6` |
 | 3 | 583 | 511,878 | .288650 (44) | `efedfe88…dacbb` |
 | 4 | 582 | 506,416 | .307318 (22) | `3959df80…81c02` |
+| 5 | 582 | 497,658 | .318294 (3) | `eeeb65e6…7056e` |
 
-四折均为 `status=complete`，共 **2,331 篇 / 2,034,736 对**，实算 SHA 与 run metadata 逐折相符。
-selection-dev 数字只是冻结 checkpoint 选择记录，不是 OOF S2 质量分；特别是 fold 3 低于 `.300`，
-不做隐藏或单折补救。13:58 已在 GPU1 用同一冻结命令启动 fold 5；当前 G-16 **4/5**，
-C-25 仍未运行。
+五折均为 `status=complete`，共 **2,913 篇 / 73,939 mentions / 2,532,394 对**，实算 SHA 与 run
+metadata 逐折相符。selection-dev 数字只是冻结 checkpoint 选择记录，不是 OOF S2 质量分；特别是 fold 3
+低于 `.300`，不做隐藏或单折补救。
+
+### 25.6 C-25 正式输入质量结果与下一小步（2026-09-21）
+
+C-25 在五折全部封存后按事前冻结的汇总器运行，正式报告位于
+`gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v62-20260920/relation_crossfit/quality_report.json`，
+SHA-256 为 `2275097562f30e9f633e5724febd5f60437b12f2ffe7f006bce722cb5ffa5074`，状态
+`quality_gate_failed`。这是**输入概率质量失败**，不是 D4 方法实验失败：
+
+| 项目 | 正式结果 | 事前门 | 判定 |
+|---|---:|---:|---|
+| coverage | 2,913 docs / 73,939 mentions / 2,532,394 pairs | 精确相等 | PASS |
+| causal exact-subtype micro-F1 | `.30814055`（P `.22675390` / R `.48065895`） | ≥ `.300` | PASS |
+| multiclass Brier | `.06875035` | `< .04142656` no-skill | **FAIL** |
+
+混淆计数为 TP 25,647 / FP 87,458 / FN 27,711；预测 CAUSE/PRECONDITION 共 113,105 对，而 gold
+正类共 53,358 对，约为 **2.12 倍**。五折 Brier 均劣于各自 no-skill（`.06795–.06958` vs
+`.04031–.04309`），不是某一折偶发。因而 C-26 保持冻结；原始 posterior 与失败报告不覆盖、不删除。
+
+下一步 C-25R 只解决这一层问题：先从一手论文与代码确认校准机制，再冻结**每折仅用 selection-dev
+标签拟合、evaluation 标签不参与参数选择**的校准契约。科研价值是保住已经过线的 causal 排序/硬判别，
+同时让进入 uncertainty gate 的概率具备可用尺度；可行性依赖既有五折 checkpoint、selection-dev manifest
+和完整 evaluation sidecar，数据/协议/代码/4090 资产均已具备。验收仍沿用原门：calibrated causal F1
+≥`.300` 且 Brier 严格优于 `.0414265581`，不过则记录失败并进入实质不同的第二个校准周期，不用
+evaluation 扫温度、阈值或类别偏置。
