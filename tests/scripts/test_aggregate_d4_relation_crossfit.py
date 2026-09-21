@@ -287,6 +287,96 @@ def _add_calibrated_artifacts(root: Path, plan: Path) -> Path:
     return raw_quality_report
 
 
+def _add_dirichlet_artifacts(root: Path, plan: Path) -> Path:
+    plan_payload = json.loads(plan.read_text(encoding="utf-8"))
+    for row in plan_payload["folds"]:
+        fold = row["fold"]
+        run_dir = plan.parent / "relation_crossfit" / f"fold-{fold}"
+        raw_path = run_dir / "causal_posteriors.jsonl"
+        raw_metadata_path = run_dir / "causal_posteriors.metadata.json"
+        natural_path = run_dir / "dirichlet_causal_posteriors.jsonl"
+        natural_path.write_bytes(raw_path.read_bytes())
+        selection_posterior = run_dir / "selection_causal_posteriors.jsonl"
+        selection_metadata = run_dir / "selection_causal_posteriors.metadata.json"
+        training_metadata = run_dir / "checkpoint" / "run_metadata.json"
+        selection_posterior.write_text("selection\n", encoding="utf-8")
+        _write_json(selection_metadata, {"fixture": True})
+        _write_json(training_metadata, {"fixture": True})
+        selection_manifest = root / row["manifests"]["evaluation"]["path"]
+        row["manifests"]["selection_dev"] = {
+            "path": str(selection_manifest.relative_to(root)),
+            "sha256": aggregate.sha256_file(selection_manifest),
+        }
+        _write_json(
+            run_dir / "dirichlet_calibration.metadata.json",
+            {
+                "schema_version": "ekg.d4_dirichlet_calibration.v1",
+                "fold": fold,
+                "class_order": list(aggregate.CLASSES),
+                "class_weights": {"NONE": 1.0, "CAUSE": 1.0, "PRECONDITION": 1.0},
+                "gold_fields_present": False,
+                "method": {
+                    "name": "full_dirichlet_natural_posterior_with_cost_aware_decision",
+                    "posterior_formula": "softmax(W log(q) + b)",
+                    "decision_formula": "argmax_k w_k p_k",
+                    "fit_objective": "unweighted multiclass NLL on full selection-dev",
+                    "penalty": None,
+                    "tolerance": 1e-10,
+                    "maximum_iterations": 1000,
+                    "iterations": 5,
+                },
+                "evaluation": {"gold_accessed": False, "ordered_mention_pairs": 2},
+                "inputs": {
+                    "selection_manifest": {
+                        "sha256": aggregate.sha256_file(selection_manifest)
+                    },
+                    "selection_posterior": {
+                        "path": str(selection_posterior),
+                        "sha256": aggregate.sha256_file(selection_posterior),
+                    },
+                    "selection_metadata": {
+                        "path": str(selection_metadata),
+                        "sha256": aggregate.sha256_file(selection_metadata),
+                    },
+                    "training_metadata": {
+                        "path": str(training_metadata),
+                        "sha256": aggregate.sha256_file(training_metadata),
+                    },
+                    "evaluation_posterior": {
+                        "sha256": aggregate.sha256_file(raw_path)
+                    },
+                    "evaluation_metadata": {
+                        "sha256": aggregate.sha256_file(raw_metadata_path)
+                    },
+                },
+                "output": {
+                    "path": str(natural_path),
+                    "sha256": aggregate.sha256_file(natural_path),
+                },
+            },
+        )
+    _write_json(plan, plan_payload)
+    plan_hash = aggregate.sha256_file(plan)
+    for fold in range(1, 6):
+        run_metadata = plan.parent / f"relation_crossfit/fold-{fold}/run_metadata.json"
+        payload = json.loads(run_metadata.read_text(encoding="utf-8"))
+        payload["plan_sha256"] = plan_hash
+        _write_json(run_metadata, payload)
+    raw_quality_report = plan.parent / "quality_report.json"
+    _write_json(
+        raw_quality_report,
+        {
+            "schema_version": "ekg.d4_relation_crossfit_quality.v1",
+            "status": "quality_gate_failed",
+            "gate": {
+                "causal_f1_pass": True,
+                "multiclass_brier_pass": False,
+            },
+        },
+    )
+    return raw_quality_report
+
+
 def test_aggregate_quality_passes_exact_coverage_f1_and_brier(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -366,3 +456,46 @@ def test_aggregate_quality_validates_calibrated_provenance(
     assert report["schema_version"].endswith("calibrated_quality.v1")
     assert report["calibration"]["evaluation_gold_used_for_fit"] is False
     assert [fold["temperature"] for fold in report["folds"]] == [1.0] * 5
+
+
+def test_aggregate_quality_scores_dirichlet_posterior_and_cost_aware_decision(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root, plan = _fixture(tmp_path)
+    raw_quality_report = _add_dirichlet_artifacts(root, plan)
+    monkeypatch.setattr(aggregate, "_git_commit", lambda repo: "fixture")
+
+    report = aggregate.aggregate_quality(
+        repo=root,
+        plan_path=plan,
+        expected_documents=5,
+        expected_mentions=10,
+        expected_pairs=10,
+        dirichlet=True,
+        raw_quality_report=raw_quality_report,
+    )
+
+    assert report["schema_version"].endswith("dirichlet_quality.v1")
+    assert report["status"] == "quality_gate_passed"
+    assert report["pooled_metrics"]["causal_positive"]["f1"] == 1.0
+    assert report["plain_argmax_pooled_metrics"]["causal_positive"]["f1"] == 1.0
+    assert report["calibration"]["evaluation_gold_used_for_fit"] is False
+    assert report["contract"]["minimum_brier_improvement_over_no_skill"] == 0.0027
+
+
+def test_aggregate_quality_rejects_both_calibration_modes(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root, plan = _fixture(tmp_path)
+    monkeypatch.setattr(aggregate, "_git_commit", lambda repo: "fixture")
+
+    with pytest.raises(aggregate.D4QualityError, match="mutually exclusive"):
+        aggregate.aggregate_quality(
+            repo=root,
+            plan_path=plan,
+            expected_documents=5,
+            expected_mentions=10,
+            expected_pairs=10,
+            calibrated=True,
+            dirichlet=True,
+        )
