@@ -186,3 +186,20 @@ def test_residual_scales_with_the_gate_and_trains() -> None:
     assert torch.allclose(weak, triggers, atol=1e-5)
     strong.sum().backward()
     assert all(message.weight.grad.abs().sum() > 0 for message in module.messages.values())
+
+
+def test_rewiring_terminates_on_a_hub_graph_that_defeats_stub_shuffling() -> None:
+    # One source, one sink and a shared middle: almost every independent
+    # re-pairing of stubs makes a self-loop or a duplicate. Real fold-1
+    # document 002383d0…dac3 is this shape, and it exhausted the first
+    # implementation's 1,000 retries.
+    hub = [CausalEdge("h", f"t{i}", "CAUSE", 0.2 + i / 100) for i in range(8)]
+    hub += [CausalEdge(f"t{i}", "z", "PRECONDITION", 0.3 + i / 100) for i in range(8)]
+
+    rewired = rewire_edges(hub, fold=1, doc_id="hub")
+
+    report = rewiring_diagnostics(hub, rewired)
+    assert report.structure_preserved is True
+    assert report.edges == len(hub)
+    assert all(e.head_mention_id != e.tail_mention_id for e in rewired)
+    assert len({(e.head_mention_id, e.tail_mention_id) for e in rewired}) == len(hub)

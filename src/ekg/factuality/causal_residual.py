@@ -63,10 +63,11 @@ POSITIVE_LABELS = frozenset({"CT+", "PS+"})
 NEGATIVE_LABELS = frozenset({"CT-", "PS-"})
 _UNKNOWN_LABEL = "Uu"
 
-# A degree- and multiset-preserving rewiring is found by stub shuffling; a few
-# documents are so small that most shufflings collide.
-# ponytail: bounded retry, raise a partial-shuffle search if some real graph ever exhausts it.
-_REWIRE_ATTEMPTS = 1000
+# Swap attempts per edge for the degree-preserving rewiring. 10x|E| is the
+# usual double-edge-swap budget; a denser budget only matters if some document
+# turns out to be badly under-mixed, which `RewiringReport.identical_edges`
+# makes visible instead of hiding.
+_SWAP_MULTIPLIER = 10
 
 
 @dataclass(frozen=True)
@@ -154,44 +155,54 @@ def _rewire_seed(*, fold: int, doc_id: str) -> int:
 def rewire_edges(edges: Sequence[CausalEdge], *, fold: int, doc_id: str) -> list[CausalEdge]:
     """The negative control: same degrees, same payloads, different endpoints.
 
-    Out-stubs and in-stubs are re-paired by a shuffle, so every mention keeps
-    its exact in-degree and out-degree; the ``(subtype, confidence)`` payloads
-    are permuted over the new pairs, so the document's joint multiset is
-    untouched.  The stream is seeded from ``SHA256(namespace|fold|doc_id)`` and
-    is therefore independent of the training seed and recomputable on its own.
+    Endpoints are mixed by **double-edge swaps** — take ``a->b`` and ``c->d``,
+    rewrite them as ``a->d`` and ``c->b`` whenever that makes neither a
+    self-loop nor a duplicate pair. Every accepted swap preserves each node's
+    out-degree and in-degree exactly, so the constraint holds by construction
+    rather than by rejection sampling; the ``(subtype, confidence)`` payloads
+    are then permuted over the mixed pairs, leaving the document's joint
+    multiset untouched.
 
-    Self-loops and duplicated ``(head, tail, subtype)`` triples are rejected
-    rather than repaired, because a repaired control is no longer the control
-    that was frozen.  A document whose graph admits no such rewiring raises.
+    The first implementation re-paired shuffled out-stubs with shuffled
+    in-stubs and retried on collision. On real fold-1 documents that search
+    exhausted 1,000 attempts (`002383d0…dac3`): with degrees concentrated on a
+    few hubs, almost every independent pairing produces a self-loop or a
+    duplicate, and a document whose graph is simply hard to mix is not a reason
+    to abort a 2,913-document run. Swapping always terminates and reports how
+    much actually moved.
+
+    The stream is seeded from ``SHA256(namespace|fold|doc_id)``, so the control
+    is independent of the training seed and recomputable on its own.
     """
-    if not edges:
-        return []
+    if len(edges) < 2:
+        return list(edges)
     stream = random.Random(_rewire_seed(fold=fold, doc_id=doc_id))
-    heads = [edge.head_mention_id for edge in edges]
-    tails = [edge.tail_mention_id for edge in edges]
-    payloads = [(edge.subtype, edge.confidence) for edge in edges]
-
-    for _ in range(_REWIRE_ATTEMPTS):
-        stream.shuffle(heads)
-        stream.shuffle(tails)
-        stream.shuffle(payloads)
-        candidate = [
-            CausalEdge(
-                head_mention_id=head,
-                tail_mention_id=tail,
-                subtype=subtype,
-                confidence=confidence,
-            )
-            for head, tail, (subtype, confidence) in zip(heads, tails, payloads, strict=True)
-        ]
-        if any(edge.head_mention_id == edge.tail_mention_id for edge in candidate):
+    pairs = [(edge.head_mention_id, edge.tail_mention_id) for edge in edges]
+    present = set(pairs)
+    for _ in range(_SWAP_MULTIPLIER * len(pairs)):
+        left = stream.randrange(len(pairs))
+        right = stream.randrange(len(pairs))
+        if left == right:
             continue
-        keys = {(e.head_mention_id, e.tail_mention_id, e.subtype) for e in candidate}
-        if len(keys) == len(candidate):
-            return candidate
-    raise ValueError(
-        f"{doc_id}: no degree-preserving rewiring found in {_REWIRE_ATTEMPTS} attempts"
-    )
+        (head_a, tail_a), (head_b, tail_b) = pairs[left], pairs[right]
+        if head_a == tail_b or head_b == tail_a:
+            continue
+        if (head_a, tail_b) in present or (head_b, tail_a) in present:
+            continue
+        present.difference_update({(head_a, tail_a), (head_b, tail_b)})
+        present.update({(head_a, tail_b), (head_b, tail_a)})
+        pairs[left], pairs[right] = (head_a, tail_b), (head_b, tail_a)
+    payloads = [(edge.subtype, edge.confidence) for edge in edges]
+    stream.shuffle(payloads)
+    return [
+        CausalEdge(
+            head_mention_id=head,
+            tail_mention_id=tail,
+            subtype=subtype,
+            confidence=confidence,
+        )
+        for (head, tail), (subtype, confidence) in zip(pairs, payloads, strict=True)
+    ]
 
 
 @dataclass(frozen=True)
