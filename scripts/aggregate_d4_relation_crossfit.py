@@ -262,6 +262,109 @@ def _validate_fold_metadata(
     return run, posterior
 
 
+def _validate_temperature_calibration(
+    *,
+    fold: int,
+    row: dict,
+    raw_posterior_path: Path,
+    raw_metadata_path: Path,
+) -> tuple[Path, dict]:
+    run_dir = raw_posterior_path.parent
+    calibrated_path = run_dir / "calibrated_causal_posteriors.jsonl"
+    metadata_path = run_dir / "temperature_calibration.metadata.json"
+    metadata = _load_object(metadata_path)
+    _require(
+        metadata.get("schema_version") == "ekg.d4_temperature_calibration.v1",
+        f"fold {fold}: calibration schema drift",
+    )
+    _require(metadata.get("fold") == fold, f"fold {fold}: calibration fold drift")
+    _require(
+        metadata.get("class_order") == list(CLASSES),
+        f"fold {fold}: calibrated class order drift",
+    )
+    _require(
+        metadata.get("gold_fields_present") is False,
+        f"fold {fold}: calibrated posterior reports gold fields",
+    )
+    method = metadata.get("method", {})
+    _require(
+        method.get("name") == "scalar_temperature_scaling",
+        f"fold {fold}: calibration method drift",
+    )
+    _require(
+        method.get("formula") == "softmax(log(p) / T)",
+        f"fold {fold}: calibration formula drift",
+    )
+    _require(
+        method.get("fit_objective")
+        == "unweighted multiclass NLL on selection-dev",
+        f"fold {fold}: calibration objective drift",
+    )
+    temperature = method.get("temperature")
+    _require(
+        isinstance(temperature, (int, float))
+        and not isinstance(temperature, bool)
+        and math.isfinite(float(temperature))
+        and float(temperature) > 0.0,
+        f"fold {fold}: invalid fitted temperature",
+    )
+    evaluation = metadata.get("evaluation", {})
+    _require(
+        evaluation.get("gold_accessed") is False,
+        f"fold {fold}: evaluation gold used during calibration",
+    )
+    _require(
+        evaluation.get("argmax_unchanged") is True,
+        f"fold {fold}: calibration changed argmax",
+    )
+    _require(
+        evaluation.get("raw_prediction_counts")
+        == evaluation.get("calibrated_prediction_counts"),
+        f"fold {fold}: calibrated prediction counts changed",
+    )
+    _require(
+        evaluation.get("ordered_mention_pairs")
+        == row["expected_output"]["ordered_mention_pairs"],
+        f"fold {fold}: calibrated evaluation pair count drift",
+    )
+    inputs = metadata.get("inputs", {})
+    selection_manifest = row["manifests"]["selection_dev"]
+    _require(
+        inputs.get("selection_manifest", {}).get("sha256")
+        == selection_manifest["sha256"],
+        f"fold {fold}: calibration selection manifest drift",
+    )
+    _require(
+        inputs.get("evaluation_posterior", {}).get("sha256")
+        == sha256_file(raw_posterior_path),
+        f"fold {fold}: calibration raw posterior drift",
+    )
+    _require(
+        inputs.get("evaluation_metadata", {}).get("sha256")
+        == sha256_file(raw_metadata_path),
+        f"fold {fold}: calibration raw metadata drift",
+    )
+    for name in ("selection_posterior", "selection_metadata"):
+        entry = inputs.get(name, {})
+        path = Path(entry.get("path", ""))
+        _require(path.is_file(), f"fold {fold}: missing calibration input {name}")
+        _require(
+            sha256_file(path) == entry.get("sha256"),
+            f"fold {fold}: calibration input hash drift for {name}",
+        )
+    output = metadata.get("output", {})
+    _require(
+        Path(output.get("path", "")).resolve() == calibrated_path.resolve(),
+        f"fold {fold}: calibrated output path drift",
+    )
+    _require(calibrated_path.is_file(), f"fold {fold}: calibrated output missing")
+    _require(
+        sha256_file(calibrated_path) == output.get("sha256"),
+        f"fold {fold}: calibrated output hash drift",
+    )
+    return calibrated_path, metadata
+
+
 def _score_fold(
     *,
     fold: int,
@@ -308,6 +411,8 @@ def aggregate_quality(
     expected_mentions: int = 73939,
     expected_pairs: int = 2532394,
     minimum_causal_f1: float = 0.300,
+    calibrated: bool = False,
+    raw_quality_report: Path | None = None,
 ) -> dict:
     repo = repo.resolve()
     plan_path = plan_path.resolve()
@@ -339,6 +444,27 @@ def aggregate_quality(
         str(source_path): source_hash,
         str(plan_path): plan_hash,
     }
+    raw_quality_hash = None
+    if calibrated:
+        _require(
+            raw_quality_report is not None,
+            "calibrated evaluation requires the frozen raw quality report",
+        )
+        raw_quality_report = raw_quality_report.resolve()
+        raw_report = _load_object(raw_quality_report)
+        _require(
+            raw_report.get("schema_version") == "ekg.d4_relation_crossfit_quality.v1",
+            "raw quality report schema drift",
+        )
+        _require(raw_report.get("status") == "quality_gate_failed", "raw gate did not fail")
+        raw_gate = raw_report.get("gate", {})
+        _require(raw_gate.get("causal_f1_pass") is True, "raw causal F1 did not pass")
+        _require(
+            raw_gate.get("multiclass_brier_pass") is False,
+            "raw Brier did not fail",
+        )
+        raw_quality_hash = sha256_file(raw_quality_report)
+        input_hashes[str(raw_quality_report)] = raw_quality_hash
     for row in fold_rows:
         fold = int(row["fold"])
         manifest_entry = row["manifests"]["evaluation"]
@@ -367,11 +493,23 @@ def aggregate_quality(
             manifest_path=manifest_path,
             posterior_path=posterior_path,
         )
+        scored_posterior_path = posterior_path
+        calibration_metadata = None
+        if calibrated:
+            scored_posterior_path, calibration_metadata = (
+                _validate_temperature_calibration(
+                    fold=fold,
+                    row=row,
+                    raw_posterior_path=posterior_path,
+                    raw_metadata_path=posterior_path.parent
+                    / "causal_posteriors.metadata.json",
+                )
+            )
         score = _score_fold(
             fold=fold,
             docs=docs,
             document_ids=document_ids,
-            posterior_path=posterior_path,
+            posterior_path=scored_posterior_path,
         )
         _require(
             score.rows == row["expected_output"]["ordered_mention_pairs"],
@@ -387,6 +525,12 @@ def aggregate_quality(
         input_hashes[str(run_dir / "causal_posteriors.metadata.json")] = sha256_file(
             run_dir / "causal_posteriors.metadata.json"
         )
+        if calibrated:
+            calibration_path = run_dir / "temperature_calibration.metadata.json"
+            input_hashes[str(scored_posterior_path)] = sha256_file(
+                scored_posterior_path
+            )
+            input_hashes[str(calibration_path)] = sha256_file(calibration_path)
         fold_reports.append(
             {
                 "fold": fold,
@@ -394,7 +538,15 @@ def aggregate_quality(
                 "mentions": sum(len(docs[doc_id].nodes) for doc_id in document_ids),
                 "metrics": score.metrics(),
                 "run_commit": run.get("commit"),
-                "posterior_sha256": posterior["output_sha256"],
+                "posterior_sha256": sha256_file(scored_posterior_path),
+                **(
+                    {
+                        "temperature": calibration_metadata["method"]["temperature"],
+                        "raw_posterior_sha256": posterior["output_sha256"],
+                    }
+                    if calibrated
+                    else {}
+                ),
             }
         )
 
@@ -423,8 +575,12 @@ def aggregate_quality(
         "multiclass_brier_pass": brier_pass,
         "passed": coverage_pass and causal_pass and brier_pass,
     }
-    return {
-        "schema_version": "ekg.d4_relation_crossfit_quality.v1",
+    report = {
+        "schema_version": (
+            "ekg.d4_relation_crossfit_calibrated_quality.v1"
+            if calibrated
+            else "ekg.d4_relation_crossfit_quality.v1"
+        ),
         "status": "quality_gate_passed" if gate["passed"] else "quality_gate_failed",
         "scientific_result": True,
         "gold_used_for_evaluation_only": True,
@@ -445,6 +601,15 @@ def aggregate_quality(
         "input_sha256": dict(sorted(input_hashes.items())),
         "command_argv": sys.argv,
     }
+    if calibrated:
+        report["calibration"] = {
+            "method": "per-fold scalar temperature scaling",
+            "fit_data": "selection-dev only",
+            "evaluation_gold_used_for_fit": False,
+            "argmax_required_unchanged": True,
+            "raw_quality_report_sha256": raw_quality_hash,
+        }
+    return report
 
 
 def _write_report(report: dict, output: Path) -> None:
@@ -474,8 +639,15 @@ def main() -> int:
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--plan", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--calibrated", action="store_true")
+    parser.add_argument("--raw-quality-report", type=Path)
     args = parser.parse_args()
-    report = aggregate_quality(repo=args.repo, plan_path=args.plan)
+    report = aggregate_quality(
+        repo=args.repo,
+        plan_path=args.plan,
+        calibrated=args.calibrated,
+        raw_quality_report=args.raw_quality_report,
+    )
     _write_report(report, args.output)
     print(
         json.dumps(

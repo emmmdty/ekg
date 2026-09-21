@@ -202,6 +202,91 @@ def _aggregate(monkeypatch, root: Path, plan: Path) -> dict:
     )
 
 
+def _add_calibrated_artifacts(root: Path, plan: Path) -> Path:
+    plan_payload = json.loads(plan.read_text(encoding="utf-8"))
+    for row in plan_payload["folds"]:
+        fold = row["fold"]
+        run_dir = plan.parent / "relation_crossfit" / f"fold-{fold}"
+        raw_path = run_dir / "causal_posteriors.jsonl"
+        raw_metadata_path = run_dir / "causal_posteriors.metadata.json"
+        calibrated_path = run_dir / "calibrated_causal_posteriors.jsonl"
+        calibrated_path.write_bytes(raw_path.read_bytes())
+        selection_posterior = run_dir / "selection_causal_posteriors.jsonl"
+        selection_metadata = run_dir / "selection_causal_posteriors.metadata.json"
+        selection_posterior.write_text("selection\n", encoding="utf-8")
+        _write_json(selection_metadata, {"fixture": True})
+        selection_manifest = root / row["manifests"]["evaluation"]["path"]
+        row["manifests"]["selection_dev"] = {
+            "path": str(selection_manifest.relative_to(root)),
+            "sha256": aggregate.sha256_file(selection_manifest),
+        }
+        _write_json(
+            run_dir / "temperature_calibration.metadata.json",
+            {
+                "schema_version": "ekg.d4_temperature_calibration.v1",
+                "fold": fold,
+                "class_order": list(aggregate.CLASSES),
+                "gold_fields_present": False,
+                "method": {
+                    "name": "scalar_temperature_scaling",
+                    "formula": "softmax(log(p) / T)",
+                    "fit_objective": "unweighted multiclass NLL on selection-dev",
+                    "temperature": 1.0,
+                },
+                "evaluation": {
+                    "gold_accessed": False,
+                    "argmax_unchanged": True,
+                    "ordered_mention_pairs": 2,
+                    "raw_prediction_counts": {"NONE": 1, "CAUSE": 1},
+                    "calibrated_prediction_counts": {"NONE": 1, "CAUSE": 1},
+                },
+                "inputs": {
+                    "selection_manifest": {
+                        "sha256": aggregate.sha256_file(selection_manifest)
+                    },
+                    "selection_posterior": {
+                        "path": str(selection_posterior),
+                        "sha256": aggregate.sha256_file(selection_posterior),
+                    },
+                    "selection_metadata": {
+                        "path": str(selection_metadata),
+                        "sha256": aggregate.sha256_file(selection_metadata),
+                    },
+                    "evaluation_posterior": {
+                        "sha256": aggregate.sha256_file(raw_path)
+                    },
+                    "evaluation_metadata": {
+                        "sha256": aggregate.sha256_file(raw_metadata_path)
+                    },
+                },
+                "output": {
+                    "path": str(calibrated_path),
+                    "sha256": aggregate.sha256_file(calibrated_path),
+                },
+            },
+        )
+    _write_json(plan, plan_payload)
+    plan_hash = aggregate.sha256_file(plan)
+    for fold in range(1, 6):
+        run_metadata = plan.parent / f"relation_crossfit/fold-{fold}/run_metadata.json"
+        payload = json.loads(run_metadata.read_text(encoding="utf-8"))
+        payload["plan_sha256"] = plan_hash
+        _write_json(run_metadata, payload)
+    raw_quality_report = plan.parent / "quality_report.json"
+    _write_json(
+        raw_quality_report,
+        {
+            "schema_version": "ekg.d4_relation_crossfit_quality.v1",
+            "status": "quality_gate_failed",
+            "gate": {
+                "causal_f1_pass": True,
+                "multiclass_brier_pass": False,
+            },
+        },
+    )
+    return raw_quality_report
+
+
 def test_aggregate_quality_passes_exact_coverage_f1_and_brier(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -259,3 +344,25 @@ def test_aggregate_quality_rejects_incomplete_fold(tmp_path: Path, monkeypatch) 
 
     with pytest.raises(aggregate.D4QualityError, match="fold 3: run is not complete"):
         _aggregate(monkeypatch, root, plan)
+
+
+def test_aggregate_quality_validates_calibrated_provenance(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root, plan = _fixture(tmp_path)
+    raw_quality_report = _add_calibrated_artifacts(root, plan)
+    monkeypatch.setattr(aggregate, "_git_commit", lambda repo: "fixture")
+
+    report = aggregate.aggregate_quality(
+        repo=root,
+        plan_path=plan,
+        expected_documents=5,
+        expected_mentions=10,
+        expected_pairs=10,
+        calibrated=True,
+        raw_quality_report=raw_quality_report,
+    )
+
+    assert report["schema_version"].endswith("calibrated_quality.v1")
+    assert report["calibration"]["evaluation_gold_used_for_fit"] is False
+    assert [fold["temperature"] for fold in report["folds"]] == [1.0] * 5
