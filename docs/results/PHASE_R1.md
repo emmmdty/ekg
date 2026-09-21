@@ -2113,3 +2113,27 @@ out-stub/in-stub 重配对连续 1,000 次都撞上自环或重复边。改为 *
 
 ⇒ C-27 完成。两条参照线已写进 `docs/phases/PHASE_D4_predicted_causal_residual.md`，
 下一步是 G-17 单折三臂 CUDA 冒烟。
+
+### 25.17 G-17 单折三臂 CUDA 冒烟通过（2026-09-22）
+
+bounded fixture 取 fold 1 的前 20 train / 10 selection-dev / 10 evaluation 篇，sidecar 按同样的
+doc_id 过滤（13,960 / 7,230 / 8,582 行），1 epoch，三臂分别在 4090 卡 0/1/2 上跑
+train + evaluate，**六个进程全部 exit=0**。分数不进选模、不进主表。
+
+| 臂 | dev macro-F1 | eval macro-F1 | eval 边 | 中介（violations/pairs） | rewiring |
+|---|---:|---:|---:|---|---|
+| base | .193814 | .194510 | 560 | CAUSE 0/221 · PRE 0/144 | — |
+| full | .193814 | .194510 | 560 | 同上 | — |
+| rewired | .193814 | .194510 | 560 | 同上 | 286/560 同边（`.5107`） |
+
+**三臂逐 mention 预测完全相同（262 个 mention 里 0 个不同）。这不是机制失效，必须说清楚为什么：**
+1 epoch × 20 篇之后三臂都塌到全 `CT+`（macro `.19451` ≈ 多数类地板），所以预测相同只反映
+「冒烟规模下谁都没学会」。**机制本身是活的**——`full` 的 residual 权重训练后
+`|W|₁` 为 CAUSE `40.33` / PRECONDITION `55.09`（零初始化出发），`rewired` 为 `35.76` / `59.66`；
+`base` 的 checkpoint 里**没有** `causal_residual.pt`，evaluator 也会因为它存在而拒绝。
+⇒ 冒烟证明的是「forward/backward/evaluator/中介/负控诊断在 CUDA 上跑得通且三臂互斥」，
+不是任何效果判断。
+
+顺带确认 base 的配方与冻结锚逐项相同：`--epochs 12 --lr 2e-05 --alpha 0.5 --batch-size 32
+--max-length 128 --seed 13`、同一个内容寻址 backbone `71be7419…c961ea9`；锚 fold-1 的
+evaluation macro-F1 是 `.5568315`（pooled `.553995`）。唯一差异仍是 §25.16 说明的按文档打包。

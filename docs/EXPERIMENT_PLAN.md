@@ -393,7 +393,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **G-14** | **A4 四臂 dry-run（5090 探测，数字不进主表）** —— 2026-09-13 启动。用 A4.3 那条正式命令跑满四臂 + `--aggregate`，验证产物清单、中介统计与聚合断言 | 5090 空闲 + ≤1 天授权 | 约 4–5 小时（单臂实测 56 分钟） | `DRYRUN_COMPLETE`；或抓到缺陷并记进 `results/PHASE_A.md`——**抓到就是赚到，那本该是 4090 上 2–3 GPU·day 之后才暴露的** |
 | **G-15** | ✅ **D4 relation cross-fit 单折 CUDA 冒烟完成（2026-09-21，gpu-4090 GPU1）**：约 32 秒，真实 encoder/head 反传、causal-family checkpoint 重载和 posterior dump 闭环；`smoke.json` `068e71a7…e564`，`status=complete` / `device=cuda` / `scientific_result=false`；独立重算 5 篇 / 5,198 行且概率契约全过。smoke causal F1=0 不用于选配方或主表 | C-24 + 空闲 4090；事前已披露 exact command | 实测约 32 秒 | ✅ 达成；下一步 G-16 |
 | **G-16** | ✅ **D4 五折真实 predicted causal posterior 完成（2026-09-21）**：seed 13；五折均 `status=complete`，独立重算合计 2,913 docs / 73,939 mentions / 2,532,394 pairs 与逐折 SHA 全部匹配；evaluation 从未参与训练/选模；不同 fold 并行不是多种子 | G-15 | 09:08–15:53 墙钟（含 fold 5 启动前空档） | ✅ 达成；C-25 已如实判出 hard-label pass / probability-quality fail |
-| **G-17** | **D4 新机制单折 CUDA 冒烟** | C-27 + 空闲 4090 | ≤1 小时 | 三臂均走真实 posterior；前向/反向/评测/中介产物闭环；不进主表 |
+| **G-17** | ✅ **D4 单折三臂 CUDA 冒烟通过（2026-09-22）**：20/10/10 篇 bounded fixture、1 epoch，六个进程全部 exit=0；三臂预测相同是因为冒烟规模下都塌到多数类 `.19451`，而 residual 权重确实从零初始化训起（|W|₁ 40.33 / 55.09），base 无 residual 文件 | G-16 + C-27 | 约 3 分钟 | ✅ 达成；分数不进选模与主表（`results/PHASE_R1.md` §25.17）|
 | **G-18** | **D4 seed-13 五折三臂正式实验** | G-17 + C-26 immutable contract | 约 1.5 GPU·day | pooled OOF 主指标、五类分项、配对 bootstrap、两项一致性中介和 rewiring 负控全部落盘；按 §25 一次判定，不达标则进入第二个实质设计周期而非“全部止损” |
 
 **G-13 / G-14 共同确立的方针（作者 2026-09-13）**：4090 被占不是停工理由。
