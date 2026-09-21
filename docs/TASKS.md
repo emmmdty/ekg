@@ -136,9 +136,9 @@ not active while this queue advances.
 - [x] **T067 [RS-003]** Aggregate and quality-check the five posterior dumps → coverage/no-gold and pooled causal
   F1 `.308141` passed, but multiclass Brier `.068750` was worse than the evaluation-prevalence no-skill `.041427`;
   status is `quality_gate_failed` at the input-probability layer, not a D4 mechanism result.
-- [ ] **T067a [RS-003]** Repair posterior calibration without reading evaluation labels → verify the mechanism against
-  primary paper/code, freeze a selection-dev-only calibration contract, preserve the raw sidecars, and require the
-  recalibrated five-fold OOF posterior to retain causal F1 ≥`.300` while beating no-skill Brier.
+- [ ] **T067a [RS-003]** Repair posterior calibration without reading evaluation labels → the first cycle is frozen to
+  one scalar temperature per fold, fit by unweighted NLL on that fold's exhaustive selection-dev posterior; preserve
+  raw sidecars, assert evaluation argmax/F1 remains exactly `.308141`, and require Brier `< .0414265581`.
 - [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067a passes → exact three arms,
   project-defined consistency mediators, rare-class floors, bootstrap inference and stop/second-cycle branches are
   fixed before method results exist.

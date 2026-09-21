@@ -46,7 +46,7 @@
 
 ## 下一步
 
-1. 核到校准机制的一手论文与官方实现，先冻结 C-25R 的 selection-dev-only 变换、输入/输出哈希和验收线；
+1. 实现已冻结的 per-fold scalar temperature：selection-dev unweighted NLL 拟合，evaluation 只变换概率；
 2. 生成各折 selection-dev posterior，拟合校准器并对封存 evaluation posterior 做一次变换与质量复核；
 3. 只有 recalibrated Brier `< .0414265581` 且 causal F1 仍 ≥`.300` 才解锁 C-26；C5/A4/Ch6 不插队。
 

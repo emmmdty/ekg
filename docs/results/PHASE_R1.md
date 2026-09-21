@@ -1767,3 +1767,35 @@ SHA-256 为 `2275097562f30e9f633e5724febd5f60437b12f2ffe7f006bce722cb5ffa5074`�
 和完整 evaluation sidecar，数据/协议/代码/4090 资产均已具备。验收仍沿用原门：calibrated causal F1
 ≥`.300` 且 Brier 严格优于 `.0414265581`，不过则记录失败并进入实质不同的第二个校准周期，不用
 evaluation 扫温度、阈值或类别偏置。
+
+### 25.7 C-25R 第一校准周期预注册（在 calibrated evaluation 数字之前）
+
+**错误假设。** 五折训练的 causal class weights 不是概率中性的：由各折冻结 train population 按训练器
+原公式重算，NONE 为 `.58344–.58358`、CAUSE 为 `7.61566–7.77331`、PRECONDITION 为
+`4.60492–4.69440`。加权 cross-entropy 的总体最优输出满足
+`q_k(x) ∝ w_k p(y=k|x)`，所以它适合抬稀有类召回，却不能直接当自然类别分布下的 posterior；C-25
+中预测正类约为 gold 的 2.12 倍与这个方向一致，但目前只把它记为**待检验根因**，不冒充因果结论。
+
+业界首选从最小可证伪修复开始：[Guo et al. (ICML 2017) 正文](https://proceedings.mlr.press/v70/guo17a.html)
+§4 明确要求 calibration 使用 hold-out validation、固定网络参数；其 multiclass temperature scaling 只拟合
+一个 `T>0`、用 validation NLL 优化，并因不改变 softmax 最大项而保持分类结果不变。
+[作者公开实现](https://github.com/gpleiss/temperature_scaling/blob/master/temperature_scaling.py) 同样收集 validation
+logits/labels 后只用 LBFGS 更新一个 temperature。这里的 selection-dev 与 evaluation 来自同一冻结五折分布，
+且论文明确允许 calibration set 与 hyperparameter validation set 相同，因此【数据/协议/代码/算力】均可行。
+
+第一周期冻结如下，不根据 calibrated evaluation 结果改动：
+
+1. 每个 fold 用**自己的** causal-family checkpoint 在该 fold selection-dev 上导出 exhaustive 三类 posterior；
+   文档、候选顺序、行数和 checkpoint hash 任一漂移都 fail-fast；
+2. 将 `log(p)` 作为与原 logits 只差逐样本加法常数的等价 logits；原 posterior 若含零或非法概率则拒绝，
+   不加 epsilon 掩盖；每折以全部 selection-dev pair 的**非加权 multiclass NLL**拟合唯一 `T>0`；
+3. evaluation 只做 `q_k = p_k^(1/T) / Σ_j p_j^(1/T)`，原始 sidecar 永不覆盖；不根据 selection-dev
+   Brier/F1 选择另一个 calibrator，也不拟合阈值或类别偏置；
+4. 变换前后 evaluation 的 argmax、三类 prediction counts 与 causal TP/FP/FN 必须逐项相同，因此正式
+   causal F1 必须仍为 `.30814055`；唯一待检验变量是 Brier，必须严格 `< .0414265581`；
+5. evaluation gold 只在五折 calibrated sidecar 和 metadata 全部封存后读取一次。若 Brier 仍失败，首轮
+   temperature family 如实封存；第二周期才回 R1 立项沿训练 class-weight 方向的 class-bias correction，
+   并重新事前冻结 F1 护栏，禁止用 evaluation 扫偏置强度。
+
+这一步能支撑的论断仅是“部署 posterior 的全局置信度尺度已/未修复”，不是 D4 方法有效。只有它过门，
+C-26 才能把概率作为 uncertainty gate 的输入。
