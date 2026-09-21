@@ -1,5 +1,24 @@
 {
-  "patches": [],
+  "patches": [
+    {
+      "date": "2026-09-22",
+      "file": "trainEFD/train.py",
+      "line_endings": "CRLF preserved so the diff shows only these changes",
+      "not_changed": [
+        "model architecture, tokenizer, special tokens, optimiser, loss",
+        "every default hyper-parameter",
+        "the EFDDataset loader and the relation/argument feature construction"
+      ],
+      "patched_sha256": "362146f45d5ba6adcce9f5d4802613108ecb9af52d6f18f9e12f12eb27d61a79",
+      "verbatim_sha256": "68bfcbd1102a2c721ebc6cb8f00b9b4dd3746dea865634868f6399bb433e2313",
+      "what": [
+        "new --dev_data (required) and --report_out arguments",
+        "inline per-epoch inference lifted into _infer() and _report() so dev and test are scored by the same code path",
+        "dev-selected result and upstream epoch-max both written to --report_out"
+      ],
+      "why": "Upstream evaluates --test_data every epoch and reports max-over-epochs of the test macro-F1 (its checkpoint-saving line is commented out), which is selection on the evaluation set. This fork adds a required --dev_data, picks the epoch by dev macro-F1, reports the test metrics of that epoch, and still reports the upstream epoch-max number so the two protocols can be compared."
+    }
+  ],
   "schema_version": "ekg.vendored_baseline.v1",
   "upstream": {
     "commit": "67544719c60c6eb7587ed00a3e59df83822f6847",
