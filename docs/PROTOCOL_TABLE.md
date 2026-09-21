@@ -57,7 +57,9 @@ python3 -c "import json;d=json.load(open('data/protocols/v6/manifests/maven_ere_
 | 缺失处理 | 有 gold 无预测、或预测到未知 mention，**直接抛异常**，不补默认值 | 同上函数体 |
 | 配对统计 | 同一批 OOF 文档上的 document-cluster bootstrap | `factuality_cv.json` `config.paired_inference` |
 | final-valid | **未打开** | `factuality_cv.json` `config.final_valid_accessed = false` |
-| 本轮状态 | **failed**（typed-cue 家族已关闭） | `results/PHASE_D.md` |
+| **结构输入**（v6.2 新增的第四条轴） | 每折**自己的** causal checkpoint 产出的 posterior，经**同一张冻结 Dirichlet map** 变换为自然后验；硬判定 `argmax_k w_k p_k`，`NONE` 即无边，置信度＝被判子类型的自然后验。三个 split（train / selection-dev / evaluation）各一份 sidecar，map 参数逐位相同 | `runs/stages/R1/r1-v62-20260920/relation_crossfit/fold-*/`（`dirichlet_quality_report.json` `fea7d3ed…1b54d4`）；`results/PHASE_R1.md` §25.13 / §25.15 |
+| **结构输入的泄漏纪律** | 训练文档的边**不用** OOF sidecar 并集——那会让 fold `i` 的 evaluation 金标关系经 relation fold `j` 间接流进训练。改用该折自己的 checkpoint 现场 dump，代价是 train 侧 in-sample 乐观（**偏离**而非偏向我们的结论） | `results/PHASE_R1.md` §25.14 |
+| 本轮状态 | typed-cue 家族 **failed / 已关闭**（`results/PHASE_D.md`）；**v6.2 predicted-causal residual 家族的五折三臂 2026-09-22 在跑**，契约 `docs/phases/PHASE_D4_predicted_causal_residual.md` | `results/PHASE_R1.md` §25 |
 
 ### 2.2 第 4 章 · 事件关系抽取（A4，MAVEN-ERE）
 
