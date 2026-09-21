@@ -2019,3 +2019,34 @@ git、对象完整性由 git 自身校验，且顺带修好了「远端 `origin/
 
 ⇒ 按 §25.12 冻结的条款，**C-25R3F 三项必要门全过，C-26 解锁**。C-26 之后不得回头改 map、阈值、
 权重或正则；`argmax_k w_k p_k` 与五折 map 参数自此是冻结输入。
+
+### 25.14 C-27 开工自审时查出的泄漏路径：**训练文档的结构输入不能用 OOF posterior**（2026-09-22）
+
+C-26 冻结了三臂与门，但没有写明**训练文档**的边从哪来——契约只约束了 evaluation。落实现时必须先答
+这一条，答错就是又一次「事后才发现口径不对」。
+
+**事实链（可自查）。** `factuality_cv` 的轮换是 `evaluation=i；selection_dev=(i+1) mod 5；train=其余三组`。
+记五组文档为 `g0…g4`，D4 fold `i` 的 evaluation 是 `g_{i-1}`、train 是另外三组；而任一文档 `d ∈ g_j` 的
+**OOF posterior 由 relation fold `j+1`** 产出。以 D4 fold 1 为例：eval = `g0`，train = `g2,g3,g4`；
+`g2` 的 OOF posterior 来自 relation fold 3，而 **relation fold 3 的 train 正好包含 `g0`**。
+⇒ **把 OOF posterior 当训练文档的结构输入，等于让 fold 1 的 evaluation 金标关系经由「relation fold 3 学到的
+东西」流进 fold 1 的检测器训练**。这条通道很细（检测器只看局部边，不看文档身份），但它的类型与
+ESC `19.6` 那次切分泄漏完全相同，按 A 类口径处理，不按「影响应该很小」处理。
+
+**两个候选与裁定。**
+
+| 方案 | 训练文档的边来自 | 泄漏 | 噪声匹配 | 代价 |
+|---|---|---|---|---|
+| A（免费） | 五份 OOF sidecar 的并集 | **有**上述间接通道 | train/eval 噪声同分布 | 0 |
+| **B（采用）** | **该折自己的** relation checkpoint 现场 dump | **无**：fold `i` 的 relation 模型从未见过 `g_{i-1}` | train 侧偏乐观（in-sample） | 5 折 × ~1.5M pair 的纯推理 |
+
+取 **B**。理由是两条偏置的方向不同：A 的泄漏**偏向**我们的结论，B 的 in-sample 乐观**偏离**我们的
+结论——训练时的边比推理时干净，检测器会过度信任边，在 evaluation 上**掉分**。**保守的偏置可以带着走并
+如实披露，偏向自己的偏置不行。** B 的 in-sample 乐观在结果页与主表里明写，不做「嵌套交叉拟合」去修
+（那要把 relation 训练再乘三，超出本章预算）。
+
+**执行后果（已写进主表）。** 新增一格 **C-27b**：用 fold `i` 的 causal checkpoint 对该折 `train.json`
+（1,747 / 1,747 / 1,748 / 1,749 / 1,748 篇，合计 **7,597,182** ordered pairs）dump raw posterior，
+再用**同一张已冻结的 fold map** 做 Dirichlet 变换。selection-dev 侧的 posterior 已存在（C-25R 阶段产出，
+同一 checkpoint），无需重跑。这一步不训练任何模型、不读 evaluation、不改 map 参数，
+沿用 `dump_relation_causal_posteriors.py` 与 `formalize_d4_dirichlet_posteriors.py` 原样调用。
