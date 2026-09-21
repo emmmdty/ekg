@@ -55,6 +55,14 @@ def _sidecar_documents(path: Path):
         yield current, rows
 
 
+def _bare(mention_id: str, doc_id: str) -> str:
+    """Our loaders namespace mention ids as ``<doc>::<mention>``; upstream does not."""
+    prefix = f"{doc_id}::"
+    if not mention_id.startswith(prefix):
+        raise ValueError(f"{mention_id} does not belong to {doc_id}")
+    return mention_id[len(prefix) :]
+
+
 def write_split(
     *,
     source: Path,
@@ -85,11 +93,12 @@ def write_split(
             }
             rebuilt: dict[str, list[list[str]]] = {"CAUSE": [], "PRECONDITION": []}
             for subtype, pairs in mention_edges[doc["id"]].items():
-                lifted = {
-                    (cluster_of[head], cluster_of[tail])
-                    for head, tail in pairs
-                    if cluster_of[head] != cluster_of[tail]
-                }
+                lifted = set()
+                for head, tail in pairs:
+                    source_cluster = cluster_of[_bare(head, doc["id"])]
+                    target_cluster = cluster_of[_bare(tail, doc["id"])]
+                    if source_cluster != target_cluster:
+                        lifted.add((source_cluster, target_cluster))
                 rebuilt[subtype] = [[head, tail] for head, tail in sorted(lifted)]
             doc["causal_relation"] = rebuilt
         for subtype in counts:

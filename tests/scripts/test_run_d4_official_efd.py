@@ -57,8 +57,8 @@ def test_predicted_structure_lifts_mentions_to_clusters_and_drops_self_edges(
     edges = {
         "d1": {
             # m1 and m2 are the same cluster: that pair must not become a self-edge.
-            "CAUSE": {("m3", "m1"), ("m1", "m2")},
-            "PRECONDITION": {("m1", "m3")},
+            "CAUSE": {("d1::m3", "d1::m1"), ("d1::m1", "d1::m2")},
+            "PRECONDITION": {("d1::m1", "d1::m3")},
         }
     }
 
@@ -76,6 +76,17 @@ def test_predicted_structure_lifts_mentions_to_clusters_and_drops_self_edges(
         "PRECONDITION": [["E1", "E2"]],
     }
     assert written["cluster_relation_counts"] == {"CAUSE": 1, "PRECONDITION": 1}
+
+
+def test_a_mention_from_another_document_fails_fast(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="does not belong to d1"):
+        official.write_split(
+            source=_source(tmp_path),
+            document_ids=["d1"],
+            structure="predicted",
+            mention_edges={"d1": {"CAUSE": {("d9::m1", "d1::m3")}, "PRECONDITION": set()}},
+            output=tmp_path / "out.jsonl",
+        )
 
 
 def test_predicted_structure_without_edges_fails_fast(tmp_path: Path) -> None:
