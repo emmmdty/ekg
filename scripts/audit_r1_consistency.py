@@ -75,7 +75,7 @@ TRACEABILITY = {
     ),
     "RS-004": _entries(
         ["docs/phases/PHASE_E3_graph_application.md"],
-        ["T040", "T041", "T042", "T043", "T044"],
+        ["T054", "T055", "T056", "T057", "T058"],
         [PHASE_PATHS["consumer"]],
     ),
     "FR-001": _entries(
@@ -85,17 +85,17 @@ TRACEABILITY = {
     ),
     "FR-002": _entries(
         ["docs/phases/PHASE_E3_graph_application.md#goal"],
-        ["T040", "T044"],
+        ["T054", "T058"],
         [PHASE_PATHS["consumer"]],
     ),
     "FR-003": _entries(
         ["docs/phases/README.md#错误隔离与交接"],
-        ["T029", "T034", "T039", "T044"],
+        ["T029", "T034", "T039", "T058"],
         list(PHASE_PATHS.values()),
     ),
     "FR-004": _entries(
         ["docs/RESEARCH_PLAN.md#protocol-layers"],
-        ["T028", "T033", "T038", "T043"],
+        ["T028", "T033", "T038", "T057"],
         list(PHASE_PATHS.values()),
     ),
     "FR-005": _entries(
@@ -115,17 +115,17 @@ TRACEABILITY = {
     ),
     "FR-008": _entries(
         ["docs/phases/PHASE_E3_graph_application.md#e34-构建质量评估"],
-        ["T042", "T043", "T044"],
+        ["T056", "T057", "T058"],
         [PHASE_PATHS["consumer"]],
     ),
     "FR-009": _entries(
         ["docs/phases/README.md#错误隔离与交接"],
-        ["T026", "T029", "T031", "T034", "T036", "T039", "T044"],
+        ["T026", "T029", "T031", "T034", "T036", "T039", "T058"],
         list(PHASE_PATHS.values()),
     ),
     "FR-010": _entries(
         [f"{R1_ROOT}/protocol.json#/final_valid_ledger"],
-        ["T029", "T034", "T039", "T044"],
+        ["T029", "T034", "T039", "T058"],
         list(PHASE_PATHS.values()),
     ),
     "FR-011": _entries(
@@ -140,12 +140,12 @@ TRACEABILITY = {
     ),
     "FR-013": _entries(
         [f"{R1_ROOT}/id_coverage.json"],
-        ["T025", "T040"],
+        ["T025", "T054"],
         [PHASE_PATHS["identity"], PHASE_PATHS["consumer"]],
     ),
     "FR-014": _entries(
         ["tests/core/test_propagation.py"],
-        ["T025", "T035", "T040"],
+        ["T025", "T035", "T054"],
         [PHASE_PATHS["identity"], PHASE_PATHS["factuality"], PHASE_PATHS["consumer"]],
     ),
     "FR-015": _entries(
@@ -184,17 +184,17 @@ TRACEABILITY = {
     ),
     "QR-005": _entries(
         ["docs/phases/PHASE_E3_graph_application.md#baselines"],
-        ["T041", "T042", "T044"],
+        ["T055", "T056", "T058"],
         [PHASE_PATHS["consumer"]],
     ),
     "QR-006": _entries(
         ["docs/phases/README.md#运行方式"],
-        ["T025", "T030", "T035", "T040", "T045"],
+        ["T025", "T030", "T035", "T054", "T045"],
         [*PHASE_PATHS.values(), "docs/phases/PHASE_H2_thesis_acceptance.md"],
     ),
     "QR-007": _entries(
         ["docs/results/PHASE_A.md", "docs/results/PHASE_C.md", "docs/results/PHASE_D.md"],
-        ["T028", "T033", "T038", "T044"],
+        ["T028", "T033", "T038", "T058"],
         list(PHASE_PATHS.values()),
     ),
     "SC-001": _entries(
@@ -215,22 +215,22 @@ TRACEABILITY = {
     ),
     "SC-005": _entries(
         ["docs/phases/PHASE_E3_graph_application.md#e33-下游事件预测对比实验本章主表"],
-        ["T042", "T043", "T044"],
+        ["T056", "T057", "T058"],
         [PHASE_PATHS["consumer"]],
     ),
     "SC-006": _entries(
         ["docs/phases/README.md#错误隔离与交接"],
-        ["T044", "T045", "T046"],
+        ["T058", "T045", "T046"],
         [PHASE_PATHS["consumer"], "docs/phases/PHASE_H2_thesis_acceptance.md"],
     ),
     "SC-007": _entries(
         [f"{R1_ROOT}/id_coverage.json"],
-        ["T040", "T045"],
+        ["T054", "T045"],
         [PHASE_PATHS["consumer"], "docs/phases/PHASE_H2_thesis_acceptance.md"],
     ),
     "SC-008": _entries(
         ["docs/phases/README.md#运行方式"],
-        ["T025", "T030", "T035", "T040", "T045"],
+        ["T025", "T030", "T035", "T054", "T045"],
         [*PHASE_PATHS.values(), "docs/phases/PHASE_H2_thesis_acceptance.md"],
     ),
     "SC-009": _entries(

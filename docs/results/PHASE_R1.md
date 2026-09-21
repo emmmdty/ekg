@@ -2137,3 +2137,26 @@ train + evaluate，**六个进程全部 exit=0**。分数不进选模、不进�
 顺带确认 base 的配方与冻结锚逐项相同：`--epochs 12 --lr 2e-05 --alpha 0.5 --batch-size 32
 --max-length 128 --seed 13`、同一个内容寻址 backbone `71be7419…c961ea9`；锚 fold-1 的
 evaluation macro-F1 是 `.5568315`（pooled `.553995`）。唯一差异仍是 §25.16 说明的按文档打包。
+
+### 25.18 一致性审计自 09-20 起一直是 BLOCKED，已修复（2026-09-22）
+
+`HANDOFF.md` §0.1 的三条只读检查里，第三条 `audit_r1_consistency.py` **从 2026-09-20 的 `c9afdeb`
+起就一直返回 `BLOCKED`**，两天没人发现——因为那次提交把作者撤销的 24 条件 factorial 队列
+**T040–T044 从 `TASKS.md` 里删掉了，却没有同步审计脚本里的 traceability 映射**，于是每次审计都报
+`task-undeclared`。这条记下来不是为了追责，而是因为它说明**「开工前跑一遍 §0.1」不是形式**：
+一个 B 类可追溯闸门失效了两天，期间所有「36/36 PASS」的引用都是过期的。
+
+修法是一对一改指到活着的后继任务，不是删引用（删引用会让需求覆盖静默变少）：
+`T040→T054`（冻结评测单元）、`T041→T055`（重跑上游行）、`T042→T056`（透明移植公开对手）、
+`T043→T057`（导出与论断边界）、`T044→T058`（授权后才跑多种子）。RS-004 与六条 FR 的角色逐项对应，
+**没有任何需求失去覆盖**，也没有任何 run hash 变化。
+
+脚本身份本来就被 R1 protocol 的 `code.files` 钉着，所以改脚本必然触发 `audit-script-hash-drift`。
+按既有先例（amendment 4，2026-09-07 同样重钉过这个脚本）追加第 5 条 amendment 并更新 pin：
+审计脚本 SHA-256 `a1d99a7f…a7a65ca → 612596bf…201a5f7b`，**R1 protocol SHA-256
+`f0b4702b258ef61257d0aeae20fd23bb48f36e4ff4761a575ac1b97277150829` →
+`a4528861e0581d946ecadaba6cb7c2b83941796c7dbb9c49c5d186ddf8f768af`**，
+本地与 4090 双端 scp 后 SHA 一致。重跑审计恢复 **PASS: 36 requirements mapped**。
+
+⚠️ 4090 上的脚本仍是旧版（**G-18 跑完之前不 `git reset --hard`**，runner 每折现拉脚本起子进程），
+所以在远端重跑审计会暂时报 `audit-script-hash-drift`——那是正确行为，G-18 收口后同步即消。
