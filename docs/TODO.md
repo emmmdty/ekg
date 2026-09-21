@@ -7,12 +7,12 @@
 
 **活动队列只剩 Ch3/D4。** 作者要求按第一性原理拆到最终目标、必达门和中间指标，一次只推进一个章节。
 目标树与阶段结果在 `results/PHASE_R1.md` §25；执行顺序是
-`C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-25R2 → C-25R3 → C-26 → C-27 → G-17 → G-18`。
+`C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-25R2 → C-25R3 → C-25R3F → C-26 → C-27 → G-17 → G-18`。
 旧 typed cues 继续封存；失败的是机制家族，不是 D4 整章。
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-25R2 selection-only 失败（Brier `.041942 > .041427`；F1 `.279911 < .300`）；当前回 R1 冻结 C-25R3 第三机制，C-26 仍冻结 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-25R3 holdout 已正向过门（Brier `.034240 < .040057`；cost-aware F1 `.300990`）；当前只做 C-25R3F 正式输入门，C-26 仍冻结 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -26,8 +26,9 @@
   **703 passed / 29 skipped、ruff 0、smoke OK**；C-25 汇总器已在看到五折分数前冻结，当前全门
   **707 passed / 29 skipped、ruff 0、smoke OK**；
   S2 原始五折输入已完成并由 C-25 判定：coverage 全过，causal F1 **`.308141`** 过线；但 Brier
-  **`.068750`** 劣于 no-skill **`.041427`**；C-25R2 虽把 selection Brier 降至 **`.041942`**，却同时
-  把 F1 降至 **`.279911`**，故仍处于输入概率修复阶段，没有 D4 新方法分数。
+  **`.068750`** 劣于 no-skill **`.041427`**；第三机制已在互斥 selection holdout 上同时得到 Brier
+  **`.034240`**（比 no-skill 低 `.005817`）和 cost-aware F1 **`.300990`**，是首个正的输入阶段结果；
+  正式 evaluation 仍未访问，故还不能宣布 S2 或 D4 方法结果过线。
 
 ## ✅ 已完成：C-13–C-21（2026-09-20，本地文献/CPU/代码）
 
@@ -47,10 +48,9 @@
 
 ## 下一步
 
-1. C-25R2 负结果已封存，evaluation 未访问、未生成 sidecar；
-2. C-25R3 已冻结为 Dirichlet natural posterior + cost-aware Bayes decision；下一步实现并只在 1,458 篇
-   未参与拟合的 selection holdout 验收（Brier 改善目标 `.0027`、F1 ≥`.300`、power `.808`）；
-3. 只有第三机制 selection holdout 与另行冻结的 formal gate 都通过才解锁 C-26；C5/A4/Ch6 不插队。
+1. C-25R3 holdout 正结果已封存，报告 SHA `ee7835d0…cad90f`；evaluation 未访问；
+2. 实现 C-25R3F：完整 selection refit 五折 map、先封存 natural posterior sidecar，再做一次 formal gate；
+3. formal 必须同时达到 Brier ≤`.0387265581`、cost-aware F1 ≥`.300` 才解锁 C-26；C5/A4/Ch6 不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
 backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。

@@ -1925,3 +1925,41 @@ D4 uncertainty gate”。可行性成立：五折 selection posterior/labels、�
 因果链是可证伪的：class-weight/类别对失真 → full multiclass map 修复自然 posterior → cost-aware rule
 恢复稀有类决策 → D4 uncertainty gate 才能区分强弱预测边。plain-vs-cost-aware 消融隔离最后一箭；若
 Brier 过而 F1 不过，失败在 decision link；若 F1 过而 Brier 不过，失败在 probability map。
+
+### 25.12 C-25R3 selection document-holdout 结果与 formal 预注册（2026-09-22）
+
+实现提交 `21d9824` 在本地通过 **727 passed / 29 skipped、ruff 0、`ekg-smoke` OK**。4090 的
+`git fetch` 再次因 `gh-proxy.com` DNS 失败，改用完整 Git bundle；双端 bundle SHA-256 均为
+`9ddc9c8a2dc80dfee202dfd4fb8c61de0292259bce097da777114832cfb48e23`，远端 HEAD 精确为
+`21d9824`，定向测试 **17/17 passed**。这次同步错误没有被写成实验结论，也未散拷脚本。
+
+selection-only 正式报告
+`gpu-4090:.../relation_crossfit/dirichlet_holdout_selection_audit.json` SHA-256 为
+`ee7835d0a09bd44a46e9c3c2b506647b6151c0d74d2a1f28663edbab28cad90f`；状态
+`accepted_for_formal_freeze`，`evaluation_artifacts_accessed=false`：
+
+| 1,458 篇 holdout / 1,258,280 pairs | raw | Dirichlet natural posterior | 事前门 | 判定 |
+|---|---:|---:|---:|---|
+| multiclass Brier | `.06732862` | `.03423965` | 比 no-skill `.04005695` 至少低 `.0027` | **低 `.00581730`，PASS** |
+| cost-aware causal exact-subtype F1 | `.30309877`（raw argmax） | `.30099005` | ≥ `.300` | **PASS** |
+| plain argmax causal F1（单变量消融） | — | `.08192121` | 仅诊断 | 决策分离必要 |
+
+五折 map 均由互斥 calibration documents 拟合，LBFGS 在 43–50 iterations 内收敛。单折 cost-aware F1
+为 `.28374–.32214`，其中 3/5 低于 `.300`，但预注册判据是合并 candidate universe，pooled 仅高门
+`.000990`；这个窄裕量必须如实保留，不能写成稳健完成。相反，五折 Brier 全部低于各自 no-skill，
+pooled 目标裕量 `.003117`（实际改善 `.005817` 减预注册 `.0027`）。文档宏观 paired difference 均值
+`−.012064`、SD `.026189`，方向与 pair-micro 一致。
+
+**formal gate 在读取 evaluation 前冻结。** 每折用完整 selection population、相同无正则 full
+Dirichlet Eq.7 和同一收敛参数 refit；evaluation raw posterior 只用于无标签变换，输出新的 immutable
+natural-posterior sidecar 与 metadata，原始/scalar-temperature sidecar 均不覆盖。五份 sidecar 全部通过
+checkpoint、候选顺序、概率、class order、输入/输出 hash 后，汇总器才读取 evaluation gold 一次。
+正式必要门为：
+
+1. 2,913 docs / 73,939 mentions / 2,532,394 ordered pairs 精确一次，gold 字段仍不进入 sidecar；
+2. natural posterior Brier 优于 raw，且 ≤ **`.0387265581`**，即比冻结 evaluation no-skill
+   `.0414265581` 至少低 `.0027`；
+3. 用每折冻结 trainer weight 作 `argmax_k w_k p_k`，pooled exact-subtype causal F1 ≥`.300`；
+4. 同时报告 plain `argmax p_k` F1/prediction counts，但不把它用作 deployable decision；
+5. 任一失败即封存 C-25R3 family，不在 evaluation 上改正则、阈值、权重或 map。全过才解锁 C-26；
+   本节仍不等同于 D4 三臂方法结果。
