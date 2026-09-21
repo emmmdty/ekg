@@ -136,10 +136,13 @@ not active while this queue advances.
 - [x] **T067 [RS-003]** Aggregate and quality-check the five posterior dumps → coverage/no-gold and pooled causal
   F1 `.308141` passed, but multiclass Brier `.068750` was worse than the evaluation-prevalence no-skill `.041427`;
   status is `quality_gate_failed` at the input-probability layer, not a D4 mechanism result.
-- [ ] **T067a [RS-003]** Repair posterior calibration without reading evaluation labels → the first cycle is frozen to
-  one scalar temperature per fold, fit by unweighted NLL on that fold's exhaustive selection-dev posterior; preserve
-  raw sidecars, assert evaluation argmax/F1 remains exactly `.308141`, and require Brier `< .0414265581`.
-- [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067a passes → exact three arms,
+- [x] **T067a [RS-003]** Run the preregistered scalar-temperature calibration cycle → argmax/F1 remained exactly
+  `.308141` and Brier improved `.068750 → .064155`, but still failed the `< .0414265581` gate; the complete negative
+  report and five calibrated sidecars remain preserved.
+- [ ] **T067b [RS-003]** Test the materially different class-weight loss correction on selection-dev only → derive each
+  fold's exact training weights, apply the analytic inverse `p_k ∝ q_k / w_k`, and require pooled selection causal F1
+  ≥`.300` plus Brier below selection prevalence no-skill before evaluation may be transformed again.
+- [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067b and its formal gate pass → exact three arms,
   project-defined consistency mediators, rare-class floors, bootstrap inference and stop/second-cycle branches are
   fixed before method results exist.
 - [ ] **T069 [RS-003]** Implement the uncertainty-gated causal residual and rewiring control → no/low-confidence edges

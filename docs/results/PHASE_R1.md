@@ -1822,5 +1822,38 @@ selection-dev candidate universe，未写 gold 字段：
 
 执行中的错误如实保留：代码 push 后，4090 首次 `git fetch` 因 `gh-proxy.com` DNS 解析失败；随后 cpolar
 SSH 在 banner 前连续超时。按三态规则这不表示服务器或上述产物消失。为保持代码必须来自 git 的绑定，
-尚未手工散拷脚本、尚未拟合任何 `T`、也尚未读取 calibrated evaluation 指标；恢复后先确认远端 HEAD
-等于 `078fe00`，再执行五折校准。
+没有手工散拷脚本；隧道恢复后改用双端 SHA 一致的 Git bundle 同步完整 commit 图，远端 HEAD
+`7f347c2` 包含实现提交 `078fe00`，随后远端相关测试 **12/12 passed**，才执行五折校准。
+
+### 25.9 C-25R 正式结果与 C-25R2 预注册（2026-09-21）
+
+scalar-temperature 五折产物全部通过 checkpoint、候选顺序、覆盖与 argmax invariance 校验后，才读取一次
+evaluation gold。正式报告
+`gpu-4090:.../relation_crossfit/calibrated_quality_report.json` SHA-256 为
+`5fc28b7c2db2da598bc0f05238507408c83957939cb178d52ee1c2288fc7b296`，状态仍为
+`quality_gate_failed`：
+
+| 指标 | raw C-25 | scalar temperature | 变化/判定 |
+|---|---:|---:|---|
+| causal exact-subtype micro-F1 | `.30814055` | `.30814055` | argmax 精确不变，PASS |
+| multiclass Brier | `.06875035` | `.06415525` | `−.00459510`（约 −6.7%），有改善 |
+| evaluation no-skill Brier | `.04142656` | `.04142656` | calibrated 仍高 `.02272869`，**FAIL** |
+
+五折温度依次为 `2.085692 / 1.888133 / 2.173413 / 1.706430 / .751421`；每折 selection NLL 都下降，
+但每折正式 Brier 仍为 `.061785–.068109`，全部劣于各自 no-skill。结论是全局 entropy/置信度尺度确实
+贡献了一部分误差，却不是主因；继续扫 temperature 属于复活同一失败 family，已禁止。
+
+**第二周期科研价值。** 当前模型明确用 class-weighted cross-entropy 训练，而 uncertainty gate 需要自然分布
+posterior。[Caplin, Martin & Marx (2022)](https://arxiv.org/abs/2205.04613) 正文 §3 的 Proposition 3 给出
+multiclass weighted loss 会把 posterior 映射为权重扭曲的最优 score；Proposition 4–5 要求在映射可逆时用
+解析逆恢复 calibration，并说明这种 correction 不再估计额外参数。对本项目的 categorical weighted CE，
+直接对条件风险求导得到 `q_k = w_k p_k / Σ_j w_j p_j`，所以解析逆是
+`p_k = (q_k/w_k) / Σ_j(q_j/w_j)`。
+
+**可行性与门。** 数据、代码与算力已具备：每折 run metadata 含未下采样 train 的三类 counts，训练器
+`class_weights()` 的公式与 `alpha=.5` 已冻结，selection posterior/label 全覆盖；该变换纯 CPU。它会改变
+argmax，因此不能直接再看 evaluation。C-25R2 先只生成 selection-only audit，既不读取 raw/calibrated
+evaluation posterior 也不输出 evaluation sidecar；必须同时满足 pooled selection exact-subtype F1 ≥`.300`、
+corrected Brier `< raw Brier` 且 `< selection-prevalence no-skill`。过门后才另行冻结第二次正式评测；不过门
+则点名“解析 loss correction 恢复概率但损伤判别”或相应实测根因，再设计第三个实质 family，禁止在
+evaluation 上插值权重强度。

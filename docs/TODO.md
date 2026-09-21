@@ -7,12 +7,12 @@
 
 **活动队列只剩 Ch3/D4。** 作者要求按第一性原理拆到最终目标、必达门和中间指标，一次只推进一个章节。
 目标树与阶段结果在 `results/PHASE_R1.md` §25；执行顺序是
-`C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-26 → C-27 → G-17 → G-18`。
+`C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-25R2 → C-26 → C-27 → G-17 → G-18`。
 旧 typed cues 继续封存；失败的是机制家族，不是 D4 整章。
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-25R 方法/代码已冻结，五折 selection posterior 已完成；待 4090 隧道恢复后拟合 `T` 并一次性复核 Brier，C-26 仍冻结 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-25R 温度周期正式失败（Brier `.064155 > .041427`）；当前只做 C-25R2 class-weight analytic correction 的 selection-only 可行性门，C-26 仍冻结 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -46,9 +46,9 @@
 
 ## 下一步
 
-1. 4090 隧道恢复后先把远端 HEAD 同步到校准实现提交 `078fe00`；
-2. 对已完成的五折 selection posterior 拟合 `T`，再对封存 evaluation posterior 做一次变换与质量复核；
-3. 只有 recalibrated Brier `< .0414265581` 且 causal F1 仍 ≥`.300` 才解锁 C-26；C5/A4/Ch6 不插队。
+1. 实现 C-25R2 selection-only audit：从每折冻结 train counts 重算 class weights，解析逆校准，无参数拟合；
+2. 只在 selection-dev 判 pooled F1/Brier；不过线就记录根因并设计第三个实质周期，不碰 evaluation；
+3. 只有第二周期 selection 门与另行冻结的 formal gate 都通过才解锁 C-26；C5/A4/Ch6 不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
 backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。
