@@ -139,10 +139,14 @@ not active while this queue advances.
 - [x] **T067a [RS-003]** Run the preregistered scalar-temperature calibration cycle → argmax/F1 remained exactly
   `.308141` and Brier improved `.068750 → .064155`, but still failed the `< .0414265581` gate; the complete negative
   report and five calibrated sidecars remain preserved.
-- [ ] **T067b [RS-003]** Test the materially different class-weight loss correction on selection-dev only → derive each
-  fold's exact training weights, apply the analytic inverse `p_k ∝ q_k / w_k`, and require pooled selection causal F1
-  ≥`.300` plus Brier below selection prevalence no-skill before evaluation may be transformed again.
-- [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067b and its formal gate pass → exact three arms,
+- [x] **T067b [RS-003]** Test the materially different class-weight loss correction on selection-dev only → Brier fell
+  `.068231 → .041942`, but remained above no-skill `.041427`; causal F1 fell `.308297 → .279911`, so the frozen gate
+  rejected it without reading or transforming evaluation artifacts.
+- [ ] **T067c [P] [RS-003]** Return to primary literature and freeze a third, materially different probability/decision
+  mechanism → fit full Dirichlet calibration on deterministic document halves, test on the other 1,458 documents,
+  require Brier improvement ≥`.0027` over no-skill and cost-aware causal F1 ≥`.300`, and report plain-vs-cost-aware
+  argmax as the single-variable ablation; do not touch evaluation before that gate passes.
+- [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067c and its formal gate pass → exact three arms,
   project-defined consistency mediators, rare-class floors, bootstrap inference and stop/second-cycle branches are
   fixed before method results exist.
 - [ ] **T069 [RS-003]** Implement the uncertainty-gated causal residual and rewiring control → no/low-confidence edges

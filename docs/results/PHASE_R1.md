@@ -1857,3 +1857,71 @@ evaluation posterior 也不输出 evaluation sidecar；必须同时满足 pooled
 corrected Brier `< raw Brier` 且 `< selection-prevalence no-skill`。过门后才另行冻结第二次正式评测；不过门
 则点名“解析 loss correction 恢复概率但损伤判别”或相应实测根因，再设计第三个实质 family，禁止在
 evaluation 上插值权重强度。
+
+### 25.10 C-25R2 selection-only 正式结果（2026-09-21）
+
+实现提交 `4a88fca` 在本地通过 **720 passed / 29 skipped、ruff 0、`ekg-smoke` OK**，4090 端两份定向
+测试 **10/10 passed**。随后只运行冻结的 selection audit；报告位于
+`gpu-4090:.../relation_crossfit/class_weight_correction_selection_audit.json`，SHA-256 为
+`fb88778508054a204a42ffc41a71411d03e87ed43a8b42dd4588574438fcd6f8`，明确记录
+`evaluation_artifacts_accessed=false`，状态 `rejected_at_selection_gate`：
+
+| selection pooled 指标 | raw | analytic inverse | 事前门 | 判定 |
+|---|---:|---:|---:|---|
+| causal exact-subtype F1 | `.30829735` | `.27991091` | ≥ `.300` | **FAIL** |
+| multiclass Brier | `.06823085` | `.04194243` | `< raw` | PASS |
+| prevalence no-skill Brier | `.04142656` | `.04142656` | corrected `< no-skill` | **FAIL** |
+
+解析逆把 pooled 正类预测从 112,683 降到 40,479，更接近 gold 53,358，但折间不稳定：fold 1 F1
+`.32062`，fold 2–4 为 `.29322–.29835`，fold 5 从 raw `.31697` 跌至 `.12214`，其正类预测从
+24,895 降到 1,242。结论限定为：**固定训练权重解释了绝大部分 Brier 失真，但把自然分布 posterior
+直接按 argmax 当作稀有类决策，会损伤 causal F1；且仅靠理论逆映射仍未超过 no-skill Brier。** 这不是
+D4 方法结果，也不能用 evaluation 插值逆校正强度补救；第二套 evaluation sidecar 没有创建。
+
+下一步 C-25R3 回 R1 核实第三个实质机制。开工两问先固定：科研价值是让 uncertainty gate 得到优于
+no-skill 的自然分布概率，同时不把概率校准与类别不平衡下的任务决策混为同一 argmax；证据将落在本节
+后续的 primary-source design brief 与独立 selection holdout 表。可行性先只认既有五折 selection posterior，
+按文档切出互斥 calibration/gate 子集，gate 不参与拟合；在一手机制、代码可运行性和门都冻结前，不读取
+evaluation。若文献不支持分离、或 holdout 不同时过 Brier/F1，就如实封存第三 family，不改门绕开。
+
+### 25.11 C-25R3 一手依据与预注册（在第三机制数字之前）
+
+**机制依据。** [Kull et al. (NeurIPS 2019)](https://proceedings.neurips.cc/paper/2019/hash/8ca01ea920679a0fe3728441494041b9-Abstract.html)
+正文 Eq. 7 把 Dirichlet calibration 定义为 `softmax(W log q+b)`：它原生处理 multiclass posterior，能表达
+类别和类别对偏差，包含 identity 与 temperature map；论文同时强调 calibration map 用 holdout validation
+学习，且 Brier/log-loss 这类 proper loss 必须与仅报 ECE/accuracy 同时看。其深度模型实验还在 validation
+内部做 CV，避免把同一拟合分数当测试结果。[作者官方实现](https://github.com/dirichletcal/dirichlet_python/tree/b03f65fc6582cad89497b977b3b33a3c4fe48e39)
+提供 `FullDirichletCalibrator`；本项目不引入其 Python 3.12/JAX 栈，而用既有 scikit-learn multinomial
+logistic regression 执行论文完全相同的 `log(q) → linear → softmax`，这是透明环境适配，不重写优化器。
+
+概率与决定不能继续混成同一个普通 argmax。[Menon et al. (ICLR 2021)](https://arxiv.org/abs/2007.07314)
+§3 Eq. 8–9 证明长尾目标的 Bayes decision 是在自然 posterior 上做 prior/logit adjustment，而不是把
+posterior 本身改写后仍称自然概率；[Caplin et al. (2022)](https://arxiv.org/abs/2205.04613) 已给出本项目
+weighted CE 的逆映射。因此 C-25R3 输出两个有明确语义的量：`p` 是供 uncertainty gate 使用的自然分布
+posterior，关系硬判定固定为 `argmax_k w_k p_k`。普通 `argmax p_k` 只作单变量消融，不再错误地拿它
+承担稀有类决策目标。
+
+**开工两问。** 科研价值是同时关闭 S2 的两个必要条件：自然 posterior 必须携带超过 prevalence 的逐例
+信息，cost-aware 决策必须保持 causal 输入判别力；二者同时过线才能支撑“可校准的预测关系输入可进入
+D4 uncertainty gate”。可行性成立：五折 selection posterior/labels、训练权重和文档 ID 均已封存；每折
+至少 582 篇，三类都存在；scikit-learn 已是 core 依赖；全流程 CPU，不需要新数据、GPU 或授权。
+
+**冻结协议。** 不根据输出改动以下规则：
+
+1. 每折对 selection manifest 的文档按 `SHA256("r1-v62-c25r3|{fold}|{doc_id}")` 排序；前
+   `floor(n/2)` 篇是 calibration half，后半是 gate half。五折合计 1,455/1,458 篇，pair 不跨文档泄漏；
+2. 每折仅在 calibration half 以**非加权 NLL**拟合 full Dirichlet map `softmax(W log q+b)`；固定
+   `penalty=None`、LBFGS、`tol=1e-10`、`max_iter=1000`，不扫正则、阈值或校正强度；零概率直接失败；
+3. gate half 只在五个 map 全部冻结后评分。自然 posterior 的 pair-micro Brier 必须同时优于 raw，且
+   至少比 gate 自身 prevalence no-skill 低 **`.0027`**；cost-aware exact-subtype causal F1 必须 ≥`.300`；
+4. 单变量消融只切换同一 calibrated posterior 的 decision rule：plain `argmax p_k` 对比冻结的
+   `argmax w_k p_k`。报告每折参数、收敛状态、三种 prediction counts、NLL/Brier/F1 与全部输入 hash；
+5. 目标功效不是事后补写：用已公开 C-25R2 analytic posterior 对 2,913 篇逐文档 Brier difference 估得
+   SD `.0410065`；gate `n=1,458`，单侧 α=`.05` 时最小 80% power effect `.0026703`。取目标 `.0027`
+   后 power=`.8077`。该诊断未计算 Dirichlet 输出，也未访问 evaluation；
+6. Gate 任一项失败即封存本 family，不创建 evaluation sidecar。只有全过，才另行冻结“用完整
+   selection refit 五个 map → evaluation 一次性 formal gate”；本节不预授权该步。
+
+因果链是可证伪的：class-weight/类别对失真 → full multiclass map 修复自然 posterior → cost-aware rule
+恢复稀有类决策 → D4 uncertainty gate 才能区分强弱预测边。plain-vs-cost-aware 消融隔离最后一箭；若
+Brier 过而 F1 不过，失败在 decision link；若 F1 过而 Brier 不过，失败在 probability map。
