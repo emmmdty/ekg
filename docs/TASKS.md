@@ -145,9 +145,11 @@ not active while this queue advances.
 - [x] **T067c [P] [RS-003]** Return to primary literature and test a third probability/decision mechanism on untouched
   selection documents → full Dirichlet Brier `.034240` beat no-skill `.040057` by `.005817`; cost-aware F1 `.300990`
   passed while plain argmax collapsed to `.081921`, so all preregistered holdout gates passed without evaluation access.
-- [ ] **T067d [RS-003]** Run the separately frozen C-25R3 formal input gate once → refit each Dirichlet map on its full
-  selection fold, publish immutable natural-posterior sidecars, then read evaluation gold once and require Brier at
-  least `.0027` below no-skill plus cost-aware F1 ≥`.300`; no refit or threshold change after the formal result.
+- [x] **T067d [RS-003]** Run the separately frozen C-25R3 formal input gate once → five immutable natural-posterior
+  sidecars were published before any gold access, then evaluation gold was read once over the exact
+  2,913 docs / 2,532,394 pairs: Brier `.03513538` beat no-skill `.04142656` by `.00629118` and cost-aware F1
+  `.30602311` cleared `.300`, so the gate passed; hard F1 did not improve over raw `.30814055` (−`.00211744`),
+  and the plain-argmax ablation collapsed to `.07912232`. Maps, weights and thresholds are frozen from here.
 - [ ] **T068 [P] [RS-003]** Freeze the predicted-causal D4 phase contract after T067d passes → exact three arms,
   project-defined consistency mediators, rare-class floors, bootstrap inference and stop/second-cycle branches are
   fixed before method results exist.

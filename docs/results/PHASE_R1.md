@@ -1963,3 +1963,59 @@ checkpoint、候选顺序、概率、class order、输入/输出 hash 后，汇�
 4. 同时报告 plain `argmax p_k` F1/prediction counts，但不把它用作 deployable decision；
 5. 任一失败即封存 C-25R3 family，不在 evaluation 上改正则、阈值、权重或 map。全过才解锁 C-26；
    本节仍不等同于 D4 三臂方法结果。
+
+### 25.13 C-25R3F formal input gate 正式结果（2026-09-22）：**三项全过，C-26 解锁**
+
+实现提交 `0bd11b2`（`scripts/formalize_d4_dirichlet_posteriors.py` + `aggregate_d4_relation_crossfit.py
+--dirichlet`），本地三件套 **pytest 全绿 / 29 skipped、ruff 0、`ekg-smoke` OK**。4090 的 `git fetch`
+第三次因 **DNS 解析失败**（`gh-proxy.com` 与 `github.com` 都 `Could not resolve host`）；这次不再走
+bundle 散拷，而是从本地直接 `git push gpu-4090:/data/TJK/ekg main:refs/remotes/origin/main`，把 commit
+图经 ssh 推进远端的 remote-tracking ref，再在远端 `git reset --hard origin/main`——代码仍然只来自
+git、对象完整性由 git 自身校验，且顺带修好了「远端 `origin/main` 指向陈旧 commit」这个坑（本次
+`git reset --hard origin/main` 在 fetch 失败后曾把远端工作树退回 `d0f66bf`，产物未受影响，已恢复）。
+远端 HEAD 精确为 `0bd11b2`，定向测试 **23/23 passed**，随后才执行五折 refit。
+
+五折 natural-posterior sidecar 先于任何 gold 读取封存，`gold_accessed=false`、`gold_fields_present=false`：
+
+| fold | LBFGS iters | sidecar SHA-256 | calibration metadata SHA-256 |
+|---:|---:|---|---|
+| 1 | 52 | `bb3a3161…6126c` | `5eed488a…c8d315f` |
+| 2 | 48 | `b6501699…a8f6a1b` | `75dfbfa6…f562eaf` |
+| 3 | 53 | `2e74ab45…8540020` | `2b64b8f1…2f2a1220` |
+| 4 | 43 | `b78d804f…68147971` | `28f41650…8ad47af6` |
+| 5 | 50 | `4bc0daaa…8686d671` | `a8856b12…67e97f3f8` |
+
+正式报告 `gpu-4090:.../relation_crossfit/dirichlet_quality_report.json` SHA-256 为
+`fea7d3edf3da85a734d805d3f092db146d4010cd0cecec0cfb9e58e5e51b54d4`，commit 记为 `0bd11b2`，
+状态 **`quality_gate_passed`**。覆盖精确命中 **2,913 docs / 73,939 mentions / 2,532,394 ordered pairs**：
+
+| 事前冻结的门 | raw C-25 | scalar T（C-25R） | **Dirichlet + cost-aware** | 判定 |
+|---|---:|---:|---:|---|
+| multiclass Brier | `.06875035` | `.06415525` | **`.03513538`** | 比 no-skill `.04142656` 低 `.00629118`（门 ≥`.0027`）**PASS** |
+| causal exact-subtype micro-F1 | `.30814055` | `.30814055` | **`.30602311`** | ≥`.300`，**PASS**（裕量 `.00602`） |
+| plain `argmax p_k`（单变量消融） | — | — | `.07912232` | 仅诊断，precision `.4883` / recall `.0430` |
+| 覆盖 / 无 gold 字段 | PASS | PASS | PASS | — |
+
+逐折：cost-aware F1 `.294609 / .314457 / .309602 / .301577` 与 fold 4 的 `.294609`——**5 折里有 1 折
+低于 `.300`**（holdout 阶段是 3/5，收窄但没有消失），预注册判据是合并 candidate universe，
+这条不稳定性如实保留。五折 Brier 分别 `.03513723 / .03629909 / .03468328 / .03550075 / .03403112`，
+**全部低于各自 no-skill**（`.04156872 / .04308724 / .04067288 / .04146602 / .04030742`）。
+五折训练权重仍是冻结值（NONE `.58344–.58358`、CAUSE `7.61566–7.77331`、PRECONDITION
+`4.60492–4.69440`），未作任何拟合。
+
+**必须如实写清楚的三点。**
+
+1. **硬判别力没有提高，只是没被牺牲。** cost-aware F1 `.30602311` 比 raw argmax 的 `.30814055`
+   **低 `.00211744`**。本门要的从来不是抬 F1，而是「在不损伤稀有类决策的前提下把概率修成可用」；
+   C-25R2 的失败正是掉在这一侧（`.279911`）。所以这一格的论断只有一条：
+   **部署 posterior 现在既优于 prevalence no-skill、又保住了 raw 的判别力**，不是 D4 机制有效。
+2. **plain-vs-cost-aware 消融证明决策分离是必要条件而非修辞**：同一组 calibrated 概率下，
+   普通 argmax 的 causal F1 只有 `.07912232`（recall `.0430`），把概率校准与长尾决策混成同一个
+   argmax 会直接毁掉稀有类召回。两者 Brier 完全相同（`.03513538`），因为消融只换 decision rule。
+3. **三个失败周期定位出的根因得到闭合验证**：全局温度只解释约 6.7% 的 Brier 失真（C-25R），
+   解析逆映射修好概率却打坏决策（C-25R2），full Dirichlet map + cost-aware Bayes rule 才同时成立。
+   链条 `class-weight/类别对失真 → 多类 map 修自然 posterior → cost-aware rule 恢复稀有类决策`
+   是可证伪的，三次实测按顺序把两个断点各自排除。
+
+⇒ 按 §25.12 冻结的条款，**C-25R3F 三项必要门全过，C-26 解锁**。C-26 之后不得回头改 map、阈值、
+权重或正则；`argmax_k w_k p_k` 与五折 map 参数自此是冻结输入。

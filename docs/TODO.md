@@ -12,7 +12,7 @@
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | C-25R3 holdout 已正向过门（Brier `.034240 < .040057`；cost-aware F1 `.300990`）；当前只做 C-25R3F 正式输入门，C-26 仍冻结 |
+| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | ✅ C-25R3F 正式输入门已过（Brier `.035135 < .041427`，低 `.006291`；cost-aware F1 `.306023`）⇒ **C-26 解锁**，当前活动小步是冻结 phase contract；输入概率 map/权重/阈值自此不得再改 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
 | Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
 
@@ -48,9 +48,12 @@
 
 ## 下一步
 
-1. C-25R3 holdout 正结果已封存，报告 SHA `ee7835d0…cad90f`；evaluation 未访问；
-2. 实现 C-25R3F：完整 selection refit 五折 map、先封存 natural posterior sidecar，再做一次 formal gate；
-3. formal 必须同时达到 Brier ≤`.0387265581`、cost-aware F1 ≥`.300` 才解锁 C-26；C5/A4/Ch6 不插队。
+1. ✅ C-25R3F 正式输入门 2026-09-22 通过，报告 SHA `fea7d3ed…1b54d4`；五折 natural-posterior sidecar
+   已封存，evaluation gold 只读了一次。⚠️ 它只说明概率可用，**cost-aware F1 `.306023` 比 raw `.308141`
+   还低 `.002117`**，不能写成 D4 机制有效；
+2. 当前活动小步是 **C-26**：冻结 D4 predicted-causal phase contract（三臂唯一差异、两项一致性中介、
+   稀有类护栏、配对 bootstrap、停止条件），在任何方法结果之前定死；
+3. 之后 C-27 实现 + 本地门 → G-17 单折 CUDA 冒烟 → G-18 五折三臂正式实验。C5/A4/Ch6 不插队。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
 backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。
