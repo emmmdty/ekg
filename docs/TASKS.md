@@ -160,10 +160,11 @@ not active while this queue advances.
   drive the residual to zero, all arms keep identical base/budget, and the complete local gate passes.
 - [ ] **T070 [RS-003]** Run a bounded one-fold CUDA smoke of all three D4 arms → forward/backward/evaluator/mediator
   outputs close without entering the thesis table.
-- [ ] **T071 [RS-003]** Run and score the five-fold, three-arm, seed-13 D4 experiment → pooled five-class macro-F1,
-  per-class guardrails, paired document bootstrap, semantic consistency mediator and rewiring falsification are all
-  published to the D4 result page; a failed first cycle triggers a materially new second design cycle, not chapter-wide
-  abandonment.
+- [x] **T071 [RS-003]** Run and score the five-fold, three-arm, seed-13 D4 experiment → pooled macro-F1 came out
+  base `.543166`, full `.540671`, rewired `.532591`; the paired document-cluster bootstrap put `full - base` at
+  `-.002495` (CI `[-.015608, +.010516]`) and `full - rewired` at `+.008080` with a CI crossing zero, so four of the
+  five necessary gates failed and the mechanism is not effective. Coverage hit 2,913 documents / 73,939 mentions
+  exactly and no gold edge reached a model arm.
 
 **Checkpoint**: T071 is the first new D4 method-effectiveness result. Extra seeds remain separately authorized and
 cannot start merely because the cross-fit folds ran in parallel.
