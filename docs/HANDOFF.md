@@ -1,17 +1,20 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-09-22 凌晨**（D4 v6.2：输入门通过 · 契约冻结 · 实现与冒烟完成 · **G-18 正在 4090 上跑**）。
+> 更新于 **2026-09-22 11:36（+08:00）**（根据 Claude 后台会话 `2563256a` 的最后日志与
+> `gpu-4090` 实测接管：D4 v6.2 已收口；**C-28 官方代码比较仍在跑**）。
 > 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
 > 本文只记录**状态、决策、依赖、下一步**，**不复制实验表格——数字只认 [`results/`](results/README.md)**。
 >
 > **状态一句话：D4 v6.2 的一个完整周期已收口——必要门不过，机制无效**（G-18 `gate_failed`），
 > 且 **oracle 诊断证明给一张完美的因果图也是零增益**（`oracle − base = −.000223`，CI 跨 0，§25.25）
 > ⇒ 不是边不够好，是这套接法本身不携带增量信息。归因链完整（§25.21–§25.25）。
-> **卡 0/1/2 已释放，无在跑任务。**
+> **当前唯一活动任务是 C-28**：用官方 EFD 接法比较 gold / predicted 结构；截至本次核验 10 个 run
+> 已完成 6 个、3 个在跑、1 个排队，**尚无可报告的 C-28 结果**。Claude 会话因额度中断不影响这个
+> `setsid nohup` 后台 driver；不要尝试恢复会话来替代远端判活。
 > 其余三章维持 09-18 的终局判断（A4 一个周期失败 · C5 家族封存 · Ch6 唯一有正结果，第一轮已收口）。
-> ⇒ **队首是一个裁决：D4 第二个实质不同的设计周期投不投、投哪条。**
-> ⚠️ 09-18 那条「建议不投、转写作」的队首**已被作者 09-20 的指示覆盖**——D4 单章继续推进；
-> 下面 §0.3 的旧队列描述属于历史，**当前队列以 `EXPERIMENT_PLAN.md` §4 主表为准**。
+> ⇒ **队首是 C-28 的安全收口，而不是重开 D4 第二个机制周期。** 后者已在 §25.24 裁定为不投；
+> C-28 的官方代码比较只补充外部保真度证据，不改这个裁定。下面 §0.3a 的旧队列描述属于历史，
+> **当前队列以 `EXPERIMENT_PLAN.md` §4 主表 C-28 为准**。
 >
 > **最短读法**：首表 → **§0.3（当前队列）** → 需要哪章再看 §0.4 的对应小节。
 > §0.5–§0.7 是已裁定的决策与纪律，开工前扫一眼。
@@ -21,7 +24,7 @@
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | 🟡 **C-28 在跑**：官方 `trainEFD` 的 gold / predicted 两行 × 五折共 10 个 run，2026-09-22 **07:46:20** 起，4090 卡 0/1/2，约 7 GPU·h，状态板 `logs/d4_official_status.log`。⛔ **跑完之前不要在 4090 上 `git reset --hard`**——driver 每个 job 现拉 `scripts/run_d4_official_efd.py` 起子进程。汇总器 `aggregate_d4_official_efd.py` 已就绪并已 push。 |
+| **活动任务** | 🟡 **C-28 在跑**：官方 `trainEFD` 的 gold / predicted 两行 × 五折共 10 个 run，2026-09-22 **07:46:20** 起，4090 卡 0/1/2。**11:36 实测**：gold fold 1–5 和 predicted fold 1 已 `exit=0`；predicted fold 2/3/4 在卡 0/1/2 训练，fold 5 排在卡 2。状态板是 `gpu-4090:/data/TJK/ekg/logs/d4_official_status.log`。⛔ **10 个都收口前不要在 4090 上 `git reset --hard`**——driver 每个 job 现拉 `scripts/run_d4_official_efd.py` 起子进程。远端 `HEAD=5636d0d` 是该 driver 绑定的旧版本；本地 `HEAD=origin/main=ede694b` 已含汇总器，待任务完成后才可安全同步。 |
 | ✅ **裁决已落地（执行代理拍板，§25.24）** | **不投第二个机制设计周期。** C-28a 之后理由更硬：oracle 给完美图仍是零增益 ⇒ (甲) 从「走不通」变成「走了也没用」，(乙)「只在结构足够时介入」失去前提。⛔ 仍不得换名、扫参、加大 backbone、启动未授权多种子。若将来 Ch4 真的产出更准的关系图，(甲) 可重新立项。 |
 | 🟢 **C-28 跑完之后** | 用 `scripts/aggregate_d4_official_efd.py` 汇总成每种结构一行的五折 OOF，并做 gold−predicted 的配对 bootstrap；两行都是 FR-016 **(b)**、gold 行不可部署，**都不进任何通过门**。背景：用官方 `THU-KEG/MAVEN-FACT` `trainEFD --add_relation` 跑 gold / predicted 两行。假设已被 C-28a 磨锋利——**原论文的 `+2` 到底来自前驱句的文本，还是关系这条结构？** 我们的残差传的正是前驱 mention 的编码表示，给金标图零增益，所以要对着官方那套**拼接**实现跑，而不是继续改我们的残差。两处适配必须透明披露（官方脚本在 test 上选 epoch；官方 test 划分拿不到 ⇒ FR-016 只能到 (b)）。 |
 | ⚠️ **裁决前必须先读的一条** | **配置敏感度大过效应量**：同样三臂同样 seed，只换打包规则，`full` 就动 `+.009207`，而更好那一跑的 `full − base` 只有 `+.006740`（§25.23）。⇒ 在这个量级上投第二周期，**很可能测不出任何可信的东西**；要投就得先解决可测性（例如提高效应目标，或先把配置抖动压下去），这一点应写进裁决材料。 |
@@ -35,17 +38,17 @@
 | 🔴 **读表 6-2 的前提** | 那张表**不能按 MRR 从高到低读**——评测单元本身有一条 **Hit@10 = 1.000** 的文档捷径，读候选文本的对手吃得到、SeDGPL 族吃不到；另一个对手则因**金标在训练图里 0/1,908 有边**而系统性垫底。两条机制都已量出，**见 §0.4c 末尾**。**不得写「我们超过了 CSProm-KG / SimKGC」。** |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问（`CLAUDE.md`「开工自审」节）。不可行**必须点名是数据 / 协议 / 代码 / 算力 / 授权哪一条**，附一手证据，**停下交作者裁决**，不得自行换题绕开。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文 §0.3 只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **GPU**（细则 §E.3） | **gpu-4090** 🟢 **四卡已全部空闲**（09-22 06:04 起；卡 3 需 NVML shim），卡 3 空但需 NVML shim；⚠️ 远端 `git fetch` 已连续三次 DNS 失败（`gh-proxy.com`/`github.com` 都解析不了），**改用本地 `git push gpu-4090:/data/TJK/ekg main:refs/remotes/origin/main`**，再在远端 `git reset --hard origin/main`——比 bundle 省事，且顺带修好「远端 origin/main 指向陈旧 commit」这个坑（曾把远端工作树退回 `d0f66bf`，产物未损）；隧道反复掉线且作者的 cpolar 脚本**管不了这台**，按三态判活。**gpu-5090** ⚠️ 核卡再用，且**每次单独取得授权**。**多种子：作者 2026-09-18 晚明确「现在不做」。** |
+| **GPU**（细则 §E.3） | **gpu-4090**：C-28 当前占卡 0/1/2；**11:36** `nvidia-smi` 显示卡 3 也满载，但不属于 C-28，归属未核实，**不得抢占**。任务结束前只做三态判活，不重置远端工作树。⚠️ 远端 `git fetch` 已连续三次 DNS 失败（`gh-proxy.com`/`github.com` 都解析不了）；C-28 确认收口后，先检查远端工作树没有需保留改动，再按既有路径用本地 `git push gpu-4090:/data/TJK/ekg main:refs/remotes/origin/main` 更新 `origin/main`，最后才可在远端 `git reset --hard origin/main`。隧道反复掉线且作者的 cpolar 脚本**管不了这台**，按三态判活。**gpu-5090** ⚠️ 核卡再用，且**每次单独取得授权**。**多种子：作者 2026-09-18 晚明确「现在不做」。** |
 | ⚠️ **只在 4090 上的大件** | `runs/factuality/predicted_edges_valid.jsonl`（133 MB，**`.1583` 的真上游**）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）、两个对手的 checkpoint、**C5 三个周期的 checkpoint**。**本地那份 `runs/relations/supervised_dump.jsonl` 是另一份 dump，别拿它当上游。** |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与**估算基准率**见 `EXPERIMENT_PLAN.md` §3（按 git 里同类事件的真实起止天数估，不按计算耗时估）。 |
 | 完成后必须做什么 | 按 **§6** 五步回填：产物落地 → 写结果页 → 改主表行状态与 commit → 推进队列 → commit + **push**。**没 push 就没交接。** |
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最新三件套**：**667 passed / 29 skipped**、ruff 0、`ekg-smoke` OK（2026-09-18 晚）。
-> 最新导师可读周报是 [`reports/2026-09-17_周报.md`](reports/2026-09-17_周报.md)
-> ——⚠️ 它写于 09-17 **上午**，其第 4 节的「下周计划」**当天下午起已全部完成或作废**，
-> 下一份周报从这里接着写，**不要照抄那张计划表**。
+> **最新本地三件套记录**：**727 passed / 29 skipped**、ruff 0、`ekg-smoke` OK（C-25R3，
+> `results/PHASE_R1.md` §25.12）；C-28 只新增外部官方代码适配与远端训练，收口后按其变更再验证。
+> 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 的最终结果
+> 产生前，不把它补写成正、负或完成。
 
 ## 0. 接手后先做什么
 
@@ -81,7 +84,41 @@ uv run python scripts/audit_r1_consistency.py \
 
 按需再读：对应章节的 `phases/PHASE_*.md` 契约、`results/PHASE_*.md`（数字唯一权威）。
 
-### 0.3 下一个窗口执行什么：🔴 **一个裁决 + 一件不用裁决的**
+### 0.3 当前队列：🟡 **只等待并收口 C-28**
+
+**科研价值与可行性已在 `EXPERIMENT_PLAN.md` 主表 C-28 与 `results/PHASE_R1.md` §25.26 预先记录，
+无需重新立项。** 它不为 D4 失败机制翻案、也不进入任何通过门；唯一要回答的是原论文的关系增益在
+官方「拼接前驱句」接法下能否区分为 gold 结构与可部署的 predicted 结构。
+
+接手者在 10 个 run 结束前只可判活，不开新 GPU 任务、不改超参、不恢复 D4 第二周期。判活使用：
+
+```bash
+ssh gpu-4090 "bash -lc 'cd /data/TJK/ekg &&
+  ps -eo pid,etime,stat,cmd | grep -E \"run_d4_official_efd|trainEFD\" | grep -v grep;
+  tail -n 80 logs/d4_official_status.log'"
+```
+
+成功 ssh 且 `logs/d4_official_status.log` 出现十条 `exit=0` 和 `ALL DONE`、并且相应进程 GONE 后，才可：
+
+1. 先检查远端 `git status --short`，保留任何非 C-28 的改动；确认可安全同步后，按上表的本地 push +
+   远端 `git reset --hard origin/main` 路径取得 `aggregate_d4_official_efd.py`。
+2. 在远端用 `.venv/bin/python`（**不用** `uv run`）执行下列一次性汇总；输出文件不存在才可运行，脚本会
+   验证每折状态、顺序、标签和 OOF 覆盖，并拒绝覆盖：
+
+   ```bash
+   cd /data/TJK/ekg
+   .venv/bin/python scripts/aggregate_d4_official_efd.py \
+     --repo /data/TJK/ekg \
+     --runs runs/stages/D4/d4-official-efd/seed-13 \
+     --cv runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json \
+     --source data/processed/maven_fact/train.jsonl \
+     --output runs/stages/D4/d4-official-efd/seed-13/pooled_report.json
+   ```
+
+3. 将**实测**两行、gold−predicted 配对 bootstrap、FR-016 `(b)` 和 gold 不可部署性写入
+   `docs/results/PHASE_R1.md`；再将 C-28 主表状态、`TODO.md` 与本页同步，按 §6 提交并 push。
+
+### 0.3a 历史队列切片（09-18；仅供追溯，**不是当前动作**）
 
 作者 2026-09-18 晚的方向性指示是「**前三个方法章要整体提高**」，并为此批了 C5 一格有效周期。
 **那一格已经用掉、未过门**，而且它连带打掉了一条旧结论（见 §0.4b）。要不要继续投，是作者的事。
