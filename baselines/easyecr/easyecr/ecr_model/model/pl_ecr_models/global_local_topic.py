@@ -1451,8 +1451,13 @@ class GlobalLocalTopicModel(PlEcrModel):
         best_model_filename: str = "best.ckpt",
         conf: Optional[DictConfig] = None,
     ):
+        if conf is None:
+            raise ValueError("GlobalLocalTopicModel requires its resolved configuration")
+        # Upstream hard-codes this after module construction, so it cannot make
+        # the model weights or loader order reproducible.  The transparent
+        # adaptation passes the frozen experiment seed in ``conf``.
+        seed_everything(int(conf.get("seed", 13)), workers=True)
         super().__init__(mode, model_dir, model_filename, trainer_parameters, best_model_filename, conf)
-        seed_everything(42)
 
     def build_tokenizer(self):
         self.tokenizer = AutoTokenizer.from_pretrained(self.conf["module"]["doc_encoder"])

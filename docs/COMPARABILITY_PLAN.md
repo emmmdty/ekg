@@ -41,9 +41,10 @@
 2. **G-19 · EasyECR / Global-Local Topic。** 先从 P1 的 2,622-document train manifest 用
    `sha256("g19-selection-v1:" + doc_id)` 的固定排序切出 291-document selection-dev，余下 2,331
    篇才可训练；P1 internal-dev 的 291 篇只生成无 gold 的 test shape，绝不参与选档或阈值选择。再在
-   gpu-4090 的独立环境完成 import + one-batch smoke（C-2b）；只作两项已登记的透明补丁：vendor
-   `SelfAttentiveSpanExtractor`，以及移除 upstream test-predict 对 gold `event_id` 的错误依赖，保留
-   upstream 和补丁 hash。固定 seed 13 训练一次，用 selection-dev
+   gpu-4090 的独立环境完成 import + one-batch smoke（C-2b）；只作三项已登记的透明补丁：vendor
+   `SelfAttentiveSpanExtractor`、移除 upstream test-predict 对 gold `event_id` 的错误依赖，以及把 upstream
+   初始化**之后**硬编码的 seed 42 改为在建模**之前**读取显式的固定 seed 13；保留 upstream 和补丁 hash。
+   固定 seed 13 训练一次，用 selection-dev
    选档，预测冻结 evaluation unit，并用项目 official scorer 重算全部四个 coreference 指标。2,331 vs
    既有锚的 2,622 training documents 是必须披露的 U 层 input delta，故本行不作 superiority claim。
    任何路径/环境/ID/覆盖失败都停止，记录 FR-016(b) 不可运行障碍，不重写模型或改目标。

@@ -2,7 +2,7 @@
   "patches": [
     {
       "file": "easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py",
-      "patched_sha256": "62c4ddf423e2cd3f9681c7426e44c7d08171ce76ff72533437091b296c0f198e",
+      "patched_sha256": "cc56641234775927143db6d1f7a99b7dcbd16d392ffd91bfe69de7df4959d748",
       "verbatim_sha256": "679e14c34e5068bbafe919d9292f95afd3cc4b597ac0d5bfa24d87f2aff15bd1",
       "what": "Redirect the only Global-Local Topic allennlp import to the vendored compatibility module.",
       "why": "EasyECR pins torch==2.0.1, while the final allennlp release providing SelfAttentiveSpanExtractor requires torch<1.13. The dependency solver proves those constraints cannot coexist.",
@@ -21,12 +21,22 @@
     },
     {
       "file": "easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py",
-      "patched_sha256": "62c4ddf423e2cd3f9681c7426e44c7d08171ce76ff72533437091b296c0f198e",
+      "patched_sha256": "cc56641234775927143db6d1f7a99b7dcbd16d392ffd91bfe69de7df4959d748",
       "what": "Permit the existing prediction path to consume an unlabeled MAVEN-ERE test shape by using a mention-local placeholder only where the upstream batch object requires a cluster id, then return no gold-derived Event container after distance prediction.",
       "why": "The upstream MAVEN adapter omits event_id on test mentions, but adapt_maven_data and predict read it even though Global-Local Topic's prediction logits and clustering need only mentions, types and pair distances. Supplying labelled evaluation records would leak gold clusters. The placeholder is never used as a prediction feature or exported cluster; it only keeps the existing all-pair batch shape valid.",
       "not_changed": [
         "Longformer/BERT inputs, pair-distance logits, connected-component clustering and threshold selection",
         "labelled train and selection-dev behavior, where event_id remains the original value"
+      ]
+    },
+    {
+      "file": "easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py",
+      "patched_sha256": "cc56641234775927143db6d1f7a99b7dcbd16d392ffd91bfe69de7df4959d748",
+      "what": "Replace the upstream post-construction hard-coded seed 42 with the explicit configured seed before model construction.",
+      "why": "A seed set after the module is built cannot control its initial weights. The frozen G-19 run requires seed 13, so the configuration must set it before both module construction and data-loader creation.",
+      "not_changed": [
+        "Global-Local Topic architecture, loss, optimiser, learning-rate schedule and clustering threshold grid",
+        "the one fixed seed value (13), which remains declared by the project run manifest rather than selected from results"
       ]
     }
   ],

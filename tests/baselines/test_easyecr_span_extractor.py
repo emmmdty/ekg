@@ -39,3 +39,14 @@ def test_global_local_topic_test_prediction_never_requires_gold_cluster_ids() ->
     ).read_text(encoding="utf-8")
     assert '"cluster_id": m.meta.get("event_id", m.mention_id)' in source
     assert "EcrData(data.name, documents, doc_mentions, None, data.meta)" in source
+
+
+def test_global_local_topic_uses_the_explicit_seed_before_module_construction() -> None:
+    source = (
+        Path(__file__).parents[2]
+        / "baselines/easyecr/easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py"
+    ).read_text(encoding="utf-8")
+    seed_call = 'seed_everything(int(conf.get("seed", 13)), workers=True)'
+    assert seed_call in source
+    assert source.index(seed_call) < source.index("super().__init__(mode, model_dir")
+    assert "seed_everything(42)" not in source
