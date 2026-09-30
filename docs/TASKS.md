@@ -156,9 +156,9 @@ not active while this queue advances.
   natural posterior, zero edges imply an exactly zero residual), both project-defined mediators with numerator,
   denominator and aggregation, the rare-class floors (PS− ≥`.352456`, Uu ≥`.166850`), 10,000 document-cluster
   paired bootstrap resamples and the stop/second-cycle branches — all before any method result exists.
-- [ ] **T069 [RS-003]** Implement the uncertainty-gated causal residual and rewiring control → no/low-confidence edges
+- [x] **T069 [RS-003]** Implement the uncertainty-gated causal residual and rewiring control → no/low-confidence edges
   drive the residual to zero, all arms keep identical base/budget, and the complete local gate passes.
-- [ ] **T070 [RS-003]** Run a bounded one-fold CUDA smoke of all three D4 arms → forward/backward/evaluator/mediator
+- [x] **T070 [RS-003]** Run a bounded one-fold CUDA smoke of all three D4 arms → forward/backward/evaluator/mediator
   outputs close without entering the thesis table.
 - [x] **T071 [RS-003]** Run and score the five-fold, three-arm, seed-13 D4 experiment → pooled macro-F1 came out
   base `.543166`, full `.540671`, rewired `.532591`; the paired document-cluster bootstrap put `full - base` at
@@ -171,6 +171,9 @@ not active while this queue advances.
   configuration change alone moved it `+.009207` — more than the `+.006740` full-minus-base effect in the better of
   the two runs — so the effect sits below the configuration noise floor. Both runs leave the registered consistency
   mediators pointing the wrong way, and G-18 remains the registered result.
+- [x] **T072 [RS-003]** Run the official MAVEN-FACT EFD relation hookup with gold and frozen predicted structures →
+  ten fold-runs complete with exact 2,913-document / 73,939-mention OOF coverage; gold does not outperform predicted
+  under paired document bootstrap. The result is FR-016(b), gold is non-deployable, and neither row enters a gate.
 
 **Checkpoint**: T071 is the first new D4 method-effectiveness result. Extra seeds remain separately authorized and
 cannot start merely because the cross-fit folds ran in parallel.

@@ -1,20 +1,20 @@
 # EKG 实时状态
 
-> 更新于 **2026-09-21**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-09-30**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
 
-**活动队列只剩 Ch3/D4。** 作者要求按第一性原理拆到最终目标、必达门和中间指标，一次只推进一个章节。
+**Ch3/D4 单章队列已经收口。** 作者要求按第一性原理拆到最终目标、必达门和中间指标，一次只推进一个章节。
 目标树与阶段结果在 `results/PHASE_R1.md` §25；执行顺序是
 `C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-25R2 → C-25R3 → C-25R3F → C-26 → C-27 → G-17 → G-18`。
 旧 typed cues 继续封存；失败的是机制家族，不是 D4 整章。
 
 | 章 | R1 v6.2 结论 | 当前门 |
 |---|---|---|
-| Ch3 · D4 | **唯一活动章**：predicted causal uncertainty residual | ❌ **一个完整周期已失败**（G-18 必要门四条不过；G-18b 修复重跑的理由被证伪，不替代 G-18）。归因与可行性诊断已齐（§25.21–§25.23）。✅ C-25R3F 正式输入门已过（Brier `.035135 < .041427`，低 `.006291`；cost-aware F1 `.306023`）⇒ **C-26 解锁**，当前活动小步是冻结 phase contract；输入概率 map/权重/阈值自此不得再改 |
+| Ch3 · D4 | **本轮已完成**：predicted causal uncertainty residual + oracle + 官方 EFD 透明适配 | ❌ **正式方法周期失败**（G-18 必要门四条不过；G-18b 不替代 G-18）。✅ 输入门、契约、实现、单折 CUDA 冒烟、五折三臂、错误归因、gold oracle 与 C-28 官方 gold/predicted 对照全部闭合；最终结果与边界见 `results/PHASE_R1.md` §25.20–§25.27 |
 | Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
-| Ch5 · C5 | **暂停排队，不取消** document-complete asymmetric shortcut invariance | C-22 保持未启动；D4 队列完成前不切章 |
+| Ch5 · C5 | **两个周期均未过门，机制家族已封存** | C-22 不再作为活动任务；不因 D4 队列结束而自动重开，见 `HANDOFF.md` §0.4b |
 
 ## D4 目标与当前阶段结果
 
@@ -62,9 +62,12 @@
 6. ✅ **裁定：不投第二个机制设计周期**（§25.24），且 **C-28a oracle 诊断让理由更硬**——
    给一张**完美**的因果图，`oracle − base = −.000223`（CI 跨 0），**增益为零** ⇒
    边质量不是主因，§25.21 的「稀释」解释作废，路线 (甲)(乙) 都失去意义（§25.25）；
-7. 🟢 **当前唯一活动小步是 C-28**：用官方 `trainEFD --add_relation` 跑 gold / predicted 两行，
-   回答「原论文的 `+2` 来自前驱句文本还是关系结构」。零新机制代码，两处适配须透明披露。
-   ⛔ 不得换名、扫参、加大 backbone 或启动未授权多种子。C5/A4/Ch6 不插队。
+7. ✅ **C-28 已收口**：官方 `trainEFD --add_relation` 的 gold / predicted 五折 OOF 覆盖精确，gold
+   没有优于 predicted，CI 跨 0；完整数字只见 `results/PHASE_R1.md` §25.27。该对照排除了「gold
+   结构显著更好」，但因两行都启用关系输入，不能把原论文增益唯一归因给文本；未事后增设新臂；
+8. ✅ **D4 单章队列清空**：目标、文献、输入、机制、负控、oracle、官方代码保真度、错误与失败原因
+   均已落盘。正式结论仍是 G-18 `gate_failed`，C-28 不翻案；不换名、扫参、加大 backbone 或启动
+   未授权多种子。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
 backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。
@@ -161,18 +164,19 @@ Done-when 逐条核对——**只差 matched seeds**（须逐次授权，表 6-2
 
 ## 当前三端
 
-- **local**：三件套 **694 passed / 29 skipped**、ruff 0、`ekg-smoke` OK；P1 r15
-  `1e31a9ac…f9655`。`docs/HANDOFF.md` 有本轮开始前已存在的用户编辑，不纳入本轮提交；
-- **gpu-4090**：GPU 已修好（580.178.04），但**四卡自 09-10 起被他人 vllm 占满**（09-16 复核
-  19,15x MiB / 24,564 MiB，35–63% util），已第 8 天；**09-17 隧道 `Connection refused`，状态未知**。
-  **作者 2026-09-15：不要因为它拖慢进度**；
-- **gpu-5090**：**主力机，现已空闲**（09-17 核卡 276 MiB / 32,607 MiB，0% util）。A4.3 四臂
+- **local**：2026-09-30 三件套 **776 passed / 31 skipped**、ruff 0、`ekg-smoke` OK；R1 一致性审计
+  **36/36 requirements mapped**；P1 r15
+  `1e31a9ac…f9655`；
+- **gpu-4090**：2026-09-30 SSH 可达；C-28 相关进程 GONE，10 个 run 全部完成，聚合报告已落盘；
+  远端代码受控同步到 `8bc62b0` 后完成聚合，未清理 remote-only 产物。**本次未核 GPU 占用，后续用卡
+  仍须先 `nvidia-smi`**；
+- **gpu-5090**：**当前占用未核，使用前必须重新核卡**。A4.3 四臂
   2026-09-16 11:02–23:27 跑完（实测 12h25m），C5.3 pilot-r2 与 CSProm-KG WN18RR 推理 09-16 跑完。
   ⚠️ **外网是分域的**：gh-proxy 增量 fetch ✅ / 清华 PyPI ✅ / GitHub 直连 ❌ / 完整 clone ❌ /
   Google Drive ❌ / ModelScope ✅。⛔ 硬边界：EasyECR 的 torch 2.0.1 无 sm_120；SimKGC 的 batch 1024
   要 4×32 GB 装不下。
-- ⚠️ **cpolar 隧道会整条下线**：09-17 `ssh gpu-4090` 直接 `Connection refused`（不是端口变动）。
-  按三态判活，**ssh 失败不得判远端进程已死**。
+- ⚠️ **cpolar 隧道可能整条下线**：2026-09-30 本次可达，但历史上出现过 `Connection refused`。
+  继续按三态判活，**ssh 失败不得判远端进程已死**。
 
 ## 禁止
 
