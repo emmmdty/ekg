@@ -12,7 +12,7 @@
 
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|
-| G-19 · Ch5 外部 baseline | Global-Local Topic / EasyECR 是独立发表方法；原始 KBP 基准受 LDC 许可阻断，故只可作 FR-016(b) 透明适配 | 先完成 gpu-4090 独立环境 import + one-batch smoke，再固定 seed 13 训练、冻结 291-document unit 预测与官方 MUC/B³/CEAFe/BLANC 重算 |
+| G-19 · Ch5 外部 baseline | Global-Local Topic / EasyECR 是独立发表方法；原始 KBP 基准受 LDC 许可阻断，故只可作 FR-016(b) 透明适配 | 先从 P1 2,622 train docs 以固定 hash 切出 291 selection-dev（余下 2,331 才训练），再完成 gpu-4090 独立环境 import + one-batch smoke、固定 seed 13 训练、冻结 291-document evaluation 预测与官方 MUC/B³/CEAFe/BLANC 重算 |
 | G-20 · Ch4 外部 baseline | LLMERE 是直接的 MAVEN-ERE causal 方法；原文 published split 不读取，故只可作 FR-016(b) 透明适配 | 全量固定 stop 生成；若仍有格式错误才触发全量 constrained decoding；通过转换/覆盖/官方 scorer 后报告单 seed causal P/R/F1 |
 | C-30 · 全章 | 尚无新实验分数 | 从 raw predictions 独立重算；每一行必须有 P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 标签 |
 | D4 / A4 / C5 方法机制 | D4、A4、旧 C5 均已按契约收口或封存 | 不重开；C-22 继续暂停，不得因为本队列结束自动恢复 |

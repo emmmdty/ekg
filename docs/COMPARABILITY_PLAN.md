@@ -38,7 +38,14 @@
 ## 4. 固定执行顺序与预期交付
 
 1. **C-29（已完成）· 比较登记冻结。** 本文与 `BASELINE_ROSTER.md` 为每章固定 P/V/U 三层、状态和禁止论断；不改任何分数。
-2. **G-19 · EasyECR / Global-Local Topic。** 先在 gpu-4090 的独立环境完成 import + one-batch smoke（C-2b）；只 vendor 已点名的 `SelfAttentiveSpanExtractor`，保留 upstream 和补丁 hash。再以固定 seed 13 训练一次，用 selection-dev 选档，预测冻结 evaluation unit，并用项目 official scorer 重算全部四个 coreference 指标。任何路径/环境/ID/覆盖失败都停止，记录 FR-016(b) 不可运行障碍，不重写模型或改目标。
+2. **G-19 · EasyECR / Global-Local Topic。** 先从 P1 的 2,622-document train manifest 用
+   `sha256("g19-selection-v1:" + doc_id)` 的固定排序切出 291-document selection-dev，余下 2,331
+   篇才可训练；P1 internal-dev 的 291 篇只生成无 gold 的 test shape，绝不参与选档或阈值选择。再在
+   gpu-4090 的独立环境完成 import + one-batch smoke（C-2b）；只 vendor 已点名的
+   `SelfAttentiveSpanExtractor`，保留 upstream 和补丁 hash。固定 seed 13 训练一次，用 selection-dev
+   选档，预测冻结 evaluation unit，并用项目 official scorer 重算全部四个 coreference 指标。2,331 vs
+   既有锚的 2,622 training documents 是必须披露的 U 层 input delta，故本行不作 superiority claim。
+   任何路径/环境/ID/覆盖失败都停止，记录 FR-016(b) 不可运行障碍，不重写模型或改目标。
 3. **G-20 · LLMERE-causal。** 对全部冻结生成请求实施一套固定 stop 规则；第一阶段全量生成后若仍有任何不可解析第一行，按预登记启动第二阶段的全量 constrained decoding，绝不补跑单条。prompt 等价、覆盖、转换和 candidate universe 全过后，才用项目 official evaluator 产生 causal P/R/F1 行。结果无论高低均标 FR-016(b) 透明适配、single-seed。
 4. **C-30 · 表格和声称审计。** 从 raw predictions 独立重算主表；为每一行输出 P/V/U 状态和七项登记。只有 U 层、同一章、同一 unit 的行可列 delta；P 层永不进排序。此步完成后才重新评估 C-22 是否值得成为“提高方法贡献”的下一单章任务。
 

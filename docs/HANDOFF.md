@@ -105,7 +105,9 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
 - **可行性**：**有条件可行**。一手代码核实 EasyECR 的 MAVEN adapter、selection-dev 选档和 predict
   通路均存在；KBP 2017 受 LDC 许可阻断，预先固定 FR-016(b)。唯一允许的实现补丁是已点名的
   `SelfAttentiveSpanExtractor` vendor（上游依赖约束冲突使之必要），必须在 4090 的隔离
-  `torch==2.0.1` 环境完成 import + one-batch smoke 后才可训练。19:28 的只读核卡证明 4090 可达，
+  `torch==2.0.1` 环境完成 import + one-batch smoke 后才可训练。为隔离选档与评测，从 P1 2,622
+  train 文档以固定 hash 切出 291 selection-dev，余下 2,331 才训练；P1 internal-dev 291 篇只作无
+  gold test shape，2,331-vs-2,622 的训练量差异必须入 U 层登记。19:28 的只读核卡证明 4090 可达，
   但全部 GPU 均有他人进程；下一步先查进程与空闲卡，不能挤占。
 
 ### 0.3a 历史队列切片（09-18；仅供追溯，**不是当前动作**）

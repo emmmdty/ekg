@@ -187,9 +187,11 @@ single-seed transparent adaptation for a reproduction of a published result.
   U (unified-protocol) registry, seven required provenance fields, execution order and forbidden claims →
   `COMPARABILITY_PLAN.md` is linked from the executable main table; no experiment score is changed.
 - [ ] **T074 [RS-001]** Run the EasyECR Global-Local Topic transparent adaptation once on the frozen 291-document
-  coreference unit → an isolated-venv import/one-batch smoke precedes fixed-seed-13 training, project official
-  MUC/B³/CEAFe/BLANC recomputation, raw clusters, upstream/patch hashes and a complete FR-016(b) record; any
-  environment, identity or coverage failure is preserved as the named blocker rather than repaired by reimplementation.
+  coreference unit → first hash-split the 2,622 P1 train documents into a 2,331-document train and a 291-document
+  selection-dev, so evaluation is untouched; an isolated-venv import/one-batch smoke precedes fixed-seed-13
+  training, project official MUC/B³/CEAFe/BLANC recomputation, raw clusters, upstream/patch hashes and a complete
+  FR-016(b) record. The 2,331-vs-2,622 train delta is disclosed; any environment, identity or coverage failure is
+  preserved as the named blocker rather than repaired by reimplementation.
 - [ ] **T075 [RS-002]** Run the LLMERE causal transparent adaptation once on its frozen internal-dev unit → full-set
   stop-rule generation, and only if necessary a full-set constrained-decoding stage, preserve both raw generations;
   prompt-equivalence, coverage, conversion, candidate and official-scorer checks precede fixed-seed-13 causal P/R/F1
