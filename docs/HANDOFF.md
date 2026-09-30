@@ -104,7 +104,8 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   机制/负控”的可审查证据链。它对准主表的外部 baseline 广度与 FR-016，不为已封存 C5 机制争取翻案。
 - **可行性**：**有条件可行**。一手代码核实 EasyECR 的 MAVEN adapter、selection-dev 选档和 predict
   通路均存在；KBP 2017 受 LDC 许可阻断，预先固定 FR-016(b)。唯一允许的实现补丁是已点名的
-  `SelfAttentiveSpanExtractor` vendor（上游依赖约束冲突使之必要），必须在 4090 的隔离
+  `SelfAttentiveSpanExtractor` vendor（上游依赖约束冲突使之必要）与 upstream test-predict 对 gold
+  `event_id` 的错误依赖移除（否则无标签评测会崩溃或泄漏 cluster），必须在 4090 的隔离
   `torch==2.0.1` 环境完成 import + one-batch smoke 后才可训练。为隔离选档与评测，从 P1 2,622
   train 文档以固定 hash 切出 291 selection-dev，余下 2,331 才训练；P1 internal-dev 291 篇只作无
   gold test shape，2,331-vs-2,622 的训练量差异必须入 U 层登记。19:28 的只读核卡证明 4090 可达，

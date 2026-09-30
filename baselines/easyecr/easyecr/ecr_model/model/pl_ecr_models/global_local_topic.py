@@ -796,7 +796,7 @@ class GlobalLocalTopicCoreferenceDataset(Dataset):
                         "char_end": m.anchor.end,
                         "trigger": m.anchor.text,
                         "subtype": self.subtype2id.get(m.meta["event_type"], 0),
-                        "cluster_id": m.meta["event_id"],
+                        "cluster_id": m.meta.get("event_id", m.mention_id),
                         "mention_id": m.mention_id,
                     }
                 )
@@ -1689,7 +1689,6 @@ class GlobalLocalTopicModel(PlEcrModel):
         result = self.inner_pred(trainer, self.module, test_dataloaders, test_dataset)
         documents = {}
         doc_mentions = {}
-        events = []
         for id_id_distance in result:
             for mention_id, id_distance in id_id_distance.items():
                 mention = data.mentions[mention_id]
@@ -1699,15 +1698,7 @@ class GlobalLocalTopicModel(PlEcrModel):
                 document = data.documents[doc_id]
                 documents[doc_id] = document
 
-        event2mentions = defaultdict(list)
-        for _, mention in doc_mentions.items():
-            event_id = mention.meta["event_id"]
-            event2mentions[event_id].append(mention)
-        for event_id, mentions in event2mentions.items():
-            event = Event(event_id, mentions)
-            events.append(event)
-
-        new_data = EcrData(data.name, documents, doc_mentions, events, data.meta)
+        new_data = EcrData(data.name, documents, doc_mentions, None, data.meta)
         return new_data
 
     def get_predict_type(self) -> str:

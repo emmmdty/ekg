@@ -2,7 +2,7 @@
   "patches": [
     {
       "file": "easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py",
-      "patched_sha256": "63e8bdbbd727a2eddef5ad155c046592ce724884014214fb46e936cc1b15f752",
+      "patched_sha256": "62c4ddf423e2cd3f9681c7426e44c7d08171ce76ff72533437091b296c0f198e",
       "verbatim_sha256": "679e14c34e5068bbafe919d9292f95afd3cc4b597ac0d5bfa24d87f2aff15bd1",
       "what": "Redirect the only Global-Local Topic allennlp import to the vendored compatibility module.",
       "why": "EasyECR pins torch==2.0.1, while the final allennlp release providing SelfAttentiveSpanExtractor requires torch<1.13. The dependency solver proves those constraints cannot coexist.",
@@ -18,6 +18,16 @@
       "source": "https://github.com/allenai/allennlp/blob/v2.10.1/allennlp/modules/span_extractors/self_attentive_span_extractor.py",
       "license": "Apache-2.0",
       "why": "This is the one upstream API Global-Local Topic needs; retaining its learned global attention and inclusive-span masking is more faithful than changing the EasyECR runtime stack."
+    },
+    {
+      "file": "easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py",
+      "patched_sha256": "62c4ddf423e2cd3f9681c7426e44c7d08171ce76ff72533437091b296c0f198e",
+      "what": "Permit the existing prediction path to consume an unlabeled MAVEN-ERE test shape by using a mention-local placeholder only where the upstream batch object requires a cluster id, then return no gold-derived Event container after distance prediction.",
+      "why": "The upstream MAVEN adapter omits event_id on test mentions, but adapt_maven_data and predict read it even though Global-Local Topic's prediction logits and clustering need only mentions, types and pair distances. Supplying labelled evaluation records would leak gold clusters. The placeholder is never used as a prediction feature or exported cluster; it only keeps the existing all-pair batch shape valid.",
+      "not_changed": [
+        "Longformer/BERT inputs, pair-distance logits, connected-component clustering and threshold selection",
+        "labelled train and selection-dev behavior, where event_id remains the original value"
+      ]
     }
   ],
   "schema_version": "ekg.vendored_baseline.v1",

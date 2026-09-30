@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
-
-torch = pytest.importorskip("torch")
-
-from baselines.easyecr.easyecr.external_code.allennlp_span_extractor import (  # noqa: E402
-    SelfAttentiveSpanExtractor,
-)
 
 
 def test_self_attentive_span_extractor_masks_padding_and_uses_inclusive_endpoints() -> None:
+    torch = pytest.importorskip("torch")
+    from baselines.easyecr.easyecr.external_code.allennlp_span_extractor import (
+        SelfAttentiveSpanExtractor,
+    )
+
     extractor = SelfAttentiveSpanExtractor(input_dim=2)
     with torch.no_grad():
         extractor._global_attention.weight.copy_(torch.tensor([[1.0, 0.0]]))
@@ -29,3 +30,12 @@ def test_self_attentive_span_extractor_masks_padding_and_uses_inclusive_endpoint
         ]
     ).unsqueeze(0)
     torch.testing.assert_close(output, expected)
+
+
+def test_global_local_topic_test_prediction_never_requires_gold_cluster_ids() -> None:
+    source = (
+        Path(__file__).parents[2]
+        / "baselines/easyecr/easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py"
+    ).read_text(encoding="utf-8")
+    assert '"cluster_id": m.meta.get("event_id", m.mention_id)' in source
+    assert "EcrData(data.name, documents, doc_mentions, None, data.meta)" in source
