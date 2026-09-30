@@ -108,8 +108,9 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   `event_id` 的错误依赖移除（否则无标签评测会崩溃或泄漏 cluster），以及把其模块初始化**之后**的硬编码
   seed 42 改为模块初始化**之前**读取显式 seed 13（否则固定 seed 不能约束初始权重），必须在 4090 的隔离
   `torch==2.0.1` 环境完成 import + one-batch smoke 后才可训练。为隔离选档与评测，从 P1 2,622
-  train 文档以固定 hash 切出 291 selection-dev，余下 2,331 才训练；P1 internal-dev 291 篇只作无
-  gold test shape，2,331-vs-2,622 的训练量差异必须入 U 层登记。19:28 的只读核卡证明 4090 可达，
+  train 文档以固定 hash 切出 291 selection-dev，余下 2,331 才训练；该选择集物理名固定为
+  `selection-valid.jsonl`（上游 loader 仅在 `train`/`valid` 路径加载 Event labels），P1 internal-dev 291 篇
+  只作无 gold test shape，2,331-vs-2,622 的训练量差异必须入 U 层登记。19:28 的只读核卡证明 4090 可达，
   但全部 GPU 均有他人进程；下一步先查进程与空闲卡，不能挤占。
 
 ### 0.3a 历史队列切片（09-18；仅供追溯，**不是当前动作**）

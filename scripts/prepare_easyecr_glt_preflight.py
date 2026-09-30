@@ -166,7 +166,11 @@ def prepare(
     evaluation_records = [source_by_id[doc_id] for doc_id in evaluation_ids]
     paths = {
         "train": output / "train.jsonl",
-        "selection_dev": output / "selection-dev.jsonl",
+        # EasyECR's MAVEN loader decides whether to build the labelled Event
+        # container from the filename.  This is selection-only ground truth,
+        # hence the conventional ``valid`` suffix is required; evaluation
+        # remains the separate unlabeled test-shaped file below.
+        "selection_dev": output / "selection-valid.jsonl",
         "evaluation_test": output / "evaluation-test.jsonl",
     }
     _write_jsonl(paths["train"], training_records)
@@ -201,7 +205,11 @@ def prepare(
             "selection-dev documents; existing 2,622-document anchor training is not reused."
         ),
         "p1_protocol_sha256": expected_p1_protocol_sha256,
-        "schema_version": "ekg.easyecr_glt_preflight.v1",
+        "schema_version": "ekg.easyecr_glt_preflight.v2",
+        "selection_loader_path_semantics": (
+            "selection-valid.jsonl is labelled selection-only input; EasyECR's "
+            "MAVEN loader uses the 'valid' filename marker to construct Event objects."
+        ),
         "source_sha256": source_hash,
         "split_counts": {
             "evaluation": len(evaluation_records),

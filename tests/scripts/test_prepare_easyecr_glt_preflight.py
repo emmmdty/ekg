@@ -102,6 +102,7 @@ def test_prepare_freezes_disjoint_selection_and_unlabeled_evaluation(tmp_path: P
     selection_path = tmp_path / "one" / "selection_manifest.json"
     selection = json.loads(selection_path.read_text(encoding="utf-8"))
     assert set(selection["doc_ids"]).isdisjoint({"doc-4", "doc-5"})
+    assert (tmp_path / "one" / "selection-valid.jsonl").is_file()
     test_path = tmp_path / "one" / "evaluation-test.jsonl"
     test_record = json.loads(test_path.read_text(encoding="utf-8").splitlines()[0])
     assert "events" not in test_record

@@ -42,7 +42,7 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _validate_preflight(path: Path) -> dict[str, Path]:
     report = _read_json(path)
-    if report.get("schema_version") != "ekg.easyecr_glt_preflight.v1":
+    if report.get("schema_version") != "ekg.easyecr_glt_preflight.v2":
         raise G19RunError("preflight schema is not the frozen G-19 version")
     if report.get("p1_protocol_sha256") != EXPECTED_P1_PROTOCOL_SHA256:
         raise G19RunError("preflight has the wrong P1 trust root")
@@ -58,7 +58,7 @@ def _validate_preflight(path: Path) -> dict[str, Path]:
     root = path.parent
     names = {
         "train": "train.jsonl",
-        "selection": "selection-dev.jsonl",
+        "selection": "selection-valid.jsonl",
         "evaluation": "evaluation-test.jsonl",
     }
     artifact_hashes = report.get("artifact_sha256")

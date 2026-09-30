@@ -22,13 +22,13 @@ def _sha256(path: Path) -> str:
 def test_validate_preflight_accepts_only_hashed_unlabeled_inputs(tmp_path: Path) -> None:
     paths = {
         "train": tmp_path / "train.jsonl",
-        "selection_dev": tmp_path / "selection-dev.jsonl",
+        "selection_dev": tmp_path / "selection-valid.jsonl",
         "evaluation_test": tmp_path / "evaluation-test.jsonl",
     }
     for name, path in paths.items():
         path.write_text(f'{{"id": "{name}"}}\n', encoding="utf-8")
     report = {
-        "schema_version": "ekg.easyecr_glt_preflight.v1",
+        "schema_version": "ekg.easyecr_glt_preflight.v2",
         "p1_protocol_sha256": _MODULE.EXPECTED_P1_PROTOCOL_SHA256,
         "evaluation_gold_access": False,
         "split_counts": {"evaluation": 291, "selection_dev": 291, "training": 2331},

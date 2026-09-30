@@ -40,7 +40,9 @@
 1. **C-29（已完成）· 比较登记冻结。** 本文与 `BASELINE_ROSTER.md` 为每章固定 P/V/U 三层、状态和禁止论断；不改任何分数。
 2. **G-19 · EasyECR / Global-Local Topic。** 先从 P1 的 2,622-document train manifest 用
    `sha256("g19-selection-v1:" + doc_id)` 的固定排序切出 291-document selection-dev，余下 2,331
-   篇才可训练；P1 internal-dev 的 291 篇只生成无 gold 的 test shape，绝不参与选档或阈值选择。再在
+   篇才可训练；selection-only 文件物理名固定为 `selection-valid.jsonl`，因为上游 MAVEN loader 仅据该
+   `valid` 标记构建有标签 Event container；P1 internal-dev 的 291 篇只生成无 gold 的 test shape，绝不参与
+   选档或阈值选择。再在
    gpu-4090 的独立环境完成 import + one-batch smoke（C-2b）；只作三项已登记的透明补丁：vendor
    `SelfAttentiveSpanExtractor`、移除 upstream test-predict 对 gold `event_id` 的错误依赖，以及把 upstream
    初始化**之后**硬编码的 seed 42 改为在建模**之前**读取显式的固定 seed 13；保留 upstream 和补丁 hash。
