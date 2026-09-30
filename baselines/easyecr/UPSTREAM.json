@@ -1,0 +1,38 @@
+{
+  "patches": [
+    {
+      "file": "easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py",
+      "patched_sha256": "63e8bdbbd727a2eddef5ad155c046592ce724884014214fb46e936cc1b15f752",
+      "verbatim_sha256": "679e14c34e5068bbafe919d9292f95afd3cc4b597ac0d5bfa24d87f2aff15bd1",
+      "what": "Redirect the only Global-Local Topic allennlp import to the vendored compatibility module.",
+      "why": "EasyECR pins torch==2.0.1, while the final allennlp release providing SelfAttentiveSpanExtractor requires torch<1.13. The dependency solver proves those constraints cannot coexist.",
+      "not_changed": [
+        "Global-Local Topic architecture, loss, optimiser and hyperparameters",
+        "MAVEN-ERE loader, selection rule, clustering threshold grid and prediction path"
+      ]
+    },
+    {
+      "file": "easyecr/external_code/allennlp_span_extractor.py",
+      "patched_sha256": "7f7b955567dafd35d974bb681dcb1831e0269fe68a684e95581128250ab92511",
+      "what": "Port only AllenNLP v2.10.1 SelfAttentiveSpanExtractor's default no-width-embedding path.",
+      "source": "https://github.com/allenai/allennlp/blob/v2.10.1/allennlp/modules/span_extractors/self_attentive_span_extractor.py",
+      "license": "Apache-2.0",
+      "why": "This is the one upstream API Global-Local Topic needs; retaining its learned global attention and inclusive-span masking is more faithful than changing the EasyECR runtime stack."
+    }
+  ],
+  "schema_version": "ekg.vendored_baseline.v1",
+  "upstream": {
+    "commit": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "license": null,
+    "paper": "https://aclanthology.org/2022.emnlp-main.454/",
+    "repository": "https://github.com/hqyang/EasyECR"
+  },
+  "verbatim_sha256": {
+    "config/model_dataset/global_local_topic_mavenere.yaml": "391ed2c845987a40990463601543165cd9399c410c9045854f0db400a294de97",
+    "easyecr/ecr_data/datasets/maven_ere/maven_ere.py": "d3efedf191a8abc0fb19b44ecce977923f76702e4f18e620137cc0e172397d50",
+    "easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py": "679e14c34e5068bbafe919d9292f95afd3cc4b597ac0d5bfa24d87f2aff15bd1",
+    "easyecr/pipeline/example_emnlp2022.py": "e10ab01fb6c7bb37cdccb8cfe03f16cff7cf7c7ab6b4eb427971ffe54de6baa3",
+    "requirements.txt": "88cbe7979f6497df8b7683ce10eb9f8f2b11ea2f96137ff4b9448560eed5afcf"
+  },
+  "why_vendored": "gpu-4090 reaches project code through git, not a server-side clone. Vendoring the official source at its fixed commit makes the required compatibility patch reviewable and keeps remote artifacts traceable."
+}
