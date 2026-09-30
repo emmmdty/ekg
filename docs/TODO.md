@@ -5,32 +5,27 @@
 
 ## 当前正式活动阶段
 
-**Ch3/D4 单章队列已经收口。** 作者要求按第一性原理拆到最终目标、必达门和中间指标，一次只推进一个章节。
-目标树与阶段结果在 `results/PHASE_R1.md` §25；执行顺序是
-`C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-25R2 → C-25R3 → C-25R3F → C-26 → C-27 → G-17 → G-18`。
-旧 typed cues 继续封存；失败的是机制家族，不是 D4 整章。
+**当前优先级是公开论文可比性，而非重开失败机制。** 保持单 seed；执行顺序固定为
+`C-29 ✅ → G-19 EasyECR / Global-Local Topic → G-20 LLMERE-causal → C-30 P/V/U 主表与声称审计`。
+完整决策、科研价值、可行性、一手依据、预期结果和停止条件见
+[`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)；可执行行只认 `EXPERIMENT_PLAN.md` §4。
 
-| 章 | R1 v6.2 结论 | 当前门 |
+| 项 | 当前状态 | 下一道门 |
 |---|---|---|
-| Ch3 · D4 | **本轮已完成**：predicted causal uncertainty residual + oracle + 官方 EFD 透明适配 | ❌ **正式方法周期失败**（G-18 必要门四条不过；G-18b 不替代 G-18）。✅ 输入门、契约、实现、单折 CUDA 冒烟、五折三臂、错误归因、gold oracle 与 C-28 官方 gold/predicted 对照全部闭合；最终结果与边界见 `results/PHASE_R1.md` §25.20–§25.27 |
-| Ch4 · A4 | **不立项**：rationale + graph + counterfactual 宽命题已被近邻论文覆盖 | 新颖性阻断；不是继续调参或换 backbone 能解决的问题 |
-| Ch5 · C5 | **两个周期均未过门，机制家族已封存** | C-22 不再作为活动任务；不因 D4 队列结束而自动重开，见 `HANDOFF.md` §0.4b |
+| G-19 · Ch5 外部 baseline | Global-Local Topic / EasyECR 是独立发表方法；原始 KBP 基准受 LDC 许可阻断，故只可作 FR-016(b) 透明适配 | 先完成 gpu-4090 独立环境 import + one-batch smoke，再固定 seed 13 训练、冻结 291-document unit 预测与官方 MUC/B³/CEAFe/BLANC 重算 |
+| G-20 · Ch4 外部 baseline | LLMERE 是直接的 MAVEN-ERE causal 方法；原文 published split 不读取，故只可作 FR-016(b) 透明适配 | 全量固定 stop 生成；若仍有格式错误才触发全量 constrained decoding；通过转换/覆盖/官方 scorer 后报告单 seed causal P/R/F1 |
+| C-30 · 全章 | 尚无新实验分数 | 从 raw predictions 独立重算；每一行必须有 P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 标签 |
+| D4 / A4 / C5 方法机制 | D4、A4、旧 C5 均已按契约收口或封存 | 不重开；C-22 继续暂停，不得因为本队列结束自动恢复 |
 
-## D4 目标与当前阶段结果
+## 可比性口径（本队列的通过条件）
 
-- 最低过线：pooled five-class macro-F1 严格高于 `.553995`；
-- 论文有效目标：当前 **≥ `.583995`**，且 full 同时超过 base/rewired、配对 bootstrap CI 下界 `>0`；
-- 稀有类护栏：PS− F1 ≥ `.352456`，Uu F1 ≥ `.166850`；
-- 输入门：2,913 docs / 2,532,394 ordered pairs 恰好一次，causal F1 ≥ `.300`，Brier 优于 no-skill；
-- 阶段成果：S0 目标/文献闭合；S1 hash-bound train→causal-checkpoint→posterior runner 已完成并通过
-  **703 passed / 29 skipped、ruff 0、smoke OK**；C-25 汇总器已在看到五折分数前冻结，当前全门
-  **707 passed / 29 skipped、ruff 0、smoke OK**；
-  S2 原始五折输入已完成并由 C-25 判定：coverage 全过，causal F1 **`.308141`** 过线；但 Brier
-  **`.068750`** 劣于 no-skill **`.041427`**；第三机制已在互斥 selection holdout 上同时得到 Brier
-  **`.034240`**（比 no-skill 低 `.005817`）和 cost-aware F1 **`.300990`**，是首个正的输入阶段结果；
-  正式 evaluation 仍未访问，故还不能宣布 S2 或 D4 方法结果过线。
+- P（原文参考）只能给出处、表号与原始协议背景，永不与项目数字相减或排序；
+- V（原始基准保真度）要求在公开原始基准复现发表数值；当前两项若无法完成，逐项说明障碍并标 FR-016(b)；
+- U（统一协议）才可直接比较：manifest、候选/mention 全集、official scorer、标签映射、训练/selection/evaluation
+  隔离与推理输入逐项一致；
+- 单 seed 仅能给出同协议描述性比较。document bootstrap 只能描述评测单位不确定性，不能替代跨初始化确认。
 
-## ✅ 已完成：C-13–C-21（2026-09-20，本地文献/CPU/代码）
+## 历史：C-13–C-21（2026-09-20，本地文献/CPU/代码）
 
 - **C-13**：一手论文与官方代码矩阵完成；A4 被新颖性证据淘汰，D4/C5 保留为条件路线；
 - **C-14**：FACT↔ERE 的 2,913 篇 / 73,939 mentions 对齐；现成 held-out relation prediction 只覆盖
@@ -48,29 +43,12 @@
 
 ## 下一步
 
-1. ✅ C-25R3F 正式输入门 2026-09-22 通过，报告 SHA `fea7d3ed…1b54d4`；五折 natural-posterior sidecar
-   已封存，evaluation gold 只读了一次。⚠️ 它只说明概率可用，**cost-aware F1 `.306023` 比 raw `.308141`
-   还低 `.002117`**，不能写成 D4 机制有效；
-2. ✅ C-26 已冻结：`docs/phases/PHASE_D4_predicted_causal_residual.md`（三臂唯一差异、边构造、
-   两项中介的分子/分母、稀有类护栏、10,000 次配对 bootstrap、停止条件），在任何方法数字之前定死；
-3. ✅ C-27b（训练侧结构输入）/ C-27（实现与本地门）/ G-17（单折三臂 CUDA 冒烟）均已完成；
-4. ❌ **G-18 判 `gate_failed`**（base `.543166` / full `.540671` / rewired `.532591`；
-   `full−base −.002495` CI 跨 0）；**G-18b** 执行修复重跑的理由被证伪（base 纹丝不动 `.000028`），
-   **不替代 G-18**。两跑之间只换打包规则就让 full 动了 `+.009207`，**大过效应量本身**；
-5. ✅ 错误归因（§25.21：边精确率 `.2243`、触及 47.8%、入度 ≥2 那层 `full > rewired > base`）
-   与可行性诊断（§25.22：精确率 `.50` 封顶、触及面只剩 3.2%）已完成；
-6. ✅ **裁定：不投第二个机制设计周期**（§25.24），且 **C-28a oracle 诊断让理由更硬**——
-   给一张**完美**的因果图，`oracle − base = −.000223`（CI 跨 0），**增益为零** ⇒
-   边质量不是主因，§25.21 的「稀释」解释作废，路线 (甲)(乙) 都失去意义（§25.25）；
-7. ✅ **C-28 已收口**：官方 `trainEFD --add_relation` 的 gold / predicted 五折 OOF 覆盖精确，gold
-   没有优于 predicted，CI 跨 0；完整数字只见 `results/PHASE_R1.md` §25.27。该对照排除了「gold
-   结构显著更好」，但因两行都启用关系输入，不能把原论文增益唯一归因给文本；未事后增设新臂；
-8. ✅ **D4 单章队列清空**：目标、文献、输入、机制、负控、oracle、官方代码保真度、错误与失败原因
-   均已落盘。正式结论仍是 G-18 `gate_failed`，C-28 不翻案；不换名、扫参、加大 backbone 或启动
-   未授权多种子。
+1. G-19：完成已登记的 EasyECR 透明适配；若环境/ID/覆盖无法通过，封存障碍并停止，不重写模型。
+2. G-20：仅在 G-19 收口后，执行全量 LLMERE-causal 透明适配；不得读取 final-valid、单条补跑或扫阈值。
+3. C-30：只有两条 raw outputs 都可复算后才更新主表；结果高低均如实记录，外部适配较高则抬高项目要求。
 
-⛔ 仍禁止：未授权多种子、final-valid 选模、gold 关系输入、删除候选、事后修 prompt/阈值、用更大
-backbone 掩盖机制失败。本轮没有新增方法指标，不能写成“D4/C5 已有效”。
+⛔ 仍禁止：未授权多种子、final-valid 选模、删除候选、事后修 prompt/阈值、用更大 backbone 掩盖机制失败，
+以及把透明适配写成“胜过原论文”。
 
 ## 已完成：**G-11a · 表 6-2 的公开对手行**（2026-09-18 收口）
 

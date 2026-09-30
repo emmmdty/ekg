@@ -350,10 +350,13 @@ gantt
 | **C-28a** | ✅ **gold 边 oracle 诊断完成，增益为零（2026-09-22）**：五折共 **53,358** 条金标边（与 gold-expanded pair 总数逐条相等），pooled macro-F1 `.542915`；`oracle − base = −.000223`（CI `[−.0147, +.0143]`）、`oracle − full = −.006963`。**⇒ 边的质量不是主因**：把精确率从 `.2243` 换成 `1.0`、触及面换成金标全覆盖，主指标纹丝不动。**这推翻了 §25.21 的「稀释」解释**，路线 (乙) 随之失去意义，(甲) 从「走不通」变成「走了也没用」 | C-27 ✅ | oracle 不设臂，只作 `results/` 诊断行，不得进任何通过门；结论边界＝本项目的参数化与协议，**不反驳**原论文 `47.1→49.1`（另一 backbone、另一种拼接接法、另一划分） | `.../seed-13-oracle/` + `compare_oracle_vs_{base,full}.json`（`results/PHASE_R1.md` §25.25）|
 > ⚠️ **流程如实记录**：C-28a 是 2026-09-22 06:20 **先启动、后补进本表**的，违反了「要偏离顺序先改主表」。它没有污染任何已判定结果（oracle 本就不进门），但这类顺序倒置正是主表要防的漂移，记在这里不抹掉。
 | **C-27b** | ✅ **D4 训练/选择文档的结构输入已补齐（2026-09-22）**：五折 train dump 合计 **7,597,182** ordered pairs（四卡并行约 2 分钟），train/selection-dev/evaluation 三个 target 的 map 参数**逐位相同**；边率 in-sample 4.08–5.16% vs evaluation 4.08–4.96%，说明 in-sample 乐观不在边数上；MAVEN-ERE↔MAVEN-FACT 的 2,913 篇 mention ID 集合逐篇相同（0 不一致）| C-26 ✅ | 起因是 §25.14 的泄漏路径裁定；不训练模型、不读 evaluation、不改 map | R1 `fold-*/train_dirichlet_*`、`fold-*/selection_dirichlet_*`（`results/PHASE_R1.md` §25.15）|
+| **C-29** | ✅ **公开论文可比性登记冻结（2026-09-30）**：作者将“可与公开论文比较、保持单 seed”定为当前优先级；新增 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)，为每个外部行固定 P（原文参考）/V（原始基准保真度）/U（统一协议）三层与七项必填 provenance | D4 队列收口 | 不产生方法分数；固定 G-19 → G-20 → C-30 的顺序，排除 D4 bottleneck、旧 C5 家族和 Ch6 额外对手 | `docs/COMPARABILITY_PLAN.md` |
+| **C-30** | **P/V/U 主表与声称审计**：从 G-19/G-20 的冻结 raw predictions 独立重算每行；登记七项 provenance、FR-016 身份与单 seed 限制，拒绝无覆盖、无 scorer 或跨口径 delta | G-19 + G-20 收口 | P 行不得进排序；只比较同章、同一 frozen unit 的 U 行；所有新行都标 `single-seed / non-confirmatory` | `docs/COMPARABILITY_PLAN.md` §2/§4 + 结果页审计 |
 
-作者已把活动队列改为 **D4 单章：C-23 → C-24 → G-15 → G-16 → C-25 → C-25R → C-25R2 → C-25R3 → C-26 → C-27 →
-G-17 → G-18**。C-22 暂停排队但不取消；A4 仍因新颖性阻断。D4 在真实输入和 C-26 phase contract
-存在前不得创建方法训练任务。
+**当前活动队列（作者 2026-09-30 指示）**：**C-29 ✅ → G-19（EasyECR / Global-Local Topic）→
+G-20（LLMERE-causal）→ C-30 比较与声称审计**。两条 GPU 行都是独立发表方法的单 seed 透明适配，
+不重开 D4/A4/C5 的失败机制；C-22 保持暂停。完整决策、预期效果与停止条件见
+[`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)。
 
 **新增 C-10 的理由（2026-09-13）**：§3.4 推论 2 已经判定「第 6 章必须提前启动」，§3.2 依赖图里
 G-11a（4 个外部对手复现）也标了「提前启动」，但**它们全都要跑在同一个冻结的 evaluation unit 上**
@@ -399,6 +402,8 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **G-17** | ✅ **D4 单折三臂 CUDA 冒烟通过（2026-09-22）**：20/10/10 篇 bounded fixture、1 epoch，六个进程全部 exit=0；三臂预测相同是因为冒烟规模下都塌到多数类 `.19451`，而 residual 权重确实从零初始化训起（|W|₁ 40.33 / 55.09），base 无 residual 文件 | G-16 + C-27 | 约 3 分钟 | ✅ 达成；分数不进选模与主表（`results/PHASE_R1.md` §25.17）|
 | **G-18** | ❌ **D4 seed-13 五折三臂正式实验完成，必要门四条不过（2026-09-22）**：pooled `base .543166` / `full .540671` / `rewired .532591`；`full−base` **`−.002495`**（CI `[−.0156,+.0105]`）、`full−rewired` `+.008080`（CI `[−.0051,+.0215]`，跨 0）；主效果差 `.0433`；PS− `.3501` 未过 `.352456`（base `.3616` 反而过）；中介 CAUSE 与 base 持平、PRECONDITION 更差。覆盖 2,913/73,939 精确命中 | G-17 + C-26 | 2h23m（15 run 全 exit=0，卡 0/1/2）| 报告 SHA `326cc993…fca3707`；**机制无效**，fold-1 的正向顺序是单折噪声（5 折只有 1 折 full 更高）；base 比锚低 `.010829`，但欠额是效应量的 4 倍以上，**修 base 同时也修 full**（`results/PHASE_R1.md` §25.20）|
 | **G-18b** | ✅ **执行修复重跑完成，但修复的理由被证伪（2026-09-22）**：base 在 910 步与 1,248 步下是 `.543166` 与 `.543138`（**差 `.000028`**）⇒ 优化步数**不是** base 欠额的原因，不再第三次调 batch。full `.540671 → .549878`、rewired `.532591 → .533347`；`full−base +.006740`（CI 跨 0）、`full−rewired +.016531`（下界 `+.000115`，擦着 0）。⚠️ **G-18b 不替代 G-18**——其正当性已被自己的数据推翻，留好看的那一跑正是本项目禁止的模式 | G-18 | 2h15m（15 run 全 exit=0）| 报告 SHA `3fb617c2…e6d315`。**真正的产出是配置敏感度 `+.009207` 大过效应量 `+.006740`** ⇒ 要测的效应落在配置噪声地板以下；两跑中介都反向（`results/PHASE_R1.md` §25.23）|
+| **G-19** | **EasyECR / Global-Local Topic 的同协议透明适配（Ch5 外部 baseline）**：在 gpu-4090 独立 venv 完成 C-2b import/smoke 后，只 vendor 已登记的 span extractor；固定 seed 13，在 selection-dev 选档、冻结 291-document unit 预测，用项目 official `evaluate.py` 重算 MUC/B³/CEAFe/BLANC | C-2b + C-29 ✅ + 本地三件套 + 核卡 | 约 1–2 GPU·day | 独立发表方法的 cluster 输出全覆盖、raw predictions/metrics/patch hash/七项 P/V/U 登记齐全。原始 KBP 数据不可得故恒为 **FR-016(b)**；结果只可与“Global-Local Topic 透明适配”同协议比较，不能声称胜过原论文 |
+| **G-20** | **LLMERE-causal 的同协议透明适配（Ch4 外部 baseline）**：按 C-3 冻结方案，对全部请求实施 stop 规则；仅当全量仍有不可解析行才执行第二阶段的全量 constrained decoding。prompt 等价、覆盖、转换、候选与 official scorer 均通过后，固定 seed 13 产出 causal P/R/F1 | C-3 + C-29 ✅ + G-19 收口 + 本地三件套 + 核卡 | < 1 GPU·h（先 100 条计时校准） | 原始与新 raw generation 均保留，输出全量而非补行；七项 P/V/U 登记齐全。final-valid 不读，故恒为 **FR-016(b)**、single-seed；不能以结果高低评价 LLMERE 原论文 |
 
 **G-13 / G-14 共同确立的方针（作者 2026-09-13）**：4090 被占不是停工理由。
 判断一件事该不该先在 5090 上做，只问**它能不能减少那一次正式跑白跑的概率**。
@@ -438,6 +443,7 @@ Gate 之外不重排计划。Gate 上的裁决必须写回本文件与 `HANDOFF.
 | C-5, G-5 | `phases/PHASE_C5_argument_uncertainty.md` | C5.0–C5.4 |
 | C-2, C-4, G-6, G-7 | `BASELINE_ROSTER.md` §1/§2/§3/§6 | FR-016 判定 |
 | C-3, G-8 | `results/PHASE_R1.md` §9.6 / §21.6 | E8 恢复 |
+| C-29, C-30, G-19, G-20 | `COMPARABILITY_PLAN.md` + `BASELINE_ROSTER.md` §1/§2 | P/V/U 三层比较与 FR-016 |
 | G-11 | `phases/PHASE_E3_graph_application.md` | E3.0–E3.5 |
 | G-12 | `phases/PHASE_H2_thesis_acceptance.md` | 七项审计 |
 

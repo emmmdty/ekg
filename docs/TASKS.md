@@ -1,10 +1,10 @@
 # Tasks: EKG Thesis Research Program
 
 **Input**: [`SPEC.md`](SPEC.md), [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)
-**Current executable scope**: R1 v6.2 new-family admission. C-13–C-21 are complete: A4 is rejected on novelty;
-D4 waits for real cross-fit predicted posteriors; C5 C-22 waits for an idle 4090, snapshot-path recheck, generation and
-blind review. The v6.1
-typed-cue / pair-evidence / role-compatibility phases below are historical closed failures, not runnable backlog.
+**Current executable scope**: public-paper comparability uplift under one fixed seed. D4 v6.2 and the old C5 family
+are closed; C-22 remains paused. The only active sequence is T073 → T074 → T075 → T076, defined in
+`EXPERIMENT_PLAN.md` and `COMPARABILITY_PLAN.md`. The v6.1 typed-cue / pair-evidence / role-compatibility phases
+below are historical closed failures, not runnable backlog.
 
 ## Format
 
@@ -178,6 +178,30 @@ not active while this queue advances.
 **Checkpoint**: T071 is the first new D4 method-effectiveness result. Extra seeds remain separately authorized and
 cannot start merely because the cross-fit folds ran in parallel.
 
+## Phase 3d — Public-paper comparability uplift
+
+**Purpose**: Convert external-method evidence into directly auditable same-protocol rows without mistaking a
+single-seed transparent adaptation for a reproduction of a published result.
+
+- [x] **T073 [P] [RS-001–RS-003]** Freeze the P (published reference) / V (original-benchmark fidelity) /
+  U (unified-protocol) registry, seven required provenance fields, execution order and forbidden claims →
+  `COMPARABILITY_PLAN.md` is linked from the executable main table; no experiment score is changed.
+- [ ] **T074 [RS-001]** Run the EasyECR Global-Local Topic transparent adaptation once on the frozen 291-document
+  coreference unit → an isolated-venv import/one-batch smoke precedes fixed-seed-13 training, project official
+  MUC/B³/CEAFe/BLANC recomputation, raw clusters, upstream/patch hashes and a complete FR-016(b) record; any
+  environment, identity or coverage failure is preserved as the named blocker rather than repaired by reimplementation.
+- [ ] **T075 [RS-002]** Run the LLMERE causal transparent adaptation once on its frozen internal-dev unit → full-set
+  stop-rule generation, and only if necessary a full-set constrained-decoding stage, preserve both raw generations;
+  prompt-equivalence, coverage, conversion, candidate and official-scorer checks precede fixed-seed-13 causal P/R/F1
+  and an FR-016(b) record. No final-valid read, per-row retry or threshold sweep is permitted.
+- [ ] **T076 [RS-001–RS-003]** Independently rebuild the relevant thesis rows from raw predictions and audit all claims
+  → every P/V/U row has the seven provenance fields, FR-016 state and `single-seed / non-confirmatory` label; only
+  same-chapter, same-unit U rows expose deltas, and every missing field is excluded from the main table.
+
+**Checkpoint**: The paper has two additional independent published-method adaptation rows whose scope, protocol
+differences and single-seed limitation are inspectable. Their rank is not a pass criterion and does not establish a
+published-paper superiority claim.
+
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 
 - [x] **T025 [RS-001]** Implement the C5 posterior/uncertainty sidecar, role-alignment residual, registered mediator,
@@ -275,8 +299,9 @@ coverage, but they cannot be checked complete until the corresponding executable
 - T023 depends on T012–T022; each T024 contract depends on T023 and that method's prerequisites, not on a fixed chapter
   order.
 - T025–T039 are completed historical failures and are not runnable; C-13–C-18/T048–T053 supersede their design queue.
-- T048–T053, T059–T061 and T063–T064 are complete; T062 has not started and is inactive while D4 is the sole
-  chapter queue. T065–T071 are declared in `EXPERIMENT_PLAN.md`; only T065 is next. A4 has no executable task.
+- T048–T053, T059–T061 and T063–T072 are complete; T062 has not started and remains paused. T073 is complete;
+  T074 → T075 → T076 is the only active queue. A4 has no proposed-method task, but T075 is an external transparent
+  adaptation, not an A4 revival.
 - T054–T057 are complete; T058 waits for explicit matched-seed authorization. T045 waits for the intended final E3
   identity, not for the withdrawn factorial.
 - Within method phases, baseline reproduction and engineering tests may run in parallel only when they do not

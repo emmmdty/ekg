@@ -17,6 +17,14 @@ requirements**: literature, ID, power or pilot evidence may replace them while t
 Detailed evidence and primary-source links are in
 [`replan/METHODOLOGY_REDESIGN_20260904.md`](replan/METHODOLOGY_REDESIGN_20260904.md).
 
+### 2026-09-30 comparability decision
+
+The immediate research priority is not another proposed-method mechanism: it is a P/V/U evidence chain that makes
+external-method rows auditable under one frozen project protocol. The executable order, expected effect, stop rules,
+seven mandatory provenance fields and single-seed claim boundary are frozen in
+[`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md) and the `EXPERIMENT_PLAN.md` §4 main table. This supplements, and
+does not erase, the recorded failures of D4/A4/C5.
+
 ## Technical Context
 
 | Context | Choice |
