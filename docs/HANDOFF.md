@@ -129,6 +129,11 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   `gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/cpu-model-init-20261001/model_init.log`。
 - C-2b 尚未通过：2026-10-01 只读核卡发现四张 4090 均有他人 GPU 进程，故尚未启动 import + one-batch CUDA
   smoke。卡【算力】，不是数据/协议/代码；不得挤占，空闲后先执行 smoke，再决定是否训练。
+- **空卡后的唯一 smoke 命令**（工作目录 `/data/TJK/ekg`，`<idle_gpu>` 必须是重新 `nvidia-smi` 确认的空闲
+  物理卡）：
+  `CUDA_VISIBLE_DEVICES=<idle_gpu> PYTHONPATH=src:baselines/easyecr .venv-easyecr-glt/bin/python -u scripts/run_easyecr_glt.py --stage smoke --preflight runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/preflight-v2/preflight.json --doc-encoder runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/assets/models/longformer-base-4096 --mention-encoder runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/assets/models/bert-base-cased --output runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/smoke-v1-20261001`。
+  `CUDA_VISIBLE_DEVICES` 使 trainer 与上游 predict path 都只看一张卡；预期只写不可覆盖的
+  `run_manifest.json`、临时 checkpoint 和 `smoke.json(status=pass)`，不产生正式分数或 official prediction。
 
 ### 0.3a 历史队列切片（09-18；仅供追溯，**不是当前动作**）
 
