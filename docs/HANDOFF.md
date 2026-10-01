@@ -113,6 +113,19 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   只作无 gold test shape，2,331-vs-2,622 的训练量差异必须入 U 层登记。19:28 的只读核卡证明 4090 可达，
   但全部 GPU 均有他人进程；下一步先查进程与空闲卡，不能挤占。
 
+#### G-19 输入闭合进展（2026-10-01）
+
+- `bd8c1f4` 将选择输入冻结为 `preflight-v2/selection-valid.jsonl`；这是对 EasyECR filename-driven
+  MAVEN loader 的**输入语义**适配，不改变 291 个 selection doc-id、2,331 个训练 doc-id 或任何内容哈希。
+  本地和 `gpu-4090` 的 `train` / `selection-valid` / `evaluation-test` / selection manifest / preflight
+  SHA-256 五项均一致；preflight SHA-256 `f0ac88b0462440fa8555b58ec5bb2615f63bd20a04dbf15bbdf916a69bfc2fea`。
+- 4090 的隔离 venv 已完成 CPU loader 回归：selection 是 **291 documents / 6,923 Events**；evaluation 是
+  **291 documents / 7,195 mentions**、`events=None`、所有 mention 均无 `event_id`。这实际验证了 selection
+  可供上游选档而评测只保留无标签 test shape。产物：
+  `gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/cpu-check-v2-20260930/loader.log`。
+- C-2b 尚未通过：2026-10-01 只读核卡发现四张 4090 均有他人 GPU 进程，故尚未启动 import + one-batch CUDA
+  smoke。卡【算力】，不是数据/协议/代码；不得挤占，空闲后先执行 smoke，再决定是否训练。
+
 ### 0.3a 历史队列切片（09-18；仅供追溯，**不是当前动作**）
 
 作者 2026-09-18 晚的方向性指示是「**前三个方法章要整体提高**」，并为此批了 C5 一格有效周期。
