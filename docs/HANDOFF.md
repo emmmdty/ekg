@@ -123,6 +123,10 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   **291 documents / 7,195 mentions**、`events=None`、所有 mention 均无 `event_id`。这实际验证了 selection
   可供上游选档而评测只保留无标签 test shape。产物：
   `gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/cpu-check-v2-20260930/loader.log`。
+- 同一隔离环境的 CPU 模型构造也已通过：本地 Longformer/BERT 镜像可被 `GlobalLocalTopicModel` 载入，实测
+  `seed=13`、`cuda_initialized=false`。BERT checkpoint 的预训练分类头未载入提示符合将其载为 `BertModel` 的
+  官方语义，不是资产缺失。产物：
+  `gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/cpu-model-init-20261001/model_init.log`。
 - C-2b 尚未通过：2026-10-01 只读核卡发现四张 4090 均有他人 GPU 进程，故尚未启动 import + one-batch CUDA
   smoke。卡【算力】，不是数据/协议/代码；不得挤占，空闲后先执行 smoke，再决定是否训练。
 
