@@ -46,6 +46,8 @@
    gpu-4090 的独立环境完成 import + one-batch smoke（C-2b）；只作三项已登记的透明补丁：vendor
    `SelfAttentiveSpanExtractor`、移除 upstream test-predict 对 gold `event_id` 的错误依赖，以及把 upstream
    初始化**之后**硬编码的 seed 42 改为在建模**之前**读取显式的固定 seed 13；保留 upstream 和补丁 hash。
+   EasyECR 还会把全局 Python temporary directory 写死到未创建的 `/home/nobody/code/tmp/`；G-19 runner 在导入
+   Lightning 前将其进程内重定向到本次不可覆盖 run output 的 `temporary/`，仅修复运行路径，不改上游源码。
    固定 seed 13 训练一次，用 selection-dev
    选档，预测冻结 evaluation unit，并用项目 official scorer 重算全部四个 coreference 指标。2,331 vs
    既有锚的 2,622 training documents 是必须披露的 U 层 input delta，故本行不作 superiority claim。

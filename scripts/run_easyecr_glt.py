@@ -14,6 +14,7 @@ import argparse
 import hashlib
 import json
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -87,6 +88,21 @@ def _require_model_assets(doc_encoder: Path, mention_encoder: Path) -> None:
             raise G19RunError(
                 f"{label} asset is incomplete at {directory}: missing {', '.join(missing)}"
             )
+
+
+def _configure_upstream_tempdir(output: Path) -> Path:
+    """Override EasyECR's uncreated hard-coded global tempfile directory.
+
+    ``easyecr.common.common_path`` assigns ``/home/nobody/code/tmp/`` without
+    creating it.  PyTorch Lightning imports distributed utilities that create
+    a TemporaryDirectory, so the assignment must be replaced before importing
+    Global-Local Topic (and thus Lightning).  This is process-local runtime
+    plumbing, not an EasyECR model or protocol change.
+    """
+    temporary_directory = output / "temporary"
+    temporary_directory.mkdir(parents=True, exist_ok=False)
+    tempfile.tempdir = str(temporary_directory)
+    return temporary_directory
 
 
 def _take_documents(data: Any, count: int) -> Any:
@@ -225,13 +241,6 @@ def run(args: argparse.Namespace) -> None:
     inputs = _validate_preflight(args.preflight)
     _require_model_assets(args.doc_encoder, args.mention_encoder)
 
-    # Delayed imports make local protocol tests independent of EasyECR's GPU stack.
-    from easyecr.ecr_data.data_converter.data_converter import SplitDataConverter
-    from easyecr.ecr_evaluate.ecr_evaluate import Evaluator
-    from easyecr.ecr_model.cluster.cluster_model import EcrConnectedComponent
-    from easyecr.ecr_model.framework.ecr_framework import EcrFramework
-    from easyecr.ecr_model.model.pl_ecr_models.global_local_topic import GlobalLocalTopicModel
-
     args.output.mkdir(parents=True)
     trainer_parameters = _trainer_parameters(args.output, smoke=args.stage == "smoke")
     conf = _model_conf(
@@ -239,6 +248,16 @@ def run(args: argparse.Namespace) -> None:
         mention_encoder=args.mention_encoder,
         trainer_parameters=trainer_parameters,
     )
+
+    # Delayed imports make local protocol tests independent of EasyECR's GPU stack.
+    from easyecr.ecr_data.data_converter.data_converter import SplitDataConverter
+    from easyecr.ecr_evaluate.ecr_evaluate import Evaluator
+    from easyecr.ecr_model.cluster.cluster_model import EcrConnectedComponent
+    from easyecr.ecr_model.framework.ecr_framework import EcrFramework
+
+    temporary_directory = _configure_upstream_tempdir(args.output)
+    from easyecr.ecr_model.model.pl_ecr_models.global_local_topic import GlobalLocalTopicModel
+
     _write_json(
         args.output / "run_manifest.json",
         {
@@ -251,6 +270,7 @@ def run(args: argparse.Namespace) -> None:
             "input_sha256": {name: sha256_file(path) for name, path in inputs.items()},
             "doc_encoder": str(args.doc_encoder),
             "mention_encoder": str(args.mention_encoder),
+            "temporary_directory": str(temporary_directory),
             "trainer_parameters": trainer_parameters,
             "threshold_grid": THRESHOLDS,
             "command_argv": sys.argv,

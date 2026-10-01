@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import tempfile
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -13,6 +14,7 @@ _MODULE = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(_MODULE)
 _validate_preflight = _MODULE._validate_preflight
 _model_conf = _MODULE._model_conf
+_configure_upstream_tempdir = _MODULE._configure_upstream_tempdir
 
 
 def _sha256(path: Path) -> str:
@@ -55,3 +57,14 @@ def test_model_configuration_freezes_seed_13_and_single_gpu_trainer(tmp_path: Pa
     assert conf["seed"] == 13
     assert trainer["devices"] == 1
     assert trainer["max_epochs"] == 30
+
+
+def test_upstream_tempdir_is_run_local_and_overrides_the_global_hard_code(tmp_path: Path) -> None:
+    previous = tempfile.tempdir
+    try:
+        temporary_directory = _configure_upstream_tempdir(tmp_path / "run")
+        assert temporary_directory == tmp_path / "run" / "temporary"
+        assert temporary_directory.is_dir()
+        assert tempfile.tempdir == str(temporary_directory)
+    finally:
+        tempfile.tempdir = previous

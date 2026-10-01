@@ -134,6 +134,12 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   `CUDA_VISIBLE_DEVICES=<idle_gpu> PYTHONPATH=src:baselines/easyecr .venv-easyecr-glt/bin/python -u scripts/run_easyecr_glt.py --stage smoke --preflight runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/preflight-v2/preflight.json --doc-encoder runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/assets/models/longformer-base-4096 --mention-encoder runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/assets/models/bert-base-cased --output runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/smoke-v1-20261001`。
   `CUDA_VISIBLE_DEVICES` 使 trainer 与上游 predict path 都只看一张卡；预期只写不可覆盖的
   `run_manifest.json`、临时 checkpoint 和 `smoke.json(status=pass)`，不产生正式分数或 official prediction。
+- **2026-10-02 smoke-v1 失败（无 CUDA 分配）**：在模型导入前，EasyECR `common_path.py` 将 Python
+  `tempfile.tempdir` 指向不存在的 `/home/nobody/code/tmp/`，Lightning 的 `TemporaryDirectory()` 遂报
+  `FileNotFoundError`。这是【代码/环境路径】障碍，非数据、权重或模型失败；日志保留在
+  `gpu-4090:.../global-local-topic/logs/smoke-v1-20261002.log`。决策：runner 在导入 Global-Local Topic
+  前把该**进程内**临时目录覆写到自身 `output/temporary/`；不修改 EasyECR 源码、训练配方或协议，修复后必须以
+  新的不可覆盖 smoke output 重跑。
 
 ### 0.3a 历史队列切片（09-18；仅供追溯，**不是当前动作**）
 
