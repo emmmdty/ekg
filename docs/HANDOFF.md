@@ -154,6 +154,13 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   `--smoke-documents 16`（最小的已审计有效档位，而非训练超参数），再做一批训练、一批 selection 和无标签
   prediction 的 CUDA 路径验证。该 smoke 不选模型、不读 evaluation gold、不生成可报告分数；若通过，才进入
   2,331-document 的固定 seed 13 正式训练。
+- **2026-10-02 C-2b CUDA smoke 通过**：`smoke-v4-20261002/` 在 4090 GPU0 完成 1 train batch、1 selection
+  batch 和 16-document 的无标签 prediction（392 mentions），`smoke.json.status=pass`。`run_manifest.json`
+  再次钉住 preflight `f0ac88…2fea`、三份输入 hash、seed 13、16-document smoke 和 `evaluation_gold_access=false`。
+  `5f447f9` 的 runner-only 工作目录隔离也经活体验证：上游默认 `lightning_logs/` 留在该 immutable output 中，
+  没有根目录写入；不涉及模型、数据、阈值或任何分数。**决策：C-2b 已过，允许执行唯一一次
+  `train-predict`（2,331 train / 291 selection-dev / 291 unlabeled evaluation，seed 13）。** 这仍是
+  FR-016(b)、single-seed/non-confirmatory；正式 raw clusters 和官方重算分数产出前，尚无 Ch5 可报告新数字。
 
 ### 0.3a 历史队列切片（09-18；仅供追溯，**不是当前动作**）
 
