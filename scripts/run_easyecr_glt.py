@@ -13,8 +13,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
 import tempfile
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -103,6 +106,24 @@ def _configure_upstream_tempdir(output: Path) -> Path:
     temporary_directory.mkdir(parents=True, exist_ok=False)
     tempfile.tempdir = str(temporary_directory)
     return temporary_directory
+
+
+@contextmanager
+def _run_in_output_directory(output: Path) -> Iterator[None]:
+    """Contain EasyECR's unconfigured prediction-time Lightning logs.
+
+    The upstream prediction method constructs another Trainer instead of using
+    the frozen trainer parameters.  Its default relative ``lightning_logs``
+    path must therefore be rooted at this immutable run output, rather than
+    the repository root.  The current directory is restored even if prediction
+    fails.
+    """
+    original_directory = Path.cwd()
+    os.chdir(output)
+    try:
+        yield
+    finally:
+        os.chdir(original_directory)
 
 
 def _take_documents(data: Any, count: int) -> Any:
@@ -296,7 +317,8 @@ def run(args: argparse.Namespace) -> None:
         smoke_selection = _take_documents(selection, args.smoke_documents)
         smoke_evaluation = _take_documents(evaluation, args.smoke_documents)
         model.train(smoke_train, smoke_selection)
-        predicted = model.predict(smoke_evaluation, "distance")
+        with _run_in_output_directory(args.output):
+            predicted = model.predict(smoke_evaluation, "distance")
         if not predicted.mentions:
             raise G19RunError("one-batch smoke produced no unlabeled prediction mentions")
         _write_json(
@@ -330,7 +352,8 @@ def run(args: argparse.Namespace) -> None:
         raise G19RunError(
             "selection did not produce a best checkpoint and connected-component threshold"
         )
-    predicted = framework.predict(evaluation, output_tag="event_id_pred")
+    with _run_in_output_directory(args.output):
+        predicted = framework.predict(evaluation, output_tag="event_id_pred")
     raw_path = args.output / "raw_clusters.jsonl"
     _write_jsonl(raw_path, _raw_clusters(predicted, evaluation, "event_id_pred"))
     _write_json(

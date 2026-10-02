@@ -15,6 +15,7 @@ _SPEC.loader.exec_module(_MODULE)
 _validate_preflight = _MODULE._validate_preflight
 _model_conf = _MODULE._model_conf
 _configure_upstream_tempdir = _MODULE._configure_upstream_tempdir
+_run_in_output_directory = _MODULE._run_in_output_directory
 
 
 def _sha256(path: Path) -> str:
@@ -68,3 +69,12 @@ def test_upstream_tempdir_is_run_local_and_overrides_the_global_hard_code(tmp_pa
         assert tempfile.tempdir == str(temporary_directory)
     finally:
         tempfile.tempdir = previous
+
+
+def test_prediction_working_directory_is_run_local_and_is_restored(tmp_path: Path) -> None:
+    original = Path.cwd()
+    with _run_in_output_directory(tmp_path):
+        assert Path.cwd() == tmp_path
+        Path("lightning_logs").mkdir()
+    assert Path.cwd() == original
+    assert (tmp_path / "lightning_logs").is_dir()
