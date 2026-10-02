@@ -2719,3 +2719,33 @@ evaluator/label mapping、train/selection/evaluation 隔离和 input delta 均�
 `AUTONOMOUS_RESEARCH_PROGRAM.md` §3.1，若要继续必须由作者决定是否扩大 thesis 数据/任务范围；那会改变
 研究问题、公开比较轴和可行性，执行代理不可自行把外部语料或生成标注引进训练。当前可安全保留的成果是三张
 带一手证据的排除卡，它们缩小下一轮检索空间并防止重复试错。
+
+### 25.31 C-31b · 作者授权后的唯一外部 benchmark 证据卡（R0，2026-10-02）
+
+**结论：作者已授权一个、且仅一个额外公开 benchmark；C-31b 固定 EventStoryLine v0.9（ESC）为 E 层
+外部验证。** 该决定不让 C-31 的三张排除卡复活，也不修改 MAVEN 的主任务、候选全集、U 层主表或单 seed
+约束。当前只进入 C-32a CPU 数据/协议预检，尚无模型运行、GPU 任务或项目分数。
+
+#### 决定与一手证据
+
+| 核验项 | 一手证据与冻结结论 | R0 状态 |
+|---|---|---|
+| 数据与许可 | 官方仓库 [`tommasoc80/EventStoryLine`](https://github.com/tommasoc80/EventStoryLine)，revision `46edefee5e82e0917b823abe0a18bf8c7770f15c`，公开数据、评测格式、基线脚本和 `LICENSE.md`（CC BY 3.0）。原始任务论文为 [Caselli & Vossen, 2017](https://aclanthology.org/W17-2711/)。 | PASS，仍须 C-32a 逐文件哈希和解析。 |
+| 外部协议 | [ICCL](https://aclanthology.org/2024.emnlp-main.51.pdf) 明确使用 ESC v0.9：最后两个 topics 为 dev、其余 20 个 topics 作 topic-disjoint 5-fold CV，报告 causal existence 的 P/R/F1。 | 作为 E 层目标协议；精确 topic/fold 及候选定义尚待 C-32a 源码/数据闭合。 |
+| 与主表关系 | ESC 是独立新闻 topic 分布上的二元 causal-existence；MAVEN 是 Wikipedia、带方向的 CAUSE/PRECONDITION。 | **E ≠ U**；不得替代或混入 MAVEN 主表，最多检验未来新机制的外部分布泛化。 |
+| 近期对手的可得性 | DICP 官方仓库无许可证，README 所列 `src/run.sh` 不存在且仅见不完整 CausalTimeBank 入口；ICCL 官方仓库无许可证、读取未发布 `train.npy`，且按 document shuffle/split 而非上述 topic split；MAVEN-ERE 官方 causal runner 虽为 GPL-3.0，但其 ESC `KFold` 作用于 tokenized samples。 | 三者仅 P 层机制/背景参考，**不运行、不重写、不形成 V 行**。 |
+
+MECI 也未被选中：其公开仓库未给可核实许可证，也未发布可重现的精确 split membership/runner；它同时留下
+【授权/协议/代码】的不确定性。ECR 的跨文档外部数据也没有进入范围。因此 ESC 是在作者限定“一项”下唯一记录的
+选择，而不是开放新的语料检索池。
+
+#### 开工自审与停止条件
+
+1. **科研价值**：ESC 的用途是外部**证伪**未来经 C-32b 准入的新因果机制是否依赖 MAVEN 的 Wikipedia
+   分布；它为“机制价值具有跨主题新闻泛化”的限定论断提供独立的、公开的 P/R/F1 轴。它不支持“在 MAVEN
+   胜过多个方法”的学位论文主张，故绝不改变 A4 的进入门或已有封存裁决。
+2. **可行性**：研究卡本身可行（公开数据、许可和协议来源已核实），但执行尚未可行：C-32a 必须在 CPU 上给出
+   精确 source/filter manifest、topic-to-document/fold mapping、候选全集、标签折叠与可重算 scorer。任何一项
+   不能与来源闭合即为【数据/协议】阻断；届时停止，不以其他数据或第三方 runner 替换。
+3. **授权限制**：仅此一个 ESC E 行；不新增人工/生成标注、不读取 final-valid、不加 seed、不启动 GPU。5-fold
+   是待审计的外部评测结构，不是获授权的多 seed；在 C-32a 完成前不得把它解释为可训练计划。

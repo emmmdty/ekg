@@ -353,13 +353,16 @@ gantt
 | **C-29** | ✅ **公开论文可比性登记冻结（2026-09-30）**：作者将“可与公开论文比较、保持单 seed”定为当前优先级；新增 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)，为每个外部行固定 P（原文参考）/V（原始基准保真度）/U（统一协议）三层与七项必填 provenance | D4 队列收口 | 不产生方法分数；先收口 G-19 与 LLMERE 可得性，再作 C-30；排除 D4 bottleneck、旧 C5 家族和 Ch6 额外对手 | `docs/COMPARABILITY_PLAN.md` |
 | **C-30** | ✅ **P/V/U 主表与声称审计（2026-10-02）**：独立重跑 G-19 raw export 的 official scorer，覆盖/候选 digest/指标均与 immutable metrics 一致；LLMERE 按作者甲裁定登记为 `P 有 / V(b) / U 无可评分输出` 的命名协议障碍 | G-19 收口 + C-29.6 阻断 + 作者甲裁决 | 不为未运行的 LLMERE 编造分数；P 行不得排序，只比较同章同 frozen unit 的 U 行，所有 U 行标 `single-seed / non-confirmatory` | `results/PHASE_R1.md` §25.29 + `COMPARABILITY_PLAN.md` §2/§4 |
 | **C-31** | ✅ **第一轮领域证据地图与研究卡（R0，2026-10-02）**：Trucidator、MMD-ERE、rationale-distillation ECR 三张最相邻卡均完成一手论文/代码/数据/协议核验；没有一张可进入现有 MAVEN 主表的 C-32 | C-30 ✅；公开资料与本地只读资产 | `no_admissible_candidate`：分别卡【数据+协议】、【协议+代码】、【数据+协议+新颖性】；不启动训练、不为旧机制换名。扩大 thesis 数据/任务范围须作者裁决 | `results/PHASE_R1.md` §25.30 + `AUTONOMOUS_RESEARCH_PROGRAM.md` §4–§5 |
-| **C-32** | **候选准入与冻结实验合同（R1–R3）**：只对 C-31 排名第一且未被反证的卡完成 exact split/candidate/evaluator、强对照、单变量消融、负控、MDE/power、静态接口、真实数据 CPU 预检和受限 smoke | **阻断：C-31 第一轮无准入卡；等待作者是否扩大 thesis 数据/任务范围** | 所有门 PASS 才把一个具体方案 materialize 为 G-21；任一硬门失败就命名类别并收口，不能改用近似实现、调指标或选择另一个好看结果 | `AUTONOMOUS_RESEARCH_PROGRAM.md` §3–§5 |
+| **C-31b** | ✅ **作者授权后的外部 benchmark 证据卡（R0，2026-10-02）**：作者允许在 MAVEN 主表之外增加**唯一一个**公开 external-validation benchmark；选定 EventStoryLine (ESC) v0.9 的 causal-existence、topic-disjoint 5-fold 协议 | 授权已给；官方 ESC 仓库同时提供 v0.9 标注、评测格式和 CC BY 3.0；近期论文仍报告该协议 | **仅准入 benchmark，不准入任何旧方法或 GPU 合同。** ESC 的二元 causal-existence P/R/F1 是外部可迁移性证据，不能替换 MAVEN 的方向性 causal 主指标、不能进入 MAVEN U 表，也不能重开 A4。ICCL、DICP 和 MAVEN-ERE external runner 均有命名的保真度/协议障碍，不能当作可运行 V 行 | `results/PHASE_R1.md` §25.31 + `COMPARABILITY_PLAN.md` §2.1 |
+| **C-32a** | **ESC 协议准入与 CPU 数据预检（R1–R2，当前）**：从冻结 ESC v0.9 source revision 构建 topic→document→mention→candidate 清单；核 event-type filter、先后顺序、正负例、5 个 topic-disjoint fold、development topics 和 raw P/R/F1 scorer；生成不含模型分数的 immutable preflight | C-31b ✅；只读官方数据/源码；不得读取 final-valid、生成标注、改 ESC 标注或启动 GPU | 每一项 source hash、候选全集和 evaluator 与明示 protocol 一致才 PASS；任一 data/license/protocol/source ambiguity 为命名阻断。不得拿 MAVEN-ERE 的 sample-level `KFold`、ICCL 的 document shuffle 或 DICP 的句内任务替代 | `COMPARABILITY_PLAN.md` §2.1；`AUTONOMOUS_RESEARCH_PROGRAM.md` §4–§5 |
+| **C-32b** | **新机制候选准入与冻结实验合同（R1–R3）**：只在 C-32a PASS 后，对一个尚未被封存家族覆盖的 causal-relation 研究卡完成与 MAVEN 主表的价值链、ESC 外部验证链、强对照、单变量消融、负控、MDE/power、静态接口和受限 smoke | C-32a PASS；候选的文献差异、因果链和可行性全过 | 所有门 PASS 才 materialize 一个 G-21；外部 benchmark 只验证可迁移性，不能以 ESC 的好看分数替代 MAVEN 主表的机制价值。任一硬门失败就命名类别并收口，不能改用近似实现、调指标或选择另一个好看结果 | `AUTONOMOUS_RESEARCH_PROGRAM.md` §3–§5 |
 | **C-33** | **独立结果与论文价值审计（R5）**：不由 G-21 执行者从 raw output 重新 export/score，核 main metric、最强对照、单变量消融、负控、P/V/U、FR-016 与单 seed 声称 | G-21 immutable output 完整 | 只有机制、对照、消融和护栏共同支持时，才可向作者申请额外 seed；否则封存该机制家族并如实记录负结果 | `AUTONOMOUS_RESEARCH_PROGRAM.md` §3–§6 + 对应结果页 |
 | **C-34** | **研究回合复盘**：核查本回合回答了原始研究问题还是只处理工程问题；把失败类型写成下一轮 C-31 的检索约束 | C-33 完成，或 C-31/C-32 以命名阻断收口 | 只在既定 Gate 或作者决策卡处重排；不得从最终分数反推研究假设 | `AUTONOMOUS_RESEARCH_PROGRAM.md` §4–§6 |
 
-**当前活动队列（作者 2026-10-02 重设计）**：**C-29 ✅ → G-19 ✅ → C-29.5 ✅ → C-29.6 协议阻断 →
-G-20（作者甲，不执行）→ C-30 ✅ → C-31 第一轮 `no_admissible_candidate` → 作者范围裁决 → C-32 准入合同 →
-G-21（仅在合同冻结后）→ C-33 独立审计**。这是受约束自驱动而不是自动试参：AI 可推进每个有验收产物的门，
+**当前活动队列（作者 2026-10-02 授权后）**：**C-29 ✅ → G-19 ✅ → C-29.5 ✅ → C-29.6 协议阻断 →
+G-20（作者甲，不执行）→ C-30 ✅ → C-31 第一轮 `no_admissible_candidate` → 作者授权一个 external benchmark →
+C-31b ✅（ESC v0.9）→ **C-32a ESC CPU 协议预检（当前）** → C-32b 新机制合同 → G-21（仅在合同冻结后）→
+C-33 独立审计**。这是受约束自驱动而不是自动试参：AI 可推进每个有验收产物的门，
 数据/协议/代码/算力/授权阻断则强制生成决策卡。
 不重开 D4/A4/C5 的失败机制；C-22 保持暂停。完整权限、预期效果与停止条件见
 [`AUTONOMOUS_RESEARCH_PROGRAM.md`](AUTONOMOUS_RESEARCH_PROGRAM.md) 与 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)。

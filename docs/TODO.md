@@ -7,7 +7,8 @@
 
 **当前优先级是公开论文可比性与受约束自驱动研究，而非重开失败机制。** 保持单 seed；已完成
 `C-29 → G-19 → C-29.5 → C-29.6（协议阻断）→ G-20（作者甲，不执行）→ C-30`，现在进入
-`C-31 第一轮（no_admissible_candidate）→ 作者范围裁决 → C-32 准入合同 → G-21（仅合同通过后）→ C-33 独立审计`。
+`C-31 第一轮（no_admissible_candidate）→ 作者授权一个 external benchmark → C-31b（ESC v0.9）✅ →
+C-32a CPU 协议预检 → C-32b 新机制合同 → G-21（仅合同通过后）→ C-33 独立审计`。
 完整决策、科研价值、可行性、一手依据、预期结果和停止条件见
 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)；可执行行只认 `EXPERIMENT_PLAN.md` §4。
 
@@ -19,7 +20,9 @@
 | G-20 · Ch4 外部 baseline | ✋ 作者甲收口。LLMERE 保留为 `P 有 / V(b) / U 无分数` 的可得性行；它不是模型低分 | target-dependent stop 是命名协议障碍；不生成、转换或评分 |
 | C-30 · 全章 | ✅ 已完成：G-19 raw export 经独立 official scorer 复算一致；LLMERE 无 U 分数已登记 | P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 审计见 `results/PHASE_R1.md` §25.29 |
 | C-31 · 领域证据地图 | ✅ 第一轮完成：Trucidator、MMD-ERE、rationale-distillation ECR 三卡分别卡【数据+协议】、【协议+代码】、【数据+协议+新颖性】 | `results/PHASE_R1.md` §25.30；`no_admissible_candidate`，不启动 C-32/G-21 |
-| 作者范围裁决 | **当前阻断**：是否允许扩大 thesis 的数据/任务范围到额外公开基准或跨文档/外部语料设置 | 这会改变研究范围与可比较轴；执行代理不能自行带入新数据/标注 |
+| C-31b · 外部 benchmark | ✅ 作者已授权一个、且只一个外部 benchmark；ESC v0.9 被 R0 选定为 E 层 causal-existence 验证 | `results/PHASE_R1.md` §25.31；只增外部证据，不替换 MAVEN 主表、不复活 A4 |
+| C-32a · ESC 协议预检 | **当前**：source hash、topic split、candidate universe、label folding 与 scorer 的 CPU-only materialization | `COMPARABILITY_PLAN.md` §2.1；任一歧义按【数据/协议】收口，不开 GPU |
+| C-32b / G-21 | 尚未准入 | 只有 C-32a 与新的研究卡都通过，才可写冻结合同；单 seed 规则不变 |
 | D4 / A4 / C5 方法机制 | D4、A4、旧 C5 均已按契约收口或封存 | 不重开；C-22 继续暂停，不得因为本队列结束自动恢复 |
 
 ## 可比性口径（本队列的通过条件）
@@ -48,8 +51,8 @@
 
 ## 下一步
 
-1. 作者范围裁决：是否允许将研究扩展到额外公开 benchmark 或跨文档/外部语料；不允许则 C-31 本轮按排除卡收口。
-2. C-32：只有范围变更后形成的合格卡，才做 R1 准入、协议红队、CPU 预检和受限 smoke；不以预期分数、低成本或空闲 GPU 排序。
+1. C-32a：对 ESC v0.9 做 CPU-only source/split/candidate/evaluator 预检，产出 immutable preflight；不下载近邻论文的预处理黑箱、不运行模型。
+2. C-32b：仅在 E 层 protocol PASS 后，寻找一个能同时回答 MAVEN 主表价值和 ESC 外部可迁移性的全新机制卡；不以预期分数、低成本或空闲 GPU 排序。
 3. G-21/C-33：只有冻结合同、exact command 和所有前门通过后才运行单 seed；由独立审计者复算，结果不支持即封存而非调参。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、删除候选、事后修 prompt/阈值、用更大 backbone 掩盖机制失败，
