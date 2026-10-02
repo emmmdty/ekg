@@ -12,7 +12,7 @@
 
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|
-| G-19 · Ch5 外部 baseline | Global-Local Topic / EasyECR 是独立发表方法；原始 KBP 基准受 LDC 许可阻断，故只可作 FR-016(b) 透明适配。v2 输入三元组已双端同 hash，CPU loader 已验证 291 selection docs 有 6,923 Events、291 evaluation docs/7,195 mentions 无 `event_id`；模型构造实测 seed=13、未初始化 CUDA。10-02 的 smoke-v1 在 EasyECR 未创建的硬编码 temporary path 处失败，未触发 CUDA | runner 已以 run-local temporary path 修复；在空闲 4090 用新 output 重跑 one-batch smoke，通过后才可固定 seed 13 训练、冻结 evaluation 预测与官方 MUC/B³/CEAFe/BLANC 重算 |
+| G-19 · Ch5 外部 baseline | Global-Local Topic / EasyECR 是独立发表方法；原始 KBP 基准受 LDC 许可阻断，故只可作 FR-016(b) 透明适配。v2 输入三元组已双端同 hash，CPU loader 已验证 291 selection docs 有 6,923 Events、291 evaluation docs/7,195 mentions 无 `event_id`；模型构造实测 seed=13。10-02 smoke-v1 的硬编码 temporary path 已以 run-local path 修复；smoke-v2 已进入 GPU，但 1-doc 前缀只生成 64 维上游 topic vocab，和固定 500 维模型不兼容，未有 prediction/分数。真实输入审计表明 full 三分区均为 500 维，8 docs 是 388/393/477，16 docs 均为 500 | 已冻结 `--smoke-documents 16`，在空闲 4090 重新做一批 CUDA smoke。不得改 `dist_dim` 或将运行错误写成实验结果；通过后才可固定 seed 13 训练、冻结 evaluation 预测与官方 MUC/B³/CEAFe/BLANC 重算 |
 | G-20 · Ch4 外部 baseline | LLMERE 是直接的 MAVEN-ERE causal 方法；原文 published split 不读取，故只可作 FR-016(b) 透明适配 | 全量固定 stop 生成；若仍有格式错误才触发全量 constrained decoding；通过转换/覆盖/官方 scorer 后报告单 seed causal P/R/F1 |
 | C-30 · 全章 | 尚无新实验分数 | 从 raw predictions 独立重算；每一行必须有 P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 标签 |
 | D4 / A4 / C5 方法机制 | D4、A4、旧 C5 均已按契约收口或封存 | 不重开；C-22 继续暂停，不得因为本队列结束自动恢复 |

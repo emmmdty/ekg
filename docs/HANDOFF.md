@@ -1,7 +1,7 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-09-30 19:29（+08:00）**（D4 v6.2 与 C-28 官方代码比较均已收口；公开论文
-> 可比性队列与单 seed 声称边界已冻结，G-19 已开始 C-2b 活体预检）。
+> 更新于 **2026-10-02 07:57（+08:00）**（D4 v6.2 与 C-28 官方代码比较均已收口；公开论文
+> 可比性队列与单 seed 声称边界已冻结，G-19 正在完成 C-2b CUDA smoke 的输入有效性审计）。
 > 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
 > 本文只记录**状态、决策、依赖、下一步**，**不复制实验表格——数字只认 [`results/`](results/README.md)**。
 >
@@ -140,6 +140,20 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   `gpu-4090:.../global-local-topic/logs/smoke-v1-20261002.log`。决策：runner 在导入 Global-Local Topic
   前把该**进程内**临时目录覆写到自身 `output/temporary/`；不修改 EasyECR 源码、训练配方或协议，修复后必须以
   新的不可覆盖 smoke output 重跑。
+- **2026-10-02 smoke-v2 失败（已实际进入 GPU 首 batch）**：temporary-path 修复有效，模型以 seed 13 在
+  GPU0 构造并开始训练；但 one-document smoke 经上游 `verb_entity_recog()` 只得到 64 个 verb/entity 词，和
+  发表实现固定的 `dist_dim=500` 在 padding 处相撞（`Expected size 64 but got size 500`）。这不是正式训练的
+  模型/指标结论，而是缩略输入没有满足上游固定输入维度。日志保留在
+  `gpu-4090:.../global-local-topic/logs/smoke-v2-20261002.log`，未生成 prediction 或分数。**决策：不改
+  `dist_dim`、不改模型；以完全同一的 upstream spaCy 规则审计 train / selection / 无标签 evaluation 的确定性
+  文档前缀和全量词表，固定一个三个前缀均为 500 维的 N 后再 smoke。** 审计运行于
+  `gpu-4090:.../global-local-topic/topic-vocab-audit-20261002/`，不占 CUDA；正式三份输入若任一不足 500 维，
+  则按【数据/代码】不可行停下裁决，绝不以改小架构绕过。
+- **2026-10-02 词表输入闸门通过**：审计产物 `topic_vocab_widths.json` 证实 full train / selection /
+  evaluation 均为 **500**；前 8 篇依次仅为 `388 / 393 / 477`，前 16 篇三者均为 **500**。据此冻结
+  `--smoke-documents 16`（最小的已审计有效档位，而非训练超参数），再做一批训练、一批 selection 和无标签
+  prediction 的 CUDA 路径验证。该 smoke 不选模型、不读 evaluation gold、不生成可报告分数；若通过，才进入
+  2,331-document 的固定 seed 13 正式训练。
 
 ### 0.3a 历史队列切片（09-18；仅供追溯，**不是当前动作**）
 
