@@ -35,9 +35,9 @@
 | 科研价值 | ESC 的 news-topic 分布与 MAVEN 的 Wikipedia 文档不同，且公开 ECI 文献把最后两个 topic 留为 development、对其他 20 个 topic 作 5-fold cross-validation，报告 positive-class P/R/F1；它可检验一项未来的 causal-relation 机制是否只在 MAVEN 有效。它**不能**证明 MAVEN 的方向性 `CAUSE/PRECONDITION` 主表结论，也不能替代该表。见 [ICCL 的原文 §4.1](https://aclanthology.org/2024.emnlp-main.51.pdf) 与 [RichGCN 的 cross-topic 设定](https://aclanthology.org/2021.naacl-main.273.pdf)。 |
 | E 的声称边界 | `E` 是独立 benchmark 的冻结 protocol 行，不是 `U`：只有同一 ESC source hash、topic split、候选全集和 scorer 的 E 行可以互比；不和 MAVEN U 行相减、排序或替门。每个正式 E 行仍标 `single-seed / non-confirmatory`。 |
 | 已排除的捷径 | ICCL 原文确实声明 ESC v0.9、最后两 topic development、其余 topic 5-fold，但其公开仓库没有许可证、没有生成所需 `train.npy` 的闭环，且 `load_data.py` 对 document 而非 topic 作未绑定 `random.shuffle`。DICP 同样没有许可证；README 指向未发布的 `src/run.sh`，实际源码只有 Causal-TimeBank 的 `main_ctb.py` 且缺被 import 的文件。二者均只能作为 P 参考，不能作为 V 行。MAVEN-ERE 官方仓库是 GPL-3.0 且公布 ESC 预处理/命令，但它的 `main_other.py` 对 tokenized samples 直接 `KFold`，也不是本 E 层的 topic-disjoint protocol。 |
-| 当前可行性 | **C-31b 的 R0 可行；C-32a 尚未通过。** 数据与许可来源已明确，CPU 静态审计即可开始；确切 event filter、candidate universe、fold membership、标签折叠与独立 scorer 仍必须从 source snapshot 实测生成。未完成前没有模型、分数或 GPU 任务。 |
+| C-32a 结论 | **协议阻断，不能建立 E 行。** 固定 source 的 v0.9 有 22 个 topic / 258 XML，目录无 dev/test/fold manifest；同一 source 的 v1.0 才有 `dev/`、`test/`，不能倒灌到 v0.9。官方 baseline 分别使用仅同句、PPMI 同/跨句等不同候选规则；`eval_script.py` 也把 typed-relation F1 的 FN 错取 pair-level FN。因而无法得到与近期论文同一的 topic split、candidate universe 和 P/R/F1 evaluator。完整证据见 `results/PHASE_R1.md` §25.32。 |
 
-因此这不是“再找一个能跑的数字”：先让公开 benchmark 的**数据、split、候选与 evaluator**闭合，再寻找没有被 A4/旧机制占据的新研究合同。若 C-32a 发现 source 版本或标准 protocol 无法同时唯一确定，就按【数据/协议】收口；不得以 ICCL/DICP/MAVEN-ERE 的相近但不同 runner 代替。
+因此这不是“再找一个能跑的数字”：先让公开 benchmark 的**数据、split、候选与 evaluator**闭合，再寻找没有被 A4/旧机制占据的新研究合同。C-32a 已发现它们无法同时唯一确定，按【协议】收口；不得以 ICCL/DICP/MAVEN-ERE 的相近但不同 runner 代替，也不得另换一个外部语料绕过本次“一项”授权。
 
 ## 3. 一手研究结论与取舍
 
@@ -86,13 +86,12 @@
    不实现 first-line-only driver、不生成、不评分，也不把该未运行状态写成方法低分。
 6. **C-30 · 表格和声称审计。** 从可用的 G-19 raw predictions 独立重算主表；为每一行输出 P/V/U 状态和七项登记，
    并明确 LLMERE 为“P 有 / V(b) / U 无分数”的可得性行。只有 U 层、同一章、同一 unit 的行可列 delta；P 层永不进排序。
-7. **C-31b → C-32a · 外部验证协议闭合（当前）。** 在作者授权的唯一额外 benchmark 上，先将 ESC v0.9 的
-   source revision、topic split、candidate universe、label folding 与 scorer materialize 为无分数 CPU preflight。
-   不运行 ICCL/DICP/MAVEN external runner；它们各有已登记的 license/input/protocol 断点。C-32a PASS 只说明
-   external validation 可以被诚实执行，**不**说明有新机制、也不解锁 GPU。
-8. **C-32b 起 · 受约束自驱动研究回合。** C-32a 后才按
-   [`AUTONOMOUS_RESEARCH_PROGRAM.md`](AUTONOMOUS_RESEARCH_PROGRAM.md) 的研究卡、准入合同、单 seed 执行和
-   独立审计，寻找能够同时经 MAVEN 主表与 ESC E 层检验、且不属于封存家族的候选。任何数据/协议/代码/算力/授权阻断按类别停下，不用试错绕行。
+7. **C-31b → C-32a · 外部验证协议闭合（已阻断）。** 固定 ESC v0.9 source 后，CPU 审计证明官方 source 未发布
+   v0.9 的 exact development topics/folds 或唯一 candidate universe，而 evaluator 对 typed relation 也有错误；故不
+   运行 ICCL/DICP/MAVEN external runner，不建立 E 行。详见 `results/PHASE_R1.md` §25.32。
+8. **停止与作者决策。** 本轮“一项外部 benchmark”授权已经消耗且以协议阻断收口，C-32b/G-21 不启动。若要扩大
+   可比性，需由作者明确授权新的 benchmark 选择或不同的研究目标；在此之前不把 E 层失败误写成方法失败，也不靠
+   更换语料、调阈值或 GPU 试跑绕开。
 
 ## 5. 成功、失败与论文效果
 

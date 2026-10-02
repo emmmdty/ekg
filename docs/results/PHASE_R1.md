@@ -2749,3 +2749,45 @@ MECI 也未被选中：其公开仓库未给可核实许可证，也未发布可
    不能与来源闭合即为【数据/协议】阻断；届时停止，不以其他数据或第三方 runner 替换。
 3. **授权限制**：仅此一个 ESC E 行；不新增人工/生成标注、不读取 final-valid、不加 seed、不启动 GPU。5-fold
    是待审计的外部评测结构，不是获授权的多 seed；在 C-32a 完成前不得把它解释为可训练计划。
+
+### 25.32 C-32a · ESC source/split/candidate/scorer CPU 预检（协议阻断，2026-10-02）
+
+**结论：`protocol_blocked`【协议】。** C-31b 选择 ESC 作为作者授权的唯一外部 benchmark 在数据可得性和
+许可层成立，但不能建立一个能与公开 ECI 论文直接相比较的 E 行。原因不是模型性能、显卡、seed 或实现速度：
+固定 v0.9 source 后，公开物没有把 `source → development topics/folds → candidate universe → scorer` 闭合为唯一
+对象。故本节没有模型、预测、E 分数、GPU 任务或 final-valid 访问；C-32b/G-21 不启动。
+
+#### 只读 source snapshot
+
+| 项 | 实测值 / 一手位置 | 判定 |
+|---|---|---|
+| source | `tommasoc80/EventStoryLine` revision `46edefee5e82e0917b823abe0a18bf8c7770f15c`（2023-09-23）；该 revision 的 `git archive` SHA-256 是 `5b67f0bb134d5bd75cc35606267c6c2cdee853a2ad94e57b544ea443a23fcc5a`。 | source 已固定。 |
+| 许可 | `LICENSE.md` 是 CC BY 3.0（SHA-256 `07acd126b170ec6874e9d381d581177c3ba4ec51f57b2f37546cc580e66e4be7`）。 | 许可不是本次阻断。 |
+| v0.9 数据形状 | `annotated_data/v0.9/` 有 **22** 个 topic（`1,3,4,5,7,8,12,13,14,16,18,19,20,22,23,24,30,32,33,35,37,41`）和 **258** 个 `*.xml.xml`；根下没有 `dev/`、`test/` 或 fold 文件。 | 不能从 source 推出“最后两个 topic”是哪两个，也不能推导 5 个公开论文 fold。 |
+| 版本不能混用 | 同一 source 的 `annotated_data/v1.0/` 才含 `dev/`、`test/`；其 README 明示为相对 v0.9 的数据清理版本。 | 不能把 v1.0 split 倒灌为 v0.9 的论文协议。 |
+| 候选与标签 | `baseline_OP.py` 只对过滤后的同句 event pair 出链接；`baseline_PPMI1.py` 分别生成同句与跨句 PPMI candidates，并以写明的 `# seeds + dev` 阈值筛选。 | 官方 source 本身存在多个候选生成规则，不存在可直接绑定近期论文的唯一 binary candidate universe/negative rule。 |
+| evaluator | `eval_script.py` 读取系统自行输出的 link list；typed relation 的 `fn_pairs_value` 在第 104 行误聚合 `i[0].false_negative`（pair-level），而非 `i[1]`（relation-value）。`eval_script.py` SHA-256 为 `f3676af1795e2ecbf3559cf0f85a28ae67f16e82d0cfa0663181a71af8d3b366`。 | 不能把它未经修正地当作现代 causal-existence P/R/F1 的冻结 scorer；修正它又会创造不同于公开论文的口径。 |
+
+#### 为什么不能用“合理推断”补齐
+
+ICCL 的正文描述了“末两 topic 作 development、其余 20 topic 作 5-fold”这一研究习惯，但其公开仓库没有
+许可、所需 `train.npy` 也未发布，且 `load_data.py` 按 document 做未绑定 shuffle；它不能把 source 中缺失的
+fold IDs、pair construction 或 label folding 变成可审计的真值。DICP 的 `src/run.sh` 与完整依赖同样未发布；
+MAVEN-ERE 的公开 external runner 是 tokenized-sample `KFold`。把其中任何一个带入，都违背 C-32a 的“同一
+source/split/candidate/scorer”要求。
+
+自行定义“全部有序 event pair”、固定数值排序后的两个 dev topic，或修正官方 scorer，当然可以形成一个**新的**
+ESC 实验；但它将改变至少候选全集、负例分布或 evaluator，既不能验证公开论文数字，也不会解决本项目“指标可与
+公开论文比较”的诉求。把这种新任务写成 E 行会把设计选择伪装成基准事实，故不做。
+
+#### 开工自审、停止与后果
+
+1. **科研价值**：本 gate 对准 `COMPARABILITY_PLAN.md` §2.1 的“公开可比性”，不是追求一次可跑训练。它排除了
+   “同叫 ESC、分数却不是同一任务”的错误正比较，保护 MAVEN 仍为可检验的主表；这个负结果本身是对后续研究
+   资源的有效约束。
+2. **可行性**：source 与许可可得，但**实验不可行，卡在【协议】**：没有一手闭合的 v0.9 split、candidate
+   universe 和 scorer，且近邻代码不能合法地补上它们。此为 A 类有效性问题，不是可由 GPU、更多 seed 或重写
+   parser 解决的工程问题。
+3. **停止动作**：外部 benchmark 授权在 ESC 上已完成一次 fail-closed 审计；不跑模型、不产分数、不换其他
+   benchmark、不启动 C-32b/G-21。若作者要继续，必须另行选择“授权一个新 benchmark”或改为审计/整理现有
+   MAVEN 公开对手证据；两者都须从新的 R0 决策卡开始。

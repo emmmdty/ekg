@@ -1,9 +1,10 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-02 16:20（+08:00）**（作者已对 C-29.6 取甲：LLMERE 不生成、不评分，作为
+> 更新于 **2026-10-02 16:12（+08:00）**（作者已对 C-29.6 取甲：LLMERE 不生成、不评分，作为
 > FR-016(b) 的命名协议障碍收口；G-19 已被独立 official scorer 复算，C-30 完成。C-31 的第一轮三张
 > 研究卡均被排除后，作者授权**恰好一个**额外公开 benchmark：C-31b 已选 EventStoryLine v0.9 作为 E 层
-> 外部验证；当前仅执行 C-32a 的 CPU 数据/协议预检，不能自启模型训练）。
+> 外部验证；C-32a 的 CPU 源码审计已判 `protocol_blocked`【协议】，没有 E 行、模型或 GPU 任务；不得自行换
+> 第二个 benchmark）。
 > 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
 > 本文只记录**状态、决策、依赖、下一步**，**不复制实验表格——数字只认 [`results/`](results/README.md)**。
 >
@@ -24,7 +25,7 @@
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **受约束自驱动研究队列**：C-29 ✅ → G-19 ✅ → C-29.5 ✅ → C-29.6（协议阻断）→ G-20（作者甲，不执行）→ C-30 ✅ → C-31 第一轮 `no_admissible_candidate` → C-31b ✅（ESC v0.9 唯一 E 层外部 benchmark）→ **C-32a ESC CPU 数据/协议预检（当前）** → C-32b 新机制准入合同（仅 C-32a 通过后）→ G-21 → C-33 独立审计。单 seed 不变；C-22 暂停，D4/C5 已封存机制不重开。详见 `AUTONOMOUS_RESEARCH_PROGRAM.md`。 |
+| **活动任务** | **受约束自驱动研究队列**：C-29 ✅ → G-19 ✅ → C-29.5 ✅ → C-29.6（协议阻断）→ G-20（作者甲，不执行）→ C-30 ✅ → C-31 第一轮 `no_admissible_candidate` → C-31b ✅（ESC v0.9 唯一 E 层外部 benchmark）→ **C-32a ❌ `protocol_blocked`【协议】** → C-32b/G-21 不启动（等待新的作者决策）。单 seed 不变；C-22 暂停，D4/C5 已封存机制不重开。详见 `AUTONOMOUS_RESEARCH_PROGRAM.md`。 |
 | ✅ **裁决已落地（执行代理拍板，§25.24）** | **不投第二个机制设计周期。** C-28a 之后理由更硬：oracle 给完美图仍是零增益 ⇒ (甲) 从「走不通」变成「走了也没用」，(乙)「只在结构足够时介入」失去前提。⛔ 仍不得换名、扫参、加大 backbone、启动未授权多种子。若将来 Ch4 真的产出更准的关系图，(甲) 可重新立项。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **裁决前必须先读的一条** | **配置敏感度大过效应量**：同样三臂同样 seed，只换打包规则，`full` 就动 `+.009207`，而更好那一跑的 `full − base` 只有 `+.006740`（§25.23）。⇒ 在这个量级上投第二周期，**很可能测不出任何可信的东西**；要投就得先解决可测性（例如提高效应目标，或先把配置抖动压下去），这一点应写进裁决材料。 |
@@ -98,9 +99,9 @@ C-23–C-28、G-15–G-18 以及 oracle 诊断全部完成。权威结果在 `re
 `results/PHASE_R1.md` §25.28–§25.29。不得恢复第二机制周期、补多种子或事后加 text-matched/no-relation 臂。
 每行必须带 P/V/U 身份、七项 provenance、FR-016 状态与 `single-seed / non-confirmatory` 标签。C-31 第一轮已
 按 `AUTONOMOUS_RESEARCH_PROGRAM.md` 状态机完成一手检索和源码审计，但三张卡均无准入资格，详细证据见
-`results/PHASE_R1.md` §25.30。作者现已作**狭义扩展**：仅 EventStoryLine v0.9 可作为 E 层外部验证，边界见
-`COMPARABILITY_PLAN.md` §2.1 与 `results/PHASE_R1.md` §25.31；不得把其他外部语料、生成标注或未发布系统带入
-训练，亦不得把 E 层数字混入或替代 MAVEN 的 U 层主表。
+`results/PHASE_R1.md` §25.30。作者作的**狭义扩展**已只审计 EventStoryLine v0.9；C-32a 证明它无法唯一闭合
+v0.9 的 topic split、candidate universe 和可比较 scorer，故按【协议】收口，详见 `results/PHASE_R1.md` §25.32。
+不得把其他外部语料、生成标注或未发布系统带入训练，亦不得把不存在的 E 层数字混入或替代 MAVEN 的 U 层主表。
 
 #### C-29.5 收口与 C-29.6 开工自审（2026-10-02）
 
@@ -124,22 +125,20 @@ C-23–C-28、G-15–G-18 以及 oracle 诊断全部完成。权威结果在 `re
   或换模型。**作者已取 (甲)**：LLMERE 留作 FR-016(b)“无可评分行 + 命名协议障碍”；不批准、也不实现
   target-independent first-line-only driver。G-20 永久不执行，详见 `results/PHASE_R1.md` §25.29。
 
-#### C-31b / C-32a 开工自审（2026-10-02）
+#### C-31b / C-32a 开工自审与收口（2026-10-02）
 
-- **科研价值**：C-31b 不会让 C-31 被排除的三条路线重新可行；它把作者批准的唯一额外公开基准固定为
-  EventStoryLine v0.9（ESC）的 causal-existence、topic-disjoint 5-fold P/R/F1。其唯一能支撑的论文论断是：
-  未来通过 C-32b 的**新**因果机制能否在独立新闻主题分布上经受外部证伪。MAVEN 是 Wikipedia 上带方向的
-  CAUSE/PRECONDITION 主任务，ESC 不可替代、不可混入 A4 的 U 层主表，也不能借此重开已封存机制。依据、对手
-  状态与严格边界在 `COMPARABILITY_PLAN.md` §2.1、`EXPERIMENT_PLAN.md` §4 和
-  `results/PHASE_R1.md` §25.31。
-- **可行性**：C-31b 的研究选择**可行**：官方 ESC 仓库公开数据、评测格式与 CC BY 3.0 许可均已核实；近邻公开
-  ICCL 论文给出 ESC v0.9 的末两主题 dev、其余 20 个主题 topic-disjoint 5-fold 协议。C-32a 尚未通过：必须先
-  在 CPU 上逐项物化源文件过滤、topic→document/fold、候选全集、标签折叠和 scorer；在此之前没有模型、GPU 或
-  分数。DICP/ICCL 的可运行保真度行则分别卡在【授权/代码/协议】（无许可证、缺 runner/未发布数据，且非同一
-  topic split），只保留 P 层参考，不能擅自重写或运行。
-- **授权边界**：仅 ESC 一个 E 层 benchmark；不新增人工或生成标注、不改变 MAVEN 主任务、不读 final-valid、
-  不增加 seed、不运行第三方未获许可/不完整系统。当前动作仅为 C-32a CPU 预检；若其数据或协议不能闭合，必须
-  将其记为命名阻断并停止，不能以别的外部语料替换。
+- **科研价值**：C-31b 的目标不是为 MAVEN 主表补分，而是验证一个未来的、尚未被封存的因果机制能否在独立新闻
+  主题上接受外部证伪；因此 C-32a 强制要求 source、split、candidate 与 scorer 在训练前闭合。这个门保护
+  “与公开论文比较”不退化为把同名 ESC 的不同数据、候选或 F1 放在同一列。它不让 C-31 的三张排除卡或 A4
+  失败机制复活。
+- **可行性结论：不可行，卡在【协议】。** 固定官方 `46edefe` source 后，v0.9 只有 22 个 topic / 258 个 XML，
+  不含 dev/test/fold manifest；同 source 的 v1.0 才有 `dev/`、`test/`，不能倒灌。官方 baseline 分别定义仅同句与
+  PPMI 同/跨句候选，`eval_script.py` 的 typed-relation FN 聚合还错取 pair-level FN。ICCL 所述“末两 topic dev、
+  其余 20 topic 5-fold”没有随其公开 code/data 闭合。没有唯一的可比较 candidate universe/evaluator，详见
+  `results/PHASE_R1.md` §25.32。
+- **停止与授权边界**：C-32a 不生成 immutable E preflight；C-32b/G-21 不启动，未运行模型/GPU、未读
+  final-valid、未增 seed。作者本轮只授权一个 benchmark，故不能自动换 MECI、其他 ESC version 或第三方 runner；
+  任何继续路线须由作者另作范围决策。
 
 #### G-19 开工自审（2026-09-30）
 

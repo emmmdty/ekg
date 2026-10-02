@@ -80,7 +80,7 @@ AI 可不再询问作者而自行推进的范围是：只读检索、源码/数�
 | **C-31b · 授权后的外部 benchmark 卡** | 作者明确许可时，选定至多一个与主任务相邻、已有公开标注和许可的 external-validation benchmark；固定其 E 层声称边界及不相容的公开实现。 | 作者已授权该范围；MAVEN 主表、指标、封存家族均不变。 | source/data/license PASS → C-32a；否则按【数据/协议】收口，不以“常被引用”代替可审计性。 |
 | **C-32a · 外部协议准入** | CPU-only materialize source hash、topic/split、candidate universe、label mapping、scorer 与无模型覆盖审计。 | C-31b source card 完整。 | 全项 PASS 仅建立 E 层 baseline protocol → C-32b；任一歧义或不一致停止，不能借用相近论文 runner。 |
 | **C-32b · 准入与冻结合同** | 对排名第一、尚未被否定的**新机制**卡执行 R1.1–R1.6：在 MAVEN 主表与 E 层分别写精确数据/候选/evaluator、强对照、power、单变量消融、负控、最小 smoke 和 stop 条件。 | C-32a 及候选卡的每项一手证据可复核。 | 全部 PASS → 把唯一具体候选写入主表并生成 phase contract；任一不可行按类别收口，不以近似方法替代。 |
-| **G-21 · 合同绑定的单 seed 实验** | 只运行 C-32 已冻结的一个正式方案；训练、selection、evaluation 和 raw 输出隔离。 | exact command、manifest/evaluator/baseline、R2/R3 都 PASS，4090 空闲。 | 不论高低，覆盖/哈希/评分完成 → C-33；工程失败只在同一门、证明不改变科学语义后做最小修复。 |
+| **G-21 · 合同绑定的单 seed 实验** | 只运行 C-32b 已冻结的一个正式方案；训练、selection、evaluation 和 raw 输出隔离。 | exact command、MAVEN manifest、ESC E protocol、evaluator/baseline、R2/R3 都 PASS，4090 空闲。 | 不论高低，覆盖/哈希/评分完成 → C-33；工程失败只在同一门、证明不改变科学语义后做最小修复。 |
 | **C-33 · 独立结果与论文价值审计** | 由非执行角色从 raw output 复算主指标、最强对照、消融、负控与错误簿；报告 P/V/U/FR-016 与单 seed 边界。 | G-21 immutable output 完整。 | 机制、对照和护栏共同通过才可提出额外 seed 的作者请求；否则封存该家族并记录负结果。 |
 | **C-34 · 研究回合复盘** | 检查本回合是否回答原始研究问题，而非只解决工程问题；将失败类型反馈到下一轮 C-31 检索约束。 | C-33 完成。 | 只在既定 Gate/作者决策卡处重排；不从结果倒推新假设。 |
 
