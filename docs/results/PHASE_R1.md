@@ -2632,5 +2632,90 @@ mention 集，official exporter 与 scorer 的硬性校验均通过。上游 `Ec
 透明适配协议下，这个单 seed 运行产生了近乎全 singleton 的 clusters，且低于同协议主锚。** 因为 threshold
 由独立 selection-dev 在方法结果可见前已冻结的 grid 选出，事后改 threshold、重训或增大 backbone 都会污染
 baseline 行，故一律不做。G-19 据此收口；其论文价值是补齐一条独立发表方法的可审查负向 U 行，同时把
-“高 B³/CEAFe 即代表可用共指”这一单例主导误读排除在外。下一队首为 G-20 LLMERE-causal，之后才执行 C-30
-主表与声称审计。
+“高 B³/CEAFe 即代表可用共指”这一单例主导误读排除在外。C-29.6 随后发现 LLMERE 的恢复口径有协议冲突；
+作者取甲，将 G-20 收口为无可评分的可得性行，C-30 因而审计现有 G-19 U 行与该命名障碍，而不等待一个不存在的
+LLMERE 分数。
+
+### 25.29 C-30 · P/V/U 主表与声称审计（2026-10-02）
+
+**结论：C-30 完成。** G-19 是当前队列唯一可作统一协议描述性比较的外部 U 行；LLMERE 不是待补跑的
+零分或低分，而是作者取甲后明确的 `P 有 / V(b) / U 无可评分输出` 可得性行。此结论关闭了“等 G-20
+才可审计”的错误依赖，并把下一步转为受约束自驱动的研究卡（C-31），不重开 D4/A4/C5 的封存机制。
+
+#### 开工自审
+
+1. **科研价值**：C-30 对准各方法章主表的公开可比性与 `SPEC.md` QR-001/FR-016。它要验证的是一条外部
+   透明适配能否从 immutable raw output 独立复算，及无法产生分数的对手是否被诚实地标为可得性障碍；否则
+   P 层论文数字、V 层保真度和 U 层本项目数值会被错误地混作同一比较。证据是本节的 scorer 复算、
+   §25.28 的 raw/export/metrics hashes，以及 `BASELINE_ROSTER.md` §2。
+2. **可行性**：**可行。** G-19 的 raw clusters、official-shape export、gold、frozen evaluator 和候选
+   digest 都仍在 `gpu-4090:/data/TJK/ekg`；本任务只读、CPU 评分，不训练、不读 final-valid、不改输出。
+   LLMERE 的 U 行不可行是已命名的【协议】阻断，不是 C-30 的执行障碍，因为 C-30 的设计允许该行无数值。
+
+#### 独立复算与登记
+
+在不写 `--output`、不修改 immutable run 的前提下，重新执行：
+
+```text
+cd /data/TJK/ekg
+.venv/bin/python -u scripts/score_maven_ere_official.py \
+  --evaluator data/protocols/v6/tools/maven_ere_evaluate.py \
+  --gold runs/stages/A4/a4-v61-pair-evidence-r1/preflight-r2/data/MAVEN_ERE/internal-dev.jsonl \
+  --pred runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/g19-s13-20261002/official_predictions.jsonl \
+  --candidate-digest 15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910
+```
+
+输出的 291-document coverage、candidate digest 与 §25.28 的 official metrics 每一项一致；因此不是读取旧日志
+摘要。G-19 的 raw/export/metrics/evaluator/gold hash 与 coverage 已在 §25.28 全量登记，C-30 不复制为第二套
+权威数字。
+
+| 行 | P（原文背景） | V（原始基准保真度） | U（本项目统一协议） | 允许的主表/论文表述 |
+|---|---|---|---|---|
+| Global-Local Topic via EasyECR | 有；EMNLP 2022 的 KBP 2017 表只作背景 | **FR-016(b)**：KBP 2017 需要 LDC 许可，无法在原始基准验证 | **有**；G-19 raw clusters → official export → frozen MAVEN evaluator 独立复算，固定 seed 13 | 仅称“本项目披露的 MAVEN-ERE 透明适配下的描述性 U 行”；不得与原论文数字相减或称胜过原论文 |
+| LLMERE-causal | 有；COLING 2025 MAVEN-ERE causal 工作只作背景 | **FR-016(b)**：验证已发布 710-document prediction 会读封存 final-valid，已按 A 类红线放弃 | **无**；C-29.6 证明 target-third-line stop 需逐例读 internal-dev target，作者取甲不生成/不评分 | 称“无 official inference、透明适配恢复有 target-dependent stop 协议障碍”；不得写成方法低分、零分或未完成实验 |
+
+七项 provenance 的结果是：G-19 的 paper/table、upstream revision、P1 manifest、candidate universe、
+evaluator/label mapping、train/selection/evaluation 隔离和 input delta 均已在 §25.28 逐项可追溯；LLMERE 的
+同七项中，P/V 与原始适配身份可追溯，但 U 的 raw output/evaluator score **按作者甲裁决不存在**，故只进入
+可得性表。任一未来新行缺少任一项，就不能进入同协议 U 主表。
+
+#### 指标与下一步
+
+本次没有因 B³/CEAFe 的表面数值而改变 Ch5 的 MUC 主指标，也没有创造“LLMERE 缺失惩罚”指标。这样设计合理：
+可比性由相同 manifest、候选全集和 official scorer 构成，单 seed 只允许 `non-confirmatory` 描述；一个无分数的
+行只能说明可得性，不能代替或拖低模型主指标。下一任务是 C-31，按
+[`AUTONOMOUS_RESEARCH_PROGRAM.md`](../AUTONOMOUS_RESEARCH_PROGRAM.md) 只读建立领域研究卡；它尚不授权任何
+新机制训练。
+
+### 25.30 C-31 · 第一轮领域证据地图（R0，2026-10-02）
+
+**结论：第一轮 R0 已完成，没有一张卡可进入 C-32。** 这不是“该领域没有新论文”的结论，而是“在本项目
+当前的 MAVEN-ERE/MAVEN-FACT、冻结候选全集与不重写外部方法的约束下，三条最相邻的近期路线都不能形成
+可比较、可复现的新机制合同”。因此没有启动代码改动、CPU 预检、GPU 或新 seed；这正是 C-31 的 fail-closed
+设计要避免的无边界试错。
+
+#### 研究问题与取舍规则
+
+问题是：近期公开工作中是否存在一个**尚未被封存家族占据**、能为 D4/A4/C5 任一方法章提供可证伪机制、
+且能在现有公开数据/协议上经过强对照、单变量消融和负控检验的路线？优先级只按论文论断与证据强度排序，
+不按预估分数、实现快慢或 GPU 是否空闲。每张卡均核到论文正文/官方仓库，而非只信摘要或聚合网站。
+
+| R0 卡 | 一手机制与可能支撑的论断 | 数据/协议/代码核验 | 判定 |
+|---|---|---|---|
+| **D4-1 · Trucidator** | [Zhang et al., COLING 2025](https://aclanthology.org/2025.coling-main.139/) 以文内/跨文档图和多任务学习处理幻觉式 document-level factuality；若同一输入可得，它可能检验“跨文档证据是否改善极难的反事实/幻觉 factuality”。 | 原文构建并评测的是 **Factualusion**，其动机正是跨文档 hallucination documents，不是 MAVEN-FACT 的五类、2,913-document OOF unit；论文页没有可核实的官方代码链接。把它迁到 MAVEN-FACT 会同时改变数据分布、输入与任务定义，不能称为透明复现。 | **不准入：数据 + 协议；代码未核实。** 不是 D4 的可比外部行，也不能在不改研究范围下作为新机制。 |
+| **A4-1 · MMD-ERE** | [Guan et al., COLING 2025](https://aclanthology.org/2025.coling-main.460/) 的多角色辩论以关系语义为不同参与者设 topic；它在 MAVEN-ERE 上报告结果，表面上最接近 A4 的关系问题。 | 原文为 causal/subevent 各选 50 documents，报告 605/404 instances，而非项目冻结的完整 291-document causal candidate universe；它比较的是 LLM agent/辩论设置，未在论文页给出可核实的官方训练或推理实现。样本、候选集、模型服务和 evaluator 都不能与现有 U 行逐项对齐。 | **不准入：协议 + 代码。** 不能把一小样本 agent 结果移进 full-unit causal P/R/F1 主表，也不应据论文散文重写其系统。 |
+| **C5-1 · rationale distillation for ECR** | [Nath et al., NAACL 2024](https://aclanthology.org/2024.naacl-long.218/) 有官方 [代码](https://github.com/csu-signal/llama_cdcr)，以 LLM generated rationales 蒸馏 event-coreference scorer；其“避免 lexical shortcut”的问题与 C5 的高相似 false merge 相邻。 | 论文/仓库明确是 **cross-document** ECR，评测 ECB+、GVC、AIDA，而非 MAVEN-ERE 文档内全候选；它依赖外部生成 rationale 与不同聚类/数据管线。直接移植会改变数据、candidate universe、输入和预算，不能是 FR-016 透明适配；原 C5 机制家族也已封存，不能把 rationale 文本换名复活。 | **不准入：数据 + 协议；新颖性不足以绕过已封存家族。** 可作为最近邻反例保留，不产生实现任务。 |
+
+#### 可行性结论与停止
+
+- 三张卡都具有真实的科研动机，但**没有**一张同时通过数据、协议和代码门；因此“AI 找到了相关论文”不是
+  “AI 找到了可跑实验”的证据。
+- D4-1 与 C5-1 若强行迁移会扩大到其他语料/跨文档输入；A4-1 若强行做则要重建没有发布的 agent 系统，
+  分别违反【数据/协议】和【代码】可行性纪律。
+- 本轮没有足以生成 C-32 合同的 `observed error → treatment → mediator → main outcome`，也就不能诚实地
+  声称有 ≥80% power、单变量消融或可执行 GPU 预算。补写这些字段只会伪造准入。
+
+**停止动作**：C-31 第一轮以 `no_admissible_candidate` 收口，C-32/G-21 不启动。根据
+`AUTONOMOUS_RESEARCH_PROGRAM.md` §3.1，若要继续必须由作者决定是否扩大 thesis 数据/任务范围；那会改变
+研究问题、公开比较轴和可行性，执行代理不可自行把外部语料或生成标注引进训练。当前可安全保留的成果是三张
+带一手证据的排除卡，它们缩小下一轮检索空间并防止重复试错。

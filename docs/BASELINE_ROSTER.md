@@ -72,7 +72,7 @@ transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能�
 |---|---|---|---|---|---|
 | 1 | MAVEN-ERE official joint（主锚） | MAVEN-ERE | ✅ 官方 | **已验证**（E9） | **(a) 已完成** |
 | 2 | TacoERE `taco-s13-r3` | — | ❌ 无公开代码 | 不可能 → **(b)**，障碍＝「论文未发布实现」 | **(b) 已成立** |
-| 3 | LLMERE-causal（COLING 2025） | MAVEN-ERE official valid 710 篇，自写评测器，causal 36.04 | ⚠️ 有数据构造/评测器/**已发布预测**，无 trainer | **(b) Unverifiable**（作者 2026-09-15 裁决），障碍＝「保真度验证需读取封存 final-valid，按 A 类红线放弃」 | **(b) 已成立**；本项目自跑的生成本轮失败（退化重复），主表该行只报 (b) 与障碍 |
+| 3 | LLMERE-causal（COLING 2025） | MAVEN-ERE official valid 710 篇，自写评测器，causal 36.04 | ⚠️ 有数据构造/评测器/**已发布预测**，无 trainer/inference entry point | **(b) Unverifiable**（作者 2026-09-15 裁决），障碍＝「保真度验证需读取封存 final-valid，按 A 类红线放弃」 | **(b) 已成立；无 U 分数。** 作者 2026-10-02 取甲：项目恢复方案的 target-third-line stop 读取 internal-dev gold，故按【协议】收口为命名可得性障碍；不写/不跑新 driver |
 | 4 | A3.6 fallback | — | 本文 | **不适用**：本文前期方法，`failed` 身份须在表头标明 | 已有 |
 | 5 | LLM 对照（Qwen3-8B 等） | — | 自建 | **不适用** | 待建 |
 

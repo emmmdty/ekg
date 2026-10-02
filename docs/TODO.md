@@ -5,8 +5,9 @@
 
 ## 当前正式活动阶段
 
-**当前优先级是公开论文可比性，而非重开失败机制。** 保持单 seed；执行顺序固定为
-`C-29 ✅ → G-19 EasyECR / Global-Local Topic ✅ → C-29.5 AI 辅助科研流程审计 ✅ → C-29.6 LLMERE 静态契约核验 ❌ → G-20（暂停）→ C-30 P/V/U 主表与声称审计`。
+**当前优先级是公开论文可比性与受约束自驱动研究，而非重开失败机制。** 保持单 seed；已完成
+`C-29 → G-19 → C-29.5 → C-29.6（协议阻断）→ G-20（作者甲，不执行）→ C-30`，现在进入
+`C-31 第一轮（no_admissible_candidate）→ 作者范围裁决 → C-32 准入合同 → G-21（仅合同通过后）→ C-33 独立审计`。
 完整决策、科研价值、可行性、一手依据、预期结果和停止条件见
 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)；可执行行只认 `EXPERIMENT_PLAN.md` §4。
 
@@ -14,9 +15,11 @@
 |---|---|---|
 | G-19 · Ch5 外部 baseline | ✅ 已完成 FR-016(b) 透明适配：2,331 train / 独立 selection-dev / 无标签 291-doc evaluation 的 seed-13 运行，raw cluster、official export 与官方 scorer 的覆盖/候选/评测器闸门均通过；正式数字、singleton 崩塌形态、P/V/U 和禁止论断均在 `results/PHASE_R1.md` §25.28 | 不重跑、不事后调阈值或 backbone；KBP 2017 不可得，故不得以本行评价原论文 |
 | C-29.5 · 流程审计 | ✅ 已完成。G-20 的旧配置已证实缺 stop/constrained driver，不能重跑 | `AI_RESEARCH_WORKFLOW_AUDIT.md` 给出角色分离、执行就绪包、工程排障/科研迭代边界与停止规则 |
-| C-29.6 · 静态契约核验 | ❌ 已阻断。11,149 个 target 第三行有 407 种值；C-3 target-third-line stop 不能不用 gold 实现 | 【协议】；不写/不跑 recovery driver，等待作者取 (甲) 命名障碍或 (乙) 新的 target-independent first-line-only 契约 |
-| G-20 · Ch4 外部 baseline | 暂停，等待 C-29.6 的作者裁决。LLMERE 是直接的 MAVEN-ERE causal 方法；原文 published split 不读取，故只可作 FR-016(b) 透明适配 | 只有作者批准新契约且其静态/本地门通过，才全量生成、转换、official scorer；否则不产出分数 |
-| C-30 · 全章 | 尚无新实验分数 | 从 raw predictions 独立重算；每一行必须有 P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 标签 |
+| C-29.6 · 静态契约核验 | ✅ 已完成并阻断旧恢复规则。11,149 个 target 第三行有 407 种值；C-3 target-third-line stop 不能不用 gold 实现 | 【协议】；作者已取甲，不写/不跑 recovery driver |
+| G-20 · Ch4 外部 baseline | ✋ 作者甲收口。LLMERE 保留为 `P 有 / V(b) / U 无分数` 的可得性行；它不是模型低分 | target-dependent stop 是命名协议障碍；不生成、转换或评分 |
+| C-30 · 全章 | ✅ 已完成：G-19 raw export 经独立 official scorer 复算一致；LLMERE 无 U 分数已登记 | P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 审计见 `results/PHASE_R1.md` §25.29 |
+| C-31 · 领域证据地图 | ✅ 第一轮完成：Trucidator、MMD-ERE、rationale-distillation ECR 三卡分别卡【数据+协议】、【协议+代码】、【数据+协议+新颖性】 | `results/PHASE_R1.md` §25.30；`no_admissible_candidate`，不启动 C-32/G-21 |
+| 作者范围裁决 | **当前阻断**：是否允许扩大 thesis 的数据/任务范围到额外公开基准或跨文档/外部语料设置 | 这会改变研究范围与可比较轴；执行代理不能自行带入新数据/标注 |
 | D4 / A4 / C5 方法机制 | D4、A4、旧 C5 均已按契约收口或封存 | 不重开；C-22 继续暂停，不得因为本队列结束自动恢复 |
 
 ## 可比性口径（本队列的通过条件）
@@ -45,9 +48,9 @@
 
 ## 下一步
 
-1. C-29.6：等待作者对【协议】阻断取 (甲) 留下命名障碍或 (乙) 批准新的 target-independent first-line-only 契约；在此之前不做新 driver/GPU。
-2. G-20：仅在作者批准合法新契约且本地门通过后，执行全量 LLMERE-causal 透明适配；不得读取 final-valid、单条补跑或扫阈值。
-3. C-30：只有两条 raw outputs 都可复算后才更新主表；结果高低均如实记录，外部适配较高则抬高项目要求。
+1. 作者范围裁决：是否允许将研究扩展到额外公开 benchmark 或跨文档/外部语料；不允许则 C-31 本轮按排除卡收口。
+2. C-32：只有范围变更后形成的合格卡，才做 R1 准入、协议红队、CPU 预检和受限 smoke；不以预期分数、低成本或空闲 GPU 排序。
+3. G-21/C-33：只有冻结合同、exact command 和所有前门通过后才运行单 seed；由独立审计者复算，结果不支持即封存而非调参。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、删除候选、事后修 prompt/阈值、用更大 backbone 掩盖机制失败，
 以及把透明适配写成“胜过原论文”。
@@ -144,7 +147,7 @@ Done-when 逐条核对——**只差 matched seeds**（须逐次授权，表 6-2
 
 ## 当前三端
 
-- **local**：2026-09-30 三件套 **776 passed / 31 skipped**、ruff 0、`ekg-smoke` OK；R1 一致性审计
+- **local**：2026-10-02 三件套 **786 passed / 32 skipped**、ruff 0、`ekg-smoke` OK；R1 一致性审计
   **36/36 requirements mapped**；P1 r15
   `1e31a9ac…f9655`；
 - **gpu-4090**：2026-09-30 SSH 可达；C-28 相关进程 GONE，10 个 run 全部完成，聚合报告已落盘；

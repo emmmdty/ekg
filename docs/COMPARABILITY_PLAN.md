@@ -29,7 +29,7 @@
 | 线 | 一手依据 | 决策与原因 |
 |---|---|---|
 | Ch5 共指 | [Global-Local Topic（EMNLP 2022）](https://aclanthology.org/2022.emnlp-main.454/) 是独立发表的 ECR 方法；其官方 EasyECR 仓库已有 MAVEN-ERE loader、配置与 predict 路径，但原始 KBP 2017 要 LDC 许可 | **优先运行。** 以最小透明补丁在冻结 291-document unit 上产生 clusters，再用项目冻结的 MAVEN evaluator 重算 MUC/B³/CEAFe/BLANC。它是 FR-016(b) 统一协议行，能实质补齐独立发表方法族，且不把本项目机制当对手 |
-| Ch4 关系 | [LLMERE（COLING 2025）](https://aclanthology.org/2025.coling-main.500/) 直接研究 MAVEN-ERE 的 causal relation；项目已核到其推理输出的退化根因和全量、无选择性修复方案 | **第二优先运行。** 仅按已冻结的 stop/约束解码方案全量重生成、用官方 evaluator 在 frozen internal-dev 打分。它仍是 FR-016(b)：验证其原文数值须读取封存 final-valid，且不做该读取；但能补一个近期、直接任务的同协议透明适配行 |
+| Ch4 关系 | [LLMERE（COLING 2025）](https://aclanthology.org/2025.coling-main.500/) 直接研究 MAVEN-ERE 的 causal relation；项目静态核验发现已冻结恢复方案的 stop 需要读取 internal-dev target | **不运行，作者已取甲收口。** 它留作 FR-016(b) 可得性行：原文保真度仍不读封存 final-valid；本项目 U 层也无分数，因为 target-dependent stop 会造成 gold leakage。此项是命名协议障碍，不能评价 LLMERE 方法能力 |
 | Ch3 事实性 | [MAVEN-FACT（Findings 2024）](https://aclanthology.org/2024.findings-emnlp.651/) 的官方代码和本项目已完成的 EFD 对照，均无法取得原论文 test split | **不新增 G-3 supporting-word 重跑。** C-28 已给出官方 EFD 的透明适配与 gold/predicted 归因；再跑 source-paper 的 supporting-word 只增加同一论文内部变体，不能补独立方法族或原始 test 可比性 |
 | Ch6 应用 | SeDGPL 的原 CGEP-MAVEN 派生 split/candidates 未发布；本地重建协议还实测出 document shortcut 与 KGC 冷启动不兼容 | **不再扩充对手。** 新的 BART/MCPredictor 行不会消除协议缺口，反而增加不可解释的透明适配。保留三层对照、图依赖正控和构建误差分析，明确它是本地重建协议的应用证据 |
 | 新 C5 方法 | R1 已为 shortcut-invariance 冻结数据、功效与 100 条 blind-review gate，但 C-22 仍须生成和独立人工盲审 | **保留但不抢占可比性队列。** 它可能提高方法贡献，却不能在完成质量门前提供任何可比较结果；通过后仍先是单 seed 探索，不能替代当前的外部 baseline 补齐 |
@@ -66,11 +66,14 @@
    有 407 种值，固定 `Relevant reasoning information: none` 只覆盖 10,743；而逐条读 target 构造 stop string
    会把 internal-dev gold 引进 inference。故 C-3 的“第三行结尾 stop”当前不可执行，既不写 driver、也不跑 GPU。
    这是【协议】而非模型质量或算力障碍；不得用局部补行或宽松 prompt 绕开。
-5. **G-20 · LLMERE-causal（暂停，等待作者裁决）。** 作者须取：(甲，建议) LLMERE 保留为 FR-016(b) 无可评分
-   行、报告上述命名协议障碍；或 (乙) 在开始前明确批准并重审一个 target-independent first-line-only
-   constrained decoding 契约。只有 (乙) 的新契约完成静态/本地门后，才对全部冻结请求按其规则执行；结果无论高低
-   均标 FR-016(b) 透明适配、single-seed。
-6. **C-30 · 表格和声称审计。** 从 raw predictions 独立重算主表；为每一行输出 P/V/U 状态和七项登记。只有 U 层、同一章、同一 unit 的行可列 delta；P 层永不进排序。此步完成后才重新评估 C-22 是否值得成为“提高方法贡献”的下一单章任务。
+5. **G-20 · LLMERE-causal（✋ 作者 2026-10-02 取甲，不执行）。** C-29.6 证明 target-third-line stop 逐例读取
+   internal-dev gold，固定 `none` 又选择性错误；作者选择保留 FR-016(b) 无可评分行并报告该命名协议障碍。
+   不实现 first-line-only driver、不生成、不评分，也不把该未运行状态写成方法低分。
+6. **C-30 · 表格和声称审计。** 从可用的 G-19 raw predictions 独立重算主表；为每一行输出 P/V/U 状态和七项登记，
+   并明确 LLMERE 为“P 有 / V(b) / U 无分数”的可得性行。只有 U 层、同一章、同一 unit 的行可列 delta；P 层永不进排序。
+7. **C-31 起 · 受约束自驱动研究回合。** C-30 后不回头为 G-20 补分，也不重开封存机制；按
+   [`AUTONOMOUS_RESEARCH_PROGRAM.md`](AUTONOMOUS_RESEARCH_PROGRAM.md) 的研究卡、准入合同、单 seed 执行和
+   独立审计，寻找能够真正提高方法章贡献的候选。任何数据/协议/代码/算力/授权阻断按类别停下，不用试错绕行。
 
 ## 5. 成功、失败与论文效果
 

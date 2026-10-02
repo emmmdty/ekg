@@ -350,13 +350,19 @@ gantt
 | **C-28a** | ✅ **gold 边 oracle 诊断完成，增益为零（2026-09-22）**：五折共 **53,358** 条金标边（与 gold-expanded pair 总数逐条相等），pooled macro-F1 `.542915`；`oracle − base = −.000223`（CI `[−.0147, +.0143]`）、`oracle − full = −.006963`。**⇒ 边的质量不是主因**：把精确率从 `.2243` 换成 `1.0`、触及面换成金标全覆盖，主指标纹丝不动。**这推翻了 §25.21 的「稀释」解释**，路线 (乙) 随之失去意义，(甲) 从「走不通」变成「走了也没用」 | C-27 ✅ | oracle 不设臂，只作 `results/` 诊断行，不得进任何通过门；结论边界＝本项目的参数化与协议，**不反驳**原论文 `47.1→49.1`（另一 backbone、另一种拼接接法、另一划分） | `.../seed-13-oracle/` + `compare_oracle_vs_{base,full}.json`（`results/PHASE_R1.md` §25.25）|
 > ⚠️ **流程如实记录**：C-28a 是 2026-09-22 06:20 **先启动、后补进本表**的，违反了「要偏离顺序先改主表」。它没有污染任何已判定结果（oracle 本就不进门），但这类顺序倒置正是主表要防的漂移，记在这里不抹掉。
 | **C-27b** | ✅ **D4 训练/选择文档的结构输入已补齐（2026-09-22）**：五折 train dump 合计 **7,597,182** ordered pairs（四卡并行约 2 分钟），train/selection-dev/evaluation 三个 target 的 map 参数**逐位相同**；边率 in-sample 4.08–5.16% vs evaluation 4.08–4.96%，说明 in-sample 乐观不在边数上；MAVEN-ERE↔MAVEN-FACT 的 2,913 篇 mention ID 集合逐篇相同（0 不一致）| C-26 ✅ | 起因是 §25.14 的泄漏路径裁定；不训练模型、不读 evaluation、不改 map | R1 `fold-*/train_dirichlet_*`、`fold-*/selection_dirichlet_*`（`results/PHASE_R1.md` §25.15）|
-| **C-29** | ✅ **公开论文可比性登记冻结（2026-09-30）**：作者将“可与公开论文比较、保持单 seed”定为当前优先级；新增 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)，为每个外部行固定 P（原文参考）/V（原始基准保真度）/U（统一协议）三层与七项必填 provenance | D4 队列收口 | 不产生方法分数；固定 G-19 → G-20 → C-30 的顺序，排除 D4 bottleneck、旧 C5 家族和 Ch6 额外对手 | `docs/COMPARABILITY_PLAN.md` |
-| **C-30** | **P/V/U 主表与声称审计**：从 G-19/G-20 的冻结 raw predictions 独立重算每行；登记七项 provenance、FR-016 身份与单 seed 限制，拒绝无覆盖、无 scorer 或跨口径 delta | G-19 + G-20 收口 | P 行不得进排序；只比较同章、同一 frozen unit 的 U 行；所有新行都标 `single-seed / non-confirmatory` | `docs/COMPARABILITY_PLAN.md` §2/§4 + 结果页审计 |
+| **C-29** | ✅ **公开论文可比性登记冻结（2026-09-30）**：作者将“可与公开论文比较、保持单 seed”定为当前优先级；新增 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)，为每个外部行固定 P（原文参考）/V（原始基准保真度）/U（统一协议）三层与七项必填 provenance | D4 队列收口 | 不产生方法分数；先收口 G-19 与 LLMERE 可得性，再作 C-30；排除 D4 bottleneck、旧 C5 家族和 Ch6 额外对手 | `docs/COMPARABILITY_PLAN.md` |
+| **C-30** | ✅ **P/V/U 主表与声称审计（2026-10-02）**：独立重跑 G-19 raw export 的 official scorer，覆盖/候选 digest/指标均与 immutable metrics 一致；LLMERE 按作者甲裁定登记为 `P 有 / V(b) / U 无可评分输出` 的命名协议障碍 | G-19 收口 + C-29.6 阻断 + 作者甲裁决 | 不为未运行的 LLMERE 编造分数；P 行不得排序，只比较同章同 frozen unit 的 U 行，所有 U 行标 `single-seed / non-confirmatory` | `results/PHASE_R1.md` §25.29 + `COMPARABILITY_PLAN.md` §2/§4 |
+| **C-31** | ✅ **第一轮领域证据地图与研究卡（R0，2026-10-02）**：Trucidator、MMD-ERE、rationale-distillation ECR 三张最相邻卡均完成一手论文/代码/数据/协议核验；没有一张可进入现有 MAVEN 主表的 C-32 | C-30 ✅；公开资料与本地只读资产 | `no_admissible_candidate`：分别卡【数据+协议】、【协议+代码】、【数据+协议+新颖性】；不启动训练、不为旧机制换名。扩大 thesis 数据/任务范围须作者裁决 | `results/PHASE_R1.md` §25.30 + `AUTONOMOUS_RESEARCH_PROGRAM.md` §4–§5 |
+| **C-32** | **候选准入与冻结实验合同（R1–R3）**：只对 C-31 排名第一且未被反证的卡完成 exact split/candidate/evaluator、强对照、单变量消融、负控、MDE/power、静态接口、真实数据 CPU 预检和受限 smoke | **阻断：C-31 第一轮无准入卡；等待作者是否扩大 thesis 数据/任务范围** | 所有门 PASS 才把一个具体方案 materialize 为 G-21；任一硬门失败就命名类别并收口，不能改用近似实现、调指标或选择另一个好看结果 | `AUTONOMOUS_RESEARCH_PROGRAM.md` §3–§5 |
+| **C-33** | **独立结果与论文价值审计（R5）**：不由 G-21 执行者从 raw output 重新 export/score，核 main metric、最强对照、单变量消融、负控、P/V/U、FR-016 与单 seed 声称 | G-21 immutable output 完整 | 只有机制、对照、消融和护栏共同支持时，才可向作者申请额外 seed；否则封存该机制家族并如实记录负结果 | `AUTONOMOUS_RESEARCH_PROGRAM.md` §3–§6 + 对应结果页 |
+| **C-34** | **研究回合复盘**：核查本回合回答了原始研究问题还是只处理工程问题；把失败类型写成下一轮 C-31 的检索约束 | C-33 完成，或 C-31/C-32 以命名阻断收口 | 只在既定 Gate 或作者决策卡处重排；不得从最终分数反推研究假设 | `AUTONOMOUS_RESEARCH_PROGRAM.md` §4–§6 |
 
-**当前活动队列（作者 2026-09-30 指示）**：**C-29 ✅ → G-19（EasyECR / Global-Local Topic）→
-G-20（LLMERE-causal）→ C-30 比较与声称审计**。两条 GPU 行都是独立发表方法的单 seed 透明适配，
-不重开 D4/A4/C5 的失败机制；C-22 保持暂停。完整决策、预期效果与停止条件见
-[`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)。
+**当前活动队列（作者 2026-10-02 重设计）**：**C-29 ✅ → G-19 ✅ → C-29.5 ✅ → C-29.6 协议阻断 →
+G-20（作者甲，不执行）→ C-30 ✅ → C-31 第一轮 `no_admissible_candidate` → 作者范围裁决 → C-32 准入合同 →
+G-21（仅在合同冻结后）→ C-33 独立审计**。这是受约束自驱动而不是自动试参：AI 可推进每个有验收产物的门，
+数据/协议/代码/算力/授权阻断则强制生成决策卡。
+不重开 D4/A4/C5 的失败机制；C-22 保持暂停。完整权限、预期效果与停止条件见
+[`AUTONOMOUS_RESEARCH_PROGRAM.md`](AUTONOMOUS_RESEARCH_PROGRAM.md) 与 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)。
 
 **新增 C-10 的理由（2026-09-13）**：§3.4 推论 2 已经判定「第 6 章必须提前启动」，§3.2 依赖图里
 G-11a（4 个外部对手复现）也标了「提前启动」，但**它们全都要跑在同一个冻结的 evaluation unit 上**
@@ -380,7 +386,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **G-5** | ~~C5.2 smoke → C5.3 seed-13 pilot（三臂）~~ → ✅ **2026-09-16 跑完（5090）**：`full` MUC **79.90115** > `remove_core` **79.15966** > 负控 **78.83333**——**臂序第一次是对的**，但 `full` 比主锚 80.98472 低 **1.08**、比注册对照低 **0.47** ⇒ **门未过**，`gate.above_anchor=false`。契约 preflight-r2 `7a56e451…b6b0`（`code_files=9`）；首跑因「推理侧没有 `--argument-predictions`」失败，已修并补进冒烟。详见 `results/PHASE_C.md`。**G-5b 收口分析 ✅ 已完成 2026-09-17**（`df8404b`，本地纯 CPU，未训练、未改代码）：复用既有 `scripts/report_coref_error_profile.py` 把四个系统的 MUC 错误质量拆成两个方向，四份剖析全部与官方 evaluator 交叉验证（80.98 / 79.90 / 79.16 / 78.83 逐位吻合主表）。**那 1.83 里误合并解释 72.7%、漏合并 26.4%**；`full` 的 MUC recall **0.846422 已超过主锚 0.832461**，与主锚剩下的 **1.084 全部落在 precision**（0.756630 vs 0.788430）。⇒ 第二周期（若 Gate 2 批）该改的是把角色相容性接到**抑制侧**，不是继续加 recall。⚠️ +0.742 仍不是已确证效应——本 split 的 MUC 噪声地板至今未量。详见 `results/PHASE_C.md`。原注：C5.2 smoke → C5.3 seed-13 pilot（三臂） | C-5 + G-0 + 授权；**C5.1 preflight ✅ PASS 2026-09-13**（4090 纯 CPU，`protocol.json` `9402e880…e4319`、`code_files=8`、主锚 MUC 80.98472 / 注册对照 80.367586 独立重算一致、internal-dev gold `403b69a8…` 与 A4.1 同哈希） | ~1 GPU·day | 291 篇 / 7,195 mention 全覆盖；false-merge 中介与 calibration 落盘 |
 | **G-6** | EasyECR Global-Local Topic 复现 | C-2 判定可跑 + G-0 | ~1–2 GPU·day + 调试 | 若 KBP 2017 可得则先复现其发表数字（(a)）；否则直接跑 MAVEN-ERE 并标 (b) + 列差异 |
 | **G-7** | LLM 对照 ×3 章（Qwen3-8B LoRA） | C-7 + G-0 | ~1 GPU·day/章 | 三章主表各加 1–2 行；披露 backbone/revision/微调方式/提示模板 |
-| **G-8** | E8.2 LLMERE 全量重生成 + 官方评分。⚠️ **成本已于 2026-09-17 重估：< 1 GPU·h**（C-3 实测全部 11,149 条退化重复，97% 解码算力是浪费的；旧估 42 GPU·h 基于 `max_new_tokens=512`）。方案已冻结见 `results/PHASE_R1.md` §23 | C-3 ✅ + **作者明确授权** | **< 1 GPU·h**（旧估 42 GPU·h） | 11,149 条同一规则重生成；官方 evaluator 打分；或如实记为不可评分失败 |
+| **G-8** | ✋ **历史 LLMERE 全量重生成已撤销，不执行。** C-29.6 后证实 C-3 的 target-third-line stop 读取 internal-dev gold；作者 2026-10-02 取甲，沿用 G-20 的可得性收口 | — | 0 GPU·h | 不得按旧方案重生成、试跑或评分；它仅保留为“在 GPU 前发现协议冲突”的追溯记录 |
 | **G-9** | matched seeds 13/17/42（**仅对已过 seed-13 门的章**） | G-2/G-4/G-5 过门 + **逐次授权** | 各 ~2× pilot | mean delta、2/3 为正、10,000 次配对 bootstrap CI 下界 > 0 |
 | **G-10** | sealed final-valid ×1（**仅对已过 confirmation 的章**） | G-9 + 配置完全冻结 | 小时级 | 一次性评测，写入 final-valid ledger |
 | **G-11a** | **进行中（2026-09-17 起）**：CGEP 适配层已落地——数据导出 `export_cgep_as_kgc.py`（33,017 实体 / train 46,100 / test 1,908 + 每题 512 候选文件）、CSProm-KG 第 6 处补丁（只 dump 候选分数，前后 hash 已记）、`score_kgc_opponent.py`（**用我们自己的 evaluator 打分**，拒绝行号错位 / 候选漂移 / 分母变小）。源码与数据已落 `gpu-4090:/data/TJK/baselines/`，**环境未建、训练未开始**（隧道 20:09 掉线）。⚠️ **实测出一条决定这两行怎么读的事实**：CGEP 的金标后继在训练图里 **0/1,908 有边**，而干扰项 4,863/6,892 有 ⇒ CSProm-KG 这种**按实体嵌入表打分**的 KGC 模型被系统性地推离正确答案，SimKGC 那种**文本双编码器**则几乎不受影响。数字照报、解释照写，不换映射凑分。详见 `results/PHASE_E.md` 与名册 §6.2c。原注：~~4 个外部对手复现~~ → **CSProm-KG ✅ 2026-09-16 取得 (a)**（WN18RR MRR 0.572682 vs 0.572660，四项全在事前登记容差内；五处透明补丁与前后 hash 见 `results/PHASE_E.md`）。SimKGC / BART contrastive / MCPredictor 维持 **(b)** 并写障碍，**不再投入复现** | C-10 ✅ | 已达成（CSProm-KG 部分） | 名册 §6.2b |
@@ -404,8 +410,9 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **G-18b** | ✅ **执行修复重跑完成，但修复的理由被证伪（2026-09-22）**：base 在 910 步与 1,248 步下是 `.543166` 与 `.543138`（**差 `.000028`**）⇒ 优化步数**不是** base 欠额的原因，不再第三次调 batch。full `.540671 → .549878`、rewired `.532591 → .533347`；`full−base +.006740`（CI 跨 0）、`full−rewired +.016531`（下界 `+.000115`，擦着 0）。⚠️ **G-18b 不替代 G-18**——其正当性已被自己的数据推翻，留好看的那一跑正是本项目禁止的模式 | G-18 | 2h15m（15 run 全 exit=0）| 报告 SHA `3fb617c2…e6d315`。**真正的产出是配置敏感度 `+.009207` 大过效应量 `+.006740`** ⇒ 要测的效应落在配置噪声地板以下；两跑中介都反向（`results/PHASE_R1.md` §25.23）|
 | **G-19** | ✅ **2026-10-02 完成** EasyECR / Global-Local Topic 的同协议透明适配（Ch5 外部 baseline）：2,331 train / hash-frozen 291 selection-dev / 291 无标签 evaluation、seed 13；raw clusters、official export 与组织方 scorer 均全覆盖通过。唯一的权威数字、singleton 崩塌形态、P/V/U 与禁止论断在 `results/PHASE_R1.md` §25.28 | C-2b + C-29 ✅ + selection manifest preflight + 本地三件套 + 核卡 | 实测 **3h34m** | **FR-016(b) 收口**；不重跑、不事后调阈值或 backbone。KBP 2017 不可得；2,331-vs-2,622 training delta 已披露，不能声称胜过原论文 |
 | **C-29.5** | ✅ **AI 辅助科研流程审计 + G-20 执行就绪包完成（2026-10-02）**：G-19 的运行时接口/副作用问题和 AI-for-science 一手资料已归纳为角色分离、执行状态机与硬门；审计发现 G-20 的恢复 driver 未实现，故不允许用旧 512-token 无 stop 配置重跑 | 作者 2026-10-02 指令；不读 final-valid、不跑 GPU | 文档/CPU | `docs/AI_RESEARCH_WORKFLOW_AUDIT.md`；这不是方法结果，不改变任何分数或协议。G-20 `execution_ready=false`，转 C-29.6 |
-| **C-29.6** | ❌ **2026-10-02 静态契约核验阻断**：11,149 个 frozen causal target 的第三行实有 407 种文本，`…none` 只占 10,743；C-3 的 target-third-line stop 不能在不读取 internal-dev gold 的 inference 中实现。旧 512-token 无 stop runner 已 fail-closed，未实现新 driver、未调用 GPU | C-29.5 ✅；只读 CPU 审计 | 已完成 | **卡【协议】**：逐 target stop＝gold leakage；固定 `none` stop＝选择性错误。等待作者取 (甲) 留下命名障碍、不产出可评分行，或 (乙) 先批准并重审 target-independent first-line-only constrained decoding 新契约；在裁决前 G-20 不得启动 |
-| **G-20** | **LLMERE-causal 的同协议透明适配（Ch4 外部 baseline）**：按 C-3 冻结方案，对全部请求实施 stop 规则；仅当全量仍有不可解析行才执行第二阶段的全量 constrained decoding。prompt 等价、覆盖、转换、候选与 official scorer 均通过后，固定 seed 13 产出 causal P/R/F1 | C-3 + C-29 ✅ + G-19 收口 + C-29.5 ✅ + **作者对 C-29.6 协议阻断的明确裁决** + 任何新契约的静态/本地门 + 核卡 | < 1 GPU·h（仅在新契约合法时先 100 条计时校准） | 原始与新 raw generation 均保留，输出全量而非补行；七项 P/V/U 登记齐全。final-valid 不读，故恒为 **FR-016(b)**、single-seed；不能以结果高低评价 LLMERE 原论文 |
+| **C-29.6** | ✅ **2026-10-02 静态契约核验完成并发现协议阻断**：11,149 个 frozen causal target 的第三行实有 407 种文本，`…none` 只占 10,743；C-3 的 target-third-line stop 不能在不读取 internal-dev gold 的 inference 中实现。旧 512-token 无 stop runner 已 fail-closed，未实现新 driver、未调用 GPU | C-29.5 ✅；只读 CPU 审计 | 已完成 | **卡【协议】**：逐 target stop＝gold leakage；固定 `none` stop＝选择性错误。作者已取 (甲)：留下命名障碍、不产出可评分行；G-20 永久不启动 |
+| **G-20** | ✋ **LLMERE-causal 不执行（作者 2026-10-02 取甲）**：C-29.6 实测 target-third-line stop 必须逐例读取 internal-dev gold；固定 `none` 又选择性错误。LLMERE 因此保留为 FR-016(b) 可得性行，**没有 U 层分数** | C-29.6 完成 + 作者甲裁决 | 0 GPU·h | 旧 512-token runner fail-closed；不写/不跑新的 driver、不做 100 条试跑、不评分。它是协议障碍，不是 LLMERE 方法质量结论 |
+| **G-21** | **合同绑定的单 seed 正式实验（尚无具体候选）**：只运行 C-32 已冻结的一项新研究合同，并保留 immutable manifest、raw output 与覆盖报告 | C-32 全部 PASS + 具体 contract/command 已写回本表 + 本地 gate + 4090 空闲 | 由 C-32 的实测预算确定 | 训练、selection、evaluation 三隔离；唯一 seed 13；不得从 smoke/正式结果回改合同。GPU 命令启动前必须展示 cwd、命令和预期产物；完成后交 C-33 |
 
 **G-13 / G-14 共同确立的方针（作者 2026-09-13）**：4090 被占不是停工理由。
 判断一件事该不该先在 5090 上做，只问**它能不能减少那一次正式跑白跑的概率**。
@@ -446,6 +453,7 @@ Gate 之外不重排计划。Gate 上的裁决必须写回本文件与 `HANDOFF.
 | C-2, C-4, G-6, G-7 | `BASELINE_ROSTER.md` §1/§2/§3/§6 | FR-016 判定 |
 | C-3, G-8 | `results/PHASE_R1.md` §9.6 / §21.6 | E8 恢复 |
 | C-29, C-30, G-19, G-20 | `COMPARABILITY_PLAN.md` + `BASELINE_ROSTER.md` §1/§2 | P/V/U 三层比较与 FR-016 |
+| C-31–C-34, G-21 | `AUTONOMOUS_RESEARCH_PROGRAM.md` | 研究卡、准入合同、受约束执行与独立审计 |
 | G-11 | `phases/PHASE_E3_graph_application.md` | E3.0–E3.5 |
 | G-12 | `phases/PHASE_H2_thesis_acceptance.md` | 七项审计 |
 

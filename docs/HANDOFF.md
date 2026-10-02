@@ -1,8 +1,8 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-02 13:28（+08:00）**（C-29.6 的 CPU 静态核验发现：LLMERE 的 11,149 个 target
-> 第三行有 407 种文本，C-3 所写的“按第三行结尾 stop”无法不用 internal-dev gold 实现。G-20 因【协议】
-> 阻断；**仍不得启动 G-20 或 GPU 命令，等待作者在两种透明处置间裁决**）。
+> 更新于 **2026-10-02 15:33（+08:00）**（作者已对 C-29.6 取甲：LLMERE 不生成、不评分，作为
+> FR-016(b) 的命名协议障碍收口；G-19 已被独立 official scorer 复算，C-30 完成。C-31 的第一轮三张
+> 研究卡均因数据/协议/代码或新颖性被排除；当前停在“是否扩大 thesis 数据/任务范围”的作者裁决，不能自启训练）。
 > 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
 > 本文只记录**状态、决策、依赖、下一步**，**不复制实验表格——数字只认 [`results/`](results/README.md)**。
 >
@@ -23,7 +23,7 @@
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **公开论文可比性提升队列**：C-29 ✅ → G-19 EasyECR / Global-Local Topic ✅ → C-29.5 流程审计 ✅ → **C-29.6 LLMERE 静态契约核验 ❌【协议】阻断** → G-20（暂停，等待作者裁决）→ C-30。两条均为固定 seed 13 的外部方法透明适配；C-22 仍暂停，D4/C5 已封存机制不重开。详见 `COMPARABILITY_PLAN.md`。 |
+| **活动任务** | **受约束自驱动研究队列**：C-29 ✅ → G-19 ✅ → C-29.5 ✅ → C-29.6（协议阻断）→ G-20（作者甲，不执行）→ C-30 ✅ → C-31 第一轮 `no_admissible_candidate` → **作者范围裁决（当前）** → C-32 准入合同 → G-21（仅合同通过后）→ C-33 独立审计。单 seed 不变；C-22 暂停，D4/C5 已封存机制不重开。详见 `AUTONOMOUS_RESEARCH_PROGRAM.md`。 |
 | ✅ **裁决已落地（执行代理拍板，§25.24）** | **不投第二个机制设计周期。** C-28a 之后理由更硬：oracle 给完美图仍是零增益 ⇒ (甲) 从「走不通」变成「走了也没用」，(乙)「只在结构足够时介入」失去前提。⛔ 仍不得换名、扫参、加大 backbone、启动未授权多种子。若将来 Ch4 真的产出更准的关系图，(甲) 可重新立项。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **裁决前必须先读的一条** | **配置敏感度大过效应量**：同样三臂同样 seed，只换打包规则，`full` 就动 `+.009207`，而更好那一跑的 `full − base` 只有 `+.006740`（§25.23）。⇒ 在这个量级上投第二周期，**很可能测不出任何可信的东西**；要投就得先解决可测性（例如提高效应目标，或先把配置抖动压下去），这一点应写进裁决材料。 |
@@ -44,7 +44,7 @@
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最新本地三件套记录（2026-09-30）**：**776 passed / 31 skipped**、ruff 0、`ekg-smoke` OK；
+> **最新本地三件套记录（2026-10-02，C-31 交接）**：**786 passed / 32 skipped**、ruff 0、`ekg-smoke` OK；
 > R1 一致性审计 **36/36 requirements mapped**。
 > 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 最终结果
 > 已进入 `results/PHASE_R1.md` §25.27，周报尚未追补该结果。
@@ -83,7 +83,7 @@ uv run python scripts/audit_r1_consistency.py \
 
 按需再读：对应章节的 `phases/PHASE_*.md` 契约、`results/PHASE_*.md`（数字唯一权威）。
 
-### 0.3 当前队列：**公开论文可比性提升（单 seed）**
+### 0.3 当前队列：**受约束自驱动研究（单 seed）**
 
 C-23–C-28、G-15–G-18 以及 oracle 诊断全部完成。权威结果在 `results/PHASE_R1.md` §25：
 
@@ -92,12 +92,12 @@ C-23–C-28、G-15–G-18 以及 oracle 诊断全部完成。权威结果在 `re
 3. 归因层：配置噪声、边精确率曲线、gold oracle 与官方 EFD gold/predicted 对照闭合；
 4. 错误层：OOF 泄漏路径、mention-id namespace、上游 test-max 选模与打包规则敏感性均有修复证据。
 
-**C-29.5 已完成，C-29.6 发现协议阻断；当前不能启动 G-20，也不是 D4 GPU 任务。** G-19 已以 FR-016(b) 的有效负向透明适配收口（唯一数字见
-`results/PHASE_R1.md` §25.28）；G-20 收口才作 C-30；不得恢复
-第二机制周期、补多种子或事后加 text-matched/no-relation 臂。每行必须带 P/V/U 身份、七项 provenance、
-FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高，如实抬高要求；较低也只报告“本项目
-透明适配协议下”的结果，绝不声称胜过原论文。若进入写作，只引用 `results/PHASE_R1.md` §25.20–§25.27 的
-边界化 D4 结论，不把 C-28 写成正方法结果。
+**C-29.5、C-29.6、G-20（作者甲）与 C-30 均已收口；当前不启动 LLMERE，也不是 D4 GPU 任务。** G-19
+以 FR-016(b) 的有效负向透明适配收口，LLMERE 作为无 U 分数的命名协议障碍登记；唯一数字和独立复算均在
+`results/PHASE_R1.md` §25.28–§25.29。不得恢复第二机制周期、补多种子或事后加 text-matched/no-relation 臂。
+每行必须带 P/V/U 身份、七项 provenance、FR-016 状态与 `single-seed / non-confirmatory` 标签。C-31 第一轮已
+按 `AUTONOMOUS_RESEARCH_PROGRAM.md` 状态机完成一手检索和源码审计，但三张卡均无准入资格，详细证据见
+`results/PHASE_R1.md` §25.30。当前是作者范围裁决，不得把外部语料、生成标注或未发布系统自行带入训练。
 
 #### C-29.5 收口与 C-29.6 开工自审（2026-10-02）
 
@@ -118,9 +118,25 @@ FR-016 状态与 `single-seed / non-confirmatory` 标签。若外部方法较高
   有 **407** 种值；`Relevant reasoning information: none` 仅 10,743 条，另 406 条带实例特异内容。C-3 的
   “以第三行结尾作 stop”若逐条从 target 取 stop string，会在 inference 时读取 gold；若固定为 `none`，则会错误
   地选择性处理 406 条。现有旧 driver 也无法解决这一矛盾。**不实现、不运行该 driver；不得放宽 prompt、补单条
-  或换模型。** 作者须在下列透明选项间裁决：(甲，建议) 本轮将 LLMERE 留作 FR-016(b)“无可评分行 + 命名协议障碍”；
-  (乙) 在任何 G-20 前，明确批准一份新的、target-independent first-line-only constrained decoding 契约，并重新
-  审查它是否仍是可接受的透明适配。两者之外不自选。
+  或换模型。**作者已取 (甲)**：LLMERE 留作 FR-016(b)“无可评分行 + 命名协议障碍”；不批准、也不实现
+  target-independent first-line-only driver。G-20 永久不执行，详见 `results/PHASE_R1.md` §25.29。
+
+#### C-31 开工自审（2026-10-02）
+
+- **科研价值**：C-31 对准的是三个方法章能否再形成可检验、可比较的正向贡献，而不是把外部 baseline 的低分
+  修得好看。它将每个候选绑定到一张主表、公开强对照、最近邻差异、因果链、单变量消融/负控和 P/V/U；这让
+  “新方法”必须先能支撑明确论文论断，才允许消耗 GPU。流程依据和一手 AI-for-science 能力边界见
+  `AUTONOMOUS_RESEARCH_PROGRAM.md` §1–§3。
+- **可行性**：**可行（仅 R0 只读范围）。** 当前只访问公开论文、官方代码/数据和项目的只读 contracts，
+  不读取 final-valid、不改数据、不申请新 seed、不启动 GPU。单张卡若发现数据、协议、代码、算力或授权不成立，
+  那张卡按类别关闭；若本轮所有卡关闭，再交作者决策，不能自行把相近工作当替代。
+- **第一轮结果**：Trucidator 卡在【数据/协议】（Factualusion 的跨文档 hallucination corpus，不是 MAVEN-FACT）；
+  MMD-ERE 卡在【协议/代码】（50-document relation sample 与未核实公开实现，不能进入 full-unit U 表）；
+  rationale-distillation ECR 卡在【数据/协议/新颖性】（ECB+/GVC/AIDA 的跨文档输入，且不能给封存 C5 换名）。
+  因此 `no_admissible_candidate`，不做 C-32/G-21。完整一手依据与禁止论断见 `results/PHASE_R1.md` §25.30。
+- **当前作者决策卡**：若希望继续向新方法推进，需明确是否允许把 thesis 的数据/任务范围扩展到一个额外公开基准或
+  跨文档/外部语料设置；这会改变公开比较轴与论文范围，执行代理不能自行决定。若不扩展，则本轮只保留这三张排除卡，
+  不启动新的训练。
 
 #### G-19 开工自审（2026-09-30）
 

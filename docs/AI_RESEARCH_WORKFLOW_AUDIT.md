@@ -1,8 +1,9 @@
 # C-29.5 · AI 辅助科研流程审计与 G-20 执行就绪包
 
 > **完成于 2026-10-02；C-29.6 只读复核随后补入。** 本文是一次流程纠偏，不是论文机制、实验结果或指标设计变更。
-> 它不读取 final-valid、不改任何分数，也不授权 G-20 上卡。结论先行：**G-20 当前不可执行，
-> 不是因为分数或算力，而是【协议】规定的 target-third-line stop 无法不用 internal-dev gold 实现。**
+> 它不读取 final-valid、不改任何分数，也不授权 G-20 上卡。结论先行：**G-20 不执行；作者已取甲，
+> 将它收口为 FR-016(b) 无可评分行。** 原因不是分数或算力，而是【协议】规定的 target-third-line stop
+> 无法不用 internal-dev gold 实现。
 
 ## 1. 决策与边界
 
@@ -107,7 +108,7 @@ raw output、覆盖、export 和官方 scorer 都可复算；近乎全 singleton
 
 同一个人或 AI 可以顺序扮演这些角色，但不能在同一轮中既根据结果修改配方，又认证修改后的结果。
 
-## 5. G-20 执行就绪包（审计结论：未通过）
+## 5. G-20 执行就绪包（审计结论：未通过，作者取甲收口）
 
 ### 5.1 任务身份与冻结边界
 
@@ -155,12 +156,13 @@ instance-specific reasoning。故逐 request 从 `output` 取第三行来构造 
 | 100 条计时校准、GPU 空闲、磁盘与 remote venv | PENDING【算力/环境】 | 这是 driver 通过后的 R3/R4 项；尚未核卡或发任何 remote GPU 命令。 |
 
 **判定**：G-20 `execution_ready = false`。这里的 FAIL 是具体的协议矛盾，而不是对 LLMERE 的科学否定；
-也不能用旧 driver “先试 100 条”来绕过，因为它的已知配置本身不满足冻结恢复规则。
+也不能用旧 driver “先试 100 条”来绕过，因为它的已知配置本身不满足冻结恢复规则。作者随后选甲，
+故本包永久作为可得性/阻断证据，不再等待新 driver 或 GPU。
 
-## 6. 停止条件与作者裁决
+## 6. 停止条件与作者裁决（已于 2026-10-02 取甲）
 
 C-29.6 已完成它该做的事：在写任何新 driver 前发现 C-3 stop 规则要求隐藏 gold。按照本项目的可行性纪律，
-此处不自主改成 first-line-only，也不做“先跑 100 条看看”。作者需在下列互斥选项中裁决：
+此处没有自主改成 first-line-only，也没有做“先跑 100 条看看”。裁决时的互斥选项如下：
 
 1. **(甲，建议)**：LLMERE 保留为 FR-016(b) 无可评分行；主表/可得性表说明“官方无 inference，已冻结的
    transparent-adaptation recovery 需要 target-dependent stop，故因协议禁止”。这是最保守且不改口径的收口。
@@ -168,5 +170,8 @@ C-29.6 已完成它该做的事：在写任何新 driver 前发现 C-3 stop 规�
    科研价值/可行性、信息流、全量 stage 规则、prompt 等价、candidate grammar、输出/评分和 smoke 门；随后才可
    实现并测试项目侧 driver，仍不代表官方复现。
 
-在裁决前，不得因为 4090 空闲而执行任何 LLMERE generation。这个停止本身就是新流程的预期行为：把不合法的
-推理方案在花 GPU 前暴露出来，而不是跑出数字后再解释它为什么不可用。
+**作者已选 1（甲）。** LLMERE 保留在 Ch4 可得性表，明确写“官方无 inference；已冻结的透明适配恢复需要
+target-dependent stop，因协议禁止”，不产生 U 层数值。本项目不会实现或运行 first-line-only driver，也不会
+因 4090 空闲恢复 generation。这个停止正是新流程的预期行为：把不合法的推理方案在花 GPU 前暴露出来，
+而不是跑出数字后再解释它为什么不可用。其后的任务是 C-30 审计，和
+[`AUTONOMOUS_RESEARCH_PROGRAM.md`](AUTONOMOUS_RESEARCH_PROGRAM.md) 中的 C-31 受约束研究回合。
