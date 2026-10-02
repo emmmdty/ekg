@@ -12,8 +12,8 @@
 
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|
-| G-19 · Ch5 外部 baseline | Global-Local Topic / EasyECR 是独立发表方法；原始 KBP 基准受 LDC 许可阻断，故只可作 FR-016(b) 透明适配。v2 输入三元组已双端同 hash，CPU loader 与 4090 C-2b CUDA smoke 均通过：16-document train/selection/unlabeled prediction 完成，392 prediction mentions；full 三分区均验证为上游固定 500 维。run-local temporary 与 prediction `lightning_logs/` 均已活体验证 | 启动唯一一次 `train-predict`：2,331 train docs、291 hash-frozen selection-dev 选档、291 无标签 evaluation 推断，seed 13。其后导出 raw clusters、独立用 official evaluator 重算 MUC/B³/CEAFe/BLANC；不得把任何结果写成对 KBP 论文数值的胜负 |
-| G-20 · Ch4 外部 baseline | LLMERE 是直接的 MAVEN-ERE causal 方法；原文 published split 不读取，故只可作 FR-016(b) 透明适配 | 全量固定 stop 生成；若仍有格式错误才触发全量 constrained decoding；通过转换/覆盖/官方 scorer 后报告单 seed causal P/R/F1 |
+| G-19 · Ch5 外部 baseline | ✅ 已完成 FR-016(b) 透明适配：2,331 train / 独立 selection-dev / 无标签 291-doc evaluation 的 seed-13 运行，raw cluster、official export 与官方 scorer 的覆盖/候选/评测器闸门均通过；正式数字、singleton 崩塌形态、P/V/U 和禁止论断均在 `results/PHASE_R1.md` §25.28 | 不重跑、不事后调阈值或 backbone；KBP 2017 不可得，故不得以本行评价原论文 |
+| G-20 · Ch4 外部 baseline | **当前队首**。LLMERE 是直接的 MAVEN-ERE causal 方法；原文 published split 不读取，故只可作 FR-016(b) 透明适配 | 全量固定 stop 生成；若仍有格式错误才触发全量 constrained decoding；通过转换/覆盖/官方 scorer 后报告单 seed causal P/R/F1 |
 | C-30 · 全章 | 尚无新实验分数 | 从 raw predictions 独立重算；每一行必须有 P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 标签 |
 | D4 / A4 / C5 方法机制 | D4、A4、旧 C5 均已按契约收口或封存 | 不重开；C-22 继续暂停，不得因为本队列结束自动恢复 |
 

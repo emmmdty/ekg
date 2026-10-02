@@ -21,7 +21,7 @@
 | # | 方法 | 原始基准 | 代码 | 保真度路径 | 状态 |
 |---|---|---|---|---|---|
 | 1 | MAVEN-ERE official joint（主锚） | MAVEN-ERE | ✅ 官方 | **已验证**：四个共指指标与官方论文 ±0.4 内（E9，`PHASE_R1.md` §17.2） | **(a) 已完成** |
-| 2 | **Global-Local Topic**（Xu, Li, Zhu, EMNLP 2022） | KBP 2017 | ✅ EasyECR `example_emnlp2022.py` + `global_local_topic_mavenere.yaml`（1,715 行 Lightning trainer）；仓库 `github.com/hqyang/EasyECR` @ `f6cd779f…115a9` | **(b)**：KBP 2017 需 LDC 许可，不可得（`PHASE_R1.md` §22.5） | **runnable，正式透明适配待完成**：C-2b 于 2026-10-02 在 4090 通过（16-doc train/selection/unlabeled predict；run `smoke-v4-20261002`），下一步仅 seed-13 完整训练/预测 |
+| 2 | **Global-Local Topic**（Xu, Li, Zhu, EMNLP 2022） | KBP 2017 | ✅ EasyECR `example_emnlp2022.py` + `global_local_topic_mavenere.yaml`（1,715 行 Lightning trainer）；仓库 `github.com/hqyang/EasyECR` @ `f6cd779f…115a9` | **(b)**：KBP 2017 需 LDC 许可，不可得（`PHASE_R1.md` §22.5） | **完成，FR-016(b) 透明适配**：seed-13 完整训练、独立 selection、无标签 evaluation、official export/scorer 均已闭合；结果与禁止论断见 `PHASE_R1.md` §25.28 |
 | 3 | CorefPrompt（Xu et al., EMNLP 2023） | KBP 2017 | ⚠️ EasyECR 有实现，但配置依赖 OmniEvent 预测论元文件（checkpoint 已失效） | 若以我方 Qwen3 论元替代 → 必为 (b)，须列差异 | **降级候选** |
 | 4 | Qwen3 mention-local 论元池化 `qwen3-argument-s13-r2` | — | 自建 | **不适用**：本文自建的注册负面对照，非外部方法 | 已有 |
 | 5 | LLM 对照（Qwen3-8B，LoRA/prompt） | — | 自建 | **不适用**：同上 | 待建 |

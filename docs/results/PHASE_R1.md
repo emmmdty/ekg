@@ -2556,3 +2556,64 @@ oracle 结果方向一致：至少在本项目核过的残差接法与官方拼�
 ⇒ **C-28 完成，但不为 D4 翻案。** D4 的正式方法结果仍是 §25.20 的 G-18：四项必要门不过、
 机制无效；§25.25 与本节补齐的是「不是因为预测边不够接近 gold」这一归因证据。D4 v6.2 的输入、
 机制、负控、oracle、官方代码适配与错误记录至此全部闭合；不启动未预注册的新臂或第二机制周期。
+
+### 25.28 G-19 EasyECR / Global-Local Topic 透明适配收口（2026-10-02）
+
+**结论：已完成一条可复算的 FR-016(b) 透明适配，但其统一协议下的共指结果是明确负值；不重跑、
+不事后扫阈值，队列推进至 G-20。** 这不评价 Global-Local Topic 在其发表的 KBP 2017 基准上的能力：
+KBP 2017 要 LDC 许可，本项目无法取得，故不能建立原始基准的保真度验证。
+
+#### P / V / U 身份与可追溯性
+
+- **P（论文背景）**：Global-Local Topic（Xu, Li, Zhu, EMNLP 2022）原始任务为 KBP 2017；论文数字只作
+  背景，不进入下表的差值或排序。
+- **V（原始基准保真度）**：**FR-016(b) Unverifiable**。障碍是 KBP 2017 的 LDC 许可语料不可得；此外本次
+  使用 MAVEN-ERE、金标 event mentions、MAVEN 官方 evaluator，且训练文档数为 2,331 而非既有锚的 2,622。
+- **U（统一协议）**：291 篇 P1 internal-dev、7,195 event mentions、1,719 TIMEX、234,870 ordered pairs；
+  candidate digest `15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910`，组织方 evaluator
+  SHA-256 `32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598`。因此下表可与同一 unit 的
+  项目主锚作**描述性统一协议比较**，但仍是单 seed，不能替代跨初始化确认。
+
+正式运行在 `gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-20260904/baselines/coref/global-local-topic/`
+`g19-s13-20261002/`：30 epoch、seed 13、P1 train 的 hash-frozen 2,331-document training 与独立
+291-document selection-dev。selection 仅在该独立集合内从预先固定的 `0.1…0.9` grid 选择 threshold
+**0.9**；evaluation 输入在模型训练、选档与推断阶段均为无 gold test shape。上游为
+`hqyang/EasyECR@f6cd779fbddc7ced2b14397041f83d92713115a9`；运行代码为 `f483bda`，preflight SHA-256
+`f0ac88b0462440fa8555b58ec5bb2615f63bd20a04dbf15bbdf916a69bfc2fea`。透明运行补丁、输入差异和
+smoke 证据见 `COMPARABILITY_PLAN.md` §4 与 `HANDOFF.md` G-19 记录。
+
+推断阶段先写无标签 `raw_clusters.jsonl`（291 行，SHA-256
+`88c7993a30678a0c4e01480c1db77d6b26f53551e45f51800cd7919c7cdff05d`）；之后才以同一 P1 gold
+文件作 identity/partition 校验和 official-shape 转换。转换后的 prediction SHA-256 是
+`08ce7710a911a4068df5857216e12b9d93b29a40ec5ae9136f78e474491afd7a`，gold SHA-256 是
+`403b69a8a9c83e2be41e0c366fed7edcd7e00796dbd14ec6f07df7e560507e81`。export 和 scorer 均验证
+291/291 documents、7,195/7,195 mentions 与冻结 candidate digest；无静默丢弃。`official_export.json` /
+`official_metrics.json` SHA-256 分别为 `d0ff84f8e47ff68e4dcbadc71b385f03ec146357d3322fa992d1c92e90275fe4` /
+`48ab93ceed1be5cc29f7cd7ce71ed12e0b9e1cb96f0dcb8bef8d7562f3dbafb1`。log 记录的墙钟为
+08:08:41–11:42:34（约 **3h34m**）。
+
+#### 官方共指结果（MAVEN-ERE evaluator）
+
+| 行 | MUC P | MUC R | **MUC F1** | B³ F1 | CEAFe F1 | BLANC F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| MAVEN-ERE official joint（同 unit 主锚） | — | — | **80.984720** | 98.039866 | 97.731576 | 89.880089 |
+| **Global-Local Topic via EasyECR（U；FR-016(b)，single seed）** | 57.142857 | 0.698080 | **1.379310** | 95.849489 | 94.225421 | 49.961723 |
+
+这是合乎协议但几乎全 singleton 的预测：7,195 个 mention 被分为 7,188 个 cluster，其中 7,181 个
+singleton，只有 7 个 size-2 cluster（14 个 mention）。所以 B³/CEAFe 的较高数值是单例占主导的性质，
+**不能**遮蔽 MUC recall `0.698080` 与 MUC F1 `1.379310` 所揭示的共指崩塌。temporal / causal / subevent
+均为 0，因为 exporter 按定义为这条**只做共指**的外部方法补 all-NONE relation fields；它们不是该方法的
+relation 结果，也不进入本行解读。
+
+#### 有效性审查与裁决
+
+评分前后没有发生数据、候选、评测器或覆盖漂移：raw clusters 的每个 document 均 partition 了其完整
+mention 集，official exporter 与 scorer 的硬性校验均通过。上游 `EcrConnectedComponent` 对此 run 的
+语义是仅在 predicted distance 小于 selected `0.9` 时连边；不存在把阈值方向写反的接口证据。
+
+这条结果**不是**“Global-Local Topic 比原论文弱”的论断；它只能表述为：**在本项目披露的 MAVEN-ERE
+透明适配协议下，这个单 seed 运行产生了近乎全 singleton 的 clusters，且低于同协议主锚。** 因为 threshold
+由独立 selection-dev 在方法结果可见前已冻结的 grid 选出，事后改 threshold、重训或增大 backbone 都会污染
+baseline 行，故一律不做。G-19 据此收口；其论文价值是补齐一条独立发表方法的可审查负向 U 行，同时把
+“高 B³/CEAFe 即代表可用共指”这一单例主导误读排除在外。下一队首为 G-20 LLMERE-causal，之后才执行 C-30
+主表与声称审计。
