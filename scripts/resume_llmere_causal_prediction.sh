@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Resume E8 after its SFT adapter is complete but prediction has not started.
-# Run only on gpu-4090. It refuses to overwrite generated predictions or scores.
+# Historical, invalid 512-token no-stop prediction path. It is retained only so
+# the failed output remains traceable; no recovery driver is legal without a
+# new author-approved target-independent inference contract.
 set -euo pipefail
+
+echo "refusing historical LLMERE prediction path; G-20 is protocol-blocked" >&2
+exit 64
 
 project_root=${1:?usage: resume_llmere_causal_prediction.sh /data/TJK/ekg GPU_INDEX}
 gpu_index=${2:?usage: resume_llmere_causal_prediction.sh /data/TJK/ekg GPU_INDEX}

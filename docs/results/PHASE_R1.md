@@ -1319,6 +1319,23 @@ $ uv pip compile <(printf 'torch==2.0.1\nallennlp==2.10.1\n') --python-version 3
 > 对应主表 **C-3**，是 §9.6 的后续。**通过 ≠ 获准重生成**——本节只把方案冻结到可审查的程度，
 > 是否执行 G-8 由作者裁决。
 
+### 23.1 C-29.6 · target-third-line stop 的可行性反证（2026-10-02，只读 CPU，未加载模型）
+
+在按 C-3 的恢复方案写任何新 driver 前，对冻结
+`llmere-causal-s13/upstream/llmere/data/converted/MAVEN_ERE/causal/test.json` 的 **11,149** 个 target
+逐行统计 target 的第三行（`Relevant reasoning information: ...`）。结论：第三行有 **407** 种不同文本；
+`Relevant reasoning information: none` 为 **10,743** 条，余下 **406** 条为 instance-specific reasoning。
+每条都有三行，但第三行不是静态 stop string。
+
+⇒ C-3 的“在 target 第三行结尾显式 stop”若从每条 `output` 取结束序列，就在 inference 时读取
+internal-dev gold；若固定为 `…none`，则会选择性错误处理 406 条。这是【协议】阻断，不是模型质量、CUDA 或
+格式修复问题。旧的 `max_new_tokens=512` / 无 stop 运行已 fail-closed，不重跑；本次未实现 recovery driver、
+未生成任何新输出、未读取 final-valid。
+
+可接受的后续只能由作者二选一：(甲，建议) LLMERE 保留为 FR-016(b) 无可评分行，并把该命名协议障碍写入
+可得性表；(乙) 作者明确批准一个新的、target-independent first-line-only constrained-decoding 契约，然后重新
+进行其信息流、静态、CPU、smoke 审查。执行代理不得自行把 (甲) 改成 (乙)。
+
 ### 开工自审
 
 1. **科研价值**：`llmere-causal-s13` 是 Ch4 主表的**已发表方法** LLM 对照行，目前官方 causal P/R/F1

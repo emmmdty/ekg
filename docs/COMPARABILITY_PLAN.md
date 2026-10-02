@@ -56,8 +56,21 @@
    任何路径/环境/ID/覆盖失败都停止，记录 FR-016(b) 不可运行障碍，不重写模型或改目标。正式运行的
    raw clusters、official export 与评分均完成；它在统一协议下是近乎全 singleton 的负向结果，完整数字、
    provenance 与禁止论断唯一见 `results/PHASE_R1.md` §25.28。不得以这一结果回调 threshold、重训或改 backbone。
-3. **G-20 · LLMERE-causal。** 对全部冻结生成请求实施一套固定 stop 规则；第一阶段全量生成后若仍有任何不可解析第一行，按预登记启动第二阶段的全量 constrained decoding，绝不补跑单条。prompt 等价、覆盖、转换和 candidate universe 全过后，才用项目 official evaluator 产生 causal P/R/F1 行。结果无论高低均标 FR-016(b) 透明适配、single-seed。
-4. **C-30 · 表格和声称审计。** 从 raw predictions 独立重算主表；为每一行输出 P/V/U 状态和七项登记。只有 U 层、同一章、同一 unit 的行可列 delta；P 层永不进排序。此步完成后才重新评估 C-22 是否值得成为“提高方法贡献”的下一单章任务。
+3. **C-29.5 · AI 辅助科研流程审计与 G-20 执行就绪包（✅ 2026-10-02）。** 先从 G-19 的
+   真实运行史追溯反复试错的边界，再核验一手 AI-for-science 与可复现研究工作流资料。交付
+   `AI_RESEARCH_WORKFLOW_AUDIT.md`：AI 与人各自能决定什么、何时必须独立复核、如何把静态代码/数据/副作用
+   契约和真实受限 smoke 连接起来。它必须为 G-20 列出冻结输入、禁止信息流、环境和磁盘副作用、命令、产物、
+   预检、停止条件和独立结果审计者；在该包完整前，**不运行 G-20**。这项工作不产生分数、不读 final-valid、
+   不重新选择方法或指标。审计确认旧 LLMERE prediction config 是已知无终止语义的 512-token 配置，因而不能直接使用。
+4. **C-29.6 · LLMERE 恢复推理静态契约核验（❌ 2026-10-02 阻断）。** 只读审计实测 11,149 个 target 的第三行
+   有 407 种值，固定 `Relevant reasoning information: none` 只覆盖 10,743；而逐条读 target 构造 stop string
+   会把 internal-dev gold 引进 inference。故 C-3 的“第三行结尾 stop”当前不可执行，既不写 driver、也不跑 GPU。
+   这是【协议】而非模型质量或算力障碍；不得用局部补行或宽松 prompt 绕开。
+5. **G-20 · LLMERE-causal（暂停，等待作者裁决）。** 作者须取：(甲，建议) LLMERE 保留为 FR-016(b) 无可评分
+   行、报告上述命名协议障碍；或 (乙) 在开始前明确批准并重审一个 target-independent first-line-only
+   constrained decoding 契约。只有 (乙) 的新契约完成静态/本地门后，才对全部冻结请求按其规则执行；结果无论高低
+   均标 FR-016(b) 透明适配、single-seed。
+6. **C-30 · 表格和声称审计。** 从 raw predictions 独立重算主表；为每一行输出 P/V/U 状态和七项登记。只有 U 层、同一章、同一 unit 的行可列 delta；P 层永不进排序。此步完成后才重新评估 C-22 是否值得成为“提高方法贡献”的下一单章任务。
 
 ## 5. 成功、失败与论文效果
 

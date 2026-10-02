@@ -1,19 +1,21 @@
 # EKG 实时状态
 
-> 更新于 **2026-10-01**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-10-02**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
 
 **当前优先级是公开论文可比性，而非重开失败机制。** 保持单 seed；执行顺序固定为
-`C-29 ✅ → G-19 EasyECR / Global-Local Topic → G-20 LLMERE-causal → C-30 P/V/U 主表与声称审计`。
+`C-29 ✅ → G-19 EasyECR / Global-Local Topic ✅ → C-29.5 AI 辅助科研流程审计 ✅ → C-29.6 LLMERE 静态契约核验 ❌ → G-20（暂停）→ C-30 P/V/U 主表与声称审计`。
 完整决策、科研价值、可行性、一手依据、预期结果和停止条件见
 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)；可执行行只认 `EXPERIMENT_PLAN.md` §4。
 
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|
 | G-19 · Ch5 外部 baseline | ✅ 已完成 FR-016(b) 透明适配：2,331 train / 独立 selection-dev / 无标签 291-doc evaluation 的 seed-13 运行，raw cluster、official export 与官方 scorer 的覆盖/候选/评测器闸门均通过；正式数字、singleton 崩塌形态、P/V/U 和禁止论断均在 `results/PHASE_R1.md` §25.28 | 不重跑、不事后调阈值或 backbone；KBP 2017 不可得，故不得以本行评价原论文 |
-| G-20 · Ch4 外部 baseline | **当前队首**。LLMERE 是直接的 MAVEN-ERE causal 方法；原文 published split 不读取，故只可作 FR-016(b) 透明适配 | 全量固定 stop 生成；若仍有格式错误才触发全量 constrained decoding；通过转换/覆盖/官方 scorer 后报告单 seed causal P/R/F1 |
+| C-29.5 · 流程审计 | ✅ 已完成。G-20 的旧配置已证实缺 stop/constrained driver，不能重跑 | `AI_RESEARCH_WORKFLOW_AUDIT.md` 给出角色分离、执行就绪包、工程排障/科研迭代边界与停止规则 |
+| C-29.6 · 静态契约核验 | ❌ 已阻断。11,149 个 target 第三行有 407 种值；C-3 target-third-line stop 不能不用 gold 实现 | 【协议】；不写/不跑 recovery driver，等待作者取 (甲) 命名障碍或 (乙) 新的 target-independent first-line-only 契约 |
+| G-20 · Ch4 外部 baseline | 暂停，等待 C-29.6 的作者裁决。LLMERE 是直接的 MAVEN-ERE causal 方法；原文 published split 不读取，故只可作 FR-016(b) 透明适配 | 只有作者批准新契约且其静态/本地门通过，才全量生成、转换、official scorer；否则不产出分数 |
 | C-30 · 全章 | 尚无新实验分数 | 从 raw predictions 独立重算；每一行必须有 P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 标签 |
 | D4 / A4 / C5 方法机制 | D4、A4、旧 C5 均已按契约收口或封存 | 不重开；C-22 继续暂停，不得因为本队列结束自动恢复 |
 
@@ -43,8 +45,8 @@
 
 ## 下一步
 
-1. G-19：完成已登记的 EasyECR 透明适配；若环境/ID/覆盖无法通过，封存障碍并停止，不重写模型。
-2. G-20：仅在 G-19 收口后，执行全量 LLMERE-causal 透明适配；不得读取 final-valid、单条补跑或扫阈值。
+1. C-29.6：等待作者对【协议】阻断取 (甲) 留下命名障碍或 (乙) 批准新的 target-independent first-line-only 契约；在此之前不做新 driver/GPU。
+2. G-20：仅在作者批准合法新契约且本地门通过后，执行全量 LLMERE-causal 透明适配；不得读取 final-valid、单条补跑或扫阈值。
 3. C-30：只有两条 raw outputs 都可复算后才更新主表；结果高低均如实记录，外部适配较高则抬高项目要求。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、删除候选、事后修 prompt/阈值、用更大 backbone 掩盖机制失败，
