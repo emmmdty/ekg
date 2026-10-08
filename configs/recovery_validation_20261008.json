@@ -1,0 +1,1357 @@
+{
+  "anchor_inputs": {
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-1/evaluation_labels.json": "0c298ca1477fd33a5af78e15d925917b1c9edc3172317442b907d455bd474e89",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-1/run_metadata.json": "7f53c72d6c978cf96ac2f8ead3834f80fcb00744efefaa9a16ce574fe83323e9",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-2/evaluation_labels.json": "79b194874b1d32cfa31b4bf28159892b87a205f7b8f6617930b3de84f8462647",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-2/run_metadata.json": "09e4ac965001cef3896713186f3dcbe055c0997a7d66ace3f71e2354464af0f7",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-3/evaluation_labels.json": "b4c89c63e54d738dba525c489995fba2a48e4400c232f78e5f51d661841a91ac",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-3/run_metadata.json": "7a7381ae4183e0d3016f103f5143975c18f25f40e5b858e26c5f8173d916119b",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-4/evaluation_labels.json": "66e2e6df42481ae94d78bdf358af967cf622c0ee2b6ea009cf7bff15a2f060a6",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-4/run_metadata.json": "d32031e1250418bb4cd4c5522eb8cbccfe5eec8236c0997645501ffb88e4b5ad",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-5/evaluation_labels.json": "e5e79d32c90e1ff228a03e4bbfd79c2f6d501f0e85318127ae5ca2cc720b5403",
+    "runs/stages/R1/r1-v61-factuality-oof-r2/cls/fold-5/run_metadata.json": "9a8203a658fca59967112c297ae91dd537e244bc006a3aefed13e635f9150b94"
+  },
+  "code_sha256": {
+    "scripts/aggregate_d4_predicted_causal.py": "3e4c9da9cbe595fd5d07953dc990c04a60f3be49254ece1a1fd652c2926cdcff",
+    "scripts/audit_a4_checkpoint_gradients.py": "e8ddbd02c6cf599bf9642dfcf0c4747b717ad163519976851751db74d2eb1c06",
+    "scripts/audit_auxiliary_gradients.py": "859a3d8e077e6acb847baf34e7758408f54f3e1d795b17296fdd43ec666357cf",
+    "scripts/build_maven_ere_submission.py": "de9bee93ad474cd7434a17dea9ceccff729152238eeff88836e46f933fac611d",
+    "scripts/collect_recovery_factuality.py": "31dde2fa3be28c23b1561d0f8d9cf9c34066ed93df45076e071149defc6a0889",
+    "scripts/compare_d4_label_dumps.py": "d623cd882ace345eb76180fe2083cc4178e6d0f4f0cc5eded40f83a82c5adf46",
+    "scripts/compare_recovery_errors.py": "f48799f0d793009fe588da23f6f6d4132df29b5e9962e0dfdaeb05997fae7beb",
+    "scripts/evaluate_factuality.py": "fb5fcf3cebb61b04dc586d85bb35c13edb633cbc4f480a0c27d7123048735731",
+    "scripts/launch_recovery_validation.py": "4026b24a9963f89f3f3cc33f3094e9554cb5d38ff022ccdc4f149b007cd38b5b",
+    "scripts/probe_coref_decoders.py": "f2d8e2fdba834fbf75f867e2f382942fa57255f10e45dd9f8ab23fac64ce7fd7",
+    "scripts/run_r1_factuality_oof.py": "6c34987bd02afa7e489067909a4031c7740798e5fdd8ad4c724e670b9ee16b67",
+    "scripts/score_maven_ere_official.py": "2e20d6b1093d085a81b86d0fb5566521b442eaa9ca75144c5f46d8f104f1b862",
+    "scripts/train_a4_pair_evidence.py": "80f91aa05385c0d34ced6e9a2751d40ab52ecaeb45952f90d97403681b9caab0",
+    "scripts/train_factuality_detector.py": "a93b30b011563c378088978d7b6cde1414e8892f86c50f426de76552bd16f98c",
+    "src/ekg/__init__.py": "1eff8cac5d3be222df1b9a252dce51203088d88bfdd711677a89a9c45e4bfde1",
+    "src/ekg/agents/__init__.py": "c3bc2da3e32ac547f13fcd28f2cc0313ebc4c6e026877b0022214ce8b7e56d8f",
+    "src/ekg/agents/protocol.py": "e8d5f7b2611654600faae070386bd83131dee5d1fd0fd455c00cec2e41238c19",
+    "src/ekg/cli.py": "373390462d9707c069d4b8edcc77b9a4c814abad0f372fce836da6fef1f55259",
+    "src/ekg/core/__init__.py": "7cbe30036e09ec44a235f05e4b862ae39741cc94b4fab2992fe53861debcc445",
+    "src/ekg/core/calibration/__init__.py": "be88cf669f43ae94b1745110fab9051976eb5916b5618c65a5e05ba8b79e75af",
+    "src/ekg/core/calibration/aci.py": "0b3c3ab3ca6863273c57c79b83bd022551853937ccc0b79e760f171fbc759f8b",
+    "src/ekg/core/calibration/base.py": "cf37a73c7f6cbef6da4519bd48b215ea754190b39172d9807c34b6c62a009fd8",
+    "src/ekg/core/calibration/crc.py": "fcaf96e3ebea241257bf0077d8478a96982e9f4be8f9192a355f4e7a5e101367",
+    "src/ekg/core/calibration/functional.py": "0fdc68ec61fdab4a7506ac31f5a665e82b0b5ddca6065623e63b675068cdca69",
+    "src/ekg/core/calibration/metrics.py": "54e5a37321fcab70883f3af834025a071a2b8ba579aff2db76ea3ec4e0ef0ae1",
+    "src/ekg/core/calibration/probability.py": "77435211d48bc637daf980099f1e96923835679ca4567e261e0b9af9a67f4339",
+    "src/ekg/core/calibration/propagation.py": "436dd68689d491719c5dc2e5895b8bf863c7bce75fa66f6a0d13098888b41ac1",
+    "src/ekg/core/calibration/split.py": "75245acc65cf83367c23ea6c110a9f3234a30dcbb90abd3d8a30ceb32889febf",
+    "src/ekg/core/calibration/weighted.py": "964cfc41f5b6a50c70a5fe813b388cb521adcf64d707019bc3fb696dcc73feaf",
+    "src/ekg/core/config.py": "970179689f6f102a974091d44c9e2e0547cf902ef9d5912dcf0caac22e67a459",
+    "src/ekg/core/eval/__init__.py": "ba65a6364e81f84252640abf9119625b0cac010468dac84fd966a70e90615574",
+    "src/ekg/core/eval/consistency.py": "b028a52c3dd14ecffbf5d2f874a7998d913e9260f10bfc73be6654e572d35442",
+    "src/ekg/core/eval/coreference.py": "68d76479c8b14567ce3048b78abcac1fe8e35da3a804d3d8206b59cc242d1bb0",
+    "src/ekg/core/eval/faithfulness.py": "6141c9694554b28c45a5bccf88d948a75ba3290bb51b5002a364edaa20c3d03a",
+    "src/ekg/core/eval/ranking.py": "9dc7cd20eeee408bafa494b7303fdb9e2ebac4284dea653c80499636bc3de571",
+    "src/ekg/core/eval/relation.py": "6af24d59c5fc7cf1d99d052fcb6e2457c72bda605d1104d28c8cee8163b101c5",
+    "src/ekg/core/graph.py": "ea5a1d32f2a0a1a7961549b929a395c299f238d138aadc8a525c641500ccde55",
+    "src/ekg/core/io.py": "5c7b6aa7634b500ff34d219a033e45e0fc5aacdff9d47d3ca82644192885cede",
+    "src/ekg/core/protocol.py": "3e5d60d6b5e74382ad4953f92868a312d0beaf45ab11cabff28c89242a1bfcb5",
+    "src/ekg/core/registry.py": "513b18627b926729ecf1a49d3c55930be0e18b6b8544a5b73be3c5a23521be21",
+    "src/ekg/core/schema.py": "f136833839c3db3d9bdbc80a9eda245bbaa494286765f5dd057ba16a2cdabf30",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/factuality/__init__.py": "8259aceb13ca5c42542c42d165adcdf49f9403c782e4c8cadc0cf8c8277d0bfe",
+    "src/ekg/factuality/baselines.py": "4aec07a7a299ba827945d9c14fdb3d6da5f6a32e4922bcbf1c097aab5e754d1a",
+    "src/ekg/factuality/causal_residual.py": "b68680227c2ee1ed7a69ac4f458ac5bd2568cf74a53dea35e5a53f3ad899859c",
+    "src/ekg/factuality/detection.py": "4a29a6c4df2a85f2e73f435f4694af20e9ee8debea66f9abe59e989c291265c9",
+    "src/ekg/factuality/evidence.py": "8ee5a690b5a3571b9fc1beebeec7f2cd8815f46bf8ee425db897f46dcf9aaa37",
+    "src/ekg/factuality/metrics.py": "f09d8d318305b97f62ef22e12e4915c8eb7075df432d16d05212cc0c782fd998",
+    "src/ekg/factuality/purification.py": "19ebeb6da2590d91257a4c468e4b959a9ecbf0f9e54b71cc58150a9f0fecd986",
+    "src/ekg/factuality/recovery_heads.py": "93e34b0aa2b7134648e34aaaa3534ab64675c5c71e0389f649182a6c556203c0",
+    "src/ekg/factuality/typed_cues.py": "a056bb55fc87bbd323c527186a2d2c73ef9bae68648c607c932ba6448a4eb25d",
+    "src/ekg/llm_baseline.py": "0242b5cf940a5bf4cf341c1c29a8b6b5728af3ec38cf78da991e26ef3ab3d4d9",
+    "src/ekg/nodes/__init__.py": "7f274a3a1b85e4c918c70fb3cd31f1c5cfb95e076503ce7df8c77ca219249dee",
+    "src/ekg/nodes/canonical.py": "0b9f4bb8270f88dbbe25e13b1acb96269d58f82c143a84ae65f3445b79161f7b",
+    "src/ekg/nodes/coref.py": "d0b04b1314796eff94cac78dc727217fe0d9c4da17c1b681ed9f7f8c7a8846cf",
+    "src/ekg/nodes/detection.py": "6439fc458a563f7be0d5a1afc3cd45601d192afa60c5e3b0cd3df99d7d496294",
+    "src/ekg/nodes/discriminative.py": "9b9f966bf7f19631565f6622fdf60b04293377d6966fd4e7abc59dbae6a2851f",
+    "src/ekg/nodes/encoding.py": "abee9d4a83a9f4313b441c662490b69f8a1aeff29586ae143f4a4776537eb945",
+    "src/ekg/nodes/metrics.py": "b228c91efcf52cf0d590d9c7d33b5ebd24dadfa3761635501d99d7f097bd1df2",
+    "src/ekg/nodes/predicted_arguments.py": "e8191caef372c958defcf1e1a8e59298d0281aef29df623ada8dae26aa3f6fd5",
+    "src/ekg/nodes/role_uncertainty.py": "60b60443c4e2710a02b846fedff8e4269908d6e70458b712638b1d98befddd69",
+    "src/ekg/relations/__init__.py": "9ab11881ebdf4bbb40ae04459309596c89de7652e2099d1e50d4fa51e799e500",
+    "src/ekg/relations/admission.py": "3ea0a4e6b360138f5c133f7c92af5efb8343a3763c5358958a66f8cdabd9e5ed",
+    "src/ekg/relations/agents/__init__.py": "2419e7f978e9fa55765ca427cd5de863c2c437f72871df3fe65621d1025d4a3d",
+    "src/ekg/relations/agents/consistency_arbiter.py": "eb9ece8297734d925ac4efbcb2ece0c3a857d5d028646faef88cd6ac0931cd39",
+    "src/ekg/relations/agents/grounding_verifier.py": "98be8553baaaf3a6fcb66e2f5457b15781ea6719524d238de6cb9fe7f78e4245",
+    "src/ekg/relations/agents/proposer.py": "b8c1c71400e1b40805b4313eb692c722522b1c45cc0dff2718b4c830c80470fd",
+    "src/ekg/relations/balance.py": "8c3e0d877aa1e587cb85e541060b4cc80f41ce2e7f42990a2c2b51f34bb3660f",
+    "src/ekg/relations/calibration.py": "6e79ac2b44fd35bd9a10406055225873d421e5b45b040e310af40bcfa4c6de95",
+    "src/ekg/relations/consistency/__init__.py": "d4fa44f5595970349c0ab34f64812abb336c802b534a865424fd7671606cc50f",
+    "src/ekg/relations/crosssentence.py": "83ac582cf93945ede45f05e5b894d6f6280d35817ce1b7214c43c42b38b802eb",
+    "src/ekg/relations/data/__init__.py": "dbc66470454f98d8bc5c9dfcbb2b1637b45273063d15a6b29a86ab1ec516828f",
+    "src/ekg/relations/data/ccks_causal.py": "6bc0983a2a8d6f5addea53733094fb0c79b85af91a3ac71b2151ca02bf3e43ab",
+    "src/ekg/relations/data/maven_arg.py": "9b694603d457396b4855ea03a0dc67a51663b05761e711b6782aa7a0a2e55ca5",
+    "src/ekg/relations/data/maven_ere.py": "9a6167f110fe49d0db61c38fb50125f20fde963363128bd9c39e68dfb052d746",
+    "src/ekg/relations/data/maven_fact.py": "b68b8766a4c734ed54c48d44314aa79e9c9b50f9b1264e09c9a92e900782bad5",
+    "src/ekg/relations/evidence_objective.py": "565e721435fa3665a352a7c5b220320a638da8b4dfa4471e3cffa5e168fac4cb",
+    "src/ekg/relations/extractor/__init__.py": "b64281875eea560398ce2b9cf5a948bfd35304bb6b7bef2c44e7b11da1319a8e",
+    "src/ekg/relations/extractor/base.py": "9b9cab9a044cb65f701257ee0dc0ace442dc1b87bb5ecfefa6652c9a478d37ca",
+    "src/ekg/relations/extractor/heuristic.py": "93e615d89330909fdfc5b96474f37e89d0815871b363238a69313ebacd604963",
+    "src/ekg/relations/extractor/llm.py": "f191949df84bec7002d47ec621ca27969f80081762bb4859ba5e338721a6bbf4",
+    "src/ekg/relations/extractor/supervised.py": "560d838ad0c2c444e95b412aeda2cbe2b302efa212e9615b3f44dc0ef6722376",
+    "src/ekg/relations/grounding/__init__.py": "0fea315720bdf9ec10814fe7b45d35ee7bd750cb9ed6a4aae6329fe144249e19",
+    "src/ekg/relations/maven_ere_official.py": "8df2f5487daa223c797a8a0950a8cde47c070866cd6f1fd04dbda0ae9a0a05c8",
+    "src/ekg/relations/objective_registry.py": "3c76f89b70fdf985d50c37730a507f57a7565e7e372e07419db3d550755b9926",
+    "src/ekg/relations/objectives.py": "860c64afdcc750eb74c0d84af544f3a6f170f22328941935c9c597c38cb5268f",
+    "src/ekg/relations/pair_evidence.py": "9dddc00a87b7c404b7c8471de102e60e5a5bdbf3258c35ac22e53ba067b03726",
+    "src/ekg/relations/pair_heads.py": "2c34906c39b1644d843ce3994cbca42a57ac099a38838dce4c32a71e0197a546",
+    "src/ekg/relations/pairs.py": "9d679f1d74c30dd52bf113b19580b92b911c504a893d0f49c6e3955598c83b5e",
+    "src/ekg/relations/pipeline.py": "7aeacfd4b4b6476547abdec760737d718ad170f2f796e44492ffa42da5d79fbc",
+    "src/ekg/relations/posteriors.py": "5b8573201a97ad6c09daca81767ee59c3acadf085143714ddbd4f06366b43007",
+    "src/ekg/relations/prototype.py": "8aad95c8097f614a71c65ed0378c24af4b6839fbc350f6ef58494a68d48c9086",
+    "src/ekg/relations/retrieval.py": "0d3134e3626c4d6d1c9924c78e24d6f6b0559fb346268e780ee122b9c3dc2298",
+    "src/ekg/succession/__init__.py": "772cd9be07f86b47c48aafec4f4866e3645b4fd04b6d8dcff0d9ccd2f25b3535",
+    "src/ekg/succession/cross_stage.py": "f297ff48440a23ad9b1239eb224a2ef92f5abd1ab5d980450c6fc0807c043452",
+    "src/ekg/succession/data/__init__.py": "439bb912a7901acd1ae570b4ca894784c807e3bcbec9923503953245056a7db0",
+    "src/ekg/succession/data/cgep.py": "7b9f5f07effb2874e175bfd6f25eaed0704d6990b40c1637fb903185196d66aa",
+    "src/ekg/succession/data/esc.py": "ca569a4ae5d85306b487419a3963a003c6d98eefc84876783ddb4b186bb3f6ef",
+    "src/ekg/succession/encode.py": "5e0706601b82274eb6363d0580662f9ca6405770458c94c6eeab9698946f4338",
+    "src/ekg/succession/graph_context.py": "cc2dc6f27516987deda2e44dddf6af71066cf7b280b8aadc8ba8d0949c5cf082",
+    "src/ekg/succession/linearize.py": "6ec32d1b54b66f2386c6e94e173ef464fcc17b2e06dcac091180a11feb592fe6",
+    "src/ekg/succession/metrics.py": "bdba2614edf8bf5491776784f5465c557798bc47b95bd65a6e60273597e347fb",
+    "src/ekg/succession/model.py": "f3898bcdf007deb5762724d8acc82b2bbb367db7b148a5c103168b8d8408cdd8",
+    "src/ekg/succession/perturbation.py": "ef25cea4e17e810253ff1d18ada5cfbfcfc2bc4c633cc2bf4707ca184f313c35",
+    "src/ekg/succession/predictor.py": "5b3b820abe6121a3f6f53d467cc3bae8b50aede7b7402f1372812fdf747e6309",
+    "src/ekg/succession/reconstruction.py": "7689c446f98e0f943faa7b81357dabe55b24953f444c24e94f9a40a53f6393d3",
+    "src/ekg/succession/sedgpl.py": "71dc8ea10b49112e2b144c5783f8a69e323482ebb106b407db4e0c9d932d25ff",
+    "src/ekg/succession/selective.py": "4051887942e8708d7d8f902bf716c076c69b7476d46490f0bb2dae05c7c00402",
+    "src/ekg/succession/structure.py": "2231883fcd19a754f944bdc1db7fe7b5f82a6222154c82bb470820630d106147"
+  },
+  "contract": "docs/phases/PHASE_recovery_validation_20261008.md",
+  "final_valid_accessed": false,
+  "jobs": {
+    "a4-gradient-audit": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/audit_a4_checkpoint_gradients.py",
+          "--source",
+          "data/processed/maven_ere/train.jsonl",
+          "--train-manifest",
+          "data/protocols/v6/manifests/maven_ere_train.json",
+          "--checkpoint",
+          "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint",
+          "--documents",
+          "8",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-audit/gradients.json"
+        ]
+      ],
+      "cwd": "/mnt/aidata/tongjiakai/ekg",
+      "depends_on": [
+        "a4-gradient-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-audit/gradients.json"
+      ],
+      "inputs": {
+        "data/processed/maven_ere/train.jsonl": "6a5519fe7c30448690adb13d49217c50d474fc57480eae10aecb29df7eb638b7",
+        "data/protocols/v6/manifests/maven_ere_train.json": "47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/config.json": "907d8b4e1c5501df2c1a3edc856d6912a0a25d712cfda4fb02533edeabb29ecd",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/heads.pt": "9c3c013a36ae0e0ed7073023eded6efe59c2c050fefe1dbbc8b748f1ad54b035",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/model.safetensors": "03f8350dcad3f8347ed65e2f1de87aada4d924c53af9269162225188f24d12a9",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/pair_evidence_config.json": "5025f7adbbd7a4d2eaa4c9eecf6427fb7e94d2153d157308dd06becff5a9ddb3",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/pair_head.json": "74769eae0e4f0e63aec9050ec2ac3d91252a4b459e35c2d32c0bb547c96567ee",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/run_metadata.json": "1b3cdbe152d76f651239074ec22edfaff84b32bdb68c25f9d8b4c4b4ebaca66b",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/special_tokens_map.json": "06e405a36dfe4b9604f484f6a1e619af1a7f7d09e34a8555eb0b77b66318067f",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/tokenizer.json": "727009a8214ddfa5af1deedf1006d4d06e8e51e54aa5f03566263d4e19bfcdce",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/tokenizer_config.json": "4ea8648e4067230942ac6b32dd61328675bc99ae0a9f4cc665c30a95f0f68712",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/vocab.json": "ed19656ea1707df69134c4af35c8ceda2cc9860bf2c3495026153a133670ab5e",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655"
+      },
+      "machine": "gpu-5090",
+      "models": {},
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-audit/gradients.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-audit/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-audit/status.json"
+    },
+    "a4-gradient-smoke": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/audit_a4_checkpoint_gradients.py",
+          "--source",
+          "data/processed/maven_ere/train.jsonl",
+          "--train-manifest",
+          "data/protocols/v6/manifests/maven_ere_train.json",
+          "--checkpoint",
+          "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint",
+          "--documents",
+          "1",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-smoke/gradients.json"
+        ]
+      ],
+      "cwd": "/mnt/aidata/tongjiakai/ekg",
+      "depends_on": [],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-smoke/gradients.json"
+      ],
+      "inputs": {
+        "data/processed/maven_ere/train.jsonl": "6a5519fe7c30448690adb13d49217c50d474fc57480eae10aecb29df7eb638b7",
+        "data/protocols/v6/manifests/maven_ere_train.json": "47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/config.json": "907d8b4e1c5501df2c1a3edc856d6912a0a25d712cfda4fb02533edeabb29ecd",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/heads.pt": "9c3c013a36ae0e0ed7073023eded6efe59c2c050fefe1dbbc8b748f1ad54b035",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/model.safetensors": "03f8350dcad3f8347ed65e2f1de87aada4d924c53af9269162225188f24d12a9",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/pair_evidence_config.json": "5025f7adbbd7a4d2eaa4c9eecf6427fb7e94d2153d157308dd06becff5a9ddb3",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/pair_head.json": "74769eae0e4f0e63aec9050ec2ac3d91252a4b459e35c2d32c0bb547c96567ee",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/run_metadata.json": "1b3cdbe152d76f651239074ec22edfaff84b32bdb68c25f9d8b4c4b4ebaca66b",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/special_tokens_map.json": "06e405a36dfe4b9604f484f6a1e619af1a7f7d09e34a8555eb0b77b66318067f",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/tokenizer.json": "727009a8214ddfa5af1deedf1006d4d06e8e51e54aa5f03566263d4e19bfcdce",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/tokenizer_config.json": "4ea8648e4067230942ac6b32dd61328675bc99ae0a9f4cc665c30a95f0f68712",
+        "runs/stages/A4/a4-v61-pair-evidence-5090-r1/pilot/full/checkpoint/vocab.json": "ed19656ea1707df69134c4af35c8ceda2cc9860bf2c3495026153a133670ab5e",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655"
+      },
+      "machine": "gpu-5090",
+      "models": {},
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-smoke/gradients.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-smoke/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/a4-gradient-smoke/status.json"
+    },
+    "c5-decoder-audit": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/probe_coref_decoders.py",
+          "export",
+          "--source",
+          "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/preflight/data/MAVEN_ERE/internal-dev.jsonl",
+          "--manifest",
+          "data/protocols/v6/manifests/maven_ere_internal-dev.json",
+          "--arguments",
+          "runs/stages/R1/r1-v61-baseline-closure-r3/ch1/qwen3-full-r3/merged/predictions.jsonl",
+          "--checkpoint",
+          "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/pairs.jsonl"
+        ],
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/probe_coref_decoders.py",
+          "replay",
+          "--cache",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/pairs.jsonl",
+          "--utils",
+          "data/protocols/v6/sources/MAVEN-ERE/coreference/src/utils.py",
+          "--original",
+          "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/predictions.jsonl",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/replay"
+        ],
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/score_maven_ere_official.py",
+          "--gold",
+          "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/preflight/data/MAVEN_ERE/internal-dev.jsonl",
+          "--pred",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/replay/average.jsonl",
+          "--candidate-digest",
+          "15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/average_metrics.json"
+        ],
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/score_maven_ere_official.py",
+          "--gold",
+          "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/preflight/data/MAVEN_ERE/internal-dev.jsonl",
+          "--pred",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/replay/antecedent.jsonl",
+          "--candidate-digest",
+          "15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/antecedent_metrics.json"
+        ],
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/compare_recovery_errors.py",
+          "--gold",
+          "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/preflight/data/MAVEN_ERE/internal-dev.jsonl",
+          "--control",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/replay/average.jsonl",
+          "--candidate",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/replay/antecedent.jsonl",
+          "--family",
+          "coreference",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/error_exchange.json"
+        ]
+      ],
+      "cwd": "/mnt/aidata/tongjiakai/ekg",
+      "depends_on": [
+        "c5-decoder-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/pairs.jsonl",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/pairs.metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/replay/provenance.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/average_metrics.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/antecedent_metrics.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/error_exchange.json"
+      ],
+      "inputs": {
+        "data/protocols/v6/manifests/maven_ere_internal-dev.json": "f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f",
+        "data/protocols/v6/source_lock.json": "d0d7d848bfc276ccccf1ab8e442628296612f17e47b7e3b8b425985dc4589231",
+        "data/protocols/v6/sources/MAVEN-ERE/coreference/src/utils.py": "5c04f98972addcf041eb7c0a03a6bd536334741291f04291cec9d51a7a773406",
+        "data/protocols/v6/tools/maven_ere_evaluate.py": "32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/config.json": "907d8b4e1c5501df2c1a3edc856d6912a0a25d712cfda4fb02533edeabb29ecd",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/coref_config.json": "41f249745fce9c9d58c669f1527aba368013f5655757191da26c0594d5102a9b",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/coref_head.pt": "9c5f007c373742d20cc79b0bef69d0b81f69455035f96ed97e0c7bb6dc21da01",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/model.safetensors": "faba4cf0729be6aec65d59cbd5e72cc9eca0020537355d4e9b5ab67f84f208f1",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/special_tokens_map.json": "06e405a36dfe4b9604f484f6a1e619af1a7f7d09e34a8555eb0b77b66318067f",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/tokenizer.json": "7b762a69fc3d62799fec7eb61fe6e4ee87b424b7b25db49823d78105fb60599b",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/tokenizer_config.json": "4ea8648e4067230942ac6b32dd61328675bc99ae0a9f4cc665c30a95f0f68712",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/vocab.json": "ed19656ea1707df69134c4af35c8ceda2cc9860bf2c3495026153a133670ab5e",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/predictions.jsonl": "abd5ec7e6f223804f19b1cfbb0a9a3e81b0e952dd9dfac170f7f084c3c86e5e7",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/preflight/data/MAVEN_ERE/internal-dev.jsonl": "403b69a8a9c83e2be41e0c366fed7edcd7e00796dbd14ec6f07df7e560507e81",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-baseline-closure-r3/ch1/qwen3-full-r3/merged/predictions.jsonl": "855906d39e71d5cef838c3a72515ef837803afd6a43c88e6879274bf72e7142a"
+      },
+      "machine": "gpu-5090",
+      "models": {},
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/pairs.jsonl",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/replay",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/status.json"
+    },
+    "c5-decoder-smoke": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/probe_coref_decoders.py",
+          "export",
+          "--source",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/gold.jsonl",
+          "--manifest",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/manifest.json",
+          "--arguments",
+          "runs/stages/R1/r1-v61-baseline-closure-r3/ch1/qwen3-full-r3/merged/predictions.jsonl",
+          "--checkpoint",
+          "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/pairs.jsonl"
+        ],
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/probe_coref_decoders.py",
+          "replay",
+          "--cache",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/pairs.jsonl",
+          "--utils",
+          "data/protocols/v6/sources/MAVEN-ERE/coreference/src/utils.py",
+          "--original",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/frozen_predictions.jsonl",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/replay"
+        ],
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/score_maven_ere_official.py",
+          "--gold",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/gold.jsonl",
+          "--pred",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/replay/average.jsonl",
+          "--candidate-digest",
+          "c2ef7569655814b8d9244f427e68a221ca5913af121c0e62052d7e5fe7e54ce0",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/average_metrics.json"
+        ],
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/score_maven_ere_official.py",
+          "--gold",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/gold.jsonl",
+          "--pred",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/replay/antecedent.jsonl",
+          "--candidate-digest",
+          "c2ef7569655814b8d9244f427e68a221ca5913af121c0e62052d7e5fe7e54ce0",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/antecedent_metrics.json"
+        ],
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/compare_recovery_errors.py",
+          "--gold",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/gold.jsonl",
+          "--control",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/replay/average.jsonl",
+          "--candidate",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/replay/antecedent.jsonl",
+          "--family",
+          "coreference",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/error_exchange.json"
+        ]
+      ],
+      "cwd": "/mnt/aidata/tongjiakai/ekg",
+      "depends_on": [],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/pairs.jsonl",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/pairs.metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/replay/provenance.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/average_metrics.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/antecedent_metrics.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/error_exchange.json"
+      ],
+      "inputs": {
+        "data/protocols/v6/source_lock.json": "d0d7d848bfc276ccccf1ab8e442628296612f17e47b7e3b8b425985dc4589231",
+        "data/protocols/v6/sources/MAVEN-ERE/coreference/src/utils.py": "5c04f98972addcf041eb7c0a03a6bd536334741291f04291cec9d51a7a773406",
+        "data/protocols/v6/tools/maven_ere_evaluate.py": "32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/config.json": "907d8b4e1c5501df2c1a3edc856d6912a0a25d712cfda4fb02533edeabb29ecd",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/coref_config.json": "41f249745fce9c9d58c669f1527aba368013f5655757191da26c0594d5102a9b",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/coref_head.pt": "9c5f007c373742d20cc79b0bef69d0b81f69455035f96ed97e0c7bb6dc21da01",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/model.safetensors": "faba4cf0729be6aec65d59cbd5e72cc9eca0020537355d4e9b5ab67f84f208f1",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/special_tokens_map.json": "06e405a36dfe4b9604f484f6a1e619af1a7f7d09e34a8555eb0b77b66318067f",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/tokenizer.json": "7b762a69fc3d62799fec7eb61fe6e4ee87b424b7b25db49823d78105fb60599b",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/tokenizer_config.json": "4ea8648e4067230942ac6b32dd61328675bc99ae0a9f4cc665c30a95f0f68712",
+        "runs/stages/C5/c5-v61-argument-uncertainty-5090-r1/pilot-r2/full/checkpoint/vocab.json": "ed19656ea1707df69134c4af35c8ceda2cc9860bf2c3495026153a133670ab5e",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-baseline-closure-r3/ch1/qwen3-full-r3/merged/predictions.jsonl": "855906d39e71d5cef838c3a72515ef837803afd6a43c88e6879274bf72e7142a",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/frozen_predictions.jsonl": "352742252aedbe52e728461cbb13a9cf4bcf674d17de265ffa81fe66357289c8",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/gold.jsonl": "723b5a45c0e894a53088b808347a329993b4d1dc4f191b61222da385ee5c46bc",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/preflight/c5-smoke/manifest.json": "41c8707584cee149b0e351cb99e13a5baf6a8a773c65d2b86f49a096ed700231"
+      },
+      "machine": "gpu-5090",
+      "models": {},
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/pairs.jsonl",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/replay",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/status.json"
+    },
+    "d4-linear-fold-1": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "1",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "linear",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-1",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-linear-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-1/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-1/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-1/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-1",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-1/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-1/status.json"
+    },
+    "d4-linear-fold-2": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "2",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "linear",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-2",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-linear-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-2/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-2/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-2/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-2",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-2/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-2/status.json"
+    },
+    "d4-linear-fold-3": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "3",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "linear",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-3",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-linear-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-3/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-3/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-3/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-3",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-3/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-3/status.json"
+    },
+    "d4-linear-fold-4": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "4",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "linear",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-4",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-linear-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-4/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-4/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-4/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-4",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-4/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-4/status.json"
+    },
+    "d4-linear-fold-5": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "5",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "linear",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-5",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-linear-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-5/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-5/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-5/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-5",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-5/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-fold-5/status.json"
+    },
+    "d4-linear-smoke": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/train_factuality_detector.py",
+          "--train",
+          "data/processed/maven_fact/train.jsonl",
+          "--train-manifest",
+          "data/protocols/v6/manifests/maven_fact_train.json",
+          "--dev-manifest",
+          "data/protocols/v6/manifests/maven_fact_internal-dev.json",
+          "--detector",
+          "baseline",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "linear",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-smoke/checkpoint",
+          "--epochs",
+          "1",
+          "--smoke-documents",
+          "2",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--max-length",
+          "128",
+          "--batch-size",
+          "32",
+          "--seed",
+          "13"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-smoke/checkpoint/baseline_config.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-smoke/checkpoint/baseline_head.pt",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-smoke/checkpoint/dev_curve.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "data/protocols/v6/manifests/maven_fact_internal-dev.json": "8b41a18a37a60fb709af4559633a9ad6acf0a9f375076ab66971160425d2b258",
+        "data/protocols/v6/manifests/maven_fact_train.json": "e9a939440eb0dbea76e6ce56d0b06b5a1009118eefdfcb93ae85f4a38e8c609a",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-smoke/checkpoint",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-smoke/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-linear-smoke/status.json"
+    },
+    "d4-tanh5-fold-1": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "1",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "tanh5",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-1",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-tanh5-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-1/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-1/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-1/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-1",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-1/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-1/status.json"
+    },
+    "d4-tanh5-fold-2": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "2",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "tanh5",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-2",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-tanh5-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-2/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-2/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-2/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-2",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-2/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-2/status.json"
+    },
+    "d4-tanh5-fold-3": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "3",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "tanh5",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-3",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-tanh5-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-3/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-3/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-3/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-3",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-3/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-3/status.json"
+    },
+    "d4-tanh5-fold-4": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "4",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "tanh5",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-4",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-tanh5-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-4/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-4/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-4/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-4",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-4/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-4/status.json"
+    },
+    "d4-tanh5-fold-5": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/run_r1_factuality_oof.py",
+          "--cv",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+          "--source",
+          "data/processed/maven_fact/train.jsonl",
+          "--fold",
+          "5",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "tanh5",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-5",
+          "--epochs",
+          "12",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--batch-size",
+          "32",
+          "--max-length",
+          "128",
+          "--seed",
+          "13",
+          "--execute"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [
+        "d4-tanh5-smoke"
+      ],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-5/run_metadata.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-5/evaluation_labels.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-5/evaluation_report.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/evaluation.json": "cbf6fe8386f1290763d5eb634ecffe0c24a64a426b185d99619124bac178cff8",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/selection-dev.json": "9a58841d99a534a1c04345eb5d53003e269c54a8b6d6809f9c92ddbfce1c5ed7",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/evaluation.json": "ea1c597c8b1ae7b3dc6e32ce93173e723e3b5e8e0ffad74ac6fd12b3935961cc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/selection-dev.json": "934f1886f04a5a34610622ccdb5fb92c595aded9812347e9f5c5319da9701f9d",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-2/train.json": "ef855b67600345d2c013484eaec2f23b18c5078f09e8b1d1cb2a18f9210c5596",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/evaluation.json": "0af923e3ab9e6d4cc00fc1113eb219583e86d733b79d62530e952de9f0de7aa5",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/selection-dev.json": "b68c5b2c8af37cc64733991f2fa2895825df3794df372a7119a86a12455a6510",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-3/train.json": "6031ad045941de44bc84027e9c562950b52c0b7f914745c81f6bd687ff7ea22b",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/evaluation.json": "385575a45b0ba1ee78371b656b886f01dd233590846420eef097f6183f496e36",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/selection-dev.json": "278b3c98a433fe6964fa46d3913c24beb079e8b02b892f09c8493d1070ee7e18",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-4/train.json": "e83bd0a89d9a12698d0af8fee1d926519288745b563c9efe92d67c8bcfc1711e",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/evaluation.json": "3f7503ffa3e5b57345126d67a11674f7446bcccb13527575556210a0b6b14ebc",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/selection-dev.json": "4da20939098d531b3c01f0876ecb6340503ee1cba7ac0fd64d5e3ac10085bfcf",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-5/train.json": "9d398c4bee3801dae756800bfe48ec74310b8df725107e966268340d05778fc1"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/tanh5/fold-5",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-5/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-fold-5/status.json"
+    },
+    "d4-tanh5-smoke": {
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/train_factuality_detector.py",
+          "--train",
+          "data/processed/maven_fact/train.jsonl",
+          "--train-manifest",
+          "data/protocols/v6/manifests/maven_fact_train.json",
+          "--dev-manifest",
+          "data/protocols/v6/manifests/maven_fact_internal-dev.json",
+          "--detector",
+          "baseline",
+          "--pooling",
+          "cls",
+          "--head-name",
+          "tanh5",
+          "--model",
+          "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9",
+          "--output",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-smoke/checkpoint",
+          "--epochs",
+          "1",
+          "--smoke-documents",
+          "2",
+          "--lr",
+          "2e-5",
+          "--alpha",
+          ".5",
+          "--max-length",
+          "128",
+          "--batch-size",
+          "32",
+          "--seed",
+          "13"
+        ]
+      ],
+      "cwd": "/data/TJK/ekg",
+      "depends_on": [],
+      "expected_files": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-smoke/checkpoint/baseline_config.json",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-smoke/checkpoint/baseline_head.pt",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-smoke/checkpoint/dev_curve.json"
+      ],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "data/protocols/v6/manifests/maven_fact_internal-dev.json": "8b41a18a37a60fb709af4559633a9ad6acf0a9f375076ab66971160425d2b258",
+        "data/protocols/v6/manifests/maven_fact_train.json": "e9a939440eb0dbea76e6ce56d0b06b5a1009118eefdfcb93ae85f4a38e8c609a",
+        "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json": "3a724cf77a2a34bb11f40d225725504b176e4d62e916c5b34c92f9d10a52c5c4"
+      },
+      "machine": "gpu-4090",
+      "models": {
+        "/data/TJK/models/local/roberta-base/71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9": "71be7419a60dcce0fc276654c8f9213b41f8def71a0c3465d7fed2352c961ea9"
+      },
+      "outputs": [
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-smoke/checkpoint",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-smoke/status.json"
+      ],
+      "seed": 13,
+      "status_output": "runs/stages/R1/r1-v61-recovery-ready-20261008/d4-tanh5-smoke/status.json"
+    }
+  },
+  "postprocessing": {
+    "commands": [
+      [
+        ".venv/bin/python",
+        "-u",
+        "scripts/collect_recovery_factuality.py",
+        "--plan",
+        "configs/recovery_validation_20261008.json",
+        "--cv",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/factuality_cv.json",
+        "--source",
+        "data/processed/maven_fact/train.jsonl",
+        "--runs",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4",
+        "--anchor-runs",
+        "runs/stages/R1/r1-v61-factuality-oof-r2",
+        "--output",
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4_paired_report.json"
+      ]
+    ],
+    "cwd": "/data/TJK/ekg",
+    "machine": "gpu-4090"
+  },
+  "purpose": "bounded root-cause diagnostics, not method admission",
+  "schema_version": "ekg.recovery_jobs.v1",
+  "seed": 13
+}

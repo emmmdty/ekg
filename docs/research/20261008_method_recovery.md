@@ -77,3 +77,14 @@ ACCI 已审计为缺可运行实现，不重写他人方法冒充复现。
 `runs/stages/R1/r1-v61-20260904/audit/c37-primary-20261008/`。
 源码路径最初按 `coreference/model.py` 猜测返回 404，随后根据 `main.py` 的实际 import
 定位到 `coreference/src/model.py`；这是路径查找失败，不是实现缺失。
+
+
+## C-38/C-39 开工自审与本轮范围
+
+科研价值：三项验证分别隔离 head 参数化、共享梯度和 cluster 解码，检验上面的竞争解释；
+对准 D4 macro-F1、A4 causal/subevent 与 C5 MUC 的强对照差距。证据入口是
+`results/PHASE_R1.md` §25.34 和以上固定 revision 源码；不把诊断变好当作方法章通过。
+可行性：D4 复用既有 OOF trainer/evaluator；A4 checkpoint 留在 5090 做 train-only 梯度读取；
+C5 在原 checkpoint 所在机器导出 pair scores 后可 CPU 重放。数据和训练/推理函数已有，
+无新增标注、final-valid、seed 或权重跨机搬运。GPU 空闲只影响 CUDA smoke/计算，不妨碍本轮实现。
+本轮不训练，不把尚未实现的 official antecedent training 宣称为忠实复现。

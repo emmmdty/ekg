@@ -43,6 +43,18 @@ def check_gpu_rows(devices, processes, index):
     return uuid
 
 
+def check_dependencies(repo, plan, job, plan_hash):
+    for name in job["depends_on"]:
+        path = repo / plan["jobs"][name]["status_output"]
+        status = json.loads(path.read_text())
+        if (status["status"] != "complete" or status["seed"] != 13
+                or status["plan_sha256"] != plan_hash):
+            raise ValueError(f"required smoke is not complete for this plan: {name}")
+        for artifact, expected in status["artifact_sha256"].items():
+            if sha256_file(repo / artifact) != expected:
+                raise ValueError(f"smoke artifact hash mismatch: {artifact}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", required=True, type=Path)
@@ -68,6 +80,7 @@ def main():
         return 0
     if args.gpu is None:
         raise ValueError("explicit GPU index required")
+    check_dependencies(repo, plan, job, sha256_file(args.plan))
     devices = subprocess.check_output(["nvidia-smi", "--query-gpu=index,uuid,memory.used,"
         "utilization.gpu", "--format=csv,noheader,nounits"], text=True)
     processes = subprocess.check_output(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid",
