@@ -35,10 +35,8 @@ from ekg.relations.pair_evidence import (
     CONSISTENCY_FAMILY,
     CONSISTENCY_PAIR_CAP,
     arm_flags,
-    consistency_rows,
     counterfactual_sentence_ids,
     document_pair_evidence,
-    necessity_scoreable,
     pair_evidence_config,
     validate_a4_arm,
 )
@@ -119,6 +117,8 @@ def main() -> int:
     from transformers import AutoModel, AutoTokenizer
 
     from ekg.nodes.encoding import pair_features
+    from ekg.relations.evidence_objective import loss_terms
+    from ekg.relations.evidence_objective import supervised_rows as choose_rows
     from ekg.relations.extractor.supervised import (
         FAMILY_SUBTYPES,
         distance_bucket,
@@ -126,7 +126,6 @@ def main() -> int:
     )
     from ekg.relations.pair_evidence import (
         pair_counterfactual_embeddings,
-        sufficiency_necessity_loss,
     )
     from ekg.relations.pair_heads import build_pair_head
 
@@ -234,30 +233,7 @@ def main() -> int:
         return out
 
     def supervised_rows(records, logits, targets):
-        """The rows the revised pass trains on, balanced by `consistency_rows`.
-
-        Gold positives and the base pass's current false positives in equal
-        measure: trained on base-predicted positives alone the revision sees a
-        row set that is ~80% gold-NONE and collapses to always-NONE (measured).
-        The scored rule is unchanged — inference revises every base-predicted
-        positive.
-
-        A pair that is unscoreable for causal (a TIMEX endpoint) is excluded on
-        both counts.  It has to be: the official protocol does not score it, so
-        supervising the causal head on it would train outside the reported
-        population -- and a step whose every selected row was unscoreable made
-        `cross_entropy` average over zero rows and return `nan`, which is how
-        this was found (the 2026-09-12 smoke, all three evidence arms).
-        """
-        causal = logits[CONSISTENCY_FAMILY].detach().argmax(dim=-1)
-        target = targets[CONSISTENCY_FAMILY]
-        gold_positive: list[bool] = []
-        predicted_positive: list[bool] = []
-        for predicted, gold in zip(causal.tolist(), target.tolist(), strict=True):
-            scoreable = gold != IGNORE_INDEX
-            gold_positive.append(bool(scoreable and gold != NONE_INDEX))
-            predicted_positive.append(bool(scoreable and predicted != NONE_INDEX))
-        return consistency_rows(records, gold_positive, predicted_positive, arm=arm)
+        return choose_rows(records, logits, targets, arm=arm)
 
     def dev_scores() -> tuple[float, dict[str, float]]:
         """Macro pair F1 over non-NONE classes, with the residual applied."""
@@ -326,46 +302,13 @@ def main() -> int:
                 family: torch.tensor(family_targets(rows, family, index), device=device)
                 for family in families
             }
-            loss = torch.zeros((), device=device)
-            for family in families:
-                loss = loss + torch.nn.functional.cross_entropy(
-                    logits[family], targets[family], ignore_index=IGNORE_INDEX
-                )
             selected, skipped = supervised_rows(records, logits, targets)
             skipped_total += skipped
-            if selected:
-                cf = counterfactual_features(doc_id, records, selected)
-                picked = torch.tensor(selected, device=device)
-                target = targets[CONSISTENCY_FAMILY][picked]
-                # This gradient path was detached on 2026-09-14 on the argument
-                # that back-propagating through cf["retained"] asks the encoder
-                # to classify causality from the trigger spans alone.  The
-                # argument still looks right, but it was never measured on its
-                # own: the run that carried it also carried a second change and
-                # diverged, and the 2026-09-15 probe carried it alongside the
-                # sufficiency-domain fix and lost subevent entirely (official
-                # F1 23.05 -> 0.00) while causal rose 8.00 -> 12.51.  Both
-                # changes touch only the causal family, so subevent can only
-                # have died through the shared encoder, and two changes cannot
-                # be attributed at once.  Restored to the dry-run path so the
-                # next probe varies one thing.  Do not detach it again without
-                # a measurement that isolates it.
-                revised = heads(feats[picked], dist_ids[picked], cf["retained"])
-                loss = loss + torch.nn.functional.cross_entropy(
-                    revised[CONSISTENCY_FAMILY], target, ignore_index=IGNORE_INDEX
-                )
-                if flags.consistency_loss:
-                    base = heads.base(feats[picked], dist_ids[picked])[CONSISTENCY_FAMILY]
-                    masked = heads.base(cf["masked"], dist_ids[picked])[CONSISTENCY_FAMILY]
-                    retained = heads.base(cf["retained"], dist_ids[picked])[CONSISTENCY_FAMILY]
-                    scoreable = torch.tensor(
-                        [necessity_scoreable(records[i], arm=arm) for i in selected],
-                        device=device,
-                    )
-                    loss = loss + args.consistency_weight * sufficiency_necessity_loss(
-                        base, masked, retained, target, scoreable=scoreable,
-                        ignore_index=IGNORE_INDEX,
-                    )
+            cf = counterfactual_features(doc_id, records, selected) if selected else {}
+            primary, revision, hinge = loss_terms(
+                heads, feats, dist_ids, logits, targets, cf, selected, records, arm=arm
+            )
+            loss = sum(primary.values()) + revision + args.consistency_weight * hinge
             if not bool(torch.isfinite(loss)):
                 # Averaging a nan into the epoch mean hides which step produced
                 # it, and the checkpoint that follows would look trained.

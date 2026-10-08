@@ -25,26 +25,31 @@ def gradient_report(primary, auxiliary, parameters, *, weight: float = 1.0) -> d
     if not parameters:
         raise ValueError("explicit shared parameters are required")
 
-    def vector(loss):
-        grads = torch.autograd.grad(loss, parameters, retain_graph=True, allow_unused=True)
-        # An unused parameter has a mathematically zero partial derivative.
-        return torch.cat([
-            (torch.zeros_like(p) if g is None else g).detach().reshape(-1).double()
-            for p, g in zip(parameters, grads, strict=True)
-        ])
-
-    main, aux = vector(primary), vector(auxiliary)
-    if not torch.isfinite(main).all() or not torch.isfinite(aux).all():
-        raise ValueError("non-finite loss gradients")
-    main_norm, aux_norm = float(main.norm()), float(aux.norm())
-    dot = float(main.dot(aux))
+    main = torch.autograd.grad(primary, parameters, retain_graph=True, allow_unused=True)
+    aux = torch.autograd.grad(auxiliary, parameters, retain_graph=True, allow_unused=True)
+    main_sq = aux_sq = dot = 0.0
+    # Accumulate per tensor; concatenated double vectors exhaust model-sized memory.
+    for left, right in zip(main, aux, strict=True):
+        if left is not None:
+            left = left.detach().reshape(-1).double()
+            if not torch.isfinite(left).all():
+                raise ValueError("non-finite loss gradients")
+            main_sq += float(left.dot(left))
+        if right is not None:
+            right = right.detach().reshape(-1).double()
+            if not torch.isfinite(right).all():
+                raise ValueError("non-finite loss gradients")
+            aux_sq += float(right.dot(right))
+        if left is not None and right is not None:
+            dot += float(left.dot(right))
+    main_norm, aux_norm = math.sqrt(main_sq), math.sqrt(aux_sq)
     return {
         "primary_norm": main_norm,
         "auxiliary_norm": aux_norm,
         "primary_dot_auxiliary": dot,
         "cosine": dot / (main_norm * aux_norm) if main_norm and aux_norm else None,
         "weight": weight,
-        "primary_dot_combined": float(main.dot(main + weight * aux)),
+        "primary_dot_combined": main_sq + weight * dot,
     }
 
 

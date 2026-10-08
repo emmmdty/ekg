@@ -421,6 +421,7 @@ def train_baseline(
     max_length: int,
     batch_size: int,
     seed: int,
+    head_name: str = "linear",
 ) -> None:
     """Fine-tune a public-architecture baseline on the same split we train on.
 
@@ -431,7 +432,6 @@ def train_baseline(
     ourselves against a strawman.
     """
     import torch
-    from torch import nn
     from transformers import AutoModel, AutoTokenizer
 
     from ekg.factuality.baselines import BaselineFactualityDetector
@@ -443,14 +443,18 @@ def train_baseline(
     encoder = AutoModel.from_pretrained(model_name).to(device)
     encoder.gradient_checkpointing_enable()
     width = baseline_head_input_dim(encoder.config.hidden_size, pooling)
-    head = nn.Linear(width, len(FACTUALITY_LABELS)).to(device)
+    from ekg.factuality.recovery_heads import build_head
+
+    head = build_head(head_name, width, len(FACTUALITY_LABELS)).to(device)
     print(f"baseline pooling={pooling} head input dim {width}")
 
     label_index = {label: i for i, label in enumerate(FACTUALITY_LABELS)}
     weights = class_weights(train_docs, alpha)
     print(f"class weights (alpha={alpha}): {dict(zip(FACTUALITY_LABELS, weights, strict=True))}")
     optimizer = torch.optim.AdamW([*encoder.parameters(), *head.parameters()], lr=lr)
-    loss_fn = nn.CrossEntropyLoss(weight=torch.tensor(weights, dtype=torch.float, device=device))
+    loss_fn = torch.nn.CrossEntropyLoss(
+        weight=torch.tensor(weights, dtype=torch.float, device=device)
+    )
 
     # One flat mention stream: these architectures classify a sentence, not a
     # document, so a document-sized step would leave the batch size at the mercy
@@ -503,6 +507,7 @@ def train_baseline(
             json.dumps(
                 {
                     "pooling": pooling,
+                    "head_name": head_name,
                     "labels": list(FACTUALITY_LABELS),
                     "head_input_dim": width,
                     "max_length": max_length,
@@ -566,6 +571,8 @@ def main() -> int:
         choices=list(BASELINE_POOLINGS),
         help="baseline architecture: cls = RoBERTa+CLS, dynamic_multi = DMRoBERTa",
     )
+    parser.add_argument("--head-name", choices=("linear", "tanh5"), default="linear")
+    parser.add_argument("--smoke-documents", type=int, help="post-split CPU/CUDA smoke only")
     parser.add_argument("--batch-size", type=int, default=32, help="mentions per step (baseline)")
     parser.add_argument("--model", default="roberta-base", help="base encoder (supervised)")
     parser.add_argument("--output", required=True, type=Path, help="checkpoint dir (or json file)")
@@ -658,6 +665,11 @@ def main() -> int:
         return 0
 
     if args.detector == "baseline":
+        if args.smoke_documents is not None:
+            if args.smoke_documents < 1 or args.epochs != 1:
+                raise ValueError("smoke requires positive document count and one epoch")
+            train_docs = train_docs[:args.smoke_documents]
+            dev_docs = dev_docs[:args.smoke_documents]
         train_baseline(
             train_docs,
             dev_docs,
@@ -667,6 +679,7 @@ def main() -> int:
             lr=args.lr,
             alpha=args.alpha,
             pooling=validate_pooling(args.pooling),
+            head_name=args.head_name,
             max_length=args.max_length,
             batch_size=args.batch_size,
             seed=args.seed,

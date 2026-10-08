@@ -202,7 +202,6 @@ class BaselineFactualityDetector(FactualityDetector):
         if not TORCH_AVAILABLE:
             raise RuntimeError("baseline factuality detection needs torch + transformers")
         import torch
-        from torch import nn
         from transformers import AutoModel, AutoTokenizer
 
         if not self.checkpoint_path:
@@ -220,7 +219,10 @@ class BaselineFactualityDetector(FactualityDetector):
         self._tokenizer = AutoTokenizer.from_pretrained(str(ckpt))
         self._encoder = AutoModel.from_pretrained(str(ckpt))
         width = baseline_head_input_dim(self._encoder.config.hidden_size, self.pooling)
-        self._head = nn.Linear(width, len(self._labels))
+        from ekg.factuality.recovery_heads import build_head
+
+        # Checkpoints predating the diagnostic have the original linear head.
+        self._head = build_head(config.get("head_name", "linear"), width, len(self._labels))
         self._head.load_state_dict(torch.load(ckpt / HEAD_FILE, map_location="cpu"))
         self._device = "cuda" if torch.cuda.is_available() else "cpu"
         self._encoder.to(self._device).eval()

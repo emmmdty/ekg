@@ -88,6 +88,7 @@ def commands(args: argparse.Namespace, manifests: dict[str, Path]) -> tuple[list
         "--seed",
         str(args.seed),
     ]
+    train.extend(["--head-name", getattr(args, "head_name", "linear")])
     evaluate = [
         sys.executable,
         "-u",
@@ -147,6 +148,7 @@ def execute(args: argparse.Namespace, manifests: dict[str, Path]) -> None:
         "status": "incomplete",
         "fold": args.fold,
         "pooling": args.pooling,
+        "head_name": args.head_name,
         "seed": args.seed,
         "commit": _git_commit(args.repo),
         "cv_sha256": sha256_file(args.cv),
@@ -212,6 +214,7 @@ def main() -> int:
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--fold", required=True, type=int)
     parser.add_argument("--pooling", required=True, choices=BASELINE_POOLINGS)
+    parser.add_argument("--head-name", choices=("linear", "tanh5"), default="linear")
     parser.add_argument("--model", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--epochs", type=int, default=12)
