@@ -120,3 +120,43 @@ def test_real_audit_forward_and_gradients_on_tiny_encoder(tiny_encoder, monkeypa
     assert result["selected_rows"]
     assert result["encoder_alignment"]["main_vs_revision"]["primary_norm"] > 0
     assert all(p.grad is None for p in encoder.parameters())
+
+
+def test_real_coref_export_and_replay_match_old_submission(tiny_encoder, tmp_path, monkeypatch):
+    import torch
+
+    from ekg.nodes.coref import SupervisedCoreferenceScorer
+    from ekg.nodes.discriminative import head_input_dim
+    from ekg.relations.data.maven_ere import _parse_unlabeled
+
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    submission = script("build_maven_ere_submission")
+    source = ROOT / "data/fixtures/maven_ere/sample_with_text.jsonl"
+    docs = [_parse_unlabeled(submission.strip_to_test_shape(json.loads(line)))[0]
+            for line in source.read_text().splitlines() if line.strip()]
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"doc_ids": [d.doc_id for d in docs]}))
+    arguments = tmp_path / "arguments.jsonl"
+    arguments.write_text("".join(json.dumps({"doc_id": d.doc_id, "mention_id": n.event_id,
+                                             "status": "empty", "roles": {}}) + "\n"
+                                  for d in docs for n in d.nodes))
+    torch.save(torch.nn.Linear(head_input_dim(8, ()), 2).state_dict(),
+               tiny_encoder / "coref_head.pt")
+    (tiny_encoder / "coref_config.json").write_text(
+        json.dumps({"components": [], "argument_source": "none"}))
+    old = SupervisedCoreferenceScorer(checkpoint_path=str(tiny_encoder))
+    original = tmp_path / "original.jsonl"
+    original.write_text("".join(json.dumps({"id": d.doc_id,
+        "coreference": submission.predict_coreference(d, old, threshold=.7, band=0.)})
+        + "\n" for d in docs))
+    cache = tmp_path / "pairs.jsonl"
+    module = script("probe_coref_decoders")
+    module.export(SimpleNamespace(source=source, manifest=manifest, arguments=arguments,
+                                   checkpoint=tiny_encoder, output=cache))
+    output = tmp_path / "replay"
+    module.replay(SimpleNamespace(cache=cache, original=original, output=output,
+        utils=ROOT / "data/protocols/v6/sources/MAVEN-ERE/coreference/src/utils.py"))
+    assert (output / "average.jsonl").is_file()
+    assert (output / "antecedent.jsonl").is_file()
+    assert (output / "provenance.json").is_file()

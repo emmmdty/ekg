@@ -49,7 +49,8 @@ def audit_document(doc, encoder, tokenizer, heads, *, max_length, weight, device
 
     grouped, _ = rows_by_document([doc], None)
     rows = grouped[doc.doc_id]
-    records = document_pair_evidence(doc, [(r.head_id, r.tail_id) for r in rows])
+    records = document_pair_evidence(doc.nodes, doc.doc_text,
+                                     [(r.head_id, r.tail_id) for r in rows])
     embeddings = encode_trigger_reps(encoder, tokenizer, doc.nodes, doc.doc_text,
                                      max_length, device)
     features = pair_features(torch.stack([embeddings[r.head_id] for r in rows]),
