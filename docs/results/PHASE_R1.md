@@ -3001,3 +3001,79 @@ A4 实际训练行的 loss/共享参数诊断、C5 官方 antecedent 目标与�
 
 最终 C-35 `artifact_hashes.json` SHA：`4b361695dd0b5900bc277c9e0cf219475b407d47f4e234ca137e0d80ecb00d0e`。
 本地及回传远端 JSON/log 双端 SHA 一致；C-37 源码 hash 清单独立于它，旧 sealed 实验身份未改。
+
+### 25.35 C-37–C-39：非 GPU 验证包完成（2026-10-08）
+
+**作者范围**：只完成 GPU 之外的准备，便于空卡后立即验证。代理选择三项根因控制，
+不让作者选择科学路线。本节无新增模型主分数，不能裁定方法有效或已经提高三个方法。
+
+**开工自审**：科研价值是隔离 D4 头参数化、A4 shared-gradient 与 C5 解码，验证 §25.34 的竞争解释，
+对准三章 frozen 主指标与强对照欠额。可行性是复用现有数据/训练器/evaluator；
+权重留在原机器，CPU 微型模型跑完整接口，不需要新标注或 final-valid。CUDA 内存与真实模型行为
+是下一计算门；新机制的 novelty/power/消融/负控尚未准入，不以本就绪包代替。
+
+流程偏离：事前自审先写进研究卡与主表，交接/结果页在收口时才回填，未满足指定落点顺序；
+没有真实模型输出参与本轮选择。后续任务先写 results/交接，再实现。
+
+#### 交付与一手机制边界
+
+- D4：marked-CLS、同训练配方，仅 linear/tanh5 head 干预；baseline 训练、重载、OOF runner 共用入口。
+  这是裸 head 控制，不重训旧 cue/factor/causal-residual 家族；seed 固定但不同头的初始化 RNG 消耗不同。
+- A4：将训练实际使用的 primary / retained CE / hinge 与 supervised rows 提取为共享函数；
+  checkpoint 审计用该函数，在固定 train-only 文档上求 encoder/head 梯度，零 optimizer step。
+  按张量累计 dot/norm，避免拼接整模型 double gradients。它测 selected checkpoint 的局部风险，
+  不能重构历史 Adam 轨迹或推出 F1 原因。
+- C5：同一 checkpoint/预测 arguments 导出全 same-type pair cache；分别记录 scorer 原顺序和文本顺序，
+  保护原平均链接的 tie 顺序。当前 role-only 头没有启用 CONFUSABILITY/distance 特征；
+  原先把共享 scorer 的可选距离特征说成本次头使用的特征不准确，不把顺序防护当作性能原因。
+  average-link 必须逐文档复现旧 clusters，之后才能比较 official argmax。
+  直接调用 [官方 utils](https://github.com/THU-KEG/MAVEN-ERE/blob/ac81a9711a69f43f55bfbc50b3bb573fd11c64b0/coreference/src/utils.py)，
+  固定 dummy p=.5、不扫 threshold；binary scores/候选过滤与 antecedent 训练不同，标 FR-016(b)。
+- CPU collector 验证各 fold 的完成状态、plan/hash/seed/head、CV/source 与标签覆盖；
+  复用已有 document-paired bootstrap，比较两头和 frozen CLS anchor，不替换方法 promotion gate。
+
+合同：`docs/phases/PHASE_recovery_validation_20261008.md`。
+唯一 frozen argv/hash 包：`configs/recovery_validation_20261008.json`，
+SHA **`174214301d2cd3906c61ae3582de43931ebcbcd2b1f85b1e1b59b6da03f11bbf`**。
+共 **16** 个独立任务（D4 两个 smoke + 两头各五折；A4/C5 各 smoke/audit），绑定 **109** 个源码身份。
+A4 正式审计 **8** 个有至少2个 event、含TIMEX至多32 nodes/至多8句的 train 文档，
+按 SHA256(doc_id) 顺序冻结；smoke 取相同序列首篇。这个受限样本不代表完整训练分布。
+C5 smoke 是 frozen internal-dev manifest 前 **2** 篇，只作接口检查。
+
+#### 验证证据（无 GPU）
+
+| 检查 | 结果 | 限制 |
+|---|---|---|
+| 本地完整 pytest | **797 passed / 42 skipped** | 本地无 torch；跳过不作 torch 行为证据 |
+| ruff / ekg-smoke | **0 error / OK** | CPU 工程与端到端 fixture |
+| R1 consistency | **36/36 requirements mapped** | 文档/既有信任根一致性，不证明方法有效 |
+| 4090 相关测试 | **45 passed / 0 skipped**，25.01 s | `CUDA_VISIBLE_DEVICES=""`；真实微型 BERT 训练/保存/重载/梯度/重放 |
+| 5090 同一组测试 | **45 passed / 0 skipped**，17.92 s | 同样只用 CPU，不占 GPU、不跑真实大模型 |
+| 4090 CPU 资产预检 | **12 jobs / 30 assets / 1 pinned backbone PASS** | manifest/source/CV/anchor/模型内容 hash 与所有目标输出不存在 |
+| 5090 CPU 资产预检 | **4 jobs / 33 assets PASS** | checkpoint 所有顶层文件、arguments、gold、原预测与 smoke 子集；无跨机权重 |
+| 部署后标准入口 | **D4、A4、C5 三个入口均 CPU preflight PASS** | 默认只核 hash、打印命令；没有 `--execute` |
+
+TDD RED 覆盖缺失功能、输入 drift、已有输出、occupied GPU、旧 plan 的 smoke 与错误 head/labels。
+首次远端完整 A4 tiny-forward 发现 `document_pair_evidence` 的参数绑定错误；
+修正为实际 `(nodes, doc_text, pairs)` 后，两机最终 45 项均通过。该工程错误没有触发真实 GPU任务。
+
+#### Git 部署与产物
+
+实现提交：`9ff6c1e`；A4 API 修正与真实 C5 cache/replay 用例：`04d13da`；
+合同/启动闸门/汇总：**`2a4f60b08cc2287f6548b63bda43050ac8ff74a4`**。
+先在独立 Git archive 快照测试与核资产，确认两机 tracked 工作树干净、项目 root 无 Python 任务，
+push 后由 Git bundle 更新各自 origin/main 与 main。保留所有 remote-only 文件，未清 runs；
+权重训练在哪仍留在哪。本轮只有代码、smoke 子集和日志/哈希传输。
+
+证据根：`runs/stages/R1/r1-v61-20260904/audit/c39-ready-20261008/`。
+其中 `gpu-4090/`、`gpu-5090/` 有完整测试日志、资产表、部署后标准入口输出；
+`cpu-preflight.json` 的 `deployment_pending=true` 指**部署前** shadow 核查，
+后续 `deployed-*-preflight.txt` 记录真实项目 cwd 部署后 PASS，勿把历史字段当当前状态。
+实际实验输出专用新根：`runs/stages/R1/r1-v61-recovery-ready-20261008/`。
+
+**收口裁决**：C-37 诊断选择与 C-38 诊断实现完成，C-39 `cpu_ready / cuda_pending`。
+当前诊断的非 GPU 前置已闭合；下次空卡先跑合同 smoke，成功才进入对应完整诊断和 C-40。
+4090 可按授权核卡执行；5090 GPU 仍逐任务授权。**本轮未核卡、未启动 GPU、未搬 checkpoint**。
+没有新方法训练准入，也没有新的提分结论。
+
+本轮就绪证据 `artifact_hashes.json` SHA **`a79c9852718d58db64b224982e4a3ff9fb84f9957e1e02e3d1f677d6dd343dc4`**；回传日志/资产 JSON 均核双端 SHA 一致。

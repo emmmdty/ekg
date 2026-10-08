@@ -87,4 +87,4 @@ ACCI 已审计为缺可运行实现，不重写他人方法冒充复现。
 可行性：D4 复用既有 OOF trainer/evaluator；A4 checkpoint 留在 5090 做 train-only 梯度读取；
 C5 在原 checkpoint 所在机器导出 pair scores 后可 CPU 重放。数据和训练/推理函数已有，
 无新增标注、final-valid、seed 或权重跨机搬运。GPU 空闲只影响 CUDA smoke/计算，不妨碍本轮实现。
-本轮不训练，不把尚未实现的 official antecedent training 宣称为忠实复现。
+本轮不做 GPU 训练/真实大模型推理；CPU 微型训练仅验证接口，不把 official antecedent training 宣称为已复现。

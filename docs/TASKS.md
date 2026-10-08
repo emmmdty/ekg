@@ -226,12 +226,12 @@ author delegation releases a new in-scope research queue; it does not reopen old
   → evidence distinguishes measured facts, refuted explanations and untested alternatives.
 - [x] **T082 [RS-001–RS-003] / C-36** Install useful GitHub research skills into the project
   → pinned sources, preserved licenses, file hashes, precedence and applied diagnostics in `RESEARCH_SKILLS.md`.
-- [ ] **T083 [RS-001–RS-003] / C-37** Audit primary mechanisms and official code; agent selects next diagnostics
+- [x] **T083 [RS-001–RS-003] / C-37** Audit primary mechanisms and official code; agent selects next diagnostics
   → concrete feasible cards, rival predictions, strongest same-protocol controls, no unsupported novelty claims.
-- [ ] **T084 [RS-001–RS-003] / C-38** Implement admitted corrections/mechanisms
-  → meaningful regression tests, baseline parity and fresh local/remote relevant checks.
+- [x] **T084 [RS-001–RS-003] / C-38** Implement frozen diagnostics and shared execution interfaces
+  → real tiny-model training/reload/gradient/decoder tests passed on both machines; no new mechanism admitted.
 - [ ] **T085 [RS-001–RS-003] / C-39, G-22** Freeze preflight and execute admitted seed-13 comparisons
-  → exact commands, unoccupied 4090 resources, immutable outputs and independent evaluator coverage.
+  → CPU package and asset gates passed (`PHASE_R1.md` §25.35); CUDA smoke/formal results pending.
 - [ ] **T086 [RS-001–RS-003] / C-40** Recompute actual improvements and make the next scientific decision
   → main results, ablations/negative controls and explicit limitations, not workflow completion counts.
 

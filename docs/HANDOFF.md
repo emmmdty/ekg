@@ -1,7 +1,7 @@
 # 交接文档 · 新窗口从这里开始
 
 > 更新于 **2026-10-08（+08:00，作者新授权后）**：**科研改进与路线裁决由执行代理负责，作者只验收最终结果**。
-> 当前 **C-35 根因核查 ✅ → C-36 科研 skills ✅ → C-37 论文/官方代码 wip → C-38 实现 → C-39 preflight/smoke →
+> 当前 **C-35/C-36 ✅ → C-37 诊断选择 ✅ → C-38 诊断实现 ✅ → C-39 CPU ready / CUDA pending →
 > G-22 单 seed 验证 → C-40 复算与代理裁决**。ESC 退出本轮硬前置，MAVEN 主表保持。
 > 不再等待作者选科研路线；旧失败结果不改写，单 seed 与有效性/资源边界保持。详见主表与 §0.3。
 > 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
@@ -24,7 +24,7 @@
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-37 wip：匹配强 baseline 与真实损失诊断**。C-35/C-36 已完成；作者已委托科研裁决，后续 C-38 → C-39 → G-22 → C-40；按同协议主指标与消融/负控验收实际改进。C-32b/G-21 的 ESC 链未启动，E 退出本轮硬前置；单 seed 不变、旧 sealed bundle 不改写。 |
+| **活动任务** | **C-39 CPU ready / CUDA pending**：三项诊断已实现、冻结并部署两台服务器；下次空卡先跑 smoke→G-22 诊断→C-40 裁决。合同 `phases/PHASE_recovery_validation_20261008.md`，结果 §25.35。C-32b/G-21 的 ESC 链未启动，E 退出本轮硬前置；单 seed 不变、旧 sealed bundle 不改写。 |
 | ✅ **裁决已落地（执行代理拍板，§25.24）** | **不投第二个机制设计周期。** C-28a 之后理由更硬：oracle 给完美图仍是零增益 ⇒ (甲) 从「走不通」变成「走了也没用」，(乙)「只在结构足够时介入」失去前提。⛔ 仍不得换名、扫参、加大 backbone、启动未授权多种子。若将来 Ch4 真的产出更准的关系图，(甲) 可重新立项。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **裁决前必须先读的一条** | **配置敏感度大过效应量**：同样三臂同样 seed，只换打包规则，`full` 就动 `+.009207`，而更好那一跑的 `full − base` 只有 `+.006740`（§25.23）。⇒ 在这个量级上投第二周期，**很可能测不出任何可信的东西**；要投就得先解决可测性（例如提高效应目标，或先把配置抖动压下去），这一点应写进裁决材料。 |
@@ -45,9 +45,8 @@
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最新本地三件套记录（2026-10-08，C-35）**：**789 passed / 35 skipped**（缺 torch）、ruff 0、`ekg-smoke` OK；
-> 新增两份测试文件在 4090 **CPU 6/6 passed、无 skip**；真实 loss 的解析反例已落地（§25.34），不等于提分。
-> R1 一致性审计 **36/36 requirements mapped**。
+> **最新本地门（2026-10-08，C-39 CPU）**：三件套与 R1 一致性门通过；
+> torch 对应测试在 4090/5090 均用 CPU 真正执行。精确计数/日志/hash 只见 `results/PHASE_R1.md` §25.35。
 > 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 最终结果
 > 已进入 `results/PHASE_R1.md` §25.27，周报尚未追补该结果。
 
@@ -100,10 +99,17 @@ uv run python scripts/audit_r1_consistency.py \
 
 **C-35/C-36 已完成**：冻结预测错误交换复算、A4 gold 截断副本按原 SHA 恢复、
 真实 loss 的解析梯度反例与远端 CPU 测试、5 个固定版本科研 skills 和结构校验已交付。
-**C-37 当前执行**：D4 strongest CLS 的输入/头 parity；A4 真实训练行 shared-gradient 分解；
-C5 复用官方 antecedent 目标/解码作匹配控制。研究卡 `research/20261008_method_recovery.md`。
-没有新方法准入合同或模型提分结论；4090 三次核卡四卡均占用，未占他人卡、未动 5090/权重。
-科研路线由代理裁决，不等待作者选择。实验数字只见 `results/PHASE_R1.md` §25.34。
+**C-37/C-38 诊断范围已完成，C-39 CPU ready**：D4 marked-CLS 的 linear/tanh5 单变量头对照；
+A4 checkpoint train-only 梯度分解（零 optimizer step）；C5 同 pair-cache 的 average/官方 antecedent 解码。
+真实微型 CPU 模型的训练/重载/梯度/重放全链在两机通过；数据/权重/hash 和部署后的默认入口均通过。
+完整合同 `phases/PHASE_recovery_validation_20261008.md`、唯一 argv/hash 包
+`configs/recovery_validation_20261008.json`；两机研究代码已部署 `2a4f60b`，不删除 remote-only 文件。
+**GPU 之外的当前诊断前置已闭合**；下一次可用 GPU 先运行对应 smoke，成功后才允正式诊断。
+4090 cwd `/data/TJK/ekg` 用 D4 包；5090 cwd `/mnt/aidata/tongjiakai/ekg` 用 A4/C5 原地 checkpoint，
+GPU 仍须具体任务授权；本轮没有 GPU 训练或真实大模型推理，没有移动权重。
+源码变动后预检会拦截 hash drift；不得跳过或事后重绑，应在输出前形成新身份。
+**没有新方法准入或提分结论**；诊断之后的实质新机制仍需文献差异、可部署输入与 power/消融/负控。
+科研裁决由代理完成，作者验收结果。实测和 CPU 就绪证据只见 `results/PHASE_R1.md` §25.35。
 
 以下 C-23–C-34 是历史已完成队列；其中“等待作者范围选择”已被上述委托取代。
 

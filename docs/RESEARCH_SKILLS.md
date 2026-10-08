@@ -49,3 +49,6 @@ uv run python /home/tjk/.codex/skills/.system/skill-installer/scripts/install-sk
 软件来源：Kassis, Agarwal, He, Patel, Brueckner (2026),
 [Scientific Agent Skills: A Library of Procedural Knowledge for Research Agents](https://arxiv.org/abs/2609.00065v2)。
 该文没有 task-level 效果评测；本项目不声称安装 skills 已提高实验指标。
+
+C-37–C-39 的后续实际使用：一手文献与竞争解释指导三项固定诊断；TDD 在新增接口和 drift/smoke 闸门上先见 RED，
+verification-before-completion 要求两机 torch CPU 真跑与部署后的资产校验。证据与限制见 `results/PHASE_R1.md` §25.35。

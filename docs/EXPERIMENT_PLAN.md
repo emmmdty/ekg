@@ -360,9 +360,9 @@ gantt
 | **C-34** | ✅ **研究回合复盘完成（2026-10-08）**：核实 ICCL dev/seed/scorer 与 document folds，收窄 C-32a 阻断依据；归类本轮研究产出、生成下一轮检索约束及作者决策卡 | C-33 完成，或 C-31/C-32 以命名阻断收口；本次走后者，无 G-21/C-33 | 文档/CPU 自检通过；没有新机制结论、E 行或 GPU 合同；待作者选择继续范围；交付 commit **`ab384fe`** | `results/PHASE_R1.md` §25.33 + `AUTONOMOUS_RESEARCH_PROGRAM.md` §4–§6 |
 | **C-35** | **done · 三方法章根因核查与代理裁决**（2026-10-08 作者授权）：逐章核已有失败、原始产物、训练/损失/输入/解码与官方 baseline 差异，排除被旧实验证伪的解释 | C-34 完成；作者明确科研路线由代理裁决，作者只验收最终结果 | 每章有“已证实/已否定/尚待测试”因果链、源码定位、可执行下一检查；不把诊断猜想或弱对照当论文贡献 | `results/PHASE_R1.md` §25.34 起 |
 | **C-36** | **done · GitHub 科研 skills 检索、审查与项目安装**：只选直接服务根因诊断、可证伪假设与实验执行的 skills，固定来源 revision/许可/hash，记录与项目规则的冲突处理 | 作者明确允许查找并加载对本项目有用的 skills | skills 可被项目发现，原文和依赖审查完成，有来源锁定与实际使用记录；不自动安装服务/上传数据/扫参 | `.agents/skills/` + `docs/RESEARCH_SKILLS.md` |
-| **C-37** | **wip · 三章改进路线的一手论文/官方代码审计与诊断选择**：从 C-35 的真实错误出发，每章最多三张本轮候选卡，区分忠实复现、透明适配与本项目新机制 | C-35/C-36 交付；现有 MAVEN 主表保持，ESC 退出本轮硬前置 | 核机制本身、最近邻差异、数据/协议/代码/算力与强对照；代理自行选择或排除，不再向作者请求科研选题裁决 | R1 来源矩阵与改进研究卡 |
-| **C-38** | **证据绑定的 CPU 实现与诊断**：先完成可验证的实现/接口修复，再实现通过 C-37 的唯一具体新方案；不改旧 sealed bundle | C-37 有明确可行方案；新任务/phase/config 在方法输出前冻结 | 有失败复现/梯度或输入语义测试、完整本地门、baseline parity 证据；没有 torch 的本地 PASS 不替代远端对应测试 | 代码、tests、独立新 runs namespace |
-| **C-39** | **同协议 preflight 与 CPU/CUDA smoke**：冻结每章单 seed 13 的 matched control、机制、单变量消融、负控与停止规则 | C-38 完成 + 源码/manifest/evaluator/strong baseline 门 PASS | 4090 核卡、完整命令/cwd/预期输出事前披露，真实输入覆盖与指标重放正确；未通过的章继续有效独立工作，不盲跑 | 新 phase 合同与 immutable preflight |
+| **C-37** | **done · 一手机制审计与三项根因验证选择**：从 C-35 的真实错误出发，每章最多三张本轮候选卡，区分忠实复现、透明适配与本项目新机制 | C-35/C-36 交付；现有 MAVEN 主表保持，ESC 退出本轮硬前置 | 核机制本身、最近邻差异、数据/协议/代码/算力与强对照；代理自行选择或排除，不再向作者请求科研选题裁决 | R1 来源矩阵与改进研究卡 |
+| **C-38** | **done · 冻结诊断与共享执行接口实现**：D4 matched head、A4 shared loss/gradient、C5 official decoder replay；没有新机制准入，不改旧 sealed bundle | C-37 有明确可行方案；新任务/phase/config 在方法输出前冻结 | 有失败复现/梯度或输入语义测试、完整本地门、baseline parity 证据；没有 torch 的本地 PASS 不替代远端对应测试 | 代码、tests、独立新 runs namespace |
+| **C-39** | **cpu_ready / cuda_pending · 三项诊断合同与就绪包**：CPU/资产/源码门通过，CUDA smoke 等空卡；新机制的 control/消融/负控/power 须另行准入 | C-38 完成 + 源码/manifest/evaluator/strong baseline 门 PASS | 4090 核卡、完整命令/cwd/预期输出事前披露，真实输入覆盖与指标重放正确；未通过的章继续有效独立工作，不盲跑 | 新 phase 合同与 immutable preflight |
 | **C-40** | **改进结果复算与下一轮代理裁决**：每章从 raw output 判断是否超过强同协议对照，是否有机制价值，失败时按因果证据决定下一路线 | 对应正式单 seed 产物或命名阻断 | 数字只写 results；如实报告升降，禁止按最终评测改同一合同或重开已封存实验；作者验收实际改进而非流程完成数 | 对应 results 与 HANDOFF |
 
 **2026-10-08 非 GPU 执行切片（C-37–C-39）**：先交付三个可证伪的诊断包：
@@ -377,7 +377,7 @@ C5 同一冻结 pair scores，比较原 average-link 与官方 antecedent argmax
 G-20（作者甲，不执行）→ C-30 ✅ → C-31 第一轮 `no_admissible_candidate` → 作者授权一个 external benchmark →
 C-31b ✅（ESC v0.9）→ C-32a ❌ `protocol_blocked`【协议】→ C-34 ✅（复盘与决策卡）。
 **C-34 之后作者 2026-10-08 明确将科研裁决委托执行代理**：当前新队列为
-**C-35 ✅ → C-36 ✅ → C-37 wip → C-38 → C-39 → G-22 → C-40**。
+**C-35 ✅ → C-36 ✅ → C-37 ✅（诊断选择）→ C-38 ✅（诊断实现）→ C-39 CPU ready / CUDA pending → G-22 → C-40**。
 C-32b/G-21 的 ESC 链保持未启动；ESC 退出本轮改进的硬前置，MAVEN 主表保持。
 本授权允许代理基于证据选择现有主任务内的新机制与改进，不复跑旧 sealed bundle，
 不授权 final-valid、未授权 seed、5090 或跨机 checkpoint 搬运。
@@ -435,7 +435,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **C-29.6** | ✅ **2026-10-02 静态契约核验完成并发现协议阻断**：11,149 个 frozen causal target 的第三行实有 407 种文本，`…none` 只占 10,743；C-3 的 target-third-line stop 不能在不读取 internal-dev gold 的 inference 中实现。旧 512-token 无 stop runner 已 fail-closed，未实现新 driver、未调用 GPU | C-29.5 ✅；只读 CPU 审计 | 已完成 | **卡【协议】**：逐 target stop＝gold leakage；固定 `none` stop＝选择性错误。作者已取 (甲)：留下命名障碍、不产出可评分行；G-20 永久不启动 |
 | **G-20** | ✋ **LLMERE-causal 不执行（作者 2026-10-02 取甲）**：C-29.6 实测 target-third-line stop 必须逐例读取 internal-dev gold；固定 `none` 又选择性错误。LLMERE 因此保留为 FR-016(b) 可得性行，**没有 U 层分数** | C-29.6 完成 + 作者甲裁决 | 0 GPU·h | 旧 512-token runner fail-closed；不写/不跑新的 driver、不做 100 条试跑、不评分。它是协议障碍，不是 LLMERE 方法质量结论 |
 | **G-21** | **合同绑定的单 seed 正式实验（尚无具体候选）**：只运行 C-32b 已冻结的一项新研究合同，并保留 immutable manifest、raw output 与覆盖报告 | C-32a 与 C-32b 全部 PASS + 具体 contract/command 已写回本表 + 本地 gate + 4090 空闲 | 由 C-32b 的实测预算确定 | 训练、selection、evaluation 三隔离；唯一 seed 13；不得从 smoke/正式结果回改合同。GPU 命令启动前必须展示 cwd、命令和预期产物；完成后交 C-33 |
-| **G-22** | **三章改进的合同绑定单 seed 验证**（作者 2026-10-08 要求代理执行与裁决）：只运行 C-39 已准入的具体方案；每章不同方案可用空闲 4090 并行，旧 bundle 不修改 | 对应 C-37/C-38/C-39 全 PASS + exact command/manifest/evaluator/baseline/config 已冻 + 本地门与远端对应测试通过 | 预算由具体合同和实测 smoke 冻结，不事先虚构 | 唯一 seed 13；输出分训练/selection/evaluation；没有门通过的具体章不运行；raw output 与失败均保留，之后交 C-40 |
+| **G-22** | **合同绑定的单 seed 验证**：第一切片按 `PHASE_recovery_validation_20261008.md` 做诊断 smoke→正式诊断；方法训练必须另过准入。不同独立任务可用空卡并行，旧 bundle 不修改 | 对应合同 CPU 门通过 → 真实 CUDA smoke → 正式验证；方法训练另需机制/power/消融/负控准入；exact command/manifest/evaluator/baseline/config 已冻 | 预算由具体合同和实测 smoke 冻结，不事先虚构 | 唯一 seed 13；输出分训练/selection/evaluation；没有门通过的具体章不运行；raw output 与失败均保留，之后交 C-40 |
 
 **G-13 / G-14 共同确立的方针（作者 2026-09-13）**：4090 被占不是停工理由。
 判断一件事该不该先在 5090 上做，只问**它能不能减少那一次正式跑白跑的概率**。

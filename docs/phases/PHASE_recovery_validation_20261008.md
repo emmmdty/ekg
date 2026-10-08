@@ -27,6 +27,8 @@ C5 直接调用固定 `MAVEN-ERE ac81a971…` 的 `coreference/src/utils.py:get_
 SHA `5c04f989…a773406`；不重写连链算法。binary p 的 argmax 与 logit(p) 加零 dummy 的 argmax 同序，
 但训练目标、候选过滤与官方不同。p=.5 的 tie 按官方 torch argmax 选最早 antecedent，不调 dummy。
 原 average-link 必须逐文档复现冻结 full-r2 clusters；否则停止，不能归因到 decoder。
+本次 role-only 头未启用 CONFUSABILITY/distance 特征。保留原 loader 顺序主要保护 average-link 的 tie 行为；
+它不是已找到的性能原因，也不把其他历史头的可选特征冒称为本次输入。
 
 D4 的 seed 控制沿用原实现；不同头初始化会消耗不同随机数，不能把一次差值作确定性因果效应。
 五折 pooled macro-F1、每类 F1 和 document-paired bootstrap 都报告，仍只有一个训练 seed。
