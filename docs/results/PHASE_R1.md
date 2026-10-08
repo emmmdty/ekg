@@ -2885,7 +2885,7 @@ uv run ekg-smoke
 继续更换 E 数据本身不能解决这个问题。**这只是建议，尚未得到范围授权**；不重开 C-22、旧 D4/A4/C5、
 LLMERE，不加 seed，不改变论文结构。下一项只有在作者选择后写入主表，当前无可直接启动的 GPU 任务。
 
-### 25.34 C-35–C-40 · 三方法章改进与科研裁决委托（2026-10-08，开工）
+### 25.34 C-35–C-40 · 三方法章改进与科研裁决委托（2026-10-08，C-35/C-36 done，C-37 wip）
 
 **作者授权**：不再要求作者选择科研路线。执行代理负责原因分析、论文/实验/官方 GitHub 实现检索、
 有用科研 skills 的项目安装、方案取舍、改进执行与最终科研裁决；作者只验收最终结果。
@@ -2969,3 +2969,35 @@ Du 主辅梯度论文 §2–3/Algorithm 1、AuxiNash §4 与公开 GCS 实现，
 **算力事实**：4090 本轮两次只读核卡均四卡占用约 17 GB，无本项目新 GPU 任务；
 不占他人 GPU，不使用未授权 5090，不搬 checkpoint。继续远端 CPU 验证与 baseline parity，
 不将资源占用改写为方法无效，也不声称已经提高三章主指标。
+
+#### C-35 收口：远端实跑与本轮代理裁决
+
+代码提交 `3edb09898ef5b92292a3fe9c3c31d61d1b8575f9`，通过增量 Git bundle
+（SHA `e2d402fb37e3012e74886c5488782bb0fa389d485ff4e09bf75b54c3603319fe`）送达 4090；
+从 Git object 提取到独立 audit namespace，未 reset 远端工作树或移动远端 HEAD。
+对应 `pair_evidence.py` 两端 SHA 都是
+`9dddc00a87b7c404b7c8471de102e60e5a5bdbf3258c35ac22e53ba067b03726`。
+
+`CUDA_VISIBLE_DEVICES=""` 下新增两份测试文件 **6/6 passed，无 skip**。
+解析 fixture 用真实 `sufficiency_necessity_loss`：base-gold partial derivative 为 **0**，
+共享参数主 CE 梯度范数 **0.4260280132**、辅助梯度范数 **1**、cosine **−1**；
+辅助 weight **0.5** 时 `g_main · (g_main + weight*g_aux) = −0.0315141386`。
+这只证明旧 base-only 推论不充分、微小 SGD 步可升高 main CE；
+**不证明真实数据梯度分布、不保证 Adam/F1 轨迹、不构成方法提分**。
+诊断 JSON SHA `0f631ea47645787518791e50cbea001af1fa670612f4c6c31e21c512839af8cc`，
+测试日志 SHA `700bc0322b00f8e8db3ce495047983b54ab27ab59ed1fedac05f3aeba47dae24`，
+产物保留在 4090 和本地同名 audit 根；权重未移动。
+
+C5 的 pair 诊断还揭示目标不对齐：由上表 TP/FP/FN 算得 **full pair-F1 80.83889418**，
+**official_joint pair-F1 80.02594034**，而 full 的官方 MUC 低于 anchor（主指标见 `PHASE_C.md`）。
+所以独立 pair currency 改善不自动等于聚类主指标改善；该诊断 F1 不替代 MUC，
+也不能凭此把全部差异归因于目标或解码。
+
+**代理裁决**：C-35/C-36 完成。C-37 继续；下一轮具体工作是 D4 strongest-CLS 输入/头 parity、
+A4 实际训练行的 loss/共享参数诊断、C5 官方 antecedent 目标与解码匹配控制。
+既有失败机制不复跑，公开优化器不包装成创新，未经新机制准入的章不进入 C-38–G-22。
+作者不需要另选科研路线。4090 第三次核卡仍四卡占用；只有准入合同与空卡同时成立才正式训练。
+本轮没有新增模型主分数，没有“已经提高三个方法”的结论。
+
+最终 C-35 `artifact_hashes.json` SHA：`4b361695dd0b5900bc277c9e0cf219475b407d47f4e234ca137e0d80ecb00d0e`。
+本地及回传远端 JSON/log 双端 SHA 一致；C-37 源码 hash 清单独立于它，旧 sealed 实验身份未改。

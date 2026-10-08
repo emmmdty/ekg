@@ -222,7 +222,7 @@ author delegation releases a new in-scope research queue; it does not reopen old
 
 ## Phase 3f — Delegated method recovery
 
-- [ ] **T081 [RS-001–RS-003] / C-35** Recompute error exchanges and isolate loss/input/decoder hypotheses
+- [x] **T081 [RS-001–RS-003] / C-35** Recompute error exchanges and isolate loss/input/decoder hypotheses
   → evidence distinguishes measured facts, refuted explanations and untested alternatives.
 - [x] **T082 [RS-001–RS-003] / C-36** Install useful GitHub research skills into the project
   → pinned sources, preserved licenses, file hashes, precedence and applied diagnostics in `RESEARCH_SKILLS.md`.
