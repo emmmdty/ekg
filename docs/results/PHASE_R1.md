@@ -2798,6 +2798,8 @@ ESC 实验；但它将改变至少候选全集、负例分布或 evaluator，既
 
 ### 25.33 C-34 · 研究回合复盘与作者决策卡（2026-10-08）
 
+> 后续作者已明确委托执行代理完成科研路线的最终裁决，见 §25.34；本节保存委托前的复盘与建议。
+
 **结论：C-34 `done`；本研究回合以准入阻断收口，新训练仍 `blocked`。** C-31 没有准入机制，C-32a
 没有闭合 E 协议，因此没有 G-21 原始预测，C-33 的模型结果审计不适用。复盘走的是主表事先允许的
 “C-31/C-32 命名阻断 → C-34”分支，不是跳过实验门。C-34 的来源/CPU 自检不能充当 R5 模型评分。
@@ -2882,3 +2884,88 @@ uv run ekg-smoke
 当前建议甲的理由是本轮失败尚未检验机制价值，而方法章的贡献仍需在 MAVEN 主表上成立；
 继续更换 E 数据本身不能解决这个问题。**这只是建议，尚未得到范围授权**；不重开 C-22、旧 D4/A4/C5、
 LLMERE，不加 seed，不改变论文结构。下一项只有在作者选择后写入主表，当前无可直接启动的 GPU 任务。
+
+### 25.34 C-35–C-40 · 三方法章改进与科研裁决委托（2026-10-08，开工）
+
+**作者授权**：不再要求作者选择科研路线。执行代理负责原因分析、论文/实验/官方 GitHub 实现检索、
+有用科研 skills 的项目安装、方案取舍、改进执行与最终科研裁决；作者只验收最终结果。
+授权已同步 AGENTS/CLAUDE、主表 C-35–C-40/G-22 与状态机。代理选择以现有 MAVEN 三方法章为主，
+ESC 不再是本轮硬前置；尚未形成新的模型效果结论。
+
+#### C-35 开工自审
+
+- **科研价值**：形成“已观测错误 → 可干预原因 → 处理 → 中介 → frozen 主指标”的可证伪改进链。
+  对准 D4 五类 macro-F1、A4 official causal P/R/F1 与护栏、C5 official coreference 全套及主锚；
+  证据分别取本页 §25.20–§25.27、`PHASE_A.md` 的 A4.3/G-4b、`PHASE_C.md` 的两个有效周期与诊断。
+  不能将低成本、更多实验或安装 skills 本身作为贡献；机制价值需强对照、消融与负控支持。
+- **可行性**：静态/CPU 诊断可行，既有结果与本地源码可读；外部论文与代码需重新核一手来源，
+  真实训练数据/checkpoint/机器用只读 4090 核验。具体方法训练在 C-37–C-39 PASS 前不运行。
+  单 seed 与有效性/资源边界保持；不可行科研路线由代理在已授权主任务内自行裁决并更新主表。
+
+#### C-36 开工自审
+
+- **科研价值**：用来源审查、竞争解释、单变量诊断和验证纪律修复本项目曾出现的错误归因；
+  服务 C-35/C-37–C-40 的主表改进链，不以 skills 数量或宣传能力论证方法有效。
+- **可行性**：GitHub 固定 revision 的 markdown/本地脚本可安装到 `.agents/skills/`，不需外部模型、
+  GPU 或全库依赖安装。只选不改变 frozen protocol 的模块，记录用户科研裁决委托对上游人工选题建议的优先级。
+
+#### C-35 本轮复算：错误交换与资产恢复
+
+对现有冻结预测作纯 CPU 配对诊断，不加载模型、不改阈值，不读 final-valid。
+`compare_recovery_errors.py` 先过 official document/schema/candidate digest 检查，
+再按原始 gold event→mention 展开计数；错误 subtype 同时算假阳性和漏掉的 gold subtype。
+以下是**诊断 pair 数，不能替代主指标或证明某一 loss 的因果效果**。
+
+| comparison（candidate vs control） | recovered gold pairs | lost gold pairs | removed false pairs | added false pairs |
+|---|---:|---:|---:|---:|
+| A4 full vs remove_core | 31 | 1,344 | 3,157 | 107 |
+| A4 no_constraint vs remove_core | 47 | 1,271 | 3,091 | 274 |
+| A4 length_matched vs remove_core | 5 | 1,409 | 3,314 | 7 |
+| C5 full vs remove_core（pilot-r2） | 80 | 35 | 72 | 93 |
+| C5 full vs official_joint（pilot-r2） | 113 | 75 | 208 | 233 |
+
+A4 三个 evidence 臂都丢失大量 control 原本命中的 gold pairs，移除 hinge 并未恢复它们；
+因此“只修 hinge 就够”的解释不足，retained CE、revision 分布和 backbone parity 须分别测。
+C5 的信号确有修复，也制造新的错误；不能把总 recall 上升当作身份区分更准。
+这些 pair 相依，不拿 pair 数虚增独立样本量或 power。
+
+A4 复算首启因本地 gold 副本 JSON 截断失败：文件 7,798,784 bytes，只读完 228 篇，
+第 229 行损坏。保留损坏副本和恢复记录，按冻结 preflight 的 gold SHA 校验 C5 同源副本，
+并由 4090 只读 `sha256sum` 独立确认，再恢复原文件：
+`before=1fd3333de603093a44b8ebcdae5b235ec16a9d0370fbb0aa9054ac0df08f8d21` →
+`after=403b69a8a9c83e2be41e0c366fed7edcd7e00796dbd14ec6f07df7e560507e81`。
+恢复后 291 篇完整，hash 等于原合同；**没有重定义 gold 或修改实验身份**。
+
+产物根 `runs/stages/R1/r1-v61-20260904/audit/c35-recovery-20261008/`：
+`validated/*vs-*.json` 是当前脚本版本的复算，旧首次输出保留；每份均含输入与脚本 SHA。
+`asset_recovery.json`、损坏副本和 hash 清单保留；官方 scorer 主分数未在本轮重算，仍认旧结果页。
+
+#### C-36 已完成：有用 skills 已加载进项目
+
+安装与锁定 5 个技能：scientific-critical-thinking、hypothesis-generation、systematic-debugging、
+test-driven-development、verification-before-completion。两个官方来源 MIT，固定 revision、
+原文与许可保留，详见 `docs/RESEARCH_SKILLS.md` 和 `docs/research_skills.lock.json`。
+实际应用是上述证据分类、资产修复、先失败的诊断测试及竞争解释矩阵。
+`validate_prediction_matrix.py` 对本项目 3 行诊断设计输出 valid、0 errors/0 warnings；
+这仅是结构检查，不是科学准入或模型效果证明。
+
+#### C-37 一手机制审计与代理决定（进行中）
+
+已核 P1 同 revision 的官方 MAVEN-ERE antecedent 模型/训练/解码源码，
+Du 主辅梯度论文 §2–3/Algorithm 1、AuxiNash §4 与公开 GCS 实现，及现有 MAVEN-FACT 模型。
+一手源码根 `audit/c37-primary-20261008/` 的 `artifact_hashes.json` SHA 为
+`9829cf1c6fb3e0eb6ded8c5045c2be792b16f15939c4c9431d5a888d11397afa`。
+研究卡和本轮代理选择见 `docs/research/20261008_method_recovery.md`；不再要求作者选路线。
+
+- **D4**：gold causal oracle 已否定“只需更好边”；旧 typed-cue bottleneck 和 strongest CLS 输入/头存在
+  差异，但未单变量干预，不能断言 bottleneck 是原因。先做相同 CLS 配方的 parity。
+- **A4**：base-logit 梯度相反不保证 shared encoder 梯度相反，且 retained CE 仍在；
+  新增真实 loss 的解析 CPU counterexample 和梯度审计工具。fixture 不代表训练分布，待远端 torch 实跑。
+- **C5**：官方 joint 使用 antecedent+dummy softmax、marginal log likelihood 和 argmax 连链；本项目臂用
+  pair CE 与平均链接。已确认设计差异，尚未隔离其分数贡献；先复用官方实现作目标/解码匹配控制。
+
+**本地验证**：789 passed / 35 skipped（缺 torch），ruff 0、ekg-smoke OK、R1 36/36 requirements mapped。
+新增的 3 个 torch 测试仍须远端实际执行，不能拿本地 skip 声称完成。
+**算力事实**：4090 本轮两次只读核卡均四卡占用约 17 GB，无本项目新 GPU 任务；
+不占他人 GPU，不使用未授权 5090，不搬 checkpoint。继续远端 CPU 验证与 baseline parity，
+不将资源占用改写为方法无效，也不声称已经提高三章主指标。

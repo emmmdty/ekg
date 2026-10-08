@@ -1,11 +1,10 @@
 # Tasks: EKG Thesis Research Program
 
 **Input**: [`SPEC.md`](SPEC.md), [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)
-**Current executable scope**: public-paper comparability uplift under one fixed seed. D4 v6.2 and the old C5 family
-are closed; C-22 remains paused. T073–T080 are closed, including T075's author-cancelled generation and
-C-32a's named protocol blocker. C-34's retrospective/decision card is complete; C-32b/G-21/C-33 await a new
-author scope decision in `EXPERIMENT_PLAN.md`. The v6.1 typed-cue / pair-evidence / role-compatibility phases
-below are historical closed failures, not runnable backlog.
+**Current executable scope**: the author delegated scientific route selection and improvement decisions on
+2026-10-08. C-35–C-40/G-22 now govern root-cause diagnostics, GitHub skills, primary research, implementation,
+and frozen seed-13 validation on the existing MAVEN tasks. T073–T080 are historical completed/cancelled work;
+ESC is no longer a mandatory predecessor. Old sealed failures and resource/validity boundaries remain intact.
 
 ## Format
 
@@ -218,8 +217,23 @@ availability blocker. No second scored row is claimed. Neither result establishe
   synthetic CPU split checks, next-R0 constraints and an author decision card are complete.
   See `results/PHASE_R1.md` §25.33; C-32b/G-21/C-33 remain unstarted.
 
-**Checkpoint**: The bounded round has admission evidence, not a new mechanism effectiveness result. Only an
-explicit author scope decision can release the next R0; no closed mechanism or extra seed is reopened.
+**Checkpoint**: This round established admission evidence, not mechanism effectiveness. The 2026-10-08
+author delegation releases a new in-scope research queue; it does not reopen old experiment identities.
+
+## Phase 3f — Delegated method recovery
+
+- [ ] **T081 [RS-001–RS-003] / C-35** Recompute error exchanges and isolate loss/input/decoder hypotheses
+  → evidence distinguishes measured facts, refuted explanations and untested alternatives.
+- [x] **T082 [RS-001–RS-003] / C-36** Install useful GitHub research skills into the project
+  → pinned sources, preserved licenses, file hashes, precedence and applied diagnostics in `RESEARCH_SKILLS.md`.
+- [ ] **T083 [RS-001–RS-003] / C-37** Audit primary mechanisms and official code; agent selects next diagnostics
+  → concrete feasible cards, rival predictions, strongest same-protocol controls, no unsupported novelty claims.
+- [ ] **T084 [RS-001–RS-003] / C-38** Implement admitted corrections/mechanisms
+  → meaningful regression tests, baseline parity and fresh local/remote relevant checks.
+- [ ] **T085 [RS-001–RS-003] / C-39, G-22** Freeze preflight and execute admitted seed-13 comparisons
+  → exact commands, unoccupied 4090 resources, immutable outputs and independent evaluator coverage.
+- [ ] **T086 [RS-001–RS-003] / C-40** Recompute actual improvements and make the next scientific decision
+  → main results, ablations/negative controls and explicit limitations, not workflow completion counts.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 
@@ -319,8 +333,8 @@ coverage, but they cannot be checked complete until the corresponding executable
   order.
 - T025–T039 are completed historical failures and are not runnable; C-13–C-18/T048–T053 supersede their design queue.
 - T048–T053, T059–T061 and T063–T072 are complete; T062 has not started and remains paused. T073 is complete;
-  T074 → T075 → T076 is the only active queue. A4 has no proposed-method task, but T075 is an external transparent
-  adaptation, not an A4 revival.
+  T081 → T082 → T083 → T084 → T085 → T086 is the current delegated recovery queue.
+  T075 is cancelled and is not an active prerequisite.
 - T054–T057 are complete; T058 waits for explicit matched-seed authorization. T045 waits for the intended final E3
   identity, not for the withdrawn factorial.
 - Within method phases, baseline reproduction and engineering tests may run in parallel only when they do not
