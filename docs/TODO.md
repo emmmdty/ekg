@@ -1,6 +1,6 @@
 # EKG 实时状态
 
-> 更新于 **2026-10-02**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-10-08**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
@@ -8,7 +8,8 @@
 **当前优先级是公开论文可比性与受约束自驱动研究，而非重开失败机制。** 保持单 seed；已完成
 `C-29 → G-19 → C-29.5 → C-29.6（协议阻断）→ G-20（作者甲，不执行）→ C-30`，现在进入
 `C-31 第一轮（no_admissible_candidate）→ 作者授权一个 external benchmark → C-31b（ESC v0.9）✅ →
-C-32a ❌ protocol_blocked【协议】→ C-32b/G-21 不启动（等待新的作者决策）`。
+C-32a ❌ protocol_blocked【协议】→ C-34 ✅（复盘与决策卡）→ 等待新的作者范围决策`。
+C-32b/G-21/C-33 未启动；C-34 走主表允许的“准入阻断后复盘”分支。
 完整决策、科研价值、可行性、一手依据、预期结果和停止条件见
 [`COMPARABILITY_PLAN.md`](COMPARABILITY_PLAN.md)；可执行行只认 `EXPERIMENT_PLAN.md` §4。
 
@@ -21,8 +22,9 @@ C-32a ❌ protocol_blocked【协议】→ C-32b/G-21 不启动（等待新的作
 | C-30 · 全章 | ✅ 已完成：G-19 raw export 经独立 official scorer 复算一致；LLMERE 无 U 分数已登记 | P/V/U、七项 provenance、FR-016 与 `single-seed / non-confirmatory` 审计见 `results/PHASE_R1.md` §25.29 |
 | C-31 · 领域证据地图 | ✅ 第一轮完成：Trucidator、MMD-ERE、rationale-distillation ECR 三卡分别卡【数据+协议】、【协议+代码】、【数据+协议+新颖性】 | `results/PHASE_R1.md` §25.30；`no_admissible_candidate`，不启动 C-32/G-21 |
 | C-31b · 外部 benchmark | ✅ 作者已授权一个、且只一个外部 benchmark；ESC v0.9 被 R0 选定为 E 层 causal-existence 验证 | `results/PHASE_R1.md` §25.31；只增外部证据，不替换 MAVEN 主表、不复活 A4 |
-| C-32a · ESC 协议预检 | ❌ **`protocol_blocked`【协议】**：v0.9 无 dev/test/fold manifest，官方 baseline 的候选生成规则互不相同，typed scorer 存在 FN 聚合错误 | `results/PHASE_R1.md` §25.32；未启动 GPU、模型或 E 分数 |
+| C-32a · ESC 协议预检 | ❌ **`protocol_blocked`【协议】**：ICCL dev/seed/binary scorer 可得，但 document folds 不符 topic-disjoint E 合同，预处理输入未闭合；typed scorer 错误不能当作 binary scorer 不存在的依据 | `results/PHASE_R1.md` §25.32–§25.33；未启动 GPU、模型或 E 分数 |
 | C-32b / G-21 | 不启动 | 本轮唯一 external benchmark 已按协议阻断收口；只有新的作者授权后重开 R0，才可形成新合同；单 seed 规则不变 |
+| C-34 · 研究回合复盘 | ✅ 已完成：核实官方源码并收窄阻断依据，完成合成数据 CPU split 检查、下一轮检索约束与作者决策卡 | `results/PHASE_R1.md` §25.33；建议回 MAVEN 新机制 R0，E 不再作硬前置，尚待作者选择 |
 | D4 / A4 / C5 方法机制 | D4、A4、旧 C5 均已按契约收口或封存 | 不重开；C-22 继续暂停，不得因为本队列结束自动恢复 |
 
 ## 可比性口径（本队列的通过条件）
@@ -51,8 +53,9 @@ C-32a ❌ protocol_blocked【协议】→ C-32b/G-21 不启动（等待新的作
 
 ## 下一步
 
-1. 当前停在作者决策：本轮唯一外部 benchmark 已 `protocol_blocked`，不能自行换另一个数据集或近似 runner。
-2. 若作者希望继续，只能明确授权新的 benchmark 选择，或把目标改为“整理 MAVEN 已有主表的公开对手证据”；收到后从新 R0 卡开始，不复活失败机制。
+1. C-34 已完成，当前停在 `results/PHASE_R1.md` §25.33 的作者决策卡；没有可直接启动的 GPU 任务。
+2. 建议甲：回到 MAVEN 方法章的新机制 R0，将未闭合 E 退出本轮硬前置；乙：另行授权恰好一个新外部
+   benchmark R0。收到明确选择后先改主表/状态机，再执行；不能自行换数据、近似 runner 或复活失败机制。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、删除候选、事后修 prompt/阈值、用更大 backbone 掩盖机制失败，
 以及把透明适配写成“胜过原论文”。

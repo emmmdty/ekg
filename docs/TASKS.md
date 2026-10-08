@@ -2,8 +2,9 @@
 
 **Input**: [`SPEC.md`](SPEC.md), [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)
 **Current executable scope**: public-paper comparability uplift under one fixed seed. D4 v6.2 and the old C5 family
-are closed; C-22 remains paused. The only active sequence is T073 → T074 → T075 → T076, defined in
-`EXPERIMENT_PLAN.md` and `COMPARABILITY_PLAN.md`. The v6.1 typed-cue / pair-evidence / role-compatibility phases
+are closed; C-22 remains paused. T073–T080 are closed, including T075's author-cancelled generation and
+C-32a's named protocol blocker. C-34's retrospective/decision card is complete; C-32b/G-21/C-33 await a new
+author scope decision in `EXPERIMENT_PLAN.md`. The v6.1 typed-cue / pair-evidence / role-compatibility phases
 below are historical closed failures, not runnable backlog.
 
 ## Format
@@ -186,23 +187,39 @@ single-seed transparent adaptation for a reproduction of a published result.
 - [x] **T073 [P] [RS-001–RS-003]** Freeze the P (published reference) / V (original-benchmark fidelity) /
   U (unified-protocol) registry, seven required provenance fields, execution order and forbidden claims →
   `COMPARABILITY_PLAN.md` is linked from the executable main table; no experiment score is changed.
-- [ ] **T074 [RS-001]** Run the EasyECR Global-Local Topic transparent adaptation once on the frozen 291-document
+- [x] **T074 [RS-001]** Run the EasyECR Global-Local Topic transparent adaptation once on the frozen 291-document
   coreference unit → first hash-split the 2,622 P1 train documents into a 2,331-document train and a 291-document
   selection-dev, so evaluation is untouched; an isolated-venv import/one-batch smoke precedes fixed-seed-13
   training, project official MUC/B³/CEAFe/BLANC recomputation, raw clusters, upstream/patch hashes and a complete
   FR-016(b) record. The 2,331-vs-2,622 train delta is disclosed; any environment, identity or coverage failure is
-  preserved as the named blocker rather than repaired by reimplementation.
-- [ ] **T075 [RS-002]** Run the LLMERE causal transparent adaptation once on its frozen internal-dev unit → full-set
-  stop-rule generation, and only if necessary a full-set constrained-decoding stage, preserve both raw generations;
-  prompt-equivalence, coverage, conversion, candidate and official-scorer checks precede fixed-seed-13 causal P/R/F1
-  and an FR-016(b) record. No final-valid read, per-row retry or threshold sweep is permitted.
-- [ ] **T076 [RS-001–RS-003]** Independently rebuild the relevant thesis rows from raw predictions and audit all claims
+  preserved as the named blocker rather than repaired by reimplementation. Completed G-19 evidence:
+  `results/PHASE_R1.md` §25.28.
+- [ ] **T075 [RS-002] — CANCELLED by author (2026-10-02), not backlog.** The planned LLMERE recovery stop rule
+  requires internal-dev target content; C-29.6 found a protocol blocker and the author chose no generation/scoring.
+  LLMERE retains a named FR-016(b) availability row with no U score. Evidence: `results/PHASE_R1.md` §25.29.
+- [x] **T076 [RS-001–RS-003]** Independently rebuild the relevant thesis rows from raw predictions and audit all claims
   → every P/V/U row has the seven provenance fields, FR-016 state and `single-seed / non-confirmatory` label; only
   same-chapter, same-unit U rows expose deltas, and every missing field is excluded from the main table.
+  C-30 completed; LLMERE has no score to recompute. Evidence: `results/PHASE_R1.md` §25.29.
 
-**Checkpoint**: The paper has two additional independent published-method adaptation rows whose scope, protocol
-differences and single-seed limitation are inspectable. Their rank is not a pass criterion and does not establish a
-published-paper superiority claim.
+**Checkpoint**: G-19 contributes an auditable single-seed FR-016(b) adaptation; LLMERE contributes a named
+availability blocker. No second scored row is claimed. Neither result establishes published-paper superiority.
+
+## Phase 3e — Bounded research round (closed at admission, no model experiment)
+
+- [x] **T077 [RS-001–RS-003] / C-31** Audit at most three mechanism cards → all three excluded with primary
+  evidence; `no_admissible_candidate`, no contract or training. See `results/PHASE_R1.md` §25.30.
+- [x] **T078 [RS-002] / C-31b** Record the author's one-benchmark authorization and ESC v0.9 evidence card →
+  external E-layer scope is explicit and does not replace MAVEN U rows. See `results/PHASE_R1.md` §25.31.
+- [x] **T079 [RS-002] / C-32a** Audit ESC source/split/candidates/scorer → audit completed with
+  `protocol_blocked`, not protocol PASS. The retrospective narrows its rationale; no immutable E preflight,
+  model, GPU or E score exists. See `results/PHASE_R1.md` §25.32–§25.33.
+- [x] **T080 [RS-001–RS-003] / C-34** Review the blocked research round → source-backed corrections,
+  synthetic CPU split checks, next-R0 constraints and an author decision card are complete.
+  See `results/PHASE_R1.md` §25.33; C-32b/G-21/C-33 remain unstarted.
+
+**Checkpoint**: The bounded round has admission evidence, not a new mechanism effectiveness result. Only an
+explicit author scope decision can release the next R0; no closed mechanism or extra seed is reopened.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

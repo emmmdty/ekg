@@ -2752,6 +2752,10 @@ MECI 也未被选中：其公开仓库未给可核实许可证，也未发布可
 
 ### 25.32 C-32a · ESC source/split/candidate/scorer CPU 预检（协议阻断，2026-10-02）
 
+> 本节保留 10-02 的审计记录。**10-08 的一手复核收窄了其阻断依据，见 §25.33**：ICCL 明写 dev topics、
+> 在 loader 前固定 seed，也有 binary scorer；不能将 typed scorer 的错误扩张成 binary scorer 不存在。
+> `protocol_blocked` 状态保持，因为冻结的 topic-disjoint 协议与公开代码不一致，输入链也未闭合。
+
 **结论：`protocol_blocked`【协议】。** C-31b 选择 ESC 作为作者授权的唯一外部 benchmark 在数据可得性和
 许可层成立，但不能建立一个能与公开 ECI 论文直接相比较的 E 行。原因不是模型性能、显卡、seed 或实现速度：
 固定 v0.9 source 后，公开物没有把 `source → development topics/folds → candidate universe → scorer` 闭合为唯一
@@ -2791,3 +2795,90 @@ ESC 实验；但它将改变至少候选全集、负例分布或 evaluator，既
 3. **停止动作**：外部 benchmark 授权在 ESC 上已完成一次 fail-closed 审计；不跑模型、不产分数、不换其他
    benchmark、不启动 C-32b/G-21。若作者要继续，必须另行选择“授权一个新 benchmark”或改为审计/整理现有
    MAVEN 公开对手证据；两者都须从新的 R0 决策卡开始。
+
+### 25.33 C-34 · 研究回合复盘与作者决策卡（2026-10-08）
+
+**结论：C-34 `done`；本研究回合以准入阻断收口，新训练仍 `blocked`。** C-31 没有准入机制，C-32a
+没有闭合 E 协议，因此没有 G-21 原始预测，C-33 的模型结果审计不适用。复盘走的是主表事先允许的
+“C-31/C-32 命名阻断 → C-34”分支，不是跳过实验门。C-34 的来源/CPU 自检不能充当 R5 模型评分。
+
+#### 开工自审与本轮回答的问题
+
+- **科研价值**：对准方法章的新机制准入门与公开可比性要求，将准入失败、工程失败与方法无效分开。
+  §25.30 排除的研究卡和 §25.32 的协议检查限制了下一轮可研究的对象；它们没有检验新机制的效果。
+  本复盘同时核对历史 `replan/F_eci_protocol_audit.md`，防止把可恢复组件误写成不存在，进而错误缩小研究空间。
+- **可行性**：复盘可行，只需公开源码、已有结果和本地 CPU；新实验仍卡【协议/授权】，冻结的 ESC
+  topic-disjoint 链未闭合、也没有可执行新机制合同。此次没有读 final-valid、载入模型、启动 GPU、
+  增加 benchmark/seed 或修改冻结指标。
+- **研究目标完成度**：G-19/C-30 完成了独立外部方法的透明适配及同协议复算（§25.28–§25.29）；
+  C-31–C-32 没有回答“新机制能否改善主指标”。正确产出是排除证据和可行性边界，不能声称找到创新、
+  证明该领域没有机会，或将无 E 分数写成 ESC 上的方法失败。三个旧方法章与 Ch6 的既有结论保持。
+
+#### 一手复核：修正 C-32a 依据，保持停止状态
+
+固定 [ICCL 官方源码](https://github.com/ChaoLiang-HUST/ICCL/tree/a7e3b3479040b17baf87f96c5de6df5291ae91c7)
+revision `a7e3b3479040b17baf87f96c5de6df5291ae91c7`；EventStoryLine scorer 仍取
+`46edefee5e82e0917b823abe0a18bf8c7770f15c`。只读代码，没有执行上游 trainer 或真实数据预处理。
+
+| 先前表述 | 一手源码位置与复核 | 对结论的修正 |
+|---|---|---|
+| 无法确定“末两 dev topics” | [ICCL `load_data.py` L21/L69](https://github.com/ChaoLiang-HUST/ICCL/blob/a7e3b3479040b17baf87f96c5de6df5291ae91c7/load_data.py#L21) 明确排除 `37/41`，将二者合为 dev。 | 官方数据目录无 manifest 是事实，但**ICCL 的 dev topic 身份可得**；不能说所有来源都没有指定。 |
+| ICCL shuffle 未绑定随机种子 | [`parameter.py` L33](https://github.com/ChaoLiang-HUST/ICCL/blob/a7e3b3479040b17baf87f96c5de6df5291ae91c7/parameter.py#L33) 默认 seed 209；[`main.py` L64–L85](https://github.com/ChaoLiang-HUST/ICCL/blob/a7e3b3479040b17baf87f96c5de6df5291ae91c7/main.py#L64) 在 `load_data(args)` 前设置 Python/NumPy/torch RNG。 | 应改为“**按文档分折，与 topic-disjoint 合同冲突**”；不能称整条入口没有 seed。源码级 seed 不证明论文落盘 folds 已复现。 |
+| 候选规则无法找到 | [`ESC_processor.py` L70–L130/L166–L174](https://github.com/ChaoLiang-HUST/ICCL/blob/a7e3b3479040b17baf87f96c5de6df5291ae91c7/ESC_processor.py#L70) 过滤六类有锚 event markables，枚举文档内无序两两组合；L216–L267 从 `event_mentions_extended/*.tab` 读取标签，缺文件时置 `NONE`。 | 部分规则可读；**不能概括成未过滤的全部 event pair，不能仅从 XML 的 PLOT_LINK 假定标签等价**。公开仓库缺这条辅助输入链，禁止运行其静默 `NONE` 分支生成实验金标。 |
+| typed scorer 的 FN 错误阻断二分类评分 | [ESC `eval_script.py` L90–L118](https://github.com/tommasoc80/EventStoryLine/blob/46edefee5e82e0917b823abe0a18bf8c7770f15c/eval_script.py#L90) 的错误位于 typed-relation 聚合，pair 分支单独计算；ICCL [`main.py` L380–L384](https://github.com/ChaoLiang-HUST/ICCL/blob/a7e3b3479040b17baf87f96c5de6df5291ae91c7/main.py#L380) 已调用 sklearn positive-class P/R/F1。 | **binary scorer 实现存在**；它与旧 ESC link-list scorer 的候选/方向/聚合语义仍须核对，不能从存在代码推出论文同轴。 |
+
+最终不可行项收窄为：**当前 topic-disjoint E 合同卡【协议】**，ICCL `load_data.py` L19–L35
+混合非 dev topics 后按 document shuffle/slice，而不是 topic folds；其 `train.npy`、extended-mentions 输入链
+及历史论文的候选/聚合身份也未闭合。ICCL 仓库没有 LICENSE 是另一项待决可得性问题。
+恢复上述组件既不把 ICCL 变成准入 V 行，也不产生新机制，更不授权更换 E 协议。
+
+#### CPU 自检与可追溯产物
+
+产物根：`runs/stages/R1/r1-v61-20260904/audit/c34-20261008/`。ICCL 克隆只读；ESC scorer 以固定 revision
+直接取得。本轮不需要完整 ESC 数据克隆；该克隆在会话服务重启时中断，未进入任何检查或结论。
+
+```bash
+uv run python runs/stages/R1/r1-v61-20260904/audit/c34-20261008/audit.py
+uv run python scripts/audit_r1_consistency.py \
+  --output runs/stages/R1/r1-v61-20260904/audit/cross_artifact_audit.json
+uv run pytest
+uv run ruff check src tests scripts
+uv run ekg-smoke
+```
+
+- 来源检查 **PASS**：dev/seed/scorer、缺失资产和 typed scorer 分支逐项确认；源文件 SHA 写入
+  `source_audit.json`。scorer SHA 与 §25.32 一致。
+- 真实上游 `load_data` 的**合成 fixture** CPU 检查 PASS：20 个非 dev topic，每 topic 4 个虚构文档，
+  每折前重置 seed 209；5 折 test 文档覆盖恰好 80 个且各折 train/test 文档不重叠，
+  **每折 train/test 的 topic 均有交集**。这只验证代码的 split 单元，不是 ESC 数据统计、preflight 或模型分数。
+- 首次检查脚本误选了 `fn_pairs_value` 的函数内赋值而非 `sum` 聚合赋值，断言失败；修正 AST 节点选择后
+  同一检查通过。没有修改上游代码、fixture、阈值或科学判据。
+- 本地三件套：**786 passed / 32 skipped**（torch 缺失）、ruff **0 error**、`ekg-smoke` **OK**；
+  R1 一致性审计 **36/36 requirements mapped**。未改项目代码或 torch 路径，本轮不要求远端 torch 测试。
+- `audit.py` SHA-256：`19756c9c1e2e4b47720f4b5b6ba2799fa55cddbf8ad5bdaf5060afbdec98b451`；
+  `source_audit.json` SHA-256：`5edda7e80095710409080e10529bc17d9dd3c64b19f0528c0d29d08923908c85`。
+
+#### 下一轮 R0 的检索约束
+
+1. 先核对本仓已有一手审计，再把差异核到官方 loader/preprocessor/scorer 的调用链；文件存在、
+   局部源码可读、CPU 完整闭合和论文保真度分别登记，不能互相替代。
+2. 同时报告**论文声明的 split**和**代码实际 split**。固定 seed 不修复 split 单元错误；缺历史 manifest
+   也不等于不能依法冻结一个明确标注的透明适配协议。后者须先得到范围裁决，不能冒充原论文复现。
+3. 只考虑尚未封存家族覆盖的新机制，先给 `observed error → treatment → mediator → main outcome` 和
+   最近邻差异，再核数据、强 baseline 与实现；不因相关论文存在或有空闲卡而立项。
+4. 辅助数据缺失且上游静默生成 `NONE` 时直接阻断；无模型输出的准入检查不做 power/预算虚构，
+   也不当作模型负结果。新 benchmark 并不能自动提供新颖机制或强可比对照。
+
+#### 作者决策卡（待裁决，不自动执行）
+
+**阻断句**：当前 ESC E 合同不可行，卡【协议】（上述 source/split/input 证据）；新机制合同也不存在。
+本轮“唯一外部 benchmark”的授权已使用，不能靠换 benchmark、改 fold、修 scorer 或补生成标注绕过。
+
+| 可选范围 | 科研目标与下一步交付 | 代价与声称边界 |
+|---|---|---|
+| **甲 · 建议：回到 MAVEN 主表的新机制 R0，将未闭合 E 退出本轮硬前置** | 授权一个新的、最多三卡的一手检索回合，针对方法章的已观测错误检验新机制机会；先改主表/状态机，再交机制差异、现有数据可行性、强对照和代码证据卡。全部排除仍停止。 | 放弃本轮外部泛化目标；不承诺能形成合同或改善分数。MAVEN 主指标、单 seed、封存家族与训练门不变；不是仅整理表格补行。 |
+| **乙 · 另行授权恰好一个新的外部 benchmark R0** | 先审核来源、许可、split、候选与 scorer，再谈新机制；明确允许选择一项，不立即批准 GPU。 | 改变外部验证范围；仍可能无可比协议或机制。ESC 已有资产保留为排除证据，不给分数。 |
+
+当前建议甲的理由是本轮失败尚未检验机制价值，而方法章的贡献仍需在 MAVEN 主表上成立；
+继续更换 E 数据本身不能解决这个问题。**这只是建议，尚未得到范围授权**；不重开 C-22、旧 D4/A4/C5、
+LLMERE，不加 seed，不改变论文结构。下一项只有在作者选择后写入主表，当前无可直接启动的 GPU 任务。

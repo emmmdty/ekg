@@ -34,8 +34,8 @@
 | Benchmark | **EventStoryLine (ESC) v0.9**，仅评估 causal-existence。官方仓库 revision `46edefee5e82e0917b823abe0a18bf8c7770f15c` 同址发布 v0.9 标注、evaluation format、baseline/evaluator，并以 CC BY 3.0 许可。原始 benchmark 论文是 [Caselli & Vossen (2017)](https://aclanthology.org/W17-2711/)；这不是新增标注。 |
 | 科研价值 | ESC 的 news-topic 分布与 MAVEN 的 Wikipedia 文档不同，且公开 ECI 文献把最后两个 topic 留为 development、对其他 20 个 topic 作 5-fold cross-validation，报告 positive-class P/R/F1；它可检验一项未来的 causal-relation 机制是否只在 MAVEN 有效。它**不能**证明 MAVEN 的方向性 `CAUSE/PRECONDITION` 主表结论，也不能替代该表。见 [ICCL 的原文 §4.1](https://aclanthology.org/2024.emnlp-main.51.pdf) 与 [RichGCN 的 cross-topic 设定](https://aclanthology.org/2021.naacl-main.273.pdf)。 |
 | E 的声称边界 | `E` 是独立 benchmark 的冻结 protocol 行，不是 `U`：只有同一 ESC source hash、topic split、候选全集和 scorer 的 E 行可以互比；不和 MAVEN U 行相减、排序或替门。每个正式 E 行仍标 `single-seed / non-confirmatory`。 |
-| 已排除的捷径 | ICCL 原文确实声明 ESC v0.9、最后两 topic development、其余 topic 5-fold，但其公开仓库没有许可证、没有生成所需 `train.npy` 的闭环，且 `load_data.py` 对 document 而非 topic 作未绑定 `random.shuffle`。DICP 同样没有许可证；README 指向未发布的 `src/run.sh`，实际源码只有 Causal-TimeBank 的 `main_ctb.py` 且缺被 import 的文件。二者均只能作为 P 参考，不能作为 V 行。MAVEN-ERE 官方仓库是 GPL-3.0 且公布 ESC 预处理/命令，但它的 `main_other.py` 对 tokenized samples 直接 `KFold`，也不是本 E 层的 topic-disjoint protocol。 |
-| C-32a 结论 | **协议阻断，不能建立 E 行。** 固定 source 的 v0.9 有 22 个 topic / 258 XML，目录无 dev/test/fold manifest；同一 source 的 v1.0 才有 `dev/`、`test/`，不能倒灌到 v0.9。官方 baseline 分别使用仅同句、PPMI 同/跨句等不同候选规则；`eval_script.py` 也把 typed-relation F1 的 FN 错取 pair-level FN。因而无法得到与近期论文同一的 topic split、candidate universe 和 P/R/F1 evaluator。完整证据见 `results/PHASE_R1.md` §25.32。 |
+| 已排除的捷径 | ICCL 原文声明 ESC v0.9、最后两 topic development、其余 topic 5-fold；公开代码明确 dev/seed，但 `load_data.py` 按 document 而非 topic 分折，且仓库没有许可证、没有生成 `train.npy` 的完整输入链。DICP 同样没有许可证；README 指向未发布的 `src/run.sh`，实际源码只有 Causal-TimeBank 的 `main_ctb.py` 且缺被 import 的文件。二者均只能作为 P 参考，不能作为 V 行。MAVEN-ERE 官方仓库是 GPL-3.0 且公布 ESC 预处理/命令，但它的 `main_other.py` 对 tokenized samples 直接 `KFold`，也不是本 E 层的 topic-disjoint protocol。 |
+| C-32a 结论 | **协议阻断，不能建立 E 行。** v0.9 官方数据没有 split manifest；ICCL 官方代码明确 dev topics、seed、候选处理与二分类 scorer，但 document folds 不符合冻结 topic-disjoint E 协议，`train.npy`/extended-mentions 预处理输入未闭合。官方 typed-relation scorer 的 FN 错误不等于 binary scorer 不存在。完整历史证据与 2026-10-08 更正在 `results/PHASE_R1.md` §25.32–§25.33；更正不准入第三方 runner 或模型。 |
 
 因此这不是“再找一个能跑的数字”：先让公开 benchmark 的**数据、split、候选与 evaluator**闭合，再寻找没有被 A4/旧机制占据的新研究合同。C-32a 已发现它们无法同时唯一确定，按【协议】收口；不得以 ICCL/DICP/MAVEN-ERE 的相近但不同 runner 代替，也不得另换一个外部语料绕过本次“一项”授权。
 
@@ -86,10 +86,12 @@
    不实现 first-line-only driver、不生成、不评分，也不把该未运行状态写成方法低分。
 6. **C-30 · 表格和声称审计。** 从可用的 G-19 raw predictions 独立重算主表；为每一行输出 P/V/U 状态和七项登记，
    并明确 LLMERE 为“P 有 / V(b) / U 无分数”的可得性行。只有 U 层、同一章、同一 unit 的行可列 delta；P 层永不进排序。
-7. **C-31b → C-32a · 外部验证协议闭合（已阻断）。** 固定 ESC v0.9 source 后，CPU 审计证明官方 source 未发布
-   v0.9 的 exact development topics/folds 或唯一 candidate universe，而 evaluator 对 typed relation 也有错误；故不
-   运行 ICCL/DICP/MAVEN external runner，不建立 E 行。详见 `results/PHASE_R1.md` §25.32。
-8. **停止与作者决策。** 本轮“一项外部 benchmark”授权已经消耗且以协议阻断收口，C-32b/G-21 不启动。若要扩大
+7. **C-31b → C-32a · 外部验证协议闭合（已阻断）。** 固定 ESC v0.9 source 后，冻结的 topic-disjoint 协议
+   与 ICCL 的 document-fold 代码不符，预处理输入未闭合；dev/seed/binary scorer 可得不等于论文同轴。
+   不运行 ICCL/DICP/MAVEN external runner，不建立 E 行。历史与更正在 `results/PHASE_R1.md` §25.32–§25.33。
+8. **C-34 · 研究回合复盘（✅ 2026-10-08）。** 官方源码与合成 CPU split 检查收窄上述依据；复盘和下一轮
+   R0 约束、作者决策卡均见 `results/PHASE_R1.md` §25.33。不将准入阻断写成模型低分。
+9. **停止与作者决策。** 本轮“一项外部 benchmark”授权已经消耗且以协议阻断收口，C-32b/G-21 不启动。若要扩大
    可比性，需由作者明确授权新的 benchmark 选择或不同的研究目标；在此之前不把 E 层失败误写成方法失败，也不靠
    更换语料、调阈值或 GPU 试跑绕开。
 
