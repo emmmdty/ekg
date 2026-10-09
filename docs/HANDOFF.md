@@ -1,8 +1,8 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-08（+08:00，作者新授权后）**：**科研改进与路线裁决由执行代理负责，作者只验收最终结果**。
-> 当前 **C-35/C-36 ✅ → C-37 诊断选择 ✅ → C-38 诊断实现 ✅ → C-39 CPU ready / CUDA pending →
-> G-22 单 seed 验证 → C-40 复算与代理裁决**。ESC 退出本轮硬前置，MAVEN 主表保持。
+> 更新于 **2026-10-09（+08:00，4090 已启动）**：**科研改进与路线裁决由执行代理负责，作者只验收最终结果**。
+> 当前 **C-35/C-36 ✅ → C-37 诊断选择 ✅ → C-38 诊断实现 ✅ → C-39 D4 CUDA ✅ / A4+C5 pending →
+> G-22 D4 四卡运行 → C-40 复算与代理裁决**。ESC 退出本轮硬前置，MAVEN 主表保持。
 > 不再等待作者选科研路线；旧失败结果不改写，单 seed 与有效性/资源边界保持。详见主表与 §0.3。
 > 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
 > 本文只记录**状态、决策、依赖、下一步**，**不复制实验表格——数字只认 [`results/`](results/README.md)**。
@@ -24,7 +24,7 @@
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-39 CPU ready / CUDA pending**：三项诊断已实现、冻结并部署两台服务器；下次空卡先跑 smoke→G-22 诊断→C-40 裁决。合同 `phases/PHASE_recovery_validation_20261008.md`，结果 §25.35。C-32b/G-21 的 ESC 链未启动，E 退出本轮硬前置；单 seed 不变、旧 sealed bundle 不改写。 |
+| **活动任务** | **G-22 D4 running**：两个 CUDA smoke 已通过，4090 四个 worker 正在运行两头各五折的固定队列，唯一 seed 13。先监测已有任务，不重复启动；全部完成后执行合同 CPU collector，再作 C-40。A4/C5 的 CUDA 尚未执行，权重仍在 5090。合同 `phases/PHASE_recovery_validation_20261008.md`，实际状态/日志/PID 见结果 §25.36。 |
 | ✅ **裁决已落地（执行代理拍板，§25.24）** | **不投第二个机制设计周期。** C-28a 之后理由更硬：oracle 给完美图仍是零增益 ⇒ (甲) 从「走不通」变成「走了也没用」，(乙)「只在结构足够时介入」失去前提。⛔ 仍不得换名、扫参、加大 backbone、启动未授权多种子。若将来 Ch4 真的产出更准的关系图，(甲) 可重新立项。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **裁决前必须先读的一条** | **配置敏感度大过效应量**：同样三臂同样 seed，只换打包规则，`full` 就动 `+.009207`，而更好那一跑的 `full − base` 只有 `+.006740`（§25.23）。⇒ 在这个量级上投第二周期，**很可能测不出任何可信的东西**；要投就得先解决可测性（例如提高效应目标，或先把配置抖动压下去），这一点应写进裁决材料。 |
@@ -38,15 +38,15 @@
 | 🔴 **读表 6-2 的前提** | 那张表**不能按 MRR 从高到低读**——评测单元本身有一条 **Hit@10 = 1.000** 的文档捷径，读候选文本的对手吃得到、SeDGPL 族吃不到；另一个对手则因**金标在训练图里 0/1,908 有边**而系统性垫底。两条机制都已量出，**见 §0.4c 末尾**。**不得写「我们超过了 CSProm-KG / SimKGC」。** |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问。不可行点名类别与一手证据，停止该路线；按 10-08 委托由执行代理在现有主任务内选择下一路线，先改主表再执行。有效性与未授权资源动作仍不可绕过。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文 §0.3 只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **GPU**（细则 §E.3） | **gpu-4090**：C-28 已结束，不再占卡；代码已按受控路径同步到 `8bc62b0` 后完成聚合，未清理任何 remote-only 产物。后续任务仍须先 `nvidia-smi` 核卡、不挤占他人。隧道反复掉线且作者的 cpolar 脚本**管不了这台**，按三态判活。**gpu-5090** ⚠️ 核卡再用，且**每次单独取得授权**。**多种子：作者 2026-09-18 晚明确「现在不做」。** |
+| **GPU**（细则 §E.3） | **gpu-4090**：D4 冻结源码 `61bc4df` 上四卡运行，checkpoint 留在该机，新根 `runs/stages/R1/r1-v61-recovery-ready-20261008/`。每卡队列失败即停止，禁止重开已有输出；SSH 失败按 ALIVE/GONE/SSH_FAILED 三态判活，不能当作进程死亡。**gpu-5090**：A4/C5 只完成 CPU 准备，GPU 仍须具体任务授权。额外 seeds 与跨机 checkpoint 未授权。 |
 | ⚠️ **只在 4090 上的大件** | `runs/factuality/predicted_edges_valid.jsonl`（133 MB，**`.1583` 的真上游**）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）、两个对手的 checkpoint、**C5 三个周期的 checkpoint**。**本地那份 `runs/relations/supervised_dump.jsonl` 是另一份 dump，别拿它当上游。** |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与**估算基准率**见 `EXPERIMENT_PLAN.md` §3（按 git 里同类事件的真实起止天数估，不按计算耗时估）。 |
 | 完成后必须做什么 | 按 **§6** 五步回填：产物落地 → 写结果页 → 改主表行状态与 commit → 推进队列 → commit + **push**。**没 push 就没交接。** |
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最新本地门（2026-10-08，C-39 CPU）**：三件套与 R1 一致性门通过；
-> torch 对应测试在 4090/5090 均用 CPU 真正执行。精确计数/日志/hash 只见 `results/PHASE_R1.md` §25.35。
+> **最新本地门（2026-10-09，G-22 启动）**：三件套与 R1 一致性门通过；
+> torch 对应测试在 4090/5090 均用 CPU 真正执行（§25.35）；最新启动证据见 `results/PHASE_R1.md` §25.36。
 > 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 最终结果
 > 已进入 `results/PHASE_R1.md` §25.27，周报尚未追补该结果。
 
@@ -99,17 +99,29 @@ uv run python scripts/audit_r1_consistency.py \
 
 **C-35/C-36 已完成**：冻结预测错误交换复算、A4 gold 截断副本按原 SHA 恢复、
 真实 loss 的解析梯度反例与远端 CPU 测试、5 个固定版本科研 skills 和结构校验已交付。
-**C-37/C-38 诊断范围已完成，C-39 CPU ready**：D4 marked-CLS 的 linear/tanh5 单变量头对照；
+**C-37/C-38 诊断范围已完成，C-39 D4 CUDA passed / A4+C5 pending**：D4 marked-CLS 的 linear/tanh5 单变量头对照；
 A4 checkpoint train-only 梯度分解（零 optimizer step）；C5 同 pair-cache 的 average/官方 antecedent 解码。
 真实微型 CPU 模型的训练/重载/梯度/重放全链在两机通过；数据/权重/hash 和部署后的默认入口均通过。
 完整合同 `phases/PHASE_recovery_validation_20261008.md`、唯一 argv/hash 包
 `configs/recovery_validation_20261008.json`；两机研究代码已部署 `2a4f60b`，不删除 remote-only 文件。
-**GPU 之外的当前诊断前置已闭合**；下一次可用 GPU 先运行对应 smoke，成功后才允正式诊断。
-4090 cwd `/data/TJK/ekg` 用 D4 包；5090 cwd `/mnt/aidata/tongjiakai/ekg` 用 A4/C5 原地 checkpoint，
-GPU 仍须具体任务授权；本轮没有 GPU 训练或真实大模型推理，没有移动权重。
+**GPU 之外的当前诊断前置已闭合**；D4 两个 smoke 已通过，正式四卡队列已启动。
+**2026-10-09 D4 GPU 开工自审（启动前记录）**：科研价值是用 frozen strongest-CLS
+配方隔离 linear/tanh5 头参数化，检验 §25.34 的欠额解释，对准 D4 五折 OOF 主指标，
+不重开旧机制、不以 smoke 判有效。可行性：§25.35 的资产/真实 CPU 门已通过，
+本次本地三件套与一致性门重新通过，4090 成功核到四张空卡，作者明确要求启动。
+先两个 head smoke，再以四张卡运行 seed-13 十个独立 fold；详见结果页 §25.36。
+4090 cwd `/data/TJK/ekg` 用 D4 包，10-09 已按作者授权启动；5090 cwd
+`/mnt/aidata/tongjiakai/ekg` 用 A4/C5 原地 checkpoint，其 GPU 仍须具体任务授权。
+10-08 CPU 准备没有执行 GPU；10-09 D4 已执行 CUDA smoke/正式训练，两次均未移动权重。
 源码变动后预检会拦截 hash drift；不得跳过或事后重绑，应在输出前形成新身份。
 **没有新方法准入或提分结论**；诊断之后的实质新机制仍需文献差异、可部署输入与 power/消融/负控。
-科研裁决由代理完成，作者验收结果。实测和 CPU 就绪证据只见 `results/PHASE_R1.md` §25.35。
+科研裁决由代理完成，作者验收结果。CPU 就绪证据见 `results/PHASE_R1.md` §25.35，当前 GPU 状态见 §25.36。
+
+**接手顺序**：先成功 SSH 读取四个 worker 的 `ps -eo etime`、每 job 的 `status.json` 和独立日志；
+四卡固定顺序/PID/完整启动命令与证据 SHA 均见 §25.36。只有十个正式 job 都 `complete`，
+才运行 frozen plan 的 `postprocessing.commands`（`scripts/collect_recovery_factuality.py`）。
+失败保留原产物，由根因分析决定新 namespace/身份；不重新发相同 `--execute`。
+collector 的所有身份/覆盖闸门通过后回填 D4 C-40，A4/C5 未验证仍保持 pending。
 
 以下 C-23–C-34 是历史已完成队列；其中“等待作者范围选择”已被上述委托取代。
 

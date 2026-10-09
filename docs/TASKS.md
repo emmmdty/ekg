@@ -231,7 +231,8 @@ author delegation releases a new in-scope research queue; it does not reopen old
 - [x] **T084 [RS-001–RS-003] / C-38** Implement frozen diagnostics and shared execution interfaces
   → real tiny-model training/reload/gradient/decoder tests passed on both machines; no new mechanism admitted.
 - [ ] **T085 [RS-001–RS-003] / C-39, G-22** Freeze preflight and execute admitted seed-13 comparisons
-  → CPU package and asset gates passed (`PHASE_R1.md` §25.35); CUDA smoke/formal results pending.
+  → CPU package/asset gates passed (§25.35); D4 CUDA smokes passed and seed-13 four-GPU fold queues running
+  (§25.36). A4/C5 CUDA and all formal collected results remain pending.
 - [ ] **T086 [RS-001–RS-003] / C-40** Recompute actual improvements and make the next scientific decision
   → main results, ablations/negative controls and explicit limitations, not workflow completion counts.
 

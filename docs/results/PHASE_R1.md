@@ -3077,3 +3077,63 @@ push 后由 Git bundle 更新各自 origin/main 与 main。保留所有 remote-o
 没有新方法训练准入，也没有新的提分结论。
 
 本轮就绪证据 `artifact_hashes.json` SHA **`a79c9852718d58db64b224982e4a3ff9fb84f9957e1e02e3d1f677d6dd343dc4`**；回传日志/资产 JSON 均核双端 SHA 一致。
+
+### 25.36 G-22：D4 seed-13 GPU 启动（2026-10-09）
+
+**启动前自审**：科研价值是以 strongest marked-CLS 配方，仅干预 linear/tanh5 head，
+检验 §25.34 的分类头欠额解释，对准 D4 五折 OOF macro-F1 与固定 CLS anchor；
+不重开旧失败家族，不将 smoke 或一次训练 seed 当作方法有效证据。
+可行性：§25.35 数据/CV/模型内容与真实 CPU 接口已闭合；本次重新运行本地三件套，
+pytest **797 passed / 42 skipped**、ruff **0 error**、ekg-smoke **OK**，一致性 **36/36**。
+成功 SSH 核到 4090 四卡均无 compute process，memory used 分别 **68/11/11/11 MiB**，
+utilization 均 **0%**；远端 tracked 工作树无改动，HEAD=`61bc4df`。
+作者本次明确“4090可用，启动GPU任务”；仅用该机、训练 seed 13，无 checkpoint 跨机搬运。
+
+冻结 plan SHA 仍为 **`174214301d2cd3906c61ae3582de43931ebcbcd2b1f85b1e1b59b6da03f11bbf`**，
+源码不改，cwd=`gpu-4090:/data/TJK/ekg`。先 GPU 0 的 `d4-linear-smoke` 与 GPU 1 的
+`d4-tanh5-smoke`，使用启动器的 occupancy/CUDA/hash/输出不存在闸门；完成状态及 artifact
+hash 合格后才开对应正式 fold。日志为 `logs/recovery-d4-{linear,tanh5}-smoke-20261009.log`。
+上述授权、自审与队列在相应启动前写入本节；以下是实际核验状态，尚无完整 OOF 模型分数。
+
+冒烟 launcher PID：linear **3504571**，tanh5 **3504662**；两个真实 CUDA trainer 完成，
+两个 `status.json` 均为 **complete**。同 plan/seed、head 配置、selected epoch=1、有限 curve
+以及声明的全部 artifact SHA 已独立重校验通过。
+linear smoke status SHA **`754f3da969ceaa5ed0602e509c55eff63d529008dc777bb7107049de1b7093ef`**；
+tanh5 smoke status SHA **`8f76c1adee31bcd2f61fc0788e7c2e3afd7e3208d1b317bf92d56e3250530e89`**。
+小样本 smoke 仅证明接口/真实 CUDA 训练与保存重载可运行，不以其分数决定后续配方。
+正式调度事前冻结为以下操作队列，不改任何训练 argv：
+
+| GPU | worker PID | 首批 CUDA trainer PID | 顺序执行的冻结 job ID |
+|---|---|---|---|
+| 0 | 3506554 | 3507582 | `d4-linear-fold-1` → `d4-tanh5-fold-3` → `d4-linear-fold-5` |
+| 1 | 3506591 | 3507864 | `d4-tanh5-fold-1` → `d4-linear-fold-3` → `d4-tanh5-fold-5` |
+| 2 | 3506635 | 3507590 | `d4-linear-fold-2` → `d4-tanh5-fold-4` |
+| 3 | 3506740 | 3507882 | `d4-tanh5-fold-2` → `d4-linear-fold-4` |
+
+每卡一个 `setsid nohup bash -c 'set -e; for job in <上述序列>; do ...; done'` worker，
+每次调用冻结启动器 `--execute --gpu <index>`，每任务独立日志
+`logs/recovery-<job>-20261009.log`；队列日志 `logs/recovery-d4-gpu<index>-queue-20261009.log`。
+每条 SSH 只启动一个 worker。每任务前重新核空卡，任一失败该卡余下队列停止；
+不同卡可独立继续。checkpoint 始终留在 4090，不自动重启已有输出，不增 seed。
+
+**2026-10-09 20:32:27 +08:00 核验**：四个 worker 的成功 SSH `ps` 证明 ALIVE；
+四个首批正式 job 均 `running`，真实 trainer 占用相应 GPU，日志已进入 epoch 5，loss 有限。
+四卡总 memory used **3628/3571/3591/3591 MiB**，utilization **55/75/83/81%**（采样值）；
+compute process PID 与上表一致。另六个 job 是实际存活 shell 队列里的后继，尚未启动，
+不是已完成实验。重校验 **109** 个源码 SHA 及所有完成 smoke artifact，无漂移。
+训练中间 selection-dev 曲线不得用来修改 head、配方、预算或队列，不提前裁定效果。
+
+启动证据根（本地与 4090 均有）：`runs/stages/R1/r1-v61-20260904/audit/g22-start-20261009/`。
+`launch_snapshot.json` 含 UTC 时间、commit、完整 worker shell 命令与 `ps -eo etime` 等价输出、
+全部当前 status、GPU/compute process 原始行、smoke hashes 和正式训练 log tails；
+SHA **`4f887d8c302681cc8038d8217794be9c4f70917637b30e5fa2938523785c2753`**，回传双端一致。
+首批完整日志、checkpoint 与每折原始评测输出留在 `gpu-4090:/data/TJK/ekg`。
+checkpoint 根为 `.../r1-v61-recovery-ready-20261008/d4/<head>/fold-<N>/`；
+状态文件另在 `.../r1-v61-recovery-ready-20261008/d4-<head>-fold-<N>/status.json`。
+
+**交接状态**：D4 C-39 CUDA 门通过，G-22 **wip**（四卡训练，十个正式 job 尚未全部完成）；
+A4/C5 的 CUDA smoke/audit 未运行，原地 5090 权重未搬运。所有十个正式 status=complete 后，
+执行 frozen plan 的 CPU `postprocessing.commands`，产出 `d4_paired_report.json`，
+核 OOF 覆盖、同协议两头比较和 linear-vs-anchor parity，再进入对应 C-40 科研裁决。
+SSH 中断本身不代表 worker 结束，不重新发相同任务；失败保留输出并先分析原因。
+本节不产生“方法已有效/已提高三章”的结论。
