@@ -231,10 +231,11 @@ author delegation releases a new in-scope research queue; it does not reopen old
 - [x] **T084 [RS-001–RS-003] / C-38** Implement frozen diagnostics and shared execution interfaces
   → real tiny-model training/reload/gradient/decoder tests passed on both machines; no new mechanism admitted.
 - [ ] **T085 [RS-001–RS-003] / C-39, G-22** Freeze preflight and execute admitted seed-13 comparisons
-  → CPU package/asset gates passed (§25.35); D4 CUDA smokes passed and seed-13 four-GPU fold queues running
-  (§25.36). A4/C5 CUDA and all formal collected results remain pending.
+  → CPU package/asset gates passed (§25.35); D4 CUDA smokes, ten seed-13 folds and frozen CPU collection
+  completed (§25.37). A4/C5 CUDA/results remain pending.
 - [ ] **T086 [RS-001–RS-003] / C-40** Recompute actual improvements and make the next scientific decision
-  → main results, ablations/negative controls and explicit limitations, not workflow completion counts.
+  → D4 head-control decision completed (§25.37): retain linear, reject this tanh5 route; no new method claim.
+  A4/C5 pending. Main results, ablations/negative controls and explicit limitations govern further admission.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

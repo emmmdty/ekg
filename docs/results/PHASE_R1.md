@@ -3137,3 +3137,81 @@ A4/C5 的 CUDA smoke/audit 未运行，原地 5090 权重未搬运。所有十�
 核 OOF 覆盖、同协议两头比较和 linear-vs-anchor parity，再进入对应 C-40 科研裁决。
 SSH 中断本身不代表 worker 结束，不重新发相同任务；失败保留输出并先分析原因。
 本节不产生“方法已有效/已提高三章”的结论。
+
+### 25.37 G-22 / D4 C-40：五折结果汇总与裁决（2026-10-10）
+
+**汇总前自审**：科研价值是从冻结的十折 raw predictions 计算 pooled 主指标与 document-paired
+区间，区分 head 对照是否改善和强 CLS 配方是否重现；对准 §25.35 的诊断合同及 D4 强对照，
+不把一次 seed 或部分 dev 曲线当方法章贡献。可行性：成功 SSH 已读到两个 smoke 与十个正式
+status 全为 complete，原四个 worker 的成功 ps 无对应进程；产物、source/CV 与 frozen anchor
+留在 4090，可用冻结 CPU collector 原地校验汇总，无需 GPU、搬运 checkpoint 或 final-valid。
+本节在执行 collector 前记录；正式数字和结论随后据实际输出回填。
+
+#### 完成与协议核验
+
+两个 smoke、两头各五折均 **complete**；十个正式 run 均 seed 13、源码 commit `61bc4df`，
+训练均跑满冻结 **12 epochs**，只由 selection-dev 选择 checkpoint。
+冻结 collector 已 **exit=0**：所有正式 status/plan/产物 SHA、source/CV、head、selection 边界、
+固定 CLS anchor 的输入身份及 pooled mention 覆盖均通过。每头各 **2,913 documents / 73,939 mentions**，
+无重复或缺失，final-valid 未访问。四个 shell worker 已 GONE，未重启任何任务。
+当前 4090 四卡被其他任务使用，本轮只运行 CPU 汇总，无新 GPU 任务或跨机 checkpoint。
+
+#### 主指标（F1 × 100；pooled OOF，不平均五折分数）
+
+| 对照 | macro-F1 | CT+ | PS+ | CT− | PS− | Uu |
+|---|---:|---:|---:|---:|---:|---:|
+| frozen strongest CLS anchor | 55.399532 | 97.530498 | 55.261194 | 66.275316 | 38.245614 | 19.685039 |
+| matched marked-CLS linear | 55.399532 | 97.530498 | 55.261194 | 66.275316 | 38.245614 | 19.685039 |
+| matched marked-CLS tanh5 | 42.154650 | 97.108327 | 39.303843 | 43.885147 | 22.632794 | 7.843137 |
+
+| 文档配对比较 | 差值（百分点） | 95% bootstrap CI（百分点） |
+|---|---:|---|
+| tanh5 − linear | **−13.244882** | **[−15.496940, −11.064141]** |
+| linear − frozen CLS anchor | **0.000000** | **[0.000000, 0.000000]** |
+
+bootstrap 为冻结 **10,000 draws / seed 13**；训练仍仅一个 seed。
+独立 raw-label 审计确认 linear 与 frozen anchor 的 **73,939 个标签逐一相同，0 disagreement**，
+不是恰巧相同的平均分。baseline parity 已恢复，不把它当新方法提分。
+
+#### 逐折与失败形态
+
+| fold | linear macro-F1 | tanh5 macro-F1 | linear / tanh5 selected epoch |
+|---|---:|---:|---|
+| 1 | 55.683154 | 36.585477 | 7 / 1 |
+| 2 | 55.211756 | 56.975197 | 5 / 9 |
+| 3 | 55.514744 | 51.037941 | 4 / 10 |
+| 4 | 54.342652 | 19.420320 | 8 / 1 |
+| 5 | 55.678705 | 19.424240 | 5 / 1 |
+
+tanh5 fold 4/5 分别把 **14,751 / 14,795** 个 mention 全预测为 CT+，等于多数类 baseline；
+两折的其余四类 F1 全为零。fold 1 不预测 PS−；fold 2 则高于对应 linear，故不能说每折都变差。
+所有折都训练满 12 epochs，上表是 selection-dev 选择，**不是提前停训或事后挑 evaluation epoch**。
+全量错误交换：双方正确 **67,890**、双方错误 **2,024**、仅 linear 正确 **2,290**、
+仅 tanh5 正确 **1,735**。损失遍及少数类，不只是 Uu 噪声。
+
+#### 独立复算、追溯与裁决
+
+独立审计直接用 gold/raw predictions 的 Counter 计算每类 `2TP/(n_gold+n_pred)`，
+逐折与既有 evaluator 吻合（容差 `1e-12`），pooled 指标与 collector 吻合，
+逐折 manifest 的 exact mention cover、无重叠和全部 dev curve 的 12 epochs 均通过。
+首次临时审计把 `load_maven_fact` 生成器误作可重复遍历，第二次构建 doc map 时已耗尽，
+出现 KeyError；定位该 iterator 语义后改为一次 materialize，复算通过。
+这个临时审计错误没有修改模型、冻结 collector、输入或任何已有输出。
+
+配对报告：`gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-recovery-ready-20261008/d4_paired_report.json`，
+SHA **`34ba45903a876df405ef366cdff2bde8b225c3c152ac7ebcc09ca032a41fe0f7`**。
+独立复算：`runs/stages/R1/r1-v61-20260904/audit/g22-results-20261010/independent_raw_audit.json`，
+SHA **`1805d7fff3b5c2615fb6e20160afe4c5359fe81e6e60cda7ee8b20fdb339717a`**；
+含每折分数、prediction counts、selected epoch、完整覆盖、标签一致性和 40 个产物 SHA。
+两份 JSON 已回传本地同一 evidence 根，双端 SHA 一致；checkpoint 仍留 4090。
+汇总相关本地测试 **7 passed**；文档一致性门 **36/36**，diff whitespace 检查通过。
+
+**代理裁决**：D4 本次诊断计算与对应 C-40 完成，**没有改善，tanh5 路线不推进**。
+后续 D4 使用已证明 parity 的 linear 作为匹配控制，不扫 hidden size/lr/epoch、不增加 seed、
+不拿修 baseline 当创新。五维头在本冻结配方下表现退化，是当前 head 方案的直接反证；
+尚未测饱和或梯度机制，不能宣称已唯一定位优化失败原因，也不能唯一解释旧 cue/factor 家族失败。
+不同 head 的初始化 RNG 消耗不同，单 seed/document CI 不能代替跨初始化确认；
+不泛化为所有非线性头无效。新 D4 信号仍须回 C-37 完成文献差异、可部署输入、强对照、
+power/单变量消融/负控后另行准入，旧 sealed 家族不恢复。
+现有队列下一步是 A4/C5 的原地冻结诊断；两者未运行 GPU，**没有新结果**，
+5090 仍须具体任务授权，不由 D4 完成冒充三章改进。

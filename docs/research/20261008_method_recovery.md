@@ -88,3 +88,12 @@ ACCI 已审计为缺可运行实现，不重写他人方法冒充复现。
 C5 在原 checkpoint 所在机器导出 pair scores 后可 CPU 重放。数据和训练/推理函数已有，
 无新增标注、final-valid、seed 或权重跨机搬运。GPU 空闲只影响 CUDA smoke/计算，不妨碍本轮实现。
 本轮不做 GPU 训练/真实大模型推理；CPU 微型训练仅验证接口，不把 official antecedent training 宣称为已复现。
+
+## 2026-10-10 D4 诊断裁决
+
+上述合同的 D4 五折 head 对照与独立 raw-label 复算已完成，权威数字见
+[`../results/PHASE_R1.md`](../results/PHASE_R1.md) §25.37。
+linear 精确重现 frozen strongest CLS predictions，tanh5 pooled 退化且部分折多数类坍塌。
+代理不推进这个五维头方案，保留 linear 作为后续匹配控制；不扫参、不增加 seeds。
+这是当前配方下 head 方案的反证，未唯一解释旧机制失败；新信号仍须独立准入。
+A4/C5 尚未执行真实 checkpoint 的 CUDA 诊断，不能据此认定三章已改进。

@@ -1,15 +1,15 @@
 # EKG 实时状态
 
-> 更新于 **2026-10-09**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-10-10**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
 
 **当前任务是三个方法章的根因与效果改进。2026-10-08 作者已委托执行代理作科研裁决，作者只验收结果。**
 C-35/C-36 完成；C-37 诊断选择、C-38 诊断实现完成，C-39 **D4 CUDA passed / A4+C5 pending**。
-4090 上 G-22 D4 四卡固定队列正在训练，唯一 seed 13；先监测已有任务，十个正式 fold 完成后
-执行 frozen CPU collector，再作 D4 C-40 裁决。A4/C5 权重仍在 5090，GPU 尚未执行。
-合同见 `phases/PHASE_recovery_validation_20261008.md`，实际队列/日志/PID 见 `results/PHASE_R1.md` §25.36。
+G-22 D4 十折训练、CPU 配对汇总与对应 C-40 裁决已完成：linear 重现强对照，tanh5 退化，
+不推进五维头；后续保留 linear 匹配控制。A4/C5 权重仍在 5090，GPU 尚未执行，现有诊断仍待验证。
+合同见 `phases/PHASE_recovery_validation_20261008.md`，启动身份见 §25.36，最终结果见 `results/PHASE_R1.md` §25.37。
 ESC 退出本轮硬前置；不换 MAVEN 主任务、不重写旧失败数字、不开未准入 GPU 实验。
 科研选择不再等待作者；5090/跨机 checkpoint/额外 seeds 的资源边界保持。
 
