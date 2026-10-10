@@ -1,20 +1,18 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-10（+08:00，D4 结果汇总）**：**科研改进与路线裁决由执行代理负责，作者只验收最终结果**。
+> 更新于 **2026-10-10（+08:00，交接整理完成）**：**科研改进与路线裁决由执行代理负责，作者只验收最终结果**。
 > 当前 **C-35/C-36 ✅ → C-37 诊断选择 ✅ → C-38 诊断实现 ✅ → C-39 D4 CUDA ✅ / A4+C5 pending →
 > G-22 D4 完成 → C-40 D4 裁决完成 / A4+C5 pending**。ESC 退出本轮硬前置，MAVEN 主表保持。
 > 不再等待作者选科研路线；旧失败结果不改写，单 seed 与有效性/资源边界保持。详见主表与 §0.3。
 > 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
 > 本文只记录**状态、决策、依赖、下一步**，**不复制实验表格——数字只认 [`results/`](results/README.md)**。
 >
-> **状态一句话：D4 v6.2 的一个完整周期已收口——必要门不过，机制无效**（G-18 `gate_failed`），
-> 且 **oracle 诊断证明给一张完美的因果图也是零增益**（`oracle − base = −.000223`，CI 跨 0，§25.25）
-> ⇒ 不是边不够好，是这套接法本身不携带增量信息。归因链完整（§25.21–§25.25）。
-> **C-28 已完成**：10 个 run 全部 `exit=0`，五折 OOF 覆盖精确；gold 没有优于 predicted，配对 CI
-> 跨 0。完整数字、artifact SHA、逐折结果和上游 test-max 选模错误见 `results/PHASE_R1.md` §25.27。
-> 其余三章维持 09-18 的终局判断（A4 一个周期失败 · C5 家族封存 · Ch6 唯一有正结果，第一轮已收口）。
-> ⇒ **D4 单章队列已清空，不重开第二个机制周期。** 后者已在 §25.24 裁定为不投；C-28 只补充
-> 外部保真度证据，不改这个裁定。下面 §0.3a 的旧队列描述属于历史。
+> **最新结论**：D4 head 诊断已收口，linear 精确重现强对照，tanh5 退化，**本轮没有提分**。
+> 代理决定保留 linear 匹配控制、不推进当前五维头；完整数字、配对区间和边界只见
+> [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.37**。A4/C5 只有 CPU 就绪证据，尚无新的真实模型结果。
+> **旧机制历史**：D4 cue/factor/causal-residual 与旧 C5 家族仍封存，A4 旧周期仍失败，E3 第一轮已收口。
+> 新机制研究仍可按 10-08 委托回 R1 准入；**旧家族关闭不等于三个方法章的改进任务完成**。
+> 旧 D4 oracle/EFD 归因见结果 §25.21–§25.27，§0.3a 等旧队列仅供追溯。
 >
 > **最短读法**：首表 → **§0.3（当前队列）** → 需要哪章再看 §0.4 的对应小节。
 > §0.5–§0.7 是已裁定的决策与纪律，开工前扫一眼。
@@ -25,20 +23,20 @@
 | 项 | 值 |
 |---|---|
 | **活动任务** | **G-22 / C-40 D4 已收口**：十折 complete，冻结 CPU collector 已通过。linear 重现强对照，tanh5 明显退化；该头方案不推进、不加 seeds、不扫参，后续 D4 保留 linear 匹配控制。权威数字与边界见结果 §25.37。A4/C5 的 CUDA 尚未执行，原地权重在 5090，需具体 GPU 授权后跑现有合同 smoke/audit。 |
-| ✅ **裁决已落地（执行代理拍板，§25.24）** | **不投第二个机制设计周期。** C-28a 之后理由更硬：oracle 给完美图仍是零增益 ⇒ (甲) 从「走不通」变成「走了也没用」，(乙)「只在结构足够时介入」失去前提。⛔ 仍不得换名、扫参、加大 backbone、启动未授权多种子。若将来 Ch4 真的产出更准的关系图，(甲) 可重新立项。 |
+| ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
-| ⚠️ **裁决前必须先读的一条** | **配置敏感度大过效应量**：同样三臂同样 seed，只换打包规则，`full` 就动 `+.009207`，而更好那一跑的 `full − base` 只有 `+.006740`（§25.23）。⇒ 在这个量级上投第二周期，**很可能测不出任何可信的东西**；要投就得先解决可测性（例如提高效应目标，或先把配置抖动压下去），这一点应写进裁决材料。 |
+| ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
 | 🟢 **已完成，不必重做** | `docs/reports/2026-09-22_周报.md`（覆盖 09-18 — 09-22，含归因与两跑对照）。 |
-| **D4 v6.2 这一轮到哪了**（详见 `results/PHASE_R1.md` §25） | C-25 → C-25R → C-25R2 三次输入门失败 → C-25R3 holdout 通过 → **C-25R3F 正式输入门通过**（Brier `.035135` < no-skill `.041427`）→ **C-26 契约冻结** → **C-27b** 补齐训练侧结构输入（查出并绕开一条 OOF 泄漏路径，§25.14）→ **C-27** 实现 + **G-17** 冒烟 → **G-18 ❌ 必要门四条不过** → **G-18b**（执行修复重跑）**修复理由被证伪**：base 只动 `.000028`，优化步数不是欠额来源；full `.549878`、`full−base +.006740`（CI 跨 0）。**G-18b 不替代 G-18** → **§25.21 归因 + §25.22 诊断 + §25.25 oracle 完成**（oracle 推翻了 §25.21 的「稀释」解释）。 |
-| ⚠️ **读 G-18 结果的四条前提** | ① fold 1 的 `full > rewired > base` 是单折噪声，5 折只有 1 折如此；② base 比锚低 `.010829`，但**欠额是效应量的 4 倍以上，修 base 同时也修 full**；③ `full − rewired` 的 `+.008` 不显著，且负控偏保守（40.53% 边未变）；④ 一致性中介**事前就测出没有分辨力**（gold 地板 `.0036/.0077`，三臂 `.0058/.0091`）。全文在 §25.20。 |
+| **旧 D4 v6.2 终态** | C-25 输入闭合 → C-26/C-27 实现 → G-18 必要门失败 → G-18b 修复解释被证伪 → oracle 与官方 EFD 诊断收口。旧结果不改写，G-18b 不替代 G-18；具体事实见结果 §25.14–§25.27。 |
+| ⚠️ **读 G-18 的前提** | 单折臂序不是稳定增益；base 欠额不是可直接扣除的机制收益；rewiring 偏保守；一致性中介缺乏独立分辨力。原数字与限制见结果 §25.20。 |
 | 正式阶段 | Gate 2 实测 **0 个方法章过门**，`EXPERIMENT_PLAN.md` §5 的**「≤1 章过」**分支**已走完并裁定**。**Ch6 不在这个判定里**，它按 §7.5 独立成立。 |
 | 论文结构（**已定稿**） | **Ch6 承重（E3 图谱构建与下游应用）+ 一章负结果归因（D4 + A4 + C5）**。原 24 条件 factorial / Holm 家族 / frozen-vs-finetuned 对照**已撤销，不得恢复**。⚠️ 定稿是作者拍的板（裁决 ①→④），**不是执行代理自行降标**；执行代理仍不得自行改结构。 |
 | 四章现状（结论在 **§0.4**，数字在 `results/`） | **D4**（Ch3）贡献为零、家族关闭 · **A4**（Ch4）机制输给自己的消融臂，坍塌**无差别**且集中在 PRECONDITION · **C5**（Ch5）两个周期都未过主锚、**家族封存**，且周期 2 **反证了**周期 1 的臂序结论 · **E3**（Ch6）主表成形 + 正控通过 + 三对不对齐 + 两条协议发现，**不再加动作**。 |
-| 🆕 **跨三章的一条** | 三章的 **base head 全部落在自己主锚下方**，机制是建在这个欠额之上的。C5 周期 2 实测：修掉欠额的来源之后，**缺口守恒**——只从 precision 挪到 recall，消不掉。诊断全文在 `EXPERIMENT_PLAN.md` **§10**。 |
-| 🔴 **读表 6-2 的前提** | 那张表**不能按 MRR 从高到低读**——评测单元本身有一条 **Hit@10 = 1.000** 的文档捷径，读候选文本的对手吃得到、SeDGPL 族吃不到；另一个对手则因**金标在训练图里 0/1,908 有边**而系统性垫底。两条机制都已量出，**见 §0.4c 末尾**。**不得写「我们超过了 CSProm-KG / SimKGC」。** |
+| **旧三章欠额与最新控制** | 旧机制的 base 曾低于各自主锚（主表 §10）；最新 D4 marked-CLS linear 已精确重现 frozen anchor（结果 §25.37）。不能把旧 base 欠额继续当作当前 linear 的事实，也不能把恢复 baseline 当新贡献。 |
+| 🔴 **读表 6-2 的前提** | 评测文档捷径和训练图中的金标边覆盖造成系统差异，不能按 MRR 排序解读，也**不得写“我们超过 CSProm-KG / SimKGC”**。具体证据见 §0.4c 与 `results/PHASE_E.md`。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问。不可行点名类别与一手证据，停止该路线；按 10-08 委托由执行代理在现有主任务内选择下一路线，先改主表再执行。有效性与未授权资源动作仍不可绕过。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文 §0.3 只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **GPU**（细则 §E.3） | **gpu-4090**：D4 十折已完成，四个 worker 成功 ps 核为 GONE，checkpoint 留在该机 `runs/stages/R1/r1-v61-recovery-ready-20261008/`；当前卡有其他任务，本轮只作 CPU 汇总，不挤占。SSH 失败仍按三态判活。**gpu-5090**：A4/C5 只完成 CPU 准备，GPU 仍须具体任务授权。额外 seeds 与跨机 checkpoint 未授权。 |
+| **GPU**（细则 §E.3） | **gpu-4090**：D4 worker 在 10-10 核验时已 GONE，checkpoint 留在该机；当次核卡有其他任务，下一次使用须重新查占用。**gpu-5090**：A4/C5 权重原地，GPU 尚未运行，须具体任务授权。额外 seeds 与跨机 checkpoint 未授权；本次整理没有启动后台任务。 |
 | ⚠️ **只在 4090 上的大件** | `runs/factuality/predicted_edges_valid.jsonl`（133 MB，**`.1583` 的真上游**）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）、两个对手的 checkpoint、**C5 三个周期的 checkpoint**。**本地那份 `runs/relations/supervised_dump.jsonl` 是另一份 dump，别拿它当上游。** |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与**估算基准率**见 `EXPERIMENT_PLAN.md` §3（按 git 里同类事件的真实起止天数估，不按计算耗时估）。 |
 | 完成后必须做什么 | 按 **§6** 五步回填：产物落地 → 写结果页 → 改主表行状态与 commit → 推进队列 → commit + **push**。**没 push 就没交接。** |
@@ -92,38 +90,76 @@ uv run python scripts/audit_r1_consistency.py \
 旧失败机制的判断作为反证，不盲目复跑 sealed bundle；新机制或实质修复走新的合同、同协议 control、
 消融和负控。单 seed 13、final-valid 封存、5090/跨机 checkpoint 授权等边界保持。
 
-**C-35 开工自审**：科研价值是把旧 D4/A4/C5 的已证实错误转成可证伪改进，而非重复负结果叙述；
-对准三章 frozen 主表与强 baseline 门，证据取对应 results 原始分析与源码。
-可行性：已有结果和本地代码可供 CPU/静态分析，4090 可作只读资产核查；具体训练在合同、数据、
-代码与真实 smoke 闭合前不启动。科学路线不可行由代理记录并另选现有任务内的新方案，不再等作者选题。
+#### 0.3.1 本轮结论与尚未完成的部分
 
-**C-35/C-36 已完成**：冻结预测错误交换复算、A4 gold 截断副本按原 SHA 恢复、
-真实 loss 的解析梯度反例与远端 CPU 测试、5 个固定版本科研 skills 和结构校验已交付。
-**C-37/C-38 诊断范围已完成，C-39 D4 CUDA passed / A4+C5 pending**：D4 marked-CLS 的 linear/tanh5 单变量头对照；
-A4 checkpoint train-only 梯度分解（零 optimizer step）；C5 同 pair-cache 的 average/官方 antecedent 解码。
-真实微型 CPU 模型的训练/重载/梯度/重放全链在两机通过；数据/权重/hash 和部署后的默认入口均通过。
-完整合同 `phases/PHASE_recovery_validation_20261008.md`、唯一 argv/hash 包
-`configs/recovery_validation_20261008.json`；两机研究代码已部署 `2a4f60b`，不删除 remote-only 文件。
-**GPU 之外的当前诊断前置已闭合**；D4 两个 smoke 与十个正式 fold 已完成，CPU 汇总通过。
-**2026-10-09 D4 GPU 开工自审（启动前记录）**：科研价值是用 frozen strongest-CLS
-配方隔离 linear/tanh5 头参数化，检验 §25.34 的欠额解释，对准 D4 五折 OOF 主指标，
-不重开旧机制、不以 smoke 判有效。可行性：§25.35 的资产/真实 CPU 门已通过，
-本次本地三件套与一致性门重新通过，4090 成功核到四张空卡，作者明确要求启动。
-先两个 head smoke，再以四张卡运行 seed-13 十个独立 fold；详见结果页 §25.36。
-4090 cwd `/data/TJK/ekg` 用 D4 包，10-09 已按作者授权启动；5090 cwd
-`/mnt/aidata/tongjiakai/ekg` 用 A4/C5 原地 checkpoint，其 GPU 仍须具体任务授权。
-10-08 CPU 准备没有执行 GPU；10-09 D4 已执行 CUDA smoke/正式训练，两次均未移动权重。
-源码变动后预检会拦截 hash drift；不得跳过或事后重绑，应在输出前形成新身份。
-**没有新方法准入或提分结论**；诊断之后的实质新机制仍需文献差异、可部署输入与 power/消融/负控。
-科研裁决由代理完成，作者验收结果。CPU 就绪证据见 `results/PHASE_R1.md` §25.35，启动身份见 §25.36，最终 D4 对照与裁决见 §25.37。
+**交接整理自审**：价值是让下一代理依据正确状态继续强对照与根因验证，防止把诊断完成当成提分、
+把旧授权当成当前资源许可；证据锚在结果 §25.35–§25.37。可行性是本地核对文档、冻结配置与已有
+证据即可，不需要模型计算。此次只整理交接，不新增实验或改变主表顺序。
 
-**接手顺序**：D4 结果已收口，不再重发训练或 collector；后续先处理主表尚未执行的 A4/C5 诊断。
-**2026-10-10 汇总开工自审**：价值是从十折 raw predictions 重算 head 差异与 frozen CLS parity，
-对准 D4 主指标；可行性是成功 SSH 已核十折 complete，CPU 原地汇总不用 GPU/跨机权重。
-实际结果与裁决写入 `results/PHASE_R1.md` §25.37，汇总前不宣称提分。
-历史四卡固定顺序/PID/完整启动命令见 §25.36；最终 paired report 与复算证据 SHA 见 §25.37。
-新 D4 信号须回 C-37 证明机制差异、可部署输入、power/消融/负控，不拿 baseline 恢复当贡献。
-现有五维头诊断不变更配方续跑，旧 cue/factor/causal-residual 家族仍封存；A4/C5 未验证保持 pending。
+| 范围 | 已完成 | 下一步 / 不得越过的边界 |
+|---|---|---|
+| C-35–C-38 | 根因核查、固定版本科研 skills、机制审计、三项诊断实现；两机真实微型 CPU 全链通过 | 来源与加载规则见 [RESEARCH_SKILLS.md](RESEARCH_SKILLS.md)，CPU 证据见结果 §25.34–§25.35 |
+| D4 C-39 / G-22 / C-40 | 两个 CUDA smoke、两头各五折、冻结配对汇总与独立 raw-label 复算完成 | linear 精确重现 anchor，tanh5 退化；本方案不推进，结果 §25.37。不能重发十折或覆盖 collector 输出 |
+| A4 C-39 / G-22 / C-40 | CPU 接口/资产/默认预检通过；真实 checkpoint CUDA smoke/audit **尚未运行** | train-only loss/共享梯度诊断，零 optimizer step；局部梯度不等于历史 Adam 轨迹或 F1 原因 |
+| C5 C-39 / G-22 / C-40 | CPU 训练/导出/重放、资产与默认预检通过；真实 checkpoint CUDA smoke/audit **尚未运行** | 同 pair scores 的 decoder 对照；average-link 须复现旧 clusters 才可归因；不是旧 role 家族第三周期 |
+
+**整个 T085/T086 仍是 wip**，仅 D4 切片完成。A4/C5 没有新结果，也没有任何“三章已改善”的结论。
+新 D4 信号须回 C-37 证明机制差异、可部署输入、强对照、power/消融/负控；
+后续匹配控制使用 linear，不将恢复 baseline 当创新，不扫参挽救同一轮负结果。
+
+#### 0.3.2 冻结身份与产物位置
+
+合同：[PHASE_recovery_validation_20261008.md](phases/PHASE_recovery_validation_20261008.md)。
+唯一 argv/hash 包：[recovery_validation_20261008.json](../configs/recovery_validation_20261008.json)，
+SHA `174214301d2cd3906c61ae3582de43931ebcbcd2b1f85b1e1b59b6da03f11bbf`。
+代码实现 release `2a4f60b`，D4 实验 commit `61bc4df`；后续提交仅更新研究/交接文档，
+不要把文档提交误当新训练版本。当前本地 HEAD 以 §0.1 自查，不在本文维护易过期的 HEAD 副本。
+
+| 内容 | 机器 / 路径 | 权威入口 |
+|---|---|---|
+| D4 十折 checkpoint、标签、评测报告、metadata | `gpu-4090:/data/TJK/ekg/runs/stages/R1/r1-v61-recovery-ready-20261008/d4/<head>/fold-<N>/` | 结果 §25.37；checkpoint 留 4090 |
+| D4 job 完成状态 | 上述 stage 根的 `d4-<head>-fold-<N>/status.json`，与 checkpoint 目录不同 | 全部已 complete；历史启动 PID/命令只见结果 §25.36 |
+| D4 配对报告 | 4090 上述 stage 根的 `d4_paired_report.json` | 已生成，不重新执行 collector；完整 SHA 见结果 §25.37 |
+| D4 本地复算证据 | `runs/stages/R1/r1-v61-20260904/audit/g22-results-20261010/` | 含回传 paired report 与 `independent_raw_audit.json`，双端 SHA 见结果 §25.37 |
+| 两机 CPU 就绪证据 | `runs/stages/R1/r1-v61-20260904/audit/c39-ready-20261008/` | 结果 §25.35；历史 `deployment_pending=true` 不是当前部署状态 |
+| A4/C5 待运行包 | `gpu-5090:/mnt/aidata/tongjiakai/ekg`，输出用同名 recovery stage 根 | 原地 checkpoint/arguments/冻结原输出已核资产；精确输入和模型路径只认配置，勿猜路径 |
+
+本地 `runs/` 证据未入 Git，下一代理若缺 JSON 先从记录的服务器路径核 SHA 读取；
+代码走 Git，数据/产物走 scp/rsync，checkpoint 留原机器；跨机搬运须先取得具体授权。
+未授权搬运不是科学路线失败。
+
+#### 0.3.3 下一代理的接续步骤（A4/C5）
+
+1. 按 §0.1 / §E.0 对齐 `main`、`origin/main` 与活动任务所有权；读取主表 C-39/G-22/C-40、
+   冻结合同和结果 §25.35–§25.37。旧 C-23–C-34 不作为当前队首。
+2. 在 5090 项目 cwd 运行下面的**默认 CPU 预检**，核源码/资产/输出不存在。它不加载模型或占 GPU；
+   5090 GPU 仍须取得具体任务授权，不能把 4090 的启动授权套用到这台机。
+3. 授权到位后 `nvidia-smi` 核空卡，先向作者展示完整命令、cwd、预期产物，
+   分别执行对应 smoke。正式 audit 必须等同 plan SHA 下 smoke `complete` 且 artifact hashes 有效。
+   每条 SSH 只启动一个后台任务，服务器只用 `.venv/bin/python`。
+4. smoke 成功后分别运行 `a4-gradient-audit` / `c5-decoder-audit`；输出与失败都保留，
+   已有路径不覆盖。C5 先核 average-link parity；A4 报活跃行/梯度，不能假造训练分数。
+5. 把真实 raw output、hash、机器和局限写进 `results/PHASE_R1.md` 后，作对应 C-40 裁决，
+   同步主表/TASKS/TODO/本文并 push。诊断若不能支持修复，按既有科研委托另选路线，不向作者交选题菜单。
+
+下面命令仅作 CPU 预检；**不是 GPU 启动命令**：
+
+```bash
+# 在 gpu-5090 上
+cd /mnt/aidata/tongjiakai/ekg
+.venv/bin/python scripts/launch_recovery_validation.py \
+  --plan configs/recovery_validation_20261008.json --job a4-gradient-smoke
+.venv/bin/python scripts/launch_recovery_validation.py \
+  --plan configs/recovery_validation_20261008.json --job c5-decoder-smoke
+```
+
+| 冻结 job | 前置 | 预期关键产物（recovery stage 根下） |
+|---|---|---|
+| `a4-gradient-smoke` → `a4-gradient-audit` | audit 依赖对应 smoke | 每 job 的 `gradients.json`、`status.json` |
+| `c5-decoder-smoke` → `c5-decoder-audit` | audit 依赖对应 smoke；average parity 必须通过 | 每 job 的 `pairs.jsonl`/metadata、replay provenance、average/antecedent metrics、error exchange、status |
+
+源码/hash 漂移或失败先查原因，不能跳过闸门或事后重绑已有输出；修复形成新 namespace/身份。
+唯一训练 seed 13、final-valid 封存、额外 seeds/5090/跨机 checkpoint 授权边界保持。
 
 以下 C-23–C-34 是历史已完成队列；其中“等待作者范围选择”已被上述委托取代。
 
@@ -650,13 +686,14 @@ SPEC。只有研究问题、范围或质量标准改变时才修订 SPEC。
 
 ### Git 与验证
 
-- **最新三件套：667 passed / 29 skipped、ruff 0、`ekg-smoke` OK**（2026-09-18 晚，C5 pilot-r3 收工时）。
-  前值 665/29（09-18 白天）、639/29（09-16）。⚠️ **本文不记 HEAD hash**——抄过两次，两次都过期，
-  用 §0.1 的 `git log -3` 自查；
+- **最近完整三件套与两机 CPU 证据**见 `results/PHASE_R1.md` §25.35–§25.36，
+  最近 D4 汇总测试/审计见 §25.37；不要把 09-18 的历史测试计数当当前结果。
+  本文不维护当前 HEAD hash，按 §0.1 的 `git log -3` 自查；
 - 早期整改与 R1 审计的 commit 清单已移出本文（`git log --grep` 能查到，留在这里只是噪声）；
 - ⚠️ **本地三件套全绿不代表能在服务器上跑**：本地没有 torch，所有 torch 用例都是 `skip`。
-  **任何 torch 相关改动，推之前先 ssh 到 5090 跑一次对应的测试文件**（`.venv/bin/python -m pytest <file>`）；
-- local gate 的 `tested_tree_sha256`：
+  **任何 torch 相关改动，推之前在有 torch 的远端用 CPU 跑对应测试文件**
+  （`CUDA_VISIBLE_DEVICES="" .venv/bin/python -m pytest <file>`）；机器可用 4090 或 5090，GPU 模型运行另守资源授权；
+- 历史 A3.6 local gate 的 `tested_tree_sha256`（不是本轮恢复包）：
   `52c639ff79fb9401f71d42d4d1ecaec6abacf65701cecf72f1dcac7edb04f46e`（220 个文件；
   前值 `3bff2ac2…c701d3c` 对应 `886185e`）；
 - A3.6 只运行了已授权 seed 13；R1 功效只读 train-derived internal-dev。跨数据 ID 审计按合同读取了
@@ -779,15 +816,15 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
    三种处置（可比 / 口径不同 / 拿不到全文）见 §15.3。无论结果如何**它都不能进 roster**——无公开代码，
    按 FR-006 无法在我们协议下跑通。
 
-#### E.3 GPU 使用（2026-09-16 重写，旧边界已被两次裁决取代）
+#### E.3 GPU 使用（2026-10-10 与当前 AGENTS.md / CLAUDE.md 对齐）
 
 卡是公用资源，**不得为了「看起来在跑」启动无准入的训练**；但**卡空着也不要串行**
 （约束分级的 C 类，见 `CLAUDE.md`）。
 
 | 机器 | 现行规则 |
 |---|---|
-| **gpu-5090** | 作者 2026-09-11 第二次裁决 + 2026-09-15 追认：**≤1 天的任务直接执行，不必逐次请示**；超过一天、拉模型、跨机搬运仍须先问。C5 整条、A4 全部探测都在这台机上。⚠️ **2026-09-17 晚实测它的单卡被他人占着**（18.3/32.6 GB，91% util）——**核卡再用**。 |
-| **gpu-4090** | 有空即可自用（本地三件套全绿后无需逐次点头）；**不挤占他人正在跑的卡**。🟢 **2026-09-18 凌晨四卡全空**（Ch6 的两个对手已跑完）。⚠️ **隧道反复掉线**（`banner exchange` / `kex_exchange` reset），作者的 `cpolar-ssh-update` **管不了这台**（不在其 tunnels.conf 里，它在另一个 cpolar 主机上）——只能等，期间按三态判活；长任务 `setsid nohup` 起的 PPID=1，断连不影响。~~A4.3 必须在这台机上~~ 已被作者 2026-09-16 裁定推翻。 |
+| **gpu-5090** | **GPU 每次须具体任务授权**，核空卡后执行；历史“一天以内直接执行”不作本轮授权依据。A4/C5 原地诊断就绪但尚未运行；不要为改用 4090 自行搬 checkpoint。单卡占用须重新核查，不引用历史占用当当前事实。 |
+| **gpu-4090** | 有空即可自用（本地三件套全绿后无需逐次点头）；选卡前 `nvidia-smi` 核卡，不挤占他人。D4 本轮已结束，占用随时变化，不能按历史空卡快照选卡。隧道会掉线，按 ALIVE/GONE/SSH_FAILED 三态判活，SSH 失败不等于进程死亡。 |
 | 两台通用 | 选卡前 `nvidia-smi` 核卡；长任务 `setsid nohup` + `python -u` + 重定向 `logs/`，**一条 ssh 只发一个后台任务**；checkpoint 训在哪留在哪；**多种子始终另行授权**。 |
 
 #### E.3a 「先验能先验的」方针（作者 2026-09-13 定，**仍适用**）
@@ -808,9 +845,9 @@ E4 把两个问题交给作者后，作者当日给出两条裁决。完整依�
 **2026-09-17 Ch6 两个对手的小步冒烟**（CSProm-KG 的 1-epoch 冒烟证明了管道通，
 也正是它让 `-n_lar` 那条从没跑过的训练路径在 6 分钟而不是 6 小时之后暴露）。
 
-⛔ **已被推翻、不要再照着执行的旧条款**（原文留在附录）：「主体实验仍回 4090」「长任务 pilot 一律
-不放 5090」「5090 每次使用须逐次授权」「Qwen3-8B 装不下 5090」——最后一条在 2026-09-13 实测作废
-（那个约 17 GB 的服务早已不在，卡上只有 197–209 MiB 常驻）。
+历史上曾调整“主体实验回 4090”和“长任务 pilot 不放 5090”等操作规则；
+**不能由此推导当前 5090 授权已解除**，资源许可只认现行 §E.3 与 AGENTS.md / CLAUDE.md。
+Qwen3-8B 能否装入 5090 已在历史实测纠正，使用前仍须核当前服务和显存，不复用旧常驻占用快照。
 
 ⛔ **仍然成立的硬边界**：EasyECR 跑不了 5090（`torch==2.0.1` 不支持 sm_120）；
 SimKGC 的 `--batch-size 1024` 要 4×32 GB，两台机都装不下——**2026-09-17 已从推断升为本机实测**：单张 4090 上 1024 与 512 都 OOM、256 稳定（19.9 GB），见名册 §6.2b。
