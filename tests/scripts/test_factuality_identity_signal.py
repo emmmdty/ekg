@@ -83,3 +83,17 @@ def test_dev_and_final_manifests_are_rejected():
             with pytest.raises(ValueError, match="train-only"):
                 script().validate_manifest({"dataset": dataset, "split_role": role,
                                             "doc_ids": ["d"], "doc_count": 1}, dataset)
+
+
+def test_observed_classes_are_used_instead_of_gold_factuality():
+    row = script().audit_document(*documents(), observations={"a": "CT+", "b": "CT+", "c": "CT-"})
+    assert row["label_source"] == "predicted_factuality"
+    assert row["pairs"]["all_same_type"]["CT+|CT+"] == {
+        "coreferent": 1, "noncoreferent": 0}
+    assert row["pairs"]["all_same_type"]["CT+|CT-"] == {
+        "coreferent": 0, "noncoreferent": 2}
+
+
+def test_missing_observations_do_not_fall_back_to_gold():
+    with pytest.raises(ValueError, match="observation coverage"):
+        script().audit_document(*documents(), observations={"a": "CT+"})
