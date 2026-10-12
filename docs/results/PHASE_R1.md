@@ -3215,3 +3215,133 @@ SHA **`1805d7fff3b5c2615fb6e20160afe4c5359fe81e6e60cda7ee8b20fdb339717a`**；
 power/单变量消融/负控后另行准入，旧 sealed 家族不恢复。
 现有队列下一步是 A4/C5 的原地冻结诊断；两者未运行 GPU，**没有新结果**，
 5090 仍须具体任务授权，不由 D4 完成冒充三章改进。
+
+### 25.38 C-41 / T087：逐章执行开工（2026-10-12，当前 C5）
+
+**作者指令**：逐章完成后续研究、提高主指标并增强创新性。代理选择 C5 → D4 → A4，
+先把顺序和当前 C5 切片写进主表、TASKS/TODO/HANDOFF；不改变已定论文结构或 E3 封存状态。
+
+**科研价值**：对准表 5-3 的官方 MUC 与其他共指护栏，先隔离已知目标/解码差异，再检验可部署
+时间身份信号。依据是 `PHASE_C.md` 两个有效周期及本页 §25.34–§25.35；诊断或基线恢复不计创新。
+**可行性**：文献、源码、训练集内 CPU 信号核查可行；原 checkpoint CUDA 验证卡【授权】，
+须明确批准 5090 的具体 C5 smoke/audit；新方法信号、novelty、power 尚未闭合，不训练。
+研究卡：`research/20261012_chapterwise_optimization.md`。
+
+开工前 Git 工作树干净，HEAD 与 origin/main 对齐；当前 R1 一致性审计 **36/36 PASS**。
+本节是开工记录，尚无新模型结果、主指标改善或新机制准入结论。后续按真实产物回填。
+
+#### C5 日期词面代理的 train-only CPU 审查
+
+命令：
+
+```bash
+uv run python scripts/report_temporal_identity_signal.py \
+  --source data/processed/maven_ere/train.jsonl \
+  --manifest data/protocols/v6/manifests/maven_ere_train.json \
+  --output runs/stages/R1/r1-v63-c5-20261012/temporal_signal/train_audit.json
+```
+
+退出码 0；只处理 manifest 指定 **2,622 train documents / 66,744 event mentions**，
+没有处理 internal-dev 或 final-valid。DATE 来自给定 TIMEX spans，按 sentence 收集词面；
+只在一整句恰有一个不同 DATE surface 时给该句代理值，其余为 unknown，**不宣称 event-time grounding**。
+共 14,969 TIMEX / 29,233 sentences，7,299 句有唯一 DATE surface。
+
+| 全部 same-type 候选对的 DATE 代理状态 | gold coreferent pairs | gold noncoreferent pairs |
+|---|---:|---:|
+| same surface | 483 | 1,489 |
+| different surface | 1,142 | 3,991 |
+| unknown（缺失或多日期） | 12,386 | 46,650 |
+
+| 高相似（既有固定 `.8`）且跨句的 same-type 候选 | gold coreferent pairs | gold noncoreferent pairs |
+|---|---:|---:|
+| same surface | 31 | 65 |
+| different surface | 687 | 1,516 |
+| unknown | 7,771 | 13,950 |
+
+高相似跨句桶总 24,020 对，negative 基率 **64.6586%**；different-surface 桶的 negative 比例
+**68.8153%**，仅覆盖全集 **9.1715%**，且包含全部真共指的 **8.0928%**。
+这些是训练集探索性计数，pairs 相依；不是 classifier P/R、不是主指标、不是机制 power。
+不能用 negative 比例较高证明 MUC 会提高，也不把 same surface 当真共指证据。
+
+另外 gold BEFORE 在 same-type event 之间展开 18,230 mention pairs；其两端属于不同 gold event
+clusters 是数据 schema 的构造事实，不能拿其“无真共指”作为时间预测有效的经验发现。
+测试含缺失/多日期、同日期不同身份、不同日期真共指、unknown endpoint、坏 offset 与 train-only 闸门。
+TDD 首跑因脚本尚不存在 **6 failed**，实现后 **6 passed / ruff 0**。
+
+**裁决**：停止 sentence-DATE-surface 硬否决路线，保留“噪声可部署 temporal posterior”作为未准入
+候选，不外推时间信息无价值。下一步核已有强锚预测里的 temporal/coref 冲突与原地 decoder audit。
+没有新模型主分数或章节提分结论。
+
+产物根 `runs/stages/R1/r1-v63-c5-20261012/temporal_signal/`：report + per-document count JSONL。
+source SHA `6a5519fe7c30448690adb13d49217c50d474fc57480eae10aecb29df7eb638b7`；
+train manifest SHA `47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68`；
+script SHA `6a7e9b4bbdb2f3859410fe06db479b71516609ae8c6dad360a00536a0b753c1a`；
+per-document JSONL SHA `cdfd814f7b5d5d6ae7948991cd7a0d6edb10a39c88c3263d808a73b1fd869434`。
+report SHA `2ee03e7b3177692f23d9af37d8176a916bc2f3b86cef747157ca841beb91fc40`；
+原输出保持不变。
+
+#### 原机预检与资源边界
+
+5090 的 `c5-decoder-smoke` 和 `c5-decoder-audit` 默认 CPU 预检均 exit=0，
+全部既有 plan code/input hashes 校验、输出不存在闸门通过；未加载模型。
+本地既有三件套 **797 passed / 42 torch skips、ruff 0、ekg-smoke OK**。
+作者已明确授权上述两项 **仅在重新确认空卡后执行**，不训练、不新增 seed、不搬权重。
+本轮成功核卡：4090 四卡均有他人进程；5090 单卡也有他人进程，尚未启动 GPU 诊断。
+占卡属于【算力】等待，不是机制失败；C5 候选研究继续。
+
+#### 已有强锚的 predicted BEFORE/coref 冲突审查
+
+只读原 frozen `official_joint` 的 291-document internal-dev prediction；此 unit 已被历史分析
+查看，本次明确标探索诊断，不充当前瞻选模或确认。gold/pred 文件 SHA 必须逐项等于原 anchor
+metrics，文档覆盖与 candidate digest 逐项通过；temporal 输入**仅来自模型已预测的 BEFORE**。
+不改任何 cluster，不重新训练，不从 gold temporal 构造预测输入，不计算新的主指标。
+
+```bash
+uv run python scripts/report_temporal_coref_conflicts.py \
+  --gold runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl \
+  --pred runs/stages/R1/r1-v61-20260904/anchors/identity/official_joint_prediction.jsonl \
+  --manifest data/protocols/v6/manifests/maven_ere_internal-dev.json \
+  --anchor-metrics runs/stages/R1/r1-v61-20260904/anchors/identity/official_joint_metrics.json \
+  --output runs/stages/R1/r1-v63-c5-20261012/temporal_signal/anchor_conflicts.json
+```
+
+退出码 0，population **291 documents / 7,195 event mentions / 1,719 TIMEX / 234,870 ordered
+relation pairs**，candidate digest `15a3b1a5…dac10910`。BEFORE 的 TIMEX 端点验证后仅作为非共指
+候选保留，不偷换成 event mention；反向/重复 BEFORE 在 unordered conflict 统计中只计一次。
+
+| 已被 strong anchor 合并的 mention pairs | gold same event | gold different events |
+|---|---:|---:|
+| 全部已合并对 | 1,234 | 394 |
+| 同时预测 BEFORE 的已合并对 | 6 | 6 |
+| same-type、高相似、跨句的已合并对 | 713 | 177 |
+| 上一桶内同时预测 BEFORE | 4 | 5 |
+
+**裁决**：不准入“直接把 predicted BEFORE 当 cannot-link 拆簇”的处理。
+已有 BEFORE 冲突同时命中真/假合并，覆盖的错误量有限；没有 MUC 干预、document power 或
+独立信号证据，不能把这张 pair-count 表当提分保证。该结论只排除这条直接硬规则，
+不宣称 posterior、邻域信息或其他时间 grounding 都无效。下一步仍是同 scores decoder audit，
+据其真实结果核官方目标/解码匹配，再选择有证据的新信号，不扩展旧 role 家族。
+
+TDD 首跑 **4 failed**（入口尚不存在）→ 实现后 **4 passed / ruff 0**；
+本轮新代码完整三件套 **807 passed / 42 torch skips、ruff 0、CPU smoke OK**。
+原 strong anchor hash：gold `bb8c6b486196c97560cba49516324b3f69541023bfbe5cc09590d2bb265ce7e3`，
+prediction `66ff04bac5a11ab179ef50eeca51d56dbb613b7b04eaa04b749dd99ea82ffc42`。
+script SHA `a2e195f003df4b6972a312a288a58d8fa6a8bc2f10c200ac9f431d442a52e2c2`；
+report SHA `9d0211666800d0ef68cf40e8bf428149060762e6e3f49175136aa0807fa37029`；
+per-document SHA `fb5ec749f14fd69a4bcb767449036a24881354a463451f6c5fcd23c1cee926ee`。
+上述两份 CPU report 的完整文件清单保留在同目录 `artifact_hashes.json`，
+SHA `d78fb2f27027a8cf2b72a7b74e8c6c15bfcf57a9089784c9dc3662792e310b2b`；
+四文件独立 SHA 重核 PASS；纯 CPU，不涉及模型权重。
+
+#### 授权后的第一次 launcher 尝试（未进入模型）
+
+成功 SSH 核到 5090 GPU0 显存 218 MB、0% utilization、无 compute process 后，按已授权命令
+发出 `c5-decoder-smoke` 的后台 launcher，wrapper PID **2558492**。
+但 launcher 自己在 code/input hashes 后重新核卡时，已有其他进程 **2557646**，
+于是 `check_gpu_rows` 报 `GPU 0 is occupied`，在 torch CUDA check / status 创建 / 模型载入前停止。
+这是 **launch_blocked【算力】**，不是 smoke 模型失败或 GPU 已执行证据；输出 status/cache 均不存在。
+日志：`gpu-5090:/mnt/aidata/tongjiakai/ekg/logs/c5-decoder-smoke-20261012.log`。
+成功 SSH 的 `ps -p 2558492` 只有表头，证实该 launcher 已 GONE；未将 SSH 失败当作进程死亡。
+后续只在再次空卡时重试 launcher，保留此日志且使用新的 log 名；授权仅限上述两项 C5 诊断。
+两项 CPU 审查代码提交 `0c74bdbce43a7759040937e491fc5370ed675de0`，
+报告 hash 与该代码内容一致；本节不将代码提交或诊断收口记为 C5 方法章完成。

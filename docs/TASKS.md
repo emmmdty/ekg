@@ -236,11 +236,13 @@ author delegation releases a new in-scope research queue; it does not reopen old
 - [ ] **T086 [RS-001–RS-003] / C-40** Recompute actual improvements and make the next scientific decision
   → D4 head-control decision completed (§25.37): retain linear, reject this tanh5 route; no new method claim.
   A4/C5 pending. Main results, ablations/negative controls and explicit limitations govern further admission.
-- [ ] **T087 [RS-001–RS-003] / C-41** Planned next-method R1 research (registered 2026-10-12; not started)
+- [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
   → use reliable controls and observed errors to audit distinct mechanisms, runnable public implementations,
   deployable inputs, rivals, falsifiable predictions, strong comparisons, ablations/negative controls and power.
   A4/C5 GPU diagnostics are not a prerequisite for literature research; preserve one active task and all validity/
-  resource boundaries. No new mechanism or GPU contract has been admitted; see `HANDOFF.md` §0.3.4.
+  resource boundaries. Work through C5 → D4 → A4; control recovery or a rejected candidate does not complete
+  a chapter. No new mechanism or GPU training contract has been admitted; see
+  `research/20261012_chapterwise_optimization.md` and `results/PHASE_R1.md` §25.38 onward.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 
