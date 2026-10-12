@@ -3345,3 +3345,40 @@ SHA `d78fb2f27027a8cf2b72a7b74e8c6c15bfcf57a9089784c9dc3662792e310b2b`；
 后续只在再次空卡时重试 launcher，保留此日志且使用新的 log 名；授权仅限上述两项 C5 诊断。
 两项 CPU 审查代码提交 `0c74bdbce43a7759040937e491fc5370ed675de0`，
 报告 hash 与该代码内容一致；本节不将代码提交或诊断收口记为 C5 方法章完成。
+
+#### C5 原机 CUDA smoke 完成（同计划，重新空卡后启动）
+
+有界只读等待重新读到 GPU0 空闲后，用新日志 `c5-decoder-smoke-20261012-retry1.log`
+启动同一冻结 launcher，PID **2565980**。成功 SSH 读到 `status=complete`，
+plan SHA 仍为 `17421430…11bbf`，执行源码 commit **`61bc4df`**；没有重绑旧输出或更改配置。
+remote status + 6 个 artifact SHA 独立检查 PASS；回传后本地按 status 的同一份 hash 清单再次 PASS。
+
+smoke 覆盖冻结 **2 documents / 37 event mentions / 17 same-type cached pairs**；
+average-link 逐文档重现 frozen full-r2 clusters（不通过即停止的 parity 门），
+antecedent replay、两套 official score 与 error exchange 全部完成。
+这里的两篇指标只是 smoke，不作为新方法或主表分数。
+metadata 记录 checkpoint 原地路径与所有文件 SHA，权重未搬运，final-valid 未访问、无 optimizer step。
+
+原机：`gpu-5090:/mnt/aidata/tongjiakai/ekg/runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-smoke/`。
+本地回传：`runs/stages/R1/r1-v63-c5-20261012/decoder_evidence/smoke/`。
+status SHA `cfce8a1bd8938609b5b779a1664c353259e5651d78cdd064aec33ee263b2987f`。
+完整 audit 仍待重新空卡，以同 plan 下 smoke status/hash 为依赖，不复跑已完成 smoke。
+
+两份 CPU signal report 已备份到 4090 同名 `r1-v63-c5-20261012/temporal_signal/`，
+remote 四文件 SHA 复核 PASS；`code_provenance.json` 记录代码 release 和七份依赖身份，
+双端 SHA `ed7f06a6e5bdea7222a7211d061ab4ab64db5f5ef38f6ca9215983d497eb33ac`。
+
+#### 完整 audit 的空卡等待收口（尚未执行）
+
+smoke 完成后，对完整 audit 做了有界只读核卡等待（20 次、间隔 30 秒）。
+窗口结束时没有读到空卡，**没有发出完整 audit 模型命令**；没有遗留 watcher 或排队自动启动进程。
+随后成功 SSH 仍读到 GPU0 显存 31,399 MB / utilization 100%，compute PID **2566003**；
+`ps` 核为另一用户的 `VLLM::EngineCor`，不能占用。原 smoke wrapper PID 的 `ps` 仅有表头，
+原 smoke status=complete 与六份 hash 保持，不把别人的进程当成本任务子进程。
+
+授权保留，仅限同 plan 的 C5 smoke/audit；接续重新核空卡后直接执行 audit，无需重复询问。
+audit 预期根为 `gpu-5090:/mnt/aidata/tongjiakai/ekg/`
+`runs/stages/R1/r1-v61-recovery-ready-20261008/c5-decoder-audit/`。
+本轮 C5 正式 MUC 与护栏没有新分数；候选研究、CUDA smoke 通过都不算章节改善完成。
+读取完整结果前的解释规则已登记在 `research/20261012_chapterwise_optimization.md`，
+不扫 dummy/threshold/order，不把 decoder 变化当新训练目标的证据或论文创新。

@@ -2,22 +2,26 @@
 
 > 更新于 **2026-10-12（+08:00，作者授权逐章执行；C-41 C5 开工）**：**科研改进与路线裁决由执行代理负责，作者只验收最终结果**。
 > 当前 **C-35/C-36 ✅ → C-37 诊断选择 ✅ → C-38 诊断实现 ✅ → C-39 D4 CUDA ✅ / A4+C5 pending →
-> G-22 D4 完成 → C-40 D4 裁决完成 / A4+C5 pending**。ESC 退出本轮硬前置，MAVEN 主表保持。
+> G-22 D4 完成 / C5 smoke 完成、audit pending → C-40 D4 裁决完成 / A4+C5 pending**。
+> ESC 退出本轮硬前置，MAVEN 主表保持。
 > 不再等待作者选科研路线；旧失败结果不改写，单 seed 与有效性/资源边界保持。详见主表与 §0.3。
 > 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
 > 本文只记录**状态、决策、依赖、下一步**，**不复制实验表格——数字只认 [`results/`](results/README.md)**。
 >
 > **最新结论**：D4 head 诊断已收口，linear 精确重现强对照，tanh5 退化，**本轮没有提分**。
 > 代理决定保留 linear 匹配控制、不推进当前五维头；完整数字、配对区间和边界只见
-> [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.37**。A4/C5 只有 CPU 就绪证据，尚无新的真实模型结果。
+> [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.37**。C5 原机 checkpoint smoke 已通过，
+> 完整 decoder audit 尚未执行；A4 仍只有 CPU 就绪证据，三个方法章均无新提分结果。
 > **旧机制历史**：D4 cue/factor/causal-residual 与旧 C5 家族仍封存，A4 旧周期仍失败，E3 第一轮已收口。
 > 新机制研究仍可按 10-08 委托回 R1 准入；**旧家族关闭不等于三个方法章的改进任务完成**。
 > 旧 D4 oracle/EFD 归因见结果 §25.21–§25.27，§0.3a 等旧队列仅供追溯。
 > **10-12 后续方向**：作者已要求逐章执行，顺序 **C5 → D4 → A4**；主表 **C-41 为 wip，当前 C5**。
 > 旧机制停止续修，控制恢复、信号验证与方法贡献分开验收；待授权 GPU 不阻断文献/CPU 研究。
 > C5 两项 CPU 审查完成：DATE 词面硬否决停止，直接 predicted-BEFORE cannot-link 不准入；
-> 证据只见结果 §25.38。作者已具体授权 C5 原机 smoke/audit，仅空卡执行；首试被新的他人进程
-> 在 occupancy 门拦下，未加载模型。当前没有已通过准入的新方法，仍无章节提分结果。
+> 证据只见结果 §25.38。作者已具体授权 C5 原机 smoke/audit，仅空卡执行；首试被 occupancy 门拦下，
+> 重新空卡后的 smoke 已 complete，average parity 与六份产物 hash 通过；完整 audit 待空卡。
+> 有界等待已结束，没有留下自动启动 watcher；接续只需核空卡并执行已授权 audit，不重复询问。
+> 当前没有已通过准入的新方法，仍无章节提分结果。
 >
 > **最短读法**：首表 → **§0.3（当前队列）** → 需要哪章再看 §0.4 的对应小节。
 > §0.5–§0.7 是已裁定的决策与纪律，开工前扫一眼。
@@ -27,7 +31,7 @@
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41 / T087 C5 切片（2026-10-12）**：两项时间代理 CPU 审查已收口，尚无新方法准入；下一步原机 decoder smoke → audit。作者已具体授权这两项 5090 诊断，仅空卡执行；首试被 occupancy 门拦下，未加载模型。后续 D4 → A4；A4 5090 仍未授权。D4 旧 head 结果仍见 §25.37。 |
+| **活动任务** | **C-41 / T087 C5 切片（2026-10-12）**：两项时间代理 CPU 审查已收口，尚无新方法准入；原机 decoder smoke complete、average parity/hash 通过，下一步完整 audit。作者已具体授权这两项 5090 诊断，仅空卡执行；不复跑已完成 smoke。后续 D4 → A4；A4 5090 仍未授权。证据 §25.38，D4 旧 head 结果仍见 §25.37。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
@@ -42,14 +46,15 @@
 | 🔴 **读表 6-2 的前提** | 评测文档捷径和训练图中的金标边覆盖造成系统差异，不能按 MRR 排序解读，也**不得写“我们超过 CSProm-KG / SimKGC”**。具体证据见 §0.4c 与 `results/PHASE_E.md`。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问。不可行点名类别与一手证据，停止该路线；按 10-08 委托由执行代理在现有主任务内选择下一路线，先改主表再执行。有效性与未授权资源动作仍不可绕过。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文 §0.3 只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **GPU**（细则 §E.3） | **gpu-4090**：10-12 成功核卡四卡均有他人任务，不能占用。**gpu-5090**：作者已具体批准 C5 decoder smoke/audit，仅空卡；首次 launcher 在 occupancy 门停止，status/cache 未创建。A4 未获具体授权。额外 seeds 与跨机 checkpoint 未授权；重试须新 log、重新核卡。 |
+| **GPU**（细则 §E.3） | **gpu-4090**：10-12 成功核卡四卡均有他人任务，不能占用。**gpu-5090**：C5 smoke 已 complete、待空卡跑 audit；作者批准仅这两项。首次 launcher occupancy 失败日志保留，第二次 smoke 输出不可覆盖。A4、额外 seeds 与跨机 checkpoint 未授权。 |
 | ⚠️ **只在 4090 上的大件** | `runs/factuality/predicted_edges_valid.jsonl`（133 MB，**`.1583` 的真上游**）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）、两个对手的 checkpoint、**C5 三个周期的 checkpoint**。**本地那份 `runs/relations/supervised_dump.jsonl` 是另一份 dump，别拿它当上游。** |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与**估算基准率**见 `EXPERIMENT_PLAN.md` §3（按 git 里同类事件的真实起止天数估，不按计算耗时估）。 |
 | 完成后必须做什么 | 按 **§6** 五步回填：产物落地 → 写结果页 → 改主表行状态与 commit → 推进队列 → commit + **push**。**没 push 就没交接。** |
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最近完整三件套（2026-10-09，G-22 启动）**通过；10-10 汇总相关测试与一致性门见 §25.37；
+> **最近完整三件套（2026-10-12，两项 CPU 信号审查）**通过，证据见 §25.38；
+> 10-10 汇总相关测试与一致性门见 §25.37；
 > torch 对应测试在 4090/5090 均用 CPU 真正执行（§25.35）；最新启动证据见 `results/PHASE_R1.md` §25.36。
 > 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 最终结果
 > 已进入 `results/PHASE_R1.md` §25.27，周报尚未追补该结果。
@@ -114,9 +119,10 @@ uv run python scripts/audit_r1_consistency.py \
 | C-35–C-38 | 根因核查、固定版本科研 skills、机制审计、三项诊断实现；两机真实微型 CPU 全链通过 | 来源与加载规则见 [RESEARCH_SKILLS.md](RESEARCH_SKILLS.md)，CPU 证据见结果 §25.34–§25.35 |
 | D4 C-39 / G-22 / C-40 | 两个 CUDA smoke、两头各五折、冻结配对汇总与独立 raw-label 复算完成 | linear 精确重现 anchor，tanh5 退化；本方案不推进，结果 §25.37。不能重发十折或覆盖 collector 输出 |
 | A4 C-39 / G-22 / C-40 | CPU 接口/资产/默认预检通过；真实 checkpoint CUDA smoke/audit **尚未运行** | train-only loss/共享梯度诊断，零 optimizer step；局部梯度不等于历史 Adam 轨迹或 F1 原因 |
-| C5 C-39 / G-22 / C-40 | CPU 训练/导出/重放、资产与默认预检通过；真实 checkpoint CUDA smoke/audit **尚未运行** | 同 pair scores 的 decoder 对照；average-link 须复现旧 clusters 才可归因；不是旧 role 家族第三周期 |
+| C5 C-39 / G-22 / C-40 | CPU 训练/导出/重放、资产预检通过；真实 checkpoint CUDA smoke **complete**，完整 audit 待空卡 | 同 pair scores 的 decoder 对照；smoke average parity 已通过，完整全集仍须通过；不是旧 role 家族第三周期 |
 
-**整个 T085/T086 仍是 wip**，仅 D4 切片完成。A4/C5 没有新结果，也没有任何“三章已改善”的结论。
+**整个 T085/T086 仍是 wip**，仅 D4 切片完成。C5 有真实 checkpoint smoke，
+尚无完整诊断指标；A4 没有新结果，也没有任何“三章已改善”的结论。
 新 D4 信号须回 C-37 证明机制差异、可部署输入、强对照、power/消融/负控；
 后续匹配控制使用 linear，不将恢复 baseline 当创新，不扫参挽救同一轮负结果。
 
@@ -125,7 +131,8 @@ uv run python scripts/audit_r1_consistency.py \
 合同：[PHASE_recovery_validation_20261008.md](phases/PHASE_recovery_validation_20261008.md)。
 唯一 argv/hash 包：[recovery_validation_20261008.json](../configs/recovery_validation_20261008.json)，
 SHA `174214301d2cd3906c61ae3582de43931ebcbcd2b1f85b1e1b59b6da03f11bbf`。
-代码实现 release `2a4f60b`，D4 实验 commit `61bc4df`；后续提交仅更新研究/交接文档，
+代码实现 release `2a4f60b`，D4 与 C5 decoder 实验 commit `61bc4df`；10-12 的 `0c74bdb`
+只新增两项 CPU 信号审查入口，不改变冻结 GPU plan 的代码集合；其后提交更新研究/交接文档，
 不要把文档提交误当新训练版本。当前本地 HEAD 以 §0.1 自查，不在本文维护易过期的 HEAD 副本。
 
 | 内容 | 机器 / 路径 | 权威入口 |
@@ -150,6 +157,9 @@ SHA `174214301d2cd3906c61ae3582de43931ebcbcd2b1f85b1e1b59b6da03f11bbf`。
 3. 授权到位后 `nvidia-smi` 核空卡，先向作者展示完整命令、cwd、预期产物，
    分别执行对应 smoke。正式 audit 必须等同 plan SHA 下 smoke `complete` 且 artifact hashes 有效。
    每条 SSH 只启动一个后台任务，服务器只用 `.venv/bin/python`。
+   **10-12 状态覆盖**：C5 两项诊断已有具体授权与命令披露，smoke 已 complete，不重复执行；
+   只在空卡启动 `c5-decoder-audit --execute --gpu 0`。有界等待已结束，无遗留 watcher。
+   A4 仍未授权，不能沿用 C5 授权。
 4. smoke 成功后分别运行 `a4-gradient-audit` / `c5-decoder-audit`；输出与失败都保留，
    已有路径不覆盖。C5 先核 average-link parity；A4 报活跃行/梯度，不能假造训练分数。
 5. 把真实 raw output、hash、机器和局限写进 `results/PHASE_R1.md` 后，作对应 C-40 裁决，

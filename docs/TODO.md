@@ -6,19 +6,21 @@
 ## 当前正式活动阶段
 
 **当前任务是三个方法章的根因与效果改进。2026-10-08 作者已委托执行代理作科研裁决，作者只验收结果。**
-C-35/C-36 完成；C-37 诊断选择、C-38 诊断实现完成，C-39 **D4 CUDA passed / A4+C5 pending**。
+C-35/C-36 完成；C-37 诊断选择、C-38 诊断实现完成，C-39 **D4 CUDA passed / C5 smoke passed、audit pending / A4 pending**。
 G-22 D4 十折训练、CPU 配对汇总与对应 C-40 裁决已完成：linear 重现强对照，tanh5 退化，
-不推进五维头；后续保留 linear 匹配控制。A4/C5 权重仍在 5090，GPU 尚未执行，现有诊断仍待验证。
+不推进五维头；后续保留 linear 匹配控制。A4/C5 权重仍在 5090，C5 smoke 已执行，完整诊断仍待验证。
 合同见 `phases/PHASE_recovery_validation_20261008.md`，启动身份见 §25.36，最终结果见 `results/PHASE_R1.md` §25.37。
 ESC 退出本轮硬前置；不换 MAVEN 主任务、不重写旧失败数字、不开未准入 GPU 实验。
 科研选择不再等待作者；5090/跨机 checkpoint/额外 seeds 的资源边界保持。
 10-12 路线评估已入 `HANDOFF.md` §0.3.4：旧机制停止续修，有限诊断与新方法贡献分开；
 作者随后明确要求逐章执行；主表 **C-41 / T087 为 wip，当前 C5**，顺序 C5 → D4 → A4。
 先核可靠控制与时间身份候选的信号可行性，再形成实质不同的方法合同；诊断不等于提分。
-A4/C5 GPU 待授权不是文献/CPU 研究硬前置；尚无新机制准入或训练启动。
+A4 GPU 待授权、C5 audit 等空卡不是文献/CPU 研究硬前置；尚无新机制准入或训练启动。
 研究卡 `research/20261012_chapterwise_optimization.md`，证据 `results/PHASE_R1.md` §25.38 起。
 C5 DATE 词面代理和已有强锚 BEFORE/coref 冲突两项 CPU 审查已完成，均不支持直接硬规则准入。
-作者已具体批准 C5 原机 decoder smoke/audit 仅空卡执行；首试被 occupancy 门拦下，未加载模型。
+作者已具体批准 C5 原机 decoder smoke/audit 仅空卡执行；首试被 occupancy 门拦下，
+重新空卡后的 smoke 已 complete、average parity/六文件 hash PASS；下一步完整 audit，不复跑 smoke。
+有界空卡等待已结束，无遗留自动启动 watcher；接续核空卡后直接执行已授权 audit。
 仍无新方法训练或章节提分结论；A4 的 5090 授权不在这次批准内。
 
 | 项 | 当前状态 | 下一道门 |
@@ -62,9 +64,10 @@ C5 DATE 词面代理和已有强锚 BEFORE/coref 冲突两项 CPU 审查已完�
 ## 下一步
 
 1. C-35/C-36 完成：错误交换复算、A4 gold hash 恢复、远端 6 个测试和解析反例均收口；结果见 §25.34。
-2. A4/C5 CPU 准备已闭合；获得具体 5090 授权并核空卡后，只跑现有合同 smoke/audit，不扩展旧机制续修。
+2. C5 smoke 已完成；核空卡后直接执行已授权的完整 audit。A4 仍须具体 5090 授权，
+   不复跑 C5 smoke，不扩展旧机制续修。
 3. 后续 C-41 / T087 从可靠强控制的错误出发研究实质不同的新机制，按 `HANDOFF.md` §0.3.4 准入；
-   文献研究不依赖待授权诊断，但单活动任务、主表先行和新合同闸门保持。尚未开工或启动 GPU。
+   文献研究不依赖 GPU 诊断，但单活动任务、主表先行和新合同闸门保持。C5 切片已开工，方法训练未启动。
 
 ⛔ 仍禁止：未授权多种子、final-valid 选模、删除候选、事后修 prompt/阈值、用更大 backbone 掩盖机制失败，
 以及把透明适配写成“胜过原论文”。

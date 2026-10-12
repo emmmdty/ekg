@@ -56,6 +56,31 @@ gold BEFORE 的两个事件端点本来就是不同 gold clusters，直接 oracl
 没有 MUC 效应、document power 或独立信号证据。不能用这两个弱代理否定全部时间机制。
 下一步是原地同 scores decoder audit，再判断官方目标匹配与其他信号；方法合同未准入前不训练。
 作者已具体授权 C5 两项诊断仅空卡执行，第一次 launcher 被新的他人进程拦下，未加载模型。
+重新空卡后的真实 checkpoint CUDA smoke 已 complete，average parity/产物 hash 通过；
+完整 audit 仍待重新空卡，旧 smoke 不复跑。
+
+## 完整 decoder 结果的解释规则（读取前登记）
+
+比较只改变冻结 binary scores 的连簇方式，不能评价 antecedent marginal likelihood 训练。
+先核完整覆盖、输入身份和 average parity，再读官方 MUC 与 B³/CEAFe/BLANC，最后读配对错误交换。
+若 antecedent 提高 MUC，也只说明该 checkpoint 存在解码恢复空间；未超过强锚、未过护栏或
+未隔离训练目标时，不准入方法贡献。若下降，停止“只换 decoder 即修复”的解释，保留原控制，
+不扫描 dummy、阈值或 mention 顺序。错误交换只用于区分欠合并与误合并，不替代主指标。
+即使两种 decoder 都失败，也不能据此否定官方训练目标或所有结构方法。
+下一候选必须从真实错误与可部署输入出发，点名最近邻机制差异；控制重现不能占创新项。
+
+## 补充最近邻边界（2026-10-12）
+
+- [PairwiseRL, *SEM 2022](https://aclanthology.org/2022.starsem-1.6.pdf) §3：两个事件所在句
+  联合编码，trigger 表征互相条件化，显式论元比较是另一组件。它证明“pair-conditioned encoding”
+  不是我们的新颖性；可作为强对照方向，但尚未取得并审查该方法的可运行官方代码/许可/资产链。
+  论文脚注的 [CogComp 页面](https://cogcomp.seas.upenn.edu/page/publication_view/979)
+  本轮只返回 Angular 模板；作者主页仅列论文。检索失败不等于代码不存在，不据散文重写复现。
+- [FRECO, EMNLP 2025](https://aclanthology.org/2025.emnlp-main.1440.pdf) §3.1/§4.2
+  使用该类 cross-encoder，但其目标是“共指且框架不同”，**同一事件但框架不变也属负类**。
+  [公开仓库](https://github.com/jinzhao3611/freco) README 列的是 Llama SFT/DPO 和 mining，
+  本轮未核到 CDEC encoder 路径；不能把 FRECO 的 binary 输出当作 MAVEN 的 identity 输出。
+  新语料、生成偏好、阈值校准与该 adapter 均不进入本轮。该检索只限定最近邻差异，不生成新的训练许可。
 
 ## 本轮使用的研究工具来源
 

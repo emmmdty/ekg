@@ -232,10 +232,13 @@ author delegation releases a new in-scope research queue; it does not reopen old
   → real tiny-model training/reload/gradient/decoder tests passed on both machines; no new mechanism admitted.
 - [ ] **T085 [RS-001–RS-003] / C-39, G-22** Freeze preflight and execute admitted seed-13 comparisons
   → CPU package/asset gates passed (§25.35); D4 CUDA smokes, ten seed-13 folds and frozen CPU collection
-  completed (§25.37). A4/C5 CUDA/results remain pending.
+  completed (§25.37). C5 CUDA smoke completed (§25.38); full audit and A4 CUDA remain pending.
 - [ ] **T086 [RS-001–RS-003] / C-40** Recompute actual improvements and make the next scientific decision
   → D4 head-control decision completed (§25.37): retain linear, reject this tanh5 route; no new method claim.
   A4/C5 pending. Main results, ablations/negative controls and explicit limitations govern further admission.
+  C5 real-checkpoint CUDA smoke completed 2026-10-12 (average-cluster parity and six hashes PASS);
+  the full decoder audit remains pending, authorized only on an empty 5090 GPU.
+  Bounded occupancy waiting ended without an audit launch; no automatic watcher remains.
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
   → use reliable controls and observed errors to audit distinct mechanisms, runnable public implementations,
   deployable inputs, rivals, falsifiable predictions, strong comparisons, ablations/negative controls and power.

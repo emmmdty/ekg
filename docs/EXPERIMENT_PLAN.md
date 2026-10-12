@@ -378,7 +378,7 @@ gantt
 | **C-36** | **done · GitHub 科研 skills 检索、审查与项目安装**：只选直接服务根因诊断、可证伪假设与实验执行的 skills，固定来源 revision/许可/hash，记录与项目规则的冲突处理 | 作者明确允许查找并加载对本项目有用的 skills | skills 可被项目发现，原文和依赖审查完成，有来源锁定与实际使用记录；不自动安装服务/上传数据/扫参 | `.agents/skills/` + `docs/RESEARCH_SKILLS.md` |
 | **C-37** | **done · 一手机制审计与三项根因验证选择**：从 C-35 的真实错误出发，每章最多三张本轮候选卡，区分忠实复现、透明适配与本项目新机制 | C-35/C-36 交付；现有 MAVEN 主表保持，ESC 退出本轮硬前置 | 核机制本身、最近邻差异、数据/协议/代码/算力与强对照；代理自行选择或排除，不再向作者请求科研选题裁决 | R1 来源矩阵与改进研究卡 |
 | **C-38** | **done · 冻结诊断与共享执行接口实现**：D4 matched head、A4 shared loss/gradient、C5 official decoder replay；没有新机制准入，不改旧 sealed bundle | C-37 有明确可行方案；新任务/phase/config 在方法输出前冻结 | 有失败复现/梯度或输入语义测试、完整本地门、baseline parity 证据；没有 torch 的本地 PASS 不替代远端对应测试 | 代码、tests、独立新 runs namespace |
-| **C-39** | **wip · D4 CUDA smoke passed（2026-10-09）**：CPU/资产/源码门通过；A4/C5 CUDA 尚未运行。新机制的 control/消融/负控/power 须另行准入 | C-38 完成 + 源码/manifest/evaluator/strong baseline 门 PASS | 4090 核卡、完整命令/cwd/预期输出事前披露，真实输入覆盖与指标重放正确；未通过的章继续有效独立工作，不盲跑 | 合同 `PHASE_recovery_validation_20261008.md`；启动代码 `61bc4df`，实际状态见 `results/PHASE_R1.md` §25.36 |
+| **C-39** | **wip · D4/C5 CUDA smoke passed（C5 2026-10-12）**：C5 原机两篇 smoke complete，average parity/六文件 hash PASS；完整 audit 待空卡，A4 未运行。新机制 control/消融/负控/power 另行准入 | C-38 完成 + 源码/manifest/evaluator/strong baseline 门 PASS；作者具体批准 C5 两项、仅空卡 | 完整命令/cwd/预期输出事前披露，真实输入覆盖与重放正确；不复跑已完成 smoke、不扩大授权 | 合同 `PHASE_recovery_validation_20261008.md`；执行源码 `61bc4df`，证据 `results/PHASE_R1.md` §25.38 |
 | **C-40** | **wip · D4 复算与裁决完成（2026-10-10），A4/C5 pending**：D4 linear 重现 frozen anchor，tanh5 退化；保留 linear 匹配控制，不推进五维头、不加 seeds/扫参。下一步仍是现有 A4/C5 冻结诊断 | 对应正式单 seed 产物或命名阻断 | 数字只写 results；如实报告升降，禁止按最终评测改同一合同或重开已封存实验；新 D4 信号另过准入 | `results/PHASE_R1.md` §25.37；实验源码 `61bc4df` |
 | **C-41** | **wip · 逐章新方法 R1 研究，当前仅 C5（2026-10-12）**：DATE 代理与预测 temporal/coref 冲突两项 CPU 审查完成，直接硬规则不准入；下一步官方目标/解码控制。后续章节 C5 → D4 → A4，不续修封存家族 | 作者已具体授权原机 C5 decoder smoke/audit，仅重新确认空卡后执行；文献/CPU 可推进，单活动任务 | 各章科研价值/五方面可行性、最近邻差异、竞争解释、可证伪预测、强对照、单变量消融/负控与 power 闭合后才生成新的方法训练合同；候选失败不等于章完成。原始 split 不同只限制数字横比，不能单独否定机制适配；不改变有效性/资源边界 | `research/20261012_chapterwise_optimization.md`；`results/PHASE_R1.md` §25.38 起；不覆盖旧合同 |
 
@@ -394,7 +394,7 @@ C5 同一冻结 pair scores，比较原 average-link 与官方 antecedent argmax
 G-20（作者甲，不执行）→ C-30 ✅ → C-31 第一轮 `no_admissible_candidate` → 作者授权一个 external benchmark →
 C-31b ✅（ESC v0.9）→ C-32a ❌ `protocol_blocked`【协议】→ C-34 ✅（复盘与决策卡）。
 **C-34 之后作者 2026-10-08 明确将科研裁决委托执行代理**：当前新队列为
-**C-35 ✅ → C-36 ✅ → C-37 ✅（诊断选择）→ C-38 ✅（诊断实现）→ C-39 D4 CUDA ✅ / A4+C5 pending → G-22 D4 ✅ → C-40 D4 ✅ / A4+C5 pending**。
+**C-35 ✅ → C-36 ✅ → C-37 ✅（诊断选择）→ C-38 ✅（诊断实现）→ C-39 D4 CUDA ✅ / C5 smoke ✅、audit pending / A4 pending → G-22 D4 ✅、C5 smoke ✅ → C-40 D4 ✅ / A4+C5 pending**。
 C-32b/G-21 的 ESC 链保持未启动；ESC 退出本轮改进的硬前置，MAVEN 主表保持。
 本授权允许代理基于证据选择现有主任务内的新机制与改进，不复跑旧 sealed bundle，
 不授权 final-valid、未授权 seed、5090 或跨机 checkpoint 搬运。
@@ -452,7 +452,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 | **C-29.6** | ✅ **2026-10-02 静态契约核验完成并发现协议阻断**：11,149 个 frozen causal target 的第三行实有 407 种文本，`…none` 只占 10,743；C-3 的 target-third-line stop 不能在不读取 internal-dev gold 的 inference 中实现。旧 512-token 无 stop runner 已 fail-closed，未实现新 driver、未调用 GPU | C-29.5 ✅；只读 CPU 审计 | 已完成 | **卡【协议】**：逐 target stop＝gold leakage；固定 `none` stop＝选择性错误。作者已取 (甲)：留下命名障碍、不产出可评分行；G-20 永久不启动 |
 | **G-20** | ✋ **LLMERE-causal 不执行（作者 2026-10-02 取甲）**：C-29.6 实测 target-third-line stop 必须逐例读取 internal-dev gold；固定 `none` 又选择性错误。LLMERE 因此保留为 FR-016(b) 可得性行，**没有 U 层分数** | C-29.6 完成 + 作者甲裁决 | 0 GPU·h | 旧 512-token runner fail-closed；不写/不跑新的 driver、不做 100 条试跑、不评分。它是协议障碍，不是 LLMERE 方法质量结论 |
 | **G-21** | **合同绑定的单 seed 正式实验（尚无具体候选）**：只运行 C-32b 已冻结的一项新研究合同，并保留 immutable manifest、raw output 与覆盖报告 | C-32a 与 C-32b 全部 PASS + 具体 contract/command 已写回本表 + 本地 gate + 4090 空闲 | 由 C-32b 的实测预算确定 | 训练、selection、evaluation 三隔离；唯一 seed 13；不得从 smoke/正式结果回改合同。GPU 命令启动前必须展示 cwd、命令和预期产物；完成后交 C-33 |
-| **G-22** | **wip · D4 计算与汇总完成（2026-10-10），A4/C5 pending**：两个 CUDA smoke 与十个正式 fold complete，CPU collector 的 status/hash/覆盖闸门通过。合同 `PHASE_recovery_validation_20261008.md`，方法训练须另过准入，旧 bundle 不修改 | 对应合同 CPU 门通过 → 真实 CUDA smoke → 正式验证；方法训练另需机制/power/消融/负控准入；exact command/manifest/evaluator/baseline/config 已冻 | 启动身份见 §25.36，完整数字/配对报告见 `results/PHASE_R1.md` §25.37，实验代码 `61bc4df` | 唯一 seed 13；D4 已交 C-40，不重启已完成输出；A4/C5 无结果，不用 D4 完成代替三章完成 |
+| **G-22** | **wip · D4 计算与汇总完成（2026-10-10），A4/C5 pending**：D4 两个 CUDA smoke 与十个正式 fold complete，CPU collector 的 status/hash/覆盖闸门通过；C5 原机 smoke complete、parity/hash PASS，完整 audit 待空卡。合同 `PHASE_recovery_validation_20261008.md`，方法训练须另过准入，旧 bundle 不修改 | 对应合同 CPU 门通过 → 真实 CUDA smoke → 正式验证；方法训练另需机制/power/消融/负控准入；exact command/manifest/evaluator/baseline/config 已冻 | 启动身份见 §25.36，完整数字/配对报告见 `results/PHASE_R1.md` §25.37，实验代码 `61bc4df` | 唯一 seed 13；D4 已交 C-40，不重启已完成输出；C5 仅 smoke 通过、完整分数 pending，A4 无结果；不把诊断完成当三章改善 |
 
 **G-13 / G-14 共同确立的方针（作者 2026-09-13）**：4090 被占不是停工理由。
 判断一件事该不该先在 5090 上做，只问**它能不能减少那一次正式跑白跑的概率**。
