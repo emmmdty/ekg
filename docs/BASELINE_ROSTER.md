@@ -25,7 +25,7 @@
 | 3 | CorefPrompt（Xu et al., EMNLP 2023） | KBP 2017 | ⚠️ EasyECR 有实现，但配置依赖 OmniEvent 预测论元文件（checkpoint 已失效） | 若以我方 Qwen3 论元替代 → 必为 (b)，须列差异 | **降级候选** |
 | 4 | Qwen3 mention-local 论元池化 `qwen3-argument-s13-r2` | — | 自建 | **不适用**：本文自建的注册负面对照，非外部方法 | 已有 |
 | 5 | LLM 对照（Qwen3-8B，LoRA/prompt） | — | 自建 | **不适用**：同上 | 待建 |
-| 6 | official joint + 给定类型一致性（derived control） | 同 frozen MAVEN-ERE internal-dev | 原 official scorer/decoder + 固定 type constraint | **不适用**：不是 Lu & Ng 六任务模型复现；C1 仅为概念出处。零训练、无阈值扫参，task-given 类型输入显式披露 | **C-41 待评分**；先无约束 exact parity，合同 `PHASE_C5_typed_control_20261013.md`，证据 `PHASE_R1.md` §25.42；不重绑旧 anchor |
+| 6 | official joint + 给定类型一致性（derived control） | 同 frozen MAVEN-ERE internal-dev | 原 official scorer/decoder + 固定 type constraint | **不适用**：不是 Lu & Ng 六任务模型复现；C1 仅为概念出处。零训练、无阈值扫参，task-given 类型输入显式披露 | **C-41 完成**；无约束 exact parity、双端 official 评分与配对审查通过，共指四指标提高。合同 `PHASE_C5_typed_control_20261013.md`，数字只见 `PHASE_R1.md` §25.42；不重绑旧 anchor，不算创新 |
 
 **不可运行，进可得性表**：ACCI（`era211/ACCI` 全历史仅 README）、IP&M 2024（无公开代码，全文不可得，E9）、
 RESIJ（未取得）、OmniEvent EAE checkpoint（失效）、TextEE（无 checkpoint）。

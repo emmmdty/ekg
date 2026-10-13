@@ -256,6 +256,10 @@ author delegation releases a new in-scope research queue; it does not reopen old
   and continuous geometry audits did not support the planned error signal; that observer route stops.
   The next derived control is fixed given-type agreement with the original scorer/decoder (§25.42),
   explicitly distinct from a method innovation or reproduction of the cited multitask model.
+  This derived control is complete: exact unconstrained parity, independent official scores and
+  paired document counts agree. All four coreference metrics improved (§25.42); its residual profile
+  is complete. T087 remains active for a distinct admissible mechanism, rather than counting this
+  known-rule control as a chapter innovation or reopening the stopped weak observer.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

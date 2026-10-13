@@ -29,7 +29,9 @@ C5 DATE 词面代理和已有强锚 BEFORE/coref 冲突两项 CPU 审查已完�
 10-13 4090 原地 official-joint CPU 全量 cache 已通过 exact cluster parity，
 重放预测与 frozen anchor byte-identical（§25.40）。当前弱 factuality observer 的部署覆盖与
 连续几何未支持作用于真实错误，该 observer 路径停止、不调参（§25.41）。
-下一项 known type-agreement stronger control 的固定 CPU 重放/评分，非新方法创新（§25.42）。
+known type-agreement stronger control 已完成固定 CPU 重放/双端评分与配对审查，共指四指标提高，
+残余错误 profile 已完成；数字只见 §25.42。下一步据其两方向错误准入独立机制/输入/power；
+控制改进尚不是方法创新，当前 C5 切片继续 wip。
 
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|

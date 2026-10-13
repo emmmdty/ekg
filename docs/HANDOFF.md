@@ -30,7 +30,9 @@
 > **10-13 CPU 续进**：4090 原地 official-joint 的完整 CPU scores 已通过 exact cluster parity，
 > 重放预测与 frozen anchor byte-identical；证据 §25.40。弱 train-only 文本观测器的部署错误覆盖
 > 与连续概率诊断均完成，当前 observer 路径停止、不调参（§25.41）。
-> 下一步 known type-agreement stronger control 的固定 CPU 重放/评分（§25.42），不是新方法创新。
+> known type-agreement stronger control 已通过固定 CPU 重放/双端评分与配对审查，四个共指指标
+> 都提高；这是可复核的控制改进，仍不是新方法创新。其残余错误 profile 已完成，证据 §25.42。
+> 下一步依据 stronger control 的两方向错误重新闭合独立机制、部署输入和目标 power。
 > CUDA 隐藏、权重留原机，5090 原 audit 仍待空卡，无遗留 watcher；仍无新方法过门或突破结论。
 >
 > **最短读法**：首表 → **§0.3（当前队列）** → 需要哪章再看 §0.4 的对应小节。
@@ -41,7 +43,7 @@
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41 / T087 C5 切片（10-13 续）**：official-joint CPU 全量强控制 cache 已可用；当前弱 factuality observer 路径停止，下一步 known type-agreement control 的固定重放/评分，证据 §25.40–§25.42。尚无新方法准入；5090 原 decoder smoke complete、audit 待空卡，已具体授权，不复跑 smoke。后续 D4 → A4；A4 5090 仍未授权。 |
+| **活动任务** | **C-41 / T087 C5 切片（10-13 续）**：official-joint CPU 全量强控制 cache 可用；known type-agreement control 已完成，同协议四个共指指标提高，残余 profile 完成。当前弱 factuality observer 路径停止；下一步依据 stronger control 的两方向错误核新机制/输入/power，证据 §25.40–§25.42。尚无新方法准入；5090 原 smoke complete、audit 待空卡，已授权不重复问。后续 D4 → A4；A4 5090 仍未授权。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
@@ -63,7 +65,7 @@
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最近完整三件套（2026-10-12，两项 CPU 信号审查）**通过，证据见 §25.38；
+> **最近完整三件套（2026-10-13，控制改进与 implicit singleton 统计修复）**通过，证据见 §25.42；
 > 10-10 汇总相关测试与一致性门见 §25.37；
 > torch 对应测试在 4090/5090 均用 CPU 真正执行（§25.35）；最新启动证据见 `results/PHASE_R1.md` §25.36。
 > 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 最终结果
@@ -116,6 +118,10 @@ uv run python scripts/audit_r1_consistency.py \
 仅 C5 train 的 CPU 文本观测诊断已有完整 OOF 与观测差异计数，不能替代 D4/C5 新方法准入。
 旧 D4 OOF consumer 范围不隔离，本地小范围 CLS cache 与全量 OOF 也不等价；不能直接接入。
 数字、hash 和 source 边界只见 `results/PHASE_R1.md` §25.39。
+10-13 接续已将 strongest official-joint 原地 CPU cache 与 known type-agreement control 完成，
+当前弱文本 observer 路径因部署覆盖/连续几何不支持而停止。控制的四指标改善与残余画像只见
+§25.40–§25.42；不是方法创新或章节 PASS。下一机制须解释 stronger control 的两方向残余错误，
+补齐文献差异/部署输入/目标 power，不把 masked-trigger 或旧 role residual 换名复活。
 
 **2026-10-08 作者明确委托科研裁决**：执行代理查清三个方法章为什么失败，检索论文/官方实现与科研 skills，
 完成有证据的改进实验，并自己选择后续路线；作者验收最终结果。当前主表新增 C-35–C-40/G-22。

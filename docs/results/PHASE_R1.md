@@ -3645,3 +3645,68 @@ per-document SHA `d97ab95f376a2243bf338c13e2275338b88fe5877bc00f99b4b03e383a4d7b
 CUDA 隐藏的对应真实 official decoder CPU 测试 **5 passed in 26.82s**。
 测试确认遮挡跨类型最高分后选择次高合法 antecedent，dummy/合法分数/完整行形状保留；
 并非真实数据的 type-control 指标结果，后者尚待执行。
+
+原机 CPU PID **1782472**、运行 commit `85c2a93`、日志
+`logs/c5-typed-control-20261013.log`；已 `complete`。无约束重放全量 exact parity，
+固定约束改变 **21 documents**。生产不读 gold 文件、零 optimizer steps；模型/源码/cache 未改。
+远端官方评分后，回传的 prediction/changes hashes 与 metadata 对齐；
+本地使用原同一 gold/source_lock/evaluator/candidate digest 独立复算，全部 scores 数字与远端一致。
+
+| 官方共指指标（F1，%） | frozen official joint | 给定类型控制 | 差值（百分点） |
+|---|---:|---:|---:|
+| MUC | 80.9847198642 | **82.6689774697** | **+1.6842576055** |
+| B³ | 98.0398658695 | 98.2724739302 | +0.2326080607 |
+| CEAFe | 97.7315760307 | 97.9410105769 | +0.2094345462 |
+| BLANC | 89.8800889765 | 91.1163290123 | +1.2362400358 |
+
+MUC precision 从 78.8429752066 升至 82.0998278830；recall 均为 83.2460732984。
+按同协议 MUC counts 独立复核，precision numerator/denominator **477/605 → 477/581**，
+recall numerator/denominator **477/573 → 477/573**：移除 24 个 spurious MUC links，没损失总召回。
+文档 MUC **19 升 / 0 降 / 272 相同**；文档配对 bootstrap 2,000 draws、RNG 13，
+ΔMUC 95% 区间 **[0.9800180100, 2.4354309610]** 个百分点。
+这只描述 evaluation-document variation，不能替代跨初始化结果或目标 power。
+三类关系字段均复制原预测，不报告新的关系改善。
+
+**裁决：得到可复核的同协议控制改进，但不是论文创新突破、不是新方法 PASS。**
+已知 C1 type agreement 是收益来源，不能冒称新机制；旧 frozen anchor 与旧家族结果不改写。
+未来 C5 候选须将该控制列为 stronger alternative 并明确类型 policy，不能只胜旧弱锚。
+当前弱 factuality observer 仍停止；下一步从该控制的剩余错误做机制/功效准入研究。
+
+prediction SHA `0189be77150ee5f8946d3a1b09dbe5436c953451c350ec3acd41c710be984f37`；
+changes SHA `b5c99c6caeb2b967ddeae69009969d0b81be9d9e4f3917cb990960adb7614136`；
+metadata SHA `af5bc246403e7098be9f8ec8bcbc9057901a7dde100e67924be072a9d65a5941`；
+remote metrics SHA `22a55c15d12260525769650826d6f9c7b93b7c45294d30730bfd00977d1806c4`；
+local independent metrics SHA `8584708846a00949a5a9ccf3a5eeafe5b88489ee389c01ca9fe14ac37188be8c`；
+paired counts SHA `2a4690b43683156b9cdb93bd6780d4056c5a052bf038b833bbbc585f51445755`；
+paired comparison SHA `07f64e2f656279bd6b87dd3a6b22f8c3de38723c1b354ec37bcb633147dae119`。
+stage 15 份此前非权重产物 manifest SHA
+`14df267d3463394e6c9e34ccc392cbdacd6d73020daff2bb9079856255c17ee0` 已在 4090 逐项核验。
+
+配对 counts 首次遇到既有 `_coref_document_counts` 的 implicit singleton 构造 bug：
+generator 创建了 list-of-set，引发 TypeError，未产生配对报告。
+新回归测试 **1 failed → 6 passed**，只把隐式 singleton 修正为 set；不改指标公式/旧报告。
+修复后总 counts 与两份官方 MUC 独立精确一致，相关统计 helper SHA
+`3cccd3fe8c1b61a3f697425c9ea19aa16d3c32dea2f7adf896250739f9849d56`。
+最终本地门 **850 passed / 44 skips、ruff 0、CPU smoke OK**，R1 consistency **36 requirements PASS**。
+
+#### stronger control 的剩余错误（既有 profile，只读）
+
+自审：价值是防止依据旧弱控制的错误比例选择新家族，对准表 5-3 的机制准入；
+可行性是复用已存在的 CPU profile，原 gold/pred/evaluator/candidate 均已在独立评分核验。
+执行 `report_coref_error_profile.py --evaluator data/protocols/v6/tools/maven_ere_evaluate.py
+--gold runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl
+--pred runs/stages/R1/r1-v63-c5-20261013/type_control/predictions.jsonl
+--output runs/stages/R1/r1-v63-c5-20261013/type_control/residual_profile.json`，退出 0，
+profile 与官方 scorer 精确交叉核验通过。
+剩余 missing/spurious MUC links **96/104**，两方向占 **48%/52%**，不能继续称“全是 precision 问题”。
+pair 层 under/over merges **222/303**；under 中跨句 **209**、高相似 ≥0.8 **94**；
+over 中跨句 **278**、高相似 **189**。profile 是错误画像，未证明 lexical bias 的因果方向。
+report SHA `168e9c05cb820fe40a330a87daa24e52f830ccaf562654b3a0aefe0efe46f814`。
+接续研究须同时区分高相似误合并和低相似漏合并，不能复活旧 role residual 或把 trigger masking
+直接称创新；对应 counterfactual ECR 已有 2024 RCA/2025 ACCI，一手机制审查后再裁决。
+
+非权重产物已备份回 4090。type-control 八文件 manifest SHA
+`9ab77f80cba6576610ab3bf102914f31c1dec1dc756e8ae00bd95e6e8418a7ed`；
+此前 15 文件包与本包合计 **23 个 artifacts** 在 4090 独立逐项 SHA 核验通过。
+五个 sklearn model.joblib 留本地，官方 neural checkpoint 留原 4090，5090 权重/冻结诊断 snapshot
+未动；没有跨机权重搬运。implicit singleton 统计修复 commit `b049dad`；旧报告未重算。

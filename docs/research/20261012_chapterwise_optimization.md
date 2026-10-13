@@ -165,6 +165,23 @@ Train 审查已完成，数字只见 R1 §25.39。标签差异具有探索分辨
 和官方 utility 已可用，零训练/权重搬运。合同 `PHASE_C5_typed_control_20261013.md`。
 Lu & Ng §4.1 C1 已提出 semantic-type 一致性；硬约束给定类型是透明控制，不当作该 MTL 复现或创新。
 
+控制已完成且官方共指四个指标均提高，配对/复算/可追溯证据只见 R1 §25.42。
+原锚不重绑，当前新方法仍未准入；未来候选须胜过该 stronger alternative，不能把已知约束收益
+当新机制的收益。下一步复用既有 `report_coref_error_profile.py` 核该控制的残余错误。
+科研价值是从真实剩余 false/missed merges 寻找独立干预点，对准表 5-3 的新家族准入；
+可行性是同 P1 input/prediction/evaluator 的本地 CPU 只读 profile，无训练/新预测/阈值改变。
+诊断完成不等于 C5 章完成；新机制仍需文献差异、部署输入、目标 power、消融与负控。
+
+残余 profile 已完成，数字见 R1 §25.42，两类 MUC 错误均须解释；不能仅凭 trigger 相似度
+推断其因果作用。最近邻继续核到正文：
+[ACCI preprint (2025)](https://arxiv.org/abs/2506.01488) 及
+[正式正文](https://www.nature.com/articles/s41598-025-32765-6) 的 counterfactual ECR 部分
+已构造 trigger-only bias 分支、masked-trigger context 分支，并以 Eq.14 的加权加减修正 factual
+预测。因此“mask trigger + context/bias 分支”本身不能立项为创新；当前其 runnable code 障碍仍在，
+代码不可得不能抹掉其机制先行性。
+[RCA (NAACL 2024)](https://aclanthology.org/2024.naacl-long.63/) 是另一直接邻居，
+已定位论文，接续还须审其生成数据/官方实现、正文机制与 MAVEN 内适配条件，不能只凭摘要准入。
+
 ## 本轮使用的研究工具来源
 
 使用已安装的 hypothesis-generation 区分候选、竞争解释、预测与实测，不把技能校验当科学结论。
