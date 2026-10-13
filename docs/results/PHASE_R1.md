@@ -3710,3 +3710,134 @@ report SHA `168e9c05cb820fe40a330a87daa24e52f830ccaf562654b3a0aefe0efe46f814`。
 此前 15 文件包与本包合计 **23 个 artifacts** 在 4090 独立逐项 SHA 核验通过。
 五个 sklearn model.joblib 留本地，官方 neural checkpoint 留原 4090，5090 权重/冻结诊断 snapshot
 未动；没有跨机权重搬运。implicit singleton 统计修复 commit `b049dad`；旧报告未重算。
+
+
+### 25.43 C-41：最近邻审查与 antecedent 决策分解开工（2026-10-13）
+
+科研价值：对准表 5-3 与 C5 新机制准入，识别 stronger type-control 残余错误落在
+null/anaphoricity 决策还是前项排序；不把触发词相关性当因果证据，不把已知 anaphoricity
+模块或可微 MUC 目标称创新。对应观测仅引用 §25.42。
+可行性：两份既有 manifest 已逐项 SHA 核验，CPU cache/given types/identity gold/官方 evaluator
+可用；固定本地 CPU 只读诊断，不训练、不读 final-valid、不搬权重。5090 成功只读核卡仍有
+他人 vLLM 占用，原已授权 audit 未启动；这不是模型负结果。
+
+本次预先固定类别：correct dummy、correct antecedent、first-mention false link、
+false dummy with correct highest-ranked legal real antecedent、false dummy requiring ranking、
+wrong real antecedent with a gold predecessor。类型来自无标签 test input，identity 只用于诊断。
+每个 mention 只入一个类别；先还原 type-control 的全部 non-singleton clusters exact parity。
+固定 oracle 三臂：null-only 修复 first-mention false link 和 rank-correct false dummy；
+requires-ranking 修复其余两类；all 修复四类。修复到最高原 logit 的合法 gold predecessor，
+首提及修复到 dummy。all 须精确得到 gold cluster，独立 MUC counts 与官方评分必须一致。
+这是金标条件下的干预覆盖诊断，非可部署预测、非方法输出、非保证实际提分的上界或确认性 power；
+各臂效应不假定可加，不扫阈值。新 namespace 为 `decision_audit/`，未准入训练合同。
+
+
+实现 commit **`a6d159d`**；entrypoint SHA
+`e6ec2d78d1bb5a120e5f8f042316e189e6e22d0efb29140ad2c68f1b42106120`。
+配置 `configs/c5_decision_audit_20261013_r2.json` SHA
+`13069ae3be7631cf765f6776e6b2578fad266f525c793d2438ae90977414f257`。
+首个 v1 输出已完成后发现行长 lint，不改科学规则；保留 v1 config/output 和运行源码快照
+`neighbor_audit/executed_decision_audit_v1.py`（SHA 与 v1 config 精确一致），另冻 r2。
+v1/r2 的三份 oracle predictions、逐文档 decisions/counts **逐字节相同**，没有按分数改设计。
+
+执行 `uv run python scripts/report_coref_decision_audit.py
+--config configs/c5_decision_audit_20261013_r2.json`，退出 0。全部 **291 documents / 7,195 mentions**
+的 baseline cluster parity exact；每个 mention 仅落入一个类别：
+
+| 类型控制上的 antecedent 决策类别 | mention 数 | 存在该类的文档数 |
+|---|---:|---:|
+| correct dummy（在 cache 文本顺序中无 gold 前项） | 6,525 | — |
+| correct real antecedent | 471 | — |
+| 首提及错误连到另一个 event | 97 | 65 |
+| 错误选择 dummy，但最强合法 real antecedent 正确 | 76 | 61 |
+| 错误选择 dummy，最强合法 real antecedent 也错误 | 13 | 12 |
+| 有 gold 前项，但选择了错误 real antecedent | 13 | 13 |
+
+**199 个局部决策错误中，173 个属于本次 null-only oracle 的覆盖**。这不是 MUC link 数，
+也不是新增模型的检出率；普通新旧 event 判别仍须覆盖大量正确 dummy 并保护正确连链。
+first mention 包含非 singleton chain 的开头，不能拿 singleton label 当它的同义词。
+
+| 固定 CPU 金标 oracle（非部署方法） | MUC F1 (%) | precision numerator/denominator | recall numerator/denominator | B³ F1 (%) | CEAFe F1 (%) | BLANC F1 (%) |
+|---|---:|---|---|---:|---:|---:|
+| stronger type-control 重放 | 82.6689774697 | 477/581 | 477/573 | 98.2724739302 | 97.9410105769 | 91.1163290123 |
+| null-only oracle | 96.5578111209 | 547/560 | 547/573 | 99.6660788221 | 99.7226502680 | 98.5996311211 |
+| requires-ranking oracle | 85.1756640960 | 497/594 | 497/573 | 98.4650143655 | 98.1111490533 | 91.8347297945 |
+| all oracle / gold cluster 恢复 | 100.0000000000 | 573/573 | 573/573 | 100 | 100 | 100 |
+
+null-only 使 missing/spurious MUC links **96/104 → 26/13**；requires-ranking 使其
+变成 **76/97**。分臂收益不可直接相加，局部 false-link 也不等于 spurious MUC link。
+all 与每篇 gold 的 non-singleton clusters exact parity。三臂另由独立进程运行
+`score_maven_ere_official.py --gold <原 frozen gold> --pred <oracle arm> --candidate-digest
+15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910 --output <独立报告>`，
+官方四指标逐项精确一致；原 helper 的 MUC counts 也与官方分数精确一致。
+这是**探索性、gold-conditioned、non-deployable** 的决策分解，没有 proposed 指标增益、
+因果归因、确认性功效或 C5 PASS。
+
+#### train 监督范围与新颖性裁决
+
+`uv run python runs/stages/R1/r1-v63-c5-20261013/neighbor_audit/train_scope_count.py`
+退出 0，只读 frozen train；排序规则核到 frozen official `data.py:113–114`。
+**2,622 documents / 66,744 mentions**，train/dev doc intersection **0**。
+首提及 **61,362** = singleton **59,124** + 非 singleton chain 开头 **2,238**；
+重复提及 **5,382**。首提及中有同类型先前竞争 mention **20,078**；同类型合法前项 options
+总计 **66,141**。零 fit、无模型输出，仅证明标签与竞争集合可派生，不证明预测或 power。
+train source SHA `20ea01ebe71fb8c8e4f207368673cc71f29840a290698eefe15de3a24a3b6f05`，
+manifest SHA `47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68`。
+
+一手机制/代码矩阵与 candidate brief 见
+[`research/20261013_c5_newness_admission.md`](../research/20261013_c5_newness_admission.md)。
+[RCA Algorithm 1](https://aclanthology.org/2024.naacl-long.63.pdf) 与官方 commit
+`f88572fac4f50595abee730dfcf14ac8cfa916aa`已核：确有 trainer、helper/部分生成 CSV/MIT，
+非 README-only；main enhanced train CSV 指向 git 外的 Drive。没有执行其 trainer，未建立
+MAVEN 增强数据或 fidelity PASS，不把原 split 的数字移入统一主表。
+ACCI 最新 `7f5bcd81e0a352f15263a5c7e7c4853b9e3023fa` 仍 README-only；CohTP 最新
+`3843ad0a4dcdb9f4761f134894b935d4ed74d19b` 仍仅 `Comming soon`。两者卡【代码】，
+不能重建后声称官方复现；其正文机制先行性仍成立。
+
+进一步核 [Lu & Ng 2017](https://aclanthology.org/P17-1009.pdf) 的首提及监督与
+[2021 §4.1 C3/C4](https://aclanthology.org/2021.naacl-main.356.pdf)、
+[C2F-SD §3](https://aclanthology.org/2024.naacl-short.19.pdf)、
+[Lee 2017 §6](https://aclanthology.org/D17-1018.pdf)、
+[StructECR §3.4](https://aclanthology.org/2021.acl-long.374.pdf)、
+[Le & Titov §2–3](https://aclanthology.org/K17-1039.pdf)。
+**不准入普通 newness/singleton 头、删光 gold antecedents→dummy、generic cluster regularizer
+或 plain counterfactual port 作为创新**。Le & Titov 的实际训练目标为 B³/LEA，不能误称其已做 MUC loss。
+C2F-SD 本轮 web/git 访问失败，状态 UNKNOWN，不能据此说代码不存在。
+原 PDF 下载超时、GitHub API rate limit、RCA full-clone HTTP/2 错误均已分开记录；
+后续 bounded PDF 下载与 partial no-checkout git 源码核查成功，没有把工具失败当科研结论。
+
+**科研裁决**：继续条件决策风险的输入与最近邻审查，优先检验真实 null 边界；
+普通 anaphoricity/校准必须作为强竞争解释与 matched control。
+当前只有候选 brief，尚缺 train-only 文档隔离 scorer error-state 输入、selective/error-correction
+最近邻差异、具体干预/消融负控冻结与 ≥80% document power；**method_admitted=false**。
+不拿 explored internal-dev 拟合 detector，不用 scorer 的 in-sample train 错误冒充 OOF，
+不启动 proposed GPU 方法。C-41/T087 继续 wip，当前 C5；D4/A4 尚未接队。
+
+#### 验证与产物身份
+
+TDD **8 failed（入口未实现）→ 8 passed**，覆盖 first≠singleton、类型 policy、排序/dummy
+两方向、全 oracle 恢复以及 population/type/score 负测。最终本地完整门
+**858 passed / 44 skipped、ruff 0、CPU smoke OK、R1 consistency 36 requirements PASS**。
+本次没有修改或执行 torch 代码；torch skips 仍不当作远端模型验证。
+
+r2 report SHA `d38856e1cf737faa9dc98d09e3c4941a4e6590102823c688b6af613cf6325989`；
+r2 六文件 manifest SHA `2e1b4596ca83d90e90d94251b1bcc2a5f2a8bc8a3519d5dbfcbb9c190723b701`；
+独立评分六文件 manifest SHA `f9151f0006b19fae85a337322c768807d49a99aceebfca6ab6bf40dced8de8ee`；
+neighbor/train 38 文件 manifest SHA `5de28a84d1aeb97300222101b00c0188e36bd26379dc36548feae5b72e99c9e7`。
+train report SHA `c01bfb8e0c7b81c2c7694b25a002a78db7bd69ff1bc09a8c7357a902f07ae7cb`。
+独立 scorer 命令/日志见 `decision_audit_independent/`。所有新产物位于
+`runs/stages/R1/r1-v63-c5-20261013/` 的新 namespace，没有覆盖既有 cache/type-control。
+
+
+新包已备份至 **gpu-4090 `/data/TJK/ekg/` 同相对路径**：v1/r2/独立评分/neighbor 四包
+共 **60 个非权重文件**（56 个 artifact entries + 四份 manifests），tar SHA
+`77e3b09d753a8ee783b9dd64e88fa7deb90fe93e5df241f2b1d11959f18235ea` 双端一致；
+原机以 `.venv/bin/python` 解包前拒绝覆盖既有 namespace，逐项 SHA 核验 **56 entries PASS**。
+上游 shallow/no-checkout 的 `.git` 对象未搬运，保留源码/tree/PDF 快照的 manifest 项。
+没有 checkpoint 搬运、GPU 模型计算、新初始化或 final-valid 读取。
+
+
+末次只读重核 5090 时 SSH 返回 `Connection refused`（exit 255），当前资源状态 **UNKNOWN**；
+较早成功核卡见 GPU0 **31,498 / 32,607 MiB、96% util**，PID **2633736** 为他人
+`VLLM::EngineCore`，所以当时未启动原已授权 audit。SSH 失败不说明进程死亡或卡已空闲；
+接续必须成功 SSH 后重新核卡。没有启动 watcher、后台实验或扩大 5090 授权。

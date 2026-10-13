@@ -253,8 +253,13 @@ author delegation releases a new in-scope research queue; it does not reopen old
   the given-type control and its residual profile are complete (§25.39–§25.42).
   The weak observer route stops. The derived control improved all four official coreference metrics,
   with independent scores and paired counts verified; it is a known rule, not an admitted innovation.
-  Next audit first-party mechanisms/code and deployable inputs against the stronger control's residual
-  errors, then close novelty, power, ablations/negative controls and a new contract before method training.
+  The 10-13 continuation completed the first-party matrix, train-label scope and frozen antecedent
+  decision/oracle audit with independent official scoring (§25.43; implementation `a6d159d`).
+  Gold-conditioned null repair exposes the main coverage, without deployable improvement or power.
+  Ordinary newness/singleton heads and erasure-to-dummy are prior mechanisms, not admitted innovation.
+  Next follow `research/20261013_c5_newness_admission.md`: audit train-only document-isolated
+  scorer error-state inputs and selective/error-correction neighbors; close the distinct mechanism,
+  power and ablation/negative-control rules before a method contract or training.
   Do not rerun completed exports or reuse historical pools/power as fresh admission evidence.
   T087 remains active; the existing 5090 decoder audit is separately authorized only on an empty GPU.
 

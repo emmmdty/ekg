@@ -35,6 +35,14 @@ known type-agreement stronger control 已完成固定 CPU 重放/双端评分与
 新窗口承担科研负责人（PI）/方法审稿/实验执行责任，按 `HANDOFF.md` 角色与 §0.3.5
 从 stronger control 的两方向残余错误做最近邻/输入/机制准入，沿用授权，不重跑完成的控制。
 
+10-13 本次接续的最近邻矩阵、train-label scope 和 antecedent 决策/oracle 分解及独立评分已完成
+（§25.43、实现 `a6d159d`）；null 边界是主要 gold-conditioned 修复覆盖，未证明部署改进。
+普通 newness/singleton、删光 gold 前项→dummy、generic cluster loss 不准入创新；
+下一步按 `research/20261013_c5_newness_admission.md` 审 train-only 文档隔离 error-state 输入、
+selective/error-correction 最近邻和目标 power。方法训练尚未准入；C-41/T087 仍 wip。
+本次较早成功只读核卡的 5090 有他人 vLLM，末次 SSH refused 为 UNKNOWN；原 audit 未启动，须成功 SSH 后重新核卡。
+
+
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|
 | G-19 · Ch5 外部 baseline | ✅ 已完成 FR-016(b) 透明适配：2,331 train / 独立 selection-dev / 无标签 291-doc evaluation 的 seed-13 运行，raw cluster、official export 与官方 scorer 的覆盖/候选/评测器闸门均通过；正式数字、singleton 崩塌形态、P/V/U 和禁止论断均在 `results/PHASE_R1.md` §25.28 | 不重跑、不事后调阈值或 backbone；KBP 2017 不可得，故不得以本行评价原论文 |

@@ -182,6 +182,16 @@ Lu & Ng §4.1 C1 已提出 semantic-type 一致性；硬约束给定类型是透
 [RCA (NAACL 2024)](https://aclanthology.org/2024.naacl-long.63/) 是另一直接邻居，
 已定位论文，接续还须审其生成数据/官方实现、正文机制与 MAVEN 内适配条件，不能只凭摘要准入。
 
+## 10-13 接续：null 决策覆盖与新颖性门
+
+最近邻正文/官方代码、固定 antecedent 决策分解及 oracle 的独立评分、train 派生监督范围
+已完成，数值只见 R1 §25.43。原 cache/type-control/weak observer 不重跑。
+后续完整机制矩阵、错误→假设→实验映射与未准入 candidate brief 见
+[`20261013_c5_newness_admission.md`](20261013_c5_newness_admission.md)。
+null 边界有主要 gold-conditioned 修复覆盖，但 ordinary anaphoricity/singleton 头已有先行工作，
+不能把这份诊断当新方法增益。继续核 train-only 文档隔离 scorer error-state 输入与
+selective/error-correction 最近邻；power/干预/负控未冻，不形成方法训练合同。
+
 ## 本轮使用的研究工具来源
 
 使用已安装的 hypothesis-generation 区分候选、竞争解释、预测与实测，不把技能校验当科学结论。
