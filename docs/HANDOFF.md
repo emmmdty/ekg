@@ -11,8 +11,8 @@
 > antecedent 决策/oracle 分解已完成，主要金标可修复覆盖落在 null 边界；**未证明部署提分**。
 > 普通 newness/singleton、candidate-erasure→dummy 等已有先行机制，不准入创新。候选 brief 见
 > [`research/20261013_c5_newness_admission.md`](research/20261013_c5_newness_admission.md)；
-> 下一步是 train-only 文档隔离 error-state 输入与 selective/error-correction 最近邻审查，power 尚未闭合。
-> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.43**。
+> 最新执行动作由下方「本次接续」与 §0.3.5 覆盖；候选 power 尚未闭合。
+> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.47**。
 > D4 linear 恢复强控制、tanh5 退化（§25.37）；A4 仍无新效果结果；旧失败家族封存，E3 不追加实验。
 > 5090 原 C5 decoder smoke 已 complete，完整 audit 已授权但仍待空卡；无遗留自动启动 watcher。
 > 本轮新 CPU 控制与该原 decoder audit 是两份合同，不能把其中一项完成记成另一项完成。
@@ -20,7 +20,7 @@
 > **最短读法**：新窗口角色 → 当前阶段表 → **§0.1–§0.3** → **§0.3.5 接续步骤与资产**。
 > §0.4 以后按需读；历史候选、旧队列和旧功效证据不得覆盖当前主表与最新实测。
 
-**本次接续（作者要求实际结果）**：C-41 当前执行固定双向等权 scorer 的 derived control，与已完成 type-control 对比实际 MUC/护栏；源码/类型 policy/dummy 固定，无训练/扫参，不宣称对称化是新方法。原条件风险候选仍须另过输入/创新/power 门。结果见 R1 §25.44，不能把准备完成记成突破。
+**本次接续（作者要求实际结果）**：固定双向与 frozen-null 三臂都已完成，独立官方评分未胜 strongest type-control，路线停止（§25.44–§25.45）。数学候选已验证 shared-ancestry joint 与 root product 的差异（§25.46），当前冻结零训练 forest posterior-score 控制：exact/root-product/ancestry-shuffle 与原 dummy/类型 policy/decoder 成对（§25.47）。仍无 breakthrough 或新方法准入；不把数学验证或负控下降当创新完成。
 
 ## 新窗口角色：事件语义与知识图谱方向的科研负责人（PI）
 
@@ -61,7 +61,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41 / T087 C5 切片（10-13 续）**：official-joint CPU 全量强控制 cache 可用；known type-agreement control 已完成，同协议四个共指指标提高，残余 profile 完成。当前弱 factuality observer 路径停止；本次最近邻/首提及 train scope/antecedent oracle 分解及独立评分完成（§25.43，代码 `a6d159d`），主要 gold-conditioned 修复覆盖是 null 判定。下一步按新候选 brief 核文档隔离 error-state 输入、selective/error-correction 先行机制与 power；普通 anaphoricity 分头不算创新。尚无新方法准入；5090 原 smoke complete、audit 待空卡，已授权不重复问。后续 D4 → A4；A4 5090 仍未授权。 |
+| **活动任务** | **C-41/T087，当前 C5**：given-type strongest control 已完成；固定双向与 frozen-null 三臂实测未胜、停止（§25.44–§25.45）。shared-ancestry 的数学差异已检验（§25.46），当前执行固定零训练 forest posterior-score 控制、独立官方评分（§25.47）。未形成创新或方法准入；原5090 smoke complete/audit 待空卡且已有授权。后续 C5 → D4 → A4，A4 5090 未授权。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
@@ -83,7 +83,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最近完整三件套（2026-10-13，antecedent 决策分解）**通过，证据见 §25.43；
+> **最近完整三件套（2026-10-13，forest posterior 控制）**通过，证据见 §25.47；
 > 10-10 汇总相关测试与一致性门见 §25.37；
 > torch 对应测试在 4090/5090 均用 CPU 真正执行（§25.35）；最新启动证据见 `results/PHASE_R1.md` §25.36。
 > 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 最终结果
@@ -144,7 +144,7 @@ C5 的后续章序为 D4 → A4，E3 保持封存成果；论文结构不改。
 旧 D4 OOF 虽有文档级 OOF，但不满足新 C5 consumer 的 evaluation 隔离，不能直接接为新方法训练输入。
 噪声兼容性是未准入假设；此 observer 的负证据不等于所有 factuality 方法无效，也不等于该假设已可行。
 
-下一步按 **§0.3.5 的最新接续**与 `research/20261013_c5_newness_admission.md` 核 train-only 文档隔离 scorer error-state 输入和 selective/error-correction 最近邻；当前只有候选 brief，power/具体干预/负控与方法合同均未闭合。
+下一步按 **§0.3.5 的最新接续**执行固定 forest posterior-score 控制并复算；两份候选 brief 的训练准入仍未闭合，不能把数学正确/已知控制当创新完成。
 历史 C-13–C-21 的候选、pair pools 与 power 属于其原 unit，不能直接迁移为 stronger control 上的新准入。
 历史高相似误合并画像不是 lexical bias 的因果证明；剩余漏合并与误合并都须有机制解释。
 原 5090 decoder audit 仍 pending、已有具体授权；它只隔离同分数解码，不验证新方法贡献。
@@ -276,20 +276,21 @@ A4 仍待诊断。三个方法章均未形成新方法贡献，不能用旧“�
 
 #### 0.3.5 新窗口直接执行：先闭合 C5 新机制，不重跑已完成控制
 
-**最新接续（本轮已执行，下一窗口不要重做）**：最近邻正文/源码矩阵、train 监督范围、
-antecedent 决策分解与独立评分已完成（实现 `a6d159d`，结果 **§25.43**）；类型控制重放
-parity 与全 oracle 恢复已核。RCA 有真实 trainer/部分增强数据；ACCI/CohTP 最新 tree 仍是占位，
-C2F-SD 访问失败只标 UNKNOWN。ordinary newness/singleton、删光 gold 前项→dummy 和
-cluster regularizer 已有先行机制，不立项为创新。原 type-control/弱 observer 路径不重跑。
+**最新接续（本轮已执行，下一窗口不要重做）**：最近邻/首提及/antecedent oracle 完成（§25.43）；
+固定双向与 train-only frozen-null 全部实际运行、独立复算完成，未胜 strongest type-control，停止
+且不扫参（§25.44–§25.45）。原 type-control/弱 observer 不重跑，旧 role/argument 家族不复活。
 
-**下一窗口首个动作**：完成 §0.1/§E.0 后读 R1 **§25.43** 与
-[`research/20261013_c5_newness_admission.md`](research/20261013_c5_newness_admission.md)。
-当前候选是条件决策错误状态/风险，尚未准入；先核 train-only、文档隔离 official scorer
-error-state 输入的来源与可生成性，再扩查 selective prediction / learning-to-defer /
-structured error correction 的正文/代码，证明实质差异。普通 anaphoricity/校准必须作强竞争控制；
-不能拿已探索 dev 拟合 detector，不能把 baseline in-sample train 错误冒称 OOF。
-新干预规则、单变量消融/负控与 ≥80% document power 未闭合，不启动方法训练。
-下面六步是整体准入程序；已完成的诊断和初次矩阵不重跑，只补明确欠项。
+**当前动作**：固定 forest posterior-score 控制按
+`configs/c5_forest_posterior_control_20261013.json` 与新合同执行一次完整 CPU cache 重放，
+再独立评分 exact/root-product/ancestry-shuffle（§25.47）。它复用原 dummy/类型 policy/decoder，
+零训练；formula 的代数正确性已检验（§25.46），不是实际提分。已有 output 不覆盖。
+新窗口先读 §25.44–§25.47 和 `research/20261013_c5_joint_connectivity.md` 的最新状态，
+避免重新启动 complete stage。null train/dev 表示与新 head 留4090，非权重预测/评分双端可得。
+
+conditional error-risk 的旧候选仍缺 train-only 文档隔离 error-state 输入；新的 exact joint 候选
+改变联合概率/监督假设，不用 in-sample teacher errors 冒称 OOF。正文与官方 README 机制
+差异已核，不能据有限检索证明全面新颖性。具体 loss、实际算力、单变量消融/负控与
+≥80% document power 未闭合，不启动 proposed training。后续仍是同一 C-41 的 C5 切片。
 
 新资产只读核验：`decision_audit-r2/artifact_hashes.json` SHA
 `2e1b4596ca83d90e90d94251b1bcc2a5f2a8bc8a3519d5dbfcbb9c190723b701`；

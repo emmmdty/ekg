@@ -3,7 +3,7 @@
 > 更新于 **2026-10-13**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
-**本次接续（作者要求实际结果）**：C-41 当前执行固定双向等权 scorer 的 derived control，与已完成 type-control 对比实际 MUC/护栏；源码/类型 policy/dummy 固定，无训练/扫参，不宣称对称化是新方法。原条件风险候选仍须另过输入/创新/power 门。结果见 R1 §25.44，不能把准备完成记成突破。
+**本次接续（作者要求实际结果）**：固定双向与 frozen-null 三臂都已完成，独立官方评分未胜 strongest type-control，路线停止（§25.44–§25.45）。数学候选已验证 shared-ancestry joint 与 root product 的差异（§25.46），当前冻结零训练 forest posterior-score 控制：exact/root-product/ancestry-shuffle 与原 dummy/类型 policy/decoder 成对（§25.47）。仍无 breakthrough 或新方法准入；不把数学验证或负控下降当创新完成。
 
 ## 当前正式活动阶段
 

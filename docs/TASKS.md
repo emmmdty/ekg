@@ -263,8 +263,13 @@ author delegation releases a new in-scope research queue; it does not reopen old
   Do not rerun completed exports or reuse historical pools/power as fresh admission evidence.
   T087 remains active; the existing 5090 decoder audit is separately authorized only on an empty GPU.
   Author reiterated actual metrics or overall-method innovation as the deliverable. A fixed
-  bidirectional-score derived control is executing on original 4090 CPU (§25.44); its
-  same-protocol main scores must be independently verified. No symmetry novelty claim.
+  bidirectional-score control completed with independent scores and did not beat the typed
+  strongest control (§25.44); stop it without alpha/threshold repair. A train-only frozen
+  null-head control completed with negative independently reproduced metrics (§25.45), with matched arms,
+  fixed seed 13/epoch 10 and no updates to the original encoder/scorer. It is a known-mechanism
+  control, not an admitted novelty claim; stop it without a parameter rescue. Joint-connectivity
+  algebra is verified but not admitted (§25.46). Execute the fixed zero-training forest posterior
+  control (§25.47), independently score exact/product/ancestry-shuffle against strongest type-control.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

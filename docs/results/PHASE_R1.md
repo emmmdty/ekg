@@ -3881,3 +3881,198 @@ train report SHA `c01bfb8e0c7b81c2c7694b25a002a78db7bd69ff1bc09a8c7357a902f07ae7
 原机 64 CPUs、load **17.91/17.30/15.99**、available memory **490,793,128 kB**，
 限制 4 CPU threads；新 output 尚不存在。下面是真实 checkpoint parity 与评分的执行阶段，
 单元测试不替代它。
+
+
+原机 smoke 真正 `complete`，PID **1822206**、运行 commit `ffdbde5`；**8 documents**
+的全部 original forward logits 与既有 cache exact，给定类型 baseline non-singleton clusters
+exact parity。日志 `logs/c5-symmetric-cpu-smoke-20261013.log`，status/config SHA 对齐；
+四文件 artifact hashes 已由 status 记录。成功 SSH 读到 complete 且进程已 GONE，
+没有将 shell wrapper PID 当实际模型 PID。
+同 config 的 full 已启动，日志 `logs/c5-symmetric-cpu-full-20261013.log`；
+尚未读取新指标，不扫权重/阈值，不改变方法契约。
+
+
+#### §25.44 全集实际结果与停止裁决（无新方法胜出）
+
+完整 **291 documents**，所有 original logits/type-control clusters exact parity；full PID **1823867**、status complete。
+远端与本地独立 official scorer 的四指标逐项精确一致，source_lock/candidates/输入轴均一致。
+
+| 实际预测控制（非 oracle） | MUC F1 (%) | B³ F1 (%) | CEAFe F1 (%) | BLANC F1 (%) |
+|---|---:|---:|---:|---:|
+| typed strongest control | 82.6689774697 | 98.2724739302 | 97.9410105769 | 91.1163290123 |
+| fixed bidirectional mean | 82.4253075571 | 98.2666561227 | 97.9773531538 | 91.1618997973 |
+| type-matched reverse shuffle | 74.0186915888 | 97.5719451373 | 97.3630418906 | 86.2497835113 |
+
+双向平均相对 strongest type-control 的 **ΔMUC −0.2436699126** 个百分点，
+2,000 document bootstrap / RNG 13 的 95% 区间 **[−1.5593438641, 0.9994732878]**；
+precision numerator/denominator **477/581 → 469/565**，recall **477/573 → 469/573**。
+spurious **104→96**、missing **96→104**：抑制误合并伴随更多漏合并，未落实主要 null 修复覆盖。
+shuffled 的 **ΔMUC −8.6502858809**，区间 **[−11.6760812860, −5.8457032955]**。
+负控显著更差不能挽救主臂未胜出的事实，也不能当作创新证据。
+**裁决：停止此固定对称控制，不扫 alpha/min/max/threshold，不称指标突破或方法 PASS。**
+
+下载时独立 comparator 首次缺尚未回传的 remote metrics 文件：本地 scorer 已成功，但
+比较端 FileNotFoundError；补回已经 complete 的 evaluation JSON 后，两臂逐项 exact。
+这次传输/比较失败不是模型负结果，没有重跑模型或改变 score 规则。
+原机主模型 checkpoint 未搬运；full/两臂与 paired CI 的非权重产物见
+`symmetric_control/{full,evaluation,independent}/`，sha manifest 待最终双端封存。
+
+
+### 25.45 C-41：冻结 encoder/scorer 的 train-only null 控制开工（2026-10-13）
+
+科研价值：对准表 5-3，将 §25.43 的 null 决策可修复覆盖转为真实无标签 inference，
+不再以诊断完成充当目标。固定对称控制不作权重挽救；新控制直接学习是否存在合法 gold 前项，
+复用 Lu & Ng 的已知 anaphoricity 思想，不宣称新方法或其多任务系统完整复现。
+可行性：原 2622-doc train gold 可派生 first/repeat 监督，与 291-doc evaluation 无交集；
+原 frozen neural checkpoint/encoder 可在 4090 CPU 导出训练表示，不需新语料、额外 seed 或 GPU。
+只有新 null head 更新，原 encoder/scorer 冻结。这里的 train labels 是真实 first/repeat，
+不是 baseline 对 train 的 in-sample error-state 标签，不冒称 OOF error supervision。
+
+预测前固定：沿用原无标签 test、type policy、候选/dummy 与 P1 scorer；feature 来自 current
+mention embedding、同类型先前 embedding 的均值、原最强合法前项 embedding、原 logits 的
+max/logsumexp/log1p合法前项数。训练只读 train identity，evaluation feature/production 不读 gold。
+固定三臂 semantic / numeric_only（embedding 块置零、同形 head）/ shuffled_semantic
+（train 内 doc/type/opportunity 桶置换 embedding 块，numeric 块与真实 target 不动）。
+head=Linear→ReLU→Dropout(0.2)→Linear，hidden 200，训练 feature 标准化只 fit train，
+Adam lr=0.001、BCE、batch=512、固定 final epoch=10、seed=13；不 class-weight/阈值/epoch 扫描。
+三个不同控制都只用 seed 13，无新增 seed。
+
+令 q 为 head 预测的 real-antecedent 总概率；给定类型合法集合 logits 保持原值，null raw logit
+为 logsumexp(legal logits)−logit(q)，因此 real 总质量为 q、real 内排序不变。
+空合法集合强制 dummy。输出保留全部 mention/candidate IDs，类型 policy 显式成对。
+生产动作按原 argmax/decoder，不用 gold 选择修改对象；原 checkpoint 留原机，新 head 也留原机。
+baseline cached logits 和 type-control exact parity 必须先过；原 encoder/scorer 零 optimizer steps。
+此处是独立的已知机制控制训练，不是 proposed innovation training；不解除条件风险候选的
+novelty/input/power 门。未胜 strongest type-control/护栏降低/semantic 未胜 numeric 或负控时，
+如实封存并停止这个固定控制，不扫参挽救。
+
+
+§25.45 的 null 控制拟合范围补充（任何输出前冻结）：无合法前项的 mention 由定义强制 dummy，
+不参与 head 拟合；**所有有同类型合法前项的 train mention 全部参与，不采样**。
+semantic 三个 embedding 块分别是 current / mean legal previous / top original legal previous；
+numeric 三项是 max logit / logsumexp legal logits / log1p legal count。标准化仅 fit 该 train 集。
+shuffled 的固定 opportunity 桶为 0 / 1 / 2–4 / ≥5，语义块置换只在同 doc/type/桶内，
+不使用 dev 标签、外部事实性 observer 或角色特征。
+
+
+Null 控制代码的 TDD **6 failed / 1 skip → 6 passed / 1 skip**；training budget 负测
+另 **1 failed → PASS**。完整本地门 **870 passed / 47 skipped、ruff 0、CPU smoke OK**；
+原机对应真实 Torch/特征/概率用例 **8 passed in 5.28s**。冻结 config SHA
+`f6261196f021a8a3512a63bedc6f0e2c9f8ca935186562fef019b6b4be3efe73`。
+这里尚没有 head 的正式拟合或新指标；远端 smoke/cache/fit 将用原 .venv 和独立日志执行。
+
+
+§25.44 对称控制最终 17 个非权重 artifacts 的 manifest SHA
+`58bbfb684679b4fec410763dcf24cba181d79ec9ab5260c293f0d8e67efbc5ff` 已在 4090 逐项核验；
+raw/cache/status 与两个独立 scorer/paired report 完整备份，负向结果封存。
+§25.45 null 控制实现 commit `55fd63e`，smoke 日志
+`logs/c5-null-cpu-smoke-20261013.log`，train/dev 两作用域输出独立保存。
+
+
+原机 train/dev 双作用域 smoke 均 `complete`：**8/8 documents、162/202 mentions**，
+原 cache/type-control exact parity。配置 SHA 不变，dev feature npz 没有 labels；
+原 encoder/scorer 未更新。当前两项独立 CPU full feature exports 已启动，分别限制 4 threads，
+日志 `logs/c5-null-cache-train-20261013.log` / `logs/c5-null-cache-dev-20261013.log`。
+这是同一 C-41 的两个数据作用域，不是额外 seed 或两条活动队列；缓存/正式拟合尚无新指标。
+
+#### §25.45 全量真实结果与停止裁决
+
+train **2622 docs / 66744 mentions**、dev **291 docs / 7195 mentions** caches complete；
+head 实际 fit **25460** mentions，其中 positive **5382**；全部三臂固定最后 epoch10，
+原 encoder/scorer 零更新。fit PID **2084809**，运行实现 `55fd63e`，三 head 留 **4090**。
+所有 arm status/config/artifact hashes 已核；本地独立 scorer 四指标逐项与原机 exact。
+
+| 实际预测控制（非 oracle） | MUC F1 (%) | B³ F1 (%) | CEAFe F1 (%) | BLANC F1 (%) |
+|---|---:|---:|---:|---:|
+| strongest type-control | 82.6689774697 | 98.2724739302 | 97.9410105769 | 91.1163290123 |
+| semantic | 80.7794508415 | 98.1804317382 | 97.7897360233 | 91.1215267792 |
+| numeric_only | 82.2380106572 | 98.2754826646 | 97.9603346086 | 91.0992709037 |
+| shuffled_semantic | 80.3819444444 | 98.0277323306 | 97.6748347384 | 89.6688063064 |
+
+2,000 document bootstrap / RNG13 相对 strongest type-control：
+- semantic：ΔMUC **-1.8895266282** 个百分点，95% CI **[-3.510442447384462, -0.339339474768848]**；spurious/missing **100/117**，changed docs **62**。
+- numeric_only：ΔMUC **-0.4309668125** 个百分点，95% CI **[-1.4681621324296485, 0.5944414658769267]**；spurious/missing **90/110**，changed docs **23**。
+- shuffled_semantic：ΔMUC **-2.2870330252** 个百分点，95% CI **[-3.9683212096156875, -0.6367279340965999]**；spurious/missing **116/110**，changed docs **67**。
+
+semantic−numeric 的 ΔMUC **−1.4585598157**，CI **[−3.2306927791,0.2566443634]**；
+semantic−shuffle **0.3975063970**，CI **[−1.5065134920,2.2640502170]**。
+semantic 未胜 numeric、负控也没有分离，不能声称语义新ness机制有效；两拟合臂都未胜强对照。
+**停止这个固定 frozen-null 控制，不扫 epoch/lr/weight/threshold/结构挽救；无指标突破。**
+部署结果不能由 train BCE 几乎归零代替。所有关系字段逐 doc 与 baseline 不变。
+
+feature scope 补查：原 teacher max legal logit 在有合法前项的 train 上 first/repeat accuracy
+**0.995247446975648**、AUROC **0.9995857571302468**；这是 baseline 见过的 train，
+不冒称 OOF。train 内置乱真正改变 **7184/25460** 个拟合行（约28.22%），其余小桶/同值不变；
+numeric blocks 与 labels 不动，负控是局部破坏，不能说“语义全部删去”。
+该 train 饱和与 dev 失败支持重新审查输入泛化，**不能据此唯一归因 encoder 过拟合**。
+dev npz 只有 features；scope 补查未读取 dev targets。
+
+远端非权重回传 tar SHA **82e6fd85d51bef88a63d85ca1f60c6891808facfbfbc803c92f8c46c4c637738**
+双端一致；head/checkpoint/feature npz 都未跨机搬运。raw predictions/training/status/
+双端 evaluator 输出/paired counts 位于 `frozen_null_control/`；最终 manifest 另行封存。
+
+### 25.46 C-41：ordered forest 联合同簇概率的数学候选审查（未准入方法）
+
+科研价值：对准表 5-3，检验 cluster identity 中共享前件依赖是否提供独立于普通
+null head 的监督；可行性：当前只做无数据、无模型的 CPU 穷举，后续可复用原机冻结表示。
+主表先登记候选审查；下列代数探索不是预注册的提分实验，没有读取任何 split 或训练。
+机制边界与一手来源见 `research/20261013_c5_joint_connectivity.md`。
+
+固定文档且 parent choices 独立、仅向前文链接的 random forest 有精确递推
+C_ii=1，C_ij=Σ_{k<j}p_j(k)C_ik（i<j），并对称化。
+在 seed 13 生成 **120** 个 n=1–6 概率矩阵、包括零概率 edges，逐一穷举
+**17,460** 个 parent assignments：递推 vs 穷举的最大绝对误差
+**1.3322676295501878e-15**。root-marginal product 的 off-diagonal 最大差异
+**0.4115229597866288**。这是数学正确性，不是科研效应、power 或指标突破。
+
+明确反例：p0=[1]，p1=[0.5,0.5]，p2=[0,0.5,0.5]；
+两提及 1/2 精确同簇概率 **0.5**，root marginal dot product **0.25**。
+这不反驳 Le & Titov 的可微指标松弛（他们未宣称其乘积是 random-forest 联合边缘），
+也不把早已有的 antecedent forest、root DP 或 co-cluster confidence 当原创。
+候选创新仅可能落在精确共享依赖的监督/推理及其可检验收益；正文矩阵已纳入
+Rennie2007、Samdani2013、Yang2015、Le2017、Lee2018、Wick2013、Yadav2021。
+官方实现、全同机制最近邻、实际分块算力、具体 loss/负控/目标 ≥80% power 未闭合，
+**method_admitted=false**，未启动 proposed training。
+
+产物 `forest_joint_audit/{enumeration_audit.py,report.json,Q15-1037.pdf/txt,N18-2108.pdf/txt}`。
+代数入口 SHA `1ac807022ccded080d4fa4512358fa0b4ace0f05c179c6df22130ce9f333b038`；
+全部输入为构造概率，未读取 train/dev/final-valid。当前 train-only null 控制继续原合同，
+不因这个候选改变三臂、预算、强对照或采样。
+
+Official `lephong/diffmetric_coref` HEAD **37543d5000911917f86a3c1747a50aec65b53c2d**，
+commit 固定 README SHA **a6a0ec04dab18ef0194a81a530c990d12e4ea728ac212a8437e832d7a819a2f5**；
+其 actual `compute_p_m_entity` 递推与 `compute_lea_lost` 的 membership batch product
+已核，正文差异没有靠摘要措辞。full clone 下载逾三分钟后主动终止（已传部分 Git objects），
+未把未完成 clone 标可运行系统或方法不存在；固定 revision raw README 单独读取成功。
+
+
+### 25.47 C-41：固定 forest posterior-score 控制预登记（零训练）
+
+科研价值：直接检验 §25.46 的共享前件概率差异能否转为表 5-3 的真实 MUC 改善，
+而不再把数学恒等式当完成。可行性：已有无标签全量 raw logits、task-given types、
+冻结 decoder 与来源闸门；仅 291-doc 小矩阵 CPU 重放，原/新 head 均不拟合、不读金标
+选择动作，不需要 GPU、额外 seed、checkpoint 搬运。
+
+先于新结果固定四个作用域相同的控制：原 type-control exact parity；exact joint C；
+root-marginal product Q Qᵀ；previous C 同类型行/列同步置换负控（RNG13）。
+每个当前 mention 的合法 parent 分布由原 raw logits 与原 dummy logit0 稳定 softmax；
+exact C 的 diagonal1 仅用于数学递推，供 decoder 的 dummy 仍为原 p_j(dummy)。
+root-product real scores 为 Q_i·Q_j；负控只置换较早 C 子矩阵，保留 diagonal1，
+当前 p_j(k) 不动，因此直接 p_j(i) 项保留，只破坏间接 shared-ancestry alignment。
+负控每一当前 row 独立读取原 exact previous C，不把其伪概率递归为后续真实森林。
+类型不一致 score 禁用；无合法前项强制 dummy；全部 ID 和关系字段不变。
+
+C pair scores 的 row sum 不要求1（它们是相互重叠的同簇事件），不称其 antecedent
+分布或任意 partition 的 Bayes 最优解；只把固定分数送原 argmax/decoder，评价实际簇。
+不额外扫 0.5 cutoff、cluster linkage、null 规则或 posterior 温度。未胜 strongest
+type-control 或护栏退化则停止这个固定部署动作；root-product/负控未被胜过，
+不能把任何收益归给精确 shared ancestry。新产物独占 `forest_posterior_control/`。
+这不是 proposed training 或章节贡献准入；novelty/power 门仍独立。
+
+Forest 控制 TDD **8 failed / 1 skip → 8 passed / 1 skip**；构造 type-mask fixture 在实现前
+纠正 forbidden/high-logit 索引，未据模型结果改期待值。完整本地 **878 passed / 48 skipped**、
+ruff 0、CPU smoke OK、R1 consistency 36 PASS；4090 真实 Torch/decoder 用例 **9 passed**。
+测试器 `-c /dev/null` 的 pytest cache 写 /dev 权限 warning，不影响用例或实验。
+配置 SHA **5627d15feedcb2472401ca79e5e1473b9cdfbb1e27b5c9cdc728be5062ce3a00**。
+远端验证包最初把 tar 生成与 scp 错误并发，scp 因本地包尚不存在而失败；
+确认包已经生成后顺序重发成功，未执行失败包或改模型/指标。
