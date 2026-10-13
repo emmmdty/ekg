@@ -93,3 +93,16 @@ def test_document_geometry_summary_weights_documents_equally():
     assert result['paired_documents'] == 2
     assert result['mean_false_minus_true'] == pytest.approx(0.3)
     assert result['bootstrap95'][0] > 0
+
+
+def test_official_event_type_is_explicitly_projected_to_mentions():
+    gold, cache, _ = fixture()
+    gold['events'][0]['type'] = 'event'
+    gold['events'][1]['type'] = 'other'
+    typed = module().typed_gold_view(gold)
+    assert 'type' not in gold['events'][0]['mention'][0]
+    assert typed['events'][0]['mention'][0]['type'] == 'event'
+    q = {f'd::{key}': [1, 0, 0, 0, 0] for key in ['a', 'b', 'c']}
+    result = module().geometry_profile(typed, cache, q)
+    assert result['all']['false_links'] == 1
+    assert result['same_type']['false_links'] == 0

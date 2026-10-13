@@ -51,6 +51,13 @@ def profile(gold, cache, labels):
     return dict(result)
 
 
+def typed_gold_view(gold):
+    # Official ERE types live on events; this analysis uses a mention-local view.
+    return {**gold, 'events': [{**event, 'mention': [
+        {**mention, 'type': event['type']} for mention in event['mention']]}
+        for event in gold['events']]}
+
+
 def geometry_profile(gold, cache, observations):
     mentions = {mention['id']: (event['id'], mention['type']) for event in gold['events']
                 for mention in event['mention']}
@@ -141,7 +148,7 @@ def main():
         result = profile(gold[row['id']], row, labels)
         totals.update(result)
         if continuous:
-            result.update(geometry_profile(gold[row['id']], row, vectors))
+            result.update(geometry_profile(typed_gold_view(gold[row['id']]), row, vectors))
         documents.append({'id': row['id'], **result})
     output = Path(config['output'])
     if output.exists():

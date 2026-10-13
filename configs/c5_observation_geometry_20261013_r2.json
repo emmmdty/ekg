@@ -1,0 +1,22 @@
+{
+  "diagnostic_only": true,
+  "distance": "half_squared_l2",
+  "entrypoint_sha256": "2d9b60c88c05c970974f1b7f6106439a81188edbd5ca72563bfbb9de677bf72c",
+  "final_valid_accessed": false,
+  "gold": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl",
+  "input_sha256": {
+    "data/protocols/v6/manifests/maven_ere_internal-dev.json": "f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl": "bb8c6b486196c97560cba49516324b3f69541023bfbe5cc09590d2bb265ce7e3",
+    "runs/stages/R1/r1-v63-c5-20261013/deployed_observation/metadata.json": "2808874c506615bd277a3bc71519b6c6ba46a7437f853507c7804344fba5f25b",
+    "runs/stages/R1/r1-v63-c5-20261013/deployed_observation/probabilities.jsonl": "2183978f3f1753fedb9397a3ae6480e1947a148f18b300d90c311d4c5e5f7b57",
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/scores.jsonl": "b9b119a41c575427cab721ed3762a5502250a08ed5b6da2fe8651f9121a73cd7",
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/status.json": "ff0fae6c550375b24e02e0a43a792ba8783c31dd20780dbdff403bcda4b44c55",
+    "scripts/export_official_coref_cpu.py": "503dcf0bbbc97b05c84f309f348abfc38a0e54208b63418201aa935efbe9ae59"
+  },
+  "manifest": "data/protocols/v6/manifests/maven_ere_internal-dev.json",
+  "observation_metadata": "runs/stages/R1/r1-v63-c5-20261013/deployed_observation/metadata.json",
+  "observations": "runs/stages/R1/r1-v63-c5-20261013/deployed_observation/probabilities.jsonl",
+  "output": "runs/stages/R1/r1-v63-c5-20261013/observation_geometry-r2",
+  "schema_version": "ekg.c5_observation_geometry.v1",
+  "scores": "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/scores.jsonl"
+}
