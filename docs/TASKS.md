@@ -273,8 +273,9 @@ author delegation releases a new in-scope research queue; it does not reopen old
   old predictions replayed exactly. All four fixed-control routes stop. Next R1 examines learning
   with exact joint dependence (§25.49): toy wrong-edge gradient cancellation is verified against
   finite differences; full-train structural opportunities and type-block sizes are independently verified.
-  Inspect the pinned joint first-dummy labeling with real CPU autograd before training; if confirmed,
-  include corrected marginal as a stronger control across structural arms. Full-model budget/power/
+  Pinned joint first-dummy supervision blindness and full-model gradient connectivity are confirmed.
+  A fixed legacy-versus-corrected pair-MLP adaptation control is implemented/tested; execute CPU
+  smoke, then fit and independently score (§25.50). It is baseline engineering, not novelty. Full-model budget/power/
   admission remain open. No contribution PASS.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)

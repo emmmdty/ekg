@@ -1,0 +1,47 @@
+{
+  "checkpoint": "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/output/13/MAVEN-ERE/best_COREFERENCE",
+  "control_only": true,
+  "dev_manifest": "data/protocols/v6/manifests/maven_ere_internal-dev.json",
+  "entrypoint_sha256": "0dbbfc88f61b9d0104b7bfc74841c17d8faf17096ef39a6055ee671e07b9e847",
+  "feature_cache": "runs/stages/R1/r1-v63-c5-20261013/frozen_null_control/cache",
+  "final_valid_accessed": false,
+  "input_sha256": {
+    "data/protocols/v6/manifests/maven_ere_internal-dev.json": "f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f",
+    "data/protocols/v6/manifests/maven_ere_train.json": "47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68",
+    "data/protocols/v6/source_lock.json": "d0d7d848bfc276ccccf1ab8e442628296612f17e47b7e3b8b425985dc4589231",
+    "data/protocols/v6/tools/maven_ere_evaluate.py": "32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598",
+    "docs/phases/PHASE_C5_first_dummy_control_20261013.md": "85389c399ec1111e292f498fd547e39f86cf526da9c1ecf02fb9b52ed706cfed",
+    "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/output/13/MAVEN-ERE/best_COREFERENCE": "c84faee62a603ab375e00a95e9bb63a8ee26171f22f5d218cbf00e8ef76fff98",
+    "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/src/data.py": "8375a8a2bbf277098111213ec831f559226f16d3938f8381216e4a51c2f9e982",
+    "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/src/model.py": "03aa41ea0da3b0d14fe51096fd263cee22a2336c19c0bfb8f4786296f9dbc734",
+    "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/src/utils.py": "c1b49911366ec505ba52405ac1f210274a50b723d9dd62664fa966ecd2f2fd61",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl": "20ea01ebe71fb8c8e4f207368673cc71f29840a290698eefe15de3a24a3b6f05",
+    "runs/stages/R1/r1-v63-c5-20261013/frozen_null_control/cache/dev/documents.jsonl": "482eb06f0124a912f7e8badcd8772060503574213dfce827306a1c1f4c288d32",
+    "runs/stages/R1/r1-v63-c5-20261013/frozen_null_control/cache/dev/features.npz": "2b0b71627a4ffd9e6d4bec22bbb32dc4ba7916ea098378b853f9cf8132f099fd",
+    "runs/stages/R1/r1-v63-c5-20261013/frozen_null_control/cache/train/documents.jsonl": "a30f606e369c6ed9b0ceb86251ca79c786397c7d6c92da9246bc117c13a0f648",
+    "runs/stages/R1/r1-v63-c5-20261013/frozen_null_control/cache/train/features.npz": "be52275efbf40b2190a9cafd8e9b8e88c877ed3a87b77eabf24a11a567668e13",
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/scores.jsonl": "b9b119a41c575427cab721ed3762a5502250a08ed5b6da2fe8651f9121a73cd7",
+    "runs/stages/R1/r1-v63-c5-20261013/training_interface_audit/report.json": "50ef58450a980b8a53bd8e387bf257a72d4236064e39af1ccb0b30b56ffe4f81",
+    "runs/stages/R1/r1-v63-c5-20261013/type_control/predictions.jsonl": "0189be77150ee5f8946d3a1b09dbe5436c953451c350ec3acd41c710be984f37"
+  },
+  "interface_report": "runs/stages/R1/r1-v63-c5-20261013/training_interface_audit/report.json",
+  "method_admitted": false,
+  "output": "runs/stages/R1/r1-v63-c5-20261013/first_dummy_control",
+  "schema_version": "ekg.c5_first_dummy_control.v1",
+  "scores": "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/scores.jsonl",
+  "seed": 13,
+  "source_root": "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint",
+  "train_input": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl",
+  "train_manifest": "data/protocols/v6/manifests/maven_ere_train.json",
+  "training": {
+    "arms": [
+      "legacy",
+      "corrected"
+    ],
+    "batch_size": 8,
+    "encoder_frozen": true,
+    "epochs": 5,
+    "lr": 0.0003
+  },
+  "typed_predictions": "runs/stages/R1/r1-v63-c5-20261013/type_control/predictions.jsonl"
+}

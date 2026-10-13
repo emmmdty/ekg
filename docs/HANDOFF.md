@@ -12,7 +12,7 @@
 > 普通 newness/singleton、candidate-erasure→dummy 等已有先行机制，不准入创新。候选 brief 见
 > [`research/20261013_c5_newness_admission.md`](research/20261013_c5_newness_admission.md)；
 > 最新执行动作由下方「本次接续」与 §0.3.5 覆盖；候选 power 尚未闭合。
-> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.49**。
+> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.50**。
 > D4 linear 恢复强控制、tanh5 退化（§25.37）；A4 仍无新效果结果；旧失败家族封存，E3 不追加实验。
 > 5090 原 C5 decoder smoke 已 complete，完整 audit 已授权但仍待空卡；无遗留自动启动 watcher。
 > 本轮新 CPU 控制与该原 decoder audit 是两份合同，不能把其中一项完成记成另一项完成。
@@ -20,7 +20,7 @@
 > **最短读法**：新窗口角色 → 当前阶段表 → **§0.1–§0.3** → **§0.3.5 接续步骤与资产**。
 > §0.4 以后按需读；历史候选、旧队列和旧功效证据不得覆盖当前主表与最新实测。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit 四类控制已完成并独立复算（§25.44–§25.48），没有达到突破；全部固定动作停止。C-41 当前转入 exact joint 结构训练目标的 R1 审查（§25.49）：same toy/surrogate 的误链梯度抵消差异已由 CPU autograd 与有限差分验证，完整train结构机会/类型分块规模经独立枚举一致。原joint first-dummy监督观察正在真实模型CPU核查，若成立增加corrected marginal强对照。数学/覆盖结果不是 MAVEN 提分、全面新颖性或方法准入；full-model 从 pretrained 初始化的公平对照/具体 loss/预算/power 仍须闭合。C5 切片保持 wip，D4/A4未接队。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit 四类控制已完成并独立复算（§25.44–§25.48），没有达到突破；全部固定动作停止。C-41 当前转入 exact joint 结构训练目标的 R1 审查（§25.49）：same toy/surrogate 的误链梯度抵消差异已由 CPU autograd 与有限差分验证，完整train结构机会/类型分块规模经独立枚举一致。原joint first-dummy监督盲区与真实模型梯度接口已核实；固定legacy-versus-corrected pair-MLP适配控制已实现/通过本地与远端测试，接续smoke→fit→独立评分（§25.50）。数学/覆盖结果不是 MAVEN 提分、全面新颖性或方法准入；full-model 从 pretrained 初始化的公平对照/具体 loss/预算/power 仍须闭合。C5 切片保持 wip，D4/A4未接队。
 
 ## 新窗口角色：事件语义与知识图谱方向的科研负责人（PI）
 

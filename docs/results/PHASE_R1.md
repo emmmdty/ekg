@@ -4253,3 +4253,67 @@ product/exact，用autograd.grad检查至MLP/encoder参数；无optimizer、无c
 概率，计算原loss、逐行梯度与正确dummy标记counterfactual；不改官方封存源码/weights。
 若盲区成立，新候选必须加入first-mention-correct marginal强对照，并在各结构臂一致应用；
 修复本身属于baseline engineering，不宣称创新，也不凭这点断言历史错误的唯一原因。
+
+#### §25.49 真实模型与监督盲区实际核查
+
+原机CPU PID **2154377**已GONE，report完整落地且双端SHA
+**50ef58450a980b8a53bd8e387bf257a72d4236064e39af1ccb0b30b56ffe4f81**一致。
+zero optimizer/full original architecture/pretrained initializer/first8 train docs，
+三项固定源码与main SHA匹配sealed training metadata。
+
+原 `fill_expand({0},{1,2})` 的第二行确为全0；同真实torch图/相同原loss下，该row误前件
+logit梯度原 **0**、仅补dummy后 **0.16666666000000022**，其余logit梯度不变。
+真实全train **2238**个非单例首mention、**1573docs**对应此目标空行（不是部署误判数）。
+该实现盲区已确认；不能据此称历史错误皆由它造成。规范dummy监督是Lee2017 §6已知机制。
+
+真实batch **16 chunks×256**；tokenize/model载入 **7.037s**，四头forward **6.084s**；
+legacy/corrected/exact/product各自autograd至首pair linear与encoder首query耗时
+**2.407/2.394/2.599/2.615s**。峰值RSS **7945788KiB**，只反映该batch/保留多目标图，
+不能外推GPU epoch预算或所有doc最大内存。四任务前向真实执行，但未更新任一参数。
+
+| 该batch目标 | loss | pair首linear grad L2 | encoder首query grad L2 |
+|---|---:|---:|---:|
+| legacy marginal（原type policy） | 2.6244859695 | 12.8735656738 | 0.0616115779 |
+| corrected marginal（given-type policy） | 0.3634418547 | 2.9342546463 | 0.0096701430 |
+| exact joint pair surrogate | 0.6848978400 | 0.6664339900 | 0.0053414777 |
+| root-product same pair surrogate | 0.6764646769 | 0.6174728870 | 0.0049433890 |
+
+actual marginal两行还同时改变type policy，**不能把其loss/grad差归因给dummy修正**；
+单变量盲区证据来自上面的toy，部署影响须§25.50匹配两臂检验。结构目标确能传回真实
+encoder，但梯度连通/不同不等于泛化/主指标收益。下一强对照必须修正dummy并匹配
+类型policy；full-model proposed method仍未准入。
+
+补核READS2017 Eq.1/§3/§4.1：coalescing/shared-walk/tree采样与递归相似度均是先行机制；
+其相遇为等hop双walk、有decay，不能因本候选condition later节点就声称发明coalescence。
+有限差异只用于same-surrogate exact-vs-root-product训练假设，不证明全部图算法无先行性。
+三项文献快照manifest SHA **52661ee92844d4783cfda729071cf546a94c6350a0072d9ff9c8d7f7c500f55c**；
+Fogaras作者PDF本地certificate失败/browser timeout，未读取、不依赖它的正文作结论。
+
+### 25.50 C-41：first-dummy单变量CPU强对照（条件预登记，未启动）
+
+科研价值：表5-3；若§25.49实际确认原loss对非单例首mention没有梯度，单变量检验补齐
+常规dummy监督是否改善真实部署，而不是只报告代码盲区。它是已知marginal目标的控制
+工程，不能当作新机制，也不替代exact joint候选的novelty/power准入。
+可行性：原teacher/current mention表示已在4090全量缓存，source pair-MLP/权重也在原机。
+直接train gold identity，不训练误差observer、不需要OOF；原encoder与关系输出冻结。
+两臂从相同原pair-MLP checkpoint开始，只改非单例first-dummy label，类型约束两臂一致，
+保持原real ranking/原decoder规则。先全量dev logits/typed prediction parity，再在固定train
+缓存上各5epochs、Adam lr3e-4、每步8doc、seed13、dropout原0.2；无dev endpoint选择、
+不读dev gold直到两臂预测封存后评分，无weight搬运、新seed或GPU。匹配epoch/optimizer/input
+预算的legacy继续拟合臂用于分离再训练本身的影响，另保留旧strongest type control。
+first-dummy监督本身已知（Lee2017 §6），阶段promotion只声称control effect，
+不进入新方法贡献门。未过strong control/护栏则停止该固定adaptation，不扫epoch/lr/decoder。
+独占新 `first_dummy_control/`；正式执行须等§25.49真实报告、TDD/本地三件套与远端Torch
+用例、CPU smoke/parity全通过，按固定合同/config/source输入hash执行。
+
+§25.50控制TDD **7 failed（入口未实现）→7 passed/2Torch skip**；完整本地
+**892 passed/51 skipped、ruff0、CPU smoke OK**；4090真实Torch **9 passed in2.67s**，
+再次相同源码用例 **9 passed in1.73s**（未改变源码/测试）。配置 SHA
+**30d14ba95238672aa8e387fee173ad76e6ad2d4807e48d0070c1c18384abd7ba**，
+entrypoint SHA **0dbbfc88f61b9d0104b7bfc74841c17d8faf17096ef39a6055ee671e07b9e847**。
+config生成时误写source-lock子路径，FileNotFoundError拒绝后核真实位置
+`data/protocols/v6/source_lock.json`并重新生成；没有省略source-lock闸门或产生训练。
+
+全train额外只读核查：上述首mention中，仅 **477**项（**395docs**）有同类型较早竞争前件；
+其余目标空行仍是实现盲区，但在本given-type前件集合下补dummy并不产生该row的非零
+wrong-real梯度。不能把全部2238行当有效干预机会、原模型错误或提升覆盖。
