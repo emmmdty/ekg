@@ -246,6 +246,12 @@ author delegation releases a new in-scope research queue; it does not reopen old
   resource boundaries. Work through C5 → D4 → A4; control recovery or a rejected candidate does not complete
   a chapter. No new mechanism or GPU training contract has been admitted; see
   `research/20261012_chapterwise_optimization.md` and `results/PHASE_R1.md` §25.38 onward.
+  Author requested continued work until a verifiable breakthrough. Train FACT/ERE oracle and upstream
+  scope and train-only CPU text-observation audits completed (§25.39); noisy compatibility feasibility
+  and reliable strong-control caches are next. No new coreference mechanism has passed admission.
+  Remote CPU export of the original official-joint checkpoint is frozen in
+  `PHASE_C5_official_cpu_cache_20261013.md`: exact cluster parity, smoke before full,
+  no GPU, no training and no checkpoint transfer (§25.40).
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

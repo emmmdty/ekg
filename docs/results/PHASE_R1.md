@@ -3382,3 +3382,175 @@ audit 预期根为 `gpu-5090:/mnt/aidata/tongjiakai/ekg/`
 本轮 C5 正式 MUC 与护栏没有新分数；候选研究、CUDA smoke 通过都不算章节改善完成。
 读取完整结果前的解释规则已登记在 `research/20261012_chapterwise_optimization.md`，
 不扫 dummy/threshold/order，不把 decoder 变化当新训练目标的证据或论文创新。
+
+### 25.39 C-41 持续执行：事实性与事件身份信号审查（2026-10-12）
+
+作者追加指令要求持续推进到有可复核的突破证据；空卡等待不结束科研工作。
+本节开工自审先于新信号计数与实现：
+
+- **科研价值**：对准 C5 表 5-3 的官方 MUC 与误/欠合并，核事实性是否提供独立身份信息，
+  不把多数类标签一致当成共指；正文和来源相对事实性的边界见研究卡。
+- **可行性**：现有 FACT/ERE train 及冻结 train manifests 可读。仅在 train 做 mention ID、
+  tokens、type、sent_id/offset 对齐；不读 final-valid、不训练、不输入 gold arguments/cluster。
+  gold factuality 仅探索信号上界，训练标签含预标注，不能直接确认可部署贡献。
+
+尚无新结果；新机制训练须另闭合预测输入、最近邻差异、power、强对照与消融/负控。
+C5 full decoder audit 继续遵守已经获得的原机/空卡许可，不复跑 smoke。
+
+#### Train 事实性信号实测（探索 oracle，不是模型结果）
+
+```bash
+uv run python scripts/report_factuality_identity_signal.py \
+  --ere-source data/processed/maven_ere/train.jsonl \
+  --fact-source data/processed/maven_fact/train.jsonl \
+  --ere-manifest data/protocols/v6/manifests/maven_ere_train.json \
+  --fact-manifest data/protocols/v6/manifests/maven_fact_train.json \
+  --output runs/stages/R1/r1-v63-c5-20261012/factuality_signal/train_audit.json
+```
+
+退出码 0；冻结 **2,622 documents / 66,744 mentions** 的 ID/type/sent_id/offset/tokens 对齐通过。
+FACT 的 cluster ID 和 arguments 均未用于标签配对或 identity 判定；identity 只来自 ERE。
+61,362 gold clusters 中 **69** 个有不同 factuality 标签。
+标签计数：CT+ 62,947，CT− 1,363，PS+ 2,064，PS− 266，Uu 104。
+
+| 全候选 train 桶 | 全部真 / 假共指 | 标签不同的真 / 假共指 | 标签不同的 negative 比例 | 候选覆盖 | 命中真共指比例 |
+|---|---:|---:|---:|---:|---:|
+| 同类型 | 14,011 / 52,130 | 147 / 3,573 | 96.0484% | 5.6243% | 1.0492% |
+| 同类型、高相似且跨句 | 8,489 / 15,531 | 101 / 919 | 90.0980% | 4.2465% | 1.1898% |
+
+完整五类 unordered 配对表保留在 report，不把相关 pairs 当独立样本。
+这说明不同事实性可能有分辨信息，**但既未证明 MUC 收益，也未通过 power/新颖性/部署准入**。
+同 gold cluster 标签差异的原因尚未判明，可能含语境承诺差异或标注噪声；不能预先认定某个解释。
+直接标签硬否决不准入；FACT 五类不等于 KBP 的 ACTUAL/GENERIC/OTHER realis。
+
+TDD：入口不存在时 **8 failed**，实现后 **8 passed**；完整门 **815 passed / 42 torch skips**，
+ruff 0，CPU smoke OK。测试覆盖不同标签真共指、同标签假共指、FACT cluster/arguments 不参与、
+四类跨数据漂移、重复 mention/未知标签和 dev/final manifests 拒绝。
+
+script SHA `06f813d68894a3128b07b70b8e444d581c9900f159e85fbd5b31ad76a4b15e7d`；
+report SHA `bf15022fda353d5d9c465d0a0965822f409774c98b8da1e456684c2b3b0b4805`；
+per-document SHA `987dfd5967297353b748124eb90de32141707c4dc403343df1a10db4d616738c`。
+FACT source SHA `190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7`；
+FACT train manifest SHA `e9a939440eb0dbea76e6ce56d0b06b5a1009118eefdfcb93ae85f4a38e8c609a`；
+ERE 两项输入身份与 §25.38 相同，report 逐项记录全 SHA。
+
+#### 预测输入来源核查（未将旧缓存接入新方法）
+
+从 4090 只回传旧 CLS 五折 evaluation labels/metadata 与 summary，没有回传 checkpoint。
+summary SHA 按 §3 的 `21e7e505…88165` 核验通过；十份文件按 recovery plan 的 `anchor_inputs` 核验。
+旧五折 CV 每个预测文档自身未入对应 train/selection，属于文档级 OOF；
+但 CV 总体是 2,913 篇，而 C5 train 仅 2,622 篇，不能据此称未来 C5 训练输入已隔离。
+
+| 旧 D4 fold | train 与 C5 internal-dev 交集 | selection 与 C5 internal-dev 交集 | evaluation 与 C5 internal-dev 交集 |
+|---|---:|---:|---:|
+| 1 | 170 | 65 | 56 |
+| 2 | 163 | 63 | 65 |
+| 3 | 174 | 54 | 63 |
+| 4 | 184 | 53 | 54 |
+| 5 | 182 | 56 | 53 |
+
+拟作为 consumer 训练输入时，这些上游模型见过 consumer evaluation 的 factuality 标注，
+需要重新隔离，不能靠“每篇是 OOF”跳过来源闸门。**这不改写旧 D4 自身 OOF 的有效性**。
+本地 `anchors/factuality/cls_labels.json` 也不能视为这个 pooled OOF：只有 7,195 条，
+与旧 OOF 的共有键存在 234 个不同预测。它是不同作用域的历史缓存，不据此判数据损坏；
+本轮没有拿它构造新方法输入或报告预测信号效果，继续追溯其训练来源。
+
+#### CPU 辅助观测诊断开工自审（预测前登记）
+
+科研价值：从 gold oracle 走向实际文本预测，检验同身份标签变化与观测噪声下的信息保留，
+对准 C5 的信号准入，不将经典 TF-IDF/logistic 写作新方法或 D4 贡献。
+可行性：sklearn 已安装、FACT/ERE train 可对齐；仅 C5 train 文档交叉拟合，
+不把旧 D4 OOF 的 consumer-evaluation 接触带入新模型，不读 dev/final 标签。
+运行参数在新 JSON 中冻结，单 seed 13，不选模/扫参；CPU 结果不能代替 C5 主指标、power 或新颖性。
+
+冻结配置：`configs/c5_factuality_observation_probe_20261012.json`，
+SHA `83bff46affd273308d923fbf1111cbd630ab31e33c7965cb5d07a9d5fb9f9781`；
+入口 SHA `5d9629b089f95fdefdb636eb8957a359dd042ea8cd69be1a9010e37433c9d8a8`。
+sklearn 1.7.2，TF-IDF whitespace tokens（保留 trigger 的 `*` 标记）、unigram/bigram、
+最多 30,000 特征；multinomial logistic `C=1 / lbfgs / max_iter=1000 / tol=1e-4 / class_weight=None`。
+文档按 `sha256(c5-fact-observation-13:<doc_id>)` 排序后交错分五折，训练另外四折，不使用选模折。
+同一 seed 13；不新增 seeds，不共享 evaluation 的词表，不拿分类器作强 coreference 对手。
+输出根 `runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/`；
+含各折本地 CPU 模型、完整 OOF 概率、fold ledger、summary 和 provenance。
+模型留本地，回传/备份只含非权重产物；尚未启动任何 proposed coreference 训练。
+
+```bash
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 uv run python -u \
+  scripts/probe_factuality_observations.py \
+  --config configs/c5_factuality_observation_probe_20261012.json
+```
+
+TDD 首跑 **5 failed**（入口未创建），实现后 **5 passed**；包含 holdout 的专属 token
+未进入每折词表、每篇文档只有一折 OOF、输出概率 class-order/和校验、缺类别无 fallback 等检查。
+此处记录参数和测试，不预先报告真实预测结果。
+
+Oracle 审查代码 commit `64f0aff49c966c8497d53d7b125f766331e6e5f7`；
+oracle + 旧 OOF 只读副本 + lineage/provenance 的 15 文件 manifest SHA
+`de50036c2652f4543b23b9a75a3685b4c0e4a3e2bea62290d6f1a4f7da5b5627`。
+该 manifest 不包含随后生成的观测器模型，不作为模型共享或搬运许可。
+
+#### CPU 观测器与 observed signal 实测（非 coreference 主结果）
+
+固定五折已完成，OOF **2,622 documents / 66,744 mentions** 全覆盖。
+训练/评估 mention 数：53,829/12,915、53,117/13,627、53,348/13,396、53,519/13,225、
+53,163/13,581；每篇只产生一个 held-out 预测，词表只在各折训练文本拟合。
+本次辅助 factuality **macro-F1=0.2988419686，accuracy=0.9478305166**。
+预测 CT+ 65,902、PS+ 467、CT− 375，PS−/Uu 的 argmax 预测均为零。
+这是弱的经典文本观测器，不与 D4 主表或其他 split 的方法数字比较。
+
+把其 argmax 类别与 ERE train identity 做只读计数，不改变任何 coreference cluster：
+
+| 同类型 train 桶 | 预测标签不同的真 / 假共指 | negative 比例 | 全候选覆盖 | 命中真共指比例 |
+|---|---:|---:|---:|---:|
+| 全部同类型 | 33 / 718 | 95.6059% | 1.1355% | 0.2355% |
+| 同类型、高相似且跨句 | 28 / 177 | 86.3415% | 0.8535% | 0.3298% |
+
+观察到了有分辨力但覆盖很低的预测差异；这些 pairs 不一定就是 gold 差异桶的子集，
+**不能把两个桶的 count 比叫信号保留率**。新 entry 明确区分 gold/predicted label source，
+缺失观测不回填 gold；同类别即真共指或类别不同即非共指均没有被证明。
+直接硬否决不准入；不对当前观测器扫 C/class weight/ngrams，不把辅助 accuracy 当身份指标。
+非对角噪声兼容性仍待 R1 审查、强锚逐对缓存、power 和同变量对照，不启动方法训练。
+
+producer summary SHA `af9517fcea1c301d65a878d593c1b9978ac908f3cc5dc9f297fa23203967ae79`；
+OOF probabilities SHA `44d780cad74ffdb4940062650b3e5daa44daab894319338ec93cba1a85b8b96d`；
+provenance SHA `b6dfe8fed516920ce0daf9a1f1ec9afef212f90f65f117c723b9fd262a5d5ee8`。
+observed report SHA `2bc37f56bc7397a9e217f701bba2970a64704111d121d1ae7adc5bde4a2ca90f`；
+observed per-document SHA `c0c18bec5a9af2c0e954c69aca966a20d7354eea787fdd1781716119fe521100`。
+
+producer 使用的 loader 仍是 oracle code commit `64f0aff` 的 SHA `06f813d6…a4b15e7d`。
+之后为 observed 审查扩展同入口；旧 report/loader 身份不改写，新 report 自带新 script SHA。
+两项新增语义测试先 **2 failed**（observations 接口未实现）→ 通过；完整门
+**822 passed / 42 torch skips、ruff 0、CPU smoke OK**。
+
+### 25.40 C-41：强锚远端 CPU 缓存开工（2026-10-13）
+
+科研价值：隔离模型恢复与新信号，获得表 5-3 frozen official-joint anchor 的完整 antecedent 分数，
+使后续 power/对照与测量噪声假设可以使用真实 scorer，而非硬 cluster 或弱 baseline。
+可行性：4090 的原 baseline workspace/checkpoint 仍在原机；成功 SSH 核到 64 CPU、
+load average 10.81/11.48/11.50，约 481 GB available memory。拟限制 4 CPU threads，隐藏全部 CUDA。
+已有 Torch 2.8.0+cu128 在 `CUDA_VISIBLE_DEVICES=-1` 下报告 `cuda.is_available=False`；
+官方 `joint/src/utils.py:to_cuda` 支持该路径，真实 checkpoint forward 尚未执行。
+
+原 checkpoint 是 baseline `best_COREFERENCE`，metadata 记录 SHA
+`c84faee62a603ab375e00a95e9bb63a8ee26171f22f5d218cbf00e8ef76fff98`。
+baseline metadata SHA `d7c4cc7be37adb62928b11f3f248a848edd7b50a122c328d571da15b09a349c3`；
+原 preflight 与 workspace 的 unlabeled test input 两份 SHA 均为
+`c358da8b04bdeca9477bd26a1a7fa325b634ea62a488b85b28119be8cce2a891`。
+已回传仅源码/metadata 的只读快照，全部 joint/src Python hash 与 baseline metadata 对齐。
+checkpoint 未回传，未修改旧 baseline，未执行 5090 decoder audit。
+完整 identity、CPU 命令与 CPU/GPU parity 门将在新配置中固定；本节尚无模型结果。
+
+冻结合同 `docs/phases/PHASE_C5_official_cpu_cache_20261013.md`；配置
+`configs/c5_official_cpu_cache_20261013.json` SHA
+`143a532d07b160c1cf7c15598fa86692c13d3958ea7f1429173a81b01a6d2487`；
+entrypoint SHA `503dcf0bbbc97b05c84f309f348abfc38a0e54208b63418201aa935efbe9ae59`。
+CPU max_length=256、batch=8、threads=4、seed=13，保持原 scorer/decoder，不过滤类型，
+首批八篇 smoke 后才能导出全集；关系字段仅复制冻结预测，不声称重跑关系模型。
+源码 commit `b85584d`。TDD：入口缺失时 8 failed，随后 8 passed；候选 digest 接口测试
+1 failed → 通过。完整本地门 **831 passed / 43 skips、ruff 0、CPU smoke OK**。
+推送前通过 Git archive 将对应 script/config/test 发至 4090 临时目录，原项目 checkout 未改；
+`CUDA_VISIBLE_DEVICES=-1 PYTHONPATH=/data/TJK/ekg/src .venv/bin/python -m pytest
+/tmp/ekg-official-cpu-verification-b85584d/tests/scripts/test_official_coref_cpu_cache.py -q`
+真实 Torch/官方 coreference head CPU 测试 **10 passed in 98.09s**。
+该测试用小张量验证原 scorer 的事件索引、完整 logits/概率和 dummy，并非真实 checkpoint parity。
+后者必须由下一步 smoke 实测，不能拿单元测试替代。

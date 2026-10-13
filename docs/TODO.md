@@ -1,6 +1,6 @@
 # EKG 实时状态
 
-> 更新于 **2026-10-12**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-10-13**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
 ## 当前正式活动阶段
@@ -22,6 +22,12 @@ C5 DATE 词面代理和已有强锚 BEFORE/coref 冲突两项 CPU 审查已完�
 重新空卡后的 smoke 已 complete、average parity/六文件 hash PASS；下一步完整 audit，不复跑 smoke。
 有界空卡等待已结束，无遗留自动启动 watcher；接续核空卡后直接执行已授权 audit。
 仍无新方法训练或章节提分结论；A4 的 5090 授权不在这次批准内。
+作者要求持续推进至突破；C-41 保持活动。FACT/ERE train 事实性信号已审查，直接硬规则不准入；
+仅 C5 train 的固定单 seed CPU 文本观测诊断已完成，覆盖低且稀有类别弱；
+下一步噪声兼容性可行性与可靠强控制缓存，证据 §25.39。
+旧 D4 OOF 输入不能直接接入新 C5 consumer；这不改写 D4 自身的结果。
+10-13 在 4090 原地 official-joint 强锚冻结 CPU smoke → 全量分数缓存合同，
+必须 exact cluster parity；零 GPU、零训练、权重不搬运。验证与执行状态只见 §25.40。
 
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|

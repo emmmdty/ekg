@@ -82,6 +82,57 @@ gold BEFORE 的两个事件端点本来就是不同 gold clusters，直接 oracl
   本轮未核到 CDEC encoder 路径；不能把 FRECO 的 binary 输出当作 MAVEN 的 identity 输出。
   新语料、生成偏好、阈值校准与该 adapter 均不进入本轮。该检索只限定最近邻差异，不生成新的训练许可。
 
+## 持续推进与下一项独立审查（作者追加指令）
+
+作者要求推进到突破证据再停止。资源等待不结束 C-41，记录负结果后继续选择实质不同路线；
+突破只认同协议官方主指标胜过强锚、护栏与机制消融/负控支持，不保证科研一定出正结果。
+既有 5090 许可仍只覆盖两项 decoder 诊断，不扩为训练、额外 seeds 或搬权重。
+
+**科研价值**：检验事实性是否携带事件发生实例的独立分辨信息，对准表 5-3 的误合并与欠合并。
+[MAVEN-FACT](https://aclanthology.org/2024.findings-emnlp.651.pdf) §2 按 mention 标注五类事实性；
+[FactBank 官方说明](https://catalog.ldc.upenn.edu/LDC2009T23)明确同一事件可有来源相对的不同事实性。
+故“标签不同就不同事件”不是可直接成立的规则。先在冻结 train 统计完整标签配对与真/假身份，
+检查同 gold cluster 内的 label diversity；不把 gold 标签输入可部署 coreference 模型。
+
+**可行性**：本地 FACT/ERE train 与两个冻结 train manifests 可读；按 mention ID、type、offset、
+tokens 对齐，禁止用 FACT 的 cluster/arguments 信息构造预测。训练集标签含 LLM 预标注，
+故标签一致性不能作为独立的身份真值或确认性机制证据。可部署预测、最近邻差异与 power 尚未闭合，
+本步骤仅 CPU 信号审查，不准入训练。若没有潜在独立分辨力，停止本候选而继续找下一机制。
+竞争解释包括：事实性只是多数类先验；同源标注使标签与身份相关；不同来源对同一事件有不同承诺；
+实际分类器噪声消除 oracle 信号。禁止从 gold oracle 计数直接写 MUC 增益。
+
+Train 审查已完成，数字只见 R1 §25.39。标签差异具有探索分辨力，但其覆盖有限且命中真共指；
+直接硬否决不准入。MAVEN-FACT §2.1 的标签来源是 author，不能把它描述成带 source 标注的 FactBank。
+按 doc/event ID 排序读取的首批混合标签簇包含尝试/拒绝、引述与否定语境，也可能有标注噪声；
+目前没有人为重标注，不能把其中任一解释认成真相。
+
+最近邻新增：[Lu & Ng, NAACL 2021](https://aclanthology.org/2021.naacl-main.356.pdf)
+§4.1 的 C5/C6 已将 realis 一致性接入 antecedent score，并通过 Eq.13 的软 penalty 改连链倾向；
+§4.2 联合训练、§5.3 做 realis 消融。**简单加事实性、改成 soft penalty、换五类标签均不够新颖**。
+其 ACTUAL/GENERIC/OTHER 与 FACT 五类也不能直接映射。
+
+下一待证候选是“测量噪声下的非对角兼容性”：同身份允许不同 factuality 观测，
+使用预测观测的噪声模型与 train 内 identity/标签联合分布，而非强制 label equality。
+这只是机制假设，尚未证明最近邻差异或可检出的 MUC 效应；不把换信号的旧 role residual 当新家族。
+竞争解释是加入多数类先验/容量产生表面提升、同源标注诱导循环或类别噪声抹去收益。
+需匹配相同文本 scorer/decoder 的无信号与现有 realis-penalty 强对照，以及文档内同类型打乱的负控。
+
+输入来源检查发现旧 D4 的文档级 OOF 不等于 C5 consumer 级隔离：部分上游训练/选择文档
+属于 C5 internal-dev，不能将其并集接入新的 consumer 训练。旧 D4 OOF 自身结论保持；
+本地 internal-dev CLS cache 与旧全量 OOF 作用域不同，未把 cache 当作全量预测或数据损坏。
+若继续该候选，须重新闭合不接触 consumer evaluation 标注的训练/预测路径，再核 power。
+
+下一项独立 CPU 观测诊断：固定 TF-IDF + multinomial logistic regression，只在 C5 的 FACT train
+做按文档交叉拟合；借助已有 sklearn，不重写外部方法，不作为 D4 的创新或对手。
+科研价值是用独立于 gold identity 的真实文本预测，测量上述 oracle 信号在观测噪声下是否仍存在，
+以及它和同身份标签变化能否区分；“机器空闲/成本低”不是选型理由。
+可行性：sklearn 已安装，已核 train 2622 文档对齐；marked sentence 不读 evidence/arguments/cluster，
+每次只用其他文档拟合词表与分类器，同一冻结 seed，不调 C/class weight/ngrams 或看 dev 选模。
+折分、词表和分类器参数在运行前由独立 JSON 冻结；收敛警告、标签缺失和 hash 漂移即停止。
+弱观测器失败只否定该观测路径，不否定事实性全部信息；即使成功，仍不是 coreference 方法提分。
+该诊断已经完成：真实 OOF 与只读 observed signal 数字见 R1 §25.39，覆盖很低，稀有类别很弱。
+不对它扫参，不准入直接拆簇，也不把辅助指标当论文贡献。
+
 ## 本轮使用的研究工具来源
 
 使用已安装的 hypothesis-generation 区分候选、竞争解释、预测与实测，不把技能校验当科学结论。
