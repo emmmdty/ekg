@@ -58,3 +58,38 @@ def test_no_difference_keeps_errors_visible():
     report = module().profile(gold, cache, q)
     assert report['selected_false_links'] == 1
     assert report['different_observation_false_links'] == 0
+
+
+def test_continuous_geometry_separates_error_and_correct_links_without_argmax_veto():
+    gold, cache, _ = fixture()
+    for event in gold['events']:
+        for mention in event['mention']:
+            mention['type'] = 'event'
+    q = {'d::a': [1, 0, 0, 0, 0], 'd::b': [1, 0, 0, 0, 0],
+         'd::c': [0.6, 0.4, 0, 0, 0]}
+    result = module().geometry_profile(gold, cache, q)
+    assert result['all']['true_mean_distance'] == 0
+    assert result['all']['false_mean_distance'] == pytest.approx(0.16)
+    assert result['same_type'] == result['all']
+
+
+def test_cross_type_false_link_does_not_enter_same_type_geometry():
+    gold, cache, _ = fixture()
+    for event in gold['events']:
+        for mention in event['mention']:
+            mention['type'] = 'event' if mention['id'] != 'c' else 'other'
+    q = {f'd::{key}': [1, 0, 0, 0, 0] for key in ['a', 'b', 'c']}
+    result = module().geometry_profile(gold, cache, q)
+    assert result['all']['false_links'] == 1
+    assert result['same_type']['false_links'] == 0
+    assert result['same_type']['false_mean_distance'] is None
+
+
+def test_document_geometry_summary_weights_documents_equally():
+    rows = [{'all': {'false_mean_distance': 0.5, 'true_mean_distance': 0.1}},
+            {'all': {'false_mean_distance': 0.3, 'true_mean_distance': 0.1}},
+            {'all': {'false_mean_distance': None, 'true_mean_distance': 0.1}}]
+    result = module().geometry_summary(rows, 'all')
+    assert result['paired_documents'] == 2
+    assert result['mean_false_minus_true'] == pytest.approx(0.3)
+    assert result['bootstrap95'][0] > 0

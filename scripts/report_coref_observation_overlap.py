@@ -51,6 +51,50 @@ def profile(gold, cache, labels):
     return dict(result)
 
 
+def geometry_profile(gold, cache, observations):
+    mentions = {mention['id']: (event['id'], mention['type']) for event in gold['events']
+                for mention in event['mention']}
+    distances = {bucket: {'true': [], 'false': []} for bucket in ('all', 'same_type')}
+    ids = cache['mentions']
+    for index, values in enumerate(cache['probabilities']):
+        antecedent = max(range(index + 1), key=values.__getitem__)
+        if antecedent == index:
+            continue
+        current, previous = ids[index], ids[antecedent]
+        q = observations[f"{gold['id']}::{current}"]
+        r = observations[f"{gold['id']}::{previous}"]
+        for vector in (q, r):
+            if (len(vector) != 5 or not all(math.isfinite(v) and 0 <= v <= 1 for v in vector)
+                    or not math.isclose(sum(vector), 1.0, abs_tol=1e-5)):
+                raise ValueError('invalid observation probability vector')
+        distance = 0.5 * sum((a - b) ** 2 for a, b in zip(q, r, strict=True))
+        kind = 'true' if mentions[current][0] == mentions[previous][0] else 'false'
+        distances['all'][kind].append(distance)
+        if mentions[current][1] == mentions[previous][1]:
+            distances['same_type'][kind].append(distance)
+    return {bucket: {key: value for kind, values in groups.items() for key, value in (
+        (f'{kind}_links', len(values)),
+        (f'{kind}_mean_distance', sum(values) / len(values) if values else None))}
+            for bucket, groups in distances.items()}
+
+
+def geometry_summary(documents, bucket):
+    import numpy as np
+
+    differences = [row[bucket]['false_mean_distance'] - row[bucket]['true_mean_distance']
+                   for row in documents if row[bucket]['false_mean_distance'] is not None
+                   and row[bucket]['true_mean_distance'] is not None]
+    result = {'paired_documents': len(differences), 'mean_false_minus_true': None,
+              'bootstrap95': None, 'bootstrap_draws': 2000, 'bootstrap_seed': 13}
+    if differences:
+        result['mean_false_minus_true'] = float(np.mean(differences))
+    if len(differences) >= 2:
+        means = np.random.default_rng(13).choice(
+            differences, size=(2000, len(differences)), replace=True).mean(axis=1)
+        result['bootstrap95'] = np.quantile(means, [0.025, 0.975]).tolist()
+    return result
+
+
 def main():
     from export_official_coref_cpu import validate_cache_document
 
@@ -59,8 +103,12 @@ def main():
     args = parser.parse_args()
     config = json.loads(args.config.read_text())
     if (config['diagnostic_only'] is not True or config['final_valid_accessed'] is not False
-            or config['schema_version'] != 'ekg.c5_observation_overlap.v1'):
+            or config['schema_version'] not in (
+                'ekg.c5_observation_overlap.v1', 'ekg.c5_observation_geometry.v1')):
         raise ValueError('diagnostic role drift')
+    continuous = config['schema_version'] == 'ekg.c5_observation_geometry.v1'
+    if continuous and config['distance'] != 'half_squared_l2':
+        raise ValueError('frozen probability geometry drift')
     if sha256_file(Path(__file__)) != config['entrypoint_sha256']:
         raise ValueError('overlap entrypoint drift')
     for path, expected in config['input_sha256'].items():
@@ -83,6 +131,7 @@ def main():
     observations = [json.loads(line) for line in
                     Path(config['observations']).read_text().splitlines()]
     labels = {row['mention_id']: row['label'] for row in observations}
+    vectors = {row['mention_id']: row['probabilities'] for row in observations}
     population = {f"{row['id']}::{mention}" for row in cache for mention in row['mentions']}
     if len(labels) != len(observations) or set(labels) != population:
         raise ValueError('observation mention coverage mismatch')
@@ -91,6 +140,8 @@ def main():
         validate_cache_document(row)
         result = profile(gold[row['id']], row, labels)
         totals.update(result)
+        if continuous:
+            result.update(geometry_profile(gold[row['id']], row, vectors))
         documents.append({'id': row['id'], **result})
     output = Path(config['output'])
     if output.exists():
@@ -109,9 +160,15 @@ def main():
                               'No changed coreference predictions or method training',
                               'Observed dev is exploratory, not confirmatory',
                               'Counted pair dependence cannot establish document-level power']}
+    if continuous:
+        report['probability_geometry'] = {bucket: geometry_summary(documents, bucket)
+                                          for bucket in ('all', 'same_type')}
+        report['distance'] = config['distance']
     (output / 'report.json').write_text(json.dumps(report, indent=2, sort_keys=True))
     print(json.dumps({key: report[key] for key in ('documents', 'totals',
                      'affected_false_link_documents', 'affected_true_link_documents')}, indent=2))
+    if continuous:
+        print(json.dumps(report['probability_geometry'], indent=2))
 
 
 if __name__ == '__main__':
