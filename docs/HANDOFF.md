@@ -12,7 +12,7 @@
 > 普通 newness/singleton、candidate-erasure→dummy 等已有先行机制，不准入创新。候选 brief 见
 > [`research/20261013_c5_newness_admission.md`](research/20261013_c5_newness_admission.md)；
 > 最新执行动作由下方「本次接续」与 §0.3.5 覆盖；候选 power 尚未闭合。
-> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.52**。
+> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.53**。
 > D4 linear 恢复强控制、tanh5 退化（§25.37）；A4 仍无新效果结果；旧失败家族封存，E3 不追加实验。
 > 5090 原 C5 decoder smoke 已 complete，完整 audit 已授权但仍待空卡；无遗留自动启动 watcher。
 > 本轮新 CPU 控制与该原 decoder audit 是两份合同，不能把其中一项完成记成另一项完成。
@@ -20,7 +20,7 @@
 > **最短读法**：新窗口角色 → 当前阶段表 → **§0.1–§0.3** → **§0.3.5 接续步骤与资产**。
 > §0.4 以后按需读；历史候选、旧队列和旧功效证据不得覆盖当前主表与最新实测。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；正式损失/强对照/冻结方差假设/单卡预算与合同仍待闭合，method未准入。C5切片保持wip，D4/A4未接队。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；完整原tokenization/chunk成本审查也已完成（§25.53），固定峰值/最坏输入已保存；正式损失/强对照/冻结方差假设/单卡预算与合同仍待闭合，method未准入。C5切片保持wip，D4/A4未接队。
 
 ## 新窗口角色：事件语义与知识图谱方向的科研负责人（PI）
 
@@ -285,7 +285,7 @@ A4 仍待诊断。三个方法章均未形成新方法贡献，不能用旧“�
 - 数据/数学/真实CPU接口已闭合：train结构覆盖、type块规模、full-model从pretrained的gradient connectivity；不要重新导出teacher/cache或再证同一个toy。
 - 明确下一训练设计：同pretrained完整原joint架构/seed13/given-type policy/规范first-dummy；corrected marginal、same-surrogate root-product、exact joint、ancestry-shuffle，并保留总量匹配global-inflation rival以识别局部依赖。原strongest type-control与frozen anchor保持。
 - 条件功效不是未知方差保证：3pp目标在现有控制噪声假设下可检出，1.5/2倍敏感性未过；正式设计必须明确可辩护的规划方差假设/或合法补强，不能拿oracle或纯location shift宣称方法会提分。不要为造PASS继续调大目标、扩seed或恢复已撤销统计家族。
-- 仍欠实际单卡显存/成本和具体loss/预算/合同。原GPU epoch时长的选卡未钉，不能外推单卡PASS；4090成功核空卡后优先做R1原架构零optimizer成本smoke，事前披露确切命令/outputs，经准入/TDD/完整本地门与远端真实测试后才跑proposed learning。当前 `method_admitted=false`。
+- 原tokenizer的完整train chunk census完成（§25.53），固定峰值/最坏输入可直接复用，不重复tokenize全量train。仍欠实际单卡显存/成本和具体loss/预算/合同。原GPU epoch时长的选卡未钉，不能外推单卡PASS；4090成功核空卡后优先做R1原架构零optimizer成本smoke，事前披露确切命令/outputs，经准入/TDD/完整本地门与远端真实测试后才跑proposed learning。当前 `method_admitted=false`。
 
 全部本轮CPU入口已实际GONE（first-dummy smoke/fit complete）。本次末次成功核卡4090四卡均有他人任务；SSH失败按UNKNOWN记录，不当进程死亡或科研失败。非权重产物/SHA/备份见results；weights/npz留4090，无watcher、无新5090或checkpoint搬运授权。
 

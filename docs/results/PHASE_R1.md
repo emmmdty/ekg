@@ -4463,3 +4463,39 @@ covariance/rival审查 **2**项 **0444c4329931f286c644cb7354f10caae42fce30e21537
 上列tar SHA原机与本地一致；既有产物只验证相等、新文件exclusive-create，未搬任何weights。
 5090本次只读核卡SSH **Connection refused / exit255**，资源现态UNKNOWN；
 原已授权audit未启动，不重复原smoke、不推断占卡或进程死亡、不申请新5090范围。
+
+### 25.53 C-41：完整train的原tokenization/chunk成本审查预声明
+
+科研价值：表5-3/下一full-model预算；type块规模决定结构DP成本，transformer显存/时间
+还受每doc token chunks影响，不能由first8的16chunks/RSS直接外推完整训练可行性。
+可行性：只读原train file/manifest、固定官方data.py与服务器本地pretrained tokenizer；
+4090 CPU四线程/CUDA隐藏，完整2622docs原tokenize/max_length256，无模型/optimizer、
+dev/final-valid、checkpoint搬运或新增监督。核doc IDs/event mention总量/hash，
+记录每doc chunk/nonpad token数量与P50/P95/P99/max、固定RNG13 doc order下8doc批次
+chunk峰值、任意8doc最坏上界及对应IDs。顺序不是原历史Torch shuffle的重现，只是
+下一smoke的固定成本输入集合；不评估模型，不把counts当单卡budget PASS。
+独占 `training_chunk_audit/`；监督/假设仍是原candidate，不新开decoder/head控制。
+
+§25.53原机PID **2206737** complete/GONE；无neural model、无optimizer，原P1 protocol
+SHA与train/data/pretrained内容摘要全部实际核过。完整 **2622docs/66744mentions**，
+原tokenize/max_length256耗时 **46.7416018751s**，共 **4799chunks、892998nonpad tokens**。
+doc chunk P50/P95/P99/max分别 **2/3/4.79/8**；固定numpy RNG13的8doc批次峰值
+**23chunks**，任意8docs最坏上界 **55chunks**，对应IDs已固定保存。
+nonpad tokens/doc P50/P95/P99/max为 **293/679.95/952.06/1735**。
+这些输入规模有实测依据，仍不等于CUDA峰值/optimizer内存/epoch wallclock PASS。
+后续成本smoke应覆盖固定峰值/最坏输入，而非只重复16chunks的first8模型probe。
+入口 SHA **fd0e5964c2106b8e1831655df0d14cc56a884cd348237ccbf4f7b46f7e162394**；
+report SHA **329bd608d33eba3b85021c8fffc4dfc098fc70e5ad9bf3029a67f102fbccc917**
+已从原机base64无损落地本地；逐doc文件/hash与最终备份另补。
+
+§25.53逐doc文件已回传；LOCAL独立重算docs/mentions/chunks/nonpad totals与top8上界
+全量一致，**3**项manifest SHA
+**9334f5fc2da9bc3d4582761bdbf2b99c2678364914f6ff6543182bdb262a062b**。
+SSH复用的临时ControlMaster成功建立后再核卡：4090四卡仍为他人任务，
+占用 **23890/23221/23221/23221MiB**，util **74/98/67/50%**，未启动CUDA任务。
+这是最新成功状态，不把此前banner失败当空卡/任务死亡；无后台GPU启动watcher。
+
+§25.53最终LOCAL/4090 **3**项逐文件SHA一致、备份核验PASS。所有本轮CPU实验/审查
+进程已成功SSH读到GONE，完整报告存在；此次临时SSH ControlMaster仅改善读写连接，
+收尾显式退出，不留后台启动器/训练watcher。C-41/T087仍wip，未宣称指标突破、
+method admission或方法章PASS；下一实际单卡cost依空卡条件，不以数据量代替资源验证。

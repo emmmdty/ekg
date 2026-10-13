@@ -277,7 +277,9 @@ author delegation releases a new in-scope research queue; it does not reopen old
   The fixed legacy-versus-corrected pair-MLP adaptation completed and independently scored
   without gain (§25.50); stop its action. It is baseline engineering, not novelty.
   Covariance decomposition and total-mass rival are verified (§25.52); conditional power sensitivity
-  is measured (§25.51), not an effect prediction or unknown-variance guarantee. Full-model budget/power/
+  is measured (§25.51), not an effect prediction or unknown-variance guarantee.
+  Full-train original tokenizer/chunk census is complete (§25.53); reuse its fixed peak/worst
+  inputs for actual single-GPU cost smoke when an authorized GPU is empty. Full-model budget/power/
   admission remain open. No contribution PASS.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
