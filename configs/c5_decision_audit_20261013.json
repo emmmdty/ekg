@@ -1,0 +1,34 @@
+{
+  "arms": [
+    "baseline",
+    "null_only",
+    "requires_ranking",
+    "all"
+  ],
+  "candidate_digest": "15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910",
+  "diagnostic_only": true,
+  "entrypoint_sha256": "72ff221751af0be7efe2e7b55f3bfa71f01aab819e5a4227179173778618b929",
+  "evaluator": "data/protocols/v6/tools/maven_ere_evaluate.py",
+  "exploratory": true,
+  "final_valid_accessed": false,
+  "gold": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl",
+  "input": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl",
+  "input_sha256": {
+    "data/protocols/v6/manifests/maven_ere_internal-dev.json": "f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f",
+    "data/protocols/v6/source_lock.json": "d0d7d848bfc276ccccf1ab8e442628296612f17e47b7e3b8b425985dc4589231",
+    "data/protocols/v6/tools/maven_ere_evaluate.py": "32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl": "c358da8b04bdeca9477bd26a1a7fa325b634ea62a488b85b28119be8cce2a891",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl": "bb8c6b486196c97560cba49516324b3f69541023bfbe5cc09590d2bb265ce7e3",
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/scores.jsonl": "b9b119a41c575427cab721ed3762a5502250a08ed5b6da2fe8651f9121a73cd7",
+    "runs/stages/R1/r1-v63-c5-20261013/type_control/predictions.jsonl": "0189be77150ee5f8946d3a1b09dbe5436c953451c350ec3acd41c710be984f37",
+    "scripts/export_official_coref_cpu.py": "503dcf0bbbc97b05c84f309f348abfc38a0e54208b63418201aa935efbe9ae59",
+    "scripts/report_coref_error_profile.py": "4fabb2cfcae9c0a7584fa6dee82f69c337da0fd2dfc063478f84873e408b6c29",
+    "scripts/report_r1_prospective_power.py": "3cccd3fe8c1b61a3f697425c9ea19aa16d3c32dea2f7adf896250739f9849d56"
+  },
+  "manifest": "data/protocols/v6/manifests/maven_ere_internal-dev.json",
+  "output": "runs/stages/R1/r1-v63-c5-20261013/decision_audit",
+  "predictions": "runs/stages/R1/r1-v63-c5-20261013/type_control/predictions.jsonl",
+  "schema_version": "ekg.c5_decision_audit.v1",
+  "scores": "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/scores.jsonl",
+  "source_lock": "data/protocols/v6/source_lock.json"
+}
