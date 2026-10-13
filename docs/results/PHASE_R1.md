@@ -4500,3 +4500,18 @@ SSH复用的临时ControlMaster成功建立后再核卡：4090四卡仍为他人
 收尾显式exit请求时socket已不存在（exit255）；随后成功本地ps核该任务master为GONE，
 没有把socket错误当实验死亡，没有遗留后台启动器/训练watcher。C-41/T087仍wip，未宣称指标突破、
 method admission或方法章PASS；下一实际单卡cost依空卡条件，不以数据量代替资源验证。
+
+### 25.54 C-41：原joint完整反向成本与checkpointing等价验证预声明
+
+科研价值：对准表5-3新结构训练的算力可行性门。§25.53固定峰值/最坏输入已有真实
+规模，但未测完整四头损失反向、单卡CUDA峰值与checkpointing是否保持梯度；
+只测部分参数/first8不能闭合完整训练预算。
+可行性：复用已hash的官方Model/data/utils和同一pretrained initializer，固定seed13，
+原始四头目标与权重0.4/2/4/4，max_length256，完整参数反向；零optimizer/零权重更新，
+不读dev/final-valid，不加载teacher checkpoint或导出权重。CPU四线程先核等价，GPU仅
+4090空卡且本地三件套后运行；CPU RSS与投影Adam状态大小不充当CUDA/optimizer实测。
+独占 `original_joint_cost/` 的device/fixture子路径，拒绝覆盖；原源码零修改，
+checkpointing仅调用官方transformers接口（nonreentrant、preserve_rng_state）。
+冻结输入为chunk census的两组8doc IDs；一次子任务只执行一个fixture，原始/重算
+从同一初始化和同一forward RNG出发，比较loss与所有有梯度参数；保留失败报告。
+这是R1工程成本验证，method_admitted=false，不是proposed loss实现或方法训练。
