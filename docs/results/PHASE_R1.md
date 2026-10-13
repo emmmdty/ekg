@@ -4317,3 +4317,149 @@ config生成时误写source-lock子路径，FileNotFoundError拒绝后核真实�
 全train额外只读核查：上述首mention中，仅 **477**项（**395docs**）有同类型较早竞争前件；
 其余目标空行仍是实现盲区，但在本given-type前件集合下补dummy并不产生该row的非零
 wrong-real梯度。不能把全部2238行当有效干预机会、原模型错误或提升覆盖。
+
+§25.50 CPU smoke运行commit **85cdb3b**，PID **2168619** complete/GONE；
+full291docs raw-logit/typed-cluster exact parity，first8训练一步/两臂可运行，未读dev gold。
+fit PID **2172210** 已成功启动，固定两臂final5epochs；未取得完整fit status前不评分、
+不把smoke结果当全量效果。原始weights、smoke/futurefit新weights均留4090。
+首次远端fetch+launch SSH banner失败；改用已push的增量Git bundle同步已成功，
+bundle SHA **47792806e7ca613b4c05af41f70f7787c4cc3f0e6ea4d9e626773a83b96facf6**，
+remote git bundle verify/fetch/reset与HEAD **85cdb3b145a19fdb4722e67bfdd88121f15c5f29**
+均实际核过。旧gitignored源码/产物不改写，非scp散文件代替git代码版本。
+
+#### §25.50 实际结果与固定适配控制停止
+
+运行commit **85cdb3b**；fit PID **2172210** complete/GONE，两臂均固定final5epochs、
+完整2622train docs/291dev docs。初始全量raw logits/typed clusters精确重现stronger
+control。两臂预测封存后首次官方评分；本地独立官方scorer全指标与原机逐项精确一致，
+candidate digest完全一致，所有非coreference字段不变，无dev选模/final-valid读取。
+
+| 同encoder/原pair-MLP起点的控制 | MUC F1 (%) | B³ F1 (%) | CEAFe F1 (%) | BLANC F1 (%) |
+|---|---:|---:|---:|---:|
+| strongest type-control（封存） | 82.6689774697 | 98.2724739302 | 97.9410105769 | 91.1163290123 |
+| legacy continuation | 82.2064056940 | 98.2707652554 | 97.9710763786 | 91.1643823648 |
+| corrected first-dummy | 81.4414414414 | 98.2359585080 | 97.9130630405 | 90.8721855844 |
+
+2,000 paired document bootstrap/RNG13：legacy相对strongest ΔMUC
+**-0.4625717757pp**，95% CI **[-1.8145440240433153, 0.8365559749453935]**；
+corrected相对strongest **-1.2275360282pp**，CI
+**[-2.902762566453322, 0.24139249917185687]**。单变量corrected−legacy
+**-0.7649642525pp**，CI **[-2.149725382613847, 0.5604402834605]**。
+区间均跨0，不称显著退化；方向没有支持收益，也没有达到突破目标/护栏。
+
+legacy MUC counts **[462,551,462,573]**，spurious/missing **89/111**，改变 **37docs**；
+corrected **[452,537,452,573]**，spurious/missing **85/121**，改变 **44docs**。
+相对strongest，corrected减少 **19**个spurious MUC links却增加 **25**个missing，
+呈precision提高、recall损失更大。相对matched legacy减少spurious **4**、增加missing **10**。
+
+**停止这个固定5epoch/frozen-encoder适配，不扫epoch/lr/type policy或head endpoint。**
+原target空行的监督盲区仍真实存在，但修复的这一部署动作没有实测收益；不能由源码
+bug直接推导错误归因/提升。两臂loss幅度差很大主要还包含全0行常数被移除，
+不把train loss骤降当学习性能跃升。规范first-dummy目标在未来公平全模型对照中仍需
+使用，以免把修复当创新；本负结果不证明正确目标或其他full-model学习无效。
+
+非权重tar SHA **6c910bf1350f9595f3f3854857075923500d1519117c521f1bccbdebcfece12a**
+双端一致；预测/status/training/remote与独立metrics/paired doc counts均已本地落地。
+两臂weights留 **gpu-4090:/data/TJK/ekg/** 同root的
+`first_dummy_control/fit/{legacy,corrected}/pair_head.pt`，新weights SHA见fit/status.json；
+smoke两档同样留原机，未跨机搬运。独立结果不能回写原strongest或其他封存控制。
+
+§25.50合同勘误：预登记/hashed contract中“保持原real ranking”的短语不准确，
+**实际已冻结源码始终更新整个pair-MLP，real scores及其相对排序可以变化**；
+保持的是候选集合/chronological候选索引、pair评分函数架构、类型policy与原argmax
+decoder规则。不能声称保留teacher的数值排序，或把修正作用唯一归给dummy标量。
+两臂来源/参数起点/输入/优化/预算/decoder相同，只改变first-dummy gold target，
+所以matched监督单变量比较仍成立。原合同/config/产物不改写；此处纠正文字，
+不重跑/改评分或隐去跌分。
+
+### 25.51 C-41：突破目标的前瞻性功效敏感性预声明（非准入结论）
+
+科研价值：表5-3；作者要求突破而非微小漂移，因此在任何proposed训练/结果前，将
+新方法最小实质目标预声明为strongest control上 **+3pp MUC**，其他指标不退化、
+exact-vs-root-product须支持归因。此目标是可证伪验收标准，不是方法能达到的证据；
+尚未证明该target有80%power。旧方法/其他章的阈值和统计家族不恢复或更改。
+可行性：现有同协议291doc的sealed type-anchor与class-unit三臂paired counts可只读重算，
+仅用实际配对bootstrap噪声，不用oracle修复预测或pairs独立化；不读取final-valid。
+
+R1敏感性协议：固定RNG13/document bootstrap 2000，三臂各自ΔMUC噪声减去其bootstrap
+均值形成零均值location noise；假设未来干预的noise shape相同、signal是固定+3pp location
+shift，检验经验97.5%单侧critical（对应95%双侧CI下界>0）。报告noise scales1/1.5/2，
+power为有界empirical noise下的alternative rejection比例，MDE80=critical−noise的20%
+分位数。三臂均报告，以最大MDE为现有控制噪声包络；不可挑小的forest漂移噪声造PASS。
+这是一项显式假设的设计敏感性，**不是完整模型方差保证、不是未来效果预测、不是训练
+准入**。冻结控制适配结果如改变stronger baseline，正式method合同前需重绑定并说明
+噪声假设，不能由条件power一行掩盖1.5/2倍敏感性。独占 `learning_power_sensitivity/`。
+
+#### §25.51 条件功效实际结果与限制
+
+预声明3pp目标下，semantic/numeric/shuffle的1×条件power为
+**0.953/1.000/0.9565**，对应MDE80 **2.2481/1.4924/2.3605pp**。
+现有控制噪声包络的最大MDE80在1/1.5/2×分别为
+**2.3605466911/3.5408200366/4.7210933821pp**；不能只报告1×的高power。
+semantic 1.5/2× power为 **0.7075/0.4735**，shuffle为 **0.667/0.446**。
+因此在这些明确location-noise假设下3pp可检出，但稍高方差情形不满足80%；
+这不证明完整模型candidate的效果/真实方差，也不自动放行新机制训练。
+
+该audit没有oracle修复、未生产预测clusters；location shift是设计模型，不能写成
+数据可修复上界、实际拟合或MUC提升。后续stronger baseline/拟议干预与variance假设
+仍须在proposed结果前绑定；必要补强须合法冻结协议，不扩大seed或读final-valid。
+入口 SHA **902fb98446f397b856e4544e9d98ee360d218a57e94c9cedf4087068c426de23**；
+输入doc_counts SHA **ca6bd70a7ba4c47687811dc1e4bf6d7ecf3cb2edda8debb579e7cbfdee9ca799**。
+manifest见audit目录；当前仍 **method_admitted=false**，原target3pp不因敏感性结果调大。
+
+### 25.52 C-41：联合依赖与整体概率膨胀的竞争解释预声明（纯数学R1）
+
+科研价值：表5-3/学习目标归因；若exact C的offdiag始终≥root-product，exact-vs-product
+差异也可能是整体分数增大，不能直接认作“局部shared-ancestry信息”收益。
+预声明核查：P为strict-lower parent probability，A=(I−P)^{-1}，Q=A diag(dummy)。
+检验 C−QQᵀ 是否逐项非负/PSD，是否为A diag(v) Aᵀ，其中
+`v_j=1−dummy_j²−p_j(real)ᵀ C_<j p_j(real)`（root-indicator的martingale残差方差）。
+若成立，构造 same-doc strict-lower **总概率量匹配** 的竞争对照
+`B_ij=Qdot_ij+α(1−Qdot_ij)`，α=Σ(C−Qdot)/Σ(1−Qdot)。
+α为doc标量，保留总体soft predicted pairs但抹去pair-specific correction归属；
+不是新decoder、额外阈值或训练超参，尚未作为方法执行。零denominator时D也须为0，
+数学定义α=0；单节点无strict-lower pairs，直接检查空集合恒等式。
+可行性：纯numpy、RNG13/n=1..8/每n20个概率矩阵，无实际split/模型/optimizer。
+核covariance分解、PSD/元素范围、总量一致及构造gold {0},{1,2}的same-F1 surrogate；
+总量匹配不代表该control是同一个forest的exact概率，也不证明方法新颖/提分。
+独占 `learning_covariance_audit/`，不改原数学/控制产物，不开始proposed训练。
+
+§25.52 实际零数据审查：**160**个RNG13随机矩阵与**2**个全singleton/全chain边界例均通过。
+root-factorization、covariance分解、总offdiag量匹配最大绝对误差分别
+**1.1102230246e-16 / 2.7755575616e-16 / 7.7715611724e-16**；D逐项/PSD只出现
+浮点舍入负值，分别最小 **-1.1102230246e-16 / -2.0550320201e-31**。
+构造toy中α **0.1**，exact与matched-mass总soft pairs同为 **1.5**，但目标pair分数
+**0.5 / 0.4**、same-F1 surrogate loss **0.4285714286 / 0.4857142857**；
+root-product总量 **1.3333333333**、目标pair **0.3333333333**、loss **0.5**。
+因此局部归属差异可以在相同总量下存在，尚未测试真实模型/收益/梯度方向。
+理论证明与新竞争对照已入candidate brief，必须保留“总体probability inflation”竞争解释；
+不把既有covariance分解、纯数学PASS或总量rival冒称新method完成。
+入口 SHA **58e3353cb813de490ef6e3940f9b52e1a67bad97a365373512e44239e1514304**；
+复用已验证递推来源 SHA **293edadb3d97e2b97e32b6594c855504c8bf6f7d9a2aaf82e7a521844054d83c**。
+
+§25.49预算补充：原A3 official-joint实际launcher stderr可读；最后三个完整epoch的tqdm
+时长分别 **64/68/69s**（328 batches，各epoch打印两行，不把199行当199个epoch）。
+source EventEncoder为DataParallel，原gpu_preflight四卡均空、launcher未指定单卡；
+因此这些仅是原执行环境下的晚期epoch成本，**不能直接当作单卡4090的新目标预算**。
+该log的末端仍重现原共指主锚；后续需从实际CUDA smoke记录选定空卡/显存/批量成本，
+不得把CPU batch或历史未钉选卡的速率伪装为未来单卡可行性PASS。
+
+§25.49–§25.52非权重备份：完整train结构 **3**项manifest
+**7926b8a06f38e1f3c9a5689c26094a0fe5ae0db9b991c95db0a5812dccec1ab9**；
+真实模型接口/原源码快照 **5**项 **9dcdd44bbf9d53838d336c0dc4b15f242b9b638ba48b00e895ce4d42e697d138**；
+READS文献 **3**项 **52661ee92844d4783cfda729071cf546a94c6350a0072d9ff9c8d7f7c500f55c**。
+tar SHA **5874fd8e87583e9b91559880ef544b8c6bfe0fd8ee52ff4d4e047ee02c559f59** 双端一致，
+4090 exclusive-create/既有文件只读相等比对/逐manifest核验全部PASS。
+
+first-dummy控制含独立复算 **15**项非权重manifest SHA
+**fa169bedc14a43f059fc79823cf683b7ef7f5c18141da5432304d21413934a8a**；
+power敏感性 **2**项 **de0f4d688cacbbf5ddd75be48ac79fb363e1589b70bbca867398e7da9510c183**；
+covariance/rival审查 **2**项 **0444c4329931f286c644cb7354f10caae42fce30e21537d5e9122a497b732201**。
+末轮tar SHA **b19c87bd05178af68244db074fbdff511603a556c37ef0a70f14f2ef3f380783**；
+其回传/备份曾SSH banner timeout，原实际控制与独立结果无损，最后逐文件核验状态另记。
+
+最终末轮备份逐文件核验已成功：`first_dummy_control` **15**项、
+`learning_power_sensitivity` **2**项、`learning_covariance_audit` **2**项全部PASS，
+上列tar SHA原机与本地一致；既有产物只验证相等、新文件exclusive-create，未搬任何weights。
+5090本次只读核卡SSH **Connection refused / exit255**，资源现态UNKNOWN；
+原已授权audit未启动，不重复原smoke、不推断占卡或进程死亡、不申请新5090范围。

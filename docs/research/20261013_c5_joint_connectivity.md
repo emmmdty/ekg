@@ -85,3 +85,28 @@ backbone/seed13不变。真实训练成本、具体合同、目标效应/≥80%d
 原joint `fill_expand` 与marginal loss接口的新观察须先做真实autograd反证：非单例簇首mention的dummy可能缺失。如确认，各结构臂均使用规范first-dummy监督，corrected marginal列为强对照；只修正已有目标不算创新。封存源代码不改写，实证见R1 §25.49。
 
 已补核[READS, PVLDB 2017](https://home.cse.hkust.edu.hk/~raywong/paper/vldb17-SimRank.pdf) Eq.1/§3/§4.1：同时移动的双walk递推、等hop首次相遇、可合并walk/tree均属先行机制。候选是每个ordered mention一次parent选择下的同森林连接概率、mention特定dummy、condition later节点的训练目标；不以coalescence/递推/共享walk本身作创新。该有限对照不能证明全部同类图算法无先行性，源码快照与解释在 `learning_literature_audit/`。
+
+## 依赖修正与整体概率膨胀的竞争解释
+
+令Z为每个mention的随机one-hot root标签矩阵，Q=E[Z]，P为strict-lower parent概率，
+A=(I−P)^{-1}。设ε_j=Z_j−E[Z_j|Z_<j]，则ε是按mention顺序的martingale差分，
+不同j的交叉内积期望为0。条件均值为p_j Z_<j+dummy_j e_j，较早节点不可能root于j，
+所以其残差能量v_j=1−dummy_j²−p_j C_<j p_jᵀ。由Z−Q=Aε，
+
+`C−QQᵀ = A diag(v) Aᵀ`。
+
+v是条件残差方差的期望，故非负；A=I+P+...+P^(n−1)逐项非负。因此covariance
+修正既PSD又逐项非负。该分解是既有covariance/线性innovation思想的推导，不能
+声称发明covariance factorization或coalescence。数值验证与限制只见R1 §25.52。
+
+这也给出更强的竞争解释：exact C不仅改变局部归属，还增加所有pair的总体概率量。
+正式候选除root-product、corrected marginal与ancestry-shuffle外，需考虑同总量rival：
+在同doc/type合法strict-lower pairs上令α=Σ(C−Qdot)/Σ(1−Qdot)，以
+`B=Qdot+α(1−Qdot)`匹配总体soft预测pair量。该α按输入确定、没有训练/dev选阈值；
+不把B称为同parent forest的exact联合概率。零分母时D亦零，定义α=0。
+它保留总体膨胀而移除pair-specific correction归属，能区分局部依赖价值与统一增分。
+对照/aux loss/scale最终仍须在训练前冻结；toy保持总量不同TP不证明部署效果。
+
+作者要求的突破目标已预声明为strongest control上有实质主指标改进，目标及前瞻性
+noise敏感性只见R1 §25.51。location-noise功效是有假设的设计分析，不是预测真实改进
+或未知full-model方差；方法仍未准入，最终绑定须等强对照与预算/损失合同闭合。

@@ -1,6 +1,6 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-13（+08:00，C-41 最近邻/决策边界接续完成）**。
+> 更新于 **2026-10-13（+08:00，C-41 结构学习审查与固定适配实测接续）**。
 > 本文是新窗口唯一必读入口；按下面的角色、状态与接续步骤直接执行，不依赖聊天记录。
 > 科研改进与路线裁决已由作者委托执行代理，作者验收最终结果；角色不扩大现有资源授权。
 > 当前 **C-41 / T087 为 wip，持有 C5 切片**，后续 **D4 → A4**；唯一权威计划仍是
@@ -12,7 +12,7 @@
 > 普通 newness/singleton、candidate-erasure→dummy 等已有先行机制，不准入创新。候选 brief 见
 > [`research/20261013_c5_newness_admission.md`](research/20261013_c5_newness_admission.md)；
 > 最新执行动作由下方「本次接续」与 §0.3.5 覆盖；候选 power 尚未闭合。
-> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.50**。
+> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.52**。
 > D4 linear 恢复强控制、tanh5 退化（§25.37）；A4 仍无新效果结果；旧失败家族封存，E3 不追加实验。
 > 5090 原 C5 decoder smoke 已 complete，完整 audit 已授权但仍待空卡；无遗留自动启动 watcher。
 > 本轮新 CPU 控制与该原 decoder audit 是两份合同，不能把其中一项完成记成另一项完成。
@@ -20,7 +20,7 @@
 > **最短读法**：新窗口角色 → 当前阶段表 → **§0.1–§0.3** → **§0.3.5 接续步骤与资产**。
 > §0.4 以后按需读；历史候选、旧队列和旧功效证据不得覆盖当前主表与最新实测。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit 四类控制已完成并独立复算（§25.44–§25.48），没有达到突破；全部固定动作停止。C-41 当前转入 exact joint 结构训练目标的 R1 审查（§25.49）：same toy/surrogate 的误链梯度抵消差异已由 CPU autograd 与有限差分验证，完整train结构机会/类型分块规模经独立枚举一致。原joint first-dummy监督盲区与真实模型梯度接口已核实；固定legacy-versus-corrected pair-MLP适配控制已实现/通过本地与远端测试，接续smoke→fit→独立评分（§25.50）。数学/覆盖结果不是 MAVEN 提分、全面新颖性或方法准入；full-model 从 pretrained 初始化的公平对照/具体 loss/预算/power 仍须闭合。C5 切片保持 wip，D4/A4未接队。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；正式损失/强对照/冻结方差假设/单卡预算与合同仍待闭合，method未准入。C5切片保持wip，D4/A4未接队。
 
 ## 新窗口角色：事件语义与知识图谱方向的科研负责人（PI）
 
@@ -61,7 +61,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41/T087，当前C5**：given-type stronger control保留；四个fixed-score/head控制实测未突破并停止（§25.44–§25.48）。当前 exact joint 训练目标R1：误链梯度抵消的数学差异已验证（§25.49），真实full-model/power/合同未闭合，未准入训练。原5090 smoke complete/audit待空卡、无新任务授权。后续C5→D4→A4。 |
+| **活动任务** | **C-41/T087，当前C5**：given-type stronger control保留；五个fixed-score/head控制实测未突破并停止（§25.44–§25.50）。当前exact joint结构学习R1：真实模型梯度/结构覆盖/covariance与matched-mass竞争对照、条件power敏感性已核（§25.49–§25.52），full-model损失/预算/正式power假设与合同未闭合，未准入训练。原5090 smoke complete/audit待空卡、无新任务授权。后续C5→D4→A4。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
@@ -76,14 +76,14 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 | 🔴 **读表 6-2 的前提** | 评测文档捷径和训练图中的金标边覆盖造成系统差异，不能按 MRR 排序解读，也**不得写“我们超过 CSProm-KG / SimKGC”**。具体证据见 §0.4c 与 `results/PHASE_E.md`。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问。不可行点名类别与一手证据，停止该路线；按 10-08 委托由执行代理在现有主任务内选择下一路线，先改主表再执行。有效性与未授权资源动作仍不可绕过。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文 §0.3 只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **GPU**（细则 §E.3） | **gpu-4090**：10-12 成功核卡四卡均有他人任务，不能占用。**gpu-5090**：原 C5 smoke complete、audit 未启动；本次较早成功核卡有他人 vLLM，末次 SSH `Connection refused`，现态 UNKNOWN，须成功 SSH 后重新核空卡。原两项授权保持，smoke 不复跑；A4、额外 seeds 与跨机 checkpoint 未授权。 |
+| **GPU**（细则 §E.3） | **gpu-4090**：10-13 本轮成功核卡四卡均有他人任务，不能占用。**gpu-5090**：原 C5 smoke complete、audit 未启动；原成功核卡有他人 vLLM，10-13末次 SSH `Connection refused`，现态 UNKNOWN，须成功 SSH 后重新核空卡。原两项授权保持，smoke 不复跑；A4、额外 seeds 与跨机 checkpoint 未授权。 |
 | ⚠️ **只在 4090 上的大件** | `runs/factuality/predicted_edges_valid.jsonl`（133 MB，**`.1583` 的真上游**）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）、两个对手的 checkpoint、**C5 三个周期的 checkpoint**。**本地那份 `runs/relations/supervised_dump.jsonl` 是另一份 dump，别拿它当上游。** |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与**估算基准率**见 `EXPERIMENT_PLAN.md` §3（按 git 里同类事件的真实起止天数估，不按计算耗时估）。 |
 | 完成后必须做什么 | 按 **§6** 五步回填：产物落地 → 写结果页 → 改主表行状态与 commit → 推进队列 → commit + **push**。**没 push 就没交接。** |
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最近完整三件套（2026-10-13，decision-unit 审查）**通过，证据见 §25.48；
+> **最近完整三件套（2026-10-13，first-dummy控制）**通过，证据见 §25.50；
 > 10-10 汇总相关测试与一致性门见 §25.37；
 > torch 对应测试在 4090/5090 均用 CPU 真正执行（§25.35）；最新启动证据见 `results/PHASE_R1.md` §25.36。
 > 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 最终结果
@@ -280,16 +280,14 @@ A4 仍待诊断。三个方法章均未形成新方法贡献，不能用旧“�
 固定双向与 train-only frozen-null 全部实际运行、独立复算完成，未胜 strongest type-control，停止
 且不扫参（§25.44–§25.45）。原 type-control/弱 observer 不重跑，旧 role/argument 家族不复活。
 
-**当前动作**：四类固定控制的计算/双端评分均 complete（§25.44–§25.48），不重放已完成
-stage，不改头/threshold/linkage/temperature。读取 §25.49 和
-`research/20261013_c5_joint_connectivity.md` 的学习目标路线：数学反例已验证，下一步补完整
-模型从相同pretrained初始化的具体监督/strong control/单变量消融/负控、实际训练成本与
-≥80%document power，再形成新合同。当前无方法训练准入，不把toy或skills PASS当贡献。
+**当前动作**：五类固定控制完整计算/双端评分均complete（§25.44–§25.50），不重放已完成stage、不扫head/threshold/linkage/temperature/epoch。first-dummy源码盲区已确认，但固定适配未改善，结果不翻案。接续§25.49–§25.52与 `research/20261013_c5_joint_connectivity.md`：
 
-原/新head与train/dev features留4090。固定控制非权重产物与独立复算可反查，manifest
-身份只见results；learning-gradient report已在原机成功生成，scp曾banner timeout，最终
-回传/备份状态认results末段，不把工具失败当数学结论。末次成功核卡4090四卡皆占用、
-本轮四个CPU模型入口皆GONE，无watcher；5090原audit仍保持原授权与待空卡状态。
+- 数据/数学/真实CPU接口已闭合：train结构覆盖、type块规模、full-model从pretrained的gradient connectivity；不要重新导出teacher/cache或再证同一个toy。
+- 明确下一训练设计：同pretrained完整原joint架构/seed13/given-type policy/规范first-dummy；corrected marginal、same-surrogate root-product、exact joint、ancestry-shuffle，并保留总量匹配global-inflation rival以识别局部依赖。原strongest type-control与frozen anchor保持。
+- 条件功效不是未知方差保证：3pp目标在现有控制噪声假设下可检出，1.5/2倍敏感性未过；正式设计必须明确可辩护的规划方差假设/或合法补强，不能拿oracle或纯location shift宣称方法会提分。不要为造PASS继续调大目标、扩seed或恢复已撤销统计家族。
+- 仍欠实际单卡显存/成本和具体loss/预算/合同。原GPU epoch时长的选卡未钉，不能外推单卡PASS；4090成功核空卡后优先做R1原架构零optimizer成本smoke，事前披露确切命令/outputs，经准入/TDD/完整本地门与远端真实测试后才跑proposed learning。当前 `method_admitted=false`。
+
+全部本轮CPU入口已实际GONE（first-dummy smoke/fit complete）。本次末次成功核卡4090四卡均有他人任务；SSH失败按UNKNOWN记录，不当进程死亡或科研失败。非权重产物/SHA/备份见results；weights/npz留4090，无watcher、无新5090或checkpoint搬运授权。
 
 conditional error-risk 的旧候选仍缺 train-only 文档隔离 error-state 输入；新的 exact joint 候选
 改变联合概率/监督假设，不用 in-sample teacher errors 冒称 OOF。正文与官方 README 机制

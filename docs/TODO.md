@@ -3,7 +3,7 @@
 > 更新于 **2026-10-13**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit 四类控制已完成并独立复算（§25.44–§25.48），没有达到突破；全部固定动作停止。C-41 当前转入 exact joint 结构训练目标的 R1 审查（§25.49）：same toy/surrogate 的误链梯度抵消差异已由 CPU autograd 与有限差分验证，完整train结构机会/类型分块规模经独立枚举一致。原joint first-dummy监督盲区与真实模型梯度接口已核实；固定legacy-versus-corrected pair-MLP适配控制已实现/通过本地与远端测试，接续smoke→fit→独立评分（§25.50）。数学/覆盖结果不是 MAVEN 提分、全面新颖性或方法准入；full-model 从 pretrained 初始化的公平对照/具体 loss/预算/power 仍须闭合。C5 切片保持 wip，D4/A4未接队。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；正式损失/强对照/冻结方差假设/单卡预算与合同仍待闭合，method未准入。C5切片保持wip，D4/A4未接队。
 
 ## 当前正式活动阶段
 

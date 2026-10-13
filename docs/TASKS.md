@@ -274,8 +274,10 @@ author delegation releases a new in-scope research queue; it does not reopen old
   with exact joint dependence (§25.49): toy wrong-edge gradient cancellation is verified against
   finite differences; full-train structural opportunities and type-block sizes are independently verified.
   Pinned joint first-dummy supervision blindness and full-model gradient connectivity are confirmed.
-  A fixed legacy-versus-corrected pair-MLP adaptation control is implemented/tested; execute CPU
-  smoke, then fit and independently score (§25.50). It is baseline engineering, not novelty. Full-model budget/power/
+  The fixed legacy-versus-corrected pair-MLP adaptation completed and independently scored
+  without gain (§25.50); stop its action. It is baseline engineering, not novelty.
+  Covariance decomposition and total-mass rival are verified (§25.52); conditional power sensitivity
+  is measured (§25.51), not an effect prediction or unknown-variance guarantee. Full-model budget/power/
   admission remain open. No contribution PASS.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
