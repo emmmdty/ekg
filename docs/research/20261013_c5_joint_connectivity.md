@@ -110,3 +110,59 @@ v是条件残差方差的期望，故非负；A=I+P+...+P^(n−1)逐项非负。
 作者要求的突破目标已预声明为strongest control上有实质主指标改进，目标及前瞻性
 noise敏感性只见R1 §25.51。location-noise功效是有假设的设计分析，不是预测真实改进
 或未知full-model方差；方法仍未准入，最终绑定须等强对照与预算/损失合同闭合。
+
+## 2026-10-13 固定的判别设计（仍待单卡预算，不启动训练）
+
+科研价值/可行性与power绑定只见R1 §25.55；原full-model零更新成本验证见§25.54。
+本节冻结目标与对照，取代上文“具体loss尚未选择”的待办；不是GPU执行合同。
+
+输入仍是全文/给定mention spans/types，监督仅train gold identity，所有臂从同一个
+pretrained initializer和seed13出发。公共项为typed parent distribution上的规范
+first-dummy marginal（clamp-before-sum与原实现一致）。保留原三个关系头loss/权重。
+类型只约束parent候选：每个mention的dummy与同类型更早mentions，零阈值扫描。
+
+对每doc按type分块，从合法parent probabilities计算C与Q。只取合法strict-lower
+pairs，令Y为gold same-cluster，T=ΣS_ij Y_ij、M=ΣS_ij、G=ΣY_ij。
+固定辅助项 `L_pair(S)=1−(2T+1)/(M+G+1)`。先跨同doc的全部type blocks汇总
+T/M/G，再平均documents；空pair doc的loss严格为0。不能按block平均过度加权
+singleton types。它是soft pair-F1 surrogate，不是E[F1]、MUC或原Le&Titov B³/LEA。
+
+固定五臂：
+
+1. corrected-marginal：公共目标，不加aux。
+2. root-product：公共目标+L_pair(QQᵀ)。
+3. exact：公共目标+L_pair(C)。
+4. mass-matched：公共目标+L_pair(B)，B=Qdot+α(1−Qdot)，α在每个
+   doc/type block按§25.52合法pairs定义。α参与autograd，不stop-gradient；
+   总量匹配在每次forward成立，不能把它称exact forest probability。
+5. assignment-shuffle：公共目标+L_pair(ΠCΠᵀ)，每个doc/type block由
+   SHA256(`seed13|doc_id|type|mention_id`)排序生成固定permutation，singleton恒等。
+   它保留diag/合法type/pair score multiset/总量，打乱监督中的mention-pair归属；
+   是aux assignment负控，并非只移除共享祖先的特殊分量，不夸大因果解释。
+
+总目标固定为 `.4*(L_marginal+L_pair)+2*L_temporal+4*L_causal+4*L_subevent`；
+第一臂L_pair=0。所有结构臂同surrogate/scale/decoder/候选/backbone/预算。
+正控marginal与任何aux臂的差异只可解释为加入结构监督；exact对root/mass-matched
+是联合依赖归因比较，exact对shuffle是pair-assignment有效性比较。
+不依赖aux loss下降宣告MUC提分，不扫aux权重。
+
+Endpoint固定为原100epochs预算的最后一步，所有臂不在internal-dev/final-valid
+选checkpoint/epoch；内部291doc仅在各臂endpoint完成后导出一次统一评分。
+原best-dev模型与新的fixed-endpoint控制具有不同选择过程，明确保留其旧强锚身份；
+方法仍须胜过该typed强锚以及同预算的corrected marginal/root/mass对照，
+不能靠新的控制欠拟合过门。优化器/梯度累积/scheduler沿原同架构实现；
+选卡/训练批次chunk策略属于工程配置，必须空卡成本验证后按全部臂相同规则冻结。
+
+正式合同与生产method实现仍待：实际单卡峰值/optimizer headroom/完整预算、
+原架构与未来aux的开销边界，power绑定已经完成并采用明确的条件性规划假设（R1 §25.55）；仍不声称真实新训练方差已测。
+当前method_admitted=false；资源等待不等于路线不可行，也不恢复已封存控制。
+
+方法promotion/止损在结果前固定：exact的官方MUC须达到预声明突破目标，同时
+超过原typed强锚与所有同预算正对照；其余三个官方共指指标B³/CEAF/BLANC
+不得低于原typed强锚及corrected-marginal。exact-vs-root和exact-vs-mass是两个
+预声明归因比较，需正的paired document差异及对应区间支持，shuffle需表现更弱；
+辅助loss下降不能替代任一项。配对区间只作该单seed评测单位证据，未调整的
+多个区间透明标探索性，不恢复旧Holm/24条件或冒充跨seed确认。
+完整原joint三个关系任务同endpoint一并报告，区分aux的共指收益与共享任务代价。
+任一关键比较失败则记录负结果并停止该固定配置，不改scale/endpoint/decoder
+或加预算挽救；协议/实现错误需要单独TDD修复及新身份，不能静默覆盖结果。

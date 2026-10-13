@@ -262,6 +262,11 @@ author delegation releases a new in-scope research queue; it does not reopen old
   power and ablation/negative-control rules before a method contract or training.
   Do not rerun completed exports or reuse historical pools/power as fresh admission evidence.
   T087 remains active; the existing 5090 decoder audit is separately authorized only on an empty GPU.
+  C-41 latest: original-joint full four-head CPU backward on both frozen chunk fixtures and
+  nonreentrant checkpoint loss/all-gradient equality verified (§25.54); five-arm loss/endpoint
+  design and pre-method conditional power assumption rebound to five completed controls (§25.55).
+  CUDA/optimizer headroom/aux cost and the formal execution contract remain pending; no method
+  admission or new deployment gain. Code/config/contract: original_joint_cost_20261013.
   Author reiterated actual metrics or overall-method innovation as the deliverable. A fixed
   bidirectional-score control completed with independent scores and did not beat the typed
   strongest control (§25.44); stop it without alpha/threshold repair. A train-only frozen

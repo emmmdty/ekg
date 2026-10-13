@@ -4515,3 +4515,77 @@ checkpointing仅调用官方transformers接口（nonreentrant、preserve_rng_sta
 冻结输入为chunk census的两组8doc IDs；一次子任务只执行一个fixture，原始/重算
 从同一初始化和同一forward RNG出发，比较loss与所有有梯度参数；保留失败报告。
 这是R1工程成本验证，method_admitted=false，不是proposed loss实现或方法训练。
+
+### 25.55 C-41：正式结构比较设计与完成控制后的power绑定预声明
+
+科研价值：表5-3/R1准入，区分exact pair-dependence、普通soft cluster supervision、
+总概率量增加与标签对齐四种解释；避免aux权重/decoder/选模同时变化造成伪归因。
+可行性：仅冻结数学设计，复用已封存的两份291doc paired counts做规划；
+不生成新预测、不用oracle/final-valid、不新增seed，不开始proposed实现/训练。
+规范first-dummy marginal为所有臂公共项，原baseline与typed stronger anchor保留。
+主规划假设是未来document-level paired MUC contrast的中心噪声处于全部已观测
+同协议控制的1× envelope；对class-unit三臂与first-dummy legacy/corrected五份噪声
+逐一计算目标+3pp的条件power，取最小值/MDE最大值。此假设在proposed结果之前
+冻结，并列1.5/2×违约敏感性；不能把规划假设解释成未知full-model方差已经测量。
+超过80%只可记conditional design power；若新结果噪声超envelope，报告设计失配，
+不得按新得分重写假设或申请未授权seed。独占 `learning_power_binding/`，输入hash/
+RNG13/2000resamples与原noise审查一致，两个输入必须同291 IDs且baseline counts相同。
+
+§25.54 实际完成：4090 CPU/PID **2268725（peak）、2268882（worst）** 均成功SSH读到GONE。
+release **fe7eb55**；入口SHA **295ba0de2655ee8f76471a52f0b10744fec57667a21bd8a856e0b567bb5c907a**，
+配置SHA **3f78e6f0c23abd27f9a16c0e53bfc453400c2beda56bd4bb27b5c9ea50232546**。
+实际Torch **2.8.0+cu128**、transformers **4.53.3**，CUDA隐藏，四线程，
+完整原四头loss/all-parameter backward，没有optimizer/teacher读取/权重导出。
+
+| 固定输入 | chunks | off forward/backward(s) | on forward/backward(s) | loss off/on | 有梯度参数 | 最大梯度绝对差 | 参数SHA不变 |
+|---|---:|---|---|---|---:|---:|---|
+| train固定shuffle peak8 | 23 | 7.853437/6.054010 | 5.997660/12.173923 | 12.2884740829 / 同值 | 221 | 0.0 | PASS |
+| train任意top8最坏 | 55 | 19.329895/16.503694 | 19.077282/32.712714 | 12.5371551514 / 同值 | 221 | 0.0 | PASS |
+
+初始/最终参数digest均 **5b67cbba9d07f1fb3408b9623833a65f7d8eecaa4799a8b6a0021be3d44a53d6**。
+模型FP32参数 **504768980bytes**；两份Adam moments投影 **1009537960bytes**，
+未分配optimizer、不称optimizer显存实测。累计CPU RSS peak/worst为
+**10798668/20148120KiB**，包含梯度比对buffer，不作checkpointing内存节省结论。
+单次CPU计时含并发/冷启动影响，不给GPU速度或完整epoch PASS；两个fixture通过只证明
+原架构完整反向与本重算接口的数值等价，新结构aux开销仍需验证。
+本地TDD **9 failed→9 passed/3 Torch skipped**；完整三件套 **901 passed/54 skipped**、
+ruff0、smokeOK，R1 consistency **36 requirements PASS**；push前4090 CPU对应
+**12 passed/6.87s**（含真实RoBERTa dropout/autograd），不是把local skip当PASS。
+代码通过Git增量bundle同步，bundleSHA **e097b446b8a443ddd49cb9e28684d4ab2846f4485244263e577dd32b4e51b675**；
+远端原有 `.cache/` 等未跟踪资产未改/删，没有分支/worktree。
+两组各3项manifest SHA为 **f0f6c93a21af6a6f6d74df674cc50329401ba9b6e8ff7c1031ac4df122eba85c**、
+**482b5e45c9832c17e9884979c0a803a8a39ddcb1aed4a086eb154db55a8d356b**；
+report SHA分别 **271dd0323cf5a2d59caf61f774dcf8c01c7361536060893af0e220e81c62d448**、
+**99cff2efaddd29945b1314c72960cdb316ac7da2f3c2d1589737e4720f74cd89**，LOCAL逐项已核，双端核验另补。
+
+§25.55 五臂目标/推理与endpoint设计已冻结在candidate brief：规范marginal公共项；
+相同pair-F1辅助项的root-product/exact/mass-matched/assignment-shuffle，
+固定aux scale、doc聚合与最后一步endpoint；shuffle保留pair分数总量，
+只能作pair-assignment负控，不能声称单独切断shared ancestry。尚无method code/训练准入。
+完成first-dummy后的两份counts全部291doc IDs/anchor counts exact一致，固定相同
+2000 bootstrap draws/RNG13，以五个已观测噪声形状逐一绑定，主假设1×envelope。
+
+| 噪声倍数 | 五对照最低条件power（目标+3pp） | 五对照最大MDE80(pp) |
+|---:|---:|---:|
+| 1×（正式规划假设） | 0.953 | 2.3605466911 |
+| 1.5×（敏感性） | 0.667 | 3.5408200366 |
+| 2×（敏感性） | 0.446 | 4.7210933821 |
+
+新增两臂没有扩大原worst envelope，不能说“真实训练方差已闭合”。在冻结1×假设下
+conditional design power满足≥80%，1.5/2×不满足；此风险正式保留，不提高目标、
+不增seed/扫预算、不按proposed结果改假设。该绑定关闭的是统计规划待办，
+不是实际效应/跨seed保证；actual单卡预算与正式执行合同仍待闭合，method_admitted=false。
+入口SHA **f35662c5fb74825a82c145b657167c9b7813e5465058a1e08033107f00d6c91a**、
+reportSHA **0ec0eb22ca5e23a474d5aebd4e92c340c26e65779e1c85cab31fa06461d698d6**；
+2项manifest SHA **41e913470087445febc6c6cf173baf1fe133a9fd0c001a9ae6a4168f287d039c**。
+
+§25.54–§25.55最终核验：LOCAL/4090峰值与最坏cost各**3项**、power binding
+**2项**逐文件SHA全部一致，非权重备份PASS。power另以独立scalar precision/recall
+公式重算全部**5 contrasts ×3 scales**，与原vectorized reporter一致（最大误差 **2.7533531011e-14**）；
+不改原noise敏感性/原控制报告。所有本轮CPU进程GONE，无CUDA启动器/等待watcher。
+
+§25.54–§25.55收尾成功核卡（2026-10-13 **15:18:53 UTC**）：4090四卡
+**23891/23221/23221/23221MiB**、util **55/95/91/83%**，仍有他人任务；
+两个cost PID再次成功读到GONE。未占GPU，无method训练/新5090任务，C-41继续wip。
+临时ControlMaster `/tmp/ekg-c41-cost-4090-20261013.sock` exit请求成功，
+local ps已确认PID **10680 GONE**；它只是SSH传输复用，不是训练/空卡启动watcher。
