@@ -4496,6 +4496,7 @@ SSH复用的临时ControlMaster成功建立后再核卡：4090四卡仍为他人
 这是最新成功状态，不把此前banner失败当空卡/任务死亡；无后台GPU启动watcher。
 
 §25.53最终LOCAL/4090 **3**项逐文件SHA一致、备份核验PASS。所有本轮CPU实验/审查
-进程已成功SSH读到GONE，完整报告存在；此次临时SSH ControlMaster仅改善读写连接，
-收尾显式退出，不留后台启动器/训练watcher。C-41/T087仍wip，未宣称指标突破、
+进程已成功SSH读到GONE，完整报告存在；此次临时SSH ControlMaster仅改善读写连接。
+收尾显式exit请求时socket已不存在（exit255）；随后成功本地ps核该任务master为GONE，
+没有把socket错误当实验死亡，没有遗留后台启动器/训练watcher。C-41/T087仍wip，未宣称指标突破、
 method admission或方法章PASS；下一实际单卡cost依空卡条件，不以数据量代替资源验证。
