@@ -246,20 +246,17 @@ author delegation releases a new in-scope research queue; it does not reopen old
   resource boundaries. Work through C5 → D4 → A4; control recovery or a rejected candidate does not complete
   a chapter. No new mechanism or GPU training contract has been admitted; see
   `research/20261012_chapterwise_optimization.md` and `results/PHASE_R1.md` §25.38 onward.
-  Author requested continued work until a verifiable breakthrough. Train FACT/ERE oracle and upstream
-  scope and train-only CPU text-observation audits completed (§25.39); noisy compatibility feasibility
-  and reliable strong-control caches are next. No new coreference mechanism has passed admission.
-  Remote CPU export of the original official-joint checkpoint is frozen in
-  `PHASE_C5_official_cpu_cache_20261013.md`: exact cluster parity, smoke before full,
-  no GPU, no training and no checkpoint transfer (§25.40).
-  CPU cache is complete with byte-identical frozen predictions. The weak text observer deployment
-  and continuous geometry audits did not support the planned error signal; that observer route stops.
-  The next derived control is fixed given-type agreement with the original scorer/decoder (§25.42),
-  explicitly distinct from a method innovation or reproduction of the cited multitask model.
-  This derived control is complete: exact unconstrained parity, independent official scores and
-  paired document counts agree. All four coreference metrics improved (§25.42); its residual profile
-  is complete. T087 remains active for a distinct admissible mechanism, rather than counting this
-  known-rule control as a chapter innovation or reopening the stopped weak observer.
+  Author requested continued work until a verifiable breakthrough. The new window acts as the
+  event-semantics/KG research lead (PI), with sequential method review and experiment ownership;
+  follow `HANDOFF.md` role instructions and §0.3.5 without expanding resource authorization.
+  Train factuality scope audits, the official-joint CPU cache, weak-observer deployment/geometry,
+  the given-type control and its residual profile are complete (§25.39–§25.42).
+  The weak observer route stops. The derived control improved all four official coreference metrics,
+  with independent scores and paired counts verified; it is a known rule, not an admitted innovation.
+  Next audit first-party mechanisms/code and deployable inputs against the stronger control's residual
+  errors, then close novelty, power, ablations/negative controls and a new contract before method training.
+  Do not rerun completed exports or reuse historical pools/power as fresh admission evidence.
+  T087 remains active; the existing 5090 decoder audit is separately authorized only on an empty GPU.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

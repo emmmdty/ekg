@@ -21,10 +21,10 @@ C5 DATE 词面代理和已有强锚 BEFORE/coref 冲突两项 CPU 审查已完�
 作者已具体批准 C5 原机 decoder smoke/audit 仅空卡执行；首试被 occupancy 门拦下，
 重新空卡后的 smoke 已 complete、average parity/六文件 hash PASS；下一步完整 audit，不复跑 smoke。
 有界空卡等待已结束，无遗留自动启动 watcher；接续核空卡后直接执行已授权 audit。
-仍无新方法训练或章节提分结论；A4 的 5090 授权不在这次批准内。
+尚无新方法训练或创新贡献；C5 已知规则的控制提分见 §25.42。A4 的 5090 授权不在这次批准内。
 作者要求持续推进至突破；C-41 保持活动。FACT/ERE train 事实性信号已审查，直接硬规则不准入；
 仅 C5 train 的固定单 seed CPU 文本观测诊断已完成，覆盖低且稀有类别弱；
-下一步噪声兼容性可行性与可靠强控制缓存，证据 §25.39。
+该早期审查见 §25.39；控制缓存与后续诊断现已完成，接续以 §25.40–§25.42 为准。
 旧 D4 OOF 输入不能直接接入新 C5 consumer；这不改写 D4 自身的结果。
 10-13 4090 原地 official-joint CPU 全量 cache 已通过 exact cluster parity，
 重放预测与 frozen anchor byte-identical（§25.40）。当前弱 factuality observer 的部署覆盖与
@@ -32,6 +32,8 @@ C5 DATE 词面代理和已有强锚 BEFORE/coref 冲突两项 CPU 审查已完�
 known type-agreement stronger control 已完成固定 CPU 重放/双端评分与配对审查，共指四指标提高，
 残余错误 profile 已完成；数字只见 §25.42。下一步据其两方向错误准入独立机制/输入/power；
 控制改进尚不是方法创新，当前 C5 切片继续 wip。
+新窗口承担科研负责人（PI）/方法审稿/实验执行责任，按 `HANDOFF.md` 角色与 §0.3.5
+从 stronger control 的两方向残余错误做最近邻/输入/机制准入，沿用授权，不重跑完成的控制。
 
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|

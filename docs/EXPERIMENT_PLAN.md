@@ -62,7 +62,8 @@ Ch5 并入「负结果与归因」章 ⇒ **最终形态定稿为「Ch6 承重 +
 pair-evidence、role-compatibility 家族仍封存，不得换名、扫参或换大 backbone 复活。详见 **§11**。
 
 **2026-10-12 路线评估写入计划**：作者要求保存逐章目标、方法、结果与后续路线判断，指出旧方法
-长期没有进展，后续考虑研究新方法。本次仅记录方向并登记 **C-41（planned，尚未开工）**，不启动实验。
+长期没有进展，后续考虑研究新方法。立项时仅登记 **C-41 planned**；当前已转 wip 并完成控制改进，
+最新状态认 §4 主表与结果 §25.42。
 执行代理判断：D4 保留已恢复的 linear 强控制，换实质不同的机制；A4 结束旧证据流的续修，
 C5 结束旧角色家族、先核官方目标/解码匹配，E3 保持现有成果与论断边界。
 现有 A4/C5 冻结诊断只回答既定问题，不扩展成调参或新的机制周期；其 GPU 待授权不阻断后续
@@ -380,7 +381,7 @@ gantt
 | **C-38** | **done · 冻结诊断与共享执行接口实现**：D4 matched head、A4 shared loss/gradient、C5 official decoder replay；没有新机制准入，不改旧 sealed bundle | C-37 有明确可行方案；新任务/phase/config 在方法输出前冻结 | 有失败复现/梯度或输入语义测试、完整本地门、baseline parity 证据；没有 torch 的本地 PASS 不替代远端对应测试 | 代码、tests、独立新 runs namespace |
 | **C-39** | **wip · D4/C5 CUDA smoke passed（C5 2026-10-12）**：C5 原机两篇 smoke complete，average parity/六文件 hash PASS；完整 audit 待空卡，A4 未运行。新机制 control/消融/负控/power 另行准入 | C-38 完成 + 源码/manifest/evaluator/strong baseline 门 PASS；作者具体批准 C5 两项、仅空卡 | 完整命令/cwd/预期输出事前披露，真实输入覆盖与重放正确；不复跑已完成 smoke、不扩大授权 | 合同 `PHASE_recovery_validation_20261008.md`；执行源码 `61bc4df`，证据 `results/PHASE_R1.md` §25.38 |
 | **C-40** | **wip · D4 复算与裁决完成（2026-10-10），A4/C5 pending**：D4 linear 重现 frozen anchor，tanh5 退化；保留 linear 匹配控制，不推进五维头、不加 seeds/扫参。下一步仍是现有 A4/C5 冻结诊断 | 对应正式单 seed 产物或命名阻断 | 数字只写 results；如实报告升降，禁止按最终评测改同一合同或重开已封存实验；新 D4 信号另过准入 | `results/PHASE_R1.md` §25.37；实验源码 `61bc4df` |
-| **C-41** | **wip · 逐章新方法 R1 研究，当前仅 C5（2026-10-12 开工，10-13 续）**：FACT/ERE oracle 与固定 CPU 文本观测诊断均完成，直接硬规则不准入。下一步在 4090 原地 official-joint checkpoint 上用远端 CPU 做 smoke → 全量 antecedent scores 导出，必须精确重现冻结强锚 cluster；零 GPU、零训练、不搬权重。用于强控制缓存与后续信号/power；随后固定复用五个 train-only CPU 观测器的概率均值，核无标签 dev 的预测作用域及真实错误覆盖，接续固定连续半平方 L2 的 all/same-type 文档内对照；弱 observer 已停止；known type-agreement stronger control 已完成 parity/双端评分与配对审查，官方共指四指标提高（§25.42），非创新；下一步复用既有 profile 核该控制残余错误，以独立机制/功效准入为目标，不增加拟合。5090 原 decoder audit 继续等空卡；后续 C5 → D4 → A4 | 作者要求持续推进到可复核突破；已有 4090 CPU 资源与原地 checkpoint 可读。5090 两项诊断许可不扩大，单活动任务 | 当前 CPU 导出合同先冻结源码/模型/数据/候选与 parity；新方法仍需文献差异、部署输入、强对照、单变量消融/负控与 power 全闭合；任何诊断不替代主指标胜出。CPU parity 失败只否定这份缓存，不重绑旧锚 | `research/20261012_chapterwise_optimization.md`；`phases/PHASE_C5_official_cpu_cache_20261013.md`；`results/PHASE_R1.md` §25.39–§25.40 |
+| **C-41** | **wip · 逐章新方法 R1 研究，当前 C5（10-13 接续）**：official-joint 全量 CPU cache、given-type stronger control 的双端评分/配对审查及残余 profile 全部完成；四个共指指标提高，数字只见 §25.42，属于已知约束控制改进、非创新。当前弱 factuality 文本 observer 的部署/连续诊断未支持作用于真实错误，路径停止。下一步依据 stronger control 的两方向残余错误补最近邻正文/官方代码差异与输入审查，再闭合独立机制/目标 power/消融负控；不重跑已完成控制。5090 原 decoder audit 等空卡，后续 C5 → D4 → A4 | 作者委托科研裁决并要求持续推进至可复核突破；单活动任务，已授权原 5090 C5 audit 不扩大。新窗口按 HANDOFF 的 PI 角色与 §0.3.5 接续，任务身份不变 | 保留旧 frozen anchor，把给定类型控制列为 stronger alternative 并明确类型 policy；新方法须文献差异、可部署输入、同协议强对照、单变量消融/负控与目标 power 闭合后才生成训练合同。控制提分/候选失败不等于章节创新完成 | `HANDOFF.md` §0.3.5；`research/20261012_chapterwise_optimization.md`；`results/PHASE_R1.md` §25.40–§25.42；合同/配置只提供已完成产物身份，不覆盖重跑 |
 
 **2026-10-08 非 GPU 执行切片（C-37–C-39）**：先交付三个可证伪的诊断包：
 D4 marked-CLS 输入与训练配方固定，仅比较 linear / 五维 tanh head；

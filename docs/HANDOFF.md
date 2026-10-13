@@ -1,43 +1,55 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-13（+08:00，C-41 C5 持续推进）**：**科研改进与路线裁决由执行代理负责，作者只验收最终结果**。
-> 当前 **C-35/C-36 ✅ → C-37 诊断选择 ✅ → C-38 诊断实现 ✅ → C-39 D4 CUDA ✅ / A4+C5 pending →
-> G-22 D4 完成 / C5 smoke 完成、audit pending → C-40 D4 裁决完成 / A4+C5 pending**。
-> ESC 退出本轮硬前置，MAVEN 主表保持。
-> 不再等待作者选科研路线；旧失败结果不改写，单 seed 与有效性/资源边界保持。详见主表与 §0.3。
-> 本文是新窗口唯一必读入口；读完后再按本文链接打开所需文件，**不回溯聊天记录**。
-> 本文只记录**状态、决策、依赖、下一步**，**不复制实验表格——数字只认 [`results/`](results/README.md)**。
+> 更新于 **2026-10-13（+08:00，作者要求整理角色与连续推进交接）**。
+> 本文是新窗口唯一必读入口；按下面的角色、状态与接续步骤直接执行，不依赖聊天记录。
+> 科研改进与路线裁决已由作者委托执行代理，作者验收最终结果；角色不扩大现有资源授权。
+> 当前 **C-41 / T087 为 wip，持有 C5 切片**，后续 **D4 → A4**；唯一权威计划仍是
+> [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md) §4 主表。
+> **最新事实**：C5 原 official-joint CPU 全量分数缓存、给定类型控制与残余错误分析均已完成；
+> 同协议四个共指指标提高，属于已知约束的控制改进，**尚无新方法准入或创新突破**。
+> 当前弱 factuality 文本观测器路径停止，不调参挽救。数字、区间、hash 和限制只见
+> [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.42**。
+> D4 linear 恢复强控制、tanh5 退化（§25.37）；A4 仍无新效果结果；旧失败家族封存，E3 不追加实验。
+> 5090 原 C5 decoder smoke 已 complete，完整 audit 已授权但仍待空卡；无遗留自动启动 watcher。
+> 本轮新 CPU 控制与该原 decoder audit 是两份合同，不能把其中一项完成记成另一项完成。
 >
-> **最新结论**：D4 head 诊断已收口，linear 精确重现强对照，tanh5 退化，**本轮没有提分**。
-> 代理决定保留 linear 匹配控制、不推进当前五维头；完整数字、配对区间和边界只见
-> [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.37**。C5 原机 checkpoint smoke 已通过，
-> 完整 decoder audit 尚未执行；A4 仍只有 CPU 就绪证据，三个方法章均无新提分结果。
-> **旧机制历史**：D4 cue/factor/causal-residual 与旧 C5 家族仍封存，A4 旧周期仍失败，E3 第一轮已收口。
-> 新机制研究仍可按 10-08 委托回 R1 准入；**旧家族关闭不等于三个方法章的改进任务完成**。
-> 旧 D4 oracle/EFD 归因见结果 §25.21–§25.27，§0.3a 等旧队列仅供追溯。
-> **10-12 后续方向**：作者已要求逐章执行，顺序 **C5 → D4 → A4**；主表 **C-41 为 wip，当前 C5**。
-> 旧机制停止续修，控制恢复、信号验证与方法贡献分开验收；待授权 GPU 不阻断文献/CPU 研究。
-> C5 两项 CPU 审查完成：DATE 词面硬否决停止，直接 predicted-BEFORE cannot-link 不准入；
-> 证据只见结果 §25.38。作者已具体授权 C5 原机 smoke/audit，仅空卡执行；首试被 occupancy 门拦下，
-> 重新空卡后的 smoke 已 complete，average parity 与六份产物 hash 通过；完整 audit 待空卡。
-> 有界等待已结束，没有留下自动启动 watcher；接续只需核空卡并执行已授权 audit，不重复询问。
-> 当前没有已通过准入的新方法，仍无章节提分结果。
-> **持续目标（作者追加）**：继续研究至可复核突破，空卡等待不结束 C-41。FACT/ERE train
-> 事实性信号审查已完成，直接 label-equality 规则不准入；预测来源审查发现旧 D4 OOF 不能直接
-> 作新 C5 consumer 输入。仅 C5 train 的 CPU 观测诊断已完成，覆盖低且稀有类别弱；
-> 噪声兼容性仍待可行性与强控制缓存，证据 §25.39。
-> 持续核卡中的 watcher 状态以实时进程为准；已获 C5 audit 授权保持，不扩为新 GPU 训练。
-> **10-13 CPU 续进**：4090 原地 official-joint 的完整 CPU scores 已通过 exact cluster parity，
-> 重放预测与 frozen anchor byte-identical；证据 §25.40。弱 train-only 文本观测器的部署错误覆盖
-> 与连续概率诊断均完成，当前 observer 路径停止、不调参（§25.41）。
-> known type-agreement stronger control 已通过固定 CPU 重放/双端评分与配对审查，四个共指指标
-> 都提高；这是可复核的控制改进，仍不是新方法创新。其残余错误 profile 已完成，证据 §25.42。
-> 下一步依据 stronger control 的两方向错误重新闭合独立机制、部署输入和目标 power。
-> CUDA 隐藏、权重留原机，5090 原 audit 仍待空卡，无遗留 watcher；仍无新方法过门或突破结论。
->
-> **最短读法**：首表 → **§0.3（当前队列）** → 需要哪章再看 §0.4 的对应小节。
-> §0.5–§0.7 是已裁定的决策与纪律，开工前扫一眼。
-> **文末附录是历史过程记录，新窗口不需要读**，只在要查「当时为什么这么判」时按标题定位。
+> **最短读法**：新窗口角色 → 当前阶段表 → **§0.1–§0.3** → **§0.3.5 接续步骤与资产**。
+> §0.4 以后按需读；历史候选、旧队列和旧功效证据不得覆盖当前主表与最新实测。
+
+## 新窗口角色：事件语义与知识图谱方向的科研负责人（PI）
+
+**你的职责是把可复核的指标改进发展为有证据的独立方法贡献。** 同时承担方法审稿与实验执行责任：
+先提出可证伪设计，再从审稿人的视角找竞争解释、输入泄漏和最近邻重合，最后执行通过准入的实验。
+这是同一代理的顺序自审，不是独立同行评审；本交接不新增子代理或并行代理任务。
+
+| 工作职责 | 必须交付的判断与证据 |
+|---|---|
+| 研究负责人 | 从强控制的真实残余错误选择干预点；先写科研价值/数据、协议、代码、算力与授权可行性，指出对应主表与门。科研路线不可行时自行记录一手证据、先改主表，再选现有 MAVEN 任务内的替代；不反复交作者选题 |
+| 方法审稿人 | 核最近邻的正文公式、训练目标、推理流程与官方实现；明确我们的实质差异和最强竞争解释。任务/split 不同限制数字比较，不能抹去机制先行性；找不到代码不等于方法不存在 |
+| 实验负责人 | 复用可运行公开实现，透明记录适配；在方法结果前冻结协议、输入、强对照与合同。准入后做单 seed 的完整实现、消融、负控、护栏和独立复算；工具/SSH 失败与科研负结果分开 |
+| 项目维护者 | 完成一项就落地证据、回填 results/主表/TASKS/TODO/交接，按逻辑单元 commit + push；接续窗口能反查源码、配置、checkpoint 与产物位置 |
+
+**创新性与提分分开验收**：恢复 baseline、加入已有类型规则、辅助指标变好，都不能算新方法贡献。
+新机制要说明改变了哪个监督、训练目标、推理假设或可识别机制，为什么最近方法未覆盖该差异，
+并由同协议强对照、单变量消融/负控与错误分析支持。C5 的给定类型控制应作为 stronger alternative，
+保留原 frozen anchor，明确各臂的 task-given 类型输入与 constraint policy；不能只胜旧弱控制。
+目标 power 仍须按现行 R1 要求闭合；统计通过、skills 校验或代码可运行不替代方法价值。
+
+**推进方式**：作者要求逐章把指标和创新性做实，并持续追求可复核突破。一个候选失败只停止该候选，
+空卡等待不结束研究队列；继续做可独立推进的文献、输入、CPU 信号或缓存工作。
+每次接手应产生可审查的证据/实现/明确路线裁决，不能只给方向清单或把准备完成当项目完成。
+科研结论可以为负，不能为满足“突破”编造正结果，也不能以更弱对手、扫参或更大 backbone 绕过失败。
+既有方法家族不复活，当前控制改进也不完成 C5；按主表和 Gate 规则推进 C5 → D4 → A4。
+
+**授权沿用，资源边界保持**：作者已委托科研选择与在范围内的实现、提交/推送，无需逐项问选题。
+本地仅轻量 CPU；4090 空卡且本地门通过可自用，远端 GPU 启动前仍须披露命令/cwd/预期输出。
+5090 已授权的范围仅原 C5 smoke → audit，smoke 不复跑，audit 重新核空卡后执行，不重复问同一授权。
+A4 的 5090 任务、其他新 5090 任务、额外 seeds 与跨机 checkpoint 搬运未授权。
+final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与数据/ID 闸门保持；不改论文结构、不开展论文/专利写作。
+
+**本次交接整理自审**：科研价值是让新窗口从最新 stronger control 与正确授权出发，避免重复已完成
+实验、误报创新或复活失败路线，证据锚在 R1 §25.37–§25.42。可行性是文档与已有资产的本地核查，
+本次不启动实验、不选择新机制、不扩大授权；仅纠正状态与明确原 C-41 的接续动作。
 
 ## ▶ 当前阶段（新窗口先看这张表）
 
@@ -73,14 +85,16 @@
 
 ## 0. 接手后先做什么
 
-### 0.1 只读检查（三条，全过才开工）
+### 0.1 开工核查（不修改已有实验产物）
 
 ```bash
 cd /home/tjk/myProjects/masterProjects/ekg
+git fetch origin                    # 先刷新远端事实；网络失败先处理，不把缓存当最新状态
 git status -sb                      # 期望：main 与 origin/main 同步、工作树干净
 git log -3 --oneline --decorate
+test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
 uv run python scripts/audit_r1_consistency.py \
-  --output runs/stages/R1/r1-v61-20260904/audit/cross_artifact_audit.json
+  --output /tmp/ekg-r1-handoff-consistency.json
                                     # 期望：PASS: 36 requirements mapped
 ```
 
@@ -90,7 +104,8 @@ uv run python scripts/audit_r1_consistency.py \
 所有 torch 用例都是 `skip`。动到 torch 相关代码，推之前先 ssh 到有卡的机器跑一次对应测试文件。
 
 > **2026-09-18 之后的新窗口**：这一天的五件**已全部做完，不必重做**，清单见 §0.3 末尾那张表。
-> 最要紧的是**别重开 C5**——它的两个有效周期都用掉了，家族已按契约 `:119` 封存。
+> **别重开旧 C5 role 家族**——它的两个有效周期都用掉了，家族已按契约 `:119` 封存。
+> 当前 C-41 的实质不同新家族研究仍活动，不把封存误读成整个身份章取消。
 > **当前状态与唯一队首见 §0.3。**
 
 ### 0.2 按顺序读这四份（够了，不要重读整个仓库）
@@ -104,24 +119,29 @@ uv run python scripts/audit_r1_consistency.py \
    是数据 / 协议 / 代码 / 算力 / 授权哪一条；科研替代按 10-08 委托由代理裁决。
 
 按需再读：对应章节的 `phases/PHASE_*.md` 契约、`results/PHASE_*.md`（数字唯一权威）。
+科研 skills 按 [`RESEARCH_SKILLS.md`](RESEARCH_SKILLS.md) 与具体任务加载：文献/机制审查用
+`r1-literature-research`、假设与竞争解释用 `hypothesis-generation`/`scientific-critical-thinking`，
+代码问题用调试/TDD/完成前验证；已安装，不重复安装，技能结构校验不算科研结论。
 
 ### 0.3 当前队列：**受约束自驱动研究（单 seed）**
 
-**10-12 追加指令**：作者要求后续逐章把指标和创新性做实，当前代理持有 **C-41 C5 切片**。
-先核控制、审查新信号，再准入单 seed 方法合同，后续研究顺序 D4 → A4；论文结构未改。
-科研价值：对准表 5-3 的官方 MUC 与其他共指护栏，隔离目标/解码差异并检验新信号能否修复身份错误。
-证据锚在 `results/PHASE_C.md` 两个周期及 `results/PHASE_R1.md` §25.34–§25.35。
-可行性：文献、训练集内信号与既有产物可在 CPU 核查；原 checkpoint C5 CUDA 诊断已获具体授权、待空卡，
-时间预测覆盖/无泄漏身份与新机制准入尚待实测，不能预先称可运行或有效。研究卡及运行证据见 §25.38。
-作者随后要求持续推进至突破证据；当前还没有突破。独立 FACT/ERE train oracle 审查完成，
-软 realis 一致性已有 NAACL 2021 先行机制，不能冒称新颖；下一待证假设是噪声下非对角兼容性。
-仅 C5 train 的 CPU 文本观测诊断已有完整 OOF 与观测差异计数，不能替代 D4/C5 新方法准入。
-旧 D4 OOF consumer 范围不隔离，本地小范围 CLS cache 与全量 OOF 也不等价；不能直接接入。
-数字、hash 和 source 边界只见 `results/PHASE_R1.md` §25.39。
-10-13 接续已将 strongest official-joint 原地 CPU cache 与 known type-agreement control 完成，
-当前弱文本 observer 路径因部署覆盖/连续几何不支持而停止。控制的四指标改善与残余画像只见
-§25.40–§25.42；不是方法创新或章节 PASS。下一机制须解释 stronger control 的两方向残余错误，
-补齐文献差异/部署输入/目标 power，不把 masked-trigger 或旧 role residual 换名复活。
+**当前唯一研究队首是 C-41 / T087 的 C5 切片，尚未准入 proposed method。**
+科研价值：对准表 5-3 的官方 MUC 与其他共指护栏，从 stronger control 的真实剩余错误选择独立机制；
+不能继续把原 baseline 欠额或已知类型规则收益当新机制收益。
+可行性：原 official-joint checkpoint 的全量 CPU scores、给定类型控制、独立评分、配对 counts 与
+残余 profile 均已落地（§25.40–§25.42），可以在 CPU 继续机制/输入审查，不以 5090 等卡作硬前置。
+C5 的后续章序为 D4 → A4，E3 保持封存成果；论文结构不改。
+
+已完成且不重跑：两项时间代理诊断（§25.38）、train factuality oracle/来源审查（§25.39）、
+强锚 CPU cache（§25.40）、弱 observer 的部署/连续诊断（§25.41）、给定类型控制及残余 profile（§25.42）。
+当前弱 observer 路径停止，不扫 C/class weight/ngrams、换距离或复用旧 D4 OOF 救它。
+旧 D4 OOF 虽有文档级 OOF，但不满足新 C5 consumer 的 evaluation 隔离，不能直接接为新方法训练输入。
+噪声兼容性是未准入假设；此 observer 的负证据不等于所有 factuality 方法无效，也不等于该假设已可行。
+
+下一步按 **§0.3.5** 做正文/官方实现的最近邻差异审查及输入可行性检查，再形成设计 brief/power/合同。
+历史 C-13–C-21 的候选、pair pools 与 power 属于其原 unit，不能直接迁移为 stronger control 上的新准入。
+历史高相似误合并画像不是 lexical bias 的因果证明；剩余漏合并与误合并都须有机制解释。
+原 5090 decoder audit 仍 pending、已有具体授权；它只隔离同分数解码，不验证新方法贡献。
 
 **2026-10-08 作者明确委托科研裁决**：执行代理查清三个方法章为什么失败，检索论文/官方实现与科研 skills，
 完成有证据的改进实验，并自己选择后续路线；作者验收最终结果。当前主表新增 C-35–C-40/G-22。
@@ -132,7 +152,7 @@ uv run python scripts/audit_r1_consistency.py \
 #### 0.3.1 本轮结论与尚未完成的部分
 
 **交接整理自审**：价值是让下一代理依据正确状态继续强对照与根因验证，防止把诊断完成当成提分、
-把旧授权当成当前资源许可；证据锚在结果 §25.35–§25.37。可行性是本地核对文档、冻结配置与已有
+把旧授权当成当前资源许可；证据锚在结果 §25.35–§25.42。可行性是本地核对文档、冻结配置与已有
 证据即可，不需要模型计算。此次只整理交接，不新增实验或改变主表顺序。
 
 | 范围 | 已完成 | 下一步 / 不得越过的边界 |
@@ -141,9 +161,11 @@ uv run python scripts/audit_r1_consistency.py \
 | D4 C-39 / G-22 / C-40 | 两个 CUDA smoke、两头各五折、冻结配对汇总与独立 raw-label 复算完成 | linear 精确重现 anchor，tanh5 退化；本方案不推进，结果 §25.37。不能重发十折或覆盖 collector 输出 |
 | A4 C-39 / G-22 / C-40 | CPU 接口/资产/默认预检通过；真实 checkpoint CUDA smoke/audit **尚未运行** | train-only loss/共享梯度诊断，零 optimizer step；局部梯度不等于历史 Adam 轨迹或 F1 原因 |
 | C5 C-39 / G-22 / C-40 | CPU 训练/导出/重放、资产预检通过；真实 checkpoint CUDA smoke **complete**，完整 audit 待空卡 | 同 pair scores 的 decoder 对照；smoke average parity 已通过，完整全集仍须通过；不是旧 role 家族第三周期 |
+| C-41 / T087 C5 | official-joint CPU cache、给定类型控制、独立评分/配对 counts 与残余 profile 完成；当前弱 observer 路径停止 | §25.40–§25.42；下一步新机制/输入/功效准入，不能把控制提分当创新完成；与上一行的原 decoder audit 分开 |
 
-**整个 T085/T086 仍是 wip**，仅 D4 切片完成。C5 有真实 checkpoint smoke，
-尚无完整诊断指标；A4 没有新结果，也没有任何“三章已改善”的结论。
+**整个 T085/T086 仍是 wip**，仅 D4 切片完成。原 C5 role checkpoint decoder 诊断仅 smoke 完成，
+完整 audit 未运行；这不否认另一个 official-joint CPU 控制已提分。A4 没有新效果结果，
+也没有任何“三章已形成新方法贡献”的结论。
 新 D4 信号须回 C-37 证明机制差异、可部署输入、强对照、power/消融/负控；
 后续匹配控制使用 linear，不将恢复 baseline 当创新，不扫参挽救同一轮负结果。
 
@@ -154,7 +176,9 @@ uv run python scripts/audit_r1_consistency.py \
 SHA `174214301d2cd3906c61ae3582de43931ebcbcd2b1f85b1e1b59b6da03f11bbf`。
 代码实现 release `2a4f60b`，D4 与 C5 decoder 实验 commit `61bc4df`；10-12 的 `0c74bdb`
 只新增两项 CPU 信号审查入口，不改变冻结 GPU plan 的代码集合；其后提交更新研究/交接文档，
-不要把文档提交误当新训练版本。当前本地 HEAD 以 §0.1 自查，不在本文维护易过期的 HEAD 副本。
+10-13 另有 CPU cache/观测/类型控制代码与统计修复，其运行版本见结果 §25.39–§25.42。
+新 CPU 控制与旧 `61bc4df` GPU 诊断须分别按合同核 hash，不把新代码/文档提交误当旧训练版本。
+当前本地 HEAD 以 §0.1 自查，不在本文维护易过期的 HEAD 副本。
 
 | 内容 | 机器 / 路径 | 权威入口 |
 |---|---|---|
@@ -169,7 +193,7 @@ SHA `174214301d2cd3906c61ae3582de43931ebcbcd2b1f85b1e1b59b6da03f11bbf`。
 代码走 Git，数据/产物走 scp/rsync，checkpoint 留原机器；跨机搬运须先取得具体授权。
 未授权搬运不是科学路线失败。
 
-#### 0.3.3 下一代理的接续步骤（A4/C5）
+#### 0.3.3 原 A4/C5 冻结 GPU 诊断的接续（研究队首另见 §0.3.5）
 
 1. 按 §0.1 / §E.0 对齐 `main`、`origin/main` 与活动任务所有权；读取主表 C-39/G-22/C-40、
    冻结合同和结果 §25.35–§25.37。旧 C-23–C-34 不作为当前队首。
@@ -209,8 +233,8 @@ cd /mnt/aidata/tongjiakai/ekg
 
 **作者意图**：本次要求把逐章目标、所用方法、实际结果和后续判断写入交接，指出旧方法长期没有
 进展，后续可能需要研究新方法。**代理裁决**：旧机制缺少继续投入的证据；保留有明确问题的有限
-诊断，为实质不同的新方法建立可靠控制。本次只改文档，主表 C-41 为 planned，尚未开展新检索、
-选择新机制或启动实验；10-08 的科研裁决委托持续有效，不能把本次记录当新 GPU 授权。
+诊断，为实质不同的新方法建立可靠控制。以下是 10-12 的立项背景，原 planned 状态已由
+当前 C-41 wip 覆盖；最新控制与裁决见 §0.3/§0.3.5，10-08 委托仍有效，不扩大 GPU 授权。
 
 **开工自审**：科研价值是让后继工作对准 §7 的方法主表与准入门，避免把基线恢复、失败解释和
 审计完成当成提分，或继续引用已被后续结果推翻的乐观推演。证据是 D4 两个旧家族、A4 正式四臂、
@@ -230,7 +254,8 @@ C5 两个有效周期、E3 论断边界以及 R1 §25.34–§25.37。可行性�
 
 **三层验收不能合并**：① 强基线恢复，只证明控制可靠；② 新信号验证，证明推理可得信息确实
 区分目标错误，并有竞争解释/负控；③ 新方法主指标超过强对照、消融支持机制且护栏不破，才讨论
-方法贡献与后续确认。当前 D4 完成的是第一层，A4/C5 仍在核控制差异；三个方法章没有新的提分结论。
+方法贡献与后续确认。当前 D4 完成控制恢复；C5 已有同协议 known type-agreement 控制提分，
+A4 仍待诊断。三个方法章均未形成新方法贡献，不能用旧“没有任何提分”描述覆盖 C5 最新控制。
 
 **剩余诊断有界**：A4/C5 仅运行现有合同的 smoke → audit，按 §0.3.3 的授权、hash 和输出边界
 保存结果或命名阻断。不增加 loss 权重、阈值、epoch、sampler 扫描，不自动追加旧家族训练周期。
@@ -242,6 +267,86 @@ C5 两个有效周期、E3 论断边界以及 R1 §25.34–§25.37。可行性�
 负控、power 与止损。**原论文 split 不同意味着数字不能直接横比，不自动意味着机制不能借鉴**：
 复现外部对手与研发本项目新方法分开处理，透明适配记录差异；不重写未发布系统冒充复现，不自行
 引入新语料/标注或改变冻结评测。尚未核实有一个候选能过门，不预先指定赢家或承诺达到目标分数。
+
+#### 0.3.5 新窗口直接执行：先闭合 C5 新机制，不重跑已完成控制
+
+**首个动作**：完成 §0.1/§E.0 后，读 R1 **§25.40–§25.42** 和研究卡的 **10-13 stronger control**
+部分，从已完成的 residual profile 建立“待修错误 → 假设 → 最近邻 → 输入 → 区分性实验”的映射。
+当前需要新机制的准入证据，而不是重跑 cache/type control、修改弱 observer 或重复写总体规划。
+
+1. **核资产与作用域**：按下面表定位完整 cache、类型控制、配对 counts/误差画像及出处，核 SHA；
+   JSON 不在 Git，缺副本就从记录的 4090 路径取非权重文件并双端核 hash。不要搬 checkpoint。
+2. **补最近邻机制审查**：承接研究卡已定位的 RCA（NAACL 2024）、ACCI（preprint 2025/正式正文）、
+   Lu & Ng（NAACL 2021）及 CohTP（ACL 2026），按当前日期补检索。
+   RCA 的正文/生成数据/官方代码与 MAVEN 内适配条件尚需闭合；ACCI 的已知代码障碍不能变成
+   “没做过该机制”的新颖性依据。类型/realis penalty、trigger masking、普通 counterfactual augmentation
+   或 temporal hard partition 本身均不足以构成新差异；不预先认定这组邻居穷尽前沿。
+3. **裁决候选与竞争解释**：选可真正运行、区别于封存家族和最近邻的干预，说明怎样分别影响
+   高相似误合并与低相似漏合并；两方向都报告，可明确目标方向与另一方向护栏。
+   只有相关错误画像不能证明因果解释。用正文/代码/数据或固定 CPU 检验裁决，不向作者交选题菜单。
+4. **先写可审查设计 brief**：在研究卡/结果页登记两问、最近邻差异、预测输入来源、强对照、
+   单变量消融、负控、可证伪预测、目标 power 与停止条件；路线变化先改主表。
+   旧 D4 OOF、旧 pair pools/功效或已探索 dev 不得充当无泄漏/确认性证据。
+5. **准入后才实现并执行新方法**：按既有工具链、TDD/完整本地门、远端真实对应测试、
+   manifest/candidates/evaluator/baseline 闸门，冻结新合同与独立 namespace 后跑 seed 13。
+   留存旧锚并与 known type-agreement stronger control 比较，类型 policy 的差异须可识别。
+   主指标未胜出或消融/负控不支持时记录负结果，按证据继续研究；不虚报创新。
+6. **持续回填**：用实际产物更新主表/TASKS/TODO/本文，实验数字只写 results，commit + push。
+   C5 的贡献门尚未过，不能把本次控制改进当章完成后直接宣布 D4/A4 都已推进。
+
+**已落地资产（均属活动 C-41 的既有证据）**：
+
+| 资产 | 本地路径（项目根下） | 原机 / 备份与用途 |
+|---|---|---|
+| official-joint 完整 scores、重放 prediction、metadata/status、独立 metrics | `runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/` | 4090 `/data/TJK/ekg/` 同相对路径；原 scorer/decoder 控制，身份/命令/hash 见 R1 §25.40；已完成，不执行 exporter 覆盖它 |
+| 给定类型控制、双端 metrics、changes、paired_counts/comparison、residual_profile | `runs/stages/R1/r1-v63-c5-20261013/type_control/` | 4090 同相对路径；新机制的 stronger alternative 与错误源，见 §25.42；类型控制是已知规则、exploratory、单 seed，旧锚未重绑 |
+| 上述两包的 SHA manifests | `runs/stages/R1/r1-v63-c5-20261013/artifact_hashes.json` 与 `type_control/artifact_hashes.json` | 4090 同相对路径；包含旧 cache/观测证据及类型控制包的非权重文件；manifest 身份见 §25.42 |
+| train-only factuality 观测器、OOF 与 provenance | `runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/` | 五个 `model.joblib` **仅本地**；这条弱 observer 路径已停止。其 OOF 属 train，不是 consumer dev，见 §25.39 |
+| dev 文本观测与覆盖/连续诊断 | `runs/stages/R1/r1-v63-c5-20261013/deployed_observation/`、`observation_overlap/`、`observation_geometry-r2/` | 非权重 JSON 已备份 4090；停止依据见 §25.41，不能当 proposed coreference predictions |
+| 原 official-joint neural checkpoint / utility | 路径只认 `configs/c5_official_cpu_cache_20261013.json` | **原地 4090**；不下载到本地/5090，不重训/改 checkpoint；类型控制配置见 `configs/c5_typed_control_20261013.json` |
+| 原 C5 role checkpoint / decoder audit 输入 | 路径只认 `configs/recovery_validation_20261008.json` 的 C5 jobs | **原地 5090**；与上述 official-joint CPU 控制不同，smoke 已完成，audit 待空卡且已有具体授权；冻结源码身份见 §0.3.2 |
+
+新窗口可先只读核这两份 manifest；读取 report 的数值只在其既定 internal-dev/train 作用域内，
+不访问 final-valid，不重新运行完成的导出或评分：
+
+```bash
+uv run python - <<'PY_VERIFY'
+import hashlib
+import json
+from pathlib import Path
+
+root = Path('runs/stages/R1/r1-v63-c5-20261013')
+packages = {
+    root: '14df267d3463394e6c9e34ccc392cbdacd6d73020daff2bb9079856255c17ee0',
+    root / 'type_control': '9ab77f80cba6576610ab3bf102914f31c1dec1dc756e8ae00bd95e6e8418a7ed',
+}
+for package, manifest_sha in packages.items():
+    manifest = package / 'artifact_hashes.json'
+    assert hashlib.sha256(manifest.read_bytes()).hexdigest() == manifest_sha
+    entries = json.loads(manifest.read_text())
+    assert entries, f'empty manifest: {manifest}'
+    for relative, expected in entries.items():
+        path = package / relative
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        assert actual == expected, f'artifact drift: {path}'
+print('PASS: C-41 nonweight artifact manifests')
+PY_VERIFY
+```
+
+**并行于等待的原 GPU 诊断**：C5 audit 沿用 §0.3.3 的具体授权，先成功 SSH 核空卡、核原 smoke
+status/manifest 与输出不存在，再用冻结 launcher（cwd `/mnt/aidata/tongjiakai/ekg`）：
+启动前披露原机 cwd/完整命令/预期产物，按 runbook 落日志：
+
+```bash
+cd /mnt/aidata/tongjiakai/ekg
+.venv/bin/python -u scripts/launch_recovery_validation.py \
+  --plan configs/recovery_validation_20261008.json --job c5-decoder-audit --execute --gpu 0
+```
+
+此处只是接续命令，没有宣称作业已运行；本轮交接不启动它。SSH 失败是 UNKNOWN，不能判 GONE；
+卡被占就继续上面 C-41 的独立研究。5090 保留冻结诊断 snapshot，不因 4090 新控制部署而盲目覆盖它。
+
+#### 0.3.6 已收口历史背景（不作为当前队首）
 
 以下 C-23–C-34 是历史已完成队列；其中“等待作者范围选择”已被上述委托取代。
 
