@@ -268,8 +268,9 @@ author delegation releases a new in-scope research queue; it does not reopen old
   null-head control completed with negative independently reproduced metrics (§25.45), with matched arms,
   fixed seed 13/epoch 10 and no updates to the original encoder/scorer. It is a known-mechanism
   control, not an admitted novelty claim; stop it without a parameter rescue. Joint-connectivity
-  algebra is verified but not admitted (§25.46). Execute the fixed zero-training forest posterior
-  control (§25.47), independently score exact/product/ancestry-shuffle against strongest type-control.
+  algebra is verified but not admitted (§25.46). The fixed forest posterior control finished without useful gain or supported attribution (§25.47);
+  stop its action. Execute the sealed-head decision-unit audit (§25.48), with exact old-prediction
+  parity, zero training and a fixed class rule; independent scores decide, no novelty claim.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

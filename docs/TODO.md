@@ -3,7 +3,7 @@
 > 更新于 **2026-10-13**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
-**本次接续（作者要求实际结果）**：固定双向与 frozen-null 三臂都已完成，独立官方评分未胜 strongest type-control，路线停止（§25.44–§25.45）。数学候选已验证 shared-ancestry joint 与 root product 的差异（§25.46），当前冻结零训练 forest posterior-score 控制：exact/root-product/ancestry-shuffle 与原 dummy/类型 policy/decoder 成对（§25.47）。仍无 breakthrough 或新方法准入；不把数学验证或负控下降当创新完成。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null 三臂与 forest posterior-score 已完成并独立复算（§25.44–§25.47），没有突破；固定动作均停止、不扫参。当前执行同一三 head 的 decision-unit 单变量审查（§25.48）：权重/scaler/输入/real ranking 冻结，先 exact 重放旧预测，再按 BCE 二类 z>0 决定是否链接。不是新训练、普通 anaphoricity routing 不称创新，旧负结果不改写。
 
 ## 当前正式活动阶段
 

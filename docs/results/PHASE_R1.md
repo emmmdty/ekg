@@ -4076,3 +4076,63 @@ ruff 0、CPU smoke OK、R1 consistency 36 PASS；4090 真实 Torch/decoder 用�
 配置 SHA **5627d15feedcb2472401ca79e5e1473b9cdfbb1e27b5c9cdc728be5062ce3a00**。
 远端验证包最初把 tar 生成与 scp 错误并发，scp 因本地包尚不存在而失败；
 确认包已经生成后顺序重发成功，未执行失败包或改模型/指标。
+
+#### §25.47 全量实际结果与停止裁决
+
+运行 commit **0d1dedb**，PID **2095238**；原机已 complete/GONE，**291 docs**。
+原 typed cache 与合法重归一化 parent 的两套 baseline decoder 全量 exact parity；
+实际四共指指标原机/本地独立评分逐项 exact，全部关系字段不变。
+
+| 实际预测控制 | MUC F1 (%) | B³ F1 (%) | CEAFe F1 (%) | BLANC F1 (%) |
+|---|---:|---:|---:|---:|
+| strongest type-control | 82.6689774697 | 98.2724739302 | 97.9410105769 | 91.1163290123 |
+| joint | 82.6989619377 | 98.2697702060 | 97.9425594212 | 91.0721982103 |
+| root_product | 82.7705627706 | 98.2819649400 | 97.9468525338 | 91.2964200003 |
+| ancestry_shuffle | 82.0779220779 | 98.1874285426 | 97.9189345320 | 90.3384843920 |
+
+2,000 document bootstrap / RNG13 相对 strongest control：
+- joint：ΔMUC **0.0299844680** 个百分点，95% CI **[-0.2065996331871432, 0.29295555332676226]**，仅改变 **2** docs，spurious/missing **105/95**。
+- root_product：ΔMUC **0.1015853009** 个百分点，95% CI **[-0.14898012933870924, 0.41719054837506914]**，仅改变 **3** docs，spurious/missing **104/95**。
+- ancestry_shuffle：ΔMUC **-0.5910553917** 个百分点，95% CI **[-1.3115275159444306, 0.03638853743744515]**，仅改变 **7** docs，spurious/missing **108/99**。
+
+joint−product **−0.0716008328**，CI **[−0.2257481064,0]**；
+joint−shuffle **0.6210398598**，CI **[0,1.3685272129]**。
+exact joint 的主指标只有极小漂移、没有胜 product，且 B³/CEAFe/BLANC 有护栏下降；
+**停止此固定 posterior-score 部署动作，不扫 cluster linkage/temperature/null rule。**
+root-product 的微小变化也不能宣称突破，不能用负控变差充当正效应。
+数学联合依赖仍与 product 有区别，但本次 frozen score/argmax 的动作证据不能支撑创新贡献；
+它不验证未来学习目标，也不自动准入该目标训练。
+
+非权重回传 tar SHA **fb59bb1b8be47fe4ca0e71ff7a7075603bee65b7a0579f581d63244225c8cf5b**
+双端一致；stage 与 independent/ 的完整来源/argv/paired doc counts 已落地。
+
+§25.45 null 控制最终 **29** 项非权重 manifest SHA
+**74492012ebf220b725419495289b29a3418057d0378ac19275a987a0484edf59**；
+§25.46 数学/固定源码快照 **7** 项 manifest SHA
+**fad82e235b7af5a24bc72547b393204f8706a5711dafa6231d0ad98789e51738**。
+备份 tar SHA **8e1823cb9995349e7129d87e5c988adb91be5e4108904e83b22851a1b23a0487**，
+4090逐文件比对/补齐与 SHA核验全部PASS，既有文件只读相等不改写；缓存npz/heads未搬运。
+
+### 25.48 C-41：固定 head 的 decision-unit 单变量审查预登记
+
+科研价值：表5-3；§25.45 的 BCE target 是存在合法 gold 前件的 class，但原 decoder 在
+每个 real candidate 与 dummy 间 argmax。设 rmax 为 real 内最高条件概率，该决策要求
+q>1/(1+rmax)，而 BCE class 的对称0–1决策要求 q>0.5。候选数/entropy 可以让二者
+不同；检验这个具体区别能否解释之前的漏合并，不能先断言原负结果是“待修bug”。
+可行性：三臂 final-epoch head 与 scaler、dev features、原 raw logits/status 完整留4090；
+只做原机 CPU replay，不新增训练、epoch、seed、数据/observer或 checkpoint 搬运。
+
+原 frozen-null 的训练与原 action 已停止、其负结果不改写。本新审查先从同 head/scaler
+精确重放原完整预测，再生成单变量 class 决策 counterfactual：有合法前项且 z>0 时链接
+原最高 raw-score 前项，否则 dummy；z=0固定dummy。阈值0来自该 BCE 二类决策，
+不是扫参或选过 dev 的值。三臂都执行，不挑最好档；全部 weights/input/type/ranking/
+关系字段不变，官方 decoder只执行这个固定动作。未超过 strongest control/护栏时
+停止该 action；无论升降都是新作用域结果，不回写§25.45。ordinary anaphoricity routing
+本身已知，不能声称创新或替代 proposed-method novelty/power。独占输出
+`null_decision_unit_audit/`，只以真实独立评分交付。
+
+Decision-unit 审查 TDD **7 failed（入口未实现）→7 passed/1 Torch skip**，
+完整本地 **885 passed/49 skipped、ruff0、CPU smoke OK**；4090真实 roundtrip/head/scaler
+用例 **8 passed in2.47s**。新配置 SHA
+**19e7c7a3fbd74206c7216b4de8d11dc9cdfd24542636ff8778847b01efc575d9**。
+这里尚无新动作评分，原三臂权重/old argmax负结果不修改。
