@@ -1,0 +1,27 @@
+{
+  "candidate_digest": "15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910",
+  "constraint": "given_type_equality",
+  "control_only": true,
+  "cpu_threads": 4,
+  "entrypoint_sha256": "2b01662ae945c07a0717a31d98842a0d8dde58992f4add2a6b3d50dc0a7a273e",
+  "final_valid_accessed": false,
+  "input": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl",
+  "input_sha256": {
+    "data/protocols/v6/manifests/maven_ere_internal-dev.json": "f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f",
+    "docs/phases/PHASE_C5_typed_control_20261013.md": "6e3fdec07b186ad8185f1432c55a043b9d0c728e1fddf88776d8ba47bc1f1a90",
+    "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/src/utils.py": "c1b49911366ec505ba52405ac1f210274a50b723d9dd62664fa966ecd2f2fd61",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl": "c358da8b04bdeca9477bd26a1a7fa325b634ea62a488b85b28119be8cce2a891",
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/metadata.json": "d85a23b9fe6683aba43644a225d4c6bbbe45c59ff7cc46609b7c426095c521a3",
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/predictions.jsonl": "66ff04bac5a11ab179ef50eeca51d56dbb613b7b04eaa04b749dd99ea82ffc42",
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/scores.jsonl": "b9b119a41c575427cab721ed3762a5502250a08ed5b6da2fe8651f9121a73cd7",
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/status.json": "ff0fae6c550375b24e02e0a43a792ba8783c31dd20780dbdff403bcda4b44c55",
+    "scripts/export_official_coref_cpu.py": "503dcf0bbbc97b05c84f309f348abfc38a0e54208b63418201aa935efbe9ae59"
+  },
+  "manifest": "data/protocols/v6/manifests/maven_ere_internal-dev.json",
+  "original_predictions": "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/predictions.jsonl",
+  "output": "runs/stages/R1/r1-v63-c5-20261013/type_control",
+  "schema_version": "ekg.c5_typed_control.v1",
+  "scores": "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/scores.jsonl",
+  "seed": 13,
+  "utility": "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/src/utils.py"
+}
