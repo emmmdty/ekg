@@ -4136,3 +4136,120 @@ Decision-unit 审查 TDD **7 failed（入口未实现）→7 passed/1 Torch skip
 用例 **8 passed in2.47s**。新配置 SHA
 **19e7c7a3fbd74206c7216b4de8d11dc9cdfd24542636ff8778847b01efc575d9**。
 这里尚无新动作评分，原三臂权重/old argmax负结果不修改。
+
+#### §25.48 实际结果与单变量否决
+
+运行 commit **98537fd**，PID **2104964**；**291 docs** complete。
+三臂权重/scaler 重载后的旧预测全量 exact parity，零optimizer。四共指指标双端独立
+official scorer 逐项精确一致；全 relation 字段不变，final-valid 未读取。
+
+| 固定 class action | MUC F1 (%) | B³ F1 (%) | CEAFe F1 (%) | BLANC F1 (%) |
+|---|---:|---:|---:|---:|
+| strongest type-control | 82.6689774697 | 98.2724739302 | 97.9410105769 | 91.1163290123 |
+| semantic | 80.8134394341 | 98.1847637386 | 97.7857282945 | 91.1939677911 |
+| numeric_only | 82.0921985816 | 98.2525091261 | 97.9421106477 | 90.9552553202 |
+| shuffled_semantic | 80.5892547660 | 98.0428053410 | 97.6831898128 | 89.7688346750 |
+
+2,000 document bootstrap/RNG13 相对 strongest control：
+- semantic：ΔMUC **-1.8555380355**，95% CI **[-3.5501953024080612, -0.26948713089325127]**，spurious/missing **101/116**。相对同weights原argmax **0.0339885927**，CI **[-0.2033903279140145, 0.30380857472132833]**，仅 **2** docs改变。
+- numeric_only：ΔMUC **-0.5767788881**，95% CI **[-1.5867644796004943, 0.46570177233068993]**，spurious/missing **92/110**。相对同weights原argmax **-0.1458120756**，CI **[-0.38952138020974664, 0.0]**，仅 **2** docs改变。
+- shuffled_semantic：ΔMUC **-2.0797227036**，95% CI **[-3.7103066558569004, -0.4566726146132732]**，spurious/missing **116/108**。相对同weights原argmax **0.2073103216**，CI **[0.0, 0.5276939724053796]**，仅 **2** docs改变。
+
+**停止这个 class action，不扫二类阈值/成本/再次训练头。** 训练target与候选级决策的
+数学区别确实存在，但本轮固定weights counterfactual未挽救退化：semantic仅补一条MUC
+true link且增加一条spurious，numeric新增两条spurious而没有recall收益。
+因此“只需改二类决策单位即可恢复”在这组weights上被否决；不能外推为所有anaphoricity无效。
+三臂及旧作用域都如实保留，不拿小的paired差或shuffle变动宣称突破。
+
+回传非权重tar SHA **bb5749d3853c1b14a79b4cacceb9975110242af9ee1205b9e7fd2dcff7263804**
+双端一致；head logits、完整预测、source parity/status、两份scorer和paired doc counts可反查。
+
+### 25.49 C-41：从 fixed-score 控制转到训练梯度的科研裁决（R1，未准入训练）
+
+科研价值：表5-3；四类固定控制实际未过门，不再作 scalar/temperature/linkage/
+head endpoint 救援。§25.46 的 exact joint 与 root-product 是不同函数，但之前只用它们
+做 frozen-score argmax，未检验学习信号。选择训练目标审查的依据是二者可能对同一
+wrong link 给出不同甚至抵消的梯度，不是成本低；需要可证伪的数学反例与独立有限差分。
+可行性：本次只用3节点构造概率和构造标签，4090 CPU/隐藏CUDA，零 optimizer、零 split
+读取、零模型/权重搬运。真实 full-model 训练另须数据/计算预算/源码/power合同闭合。
+
+预声明反例：三个 mention 同类型、parent real raw logits皆0、dummy皆0；gold构造为
+{0}、{1,2}。将 exact C 或 root-marginal dot product 的strict-lower pair scores代入
+同一个固定soft pair F1 loss：1−(2Σ_gold-positive score+1)/(Σ_all score+N_positive+1)。
+这里+1是固定单位平滑，pair F1只是训练surrogate，**不是精确期望F1或官方MUC**。
+假设 root-product 会把2→0的误链对正pair的虚假收益抵消负pair的代价，导致梯度近0；
+exact joint不奖励该虚假共同root，应给这个wrong edge正梯度。逐个logit以中心差分
+δ=1e−6复核autograd，不只比较最终loss。不能以这个toy PASS代替部署效果/novelty/power。
+
+若反例成立，下一候选是从相同 pretrained initializer 训练完整原架构，用 exact joint
+改变结构监督；matched official marginal/root-product/ancestry-shuffle、同given-type policy、
+原强锚、backbone/seed13/数据不变，不沿用饱和的frozen-null训练作为创新。尚未准入。
+当前4090四卡均占用（末次成功核卡约23GB、93/93/24/73%util），四个本轮CPU模型
+入口已GONE，无 watcher。GPU忙不是候选训练效果失败，也不结束整个C-41。
+
+#### §25.49 梯度反例实际验证（数学证据，非部署突破）
+
+4090真实Torch CPU结果：same fixed toy/F1 surrogate 下，wrong edge **2→0** 的梯度
+root-product **0**，exact joint **+0.027210884353741492**；这是logit层面偏导，
+若单独更新该logit会压低误边。共享神经参数的联合更新仍需真实模型验证，不能由此保证每条误边下降。
+对应 loss 为 **0.5 / 0.4285714285714286**。中心差分逐logit验证最大绝对误差
+product **3.5053918101546344e-11**、exact **5.0392776757002267e-11**。
+其他logits梯度与三阶矩阵完整保存在JSON；不是只检查“能backward”或一次PASS。
+
+**裁决**：这个明确反例支持“保持shared-ancestry联合依赖可改变训练惩罚”作为下一候选的
+实质差异；不把它称作算法首创、全面新颖性、任意目标优势、已发表B³/LEA损失的反证，
+也不称作MAVEN改善或>=80%power。原 frozen-score 实测失败不因toy翻案。完整模型从
+pretrained同架构学习的因果链/最近邻/实际成本/strong comparisons/power仍须R1闭合，
+**method_admitted=false**，未启动训练或申请额外seed/5090任务。
+
+入口 `learning_gradient_audit/audit.py` SHA
+**a729a533fca5159636447fe2738f23f6605af40a2cfcccdeea520170fdf8ca4c**；
+原机report SHA **7842f5b815497cdac9c7891925f045e0a16b8fc79f4c15b1355c394b8c34acd9**。
+第一次scp回传在banner阶段timeout（exit255），没有把工具失败当数学失败；
+原机成功执行的stdout与SHA已观测，回传重试/最终双端封存另记。
+
+#### §25.49 完整 train 结构机会审查预声明
+
+科研价值：表5-3；先检验梯度反例对应的同类型、按原mention顺序的
+`i<j<k, gold(i) != gold(j) = gold(k)` 是否存在于真实训练数据，以及其doc覆盖与
+类型块规模。它验证监督机会/计算量，不能证明原模型犯了这些错或方法能修复它们。
+可行性：只读冻结train manifest、train.jsonl与已封存cache/train/documents.jsonl；
+逐ID/mention/type对齐，缺失或额外项fail-fast，不读dev gold/final-valid、不用模型/optimizer。
+完整2622doc，不采样；独占新 `training_structure_audit/`，输出源码hash、输入hash、
+计数/块规模分位数与逐doc机会表。零optimizer模型接口/成本审查另记录，不是训练准入。
+
+完整train机会实测：**2622docs/66744mentions**，gold repeat **5382**项均有同类型前项；
+**756docs**存在预声明结构，共 **9418triplets、1925later mentions、4245positive pairs**。
+逐doc独立三重枚举全量一致。类型分块 **41284**个，n的median/p95/p99/max为
+**1/4/8/28**；Σn² **199026**，Σn³ **1282890**，文档事件mention最大 **109**。
+这些是标签覆盖与矩阵计算规模，不是原模型错误数、可修复率、实验效果或power。
+输入train文件 SHA **20ea01ebe71fb8c8e4f207368673cc71f29840a290698eefe15de3a24a3b6f05**；
+审查入口 SHA **645f14c922a6fb74f0a88814c37deade525bf67e6a562ac023cb447d5f7d1718**；
+三项非权重manifest SHA **7926b8a06f38e1f3c9a5689c26094a0fe5ae0db9b991c95db0a5812dccec1ab9**。
+
+最终独立复算/梯度反例已完成双端封存：forest-score **17**项manifest SHA
+**b87d59f7b969023bde7bf0143149355e74da2527f866c964503e9bc25ffb8afb**；
+decision-unit **20**项 **5f29a4cab6ec90bc7f156a28b0a7b0505e3072382f49562d52ef8bda40188b70**；
+gradient **2**项 **9685f10e1b4096d36139877b1bc37a657b1fbbed2c47d87de056fadab1f854ae**。
+tar SHA **ea35c02fc406dc715b0db6ce8158f5798c4c32ae27fbc25194dfad13c0303e22** 原机读取一致，
+所有既有文件只比对相等、新文件以exclusive-create补齐，逐manifest全部PASS。梯度report
+scp重试已成功、LOCAL SHA与原机一致，先前工具失败没有修改科学结果。未搬运weights。
+
+#### §25.49 真实模型接口/零optimizer信号审查预声明
+
+科研价值：表5-3；检验从相同pretrained initializer的原joint完整架构能否传递exact/product
+结构损失至pair MLP及encoder，以及同一真实batch上的信号与CPU成本。不得由梯度相异
+推导主指标提升。可行性：原模型/data/utils/main源码与pretrained在4090，train按冻结
+manifest/原顺序first8 docs，max_length256、不采样、无dev/final-valid标注。
+CPU四线程/隐藏CUDA，seed13，原四头前向；同一前向图的marginal与相同+1平滑soft pair-F1
+product/exact，用autograd.grad检查至MLP/encoder参数；无optimizer、无checkpoint更新。
+计算量/梯度量级只用于预算和竞争解释，正式loss/scale/endpoint/power仍待冻结。独占
+`training_interface_audit/`，保存原源码快照与hash、argv、docIDs、loss/grad/time/RSS。
+
+接口审查新观察（尚待实际梯度验证）：固定 `src/utils.py` 的 `fill_expand` 仅为singleton
+置dummy，对len>1簇只置严格较早的gold前件，故其首mention整行全0。固定main.py逐元素
+`clamp(prob*filled_labels, eps, 1-eps)` 后再sum/log，可能使这行仅有常数而无梯度。
+预声明只读核查：全train统计该类first mention覆盖，在原机用原fill_expand构造{0},{1,2}
+概率，计算原loss、逐行梯度与正确dummy标记counterfactual；不改官方封存源码/weights。
+若盲区成立，新候选必须加入first-mention-correct marginal强对照，并在各结构臂一致应用；
+修复本身属于baseline engineering，不宣称创新，也不凭这点断言历史错误的唯一原因。

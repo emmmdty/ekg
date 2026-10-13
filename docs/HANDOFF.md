@@ -12,7 +12,7 @@
 > 普通 newness/singleton、candidate-erasure→dummy 等已有先行机制，不准入创新。候选 brief 见
 > [`research/20261013_c5_newness_admission.md`](research/20261013_c5_newness_admission.md)；
 > 最新执行动作由下方「本次接续」与 §0.3.5 覆盖；候选 power 尚未闭合。
-> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.48**。
+> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.49**。
 > D4 linear 恢复强控制、tanh5 退化（§25.37）；A4 仍无新效果结果；旧失败家族封存，E3 不追加实验。
 > 5090 原 C5 decoder smoke 已 complete，完整 audit 已授权但仍待空卡；无遗留自动启动 watcher。
 > 本轮新 CPU 控制与该原 decoder audit 是两份合同，不能把其中一项完成记成另一项完成。
@@ -20,7 +20,7 @@
 > **最短读法**：新窗口角色 → 当前阶段表 → **§0.1–§0.3** → **§0.3.5 接续步骤与资产**。
 > §0.4 以后按需读；历史候选、旧队列和旧功效证据不得覆盖当前主表与最新实测。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null 三臂与 forest posterior-score 已完成并独立复算（§25.44–§25.47），没有突破；固定动作均停止、不扫参。当前执行同一三 head 的 decision-unit 单变量审查（§25.48）：权重/scaler/输入/real ranking 冻结，先 exact 重放旧预测，再按 BCE 二类 z>0 决定是否链接。不是新训练、普通 anaphoricity routing 不称创新，旧负结果不改写。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit 四类控制已完成并独立复算（§25.44–§25.48），没有达到突破；全部固定动作停止。C-41 当前转入 exact joint 结构训练目标的 R1 审查（§25.49）：same toy/surrogate 的误链梯度抵消差异已由 CPU autograd 与有限差分验证，完整train结构机会/类型分块规模经独立枚举一致。原joint first-dummy监督观察正在真实模型CPU核查，若成立增加corrected marginal强对照。数学/覆盖结果不是 MAVEN 提分、全面新颖性或方法准入；full-model 从 pretrained 初始化的公平对照/具体 loss/预算/power 仍须闭合。C5 切片保持 wip，D4/A4未接队。
 
 ## 新窗口角色：事件语义与知识图谱方向的科研负责人（PI）
 
@@ -61,7 +61,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41/T087，当前 C5**：given-type strongest control 已完成；固定双向与 frozen-null 三臂实测未胜、停止（§25.44–§25.45）。shared-ancestry 的数学差异已检验（§25.46），forest posterior-score 完成/停止；当前执行固定 head 的 decision-unit counterfactual（§25.48）。未形成创新或方法准入；原5090 smoke complete/audit 待空卡且已有授权。后续 C5 → D4 → A4，A4 5090 未授权。 |
+| **活动任务** | **C-41/T087，当前C5**：given-type stronger control保留；四个fixed-score/head控制实测未突破并停止（§25.44–§25.48）。当前 exact joint 训练目标R1：误链梯度抵消的数学差异已验证（§25.49），真实full-model/power/合同未闭合，未准入训练。原5090 smoke complete/audit待空卡、无新任务授权。后续C5→D4→A4。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
@@ -144,7 +144,7 @@ C5 的后续章序为 D4 → A4，E3 保持封存成果；论文结构不改。
 旧 D4 OOF 虽有文档级 OOF，但不满足新 C5 consumer 的 evaluation 隔离，不能直接接为新方法训练输入。
 噪声兼容性是未准入假设；此 observer 的负证据不等于所有 factuality 方法无效，也不等于该假设已可行。
 
-下一步按 **§0.3.5 的最新接续**执行固定 head 的 decision-unit 审查并复算；两份候选 brief 的训练准入仍未闭合，不能把数学正确/已知控制当创新完成。
+下一步按 **§0.3.5 的最新接续**闭合 joint-dependence 训练目标的 R1；两份候选 brief 的训练准入仍未闭合，不能把数学正确/已知控制当创新完成。
 历史 C-13–C-21 的候选、pair pools 与 power 属于其原 unit，不能直接迁移为 stronger control 上的新准入。
 历史高相似误合并画像不是 lexical bias 的因果证明；剩余漏合并与误合并都须有机制解释。
 原 5090 decoder audit 仍 pending、已有具体授权；它只隔离同分数解码，不验证新方法贡献。
@@ -280,11 +280,16 @@ A4 仍待诊断。三个方法章均未形成新方法贡献，不能用旧“�
 固定双向与 train-only frozen-null 全部实际运行、独立复算完成，未胜 strongest type-control，停止
 且不扫参（§25.44–§25.45）。原 type-control/弱 observer 不重跑，旧 role/argument 家族不复活。
 
-**当前动作**：按 `configs/c5_null_decision_unit_20261013.json` 与对应新合同执行 CPU
-固定三 head counterfactual；先 exact 重放 §25.45 的完整预测，再改二类决策单位，独立评分
-（§25.48）。前面的 frozen-null 训练与 forest posterior-score 动作均完成/停止、不复跑。
-新窗口先读 §25.44–§25.48 和最新 status；已有 output 不覆盖，不把检查完成当提分。
-train/dev features 与三 head 留4090，非权重预测/评分双端可得。
+**当前动作**：四类固定控制的计算/双端评分均 complete（§25.44–§25.48），不重放已完成
+stage，不改头/threshold/linkage/temperature。读取 §25.49 和
+`research/20261013_c5_joint_connectivity.md` 的学习目标路线：数学反例已验证，下一步补完整
+模型从相同pretrained初始化的具体监督/strong control/单变量消融/负控、实际训练成本与
+≥80%document power，再形成新合同。当前无方法训练准入，不把toy或skills PASS当贡献。
+
+原/新head与train/dev features留4090。固定控制非权重产物与独立复算可反查，manifest
+身份只见results；learning-gradient report已在原机成功生成，scp曾banner timeout，最终
+回传/备份状态认results末段，不把工具失败当数学结论。末次成功核卡4090四卡皆占用、
+本轮四个CPU模型入口皆GONE，无watcher；5090原audit仍保持原授权与待空卡状态。
 
 conditional error-risk 的旧候选仍缺 train-only 文档隔离 error-state 输入；新的 exact joint 候选
 改变联合概率/监督假设，不用 in-sample teacher errors 冒称 OOF。正文与官方 README 机制

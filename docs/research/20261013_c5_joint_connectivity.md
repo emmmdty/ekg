@@ -15,7 +15,7 @@ given-type control 之后的错误，并胜过 ordinary null/anaphoricity 控制
 权重留 4090，当前 null 控制导出的 current embedding 可以在原机重放其 pair MLP。
 不需要把 baseline 的 in-sample 错误用作训练标签，也不需要新增 factuality/argument observer。
 最终拟合/推理仍需 train/dev 隔离与 source/hash 闸门；本轮只有不读数据的数学检验。
-算力边界是 ordered forest 的递推通常 O(n³) 时间/O(n²) 内存，给定类型可分块。
+算力边界是 ordered forest 的递推通常 O(n³) 时间；最终前向矩阵O(n²)，朴素autograd保存中间矩阵可达O(n³)内存，给定类型可分块。
 实际 train 分块规模、autograd 时间与目标 power 仍须测定；不以“小规模证明通过”假装可训练。
 
 ## 可证伪的机制差异
@@ -51,10 +51,37 @@ given-type control 之后的错误，并胜过 ordinary null/anaphoricity 控制
 
 ## 尚欠准入与判别实验
 
-frozen null 控制实测已完成且未胜 strong control，停止该控制（§25.45）。当前先执行固定零训练 posterior-score 控制（§25.47）；推理分数对照不能替代监督创新的准入。拟议的最小判别是：
-相同 frozen representations/head/input/预算下，ordinary null loss、root-marginal product
-cluster-pair loss、exact joint cluster-pair loss，以及固定 ancestry shuffle 负控。
+frozen null 控制实测已完成且未胜 strong control，停止该控制（§25.45）。固定零训练 posterior-score 控制已完成并否决（§25.47）；推理分数对照不能替代监督创新的准入。拟议的最小判别是：
+从相同 pretrained 初始化的完整原模型、相同input/优化预算下，official marginal control、
+root-marginal product cluster-pair loss、exact joint cluster-pair loss与固定 ancestry shuffle负控。
 loss 或 decoder 只能择一作为单变量；不能同时换两者后把收益归给联合依赖。
 
 目标效应、document-level MDE/≥80% power、具体训练 loss、无调参 endpoint、匹配强对照
 与护栏尚未闭合。数学恒等式、toy 反例、文献差异都不替代部署主指标。
+
+## 实测之后的路线裁决（§25.47–§25.49）
+
+固定 posterior-score 解码控制已结束，没有可认定的主指标突破或精确联合优势；
+同weights的二类decision-unit审查也失败。二者不重跑或扫参。下一个实质问题是学习
+目标：不同函数是否改变wrong-link的监督，而不是继续改已拟合分数的排序/阈值。
+
+构造反例在相同固定pair-F1 surrogate下确有误边梯度抵消的差异，且中心差分支持
+autograd。该surrogate不是Le&Titov的原B³/LEA，也不是精确期望F1；不把反例写成
+对他们完整方法的否定。数据集有效性/泛化仍未测试，toy不能替代power或指标。
+
+拟议学习路线从相同pretrained initializer训练完整原架构，使结构目标有机会影响
+早期不确定的parent distributions；不把已有饱和frozen-null的train输入当OOF错误标签。
+输入仍是现有MAVEN text/spans/task-given types，监督是train gold identity。比较原
+marginal、相同surrogate的root-product、exact joint与ancestry-shuffle；保留原强锚，
+backbone/seed13不变。真实训练成本、具体合同、目标效应/≥80%document power尚未闭合。
+这是候选研究路线，未准入训练、未形成章节创新贡献。
+
+训练设计还须控制不同loss的量级/共享任务梯度预算与选择口径，避免把criterion替换
+造成的重加权当作联合依赖的收益；root-product/exact须用相同surrogate/scale/decoder。
+当前反例只测logit偏导，不能保证共享神经参数更新后每条误边都下降。
+
+完整train的预声明结构机会与类型分块规模已全量测定，并经独立逐doc枚举一致；数字只见R1 §25.49。数据标签/递推规模可行，实际模型CPU梯度与预算审查仍须完成，不将标签覆盖当可修复率或power。
+
+原joint `fill_expand` 与marginal loss接口的新观察须先做真实autograd反证：非单例簇首mention的dummy可能缺失。如确认，各结构臂均使用规范first-dummy监督，corrected marginal列为强对照；只修正已有目标不算创新。封存源代码不改写，实证见R1 §25.49。
+
+已补核[READS, PVLDB 2017](https://home.cse.hkust.edu.hk/~raywong/paper/vldb17-SimRank.pdf) Eq.1/§3/§4.1：同时移动的双walk递推、等hop首次相遇、可合并walk/tree均属先行机制。候选是每个ordered mention一次parent选择下的同森林连接概率、mention特定dummy、condition later节点的训练目标；不以coalescence/递推/共享walk本身作创新。该有限对照不能证明全部同类图算法无先行性，源码快照与解释在 `learning_literature_audit/`。

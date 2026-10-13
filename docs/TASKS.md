@@ -269,8 +269,13 @@ author delegation releases a new in-scope research queue; it does not reopen old
   fixed seed 13/epoch 10 and no updates to the original encoder/scorer. It is a known-mechanism
   control, not an admitted novelty claim; stop it without a parameter rescue. Joint-connectivity
   algebra is verified but not admitted (§25.46). The fixed forest posterior control finished without useful gain or supported attribution (§25.47);
-  stop its action. Execute the sealed-head decision-unit audit (§25.48), with exact old-prediction
-  parity, zero training and a fixed class rule; independent scores decide, no novelty claim.
+  stop its action. The sealed-head decision-unit audit also completed without recovery (§25.48);
+  old predictions replayed exactly. All four fixed-control routes stop. Next R1 examines learning
+  with exact joint dependence (§25.49): toy wrong-edge gradient cancellation is verified against
+  finite differences; full-train structural opportunities and type-block sizes are independently verified.
+  Inspect the pinned joint first-dummy labeling with real CPU autograd before training; if confirmed,
+  include corrected marginal as a stronger control across structural arms. Full-model budget/power/
+  admission remain open. No contribution PASS.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

@@ -3,7 +3,7 @@
 > 更新于 **2026-10-13**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null 三臂与 forest posterior-score 已完成并独立复算（§25.44–§25.47），没有突破；固定动作均停止、不扫参。当前执行同一三 head 的 decision-unit 单变量审查（§25.48）：权重/scaler/输入/real ranking 冻结，先 exact 重放旧预测，再按 BCE 二类 z>0 决定是否链接。不是新训练、普通 anaphoricity routing 不称创新，旧负结果不改写。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit 四类控制已完成并独立复算（§25.44–§25.48），没有达到突破；全部固定动作停止。C-41 当前转入 exact joint 结构训练目标的 R1 审查（§25.49）：same toy/surrogate 的误链梯度抵消差异已由 CPU autograd 与有限差分验证，完整train结构机会/类型分块规模经独立枚举一致。原joint first-dummy监督观察正在真实模型CPU核查，若成立增加corrected marginal强对照。数学/覆盖结果不是 MAVEN 提分、全面新颖性或方法准入；full-model 从 pretrained 初始化的公平对照/具体 loss/预算/power 仍须闭合。C5 切片保持 wip，D4/A4未接队。
 
 ## 当前正式活动阶段
 
