@@ -68,7 +68,7 @@ def _coref_document_counts(gold_record: dict, prediction: dict) -> np.ndarray:
         if cluster:
             predicted.append(cluster)
             assigned.update(cluster)
-    predicted.extend([{mention}] for mention in sorted(mention_ids - assigned))
+    predicted.extend({mention} for mention in sorted(mention_ids - assigned))
     recall_num, recall_den = _muc_counts(gold, predicted)
     precision_num, precision_den = _muc_counts(predicted, gold)
     return np.array([precision_num, precision_den, recall_num, recall_den], dtype=float)

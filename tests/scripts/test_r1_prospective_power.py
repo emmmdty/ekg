@@ -21,6 +21,15 @@ def test_muc_score_from_counts() -> None:
     assert power._muc_score(counts)[0] == pytest.approx(2 * 0.8 * 0.9 / 1.7)
 
 
+def test_coref_counts_restore_implicit_singletons_as_sets() -> None:
+    gold = {"events": [{"mention": [{"id": "a"}, {"id": "b"}]},
+                       {"mention": [{"id": "c"}]}]}
+    implicit = power._coref_document_counts(gold, {"coreference": [["a", "b"]]})
+    explicit = power._coref_document_counts(gold, {"coreference": [["a", "b"], ["c"]]})
+    assert implicit.tolist() == explicit.tolist() == [1.0, 1.0, 1.0, 1.0]
+    assert power._coref_document_counts(gold, {"coreference": []}).tolist() == [0, 0, 0, 1]
+
+
 def test_macro_f1_perfect_confusion() -> None:
     confusion = np.eye(len(power.FACT_CLASSES))
 
