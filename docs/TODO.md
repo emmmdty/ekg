@@ -26,8 +26,10 @@ C5 DATE 词面代理和已有强锚 BEFORE/coref 冲突两项 CPU 审查已完�
 仅 C5 train 的固定单 seed CPU 文本观测诊断已完成，覆盖低且稀有类别弱；
 下一步噪声兼容性可行性与可靠强控制缓存，证据 §25.39。
 旧 D4 OOF 输入不能直接接入新 C5 consumer；这不改写 D4 自身的结果。
-10-13 在 4090 原地 official-joint 强锚冻结 CPU smoke → 全量分数缓存合同，
-必须 exact cluster parity；零 GPU、零训练、权重不搬运。验证与执行状态只见 §25.40。
+10-13 4090 原地 official-joint CPU 全量 cache 已通过 exact cluster parity，
+重放预测与 frozen anchor byte-identical（§25.40）。当前弱 factuality observer 的部署覆盖与
+连续几何未支持作用于真实错误，该 observer 路径停止、不调参（§25.41）。
+下一项 known type-agreement stronger control 的固定 CPU 重放/评分，非新方法创新（§25.42）。
 
 | 项 | 当前状态 | 下一道门 |
 |---|---|---|

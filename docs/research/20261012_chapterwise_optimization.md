@@ -133,6 +133,38 @@ Train 审查已完成，数字只见 R1 §25.39。标签差异具有探索分辨
 该诊断已经完成：真实 OOF 与只读 observed signal 数字见 R1 §25.39，覆盖很低，稀有类别很弱。
 不对它扫参，不准入直接拆簇，也不把辅助指标当论文贡献。
 
+### 10-13：部署观测与强锚错误对齐（诊断，未准入方法）
+
+科研价值：检验训练集中的预测差异是否能覆盖冻结强锚的真实 identity 错误，
+对准表 5-3 的信号/功效准入；只读分数和观测，不修改 cluster，不报告 proposed MUC。
+可行性：五个已训练 CPU 观测器都只接触 C5 train，各折 ledger 与 consumer dev 不相交；
+本地原 official-joint 无标签 test input 的 SHA 与远端一致。复用五个固定模型概率的等权均值，
+不增加训练、不选 fold、不改类别权重/阈值；模型留本地，严格不读取 FACT dev factuality 标签。
+消费者标签只能在之后独立的 identity 错误分析使用，不能进入 observer。
+输出为完整 mention 概率、模型/input hashes 与角色/作用域 provenance。
+与 score cache 对齐后只做预先登记的分类差异覆盖及文档分布；差异计数不能替代 MUC 收益或 power。
+若缺实际部署信号/错误覆盖，不调当前观测器，停止这一观测路径；不据此否定所有事实性机制。
+
+最近邻补查：[Yadav et al., CRAC 2021](https://aclanthology.org/2021.crac-1.11.pdf)
+§3.3–§3.7 已用 event/entity cluster trees、LCA linkage/order 的关系相似性与交替推理表示不确定性。
+这与 factuality 测量通道不等价，但足以排除泛称“首个不确定性共指模型”；
+噪声兼容性的新颖性仍未闭合，不能只凭改 auxiliary attribute 或改 soft penalty 准入。
+
+部署 argmax 诊断已完成，错误覆盖见 R1 §25.41；不能支持直接差异 veto。
+下一项只读诊断固定连续距离 `0.5 * sum_k (q_i[k]-q_j[k])**2`，不选距离/阈值。
+预测：若该观测器仍有连续分辨信息，同文档内被选中 false links 的平均距离应高于 true links。
+竞争解释：类别多数先验、trigger/类型差异与同句相关噪声造成总体差异；因此报告 all 与同类型
+两套预先指定桶、每篇两类均存在的文档等权差值，以及按文档 bootstrap 的区间。
+不将 pairs 独立化，不据此声称 MUC 增益、目标 power 或噪声通道的新颖性。
+若均值差没有方向支持，停止当前弱文本 observer 路径，不通过扫参或更换距离挽救。
+
+连续诊断完成，未支持预设方向，证据 R1 §25.41：当前弱文本观测器路径停止，不调参。
+下一项是 known type-agreement 控制，非新方法：同 frozen official-joint scores/decoder，
+只用无标签任务输入给定的类型限制连链。先重放原强锚 parity，再做一次固定约束的 official 评分。
+价值是识别未使用已知类型规则的 baseline 欠额，避免未来虚报新机制收益；可行性是 CPU 全量 cache
+和官方 utility 已可用，零训练/权重搬运。合同 `PHASE_C5_typed_control_20261013.md`。
+Lu & Ng §4.1 C1 已提出 semantic-type 一致性；硬约束给定类型是透明控制，不当作该 MTL 复现或创新。
+
 ## 本轮使用的研究工具来源
 
 使用已安装的 hypothesis-generation 区分候选、竞争解释、预测与实测，不把技能校验当科学结论。

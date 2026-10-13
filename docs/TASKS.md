@@ -252,6 +252,10 @@ author delegation releases a new in-scope research queue; it does not reopen old
   Remote CPU export of the original official-joint checkpoint is frozen in
   `PHASE_C5_official_cpu_cache_20261013.md`: exact cluster parity, smoke before full,
   no GPU, no training and no checkpoint transfer (§25.40).
+  CPU cache is complete with byte-identical frozen predictions. The weak text observer deployment
+  and continuous geometry audits did not support the planned error signal; that observer route stops.
+  The next derived control is fixed given-type agreement with the original scorer/decoder (§25.42),
+  explicitly distinct from a method innovation or reproduction of the cited multitask model.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

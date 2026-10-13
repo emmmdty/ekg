@@ -27,9 +27,11 @@
 > 作新 C5 consumer 输入。仅 C5 train 的 CPU 观测诊断已完成，覆盖低且稀有类别弱；
 > 噪声兼容性仍待可行性与强控制缓存，证据 §25.39。
 > 持续核卡中的 watcher 状态以实时进程为准；已获 C5 audit 授权保持，不扩为新 GPU 训练。
-> **10-13 CPU 续进**：冻结 4090 原地 official-joint 强锚的 CPU smoke → 全量 scores 导出合同，
-> 只允许 exact cluster parity 后使用缓存；零训练、CUDA 隐藏，权重留原机。入口、配置与验证
-> 见结果 §25.40；这是强控制资产，不是章节提分。5090 audit 仍待空卡，无遗留 watcher。
+> **10-13 CPU 续进**：4090 原地 official-joint 的完整 CPU scores 已通过 exact cluster parity，
+> 重放预测与 frozen anchor byte-identical；证据 §25.40。弱 train-only 文本观测器的部署错误覆盖
+> 与连续概率诊断均完成，当前 observer 路径停止、不调参（§25.41）。
+> 下一步 known type-agreement stronger control 的固定 CPU 重放/评分（§25.42），不是新方法创新。
+> CUDA 隐藏、权重留原机，5090 原 audit 仍待空卡，无遗留 watcher；仍无新方法过门或突破结论。
 >
 > **最短读法**：首表 → **§0.3（当前队列）** → 需要哪章再看 §0.4 的对应小节。
 > §0.5–§0.7 是已裁定的决策与纪律，开工前扫一眼。
@@ -39,7 +41,7 @@
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41 / T087 C5 切片（2026-10-12）**：两项时间代理 CPU 审查已收口，尚无新方法准入；原机 decoder smoke complete、average parity/hash 通过，下一步完整 audit。作者已具体授权这两项 5090 诊断，仅空卡执行；不复跑已完成 smoke。后续 D4 → A4；A4 5090 仍未授权。证据 §25.38，D4 旧 head 结果仍见 §25.37。 |
+| **活动任务** | **C-41 / T087 C5 切片（10-13 续）**：official-joint CPU 全量强控制 cache 已可用；当前弱 factuality observer 路径停止，下一步 known type-agreement control 的固定重放/评分，证据 §25.40–§25.42。尚无新方法准入；5090 原 decoder smoke complete、audit 待空卡，已具体授权，不复跑 smoke。后续 D4 → A4；A4 5090 仍未授权。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |

@@ -3554,3 +3554,94 @@ CPU max_length=256、batch=8、threads=4、seed=13，保持原 scorer/decoder，
 真实 Torch/官方 coreference head CPU 测试 **10 passed in 98.09s**。
 该测试用小张量验证原 scorer 的事件索引、完整 logits/概率和 dummy，并非真实 checkpoint parity。
 后者必须由下一步 smoke 实测，不能拿单元测试替代。
+
+smoke 原机 PID 1770889，已 `complete`；首批 **8 documents** 的 non-singleton clusters
+与冻结强锚 exact parity。原机和回传本地的三个 artifact SHA 均独立核验通过：
+scores `25687261509bdbdb9d026909dc229a4edca6f7c42fc5267617c2f03ad65c6de2`；
+predictions `8df98dddbfe94e0ceeabaead35fd5d98cf6cab9b1238376cd94b55f1b70f2b4b`；
+metadata `06edcab267cc9358159c83aa914c2cf50c713a483ac787648ac5d023c777ee4b`；
+status `0e770bbaae68c24f6296f6a23fe730efeca398dc6ed41a7fff93e6313a4810b9`。
+full 已在同原机/同 config 启动，PID **1772278**，日志
+`logs/c5-official-cpu-full-20261013.log`；尚无全量完成或新方法结论。
+§25.39 原 oracle/lineage 包的 15 个非权重文件已在 4090 独立逐项 SHA 核验通过。
+
+full 后续已 `complete`，**291 documents / 7,195 mentions / 124,630 antecedent options（含 dummy）**。
+37 个 batch 全部 exact parity；prediction SHA 与原 frozen anchor **逐字节相同**。
+三个文件在 4090 和本地独立 hash 核验通过：scores
+`b9b119a41c575427cab721ed3762a5502250a08ed5b6da2fe8651f9121a73cd7`；predictions
+`66ff04bac5a11ab179ef50eeca51d56dbb613b7b04eaa04b749dd99ea82ffc42`；metadata
+`d85a23b9fe6683aba43644a225d4c6bbbe45c59ff7cc46609b7c426095c521a3`；status
+`ff0fae6c550375b24e02e0a43a792ba8783c31dd20780dbdff403bcda4b44c55`。
+原 checkpoint 仍留 4090，本地仅回传上述 JSON；无 GPU、无训练、无 final-valid 接触。
+本地使用 P1 hash-pinned evaluator/source_lock、原 291-doc ERE gold 与同 candidate digest 独立评分，
+MUC **80.98471986417657**，与 frozen strongest anchor 一致；关系分数来自复制字段，
+不是重跑关系头。独立报告 SHA
+`8fbb7060d343f90bf618457676e245f598ede8aff6a5dcc495b4b526c1878457`。
+这是控制恢复与可用 cache，**没有新方法指标提升或创新结论**。
+
+### 25.41 C-41：部署观测作用域与错误覆盖开工（2026-10-13）
+
+科研价值：从 train 信号推进到 frozen strongest anchor 的真实错误覆盖，支撑表 5-3 的
+信号/功效准入。可行性：本地既有五个 train-only CPU 观测器与无标签 official test input 可读；
+固定等权概率均值，不新增拟合、不选 fold、不读取 FACT dev 标签，不改消费者 clusters。
+ERE identity 标签仅供后续独立错误分析，不能进入 observer；探索性 dev 已被历史使用，
+此处不声称确认性结果。配置、完整 provenance 与执行结果将在本节记录。
+
+部署代码 commit `a43fc9a`，冻结配置 SHA
+`de895509934b6b1993e57ff5e815f0911140ac5aa4f64e1e15a0d5a4c30423ba`；
+五个既有模型等权均值已产出 **291 docs / 7,195 mentions**，`fit_calls=0`，
+argmax CT+ 7,110、CT− 34、PS+ 51，PS−/Uu 0。未读取 FACT internal-dev factuality 标注。
+概率 SHA `2183978f3f1753fedb9397a3ae6480e1947a148f18b300d90c311d4c5e5f7b57`；
+metadata SHA `2808874c506615bd277a3bc71519b6c6ba46a7437f853507c7804344fba5f25b`。
+TDD **6 failed → 6 passed**；验证 document isolation、无 gold shape、manifest 全覆盖与 class-order。
+
+错误覆盖代码 commit `fb1ef9b`，配置 SHA
+`0b9c0d8d4393aa3e3668ecfd60cd36bc9f790aa7b7375b33a4b91ec8313ff778`。
+强锚选中 605 条非 dummy antecedent links：470 条同 gold event、135 条不同 gold event；
+其余 6,590 个 mention 选择 dummy。全 antecedent 候选 117,435 对中预测类别不同有 3,468 对。
+**被选中的错误连链里类别不同为 0，正确连链里为 3（位于 2 篇文档）**。
+选择连链的错误不等于 MUC spurious-link 计数，不能直接推导拆簇后的 MUC。
+这份部署观测不支持直接 label-difference veto；连续概率的信息尚未分析，不否定所有 factuality 通道。
+report SHA `2553f9103f469aca223b42b56586a3fe965357f63c6eff63a15c4a55efb8332e`；
+per-document SHA `ab9ea0f61733d14e05417302bbfdad50f6ef07ad1bd0c59ae4be7cb982e848ce`。
+TDD **4 failed → 4 passed**；完整门 **841 passed / 43 skips、ruff 0、CPU smoke OK**。
+
+接续连续几何自审：价值是区分 argmax 无覆盖与连续信息真正无方向支持，避免错误扩大停止结论；
+可行性是复用相同 q/cache/ERE gold 的只读 CPU 计算，不拟合、不输出新 clusters。
+唯一距离固定为五类概率差的半平方 L2，报告 all/same-type 两桶；同文档内 false/true 各自均值
+差值与文档 bootstrap 区间。此诊断不是新主指标、功效准入或 proposed method 输出。
+
+连续诊断初始实现 `fb8c2c8` 因 raw gold type 位于 event 层而非 mention 层失败，
+未产生输出；不是科研负结果。保留原配置，追加新回归测试先 1 failed → 通过；
+`811d4ee` 显式构建不修改原 gold 的 typed view，新 r2 config SHA
+`a2774024647896f113e5ba89e53d13b4ab359bcf35299d430b9af6f907fc38cd`。
+距离、桶与统计定义未改；不回填缺失 type，不覆盖旧产物。
+
+| 连续距离诊断 | 同文档两类都存在的文档 | 文档等权 false−true 均值 | 文档 bootstrap 95% 区间 |
+|---|---:|---:|---|
+| all selected links | 64 | −0.0013963181 | [−0.0072782097, 0.0019865678] |
+| same-type selected links | 53 | −0.0018191925 | [−0.0087568721, 0.0022644747] |
+
+2,000 document draws、RNG 13；没有增加训练 seed。这是弱 observer 的半平方 L2 几何，
+并非身份指标、MUC 效应或目标 power。均值方向未支持“false 比 true 更远”，两区间包含零。
+**裁决：当前经典文本 observer 路径停止，不扫参/换距离挽救；不否定所有 factuality 方法。**
+report SHA `952dc9ce6cebb0cebabadea6e448db52d28d6b24ba6a78bc86d278eb81ad6ac6`；
+per-document SHA `d97ab95f376a2243bf338c13e2275338b88fe5877bc00f99b4b03e383a4d7b3a`。
+本轮完整门 **845 passed / 43 skips、ruff 0、CPU smoke OK**。
+
+### 25.42 C-41：任务给定类型的 stronger control 开工（2026-10-13）
+
+科研价值：表 5-3 的 frozen official-joint 未用任务给定类型作连链限制，核查其遗漏是否会
+被未来方法误认成新机制收益。可行性：完整 cache 已通过原锚 exact parity、原机 CPU utility 可用；
+给定类型就在冻结无标签 test input，不用 gold cluster，也不增加模型训练/seed/权重搬运。
+合同 `PHASE_C5_typed_control_20261013.md`；先原 decoder parity，后固定 known type-agreement。
+对应 Lu & Ng §4.1 C1 的概念，非其 MTL 复现、非创新。没有方法训练或新结果。
+
+冻结配置 `configs/c5_typed_control_20261013.json` SHA
+`63d101a880bac40153693ed4f4ea17bbcc4bdf52b78809e72d1b61316e86b516`，
+代码 commit `de5acb1`。TDD 首跑 **4 failed / 1 skip** → 本地 4 passed / 1 torch skip；
+完整本地 **849 passed / 44 skips、ruff 0、CPU smoke OK**。
+推送前通过 Git archive 将 script/config/test 和原 CPU cache helper 发至 4090 临时目录；
+CUDA 隐藏的对应真实 official decoder CPU 测试 **5 passed in 26.82s**。
+测试确认遮挡跨类型最高分后选择次高合法 antecedent，dummy/合法分数/完整行形状保留；
+并非真实数据的 type-control 指标结果，后者尚待执行。
