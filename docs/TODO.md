@@ -3,6 +3,8 @@
 > 更新于 **2026-10-13**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
+**本次接续（作者要求实际结果）**：C-41 当前执行固定双向等权 scorer 的 derived control，与已完成 type-control 对比实际 MUC/护栏；源码/类型 policy/dummy 固定，无训练/扫参，不宣称对称化是新方法。原条件风险候选仍须另过输入/创新/power 门。结果见 R1 §25.44，不能把准备完成记成突破。
+
 ## 当前正式活动阶段
 
 **当前任务是三个方法章的根因与效果改进。2026-10-08 作者已委托执行代理作科研裁决，作者只验收结果。**

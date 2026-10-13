@@ -262,6 +262,9 @@ author delegation releases a new in-scope research queue; it does not reopen old
   power and ablation/negative-control rules before a method contract or training.
   Do not rerun completed exports or reuse historical pools/power as fresh admission evidence.
   T087 remains active; the existing 5090 decoder audit is separately authorized only on an empty GPU.
+  Author reiterated actual metrics or overall-method innovation as the deliverable. A fixed
+  bidirectional-score derived control is executing on original 4090 CPU (§25.44); its
+  same-protocol main scores must be independently verified. No symmetry novelty claim.
 
 ## Phase 4 — C5 identity method (v6.1 historical failure; do not rerun)
 

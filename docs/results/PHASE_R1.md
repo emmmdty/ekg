@@ -3841,3 +3841,43 @@ train report SHA `c01bfb8e0c7b81c2c7694b25a002a78db7bd69ff1bc09a8c7357a902f07ae7
 较早成功核卡见 GPU0 **31,498 / 32,607 MiB、96% util**，PID **2633736** 为他人
 `VLLM::EngineCore`，所以当时未启动原已授权 audit。SSH 失败不说明进程死亡或卡已空闲；
 接续必须成功 SSH 后重新核卡。没有启动 watcher、后台实验或扩大 5090 授权。
+
+
+### 25.44 C-41：固定双向 scorer 的实际控制实验开工（2026-10-13）
+
+作者明确要求实际指标或整体方案创新，诊断准备不作为完成。科研价值：对准表 5-3，
+检验已完成 null 边界诊断的可修复空间能否由无身份标签的评分改变落实为真实增益。
+一手源码 `official joint/src/model.py:84–108` 的 pair MLP 使用 `[h_i;h_j;h_i*h_j]`，
+仅按当前/先前方向训练，顺序交换未被对称结构保证。对称化已有公开机制，
+本轮是 derived control，不冒称创新、不冒称外部系统完整复现。
+可行性：4090 原 checkpoint/pretrained/CPU scorer 已完整重现；当前四卡均有他人 vLLM，
+只用原机 CPU 4 threads / hidden CUDA。零训练、无额外 seed、无权重搬运；无标签 ERE input
+与给定类型固定，gold 只在独立评分时读取。§25.43 的 oracle 不作为本轮模型效果或 power。
+
+预测前固定：复用原 encoder 表示和官方 MLP，新增反向 `[h_j;h_i;h_i*h_j]` 分数；
+双向 raw logits **等权算术平均**，dummy logit 仍 0、给定类型 policy 与 stronger control 一致。
+三臂：原 typed scorer（必须 exact parity）、双向平均、同文档/同 type 对的反向 logits 固定
+置换负控（RNG 13，原正向不动）。不再尝试 min/max/权重/threshold sweep。
+先 CPU smoke 确认原 forward/cache/type-control parity 再跑全集，用原 P1 evaluator/candidate digest
+独立复算 MUC/B³/CEAFe/BLANC。若没有胜 strongest typed control 或负控同样改善，不认定
+有用对称证据；无论结果如何如实封存。新输出独占 `symmetric_control/`，已存在即拒绝覆盖。
+本轮不构成 proposed 方法训练合同，条件风险候选的输入/创新/power 闸门仍有效。
+
+
+来源已核到 [Ahmed et al. 的正式 v2 正文 §4.2.1 Eq.1](https://aclanthology.org/2023.findings-acl.100v2.pdf)，
+原文平均 CE 分数（范围 0–1）；本控制平均原 MLP raw logits，且是同一文档编码后的 head
+交换，不是重新编码两个拼接文档。差异已入合同，不称其完整复现。
+实现 TDD 首跑 **5 failed / 2 torch skips** → 本地 5 passed / 2 skips。
+远端验证首跑缺验证包内的既有 cache config（6 passed / 1 failed）；仅补入原 config。
+次跑 forward 的完整 batch 概率 parity 通过，但 reverse 单项调用与整批调用差约
+`5.96e-8`，原测试用 exact 比较误把计算形状末位误差当失败。单项对照改为 abs `1e-6`；
+正式生产的同批 forward/cache **仍要求 exact**，未改 scorer/候选/控制设计或数据结果。
+
+
+实现 commit `f2948d4`；冻结 config SHA
+`42cf77a999b41ee3bd7f7d22788757db501badbf4a893736cbd6e170ca342a74`。
+完整本地门 **863 passed / 46 skipped、ruff 0、CPU smoke OK**，R1 consistency PASS；
+4090 真实 Torch/官方 scorer CPU 用例 **7 passed in 27.82s**，原设计未变。
+原机 64 CPUs、load **17.91/17.30/15.99**、available memory **490,793,128 kB**，
+限制 4 CPU threads；新 output 尚不存在。下面是真实 checkpoint parity 与评分的执行阶段，
+单元测试不替代它。
