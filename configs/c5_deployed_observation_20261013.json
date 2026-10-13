@@ -1,0 +1,33 @@
+{
+  "aggregation": "equal_probability_mean",
+  "diagnostic_only": true,
+  "entrypoint_sha256": "952feb37b4809f142c9b4d9ba626df33ea1ba33584f2dcb541b601339634f727",
+  "final_valid_accessed": false,
+  "input": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl",
+  "input_sha256": {
+    "data/protocols/v6/manifests/maven_ere_internal-dev.json": "f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl": "c358da8b04bdeca9477bd26a1a7fa325b634ea62a488b85b28119be8cce2a891",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-1/model.joblib": "4a5238a7a8fcfd9eef509553026b17cfc03162cc4ab531d35cd99a59c66229f6",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-2/model.joblib": "1eca4f7ab9a05770c53da6a2814179bb37ba7e3266a508b1021e9441b432880a",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-3/model.joblib": "5113244c7bf688af7927623c64b1bfb80ca6b8fe518a2a12e2a74e28b2d64805",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-4/model.joblib": "9ff0fffc51b625e56c137b21aba10decc7a1795d9ddd24e5da1481b610ab2690",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-5/model.joblib": "86fca1ccbdf0cdf8fb9340ada1e8c8d32fb949ab649afd3b802abba303080052",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/provenance.json": "b6dfe8fed516920ce0daf9a1f1ec9afef212f90f65f117c723b9fd262a5d5ee8",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/summary.json": "af9517fcea1c301d65a878d593c1b9978ac908f3cc5dc9f297fa23203967ae79",
+    "scripts/probe_factuality_observations.py": "5d9629b089f95fdefdb636eb8957a359dd042ea8cd69be1a9010e37433c9d8a8"
+  },
+  "manifest": "data/protocols/v6/manifests/maven_ere_internal-dev.json",
+  "models": [
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-1/model.joblib",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-2/model.joblib",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-3/model.joblib",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-4/model.joblib",
+    "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/fold-5/model.joblib"
+  ],
+  "output": "runs/stages/R1/r1-v63-c5-20261013/deployed_observation",
+  "producer_provenance": "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/provenance.json",
+  "producer_summary": "runs/stages/R1/r1-v63-c5-20261012/factuality_signal/observation_probe/summary.json",
+  "schema_version": "ekg.c5_deployed_observation.v1",
+  "seed": 13,
+  "sklearn_version": "1.7.2"
+}
