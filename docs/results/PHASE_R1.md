@@ -4741,3 +4741,100 @@ pin或镜像下载；若与4090pin不同，记录逐文件/tokenization差异，
 同本机同initializer，不把旧数字当新同预算对照。新wrapper/config/合同/输出
 命名空间；原cost入口/合同/配置与结果均不改写。仅空卡、CPU/TDD/完整三件套及
 真实对应测试后，先披露确切cwd/命令/outputs，再运行原架构零optimizer cost。
+
+### 25.60 C-41：真实train逐候选梯度的局部机制审查（预声明）
+
+科研价值：表5-3/R1机制识别。§25.58 common-bias只测总merge倾向，exact与
+shuffle在均匀logit时相同，不能识别pair assignment。对实际train标签，在相同
+构造zero-real/dummy logits下对每条合法前件logit求partial derivative，比较
+规范marginal与固定四aux的单边方向，尤其 `i<j<k, gold(i)!=gold(j)=gold(k)`
+中的错边k→i；不是观测模型错误或可修复率。可行性：LOCAL轻量Torch2.8 CPU，
+类型块最大28，合法候选全集66141；复用已核Torch矩阵递推，完整2622docs，
+无模型/weights/optimizer/dev/final-valid。所有labels/order/type输入锁与§25.58
+一致，独占 `learning_edge_gradient_audit/`。不改loss/scale/seed/endpoint。
+按wrong/true parents与ancestor-wrong子集报告方向计数与doc级聚合，
+四aux+规范marginal+固定scale组合均保留；不能只挑exact占优的候选。
+每doc各partial之和须与§25.58 common-bias导数匹配（abs≤1e-8）；
+first有合法候选、first有ancestor-wrong、最大type块三份train doc对固定候选
+的四aux/规范marginal中心差分δ1e-6、abs≤1e-8，不按结果挑doc/候选。
+零导数仅数值诊断界限1e-12，不用于推理或选模；partial不能保证共享NN更新
+后每条edge或主指标改善。FAIL保留且不改阈值救过。
+
+§25.59新一手资产核查：5090 processed parent train为2913docs，不能直接
+作为2622doc训练。只按冻结manifest选取并sort_keys序列化，本机已重建
+`r1-v64-c5-5090-20261014/input/train.jsonl`，91419429bytes，SHA
+**20ea01ebe71fb8c8e4f207368673cc71f29840a290698eefe15de3a24a3b6f05**，
+与封存A3逐字节一致；不搬训练权重。P1 SHA与train manifest实际核一致。
+本机generic Model SHA **e3c6f2c847224ae5b92dcb7fdd4d1af048401e0832ffea8d4b1beb4da37a2a36**，
+只正规化换行与将两个model_name默认路径换成4090pin，SHA即为原
+**03aa41ea0da3b0d14fe51096fd263cee22a2336c19c0bfb8f4786296f9dbc734**；
+DATA/UTILS分别原8375a8…/c1b499…，实际模型构造显式传路径，架构代码不变。
+
+旧pin tokenizer_config SHA **dfef66475ba1a217ceab1a29ba012843041e11627cab56f5f83c7b9804cfa5c5**
+实际成功SSH只读得到145bytes，是接口错误JSON（Code/Message/RequestId/Success=false），
+不是规范tokenizer配置。旧文件/结果不改写，不把library defaults隐藏为正常元数据。
+新5090pin的tokenizer_config为规范25bytes、SHA
+**994f46754c5bf4014f1aa92d34b1374319c3a6b3f702105cd5b742beaecd18ce**；
+其余5文件实测与旧pin注册一致（包含pytorch_model.bin SHA278b7a…）。
+仅为输入比较在5090重建旧pin参考视图：5个本机已有相同文件symlink+
+旧145byte元数据副本，核全目录内容摘要必须复现71be…，不复制/搬运weights，
+且旧元数据不用于新训练。分别tokenize完整2622train，比较全token IDs/
+attention/spans/events_idx/coref/关系labels序列digest，未匹配前不称input等价。
+
+### 25.61 C-41：5090实际pretrained模型的结构aux梯度与共享预算（预声明）
+
+科研价值：表5-3/R1可行性与归因。§25.60只是构造logit partial；用实际相同
+pretrain initializer的原模型检查新固定四aux连接head/共享encoder、量级与
+canonical/其他任务的夹角，识别“只是改变共享梯度预算”竞争解释。
+可行性：5090 CPU四线程/隐藏CUDA，固定seed13/peak8同token/spans/labels，
+不加载teacher、零optimizer/权重更新、零dev/final-valid，不定义method组件。
+复用公开Model/data、已封存typed_probabilities/marginal_loss与已核矩阵函数，
+forward hook只捕获原pair-MLP raw scores，不改变forward/权重/原码。
+同一train-mode图分别测规范marginal、exact/root/mass/真实assignment-shuffle，
+保留原关系三项loss/权重，统计所有有梯度的head及encoder参数norm/与canonical
+和关系gradient的cosine；None只代表原模型未用参数，逐名记录，不当0填掩盖。
+总weight0.4/2/4/4、aux scale1不变；不按新结果调scale或选择endpoint/初始化。
+参数SHA前后相等、所有实际grad有限；head与encoder梯度连通性检查，
+FAIL保留。独占 `r1-v64-c5-5090-20261014/actual_aux_cpu/`，不覆已完成cost。
+CPU单batch耗时不充当CUDAepoch/optimizer预算；cosine不是实际NN更新后
+某条edge改善或MUC提分。这一审查不放行method训练。
+
+§25.58 实测完成：全2622 train docs，positive 1573 / no-positive且有合法候选938 /
+无合法候选111；canonical解析导数最大误差3.3306690739e-16，aux中心差分
+最大5.1353317432e-11。按doc平均dL/db如下（下降步骤与导数符号相反）：
+
+| 组 | canonical | exact aux | root aux | matched-mass aux | shuffle aux |
+|---|---:|---:|---:|---:|---:|
+| 全train | .131369159827 | .003760880429 | .002892658078 | .004574248516 | .003760880429 |
+| positive | .128039859801 | -.045936226863 | -.050556983478 | -.044580441024 | -.045936226863 |
+| no-positive/有候选 | .152498121108 | .087546602708 | .092868533573 | .087546602708 | .087546602708 |
+| 无候选 | 0 | 0 | 0 | 0 | 0 |
+
+因此“aux只增加保守性”不适用于所有组：positive组平均aux推动merge，
+no-positive组抑制merge；不能将这一步直接解释为真实参数更新或提分。
+`learning_direction_audit/executed_source.py`保留真正执行SHA9005ecc4…；Git入口
+随后仅做lint整理（lambda显式绑定n、未用变量名与折行），执行记录不换成新SHA。
+
+§25.60 实测完成：全部66141合法候选，wrong 52130 / true 14011，ancestor-wrong
+子集4685；最大sum-vs-common-bias误差3.3306690739e-16，固定候选中心差分
+最大7.5933296977e-11。下表是导数<0、即该单边下降方向**增加错边**的计数；
+并非实际模型错边、修复率或训练后的数量。
+
+| loss | 全wrong候选/52130 | ancestor-wrong/4685 |
+|---|---:|---:|
+| canonical | 0 | 0 |
+| exact aux | 4139 | 719 |
+| root aux | 5718 | 2745 |
+| matched-mass aux | 14325 | 4139 |
+| assignment-shuffle aux | 9153 | 1957 |
+| .4×(canonical+exact) | 141 | 3 |
+| .4×(canonical+root) | 459 | 192 |
+| .4×(canonical+mass) | 278 | 25 |
+| .4×(canonical+shuffle) | 1915 | 294 |
+
+exact在这个构造点比root/mass较少产生反向错边信号，但canonical单独已全部
+方向正确，故**没有证明exact胜canonical**；exact组合仍有141条wrong候选
+方向变坏。true候选canonical与exact/root/mass组合全部14011方向正确；
+shuffle组合有17条方向变坏。完整positive/negative/zero与逐doc记录均保留，
+不是只报告有利子集。执行source SHA22310a00…，输出在旧R1根
+`learning_edge_gradient_audit/`。保持固定loss/scale/endpoint，不将此诊断当准入。

@@ -172,3 +172,11 @@ uniform-parent先验审查完成（R1 §25.56–§25.57）。明确保留“概�
 可能使模型更保守，FP下降但FN增加”的竞争解释；当前只有密度/构造prior，
 没有真实模型的update direction或收益。保持固定loss/scale/五臂/endpoint，
 不以研究prototype通过解除单卡/实际结构预算与正式合同边界。
+
+10-14补充可识别性边界：所有合法real logits共同为b、dummy为0时，精确
+forest递推有Cij=σ(b)（i≠j）。归纳：设t=exp(b)，第j行real概率t/(1+jt)，
+对任一i<j，Σk<j Cik=1+(j−1)t/(1+t)，相乘即t/(1+t)。因此
+assignment-shuffle保留相同C，common-bias导数不能识别assignment；这不是
+shuffle对照失效，更不是祖先效应被证实。需用逐候选及实际模型梯度区分。
+全train局部诊断已完成，结果与限制只见R1 §25.58/§25.60；canonical单独的
+候选方向已正确，不能把exact相对root/mass的诊断差异冒称方法提升。
