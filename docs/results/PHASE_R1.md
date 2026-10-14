@@ -4618,3 +4618,16 @@ remote HEAD，但传bundle失败，审查尚未启动。为独立推进，用`/t
 CUDA始终隐藏；不载入模型/weights或做训练，不改项目GPU extras/系统Python。
 这是操作性机器调整，病例/输入/目标/容差不变；LOCAL CPU计时单独标，不外推远端。
 若下载/安装失败只报告环境阻断，不能填求导PASS。
+
+### 25.57 C-41：train label稀疏性与uniform-parent辅助目标风险（2026-10-14，预声明）
+
+科研价值：表5-3/R1设计有效性。数值稳定不能说明目标方向合理；exact概率总体
+更大，而MAVEN gold正pairs可能稀疏。检验给定类型合法pair中gold密度、
+没有正pair的文档比例、在构造uniform parent先验下exact/root surrogate的
+文档平均loss/soft predicted mass，识别过度压低合并概率的竞争解释。
+可行性：LOCAL轻量NumPy，原train file/manifest/P1与冻结cache的mention顺序/types
+完整2622doc逐ID/mention/type对齐；不读取dev/final-valid、不加载模型或teacher
+权重、不用其错误标签。复用已核 `posterior_scores`，固定每row均匀分布；
+该先验不是实际pretrained预测，所有分数只作训练标签/目标诊断，不构成部署结果、
+可修复率或power。不改已冻结loss/scale/endpoint，也不重开已停止的固定解码控制。
+独占 `learning_prior_audit/`；保留全部doc counts/source/hash与聚合，而非挑例。
