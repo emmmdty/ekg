@@ -1,0 +1,33 @@
+{
+  "census": "runs/stages/R1/r1-v63-c5-20261013/training_chunk_audit/report.json",
+  "checkpointing": true,
+  "entrypoint_sha256": "ec6ad9edc6ca16e07e6437e1180ec3ad48949016dccfe26700c200a042d48241",
+  "final_valid_accessed": false,
+  "input_sha256": {
+    "data/protocols/v6/manifests/maven_ere_train.json": "47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68",
+    "docs/phases/PHASE_C5_original_joint_cost_20261013.md": "d056b2220f9182c7649de0ecc9577d12ec55edb17559bc4a1acec22ae9906074",
+    "docs/phases/PHASE_C5_structure_budget_20261014.md": "db9a1d8301fd5b8c2cc7d85d253a5253a22f6be400b293a60221afa03d07aecd",
+    "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/src/data.py": "8375a8a2bbf277098111213ec831f559226f16d3938f8381216e4a51c2f9e982",
+    "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/src/model.py": "03aa41ea0da3b0d14fe51096fd263cee22a2336c19c0bfb8f4786296f9dbc734",
+    "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint/src/utils.py": "c1b49911366ec505ba52405ac1f210274a50b723d9dd62664fa966ecd2f2fd61",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl": "20ea01ebe71fb8c8e4f207368673cc71f29840a290698eefe15de3a24a3b6f05",
+    "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+    "runs/stages/R1/r1-v63-c5-20261013/original_joint_cost/cuda/peak/report.json": "e399c5008c038f6496fd702ccbb1ac45ea71db52f588b37514f6ed42be0f61d3",
+    "runs/stages/R1/r1-v63-c5-20261013/original_joint_cost/cuda/worst/report.json": "ea2fab3e442deb5db441fdaf898b07a94cbab1f11a202753db8c96488d866afe",
+    "runs/stages/R1/r1-v63-c5-20261013/training_chunk_audit/report.json": "329bd608d33eba3b85021c8fffc4dfc098fc70e5ad9bf3029a67f102fbccc917",
+    "runs/stages/R1/r1-v63-c5-20261013/training_interface_audit/audit.py": "93b7fa097e67c5d2d1338c938ecef0ccbed240625a27701ede174322b0467988",
+    "scripts/profile_original_joint_cost.py": "295ba0de2655ee8f76471a52f0b10744fec57667a21bd8a856e0b567bb5c907a",
+    "scripts/run_first_dummy_control.py": "0dbbfc88f61b9d0104b7bfc74841c17d8faf17096ef39a6055ee671e07b9e847"
+  },
+  "method_admitted": false,
+  "original_cuda": "runs/stages/R1/r1-v63-c5-20261013/original_joint_cost/cuda",
+  "output": "runs/stages/R1/r1-v65-c5-4090-20261014/structure_budget",
+  "pretrained": "/data/TJK/models/local/roberta-base/2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736",
+  "pretrained_digest": "2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736",
+  "probe_lr": 0.0,
+  "schema_version": "ekg.c5_structure_budget.v1",
+  "seed": 13,
+  "source_root": "runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/workspace/source/joint",
+  "train_input": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl",
+  "train_manifest": "data/protocols/v6/manifests/maven_ere_train.json"
+}

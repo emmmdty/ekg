@@ -4930,3 +4930,51 @@ pretrained_digest改为旧71be7419…；其余input pins/max_length256/数据代
 原cost仍零optimizer、零权重更新，不读dev/final-valid；通过也不自动准入方法。
 随后实际optimizer显存与固定结构aux预算须单独预声明/新输出身份，再闭合
 正式执行合同，不增加seed或改loss/scale/endpoint。不跨机搬weights。
+
+### 25.63 C-41：固定五臂实际optimizer与结构成本审查（预声明）
+
+科研价值：表5-3/R1正式执行预算；原joint四头无optimizer峰值不能放行五臂，
+必须实际测每个固定目标的完整forward/backward与optimizer临时状态。
+可行性：4090本机原公开Model/data、train两个固定8doc fixtures与矩阵/typed监督
+helper已有；新research profiler独占r1-v65-c5-4090-20261014/structure_budget/，
+不改原cost/code/results。source/input/initializer pins与fixture逐项钉住。
+新目标各臂使用规范Roberta metadata内容地址2c7ff1…（本机同weights、仅metadata
+修复的新view；须核digest/token输入相等，不修改旧71be…）；seed13、max_length256、
+固定0.4/2/4/4，aux scale1、所有臂nonreentrant checkpointing=true。
+
+本审查只用train固定fixture，不做epoch、dev或final-valid。严格lr=0：按官方
+encoder AdamW/scorer Adam实际执行cold/warm两次step，初始化真实一二阶状态并
+测step temporaries；两optimizer各两次API调用如实记账，参数SHA前后必须相同。
+这不是旧“零optimizer”cost合同，不谎报optimizer_steps=0；零权重更新、零训练
+rollout，momentum状态变化不保存为checkpoint。所有grad有限，按臂记录完整
+CUDA peak allocated/reserved与同步timing，不扫batch/目标权重或检查提分。
+CPU小模型先TDD证明lr0+两个optimizer真实状态/参数不变，再远端CPU真实测试。
+五臂/两个fixture固定10个成本病例，在空卡并行不同任务，非多seed。
+某fixture/臂OOM或fail就保留失败，不用更小输入静默替换；实际cost不能称
+正式epoch计时，最终预算须在真实train全遍或透明保守外推中单列不确定性。
+GPU启动仍须披露确切cwd/命令/产物；method_admitted=false，禁真正权重更新。
+
+§25.62 实际完成：GPU1 peak23chunks、GPU2 worst55chunks，原off/on checkpoint loss
+完全相同，221个参数梯度均finite且同集合；最大abs差分别5.5879354477e-8/
+5.9604644775e-8，固定rtol1e-4/atol1e-6全部PASS。
+
+| fixture | off allocated/reserved GiB | on allocated/reserved GiB | on forward/backward秒 |
+|---|---:|---:|---:|
+| peak8 | 4.552087 /4.953125 | 1.322186 /1.730469 | .089731 /.186546 |
+| worst8 | 11.234208 /11.791016 | 3.648078 /4.166016 | .249847 /.354027 |
+
+首个off执行包含CUDA/kernel冷启动，不把off/on时间比当速度收益。CPU与CUDA
+dropout/kernel不同，本次只证明CUDA内部重算loss/grad等价，不宣称跨设备bitwise
+等价。两参数SHA前后同5b67cbba…，optimizer_steps=0；source295ba0…、配置
+3f78e6f0…、source commit b687e37。8项非权重回传LOCAL逐manifest SHA一致。
+peak/worst report SHA **e399c5008c038f6496fd702ccbb1ac45ea71db52f588b37514f6ed42be0f61d3** /
+**ea2fab3e442deb5db441fdaf898b07a94cbab1f11a202753db8c96488d866afe**。
+两任务已完整落地；随后成功核卡GPU1/2均回到11MiB/util0，无继续占用。
+
+原A3 run_metadata成功只读核到历史训练真实argv：epochs100、seed13、lr3e-4、
+bert_lr2e-5、batch8、accumulation4；不拿generic main默认lr1e-4/batch4当历史预算。
+后续正式同预算对照必须保持此实际设置，warmup200沿官方代码，总训练steps沿
+官方len(dataloader)*epochs（即原scheduler计数，不静默“修正”为optimizer次数）。
+本机已存在规范2c7ff1… pin，实测digest与5090一致；无需新建/下载/跨机搬weights。
+§25.63小模型CPU-only TDD实际8 FAIL（入口缺失）→8 PASS，真实AdamW/Adam的
+momentum states创建与lr0参数不变均已检验；不得把cost probe lr0写进正式训练lr。
