@@ -265,6 +265,10 @@ author delegation releases a new in-scope research queue; it does not reopen old
   C-41 latest: original-joint full four-head CPU backward on both frozen chunk fixtures and
   nonreentrant checkpoint loss/all-gradient equality verified (§25.54); five-arm loss/endpoint
   design and pre-method conditional power assumption rebound to five completed controls (§25.55).
+  LOCAL CPU-only synthetic objective boundary/precision/autograd audit and full-train
+  label sparsity/uniform-prior risk diagnostic completed (§25.56–§25.57), without model
+  loading or updates. Empty-pair NumPy mask failure was repaired under a new r2 namespace;
+  the original failure/source are preserved. No deployment benefit is inferred.
   CUDA/optimizer headroom/aux cost and the formal execution contract remain pending; no method
   admission or new deployment gain. Code/config/contract: original_joint_cost_20261013.
   Author reiterated actual metrics or overall-method innovation as the deliverable. A fixed

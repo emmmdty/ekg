@@ -3,7 +3,7 @@
 > 更新于 **2026-10-13**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；原tokenization census与两组固定输入的完整四头CPU反向/checkpointing梯度等价均完成（§25.53–§25.54）；五臂loss/固定endpoint/最坏已观测噪声的条件power规划假设已绑定（§25.55）。当前待单卡CUDA峰值/optimizer余量/结构aux预算与正式合同，method仍未准入。C5切片保持wip，D4/A4未接队。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；原tokenization census与两组固定输入的完整四头CPU反向/checkpointing梯度等价均完成（§25.53–§25.54）；五臂loss/固定endpoint/最坏已观测噪声的条件power规划假设已绑定（§25.55）。本次已继续完成LOCAL隔离CPU的固定aux数值/求导边界与全train label/构造先验风险审查（§25.56–§25.57），均不构成模型提分。当前仍待单卡CUDA峰值/optimizer余量/正式结构预算与合同，method未准入。C5切片保持wip，D4/A4未接队。
 
 ## 当前正式活动阶段
 

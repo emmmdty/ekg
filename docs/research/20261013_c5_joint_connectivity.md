@@ -166,3 +166,9 @@ Endpoint固定为原100epochs预算的最后一步，所有臂不在internal-dev
 完整原joint三个关系任务同endpoint一并报告，区分aux的共指收益与共享任务代价。
 任一关键比较失败则记录负结果并停止该固定配置，不改scale/endpoint/decoder
 或加预算挽救；协议/实现错误需要单独TDD修复及新身份，不能静默覆盖结果。
+
+2026-10-14：固定四aux的数值/空pair/确定性边界与差分检查、全train label/
+uniform-parent先验审查完成（R1 §25.56–§25.57）。明确保留“概率整体膨胀后aux
+可能使模型更保守，FP下降但FN增加”的竞争解释；当前只有密度/构造prior，
+没有真实模型的update direction或收益。保持固定loss/scale/五臂/endpoint，
+不以研究prototype通过解除单卡/实际结构预算与正式合同边界。

@@ -4631,3 +4631,54 @@ CUDA始终隐藏；不载入模型/weights或做训练，不改项目GPU extras/
 该先验不是实际pretrained预测，所有分数只作训练标签/目标诊断，不构成部署结果、
 可修复率或power。不改已冻结loss/scale/endpoint，也不重开已停止的固定解码控制。
 独占 `learning_prior_audit/`；保留全部doc counts/source/hash与聚合，而非挑例。
+
+§25.57首次LOCAL入口 **8a02ba8** 在singleton type块的空pair处失败：
+`np.array([])`缺省float64，作为mask时报IndexError。无报告/分数，属于实现错误，
+不是科研负结果。已用实际AST assignment在n1空pair独立重现。保留原失败/source，
+只将mask dtype显式bool，新的 `learning_prior_audit-r2/` 重跑同输入/目标；
+import排序仅lint修正，不修改冻结官方代码、loss或已有实验结果。
+
+§25.56 LOCAL实测 **complete**：隔离uv环境Torch **2.8.0+cpu**，CUDA隐藏/4线程，
+**120 cases /480 aux求导**全部有限且bounds/空pair检查通过；无模型/optimizer/数据访问。
+float32-vs64最大loss/gradient绝对误差分别 **1.1203050221e-7 /2.1326273955e-8**；
+四目标逐logit中心差分最大误差 **1.2901804972e-10**；总量匹配最大误差
+**1.9073486328e-6**，均满足预声明容差，未加clipping/eps/stop-gradient。
+最大n28的四aux完整forward/backward CPU中位数/最大值
+**0.0067941495 /0.0087583240s**；只是本机microbenchmark，不含模型/optimizer、
+GPU拷贝/launch/同步，不外推单卡epoch或deployment收益。
+Torch提示isolated环境未装NumPy；本入口不调用NumPy转换，审查全量完成，原环境日志保留说明。
+研究入口SHA **f9486e04a15145568a5e1bdc8a1e79b3b5d8bb79ef80bcfeda3b842d41ff3d4e**，
+report SHA **8375afacc725bf73d98170501e251f2e93240cbfc043718c8ce23db6fda0bac7**；
+五项manifest SHA **7c3edb518cde03a60f107d501c173e0cda5f832d623d8f6bb9e47de747c52412**。
+研究asset只做边界审查，尚无production method code/训练准入或MUC分数。
+
+§25.57 r2 LOCAL完整train审查完成，同输入/顺序/type绑定，无checkpoint：
+**2622docs/66744mentions**、合法同type pairs **66141**、gold same-cluster pairs
+**14011**，positive density **21.1835321510%**。**1049docs（40.0076277651%）**
+无positive pair，**111docs**连合法pair也没有；空pair在已固定doc-average aux中loss0，
+不是临时exclude，也不把无positive文档删出监督。raw train按type/identity直接
+独立重算三项计数，与原mention-order reporter全量一致；P1 protocol SHA实际核过。
+构造uniform parent下exact每个合法pair恒 **0.5**，全train软pairs总量
+exact **33070.5**、root-product **25294.4062451369**，mean doc surrogate
+分别 **0.6132409841 /0.6220031382**。这是构造先验下的目标差异，不是实测模型
+score/预测簇/F1；loss更低不代表MUC更高，更大的概率量不能独自证明依赖归因。
+
+科学判断：标签确实稀疏且大量文档只给false-merge惩罚；“aux可能令模型更保守、
+减少误合并却增加漏合并”保留为竞争解释。仅凭密度/构造prior不能确定梯度或
+部署方向，不判候选已成功/失败，不改loss/scale/endpoint。未来报告必须同时给
+spurious/missing links与exact-vs-mass归因，不以loss下降或数学PASS当创新结果。
+r2入口SHA **97ac526409972774922121e5b7c41dc17e1df1e19df439d02aa0d1be3ba26019**，
+report SHA **8952f1318215339a15684a5e18affd1e3ac383e936fc003617833e23fa9a9c13**，
+三项manifest SHA **06a7691ab99b9f2199d97e7fa4fa56679b09ff5879446c438011d7c6b77aa56a**；
+原失败及源码两项manifest **b988f0d3d31202dca411f6e5b83410bf7928ba803c7959e6dff48d729a204777**，
+不覆盖、不把实现报错写成科研负结果。empty/mixed-pair mask真实AST回归已
+FAIL→PASS，额外独立raw train counts一致；最终本地三件套结果与备份状态另补。
+
+§25.56–§25.57最终本地三件套 **901 passed/54 skipped（21.36s）**、
+ruff0（含两个research assets）、CPU smokeOK；R1 consistency 36项PASS。
+默认项目env依然无Torch，skip如实保留；本次新数值证据来自单独CPU-only环境
+实际Torch求导，不把skip冒称PASS，不宣称远端/CUDA或method通过。无新的baseline/
+方法训练、额外seed/5090任务/权重搬运，无等待GPU自动启动器。非权重远端备份另补。
+下一独立CPU动作可从真实train标签检验固定aux在common-real-logit偏移方向的
+梯度，与规范marginal对照，按no-positive/positive docs分别报告；仍是构造分布下
+数学信号，不是完整模型更新或部署效应。先预声明/更新主表再执行，不扫loss scale。

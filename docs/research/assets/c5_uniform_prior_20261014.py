@@ -9,9 +9,8 @@ import numpy as np
 
 from ekg.core.stage_bundle import sha256_file
 
-
 ROOT = Path('runs/stages/R1/r1-v63-c5-20261013')
-OUT = ROOT / 'learning_prior_audit'
+OUT = ROOT / 'learning_prior_audit-r2'
 TRAIN = Path('runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl')
 MANIFEST = Path('data/protocols/v6/manifests/maven_ere_train.json')
 ORDER = ROOT / 'frozen_null_control/cache/train/documents.jsonl'
@@ -23,7 +22,6 @@ binding = json.loads((ROOT / 'training_structure_audit/report.json').read_text()
 assert sha256_file(ORDER) in json.dumps(binding), 'frozen mention order hash not bound'
 sys.path.insert(0, str(Path('scripts').resolve()))
 from replay_forest_coref_control import posterior_scores  # noqa: E402
-
 
 OUT.mkdir(exist_ok=False)
 data = [json.loads(line) for line in TRAIN.read_text().splitlines()]
@@ -56,7 +54,8 @@ for record, cache in zip(data, order, strict=True):
                 assert np.max(abs(c[np.tril_indices(n, -1)] - .5)) < 1e-12
             matrices[n] = c, product
         indices = np.tril_indices(n, -1)
-        truth = np.array([labels[i] == labels[j] for i, j in zip(*indices, strict=True)])
+        truth = np.array([labels[i] == labels[j] for i, j in zip(*indices, strict=True)],
+                         dtype=bool)
         checked_positive += int(truth.sum())
         for arm, matrix in enumerate(matrices[n]):
             score = matrix[indices]
