@@ -4589,3 +4589,25 @@ reportSHA **0ec0eb22ca5e23a474d5aebd4e92c340c26e65779e1c85cab31fa06461d698d6**�
 两个cost PID再次成功读到GONE。未占GPU，无method训练/新5090任务，C-41继续wip。
 临时ControlMaster `/tmp/ekg-c41-cost-4090-20261013.sock` exit请求成功，
 local ps已确认PID **10680 GONE**；它只是SSH传输复用，不是训练/空卡启动watcher。
+
+### 25.56 C-41：无需空卡的固定aux数值/求导边界审查（2026-10-14，预声明）
+
+科研价值：对准表5-3/R1代码与结构aux可行性门。已有数学和真实encoder梯度
+不证明最终四个aux在空pair、无正例、确定性极限或最大type块时可稳定求导。
+本次检验exact/root/matched-mass/shuffle统一pair-F1目标的有限值、质量匹配、
+精度敏感性与kernel额外成本；数学/梯度正确不替代MUC提升。
+可行性：4090 CPU四线程/CUDA隐藏；仅synthetic parent logits与构造gold partitions，
+不加载模型/权重、不读dev/final-valid、零optimizer，独占 `learning_numerics_audit/`。
+复用已验证interface audit的Torch `matrices`函数（AST只提取此函数，核源码SHA），
+仅添加已冻结目标的研究计算，不生成可复用method组件/runner或启动训练。
+固定n=1/2/4/8/28（来自§25.49真实train类型规模；不再tokenize或导出teacher）；
+zero/seed13-random/dummy-dominant/chain-dominant四种logit输入，后三类是边界
+测试而不是调参/训练方案；构造singleton/one-cluster/parity三种labels，
+分别float32/float64，全部120个cases/四种aux记录loss/gradients，不挑例。
+容差预先固定：float32-vs64 loss绝对差≤1e-5、gradient allclose rtol1e-4/atol1e-6；
+矩阵bounds容差1e-5、质量匹配abs≤1e-4+1e-6*exact mass。finite difference只
+对n4/random/parity的float64四个目标逐logit测δ1e-6，误差≤1e-8；
+空pair目标/梯度严格0，分母0仅按原冻结数学定义alpha0且必须核correction0，
+不加clipping/eps掩盖异常。记录边界分支及失败，FAIL不修改已运行输出/放宽容差。
+固定n的完整四aux forward/backward单次CPU时间与类型规模histogram只给kernel成本
+描述，不外推GPU epoch或Adam内存；不重证此前n3 wrong-link toy或重复封存控制。
