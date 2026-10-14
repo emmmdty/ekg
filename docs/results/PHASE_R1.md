@@ -4838,3 +4838,82 @@ exact在这个构造点比root/mass较少产生反向错边信号，但canonical
 shuffle组合有17条方向变坏。完整positive/negative/zero与逐doc记录均保留，
 不是只报告有利子集。执行source SHA22310a00…，输出在旧R1根
 `learning_edge_gradient_audit/`。保持固定loss/scale/endpoint，不将此诊断当准入。
+
+§25.59 input与原成本实测完成：两个完整train tokenizer投影的逐doc文件字节相同，
+2622 docs /4799 chunks /892998 nonpad，token/mask/span/events_idx/coref/三关系
+label stream SHA **293fad976f66c3480edd72a638c3974055766b8bbd241bed9675eafb7fa7aad4**。
+规范新pin与旧错误metadata参考view只在本次slowRobertaTokenizer/max_length256
+调用下证明输入一致，不泛化到其他consumer或隐藏旧文件错误。
+
+| 5090 CPU fixture | chunks | 原forward/backward秒 | checkpoint forward/backward秒 | 有梯度参数 | 最大grad差 |
+|---|---:|---:|---:|---:|---:|
+| peak8 | 23 | 4.5565 /5.0767 | 4.0206 /8.8547 | 221 | 0 |
+| worst8 | 55 | 12.8069 /14.3967 | 11.1112 /22.3962 | 221 | 0 |
+
+两fixture loss等价，零optimizer，参数SHA前后均**5b67cbba9d07f1fb3408b9623833a65f7d8eecaa4799a8b6a0021be3d44a53d6**，
+与旧4090 CPU initializer一致；不声称CUDA/跨机训练轨迹等价。Torch2.8.0+cu128
+但CUDA隐藏。CPU cumulative RSS包含parity buffers，不充当GPU显存；Adam两moment
+仅按parameter bytes推算，optimizer_memory_measured=false。
+非权重14项回传LOCAL，全部artifact manifest逐SHA复核，源5090/LOCAL均保存在
+`r1-v64-c5-5090-20261014/`。report SHA：tokenization **50e9519a…**、
+reference **4d7c1460…**、peak **4da6e2e8…**、worst **a12accd6…**。
+成功SSH ps查询实际CPU PID2750907/2750981均无行（GONE），报告完整；不是凭SSH失败判死亡。
+
+新增研究入口全套验证：pytest **913 passed/54 skipped，20.15s**，ruff0，CPU smokeOK，
+R1 consistency36PASS；默认项目env仍缺Torch，未将skip当远端实际梯度证据。
+source同步bundle SHA180cfbf9…经远端核一致。首次fetch误用refs/heads/main（bundle
+实际只含HEAD）失败且未启动任务；纠正为HEAD ref后才启动CPU审查，不当科研FAIL。
+5090最近成功核卡31967MiB/util92%，有他人任务，无CUDA启动/训练/等待启动器。
+
+§25.61 **实际 complete**：5090 CPU/四线程/隐藏CUDA，固定peak8/23chunks、
+同train-mode forward图，seed13、checkpointing=true，零optimizer/update。
+四aux与canonical均连接全部原共指MLP参数及共享encoder，梯度finite；
+仅encoder pooler两参数unused（原Model不消费pooler输出），逐名保留。
+关系loss不连共指头，其unused共指参数与undefined head cosine均如实记录None。
+下表norm为未乘0.4的canonical/aux，关系行已含原2/4/4权重。
+
+| loss | 实测loss | head grad norm | encoder grad norm | encoder cosine vs canonical | encoder cosine vs关系 | head cosine vs canonical |
+|---|---:|---:|---:|---:|---:|---:|
+| canonical | .28323510 | 2.21065677 | .73112809 | 1 | -.08327333 | 1 |
+| exact aux | .67982131 | .59519956 | .31201143 | .61120952 | -.04145524 | -.01220570 |
+| root aux | .67841578 | .61894343 | .32577494 | .59950005 | -.05015434 | .00346514 |
+| matched-mass aux | .67281175 | .59303941 | .31158148 | .61392511 | -.04188390 | .03462563 |
+| assignment-shuffle aux | .67806786 | .54990230 | .30831598 | .62579533 | -.05871081 | .05747901 |
+| 加权关系三项 | 11.11761284 | 0 | 6.44589777 | -.08327333 | 1 | undefined |
+
+实际forward4.61662s，各loss单独autograd7.97507–8.53894s；同图retain/recompute
+不是一次正常optimizer step，不外推CUDA/epoch wallclock。各aux编码器norm相对
+canonical约.422–.446；乘固定0.4后相对加权关系norm约.0191–.0202，exact为
+.01936186。仅此固定batch/pretrained点，norm大不等于任务支配或唯一失败原因。
+exact与matched-mass的量级及encoder cosine接近，故本审查没有分辨出独有收益；
+不同loss的绝对值不能横比成优劣，shuffle loss更低也不是负控胜出。
+保留共享梯度预算、assignment与整体质量膨胀三个竞争解释，不调固定loss scale。
+
+参数SHA前后仍5b67cbba…，完整source SHA
+**ea3d1a6355d6e2bf1c5ac20278d4e06f0c72809fb5ca93abb60a7b219ad74c55**，
+source commit42fc51d；配置5083b01d…、矩阵93b7fa09…、原input/P1/source pins
+实际核验。report SHA **8cc4c0df68c7179d62c8a4c6acbf56c43d2069d10f1ce445b9da5d9b6d10af07**，
+独占 `r1-v64-c5-5090-20261014/actual_aux_cpu/`，report/source/log三项manifest
+5090与LOCAL逐SHA一致。成功SSH确认PID2770187 GONE且report完整。
+§25.58/§25.60 report+逐doc+真实执行source+manifest共8项亦双端备份核一致，
+包SHA **50bd0f0ca5c9d5e1053bd4eda7ddef01fb4dcd03b2317803b6388cf9b644ea32**；无weights搬运。
+
+科研裁决：R1数据、数学、CPU信号与本机输入/initializer检查可继续支持固定五臂
+辨别实验，但没有真实更新、部署预测或新MUC结果。**method_admitted=false**，
+C-41/T087保持wip。当前独立CPU审查已完成；下一必要证据是已授权空5090的
+原架构peak/worst CUDA成本、真实optimizer显存余量与结构aux实际CUDA预算，再
+闭合正式执行合同。不能用CPU量级、旧best-dev权重或条件power替代这些门。
+最新成功5090核卡31967MiB/util100%，继续尊重他人任务；未启动CUDA/新训练，
+无自动空卡启动器，单seed/≤一天/跨机权重边界保持。
+
+参考tokenization复核入口：与新pin同一Git helper
+`profile_joint_cost_target.tokenization(config, torch)`（入口SHA50ef23b0…），
+仅将本轮config的pretrained改为
+`runs/stages/R1/r1-v64-c5-5090-20261014/input/legacy_tokenizer_reference`，
+pretrained_digest改为旧71be7419…；其余input pins/max_length256/数据代码相同。
+参考报告不冒充main wrapper的同config输出，也不把旧错误metadata用于新臂。
+
+末次两机成功只读核卡：4090四卡23890/23223/23223/23223MiB，util100/76/76/31%；
+5090仍有compute PID2766182占31778MiB（NVML总31967MiB），无可用空卡。
+三个本轮5090 CPU PID2750907/2750981/2770187成功ps核GONE，完整产物已核。
+远端原有未跟踪`mk_probe_contract.py`保留，未覆盖/clean；无遗留自动训练启动器。

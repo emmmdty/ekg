@@ -1,6 +1,6 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-14（+08:00，C-41 结构损失边界与train先验风险实测接续）**。
+> 更新于 **2026-10-14（+08:00，C-41 5090授权、完整输入等价与实际梯度审查接续）**。
 > 本文是新窗口唯一必读入口；按下面的角色、状态与接续步骤直接执行，不依赖聊天记录。
 > 科研改进与路线裁决已由作者委托执行代理，作者验收最终结果；角色不扩大现有资源授权。
 > 当前 **C-41 / T087 为 wip，持有 C5 切片**，后续 **D4 → A4**；唯一权威计划仍是
@@ -12,7 +12,7 @@
 > 普通 newness/singleton、candidate-erasure→dummy 等已有先行机制，不准入创新。候选 brief 见
 > [`research/20261013_c5_newness_admission.md`](research/20261013_c5_newness_admission.md)；
 > 最新执行动作由下方「本次接续」与 §0.3.5 覆盖；exact joint条件power已绑定，预算/执行合同仍未闭合。
-> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.57**。
+> 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.61**。
 > D4 linear 恢复强控制、tanh5 退化（§25.37）；A4 仍无新效果结果；旧失败家族封存，E3 不追加实验。
 > 5090 原 C5 decoder smoke 已 complete，完整 audit 已授权但仍待空卡；无遗留自动启动 watcher。
 > 本轮新 CPU 控制与该原 decoder audit 是两份合同，不能把其中一项完成记成另一项完成。
@@ -22,7 +22,7 @@
 
 **10-14本轮新增授权**：作者已明确允许C-41使用5090空卡做原joint成本验证，及R1准入后的固定seed13五臂训练。≤一天任务范围，超过一天/跨机权重仍须另行确认；原decoder audit保持。原文旧“无新5090授权”只描述当时状态，本段覆盖其C-41范围；不扩大A4或额外seed授权。CPU梯度方向审查与5090资产/资源准备同步推进，均属同一C5切片。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；原tokenization census与两组固定输入的完整四头CPU反向/checkpointing梯度等价均完成（§25.53–§25.54）；五臂loss/固定endpoint/最坏已观测噪声的条件power规划假设已绑定（§25.55）。本次已继续完成LOCAL隔离CPU的固定aux数值/求导边界与全train label/构造先验风险审查（§25.56–§25.57），均不构成模型提分。当前仍待单卡CUDA峰值/optimizer余量/正式结构预算与合同，method未准入。C5切片保持wip，D4/A4未接队。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；原tokenization census与两组固定输入的完整四头CPU反向/checkpointing梯度等价均完成（§25.53–§25.54）；五臂loss/固定endpoint/最坏已观测噪声的条件power规划假设已绑定（§25.55）。本次已继续完成LOCAL隔离CPU的固定aux数值/求导边界与全train label/构造先验风险审查（§25.56–§25.57），均不构成模型提分。新增common-bias/逐候选审查与5090完整输入等价/原CPU重计算完成（§25.58–§25.60）；真实四aux的head/encoder梯度连通性及量级审查已完成（§25.61），参数未更新、尚未分辨exact独有收益。当前仍待单卡CUDA峰值/optimizer余量/正式结构预算与合同，method未准入。C5切片保持wip，D4/A4未接队。
 
 ## 新窗口角色：事件语义与知识图谱方向的科研负责人（PI）
 
@@ -51,8 +51,8 @@
 
 **授权沿用，资源边界保持**：作者已委托科研选择与在范围内的实现、提交/推送，无需逐项问选题。
 本地仅轻量 CPU；4090 空卡且本地门通过可自用，远端 GPU 启动前仍须披露命令/cwd/预期输出。
-5090 已授权的范围仅原 C5 smoke → audit，smoke 不复跑，audit 重新核空卡后执行，不重复问同一授权。
-A4 的 5090 任务、其他新 5090 任务、额外 seeds 与跨机 checkpoint 搬运未授权。
+5090 已授权原 C5 smoke → audit，以及10-14 C-41原joint成本验证与R1准入后的五臂seed13训练（单任务≤一天）。smoke不复跑，空卡核验后执行，不重复问已授权范围。
+A4、超一天任务、额外seeds与跨机checkpoint搬运仍需另行授权。
 final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与数据/ID 闸门保持；不改论文结构、不开展论文/专利写作。
 
 **本次交接整理自审**：科研价值是让新窗口从最新 stronger control 与正确授权出发，避免重复已完成
@@ -63,7 +63,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41/T087，当前C5**：given-type stronger control保留；五个fixed-score/head控制实测未突破并停止（§25.44–§25.50）。当前exact joint结构学习R1：真实模型梯度/结构覆盖/covariance与matched-mass竞争对照、条件power敏感性已核（§25.49–§25.52），full-model五臂设计/power与原模型CPU重算等价已核（§25.54–§25.55），固定aux数值/求导边界已在LOCAL及4090 CPU build通过、全train label稀疏/先验风险完成且非权重双端备份已核（§25.56–§25.57）；单卡CUDA/aux预算及合同未闭合，未准入训练。原5090 smoke complete/audit待空卡、无新任务授权。后续C5→D4→A4。 |
+| **活动任务** | **C-41/T087，当前C5**：given-type stronger control保留；五个fixed-score/head控制实测未突破并停止（§25.44–§25.50）。当前exact joint结构学习R1：真实模型梯度/结构覆盖/covariance与matched-mass竞争对照、条件power敏感性已核（§25.49–§25.52），full-model五臂设计/power与原模型CPU重算等价已核（§25.54–§25.55），固定aux数值/求导边界与全train label/梯度信号完成（§25.56–§25.60）；5090完整token/label与initializer等价、原两fixture CPU重算及实际四aux head/encoder梯度审查已完成，非权重双端备份已核（§25.59/§25.61）；单卡CUDA/aux预算及合同未闭合，未准入训练。原5090 smoke complete/audit待空卡；本轮C-41成本/准入后五臂seed13已授权≤一天任务。后续C5→D4→A4。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
@@ -78,14 +78,14 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 | 🔴 **读表 6-2 的前提** | 评测文档捷径和训练图中的金标边覆盖造成系统差异，不能按 MRR 排序解读，也**不得写“我们超过 CSProm-KG / SimKGC”**。具体证据见 §0.4c 与 `results/PHASE_E.md`。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问。不可行点名类别与一手证据，停止该路线；按 10-08 委托由执行代理在现有主任务内选择下一路线，先改主表再执行。有效性与未授权资源动作仍不可绕过。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文 §0.3 只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **GPU**（细则 §E.3） | **gpu-4090**：10-14 本轮末次成功核卡四卡均有他人任务，不能占用。**gpu-5090**：原 C5 smoke complete、audit 未启动；原成功核卡有他人 vLLM，10-13末次 SSH `Connection refused`，现态 UNKNOWN，须成功 SSH 后重新核空卡。原两项授权保持，smoke 不复跑；A4、额外 seeds 与跨机 checkpoint 未授权。 |
+| **GPU**（细则 §E.3） | **gpu-4090**：10-14 本轮末次成功核卡四卡均有他人任务，不能占用。**gpu-5090**：原 C5 smoke complete、audit 未启动；原成功核卡有他人 vLLM，10-14成功SSH核卡仍有他人任务，C-41原joint新增授权已登记；须重新核空卡。原两项授权保持，smoke 不复跑；A4、额外 seeds 与跨机 checkpoint 未授权。 |
 | ⚠️ **只在 4090 上的大件** | `runs/factuality/predicted_edges_valid.jsonl`（133 MB，**`.1583` 的真上游**）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）、两个对手的 checkpoint、**C5 三个周期的 checkpoint**。**本地那份 `runs/relations/supervised_dump.jsonl` 是另一份 dump，别拿它当上游。** |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与**估算基准率**见 `EXPERIMENT_PLAN.md` §3（按 git 里同类事件的真实起止天数估，不按计算耗时估）。 |
 | 完成后必须做什么 | 按 **§6** 五步回填：产物落地 → 写结果页 → 改主表行状态与 commit → 推进队列 → commit + **push**。**没 push 就没交接。** |
 
 > **工作树状态**：`git status` 干净、`HEAD` 等于 `origin/main`——**具体 hash 用 §0.1 的 `git log -3` 自查**，
 > 不再往本文里抄（抄过两次，两次都过期）。
-> **最近完整三件套（2026-10-14，research assets）**通过，证据见 §25.56–§25.57；
+> **最近完整三件套（2026-10-14，research assets）**通过，证据见 §25.59/§25.61；
 > 10-10 汇总相关测试与一致性门见 §25.37；
 > torch 对应测试在 4090/5090 均用 CPU 真正执行（§25.35）；最新启动证据见 `results/PHASE_R1.md` §25.36。
 > 最新导师可读周报是 [`reports/2026-09-22_周报.md`](reports/2026-09-22_周报.md)；C-28 最终结果
@@ -285,12 +285,13 @@ A4 仍待诊断。三个方法章均未形成新方法贡献，不能用旧“�
 **当前动作**：五类固定控制完整计算/双端评分均complete（§25.44–§25.50），不重放已完成stage、不扫head/threshold/linkage/temperature/epoch。first-dummy源码盲区已确认，但固定适配未改善，结果不翻案。接续§25.49–§25.55与 `research/20261013_c5_joint_connectivity.md`：
 
 - 数据/数学/真实CPU接口已闭合：train结构覆盖、type块规模、full-model从pretrained的gradient connectivity；不要重新导出teacher/cache或再证同一个toy。
-- 本次LOCAL固定aux边界求导与train标签/先验审查complete（§25.56–§25.57），两入口是研究assets，不是method runner；不重跑保护路径。隔离CPU-only uv环境已具备轻量Torch求导能力，本地仍不做GPU或full-model训练。下一独立CPU步骤可预声明真实train标签下common-real-logit方向的aux-versus-marginal梯度，正/无正例分别报告，不冒称真实模型更新。四aux有限/差分支持；正例稀疏下的“减少误合并却增加漏合并”竞争解释保留，尚未检验真实更新/部署方向。
+- 固定aux数值/全train先验、common-bias与逐候选梯度审查已完成（§25.56–§25.60）。构造方向的exact与root/mass存在差异，但canonical单独已方向正确，不能称exact胜baseline。不要重跑保护路径。5090完整train输入/规范pretrain与旧metadata参考投影一致，原模型两fixture CPU反向重计算也完成（§25.59）。实际四aux的原模型head/encoder梯度审查已complete（§25.61）；actual_aux_cpu的report/source/log双端SHA一致；本地仍禁止重模型/GPU。
 - 五臂loss与固定endpoint设计已冻结（§25.55）：同pretrained完整原joint架构/seed13/given-type policy/规范first-dummy；corrected marginal、same-surrogate root-product、exact joint、matched-mass与assignment-shuffle。后者只是pair-assignment负控，不声称只切断ancestry。原strongest type-control与frozen anchor保持。
 - 条件power规划已绑定完成后的五组真实控制噪声（§25.55）：冻结1× envelope下满足目标，1.5/2×敏感性仍不足；这是正式规划假设，不是未知full-model方差或真实效应保证，不拿oracle/location shift冒称提分。不按proposed结果重绑、调大目标、扩seed或恢复已撤销统计家族。
-- 原tokenization census完成（§25.53），两个固定8doc输入的完整原四头CPU backward/重算梯度等价也已完成（§25.54），不重跑已存在CPU路径。直接用新Git入口/config/合同，在4090成功核空卡后先披露确切命令/outputs，执行CUDA cost的peak/worst独占路径；再核optimizer余量/结构aux开销与正式预算/合同。原GPU epoch选卡未钉/CPU计时不能外推单卡PASS。TDD/完整本地门与远端真实测试已通过本cost入口，未来method仍须独立准入与验证；当前 `method_admitted=false`。
+- 5090新增cost资产见`configs/c5_cost_5090_20261014.json`与`phases/PHASE_C5_cost_5090_20261014.md`，输出根`runs/stages/R1/r1-v64-c5-5090-20261014/`。完整train/CPU peak/worst均complete，原4090合同不改写。下一CUDA入口`profile_joint_cost_target.py --config configs/c5_cost_5090_20261014.json --mode cuda --fixture peak`（worst另开独占任务）；cwd`/mnt/aidata/tongjiakai/ekg`，先空卡/披露完整env命令再启动，仅零optimizer cost。不要搬旧权重或使用2913doc parent train。
+- 原tokenization census完成（§25.53），两个固定8doc输入的完整原四头CPU backward/重算梯度等价也已完成（§25.54），不重跑已存在CPU路径。直接用新Git入口/config/合同，在4090或已授权5090成功核空卡后先披露确切命令/outputs，执行CUDA cost的peak/worst独占路径；再核optimizer余量/结构aux开销与正式预算/合同。原GPU epoch选卡未钉/CPU计时不能外推单卡PASS。TDD/完整本地门与远端真实测试已通过本cost入口，未来method仍须独立准入与验证；当前 `method_admitted=false`。
 
-全部本轮CPU入口已实际GONE（first-dummy smoke/fit、original-joint cost两个fixture complete）。本次末次成功核卡4090四卡均有他人任务；SSH失败按UNKNOWN记录，不当进程死亡或科研失败。非权重产物/SHA/备份见results；weights/npz留4090，无watcher、无新5090或checkpoint搬运授权。
+全部本轮CPU入口已实际GONE（first-dummy smoke/fit、original-joint cost两个fixture complete）。本次成功核卡4090四卡、5090单卡均有他人任务；SSH失败按UNKNOWN记录，不当进程死亡或科研失败。非权重产物/SHA/备份见results；weights/npz留4090，无watcher；10-14新增C-41 5090成本/准入后五臂授权覆盖本切片，checkpoint搬运未授权。
 
 conditional error-risk 的旧候选仍缺 train-only 文档隔离 error-state 输入；新的 exact joint 候选
 改变联合概率/监督假设，不用 in-sample teacher errors 冒称 OOF。正文与官方 README 机制

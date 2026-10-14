@@ -262,6 +262,15 @@ author delegation releases a new in-scope research queue; it does not reopen old
   power and ablation/negative-control rules before a method contract or training.
   Do not rerun completed exports or reuse historical pools/power as fresh admission evidence.
   T087 remains active; the existing 5090 decoder audit is separately authorized only on an empty GPU.
+  On 2026-10-14 the author also authorized C41 original-joint cost and post-R1 five-arm seed-13
+  training on an empty 5090, with each job at most one day; checkpoint transfers, longer jobs
+  and additional seeds remain separately authorized. Full-train token/label parity and both
+  original-model CPU cost fixtures completed (§25.59); common-bias and per-edge synthetic
+  gradient diagnostics completed (§25.58/§25.60). Actual fixed-aux CPU gradients completed
+  (§25.61): head/encoder connected, finite,
+  parameters unchanged; no unique exact-method benefit demonstrated. Nonweight artifacts
+  and executed sources were hash-verified on LOCAL and 5090.
+  These checks do not establish deployed gains or admit method training.
   C-41 latest: original-joint full four-head CPU backward on both frozen chunk fixtures and
   nonreentrant checkpoint loss/all-gradient equality verified (§25.54); five-arm loss/endpoint
   design and pre-method conditional power assumption rebound to five completed controls (§25.55).
