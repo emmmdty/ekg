@@ -4978,3 +4978,33 @@ bert_lr2e-5、batch8、accumulation4；不拿generic main默认lr1e-4/batch4当�
 本机已存在规范2c7ff1… pin，实测digest与5090一致；无需新建/下载/跨机搬weights。
 §25.63小模型CPU-only TDD实际8 FAIL（入口缺失）→8 PASS，真实AdamW/Adam的
 momentum states创建与lr0参数不变均已检验；不得把cost probe lr0写进正式训练lr。
+
+§25.63当前工程状态：LOCAL CPU-only小模型8项实际PASS（不是默认env的Torch skip），
+完整本地pytest919 passed/56 skipped（22.20s）、ruff0、smokeOK、一致性36PASS。
+4090的2c7ff1…规范pin已存在且digest实核一致；原两组CUDA证据已回传，但
+随后SSH banner连续超时，彼时新的full-model CPU/结构CUDA入口尚未发起。
+Git bundle5c3d98e5…已scp完成，失败的是后续SSH同步/测试，不当科研FAIL。
+full-train规范pin tokenizer CPU进程2773865已发起；SSH失联期间状态UNKNOWN，
+不能说GONE或complete。原cost的两个CUDA输出complete且后续GPU已空闲证据不变。
+
+§25.63 SSH恢复后对应4090 CPU测试8项实际PASS（source commit1511676，CUDA隐藏）。
+作者同时提醒有人重新使用4090；必须再次核空卡，不能沿用最初四卡全空的状态。
+5090只读测试source传输尝试Connection refused，未同步/执行任务；不作实验失败。
+
+§25.63原CPU exact/peak **FAILED**（入口ec6ad9…/config b9010026…），
+`zero-lr parameter invariant failed`，failure与原log/code保留，不覆盖该目录。
+成功SSH确认PID2830542 GONE。原梯度finite已过，失败在第一次两optimizer step
+后的raw参数SHA检查；不能据此说方法失败，也不能把这次cost冒称complete。
+最小CPU复现：Adam/AdamW lr0、parameter[-0.,0.,1.]、grad[-1.,-1.,1.]后数值
+torch.equal=true，但首元素signbit从true到false，raw bytes改变。原pretrained
+实际也含negative zeros（word_embeddings7处及多个encoder权重/偏置），支持
+此竞争解释，尚需在完整模型逐参数证明没有非零数值更新。
+
+修复预声明：新r2 adapter/config/合同/输出，原入口/结果不改。真实optimizer
+step后严格逐参数torch.equal检查；任何数值变化FAIL且不撤销来掩盖。
+仅当全部值相等时，允许将零元素的原sign bit恢复；记录native前后raw SHA、
+恢复数量、恢复后SHA与实际API次数。每个optimizer post hook单独CPU审计；
+CUDA synchronize放在hook计时开始前，hook时间单列，成本不将CPU复制/校验
+耗时算作原optimizer时间。不增加持久GPU权重副本，不改loss/scale/budget。
+这是B类bit provenance修复，不放宽数值相等，不把恢复byte等同真实学习更新。
+先TDD覆盖signed-zero恢复/非零变化FAIL/nonzero-lr拒绝，再完整CPU复核。
