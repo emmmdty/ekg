@@ -4611,3 +4611,10 @@ zero/seed13-random/dummy-dominant/chain-dominant四种logit输入，后三类是
 不加clipping/eps掩盖异常。记录边界分支及失败，FAIL不修改已运行输出/放宽容差。
 固定n的完整四aux forward/backward单次CPU时间与类型规模histogram只给kernel成本
 描述，不外推GPU epoch或Adam内存；不重证此前n3 wrong-link toy或重复封存控制。
+
+§25.56执行环境调整（运行结果前）：4090 SSH多次banner超时，曾成功只读到
+remote HEAD，但传bundle失败，审查尚未启动。为独立推进，用`/tmp/ekg-c41-cpu-audit-20261014`
+隔离uv venv安装官方torch **2.8.0+cpu**，仅最大28×28合成矩阵/CPU四线程，
+CUDA始终隐藏；不载入模型/weights或做训练，不改项目GPU extras/系统Python。
+这是操作性机器调整，病例/输入/目标/容差不变；LOCAL CPU计时单独标，不外推远端。
+若下载/安装失败只报告环境阻断，不能填求导PASS。
