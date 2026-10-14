@@ -4917,3 +4917,16 @@ pretrained_digest改为旧71be7419…；其余input pins/max_length256/数据代
 5090仍有compute PID2766182占31778MiB（NVML总31967MiB），无可用空卡。
 三个本轮5090 CPU PID2750907/2750981/2770187成功ps核GONE，完整产物已核。
 远端原有未跟踪`mk_probe_contract.py`保留，未覆盖/clean；无遗留自动训练启动器。
+
+### 25.62 C-41：4090空卡后原架构CUDA预算接续（预声明）
+
+科研价值：闭合表5-3/R1算力可行性，已有CPU与条件power不能替代单卡实测。
+作者报告4090空闲，成功SSH核到四卡均无compute进程；原cost的peak/worst
+固定输入与源码/合同不变，分别在空GPU1/2执行，属于同C5切片的不同成本任务，
+不是额外seed。可行性：本机已有原train/P1/pretrained、两fixture完整CPU产物；
+核原input pins、CPU hashes/source，同步main，完成本地门与远端对应CPU tests，
+先披露命令再启动。输出原R1根original_joint_cost/cuda/{peak,worst}独占目录，
+已存在则不覆盖。CUDA失败/显存不足如实保留，不放宽gradient parity容差。
+原cost仍零optimizer、零权重更新，不读dev/final-valid；通过也不自动准入方法。
+随后实际optimizer显存与固定结构aux预算须单独预声明/新输出身份，再闭合
+正式执行合同，不增加seed或改loss/scale/endpoint。不跨机搬weights。
