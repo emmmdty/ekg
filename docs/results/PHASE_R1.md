@@ -4713,3 +4713,31 @@ C-41仍wip，新数据/数值证据不是MUC突破；剩余单卡/optimizer余�
 本轮SSH传输复用master退出请求成功，LOCAL ps确认PID **18817 GONE**。
 两份研究入口已完成，没有遗留GPU watcher/新训练；隔离CPU-only uv环境留在
 `/tmp/ekg-c41-cpu-audit-20261014/` 供后续轻量求导，不能据此运行本地GPU或重模型训练。
+
+### 25.58 C-41：真实train标签下common-real-logit梯度方向（预声明）
+
+科研价值：表5-3/R1训练信号；检验“aux只令模型更保守”的竞争解释，而非从
+label密度直接推断更新方向。可行性：LOCAL隔离Torch2.8 CPU-only四线程，
+固定实际train标签/mention顺序/types，构造每个合法real logit共同偏移b=0、
+dummy=0；零神经模型/optimizer，不读dev/final-valid。与规范first-dummy
+marginal对照，exact/root/matched-mass及固定doc/type/mention SHA排列shuffle
+四aux按已冻结doc聚合与scale分别求dL/db，按positive/no-positive/no-legal文档
+分组报告。dL/db>0表示该构造方向的下降步骤压低real概率，<0则增加；
+不等于真实神经参数轨迹、训练后的false merge/missing或MUC收益。
+所有2622doc均保留，empty doc损失/aux导数0；source/kernel复用已核Torch矩阵
+函数，不实现production method。独占 `learning_direction_audit/`；逐doc与整合
+证据保存。用独立解析marginal导数及有限差分验证，不改loss/scale/endpoint/seed。
+
+### 25.59 C-41：5090新增授权与原joint资源准备（预声明）
+
+作者10-14明确答复“授权本轮C-41使用5090空卡”：原joint成本验证，以及R1准入后
+固定seed13五臂训练；超过一天的任务和跨机权重搬运仍单独确认，原decoder audit
+授权保持。本行只持有同一C5切片，不推进A4、不解除任何科学准入。
+科研价值：表5-3/算力可行性，解除4090占满时的资源等待，实际证明本机tokenization/
+显存/完整反向/预算，不能拿CPU时间或历史4090epoch外推5090 PASS。
+可行性先核本机GPU/process、原架构source、train/manifest/P1与pretrained内容地址；
+缺数据可非权重回传且双端SHA，已有checkpoint不搬。pretrain先用5090本机已有
+pin或镜像下载；若与4090pin不同，记录逐文件/tokenization差异，所有新臂必须
+同本机同initializer，不把旧数字当新同预算对照。新wrapper/config/合同/输出
+命名空间；原cost入口/合同/配置与结果均不改写。仅空卡、CPU/TDD/完整三件套及
+真实对应测试后，先披露确切cwd/命令/outputs，再运行原架构零optimizer cost。
