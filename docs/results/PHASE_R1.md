@@ -5008,3 +5008,54 @@ CUDA synchronize放在hook计时开始前，hook时间单列，成本不将CPU�
 耗时算作原optimizer时间。不增加持久GPU权重副本，不改loss/scale/budget。
 这是B类bit provenance修复，不放宽数值相等，不把恢复byte等同真实学习更新。
 先TDD覆盖signed-zero恢复/非零变化FAIL/nonzero-lr拒绝，再完整CPU复核。
+
+§25.63 r2验证记录：三个新增回归CPU-only TDD **3 FAIL（新入口缺失）→3 PASS**。
+真实optimizer hook可恢复已证signed zero，拒绝任何数值改动且不撤销来伪装，
+并在native step之前拒绝nonzero LR。4090对应CPU测试旧8+r2新3共**11项实际PASS**，
+CUDA隐藏，不以本地59个Torch skip充当此证据。完整本地919 passed/59 skipped
+（22.05s）、ruff0、smokeOK、一致性36PASS。新source commit021049b，
+核心ec6ad9…不改，r2入口SHA**dd97bb442fe8d0b1cb0cc431e93e91bc1f0f4c93e14e77d97c790f5e6391e4e3**、
+config SHA**a168b6a63310a8d24f49a42bf89ca97292eb74184eaf4905a4276b0d1807c0f8**，
+bundle SHA9bca1900…远端核一致；完整CPU复核在新路径执行，未预先判PASS。
+
+规范2c7ff1…在4090的完整train tokenization已实际complete，PID2773865成功核GONE，
+report SHA**f4da086c0eab75c55ae6746054e3d64411d52e7159626b72d6e82b9683ecc55a**。
+2622docs/4799chunks/892998nonpad、完整input+训练labels digest293fad97…与5090
+proper pin及旧参考相同；四项token/input_config/manifest非权重回传逐SHA一致。
+旧error metadata/pin/files/results不改写，权重仍在各自本机。
+成功核4090四卡17888/17903/18023/22545MiB，存在其他任务PID2788138–2788141，
+不占用其中任何一张。5090按runbook更新动态地址后仍Connection refused；未启动
+其新任务、不伪装卡况或实验结论。GPU下一步固定10病例的结构/optimizer实测仍待空卡。
+
+§25.63 r2完整Model CPU exact/peak **complete**：seed13、8doc/23chunks，
+221个参数梯度finite，严格lr0真实encoder AdamW/scorers Adam各cold/warm两step，
+共4 API calls；真实optimizer state **1,004,814,108 bytes**，不再只是moments投影。
+四个hook对全部参数逐值验证torch.equal，numerical weight_updates=0；
+encoder每次native step发生**13**处zero sign翻转，scorers **0**，native raw SHA
+差异完整保存。只恢复这些符号后整模型SHA前后5b67cbba…完全相同。
+因此支持原raw SHA失败的signed-zero解释，原FAIL仍保留，不改判原身份PASS。
+
+| CPU cycle | loss | forward秒 | backward秒 | native optimizer秒 | integrity秒 |
+|---|---:|---:|---:|---:|---:|
+| cold | 11.50283623 | 6.979210 | 11.192407 | .407413 | 1.257795 |
+| warm | 11.50283623 | 5.824624 | 10.829343 | .264329 | 1.262924 |
+
+native timing从原optimizer span扣除post-hook完整性审查，raw span亦保留。
+CPU完整性snapshot/source/reports都不是GPU显存或正式epoch预算；两次cold/warm
+固定输入与zero LR不测学习效果。report SHA
+**42980f6d665073496f88d4713f37825be1b5eabd2cd350608abd61520d8f75e8**，
+独占r1-v65-c5-4090-20261014/structure_budget_r2/cpu/peak/exact。
+成功SSH ps确认PID2839914 GONE，report/source/log与原manifest扩展备份后回传。
+下一步仍固定10个CUDA成本病例；末次四卡17888/17903/18023/22545MiB/util20/22/20/20%，
+均有其他任务，未启动r2 CUDA/epoch/新方法训练，无自动等卡启动器。
+
+完整模型CPU r2的report/原manifest/adapter/log/扩展backup manifest回传LOCAL逐项
+SHA全PASS（共5项）。原CPU FAIL的源码/log/failure另建backup manifest，保留
+executed_source ec6ad9…、failure SHAac92ce4c…与log SHA91187ddb…；不是只留下
+新成功结果。原成本CUDA两fixture与规范token完整输入的LOCAL/4090副本亦核一致。
+
+预算边界继续明确：这两个fixture分别是冻结shuffle的chunk峰值与任意8doc的
+chunk上界，不证明任意文档的所有关系head/类型块组合峰值；cold/warm两次step
+也未实测正式accumulation4的完整周期。后续CUDA成本与最终budget closure须
+单列累积梯度驻留/完整train实际shape与epoch外推的不确定性，不能只把CPU
+state bytes加到旧allocated peak就宣告正式训练预算PASS。

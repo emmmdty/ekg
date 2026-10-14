@@ -278,7 +278,15 @@ author delegation releases a new in-scope research queue; it does not reopen old
   label sparsity/uniform-prior risk diagnostic completed (§25.56–§25.57), without model
   loading or updates. Empty-pair NumPy mask failure was repaired under a new r2 namespace;
   the original failure/source are preserved. No deployment benefit is inferred.
-  CUDA/optimizer headroom/aux cost and the formal execution contract remain pending; no method
+  Original-model CUDA cost/parity completed on both fixtures after 4090 release (§25.62).
+  Structured/real-optimizer cost probe is frozen (§25.63); its first CPU case failed a raw
+  signed-zero byte invariant. Original failure/code/config/log remain sealed; r2 admits only
+  zero-sign restoration after exact numeric equality, records native byte changes and audits
+  all actual optimizer calls. Eleven corresponding CPU tests executed on 4090, complete
+  original-model r2 CPU verification completed: all numeric values unchanged, actual moments
+  allocated, native zero-sign changes recorded and restored. Ten CUDA cases still await empty
+  GPUs, which are occupied again.
+  Structured CUDA/optimizer headroom and the formal execution contract remain pending; no method
   admission or new deployment gain. Code/config/contract: original_joint_cost_20261013.
   Author reiterated actual metrics or overall-method innovation as the deliverable. A fixed
   bidirectional-score control completed with independent scores and did not beat the typed
