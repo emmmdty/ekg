@@ -11,7 +11,7 @@
 > antecedent 决策/oracle 分解已完成，主要金标可修复覆盖落在 null 边界；**未证明部署提分**。
 > 普通 newness/singleton、candidate-erasure→dummy 等已有先行机制，不准入创新。候选 brief 见
 > [`research/20261013_c5_newness_admission.md`](research/20261013_c5_newness_admission.md)；
-> 最新执行动作由下方「本次接续」与 §0.3.5 覆盖；候选 power 尚未闭合。
+> 最新执行动作由下方「本次接续」与 §0.3.5 覆盖；exact joint条件power已绑定，预算/执行合同仍未闭合。
 > 数字、区间、hash 和限制只见 [`results/PHASE_R1.md`](results/PHASE_R1.md) **§25.40–§25.57**。
 > D4 linear 恢复强控制、tanh5 退化（§25.37）；A4 仍无新效果结果；旧失败家族封存，E3 不追加实验。
 > 5090 原 C5 decoder smoke 已 complete，完整 audit 已授权但仍待空卡；无遗留自动启动 watcher。
@@ -61,7 +61,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41/T087，当前C5**：given-type stronger control保留；五个fixed-score/head控制实测未突破并停止（§25.44–§25.50）。当前exact joint结构学习R1：真实模型梯度/结构覆盖/covariance与matched-mass竞争对照、条件power敏感性已核（§25.49–§25.52），full-model五臂设计/power与原模型CPU重算等价已核（§25.54–§25.55），LOCAL固定aux数值/求导边界与全train label稀疏/先验风险已完成（§25.56–§25.57）；单卡CUDA/aux预算及合同未闭合，未准入训练。原5090 smoke complete/audit待空卡、无新任务授权。后续C5→D4→A4。 |
+| **活动任务** | **C-41/T087，当前C5**：given-type stronger control保留；五个fixed-score/head控制实测未突破并停止（§25.44–§25.50）。当前exact joint结构学习R1：真实模型梯度/结构覆盖/covariance与matched-mass竞争对照、条件power敏感性已核（§25.49–§25.52），full-model五臂设计/power与原模型CPU重算等价已核（§25.54–§25.55），固定aux数值/求导边界已在LOCAL及4090 CPU build通过、全train label稀疏/先验风险完成且非权重双端备份已核（§25.56–§25.57）；单卡CUDA/aux预算及合同未闭合，未准入训练。原5090 smoke complete/audit待空卡、无新任务授权。后续C5→D4→A4。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
@@ -76,7 +76,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 | 🔴 **读表 6-2 的前提** | 评测文档捷径和训练图中的金标边覆盖造成系统差异，不能按 MRR 排序解读，也**不得写“我们超过 CSProm-KG / SimKGC”**。具体证据见 §0.4c 与 `results/PHASE_E.md`。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问。不可行点名类别与一手证据，停止该路线；按 10-08 委托由执行代理在现有主任务内选择下一路线，先改主表再执行。有效性与未授权资源动作仍不可绕过。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文 §0.3 只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **GPU**（细则 §E.3） | **gpu-4090**：10-13 本轮成功核卡四卡均有他人任务，不能占用。**gpu-5090**：原 C5 smoke complete、audit 未启动；原成功核卡有他人 vLLM，10-13末次 SSH `Connection refused`，现态 UNKNOWN，须成功 SSH 后重新核空卡。原两项授权保持，smoke 不复跑；A4、额外 seeds 与跨机 checkpoint 未授权。 |
+| **GPU**（细则 §E.3） | **gpu-4090**：10-14 本轮末次成功核卡四卡均有他人任务，不能占用。**gpu-5090**：原 C5 smoke complete、audit 未启动；原成功核卡有他人 vLLM，10-13末次 SSH `Connection refused`，现态 UNKNOWN，须成功 SSH 后重新核空卡。原两项授权保持，smoke 不复跑；A4、额外 seeds 与跨机 checkpoint 未授权。 |
 | ⚠️ **只在 4090 上的大件** | `runs/factuality/predicted_edges_valid.jsonl`（133 MB，**`.1583` 的真上游**）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）、两个对手的 checkpoint、**C5 三个周期的 checkpoint**。**本地那份 `runs/relations/supervised_dump.jsonl` 是另一份 dump，别拿它当上游。** |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与**估算基准率**见 `EXPERIMENT_PLAN.md` §3（按 git 里同类事件的真实起止天数估，不按计算耗时估）。 |
 | 完成后必须做什么 | 按 **§6** 五步回填：产物落地 → 写结果页 → 改主表行状态与 commit → 推进队列 → commit + **push**。**没 push 就没交接。** |

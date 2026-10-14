@@ -4682,3 +4682,34 @@ ruff0（含两个research assets）、CPU smokeOK；R1 consistency 36项PASS。
 下一独立CPU动作可从真实train标签检验固定aux在common-real-logit偏移方向的
 梯度，与规范marginal对照，按no-positive/positive docs分别报告；仍是构造分布下
 数学信号，不是完整模型更新或部署效应。先预声明/更新主表再执行，不扫loss scale。
+
+§25.56 target环境一致性补验预声明：SSH复用现已恢复，只在4090 CPU同一
+未改Git研究入口执行一次同病例/容差的环境校验，原LOCAL输出只读，不复跑训练。
+独占 `learning_numerics_remote_check/`；临时cwd中仅source audit与新输出目录
+的symlink，入口源码不改。CUDA隐藏/四线程/零模型/optimizer，检验Torch
+2.8.0+cu128的CPU结果是否满足相同边界；本机PASS不预先当远端PASS。
+
+§25.56–§25.57非权重双端备份已完成：LOCAL/4090数值审查**5**项、原失败**2**项、
+r2 prior审查**3**项逐manifest SHA全部PASS；tar SHA
+**1e8d9bc074782d6eb704aa3c533f8e14055f21a920302de8fcfdade8ea7d094d**，
+既有路径只比对相等，新项exclusive-create，未搬weights。源码走Git bundle
+SHA **e244147f01c368faf5cf51a5b88096974f2c2a8a8c7e1c1b6d23349344c86d9c**，
+原机HEAD同步 **5d92675**；之前多次banner超时没被当实验失败或进程死亡。
+
+§25.56 target补验实际 **complete**：4090 Torch **2.8.0+cu128**、CPU/隐藏CUDA，
+同未改source、相同120 cases/480求导与容差；float32-vs64最大loss/gradient误差
+**1.1203050221e-7 /1.9351237571e-8**，finite-difference最大
+**7.7312092492e-11**、mass误差 **9.5367431641e-7**，全部PASS。
+这不是跨机器梯度bitwise相同或CUDA验证；只是两个CPU build均满足同一检查。
+远端补验report SHA **79611f00b7a662bf7e5a68af2fce66466712c7e443259839cbc1c482dbc30f66**；
+三项manifest **abd00a2737e426810501a5e6ef636a787c24ce38d4ea8a74d37cb9d3b98b92c1**
+已回传本地逐项一致。原本机报告/source均未修改，补验有独立cwd/provenance。
+
+10-14末次成功核卡：4090占用 **23890/23223/23223/23223MiB**、
+util **71/93/81/73%**，仍无可用空卡；未启动任何CUDA任务或method训练。
+C-41仍wip，新数据/数值证据不是MUC突破；剩余单卡/optimizer余量/正式结构
+预算与执行合同边界保持。
+
+本轮SSH传输复用master退出请求成功，LOCAL ps确认PID **18817 GONE**。
+两份研究入口已完成，没有遗留GPU watcher/新训练；隔离CPU-only uv环境留在
+`/tmp/ekg-c41-cpu-audit-20261014/` 供后续轻量求导，不能据此运行本地GPU或重模型训练。
