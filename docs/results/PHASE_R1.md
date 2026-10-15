@@ -5100,3 +5100,67 @@ state bytes加到旧allocated peak就宣告正式训练预算PASS。
 导师卡本地链接与五臂名称对照现有源码检查通过；没有运行代码变更的三件套，
 也没有用历史测试记录声称本次已跑训练/torch测试。最终一致性报告为
 `/tmp/ekg-r1-supervisor-consistency-20261015-final.json`。
+
+### 25.65 作者确认4090不可用后的新近文献审查与创新规划（2026-10-15）
+
+**作者新指令**：4090当前不可用、修复时间未知；要求优先从创新方案升级入手，
+检索最新论文后整理任务。按该指令先更新主表§3.8及C-41覆盖切片，不等待旧Gate
+恢复资源安排。只规划/检索/静态检查，没有启动GPU、更新模型或改写任何冻结实验结果。
+
+**科研价值**：表5-3当前exact候选的联合依赖归因，以及后续表3-3/表4-3的实质新机制；
+防止把2026的反事实、图验证、meta-factivity等已有概念直接换名当创新。
+依据项目§25.37、§25.42及§25.49–§25.63，文献位置见本轮source ledger。
+**可行性**：公开一手论文/作者代码可只读审查，本地轻量CPU可完成文献/合同工作；
+5090成功SSH确认C5本机核心路径存在，尚未重核全部hash或实际训练预算。
+
+研究卡`docs/research/20261015_innovation_upgrade.md`与结构化
+`docs/research/20261015_literature_sources.json`记录检索边界和逐源解释。
+截止2026-10-15，逐轮检索2025–2026论文、最近两个月发现结果并补查旧机制邻居；
+最终ledger共14项（其中FIE2026为任务资源，BeyondAtoms只核官方release/source，未读PDF），
+不称14篇均已完整读完，不声称穷尽领域或不存在相同方法。没有引用外部效果数字来
+替代统一主表；任务、split、候选、模型、标注输入与代码可运行性分别记录。
+
+| 关键来源身份 | 本次核查与结论 |
+|---|---|
+| UERLens ACL2026；repo`ded7586c99a94da0d7a80848488be69f241eee86` | 正文§2/Appx B、MIT LICENSE及真实analyzer/metrics/SVM源码已核。公开SVM有默认空texts、固定layer/vector、多卡设置，论文特征筛选/训练资产未闭合；属于static code有缺口，runtime/fidelity未验证。不能称无代码或已复现 |
+| CohTP ACL2026；repo`3843ad0a4dcdb9f4761f134894b935d4ed74d19b` | 完整官方tree只有`Comming soon`；正文时间图/纠错/分区是先行机制，当前复现卡【代码】，不重写后继承论文身份 |
+| BeyondAtoms官方2026release；repo`172dced0a1e98a8544101ecd48754bb7bd8c4659` | README/tree/verification source已核；claim-evidence关系核验不是五类event factuality。未独立核其conference acceptance；runtime/许可未闭合，不新增外部benchmark任务 |
+| FIE2026资源；repo`bed2e72388b635f454f0d11293c42b3142022ded` | 官方任务说明为factivity inference，不能替换现MAVEN任务或据此增加数据 |
+| SVRECI、Meta-Factivity、CoT traces、LLM-SD、ECPO等 | 核正文指定位置并分别记录输入/机制边界；未定位代码的标UNKNOWN，不当成已证明无代码。框架、生成语料和不同任务结果不自动准入本项目 |
+
+**资源核查（本轮只读）**：5090成功SSH，通过本机`.venv/bin/python`
+仅用stdlib检查既有config里的pretrained、官方source_root、train_input、train_manifest、
+census五条路径，全部exists=true；`mk_probe_contract.py`仍存在，未改/删/覆盖。
+只列出FACT manifest文件名，未打开final-valid或其样本/结果。没有import torch、核空卡或
+执行模型；不把存在性当hash PASS，也不沿用较早空卡快照来启动任务。4090不重试，
+可用性按作者确认不可用处理，未推断历史进程死亡。
+
+**路线裁决**：C5保留exact joint为当前候选，不改既有五臂/loss/endpoint。
+下一项C41-S闭合5090自足source/input身份与独立成本适配，再C41-B实际成本/累积/shape预算、
+C41-A准入裁决、C41-T获准五臂。结构成本迁移须核10-14原joint成本具体许可覆盖，
+不能只凭“5090空着”扩权。D4登记事件锚点—承诺证据绑定、A4登记目标条件多正例监督，
+均只为待准入研究；需排除普通contrast/hard negatives及最新邻居覆盖，信号/数据不足则停止。
+C5→D4→A4、单seed13、final-valid、同协议强对照、封存家族与资源边界不变；E3不加动作。
+
+**原始证据与工具限制**：本地GitHub REST请求遇403 rate limit，改用只读GitHub connector
+取得官方commit/tree/source；保留失败，不当研究负结果。共享工具venv没有requests/pypdf，
+未安装包，使用stdlib下载与`pdftotext -layout`；7份尝试中4份PDF成功并记SHA，3份本地TLS
+失败，后者正文用web工具读取，不能声称本地PDF齐备。另有一次猜测raw源码路径404，
+随即读官方tree定位实际文件；未把404当仓库缺实现的证据。
+
+本地独占证据根`runs/stages/R1/r1-v66-literature-upgrade-20261015/`，
+23项产物（论文PDF/text、pinned code/tree、检索失败manifest与ledger副本），
+`artifact_hashes.json` SHA-256
+`fc4108379fbe6961f8a00dfa44f5b9f7a3f56d64428638b1f952c387dfb6b952`。
+权重没有搬运，原始证据当前仅在LOCAL，未声称已在服务器备份；Git保存source ledger与公开
+revision/URL便于重新取得。没有source/runtime冒烟或生产实现的新PASS。
+
+本轮仍`method_admitted=false`、C-41/T087 wip；新方法指标与提分结论均未产生。
+
+**文档验收**：首次R1审计报`SC-009 evidence-anchor-missing`，原因是本次把
+RESEARCH_PLAN的`Summary`标题加了后缀，破坏已有`#summary`锚点；恢复原标题并把
+历史说明移到正文后，完整审计输出`PASS: 36 requirements mapped`。
+`git diff --check`、14项source ledger的结构/唯一ID/revision校验、研究卡本地链接检查、
+23项原始证据SHA逐文件复核均PASS。报告
+`/tmp/ekg-innovation-upgrade-consistency-20261015.json`。
+只改文档/文献清单，未改src/tests/scripts，未声称运行代码变更三件套或真实torch训练。

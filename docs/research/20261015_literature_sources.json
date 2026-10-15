@@ -1,0 +1,159 @@
+{
+  "search_date": "2026-10-15",
+  "cutoff": "2026-10-15",
+  "scope": "C-41/T087; innovation review and planning only",
+  "primary_hosts": [
+    "aclanthology.org",
+    "arxiv.org",
+    "ijcai.org",
+    "authors' GitHub"
+  ],
+  "search_passes": [
+    "2025/2026 event coreference, event factuality, MAVEN-ERE/FACT",
+    "exact pairwise marginal / same-cluster probability / antecedent forest; factuality contrastive/scope",
+    "last-60-days discovery plus publication-date verification; recent IJCAI/author releases",
+    "paper sections/formulas; pinned official trees and actual source; task/input/protocol screening"
+  ],
+  "limitations": [
+    "not exhaustive; negative search is not nonexistence evidence",
+    "local GitHub API rate-limited; official GitHub connector used",
+    "three local PDF downloads failed TLS; their primary paper text was read with web tool",
+    "no external benchmark numbers promoted or compared",
+    "no GPU run, new seed, checkpoint transfer or method admission"
+  ],
+  "sources": [
+    {
+      "id": "uerlens",
+      "year": 2026,
+      "title": "UERLens: Understanding Event Relations in Large Language Models",
+      "paper": "https://aclanthology.org/2026.acl-short.38.pdf",
+      "sections": "2.1-2.3; 3.1; Appendix A.1/B",
+      "code": "https://github.com/ncepu-eai/UERLens",
+      "revision": "ded7586c99a94da0d7a80848488be69f241eee86",
+      "code_status": "static code verified; runtime/fidelity not verified",
+      "decision": "nearest neighbor; no direct port; GPT-5 counterfactual source and SAE/feature-selection/split gaps"
+    },
+    {
+      "id": "svr",
+      "year": 2026,
+      "title": "Suggest-Verify-Revise: A Three-Stage Document-Level Event Causality Identification with Narrative Consistency",
+      "paper": "https://aclanthology.org/2026.acl-long.871.pdf",
+      "sections": "3.1-3.3; Eq.1-4; Appendix C/D",
+      "code_status": "no official implementation URL located within this bounded search; UNKNOWN",
+      "decision": "narrative/graph verification and dual-level contrast are prior; no prose reimplementation"
+    },
+    {
+      "id": "meta_factivity",
+      "year": 2026,
+      "title": "From Factuality to Meta-Factivity: A Cognitive Blueprint for Trustworthy LLMs",
+      "paper": "https://aclanthology.org/2026.acl-short.7.pdf",
+      "sections": "4.1-4.2; Limitations",
+      "code_status": "position/framework paper; no complete benchmark/trainer verified",
+      "decision": "diagnostic motivation only; not an executable MAVEN method"
+    },
+    {
+      "id": "cohtp",
+      "year": 2026,
+      "title": "Incorporating Temporal Coherence to Cross-Document Event Coreference Resolution",
+      "paper": "https://aclanthology.org/2026.acl-long.1345.pdf",
+      "sections": "3-4; conflict correction; partition/recovery",
+      "code": "https://github.com/chenxinyu-nlp/CohTP",
+      "revision": "3843ad0a4dcdb9f4761f134894b935d4ed74d19b",
+      "code_status": "verified tree has only Comming soon",
+      "decision": "blocked for reproduction by code; GPT-4 and hard partitions do not fit current route"
+    },
+    {
+      "id": "cot_causal",
+      "year": 2026,
+      "title": "Generating Effective CoT Traces for Mitigating Causal Hallucination",
+      "paper": "https://aclanthology.org/2026.findings-acl.264.pdf",
+      "sections": "3.1-3.3; 4.1; Appendix A/B",
+      "code_status": "no official implementation URL located within this bounded search; UNKNOWN",
+      "decision": "large teacher/trace generation not adopted; CHR is not project causal F1"
+    },
+    {
+      "id": "llm_sd",
+      "year": 2026,
+      "title": "Debate with Myself: Zero-Shot Event Causality Identification with Adversarial Evidence Integration via Large Language Models",
+      "paper": "https://www.ijcai.org/proceedings/2026/0674.pdf",
+      "sections": "3.2; 4",
+      "code_status": "paper inspected; official runnable code not verified",
+      "decision": "pro/con evidence debate already prior; no multi-call LLM task admitted"
+    },
+    {
+      "id": "beyondatoms",
+      "year": 2026,
+      "title": "BeyondAtoms: Benchmarking and Verifying Relational Factuality Beyond Atomic Facts",
+      "paper": "https://github.com/lzy248/beyondatoms/blob/172dced0a1e98a8544101ecd48754bb7bd8c4659/BeyondAtoms.pdf",
+      "sections": "official README Overview; modules/claim_driven/verification.py",
+      "code": "https://github.com/lzy248/beyondatoms",
+      "revision": "172dced0a1e98a8544101ecd48754bb7bd8c4659",
+      "code_status": "README/tree/verification source verified; PDF not inspected; runtime and license unresolved",
+      "decision": "source labels release as EMNLP2026; conference acceptance not independently verified; claim-evidence support task is not five-class event factuality"
+    },
+    {
+      "id": "ecpo",
+      "year": 2026,
+      "title": "ECPO: Evidence-Coupled Policy Optimization for Evidence-Certified Candidate Ranking",
+      "paper": "https://arxiv.org/html/2605.21993v1",
+      "sections": "Abstract; 3.1-3.4",
+      "code_status": "runnable official release not verified",
+      "decision": "preprint; ranking+certificate task differs from MAVEN relation classification; not a comparable baseline"
+    },
+    {
+      "id": "zero_shot_belief",
+      "year": 2025,
+      "title": "Zero-Shot Belief: A Hard Problem for LLMs",
+      "paper": "https://aclanthology.org/2025.codi-1.10.pdf",
+      "sections": "3; 4.1; task/FactBank input definitions",
+      "code_status": "not audited for runnable reproduction",
+      "decision": "nested-source task requires different annotation; no source gold assumed in MAVEN-FACT"
+    },
+    {
+      "id": "efficient_ere",
+      "year": 2025,
+      "title": "Efficient Document-level Event Relation Extraction",
+      "paper": "https://aclanthology.org/2025.repl4nlp-1.7.pdf",
+      "sections": "2; retriever/cross-encoder and candidate pruning",
+      "code_status": "new runtime/release audit not performed",
+      "decision": "retrieval training motivation; pruning cannot change frozen candidate universe"
+    },
+    {
+      "id": "le_titov",
+      "year": 2017,
+      "title": "Optimizing Differentiable Relaxations of Coreference Evaluation Metrics",
+      "paper": "https://aclanthology.org/K17-1039.pdf",
+      "sections": "3-4; root-membership recurrence and relaxed cluster links",
+      "code_status": "prior project source audit retained; not newly rerun",
+      "decision": "root DP/soft-cluster loss prior; current candidate claim limited to joint-dependence training contrast"
+    },
+    {
+      "id": "sdin",
+      "year": 2023,
+      "title": "Incorporating Factuality Inference to Identify Document-level Event Factuality",
+      "paper": "https://aclanthology.org/2023.findings-acl.879.pdf",
+      "sections": "3.1/Table1; 3.2; 4",
+      "code_status": "runnable implementation not audited",
+      "decision": "sentence/document factuality labels derive support/refute/etc.; cannot treat different event labels as such inference labels"
+    },
+    {
+      "id": "pragmatics",
+      "year": 2021,
+      "title": "He Thinks He Knows Better than the Doctors: BERT for Event Factuality Fails on Pragmatics",
+      "paper": "https://aclanthology.org/2021.tacl-1.64.pdf",
+      "sections": "1-2; analyses of surface patterns and embedding environments",
+      "code_status": "not audited for runnable reproduction",
+      "decision": "shortcut diagnosis is prior; do not label same-sentence comparisons as proven causal scope"
+    },
+    {
+      "id": "fie2026",
+      "year": 2026,
+      "title": "FIE2026 official shared-task description (resource, not a method paper)",
+      "paper": "https://github.com/UM-FAH-Yuan/FIE2026/blob/bed2e72388b635f454f0d11293c42b3142022ded/README_EN.md",
+      "code": "https://github.com/UM-FAH-Yuan/FIE2026",
+      "revision": "bed2e72388b635f454f0d11293c42b3142022ded",
+      "code_status": "official task README/commit inspected; not trainer audit",
+      "decision": "Chinese factivity inference; not a replacement for MAVEN five-way task"
+    }
+  ]
+}

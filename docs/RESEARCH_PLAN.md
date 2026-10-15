@@ -7,7 +7,29 @@
 | Spec | [`SPEC.md`](SPEC.md) |
 | Status | Working design; method hypotheses remain revisable until their phase protocol is frozen. |
 
+## 2026-10-15 current design amendment
+
+The author confirmed that the 4090 is unavailable with no repair date and requested innovation work
+guided by current primary literature. The active C-41/T087 remains C5 first, then D4 and A4;
+E3 and the agreed thesis structure remain unchanged. This amendment supersedes historical candidate
+and scheduling language below; it does not reopen sealed role, cue or masked-evidence families.
+
+The leading C5 candidate remains exact joint-dependence supervision, distinguished from prior
+root-membership product losses through the already frozen five-arm comparison. D4 will first
+audit event-anchor/commitment-evidence binding in unchanged shared contexts; A4 will first audit
+target-conditioned multi-positive relation supervision. Both are unadmitted research hypotheses,
+with ordinary contrastive learning and prior graph/verification methods as strong rivals.
+
+Primary-source findings, the candidate boundaries, falsifiable contrasts and feasibility/stop rules
+are in [`research/20261015_innovation_upgrade.md`](research/20261015_innovation_upgrade.md).
+Only [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md) §3.8/§4 controls execution. Its next item C41-S
+prepares a self-contained 5090 identity without transferring 4090 checkpoints; source/input hashes,
+actual full-model budget and a formal R1 contract remain required. No new GPU authorization or
+method admission follows from this design amendment; empirical facts remain in R1 §25.65.
+
 ## Summary
+
+The following is the historical design basis; the dated amendment above controls current candidate selection.
 
 The plan tests whether explicit local evidence adequacy and uncertainty can reduce occurrence-graph construction errors
 and explain downstream risk. The current candidate designs are argument-uncertainty-aware identity resolution,
