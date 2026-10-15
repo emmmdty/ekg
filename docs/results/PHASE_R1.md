@@ -5059,3 +5059,44 @@ chunk上界，不证明任意文档的所有关系head/类型块组合峰值；c
 也未实测正式accumulation4的完整周期。后续CUDA成本与最终budget closure须
 单列累积梯度驻留/完整train实际shape与epoch外推的不确定性，不能只把CPU
 state bytes加到旧allocated peak就宣告正式训练预算PASS。
+
+### 25.64 导师视角项目/双机资源审查（2026-10-15，只读检查与目标设计）
+
+**科研价值**：服务C-41/T087、表5-3与R1预算/合同门，避免把工程成本或已知规则
+收益认成方法贡献；证据依据§25.37、§25.42及§25.49–§25.63。
+**可行性**：本地文档、配置/源码可读，远端仅做SSH/身份/Git/GPU/进程/磁盘查询；
+本次不启动成本、audit或训练，不改冻结合同与实验结果，不搬checkpoint。
+导师执行说明见 `docs/research/20261015_supervisor_review.md`，不建立第二条队列。
+
+本地 `git fetch origin` 成功，核查时 `main` 的HEAD与origin/main同为`03b7019`，
+工作树干净。R1一致性审计实际输出`PASS: 36 requirements mapped`，
+报告`/tmp/ekg-r1-supervisor-consistency-20261015.json`；它不代表方法准入。
+
+| 资源（+08:00） | 本次实际观察 | 解释与接续 |
+|---|---|---|
+| 4090，约23:12 | 两次SSH均exit255，`18.tcp.vip.cpolar.cn:14147 Connection refused` | GPU占用/进程/远端Git均UNKNOWN；不能沿用10-14四卡占用，也不能断言卡空或进程死亡。updater当前只托管5090/a6000，未修复4090 |
+| 5090，23:12:41、23:13:17 | RTX5090 GPU0，310/32607MiB、util0%；两次`--query-compute-apps`均无记录 | 核查瞬间无compute任务，满足runbook空卡筛查；不保证后续仍空闲，启动前须重核 |
+| 5090身份/目录 | `tongjiakai`、`server-System-Product-Name`；项目目录存在，Git=`f6399be`，`git status --short`仅`?? mk_probe_contract.py` | SSH保持原HostKeyAlias验证；远端落后本地主干，未跟踪文件来源未核。本次未fetch/reset/覆盖，接续同步前先查来源并保留 |
+| 5090进程/磁盘 | `ps -u tongjiakai -o pid,ppid,etime,comm`只见会话/桌面服务，无Python任务；项目挂载盘851G可用，76%已用 | 仅为本次成功查询的进程快照，不追认历史任务状态，也不把磁盘充足当训练预算通过 |
+
+5090初查旧地址`1.tcp.cpolar.cn:24870`连接关闭。按runbook执行
+`cpolar-ssh-update`成功更新为`1.tcp.cpolar.cn:22833`，再成功核卡与身份。
+该工具同时例行刷新其托管的a6000地址；没有连接/使用该机器或启动其任务。
+没有修改SSH host-key策略，没有在会话中查看或输出凭据，没有更改远端文件。
+
+源码审查确认`profile_c5_structure_budget.py:validate_scope`严格绑定
+`/data/TJK/ekg`，r2配置也绑定4090的initializer/source/output；
+`profile_c5_structure_budget_r2.py`调用该guard。故5090虽空，现有4090 r2命令
+不能原样迁移，也不能修改封存脚本来“放行”。迁移须核任务授权边界、先改主表，
+以独立本机配置/合同/产物与测试保持可追溯，不搬既有checkpoint。
+
+**导师裁决**：保持C-41/T087为wip、`method_admitted=false`、C5→D4→A4。
+下一决定性工作是固定五臂真实成本、完整累积/shape预算、R1准入裁决与生产合同；
+不继续扩展已完成CPU诊断，不重跑原两fixture CUDA或失败控制。
+已有5090原C5 decoder audit许可保持，其结果只解释同分数换解码，不能代替新方法。
+新实验证据尚未增加；本节不能被引用为MUC提升、训练已准入或机制新颖性证明。
+
+本次仅改文档；回填后R1一致性再次36项PASS，`git diff --check`通过，
+导师卡本地链接与五臂名称对照现有源码检查通过；没有运行代码变更的三件套，
+也没有用历史测试记录声称本次已跑训练/torch测试。最终一致性报告为
+`/tmp/ekg-r1-supervisor-consistency-20261015-final.json`。
