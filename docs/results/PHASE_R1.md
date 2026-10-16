@@ -5826,3 +5826,39 @@ SHA`f200e86fed49464c20a7f90b7cf5bb07b33391142e34e590aff5f4b0b75e03ce`。
 classifier输入。没有逐引用source-holder gold，不表示任务的factuality source定义未知。
 原paper说明released train与valid/test的标注流程不同；本次不读原valid/test标签，继续
 冻结train-only/OOF边界，不将不同原split论文数字搬作我们的主表。无外部成绩引用。
+
+### 25.78 C41-T mass数值修复生产门闭合（2026-10-16）
+
+**开工自审/裁决范围**：恢复原预声明总量强控制，科学目标/预算/单seed不改；这是
+§25.75数值缺陷的工程修复，不是观察dev后换新方法。旧失败完整保留；其余四臂原身份
+复用，只有mass从同initializer重跑。尚无科学KR达成。
+
+完整CPU全模型221梯度门见§25.75。GPU0在marginal真正GONE且无compute apps后使用；
+新smoke PID1141139（HEAD301a890）已GONE/complete，实际4microbatches/1optimizer cycle，
+allocated/reserved峰值5153018368/5708447744bytes；参数摘要从5b67cbba…变为
+cd4849f7…，无zero-LR审计hook。原encoder首warmup步LR仍为0，不虚称本周期encoder
+有非零LR；scorer真实更新。8doc train-only无标签完整四头export/独立CPU/source decoder
+parity通过。report SHAeb9b03fd4eaca49ed7db0c7c3d8dfe30ab62c02b4c4a91f29d62d2f8d514d4e7。
+
+独立根`runs/stages/C5/c5-mass-repair-20261016/`，config仍a88e9f…、数值修复代码076a874。
+最终protocol SHA
+`e9eacf43773ce2190624c24aeffbbc9d115a7c35f32c6ee9639c04bcf8426324`；
+最终admission SHA
+`7e5e56a52281c496b2301357406629c497e48ada184577cbb9d46a4e8e1425c0`，
+`method_admitted=true`只准原seed13/100epoch的mass重跑；未增加seed、权重搬运或5090。
+R176=`runs/stages/R1/r1-v76-mass-repair-production-20261016/`，completion manifest22件，SHA
+`c2d99fc3ffb40d9b2c3b2f200fac8a345b2446bcc847e4d27b1e02097a8f2155`。
+
+原四臂中marginal已完整100epochs/32800microbatch/8200updates、CPU export replay与
+endpoint artifact门通过；原PID1097108 GONE、无提前评分。其checkpoint SHA
+cf379e293201f20704b6316e3624d2951107dd1c69b796c67e66d73bf2dd2219留4090，
+非权重预测/report/status/训练轨迹已取回LOCAL。其余root/exact/shuffle继续原训练。
+统一评估overlay `configs/c5_joint_evaluation_repair_20261016.json`在任何方法评分前冻结，SHA
+`6c24f07d944683020ed18035b7e5b008b78b240d37d59f9cec4baa8f86c07203`，
+只映射mass至新路径/配置并披露aux float64；原科学门/目标/paired/护栏不改，必须所有
+有效臂endpoint后才评分。不能把旧float32五臂合同写成完整成功，有限精度轨迹差异保留。
+
+§25.78 R176 22件manifest已LOCAL/4090逐件重算PASS，`require_repair_admission`双端PASS。
+首次stdin检查使用namespace导入而缺scripts PYTHONPATH，import失败；修正检查命令为
+`PYTHONPATH=src:scripts`后通过，不改生产脚本/合同或伪称首次检查成功。
+新准入可信锚为本节即将push的提交；之后才启动train。consistency36PASS、diff --check通过。

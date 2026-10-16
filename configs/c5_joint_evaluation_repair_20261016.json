@@ -1,0 +1,36 @@
+{
+  "schema_version": "ekg.c5_joint_evaluation_repair_overlay.v1",
+  "base_evaluation": "configs/c5_joint_dependence_evaluation_20261016.json",
+  "output": "runs/stages/C5/c5-mass-repair-20261016/evaluation",
+  "numerical_repair_disclosure": "Original FP32 mass failed at epoch40 after39complete. Independent complementary-probability arithmetic and float64 mass auxiliary passed numerical/full-model gates, then restarts seed13 from identical initializer. Other four arms remain original FP32 identities. Finite-precision trajectories may differ; original five-arm contract was not completed.",
+  "endpoints": {
+    "marginal": {
+      "root": "runs/stages/C5/c5-joint-dependence-20261016/train/marginal",
+      "config_sha256": "e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b"
+    },
+    "root": {
+      "root": "runs/stages/C5/c5-joint-dependence-20261016/train/root",
+      "config_sha256": "e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b"
+    },
+    "exact": {
+      "root": "runs/stages/C5/c5-joint-dependence-20261016/train/exact",
+      "config_sha256": "e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b"
+    },
+    "mass": {
+      "root": "runs/stages/C5/c5-mass-repair-20261016/train/mass",
+      "config_sha256": "a88e9f0bdbd2cd1f9766cedf98f4986365f8296364598d0c433a200233897d3c"
+    },
+    "shuffle": {
+      "root": "runs/stages/C5/c5-joint-dependence-20261016/train/shuffle",
+      "config_sha256": "e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b"
+    }
+  },
+  "input_sha256": {
+    "configs/c5_joint_dependence_evaluation_20261016.json": "4c26aead0bbbc033fdbd6b52e681ba91acf1d6d69ae288557ac3a1b144439e8c",
+    "configs/c5_joint_dependence_20261016.json": "e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b",
+    "configs/c5_mass_repair_20261016.json": "a88e9f0bdbd2cd1f9766cedf98f4986365f8296364598d0c433a200233897d3c",
+    "runs/stages/C5/c5-mass-repair-20261016/admission.json": "7e5e56a52281c496b2301357406629c497e48ada184577cbb9d46a4e8e1425c0",
+    "runs/stages/C5/c5-mass-repair-20261016/protocol.json": "e9eacf43773ce2190624c24aeffbbc9d115a7c35f32c6ee9639c04bcf8426324",
+    "scripts/evaluate_c5_joint_dependence.py": "ca8e1824bc3fd56a2e571d82f008ebfd3e64c9ecd7882e2493d84af8d78b3367"
+  }
+}
