@@ -5765,3 +5765,46 @@ CPU轻量即可。只准备接线与合成测试；全部有效臂endpoint前不
 corpus MUC。全套932passed/87skipped（20.78s），ruff0、ekg-smokeOK、consistency36PASS。
 R174=`runs/stages/R1/r1-v74-c41-evaluation-preparation-20261016/`保存自审/原red与全套日志。
 当前无方法dev scores，V仍pending，准备PASS不算科学KR。
+
+### 25.77 长训练期间D4/A4有限准备（2026-10-16，非正式接队）
+
+**开工自审**：科研价值为表3-3/KR2.1–2.2避免将已有条件似然换名，并为表4-3/
+KR3.1–3.2辨别真实多原因与coref mention展开造成的伪多正例。可行性为一手公开
+源码/固定MAVEN-ERE train manifest与原生event/mention关系标注，零模型/optimizer。
+不读internal-dev/final-valid标签，不进行新准入/训练；主队仍C41-T数值修复，正式
+后续顺序C5→D4→A4不变。R175=`runs/stages/R1/r1-v75-chapter-preparation-20261016/`。
+
+D4拟议“固定语境标签直方图的条件归属loss”最近邻已核到
+[statsmodels官方ConditionalMNLogit源码](https://www.statsmodels.org/stable/_modules/statsmodels/discrete/conditional_models.html#ConditionalMNLogit.loglike)：
+按group对原生labels的排列作logsumexp分母、真实分配score作分子，并明确引
+Chamberlain1980。按相同label counts枚举唯一排列仅差与参数无关的重复数常量，
+梯度相同；两事件退化为普通配对logistic。**该标准条件似然本身不准入独立创新**。
+它可作为未来强rival，不能仅以换成事件/神经logits当新方法。CoDE等全文未核限制
+继续保留，不用此一条源码声称整个scope/evidence文献已排完。
+
+A4接下来只核train：target×方向×CAUSE/PRECONDITION的distinct event positives、
+mention-expanded positives、无关系候选、仅同coref重复的多正例、BEFORE重合。
+未标注关系只记dataset None，不当世界因果负例；不把BEFORE当CAUSE，不裁评测全集。
+
+§25.77 A4 train census实际complete，固定2622文档、61362event clusters/66744mentions。
+只在manifest内访问annotations。r1初版BEFORE重合含TIMEX、不能叫event-only，原source/
+输出保留，r2单列TIMEX后才解释事件因果；所有causal group统计与r1逐项相同。
+
+| 方向/标签 | 有正例event-target组 | distinct≥2正例组 | 覆盖doc（distinct≥2） | mention-target多正例组 | 仅同一正例event重复的mention-target组 |
+|---|---:|---:|---:|---:|---:|
+| incoming CAUSE | 4726 | 1023 | 427 | 2254 | 1207 |
+| incoming PRECONDITION | 17042 | 5837 | 1703 | 7310 | 1311 |
+| outgoing CAUSE | 2873 | 1199 | 789 | 2449 | 54 |
+| outgoing PRECONDITION | 11275 | 5131 | 2024 | 6656 | 79 |
+
+event-level CAUSE/PRECONDITION边6175/26759，官方mention展开后13174/35388。
+所有incoming CAUSE distinct-multi组均有dataset-None事件候选；PRECONDITION为5836/5837。
+同方向event-event BEFORE共398671，其中annotated causal27598、无annotated causal371073；
+另有5336条causal无同方向BEFORE。原raw BEFORE618143中219472涉及非event端点，r2
+不将这些TIMEX pairs冒充causal negatives。None仍是标注口径，不是因果真值的否定。
+
+裁决：原生多原因训练机会存在，但mention多正例中的coref重复是强竞争解释；任何
+未来候选至少要matched coref重复/样本权重与普通multi-positive对照，不能单正例softmax
+丢其他真因，也不能以BEFORE伪造CAUSE。无新方法/效果/power准入，不重开旧hinge。
+D4一手源码访问web已成功核机制，本地curl保存全文TLS EOF失败，source_review.json
+如实记无本地全文archive；不伪称下载成功，也不把网络失败当文献不存在。

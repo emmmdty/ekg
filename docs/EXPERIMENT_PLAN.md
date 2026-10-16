@@ -454,7 +454,7 @@ C5突破目标与更严格护栏认当前joint brief；D4/A4及最终确认认§
 | C41-D-R / KR2.1、KR2.2 | pending · T期间准备已开始（§25.74）；正式接队仍在C5裁决后 | 刷新CoDE/SDIN/scope/普通supcon等最近邻，train-only归属/稀有类/offset机会；候选明确准入或具体拒绝证据 | 不读评测标签选配对，不假造source/scope监督；失败则先写替代再推进 |
 | C41-D-A / KR2.1、KR2.2 | pending · D-R后 | 可识别创新、最小loss/强rival/消融/负控、条件power/预算和冻结phase；TDD实现、本地门及真实torch smoke后正式放行 | 保留可靠linear与相同全文通路，独立新身份；不复活cue/causal-residual |
 | C41-D-TV / KR2.1、KR2.2、KR4.2 | pending · D-A后 | seed13完整五折/各臂OOF；pooled官方主指标/少数类护栏/归因与独立复算，裁决并回填 | 按空4090并行不同臂或不同fold，同seed不等于额外seed；实现/协议失败另封存 |
-| C41-A-R / KR3.1、KR3.2 | pending · 正式研究接队在D4裁决后；既有长训练时可准备 | 刷新SVRECI/多正例/条件排序最近邻，train-only目标×方向×subtype分组/多正例/假负例；明确创新/数据可行性裁决 | 不裁评测候选，不单原因softmax、不把BEFORE当CAUSE；已有有限梯度诊断不阻断研究 |
+| C41-A-R / KR3.1、KR3.2 | pending · T期间train准备开始（§25.77）；正式研究接队在D4裁决后 | 刷新SVRECI/多正例/条件排序最近邻，train-only目标×方向×subtype分组/多正例/假负例；明确创新/数据可行性裁决 | 不裁评测候选，不单原因softmax、不把BEFORE当CAUSE；已有有限梯度诊断不阻断研究 |
 | C41-A-A / KR3.1、KR3.2 | pending · A-R后 | 强rival、核心消融、归属负控、机制可识别性、条件power/预算和冻结phase；TDD实现/本地门/真实torch smoke后放行 | 不续修masked/retained hinge；4090执行，无新增5090授权 |
 | C41-A-TV / KR3.1、KR3.2、KR4.2 | pending · A-A后 | seed13完整候选各臂、official causal P/R/F1和关系护栏、恢复/损失正例、独立复算与去留 | 不按保守全None或子集分数宣布改进；负结果仍交付 |
 | C41-Q / KR1.3、KR2.3、KR3.3 | pending · 本轮所有待比单seed方案超过各自baseline/护栏且作者再次明确授权 | 依各有效合同执行matched seeds与聚类配对确认，记录均值/SD/区间；合法封存程序另核其许可与历史访问 | 未满足前置或授权不得跑seed17/42；单seed成功不能记成最终确认 |
