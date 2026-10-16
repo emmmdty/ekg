@@ -245,10 +245,12 @@ author delegation releases a new in-scope research queue; it does not reopen old
   C41-R completed original-machine pins/initializer/manifests, source synchronization and untracked
   preservation plus real CPU torch tests (R1 §25.68); C41-B completed ten CUDA cost cases and five-arm accumulation/shape/budget closure (R1 §25.69);
   C41-A completed both design and production admission (R1 §25.70–§25.72, release51c27eb);
-  C41-T is now active and V follows: run and audit
-  the fixed seed-13 five arms. Original mass failed numerically; isolated complement repair gates
-  passed full-model parity/CUDA export smoke and repair training is running; original shuffle
-  is running and marginal reached endpoint (R1 §25.78–§25.79). The new 5090 migration adapter C41-S is deferred, not completed.
+  C41-T/V completed all five valid endpoints and independent LOCAL/4090 official evaluation
+  with identical reports. The fixed exact/pair-F1 candidate failed its scientific gates; stop it
+  without a parameter/epoch search or extra seeds. Original mass failure is preserved; repaired
+  mass completed under a separate float64-auxiliary identity, with the precision limitation disclosed.
+  Formal current work is C41-D-R; scientific O1 remains unmet (PHASE_C final section; R1 §25.82).
+  The new 5090 migration adapter C41-S is deferred, not completed.
   Follow EXPERIMENT_PLAN §3.9 and the 10-16 C41 subtable; `research/20261016_project_okr.md`
   maps O1–O4/KRs to C5, D4, A4, conditional confirmation and final traceability tasks.
   R1 §25.66 records resource evidence; the 10-15 source ledger/candidate science remains valid.

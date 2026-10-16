@@ -1563,3 +1563,144 @@ BLANC 同向破：周期 1 是 `full 90.2893 > remove_core 89.6895 > permutation
 | 日志 | `logs/c5_r3_{full,remove_core,permutation}.log` |
 | checkpoint | 留在 4090（`CLAUDE.md`「训在哪就留在哪」），未回传 |
 | ⚠️ 跨周期比较的限制 | 周期 1 在 **gpu-5090**、周期 2 在 **gpu-4090**，backbone pin 相同（`2c7ff1f1…`，已逐位复核）但机器不同。**与主锚的比较两边都干净**（主锚是预测文件）；**两个周期的臂值直接相减带机器分量**，上面的 Δ 只用于说方向，不作效应量 |
+
+## C41-V · exact joint固定单seed五臂裁决（2026-10-16）
+
+**结论：本固定exact/pair-F1配置未过门，停止，不扫scale/epoch/threshold或追加seed救分。**
+本节是当前Ch5/C5新家族的结果，前文role家族历史不改写；不是整个身份研究被证明不可行。
+
+**开工自审**：科研价值是表5-3/KR1.1–1.2区分精确同森林联合依赖、普通root结构监督、
+总pair概率量与标签归属。可行性依赖R1 §25.68–§25.78的原机资产/预算/真实模型门和
+预冻结合同；五个有效端点现在均完成，再统一打开internal-dev评分，不用final-valid选模。
+
+### 身份、口径与独立复算
+
+训练2622篇、seed13、同规范roberta-base initializer、官方完整四头架构及给定类型policy，
+每臂固定100epochs/32800microbatches/8200updates、batch8/accumulation4；不作dev checkpoint
+选择。规范marginal、root-product、exact、assignment-shuffle沿用生产代码51c27eb及配置
+`configs/c5_joint_dependence_20261016.json`，SHA
+`e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b`。
+原mass在第40轮数值失败，失败产物保留；新mass从同initializer完整重训，独立代码076a874、
+配置SHA`a88e9f0bdbd2cd1f9766cedf98f4986365f8296364598d0c433a200233897d3c`，
+准入锚2468e39。只有其辅助目标使用float64正数complement等价计算，model/规范loss仍FP32；
+轨迹可能受精度影响，**不能称原FP32五臂合同完整成功**，也不能把重训当第二个seed。
+
+评分使用冻结291篇internal-dev、7195个event mentions、完整候选digest
+`15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910`。
+这里的7195为当前event共指口径，不沿用旧段落的其他mention计数。evaluator SHA
+`32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598`；P1可信根仍r15。
+gold/manifest/source-lock、两锚预测及collector源码均由冻结evaluation plan逐项hash校验。
+overlay `configs/c5_joint_evaluation_repair_20261016.json`在评分前已冻结（2468e39），SHA
+`6c24f07d944683020ed18035b7e5b008b78b240d37d59f9cec4baa8f86c07203`。
+
+LOCAL与4090分别运行未改official wrapper、独立文档计数MUC及错误profile交叉检查；两端
+**完整report JSON一致**（包括七行指标、endpoint身份、paired区间、profile和错误交换）。
+report SHA`702317f596edb109f784d826eb18e29656d6e6fcca063f0012acca64087401da`；
+document-counts SHA`2cca3ce5513e5509927dc46394a3258bdc2910bcb77c65f7b005f25ff3a48567`。
+两端status均complete、所有声明产物hash通过；没有访问final-valid。
+
+### 官方共指主表（百分制）
+
+| 行 | MUC F1 | MUC P | MUC R | B³ F1 | CEAFe F1 | BLANC F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| frozen official joint锚 | 80.984720 | 78.842975 | 83.246073 | 98.039866 | 97.731576 | 89.880089 |
+| given-type strong锚 | **82.668977** | **82.099828** | 83.246073 | **98.272474** | **97.941011** | **91.116329** |
+| corrected marginal | 80.968280 | 77.600000 | 84.642234 | 98.037540 | 97.655499 | 90.166712 |
+| root-product | 81.612091 | 78.640777 | **84.816754** | 98.121292 | 97.687669 | 91.070068 |
+| exact joint | 81.260946 | 81.546573 | 80.977312 | 98.176920 | 97.756666 | 90.989438 |
+| repaired mass | 81.437126 | 79.865772 | 83.071553 | 98.131946 | 97.793534 | 90.878288 |
+| assignment-shuffle负控 | 78.437754 | 73.475610 | 84.118674 | 97.674891 | 97.299614 | 86.980902 |
+
+冻结锚与typed锚是既有checkpoint控制，不冒称与新五臂同一训练轨迹。GLT的外部FR-016(b)
+描述性U行及near-singleton/弱控制限制仍认R1 §25.28，不将其升级为strong rival或重新选分。
+这里的七行不能抹去名册广度报告要求，未跑外部方法不构成胜利。
+
+### 配对比较与预声明门
+
+sorted291文档、paired bootstrap2000次、RNG13、corpus计数先求和再算MUC；区间为未校正
+探索性95%分位区间，只描述文档采样不确定性，**没有测到训练seed方差**。
+
+| exact减对照 | MUC差值（百分点） | 95%区间 |
+|---|---:|---|
+| typed strong锚 | −1.408032 | [−3.087516, 0.270201] |
+| frozen锚 | +0.276226 | [−1.513690, 2.018805] |
+| marginal | +0.292665 | [−1.462573, 2.073720] |
+| root | −0.351145 | [−2.086103, 1.270534] |
+| repaired mass | −0.176180 | [−1.638596, 1.225254] |
+| shuffle | +2.823191 | [0.776617, 4.919702] |
+
+| 事前门 | 判定 |
+|---|---|
+| 相对typed强锚至少+3pp MUC | FAIL；实际为负 |
+| 严格超过全部正控制 | FAIL；低于typed/root/mass |
+| exact−root及exact−mass均为正且CI下界>0 | FAIL；点估计均负、区间跨零 |
+| exact严格超过shuffle | PASS；但只支持标签归属有作用，不识别exact优于普通结构目标 |
+| B³/CEAFe/BLANC不低于typed强锚与marginal | FAIL；三项均低于typed，虽均高于marginal |
+
+总体`single_seed_exploration_passed=false`、`final_confirmation_complete=false`。
+KR1.1/KR1.2本候选未达到，KR1.3前置不满足；不申请额外seed。区间跨零不等于等效，
+也不能写成exact在总体上显著劣于root/mass。
+
+### 误差交换与三关系代价
+
+| 行 | 欠并pair | 过并pair | MUC missing links | MUC spurious links |
+|---|---:|---:|---:|---:|
+| marginal | 206 | 396 | 88 | 140 |
+| root | 199 | 339 | 87 | 132 |
+| exact | 241 | 285 | 109 | 105 |
+| repaired mass | 213 | 333 | 97 | 120 |
+| shuffle | 190 | 684 | 91 | 174 |
+| typed strong锚 | 222 | 303 | 96 | 104 |
+
+相对root，exact纠正89个过并pair、引入35个，但只纠正38个欠并pair又引入80个。
+相对mass对应为过并84/36、欠并28/56；相对marginal为过并139/28、欠并52/87。
+这支持本次输出更保守、错并减少而漏并增加的描述，**不唯一证明训练因果机制**。
+pair错误总数或link错误总数不能代替corpus MUC；例如exact的pair错误少于root，主指标仍低。
+
+| 行 | temporal F1 | causal F1 | subevent F1 |
+|---|---:|---:|---:|
+| frozen/typed锚（关系预测相同） | 51.629969 | 33.167890 | 29.747428 |
+| marginal | 49.670857 | 30.233898 | 22.044917 |
+| root | 49.818887 | 30.079220 | 21.837777 |
+| exact | 49.488372 | 29.471891 | 22.028660 |
+| repaired mass | 49.648692 | 30.588235 | 22.462077 |
+| shuffle | 49.345052 | 29.820290 | 22.395833 |
+
+exact causal P/R为35.388662/25.250209；锚为34.369410/32.047540。
+不能以causal precision稍高隐藏recall/F1下降。新五臂三个关系任务整体均低于历史锚，
+这是当前完整训练配方/轨迹的差异；所有臂共同回退不能唯一归咎exact辅助目标，亦不得
+另调关系权重挽救本配置。各行完整P/R与原始预测见同一evaluation报告。
+
+### 成本、checkpoint与封存
+
+| 臂 | train墙钟秒（不含导出） | peak allocated GiB | peak reserved GiB | GPU |
+|---|---:|---:|---:|---:|
+| marginal | 7462.627 | 4.028 | 4.150 | 0 |
+| root | 9668.369 | 4.027 | 4.184 | 1 |
+| exact | 9129.346 | 4.028 | 4.150 | 2 |
+| repaired mass | 12439.630 | 4.029 | 4.174 | 0 |
+| shuffle | 10140.811 | 4.028 | 4.150 | 3 |
+
+墙钟来自各training.jsonl最终epoch，含并行负载，不作隔离硬件性能结论；旧mass失败的
+资源花费不含在新mass这一行，原失败状态/39轮轨迹见R1 §25.73–§25.75，未抹除。
+五臂checkpoint及optimizer/scheduler留`gpu-4090:/data/TJK/ekg/`，没有跨机搬权重。
+前四旧臂根`runs/stages/C5/c5-joint-dependence-20261016/train/{marginal,root,exact,shuffle}/`，
+修复mass根`runs/stages/C5/c5-mass-repair-20261016/train/mass/`，文件均为`checkpoint.pt`。
+
+| 臂 | checkpoint SHA-256 |
+|---|---|
+| marginal | `cf379e293201f20704b6316e3624d2951107dd1c69b796c67e66d73bf2dd2219` |
+| root | `d38ea7f81a3fad238d00aae6ac7b84dd7eae86cd3787e267c03b3677a86b9157` |
+| exact | `de35493b618360e5ef27d5027b29a147ceeb07bdd115e28612162ab2d7df57ff` |
+| repaired mass | `7aea4682aabeba582af6c0b6a4d613c926b735d1ab0d3089fad35b6b64b19e5c` |
+| shuffle | `4f3ec9ca031507f87190bde2f8f18071ff4119e392f85838aff4b1760cf7b001` |
+
+R180五个endpoint身份manifest SHA
+`f22476e1656995c94763d7ac3d5e502713f7b94d7272fbeeccf72434947d2b7a`已双端核验。
+评价根`runs/stages/C5/c5-mass-repair-20261016/evaluation/`；独立远端副本与两端比较证据
+在`runs/stages/R1/r1-v81-c41-joint-verdict-20261016/`。评分执行commit619c0a7，
+训练launch commits及各预测/report精确SHA见R180，生产实现与最终准入锚见R1。
+
+**去向**：固定候选停止；科学O1未完成，负结果与精度修复限制保留。按主表继续D4-R，
+先解决原生监督可识别性与最近邻实质差异。未来C5新路线必须有新证据回R1，不复活
+封存role家族，不通过扫参、更大backbone、换seed或辅助指标替代主指标绕过本结果。

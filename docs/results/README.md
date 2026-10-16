@@ -10,7 +10,7 @@
 | [`PHASE_P1.md`](PHASE_P1.md) | 协议 | P1 r12 与 A3 r13 preflight PASS；final-valid 封存 |
 | [`PHASE_A.md`](PHASE_A.md) | Ch2 | A3.6 配方分账完成；最高 causal F1 仍未过锚，A3 以不可变 failed handoff 关闭 |
 | [`PHASE_B.md`](PHASE_B.md) | Ch2 | 结构违反清零 ✅，ECG 可重建率无增益 ❌；α=0.2 因召回上限不可达 |
-| [`PHASE_C.md`](PHASE_C.md) | Ch1 | 调度修复稳定底座，但两个机制周期均未超过种子噪声，当前方法贡献为零 |
+| [`PHASE_C.md`](PHASE_C.md) | 当前Ch5/C5（旧Ch1档案） | 旧role家族封存；10-16 exact joint固定五臂裁决未过强锚/归因/护栏，停止该配置；末节含双端独立复算、误差交换与精度修复限制 |
 | [`PHASE_D.md`](PHASE_D.md) | Ch3 | evidence 点估计最高但与两条同协议强线不可区分；证据轴信号更强 |
 | [`PHASE_E.md`](PHASE_E.md) | Ch4 | 图依赖正控通过；构建损失为整张图价值的 22%，图侧修复仍在噪声内 |
 | [`PHASE_R1.md`](PHASE_R1.md) | 方法准入 | Ch1/Ch2 功效通过但 baseline/input blocked；Ch3 五折 OOF 已冻结、anchor/power 待完成 |

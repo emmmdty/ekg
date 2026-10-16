@@ -5939,3 +5939,49 @@ root checkpoint留4090，SHA`d38ea7f81a3fad238d00aae6ac7b84dd7eae86cd3787e267c03
 预测SHA`fd1238a6130a4ea0739969d49eb42e3d16eb4fa9f7dd94cbcfa3563a35039c1a`。
 R180追加root身份，现三个有效端点闭合；shuffle/修复mass仍运行，无任何方法dev评分。
 接续以前台只读工具监测已有两PID；不安装服务器后台等待器、不启动/重试新任务。
+
+### 25.82 C41-T/V全部闭合，固定exact候选未过门，正式接D4-R（2026-10-16）
+
+**开工自审**：对准表5-3/KR1.1–1.2的联合依赖辨识，必须全臂endpoint后统一评分，
+不以数学正确、负控单独通过或工程门替代效果。原机资产/生产门已闭合，评价overlay在
+任何方法dev评分前冻结；本次只完成既定T/V及科研裁决，无新增seed/5090/权重搬运。
+
+shuffle与修复mass均到100epoch/32800microbatches/8200updates、完整无标签导出与CPU
+cache/source decoder parity；成功SSH确认PID1128804/1142785均GONE。至此五个有效端点
+齐备；非权重四件取回LOCAL，逐臂预算/配置/预测/report/checkpoint身份核对PASS。
+R180追加两项identity后封存五件manifest，SHA
+`f22476e1656995c94763d7ac3d5e502713f7b94d7272fbeeccf72434947d2b7a`，双端hashPASS。
+checkpoint/score caches/optimizer均留原4090。旧mass39轮失败原命名空间保留；修复mass
+aux float64限制见§25.78，不将原FP32合同伪称完整成功。
+
+4090无tracked改动下安全同步已push619c0a7后，LOCAL与4090分别运行冻结collector，
+命令均为`python -u scripts/evaluate_c5_joint_dependence.py --config
+configs/c5_joint_evaluation_repair_20261016.json`（LOCAL用uv，远端`.venv/bin/python`，
+CUDA隐藏）。七行官方四共指/三关系分数、独立MUC计数/profile、paired bootstrap、
+错误交换与所有科学门的**完整report JSON两端相等**；两个status及其全文件hashPASS。
+report SHA`702317f596edb109f784d826eb18e29656d6e6fcca063f0012acca64087401da`；
+document counts SHA`2cca3ce5513e5509927dc46394a3258bdc2910bcb77c65f7b005f25ff3a48567`。
+原始双端输出/比较/source与成本身份在R181
+`runs/stages/R1/r1-v81-c41-joint-verdict-20261016/`。
+
+**指标唯一权威落点**：[PHASE_C末节](PHASE_C.md#c41-v--exact-joint固定单seed五臂裁决2026-10-16)。
+该节完整报告主指标/强控制/配对区间、三项共指护栏、错误交换、三关系P/R/F1边界、
+训练墙钟/显存、checkpoint位置与限制。本页不重复主表数字。
+
+**裁决**：`single_seed_exploration_passed=false`；target/positive-controls/paired-attribution/
+guardrails均FAIL，negative-control PASS。点估计不胜root/mass且区间跨零，不得写成
+“证明总体显著更差”或“等效”；负控通过也不能单独识别exact联合依赖优势。KR1.1/1.2
+本候选未达到，KR1.3前置不满足，O1仍未完成。停止固定exact/pair-F1配置，不扫scale、
+epoch、threshold或额外seed；无final-valid访问，不改旧失败家族/论文结构。
+
+按主表正式接队**C41-D-R**，先复用§25.74/§25.77/§25.80与D4原生监督准备卡，
+核可识别的新干预和最近邻正文/源码差异。D4仍未准入训练；不把C5负结果当整个Goal
+完成，不让作者重新选题。新C5实质不同路线日后仍须新证据回R1。
+
+作者回复客户端Goal已恢复active，但本线程get_goal仍返回usageLimited；如实保留状态
+不一致，按其继续指令执行已授权工作，未覆盖/重建Goal，也未声称工具自动续跑恢复。
+
+§25.82 R181十九件封存manifest SHA
+`20319d40c1e812543841984858daeca74cfc13e73afeb22214a540b698dea62b`，
+已备份原4090、逐件双端hashPASS。文档一致性36项及diff --check通过；本次未改生产代码，
+不以旧全套测试冒充新运行。独立两端真实official评分与endpoint检查是本结果的验证证据。
