@@ -5473,3 +5473,31 @@ C41-R/B已完成（febf26c/1f03ab1，代码e7e3709，§25.68–§25.69）。
 远端真实torch与CUDA smoke、最终phase/code/config/input合同冻结。
 此时`method_admitted=false`，未开始正式五臂训练或dev评分，不改旧CPU失败与科学负结果。
 本次设计记录不会自动产生科学KR达成；长期Goal保持active，继续第二段而非等作者继续。
+
+### 25.71 C41-A第二段：生产组件/原joint接线与测试（2026-10-16，wip）
+
+科研价值/可行性沿§25.70与设计卡：将已准入的固定设计落实为表5-3可执行比较，
+不是重新选loss/decoder。官方Model/data/utils/dump源码不改；新增registry forest_pair
+及lazy-torch目标/纯CPU概率cache解码，抽取本项目封存research运算；不重写公开Model。
+训练入口实现原optimizer/accumulation/scheduler/固定endpoint，完整共指与三关系导出。
+
+TDD：组件最初11 FAIL（缺模块）、入口3 FAIL（缺入口）、无标签train-smoke投影
+1 FAIL（缺函数）；实现后隔离Torch2.8.0+cpu实际20项通过，包含五臂loss与全logit梯度
+逐值等于research、四头目标/全部toy参数梯度一致、跨epoch累积、非有限拒绝、无金标
+泄漏的smoke输入投影、CPU缓存/类型/空pair及registry惰性边界。
+初版放nodes会触发既有父包torch availability import，惰性测试1 FAIL；查明来源后
+将轻量算法放core，未改旧nodes或封存代码，测试转PASS，不将导入问题当科研失败。
+本地完整925 passed/76 skipped（20.82s）、ruff零error、smokeOK、一致性36PASS。
+默认env torch skip不作为远端证据。
+
+生产合同`phases/PHASE_C5_joint_dependence_20261016.md`及
+`configs/c5_joint_dependence_20261016.json`绑定原机30项输入/source/合同证据与生产code集合。
+此时method_admitted=false；接下来先远端真实CPU测试与固定peak8五臂完整Model损失/
+全参数梯度parity，再五臂train-only CUDA生产smoke。smoke各4microbatch/1个非零LR周期，
+无zero-LR完整性hook，导出仅peak8 train去identity/relation金标后的输入，不读dev或评分。
+最后冻结admission.json才允正式100epochs；没有把代码可运行当方法价值或最终准入。
+
+新phase独占根`runs/stages/C5/c5-joint-dependence-20261016/`；parity/all、smoke/<arm>、
+train/<arm>各exclusive-create，status/源码身份/输入/CPU cache与完整预测可复查。
+本地准备证据R170=`runs/stages/R1/r1-v70-c41-production-20261016/`。
+源码/config更新只在新生产身份，不修改r2/原CPU失败/旧方法输出；本次未发起正式训练。
