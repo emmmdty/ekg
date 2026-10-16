@@ -4,7 +4,7 @@
 > 唯一活动研究队首：**C-41 / T087，C5切片，wip**；后续 **D4 → A4**。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.79。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.80。本文只给状态、资产与接续动作。
 
 **本线程接续（2026-10-16）**：长期Goal已创建；作者确认额度恢复并指令继续，工具仍返回旧usageLimited，当前执行本轮用户指令（未声称自动Goal恢复）。C41-R/B/A已完成，当前C41-T：marginal endpoint完成；root/exact/shuffle与新修复mass均运行。旧mass失败保留；新准入锚2468e39，PID1142785/GPU0与独占路径见§25.79，全部有效臂完成后统一V。失败见R1 §25.73；同一错误已由CPU构造复现，下一独立数值修复门及shuffle接空GPU3见§25.75。
 原4090 pins/initializer/封存证据、未跟踪保全及源码同步与真实CPU torch门见R1 §25.68；
@@ -25,6 +25,8 @@
 [项目OKR](research/20261016_project_okr.md)、主表§3.9及§4的10-16切片。
 10-15[文献升级卡](research/20261015_innovation_upgrade.md)的科学候选仍有效，资源安排由本次覆盖。
 D4/A4仍待准入；额外seed、final-valid与5090权限不因资源恢复放开。
+T期间D4原生监督/标注policy与已拒版本见[准备卡](research/20261016_d4_native_supervision_review.md)，
+A4 native多原因/共指重复及普通SupCon强rival边界见R1 §25.77/§25.80；不等于正式接队/准入。
 
 **当前结论**：exact joint已准入当前单seed探索（§25.72），`method_admitted=true`；尚无正式训练效果、
 方法MUC收益或创新突破。已知类型控制有改进，五类固定控制未突破且停止；旧失败家族封存。

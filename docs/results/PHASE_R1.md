@@ -5908,3 +5908,14 @@ R179=`runs/stages/R1/r1-v79-a4-contrast-preparation-20261016/`保存源码、许
 把普通batch SupCon冒称严格target条件化。A4 adapter/full pipeline尚未实现或准入。
 四件manifest SHA
 `dc6d7248210b61aee6bda8bd9dde43dbf1e67c95328e90aed7c973b8d9a09ada`；双端备份后另核。
+
+§25.80 现有D4准备已整理为`research/20261016_d4_native_supervision_review.md`：逐版本
+记录具体数据/新意障碍、普通CMLE/SupCon强rival、正例辅助仍未被否定、正式接队的
+决定性门；不因标准loss可运行即准入、不取消D4章或交作者重选题。
+HEGAT官方supplement三页已可访问，能核graph/span/lexical架构级描述；其正文订阅
+预览仍不能当完整方法已核。新增此有限访问事实，不据之声称候选已排完最近邻。
+
+§25.80 R179四件原source/license/probe/report已备份原4090，逐件双端hashPASS，
+completion manifest SHA
+`dc6d7248210b61aee6bda8bd9dde43dbf1e67c95328e90aed7c973b8d9a09ada`。
+仅文档准备落地，consistency36PASS、diff --check通过；未新增生产代码/模型训练。
