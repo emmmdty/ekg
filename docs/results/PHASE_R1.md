@@ -5693,3 +5693,33 @@ R172共11件准备产物manifest SHA256
 两组均LOCAL生成并备份原4090、远端逐件重算PASS；无checkpoint跨机搬运。
 仅文档/交接变化，`uv run python scripts/audit_r1_consistency.py`为36项PASS，
 `git diff --check`通过；未声称新代码测试或科学KR通过。
+
+### 25.75 C41-T接续：mass饱和数值复现与修复准入（2026-10-16，wip）
+
+**开工自审**：科研价值是恢复表5-3/KR1.2预声明的总概率量强控制，不能缺mass就
+声称exact依赖归因。可行性是零模型CPU logits复现、原源码/失败封存及4090空卡；
+先根因和数学等价验证，再独立修复身份/生产门。不使用dev结果选择修复，不改loss/
+alpha求导/权重/seed/epoch/decoder，不把原失败覆盖成成功。
+
+用户明确确认额度已恢复并要求继续；get_goal仍返回旧usageLimited，不据其缓存状态
+宣称活动自动Goal已恢复，也不重建/标complete。当前按用户本轮继续指令推进同一队列；
+官方Goal文档所列客户端恢复命令为/goal resume，代理工具没有resume接口。
+Git已fetch，HEAD=origin/main=62a3573，干净；consistency36PASS。
+
+R173=`runs/stages/R1/r1-v73-c41-mass-numerics-20261016/`先写自审/假设，后运行
+CPU-only Torch2.8.0+cpu，seed13构造logits、零数据/模型/optimizer。3002个构造病例
+内找到5mention输入，原production实际抛同一ValueError；所有parent row float32和
+为1，QQᵀ十个lower pair均舍入1，C中4个pair为0.9999999403953552，denominator=0、
+delta=-2.384185791015625e-7。是原代码路径的合成反例，未取得原训练失败batch，
+不能声称现场精确重放；原research实现有同一算式，production parity因忠实继承未发现。
+
+裁决：旧mass实现数值失败，不是硬件失败/科研效果负例。先独立研究正数complement
+递推与相同mass公式的等价、梯度及饱和边界，再做TDD独立实现；失败路径原样保留。
+只有数学/独立穷举/梯度/完整模型门通过才创建新mass训练身份，从同initializer重跑
+seed13固定100epoch；不从第39轮补权重，不动仍运行的其他臂源码/配置。未受影响四臂
+保留原合同身份，任何新mass对比必须显式报告数值修复差异，不能称原五臂合同完整。
+评分仍等所有有效臂endpoint，原eval计划不改；修复评测路径以独立覆盖映射绑定。
+
+接续成功SSH：marginal/root/exact均ALIVE，最后完整epoch72/56/59；mass GONE/failed，
+GPU3空闲11MiB、无compute apps。shuffle尚未启动，按原冻结配置/同精度和预算接GPU3；
+这仅是C类空卡选用调整，原phase/config/五臂科学判据不变。
