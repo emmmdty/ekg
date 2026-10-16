@@ -1,0 +1,90 @@
+{
+  "schema_version": "ekg.recovery_jobs.v1",
+  "final_valid_accessed": false,
+  "purpose": "D4-R fixed strong linear own-train inference diagnostic only; no proposed training, optimizer or model selection",
+  "seed": 13,
+  "code_sha256": {
+    "scripts/evaluate_factuality.py": "fb5fcf3cebb61b04dc586d85bb35c13edb633cbc4f480a0c27d7123048735731",
+    "scripts/launch_recovery_validation.py": "4026b24a9963f89f3f3cc33f3094e9554cb5d38ff022ccdc4f149b007cd38b5b",
+    "src/ekg/__init__.py": "1eff8cac5d3be222df1b9a252dce51203088d88bfdd711677a89a9c45e4bfde1",
+    "src/ekg/core/io.py": "5c7b6aa7634b500ff34d219a033e45e0fc5aacdff9d47d3ca82644192885cede",
+    "src/ekg/core/protocol.py": "3e5d60d6b5e74382ad4953f92868a312d0beaf45ab11cabff28c89242a1bfcb5",
+    "src/ekg/core/registry.py": "513b18627b926729ecf1a49d3c55930be0e18b6b8544a5b73be3c5a23521be21",
+    "src/ekg/core/schema.py": "f136833839c3db3d9bdbc80a9eda245bbaa494286765f5dd057ba16a2cdabf30",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/factuality/__init__.py": "8259aceb13ca5c42542c42d165adcdf49f9403c782e4c8cadc0cf8c8277d0bfe",
+    "src/ekg/factuality/baselines.py": "4aec07a7a299ba827945d9c14fdb3d6da5f6a32e4922bcbf1c097aab5e754d1a",
+    "src/ekg/factuality/causal_residual.py": "b68680227c2ee1ed7a69ac4f458ac5bd2568cf74a53dea35e5a53f3ad899859c",
+    "src/ekg/factuality/detection.py": "4a29a6c4df2a85f2e73f435f4694af20e9ee8debea66f9abe59e989c291265c9",
+    "src/ekg/factuality/evidence.py": "8ee5a690b5a3571b9fc1beebeec7f2cd8815f46bf8ee425db897f46dcf9aaa37",
+    "src/ekg/factuality/metrics.py": "f09d8d318305b97f62ef22e12e4915c8eb7075df432d16d05212cc0c782fd998",
+    "src/ekg/factuality/purification.py": "19ebeb6da2590d91257a4c468e4b959a9ecbf0f9e54b71cc58150a9f0fecd986",
+    "src/ekg/factuality/recovery_heads.py": "93e34b0aa2b7134648e34aaaa3534ab64675c5c71e0389f649182a6c556203c0",
+    "src/ekg/factuality/typed_cues.py": "a056bb55fc87bbd323c527186a2d2c73ef9bae68648c607c932ba6448a4eb25d",
+    "src/ekg/nodes/encoding.py": "abee9d4a83a9f4313b441c662490b69f8a1aeff29586ae143f4a4776537eb945",
+    "src/ekg/relations/data/maven_ere.py": "9a6167f110fe49d0db61c38fb50125f20fde963363128bd9c39e68dfb052d746",
+    "src/ekg/relations/data/maven_fact.py": "b68b8766a4c734ed54c48d44314aa79e9c9b50f9b1264e09c9a92e900782bad5",
+    "src/ekg/relations/extractor/base.py": "9b9cab9a044cb65f701257ee0dc0ace442dc1b87bb5ecfefa6652c9a478d37ca",
+    "src/ekg/relations/extractor/supervised.py": "560d838ad0c2c444e95b412aeda2cbe2b302efa212e9615b3f44dc0ef6722376"
+  },
+  "jobs": {
+    "d4-linear-fold1-train-replay": {
+      "seed": 13,
+      "cwd": "/data/TJK/ekg",
+      "machine": "gpu-4090",
+      "depends_on": [],
+      "inputs": {
+        "data/processed/maven_fact/train.jsonl": "190522b44f0702af030161924d7cb94c4a06bd5d6e2b40d79f8f1eaa5886bab7",
+        "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/native_fold1_train.jsonl": "a865781e2000cea9cae6a6c368b640f8b404e07f672f58bbce2510d698880fa9",
+        "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json": "dbaf7c5294bcec59c2e7bb1e90d90d43b4cd9e7a99f6d41c9407787616d4cf3d"
+      },
+      "models": {
+        "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-1/checkpoint": "4d19dd58da1faa6cfb356f9d9440a372d7bd46a29004fea6b527809655b9fc9b"
+      },
+      "commands": [
+        [
+          ".venv/bin/python",
+          "-u",
+          "scripts/evaluate_factuality.py",
+          "--valid",
+          "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/native_fold1_train.jsonl",
+          "--checkpoint",
+          "runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-1/checkpoint",
+          "--baseline-pooling",
+          "cls",
+          "--manifest",
+          "runs/stages/R1/r1-v61-20260904/factuality_cv/fold-1/train.json",
+          "--max-length",
+          "128",
+          "--dump-gold-labels",
+          "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/replay/labels.json",
+          "--output",
+          "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/replay/report.json"
+        ]
+      ],
+      "outputs": [
+        "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/replay",
+        "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/replay_status.json"
+      ],
+      "status_output": "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/replay_status.json",
+      "expected_files": [
+        "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/replay/labels.json",
+        "runs/stages/R1/r1-v83-d4-anchor-train-replay-20261016/replay/report.json"
+      ]
+    }
+  },
+  "train_only_scope": {
+    "documents": 1747,
+    "selection_dev_ids_excluded": true,
+    "evaluation_ids_excluded": true,
+    "no_new_seed_or_optimizer": true,
+    "interpretation": "in-sample residual diagnostics, no generalization or causal effect claim",
+    "prespecified_buckets": [
+      "all native train mentions",
+      "five factuality classes",
+      "different-label same-sentence events",
+      "valid positive support",
+      "shared positive support tokens"
+    ]
+  }
+}

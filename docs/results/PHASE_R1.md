@@ -5985,3 +5985,82 @@ epoch、threshold或额外seed；无final-valid访问，不改旧失败家族/�
 `20319d40c1e812543841984858daeca74cfc13e73afeb22214a540b698dea62b`，
 已备份原4090、逐件双端hashPASS。文档一致性36项及diff --check通过；本次未改生产代码，
 不以旧全套测试冒充新运行。独立两端真实official评分与endpoint检查是本结果的验证证据。
+
+### 25.83 C41-D-R正式接队：一手图方法与监督边界审查（2026-10-16，wip）
+
+**开工自审**：科研价值是表3-3/KR2.1–2.2在训练前排除“已有graph/evidence/普通contrast”
+重合，并防止借用DLEF全局标签伪造MAVEN的source/scope监督。可行性是仅核公开正文与
+作者固定revision源码，复用§25.74/§25.77的原生train覆盖；零encoder/optimizer、没有
+held-out或final-valid标签访问，也不将外部公开XML并入本项目训练。
+
+C5固定候选裁决已经写入主表并push dfa9207；D4-R现为唯一活动切片，未准入新训练。
+下一具体证据是UR-HAT正文及作者源码的目标/关键词统计/图边/评测选择，作者仓库HEAD
+已用git ls-remote核为35447c414d97d3def96d85c82257f5eaaaa538cd，MIT。
+它有真实模型/训练源码，不可标README-only；原benchmark复现、环境可运行及MAVEN
+透明适配尚未实跑，不得提前宣称FR-016(a)/(b)已完成。
+
+§25.83 下一项有界train检查的科研价值：决定绑定候选能否合法假设“一个支持token只属于
+一个事件”，而不是再测一般覆盖率。只用同一冻结fold-1 train及有效native正offset，
+构造token→mention/event的观测关联，区分共指重复与distinct事件共享、不同标签共享。
+可行性是无模型CPU计数并与R172既有覆盖核对；不将未列出的关联当负scope、不推导
+性能/power。若有共享正关联，一对一/exclusive binding必须拒绝或重新定义，不能用
+Sinkhorn/匹配等模块名称掩盖错误监督假设。
+
+§25.83 R182 native positive-incidence检查完成，1747篇固定fold-1 train与R172类级覆盖/
+有效token/无效offset计数逐项一致。3128个被标support的token节点、3575条mention正边、
+3570条去共指重复event正边；344个token关联多个mention，340个关联distinct事件，
+35个还关联不同事实性标签。记录中包括同一`did/not`同时支持同句两个不同事件的
+PS+/CT−，只作原生正标注的反例，不把它升格为逻辑作用域或世界真值。结论：
+**one-token/one-event排他binding版本数据不成立，停止**；不否定所有positive-only辅助。
+没有造负边、读held-out标签或用计数声称功效。
+
+UR-HAT主文经web读到§3.1/3.3/3.4/4.1，作者MIT源码与四页appendix已归档；七个原py
+仅syntax-parse通过，未加载模型或实跑原benchmark。训练目标为document CE + mention CE
++ Gaussian KL；关键词统计只取训练数据，不能误报它靠test标签选keyword。其XML读取
+独立sentence/document值；公开入口每epoch在其`test_loader`评分并按micro+macro挑档，
+需与正文所述validation调参区分，未经复现不能泛化成论文整体无效。源码报告限定
+labels=[0,1,2]，但head维度是len(label2idx)，不误写为硬编码三类head。直接移入MAVEN
+卡【数据/协议】，须重定义/透明适配，当前不是已完成FR-016(a)/(b)的新对手行。
+一手出处：[正文](https://journals.sagepub.com/doi/pdf/10.3233/FAIA230508?download=true)、
+[作者固定源码](https://github.com/JiaweiSheng/UR-HAT/tree/35447c414d97d3def96d85c82257f5eaaaa538cd)。
+
+另核[Conditional SupCon2022 §3.1 Eq2](https://aclanthology.org/2022.findings-emnlp.199.pdf)与
+[作者ConSupConLoss](https://github.com/JFChi/CSCL4FTC/blob/e55a5cc8473feeacd1e9eabbe41e59b9c91f075c/models/contrastive_losses.py)：
+共同group/task-label限制denominator已有，不能仅改为事件/同语境就立新意；该文EO条件
+不自动变成事实性归属论证。只静态读源码，未集成/运行，许可未闭合。CoDE/scope正文
+仍订阅限制，精确标题搜索出现的expert-linking CODE是不同论文，不能混同填缺口。
+本节未引用外部成绩，也未用其他split的数字比较MAVEN。
+
+§25.83 R182十五件completion manifest SHA
+`429c73d31444a440e5d3a85965f44fef39c60d38dcdcdfe7601d973dc66eb715`，
+已备份原4090、逐件双端hashPASS。没有执行新模型/optimizer或导入上游XML作训练。
+
+### 25.84 C41-D-R强linear原train重放诊断准入（2026-10-16，wip）
+
+**开工自审/科研价值**：表3-3/KR2.1–2.2的绑定假设不能仅靠support覆盖推断。下一
+只用已恢复且冻结的strong linear fold-1 checkpoint在**它自己的train manifest**重放预测，
+检查残余错是否集中在同语境不同事件/共享support等原生机会，避免把数据存在性当
+“strong control确有该失败”的证据。事前固定全train、类别/同句异标签/有效support/
+共享support桶，不筛评测中的好看例子。训练集拟合不测泛化收益、因果机制或power。
+
+**可行性**：checkpoint在4090原机、selection-dev选出的epoch既有身份不变，
+`runs/stages/R1/r1-v61-recovery-ready-20261008/d4/linear/fold-1/checkpoint/`；
+目录content digest成功重算为
+`4d19dd58da1faa6cfb356f9d9440a372d7bd46a29004fea6b527809655b9fc9b`。
+model.safetensors SHA`53e286816d23c444c05d7280c0eb407375d235c46ba6f005c14a15753726a145`，
+head SHA`a079addb39a7478a3cddfff34fed52dab6659ef5c215d8db9dec92104cda3ed7`，
+baseline_config为linear/cls、max_length128、原五类顺序。原run元数据确认seed13；
+没有新训练、optimizer、checkpoint搬运或5090任务。只从原public-train投影固定1747个
+train IDs，assert与selection-dev/evaluation ID集合不交；不将它们的实例标签传给重放器。
+
+复用未改`evaluate_factuality.py`及有hash/空卡/独占输出/status门的
+`launch_recovery_validation.py`，另冻新replay config；CPU预检、源码/资产hash与空卡
+门通过、披露确切命令后才作4090只读推理。它不是proposed method准入，不能把原
+12epoch训练再跑一遍或事后据train分数改选checkpoint。
+
+§25.84 replay config `configs/d4_anchor_train_replay_20261016.json` SHA
+`7c497822b6f0ea1a53fc6f1b23a960ae137617e2e28c7e6ad5fba06f0a89c516`，
+投影SHA`a865781e2000cea9cae6a6c368b640f8b404e07f672f58bbce2510d698880fa9`
+已LOCAL/4090独立生成并重算一致；没有从LOCAL传checkpoint。原入口未修改。
+启动前本地完整pytest exit0（torch用例skip，不冒充真实Torch通过）、ruff0、ekg-smokeOK、
+consistency36PASS及diff --check通过；该配置只准只读推理诊断，不准新方法训练。

@@ -1,6 +1,6 @@
 # D4原生监督边界与接队准备（2026-10-16）
 
-这是C41-T期间的文献/数据准备卡；正式D4-R仍在C5裁决后，训练未准入。
+这是C41-T期间建立的文献/数据准备卡；C5裁决后D4-R已正式接队（R1 §25.82–§25.83），训练未准入。
 可执行顺序只认EXPERIMENT_PLAN §4，不产生第二条队列。
 
 ## 科研价值与可行性
@@ -32,6 +32,7 @@ sentence/document双factuality、删词后必翻转的标签或不同事件之�
 | 不同事件factuality标签直接映射support/refute | [SDIN §3/Table1](https://aclanthology.org/2023.findings-acl.879.pdf)的标签来自同事件句级/文档级双监督，我们没有该字段；停止映射版本 | 以其推理机制作最近邻，不照抄标签 |
 | 同语境按label-count条件化，枚举标签分配 | [ConditionalMNLogit真实源码](https://www.statsmodels.org/stable/_modules/statsmodels/discrete/conditional_models.html#ConditionalMNLogit.loglike)已有同组标签排列归一化。单把标准估计器换成事件/神经logits不构成独立创新 | 后续条件监督候选必须面对的普通强rival |
 | 普通supcon、cue/类别重加权 | 不是新颖机制；[SupCon §3.2](https://arxiv.org/pdf/2004.11362v5)与[作者代码](https://github.com/HobbitLong/SupContrast)已核，criterion CPU可运行范围见R1 §25.80 | 匹配训练机会、样本/类别权重与容量的竞争解释 |
+| 每个support token只分配给唯一事件 | 原生正关联可同时指向不同事件、不同标签；R1 §25.83。拒绝一对一/排他匹配版本 | 允许many-to-many正关联；未标边仍未知 |
 | 正例support辅助监督 | 当前证据没有否定其可行性，但“加入evidence/span/graph”已有先行研究，尚无可识别新差异 | 保留为待研究问题，不能直接生成训练合同 |
 
 拒绝某个版本不等于取消D4方法章，也不等于所有事件条件监督均不可行。
@@ -50,6 +51,15 @@ sentence/document双factuality、删词后必翻转的标签或不同事件之�
   已访问官方三页supplement，能看到graph/span/lexical的架构级描述，不能代替正文公式。
 - 代码搜索/下载的403、TLS或InternalError均是工具事实，不是方法/实现不存在的证据。
   访问边界与原始文件hash见R172/R175/R177/R179及对应结果段。
+- [UR-HAT正文§3](https://journals.sagepub.com/doi/pdf/10.3233/FAIA230508?download=true)和
+  [作者源码35447c4](https://github.com/JiaweiSheng/UR-HAT/tree/35447c414d97d3def96d85c82257f5eaaaa538cd)
+  已核：关键词/不确定图/提及辅助监督已有先行性；它使用sentence/document双标签，
+  不能凭MAVEN mention label构造另一个gold。公开入口的held-out epoch选择和三类报告
+  也须显式适配，不能称已完成同协议复现；原源码MIT与四页appendix保存在R182。
+- [Conditional SupCon2022 Eq2](https://aclanthology.org/2022.findings-emnlp.199.pdf)及
+  [作者criterion](https://github.com/JFChi/CSCL4FTC/blob/e55a5cc8473feeacd1e9eabbe41e59b9c91f075c/models/contrastive_losses.py)
+  已核到共同group/task-label限制denominator。因此“只让同语境候选竞争”也不能单独当
+  新颖性；该文fairness假设不因改成事件group就自动成立。没有将其程序集成或宣称runtime通过。
 
 ## 正式接队后要解决的决定性问题
 
@@ -67,3 +77,7 @@ sentence/document双factuality、删词后必翻转的标签或不同事件之�
 toy梯度、缺失率或“criterion跑通”推出。只有实质差异、数据/协议、功效/预算与
 生产门闭合后才训练。科研路线裁决由持有队列的代理在现MAVEN授权内推进，
 不把这些待解问题退回作者选题。
+
+当前正式下一项为R1 §25.84：用冻结strong linear的fold-1 checkpoint在其自己的1747篇
+train manifest重放预测，先看真实剩余错误是否支持绑定假设。独立投影排除selection-dev/
+evaluation实例；不更新参数/更换checkpoint，不将in-sample诊断当泛化提分或功效。

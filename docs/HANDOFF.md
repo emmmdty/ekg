@@ -4,9 +4,9 @@
 > 唯一活动研究队首：**C-41 / T087，D4-R切片，wip**；C5固定候选T/V已裁决，后续 **A4**。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.82；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.84；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
 
-**本线程接续（2026-10-16）**：长期Goal已创建；作者报告客户端已恢复active，但get_goal仍返回usageLimited，当前按作者继续指令执行，未声称工具自动续跑已恢复。C41-R/B/A/T/V均已闭合；五个有效端点完成/进程GONE，双端独立official/paired/profile完整报告一致。固定exact/pair-F1候选科学门FAIL，停止该配置、不扫参/加seed；旧mass失败和新mass aux float64限制保留。C5科学O1未完成。**当前正式接队C41-D-R**，复用准备卡与R1 §25.74/§25.77/§25.80，先闭合可识别监督与最近邻差异；尚无D4新训练准入。C5裁决/资产见R1 §25.82及PHASE_C末节。
+**本线程接续（2026-10-16）**：长期Goal已创建；作者报告客户端已恢复active，但get_goal仍返回usageLimited，当前按作者继续指令执行，未声称工具自动续跑已恢复。C41-R/B/A/T/V均已闭合；五个有效端点完成/进程GONE，双端独立official/paired/profile完整报告一致。固定exact/pair-F1候选科学门FAIL，停止该配置、不扫参/加seed；旧mass失败和新mass aux float64限制保留。C5科学O1未完成。**当前正式接队C41-D-R**，复用准备卡与R1 §25.74/§25.77/§25.80，UR-HAT/conditional contrast正文源码已核，native共享正关联已拒绝exclusive binding（§25.83）；下一原strong linear固定fold-1 train重放诊断，config/原checkpoint身份与边界见§25.84，尚无D4新训练准入。C5裁决/资产见R1 §25.82及PHASE_C末节。
 原4090 pins/initializer/封存证据、未跟踪保全及源码同步与真实CPU torch门见R1 §25.68；
 预算已闭合（§25.69），A两段准入及真实CPU/五臂CUDA生产smoke已完成（§25.70–§25.72）。
 原`method_admitted=true`只准许固定seed13探索；该探索已完且未过科学门。当前D4-R，完成子项后继续下一项。
@@ -36,7 +36,7 @@ A4 native多原因/共指重复及普通SupCon强rival边界见R1 §25.77/§25.8
 r2只在严格数值相等后恢复signed-zero字节并记录全过程；成功不改判原失败。
 
 **下一必要动作（10-16接续）**：正式执行主表C41-D-R，复用原生train覆盖/标注policy与
-已拒版本（准备卡/R1 §25.74、§25.77、§25.80），核最近邻正文/源码，裁决可识别的新差异。
+已拒版本（准备卡/R1 §25.74、§25.77、§25.80、§25.83），下一原strong linear固定train重放诊断（§25.84），核真实残余错后裁决可识别的新差异。
 缺scope/source监督与普通contrast改名均不能放行；新D4候选仍须R1/power/预算/生产门。
 C5全部完成产物不重跑、不覆盖；checkpoint留4090，旧失败不清理。
 
@@ -368,7 +368,8 @@ A4 仍待诊断。三个方法章均未形成新方法贡献，不能用旧“�
 **10-16最终执行覆盖**：C41-R/B/A/T/V完成；五个有效端点和双端独立评分报告一致，
 固定exact/pair-F1候选未过门并停止（R1 §25.82；PHASE_C末节），不得扫参挽救。
 当前正式执行C41-D-R；入口准备卡`research/20261016_d4_native_supervision_review.md`，
-native覆盖/标注policy/普通rival认§25.74、§25.77、§25.80。先裁可识别机制与最近邻差异，
+native覆盖/标注policy/普通rival/共享正关联认§25.74、§25.77、§25.80、§25.83。
+下一原strong linear固定train重放，独立config/身份/边界见§25.84；先裁可识别机制与最近邻差异，
 再决定D-A准入；没有新D4 GPU合同。下方C5 R/B/A/T旧命令均仅供追溯，不重跑。
 
 **10-16原顺序**：读[项目OKR](research/20261016_project_okr.md)及主表§3.9/§4的
