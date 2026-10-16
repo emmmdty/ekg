@@ -5741,3 +5741,27 @@ R173本地数学/失败复现/TDD与全套日志共9件，completion manifest SH
 `f994ed884c2e197d66b64e92aae681bda32afc08804bcc815678f750ad62a38a`；原39epoch失败数据不改，远端完整模型门未跑，仍不得新训mass。
 shuffle PID1128804已成功SSH核ALIVE/Rsl、status running（cbffc21/original config）；
 随后继续原四臂，不读取任何dev分数。
+
+§25.75 远端新14例真实Torch全通过；R173九件artifact双端SHA全部核一致。
+修复CPU完整模型parity PID1130534已complete且ps GONE（GPU隐藏），旧/新total loss
+11.500032424926758 / 11.500032543587515，全部221参数梯度PASS，最大abs差
+5.960464477539063e-8（原rtol1e-4/atol1e-6不改），参数摘要前后与规范起点相同。
+report SHA3ffbcecbafbeb0f40b7242f878d3f60361fbd14dab8288b25c87747bd9bf6f9c。
+本地取回首次因目标父目录不存在失败，创建独占父目录后重取；工具失败不改parity结论。
+四卡均占用原四臂，修复CUDA smoke尚未启动，不挤占、不创建等卡启动器。
+
+### 25.76 C41-V收集器准备（2026-10-16，未开始评分）
+
+**开工自审**：价值是为表5-3/KR1.1/1.2/4.2完整执行预冻结的官方评分、强控制、配对、
+护栏与错误交换，避免只摘单臂；可行性是既有P1官方wrapper、MUC充分统计/错误profile，
+CPU轻量即可。只准备接线与合成测试；全部有效臂endpoint前不运行方法评分。
+`evaluate_c5_joint_dependence.py`复用既有official scorer CLI（各臂均完整三关系+共指），
+独立MUC统计/official cross-check与missing/spurious、pair恢复/引入。paired固定sorted
+291docs/RNG13/2000bootstrap/95%区间，原科学门不变。endpoint检查complete、配置/
+预测/report/hash、100epochs/32800microbatch/8200updates/CPU replay与checkpoint身份，
+缺一即停止，先查齐endpoint再评分。旧mass不能当完整臂；独立overlay待修复正式准入后
+冻结，仅改mass路径/透明精度差异，不调目标。checkpoint不要求跨机复制。
+新4例先缺脚本FAIL后通过：未完成endpoint/篡改预测拒绝、同系统差为0、先汇总link再算
+corpus MUC。全套932passed/87skipped（20.78s），ruff0、ekg-smokeOK、consistency36PASS。
+R174=`runs/stages/R1/r1-v74-c41-evaluation-preparation-20261016/`保存自审/原red与全套日志。
+当前无方法dev scores，V仍pending，准备PASS不算科学KR。
