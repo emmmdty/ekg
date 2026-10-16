@@ -5932,3 +5932,10 @@ report SHA`bf68f8367cca4009c2961ae65dd2bb40ccf3ea6e51b4c8e06f5c062e95672f6f`。
 marginal端点见§25.78。R180=`runs/stages/R1/r1-v80-c41-endpoints-20261016/`目前
 保存两项身份，后续追加其余端点，不假称五臂已齐。root/shuffle/修复mass仍待完成；
 没有方法dev分数被计算/查看，V未开始，科学KR未达成。
+
+§25.81 root也已完整100epoch endpoint/CPU replay与artifact门通过，原PID1097110成功
+SSH确认为GONE；非权重四件取回LOCAL后独立endpoint helper实际重核PASS。
+root checkpoint留4090，SHA`d38ea7f81a3fad238d00aae6ac7b84dd7eae86cd3787e267c03b3677a86b9157`，
+预测SHA`fd1238a6130a4ea0739969d49eb42e3d16eb4fa9f7dd94cbcfa3563a35039c1a`。
+R180追加root身份，现三个有效端点闭合；shuffle/修复mass仍运行，无任何方法dev评分。
+接续以前台只读工具监测已有两PID；不安装服务器后台等待器、不启动/重试新任务。

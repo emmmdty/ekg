@@ -6,7 +6,7 @@
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
 > [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.81。本文只给状态、资产与接续动作。
 
-**本线程接续（2026-10-16）**：长期Goal已创建；作者确认额度恢复并指令继续，工具仍返回旧usageLimited，当前执行本轮用户指令（未声称自动Goal恢复）。C41-R/B/A已完成，当前C41-T：marginal/exact endpoint已核闭合；root/shuffle与新修复mass均运行。旧mass失败保留；新准入锚2468e39，PID1142785/GPU0与独占路径见§25.79，全部有效臂完成后统一V。失败见R1 §25.73；同一错误已由CPU构造复现，下一独立数值修复门及shuffle接空GPU3见§25.75。
+**本线程接续（2026-10-16）**：长期Goal已创建；作者确认额度恢复并指令继续，工具仍返回旧usageLimited，当前执行本轮用户指令（未声称自动Goal恢复）。C41-R/B/A已完成，当前C41-T：marginal/root/exact endpoint已核闭合；shuffle与新修复mass均运行。旧mass失败保留；新准入锚2468e39，PID1142785/GPU0与独占路径见§25.79，全部有效臂完成后统一V。失败见R1 §25.73；同一错误已由CPU构造复现，下一独立数值修复门及shuffle接空GPU3见§25.75。
 原4090 pins/initializer/封存证据、未跟踪保全及源码同步与真实CPU torch门见R1 §25.68；
 预算已闭合（§25.69），A两段准入及真实CPU/五臂CUDA生产smoke已完成（§25.70–§25.72）。
 `method_admitted=true`仅准许固定seed13探索；当前T→V，尚无新方法效果或科学KR达成。完成子项后继续下一项。
