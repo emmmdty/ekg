@@ -5816,3 +5816,13 @@ D4一手源码访问web已成功核机制，本地curl保存全文TLS EOF失败�
 §25.77 R175十件原/修正版CPU分析与源码访问记录已备份4090并逐件hashPASS，manifest
 SHA`f200e86fed49464c20a7f90b7cf5bb07b33391142e34e590aff5f4b0b75e03ce`。
 首次校验在传输尚未结束时缺文件，rsync完成后重核全部PASS；不把首次工具失败冒充成功。
+
+§25.77 D4原始标注policy进一步核实（R177 source_review.json，官方19页PDF经web完整获取，
+本地未归档PDF，不虚构PDF字节hash）：[MAVEN-FACT2024 §2.1–2.2](https://aclanthology.org/2024.findings-emnlp.651.pdf)
+将factuality source固定为作者，supporting words以PS+/PS−/CT−为标注对象，CT+/Uu通常
+无显式支持；§25.74的类依赖空字段部分源于结构性标注policy，不能称随机缺失，也不能
+当已标注的负scope/负attachment。它仍不排除只用可靠正例的辅助监督，但不提供其功效。
+原pipeline先预测factuality再预测support words；不能将gold evidence可用性直接当部署
+classifier输入。没有逐引用source-holder gold，不表示任务的factuality source定义未知。
+原paper说明released train与valid/test的标注流程不同；本次不读原valid/test标签，继续
+冻结train-only/OOF边界，不将不同原split论文数字搬作我们的主表。无外部成绩引用。
