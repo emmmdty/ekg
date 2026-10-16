@@ -5454,3 +5454,22 @@ R169的shape/输入/config/报告/log/summary有completion_hashes.json，双端h
 LOCAL与4090各自重算35项均匹配，含五臂报告/manifest与15份原始日志；
 R165十份r2报告另依各自原manifest逐项核对，SHA登记在R169 summary。
 本次收口仅改文档/结果，不再改e7e3709已通过的代码；一致性36项PASS、diff --check通过。
+
+### 25.70 C41-A第一段：设计准入裁决（2026-10-16，无方法效果）
+
+开工自审与可行性/竞争解释/方法边界见
+`research/20261016_c5_design_admission.md`，对准表5-3/KR1.1–1.2。
+复用C41-L固定一手文献与§25.46–§25.61的机制/输入/条件power证据，
+C41-R/B已完成（febf26c/1f03ab1，代码e7e3709，§25.68–§25.69）。
+不新增科学阈值、loss/scale/臂/endpoint、标注、seed、外部数据或设备权限。
+
+持有队列的代理作顺序PI/方法自审，裁决`design_admitted=true`：限定差异为
+相同typed parent model与soft pair-F1下的joint-dependence训练，五臂可区分
+普通结构监督、root乘积、总量增加和pair归属；不声称发明forest/root DP/结构loss，
+检索未定位全同机制不等于不存在。条件power不等于未知训练方差已测；
+预算外推与实测学习态不同，仍须生产门。既有五臂/强锚/护栏/科学止损全部保持。
+
+第二段现在开始：TDD生产组件/CPU缓存回放、官方Model透明接线、本地完整门、
+远端真实torch与CUDA smoke、最终phase/code/config/input合同冻结。
+此时`method_admitted=false`，未开始正式五臂训练或dev评分，不改旧CPU失败与科学负结果。
+本次设计记录不会自动产生科学KR达成；长期Goal保持active，继续第二段而非等作者继续。
