@@ -5919,3 +5919,16 @@ HEGAT官方supplement三页已可访问，能核graph/span/lexical架构级描�
 completion manifest SHA
 `dc6d7248210b61aee6bda8bd9dde43dbf1e67c95328e90aed7c973b8d9a09ada`。
 仅文档准备落地，consistency36PASS、diff --check通过；未新增生产代码/模型训练。
+
+### 25.81 C41-T端点收集：marginal/exact已闭合（2026-10-16，wip）
+
+exact已完成原100epochs/32800microbatches/8200updates、full export/CPU replay与
+status=complete；原PID1097148成功SSH确认GONE。checkpoint留4090，SHA
+`de35493b618360e5ef27d5027b29a147ceeb07bdd115e28612162ab2d7df57ff`；
+其非权重预测/report/status/训练轨迹已取回LOCAL，独立endpoint helper重核配置、
+预算和report/predictions实际SHA通过。预测SHA
+`571f877ed0f0944f97dbb28b9defee76fbb38f4040c78ece6222ffe9f5b5af8e`；
+report SHA`bf68f8367cca4009c2961ae65dd2bb40ccf3ea6e51b4c8e06f5c062e95672f6f`。
+marginal端点见§25.78。R180=`runs/stages/R1/r1-v80-c41-endpoints-20261016/`目前
+保存两项身份，后续追加其余端点，不假称五臂已齐。root/shuffle/修复mass仍待完成；
+没有方法dev分数被计算/查看，V未开始，科学KR未达成。
