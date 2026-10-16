@@ -5379,3 +5379,78 @@ TDD先核累积数学/清零/非有限拒绝与scheduler计数，真实CPU测试
 安装项目core依赖后通过，均为环境缺口，不是模型/科研失败。本地不载入模型或运行GPU。
 最终完整本地919 passed/62 skipped（20.04s）、ruff零error、smokeOK、一致性36PASS。
 新入口/配置/合同待本提交push后在4090执行真实CPU测试，再启动CUDA补验；尚未据此判预算PASS。
+
+
+§25.69 实际完成与预算裁决（不是方法准入）：原r2的10个CUDA病例全部complete，
+随后五臂各2周期×4microbatch真实累积全部complete。首批累积PID
+1032022/1032121/1032247，末批1033244/1033362；原r2十病例PID依次
+1026547/1026551/1026588/1028180/1028279/1028390/1029702/1029758/1029943/1030996。
+成功SSH在2026-10-16T09:33:50+08:00核所有五个累积PID GONE且report完整，
+GPU0/1/2/3均无列出compute app，显存78/11/11/11MiB；无等卡/自动启动器。
+后续启动仍重新核卡，不将GPU3的NVML正常解释成CUDA故障已修好。
+
+r2固定病例（warm同步forward+backward；native optimizer扣除完整性hook）：
+
+| fixture | arm | peak reserved GiB | warm fwd+bwd秒 | native optimizer秒 |
+|---|---|---:|---:|---:|
+| peak | exact | 2.816406 | 0.424151 | 0.032639 |
+| peak | marginal | 2.773438 | 0.372347 | 0.023084 |
+| peak | mass | 2.873047 | 0.417562 | 0.023344 |
+| peak | root | 2.773438 | 0.476029 | 0.013945 |
+| peak | shuffle | 2.816406 | 0.400379 | 0.058020 |
+| worst | exact | 5.111328 | 0.900845 | 0.050489 |
+| worst | marginal | 5.111328 | 0.802671 | 0.023020 |
+| worst | mass | 5.111328 | 1.032156 | 0.041336 |
+| worst | root | 5.111328 | 0.933710 | 0.041284 |
+| worst | shuffle | 5.111328 | 0.918135 | 0.050775 |
+
+所有报告及原manifest在LOCAL逐项重算一致；各4次实际optimizer API调用、
+逐值相等/仅零符号恢复、weight_updates=0、method_admitted=false、final_valid_accessed=false。
+所有warm state均1,004,814,108bytes，旧CPU失败保留，不改判。
+
+补验五臂每microbatch均221个参数梯度finite，驻留梯度502,406,612bytes；
+scorer→encoder→scheduler顺序，scheduler计数[1,2]，每臂4个optimizer API，
+逐参数完整性收据全部通过。显存覆盖真实state、accumulation4及关系/type envelope，
+不再把CPU state与旧CUDA峰值相加充当通过。
+
+| arm | allocated / reserved GiB | RSS GiB | 最大warm microbatch秒 | warm native optimizer秒 | 1×外推GPU小时 | 2×规划GPU小时 |
+|---|---:|---:|---:|---:|---:|---:|
+| marginal | 5.749931 / 6.363281 | 3.769356 | 0.915740 | 0.016978 | 8.382 | 16.764 |
+| root | 5.749931 / 6.363281 | 3.670303 | 1.445340 | 0.027799 | 13.232 | 26.464 |
+| exact | 5.749931 / 6.363281 | 3.658218 | 1.347821 | 0.025975 | 12.339 | 24.679 |
+| mass | 5.749931 / 6.363281 | 3.651661 | 1.247728 | 0.019813 | 11.413 | 22.827 |
+| shuffle | 5.751029 / 6.308594 | 3.656288 | 1.447528 | 0.018643 | 13.231 | 26.462 |
+
+公式固定为32800×各臂四fixture最大warm同步forward/backward（已含transfer）+
+8200×warm native optimizer；完整性审计不计production。2×只作操作性余量，
+不是统计方差估计、完整epoch实测或严格时间上界。五臂合计1×/2×为
+58.598/117.195 GPU小时；三卡两波约26.463/52.926墙钟小时。
+实际共享服务器负载/随机batch/非零LR数值/长期碎片/endpoint导出仍未测；
+per-axis envelope不等于形式化joint最坏内存定理，必须经生产CUDA smoke且运行中fail-fast。
+当前实测最高reserved约6.36GiB，相对单卡24GiB有明显余量；不挤同卡其他任务。
+
+CPU/IO：每臂4线程，现场64CPU/available519,221,645,312bytes，disk余
+20,058,554,695,680bytes。规划每臂RAM32GiB、五臂产物磁盘32GiB，均为预留非实测峰值；
+最多三臂即12CPU/96GiB RAM，低于本次可用资源。完整train的input/attention与三组
+relation-label tensor载荷99,225,296bytes（不含Python容器）；全train分词复用§25.63
+已有规范pin等价及§25.53耗时参考，不再重跑。补验各臂input校验/读取约4.08–4.90s，
+模型/fixture初始化约3.80–4.51s，单microbatch warm transfer最大约0.00124s；
+它们不是全train/真实endpoint IO测量。FP32模型+真实optimizer state估计每臂
+1,509,583,088bytes checkpoint主体，另留序列化、scores、预测与日志空间；权重留4090。
+
+**裁决**：数据/代码/协议/现有4090资源可支撑进入C41-A设计准入，C41-B done。
+不保证学习态或科学收益，method_admitted仍false；A要先设计裁决，再生产TDD/CPU回放、
+本地完整门、真实torch与CUDA smoke、正式合同/hash冻结。不得用本成本r2 hooks进行非零LR训练。
+
+补验release=e7e3709，入口SHA
+687111e2c8c0e8fee1952bf1e83daa05bf49a53cf25ce5e7e9a9fc78e0500a6c，
+config SHA d137da51807152a87b64106db9d5337105c45786773e33e4878bbd3282697d5b。
+5份补验report SHA分别见budget_closure.json的rows；10份r2报告SHA见r2_cost_summary.json。
+R169的shape/输入/config/报告/log/summary有completion_hashes.json，双端hash核验后封账；
+现阶段结果没有MUC/关系效果，没有训练新方法、额外seed或跨机checkpoint搬运。
+
+预算封账验证：R169 `completion_hashes.json` SHA
+`aa1ec887524e1c2a6cccfce09f65b5bc7d2217a54c17e382bcb08167a67514d5`，
+LOCAL与4090各自重算35项均匹配，含五臂报告/manifest与15份原始日志；
+R165十份r2报告另依各自原manifest逐项核对，SHA登记在R169 summary。
+本次收口仅改文档/结果，不再改e7e3709已通过的代码；一致性36项PASS、diff --check通过。
