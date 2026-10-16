@@ -5862,3 +5862,18 @@ cf379e293201f20704b6316e3624d2951107dd1c69b796c67e66d73bf2dd2219留4090，
 首次stdin检查使用namespace导入而缺scripts PYTHONPATH，import失败；修正检查命令为
 `PYTHONPATH=src:scripts`后通过，不改生产脚本/合同或伪称首次检查成功。
 新准入可信锚为本节即将push的提交；之后才启动train。consistency36PASS、diff --check通过。
+
+### 25.79 C41-T修复mass正式启动，继续等待完整端点（2026-10-16，wip）
+
+外部可信新准入锚2468e39已push后，4090在无tracked改动下安全同步；新mass train
+默认无execute预检PASS。成功重核GPU0无compute apps、79MiB/util0后，一条SSH发起
+一个setsid nohup任务，完整命令/cwd/输出事前已披露。PID1142785、GPU0，配置a88e9f…、
+修复代码076a874、launch HEAD2468e39；独占输出
+`runs/stages/C5/c5-mass-repair-20261016/train/mass/`，日志
+`logs/c41-t-mass-repair-s13-20261016.log`。成功SSH确认ALIVE/running，非endpoint完成。
+原mass39轮失败路径不动，从同initializer完整100epochs；checkpoint留4090。
+R178=`runs/stages/R1/r1-v78-c41-training-continued-20261016/`保存命令/资源/身份。
+
+marginal endpoint已闭合，root/exact/shuffle继续原身份；全部有效臂完成后立即按冻结
+新overlay评分并双端独立复算，不提前选分，不把启动或工程修复记作科学KR。
+R177标注policy记录已原4090逐件hashPASS；无PDF/权重搬运或新模型训练。
