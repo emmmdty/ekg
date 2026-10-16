@@ -5605,16 +5605,6 @@ mass/shuffle尚未启动，按空卡滚动接续；不读先结束臂的dev分�
 LOCAL运行命令/资源身份记录R171=`runs/stages/R1/r1-v71-c41-training-20261016/launches.json`。
 队首C41-T保持wip，全部endpoint后立即V；训练启动不结束长期Goal。
 
-### 25.74 C41-D-R准备：D4最近邻与train归属机会（2026-10-16，非正式接队）
-
-**开工自审**：科研价值是为表3-3/KR2.1–2.2排除普通supcon/已有scope/evidence训练
-的重合，并确认原生多事件/支持词标注能否辨认event-anchor归属；不能拿同句不同标签
-直接制造蕴含/反驳或缺cue即负例。可行性为固定MAVEN-FACT public-train原数据/loader
-与一手论文/官方源码，只做轻量本地/远端CPU和检索，不读final-valid、不新训模型。
-这是主表明确允许的C41-T长训练期间准备，正式D4接队/准入仍等C5裁决；单一活动队列不变。
-下一核CoDE/SDIN/scope/近期同任务方法正文及公开实现，字段级train覆盖/稀有类/offset，
-已知24处train evidence offset噪声沿原loader丢弃计数，不把缺失当negative scope监督。
-
 §25.73 操作性资源补充（执行前声明）：GPU3只有历史故障记录，本次恢复后NVML正常
 仍不等于CUDA可用。先在该空卡做独立、限时、无模型/无训练的FP32 matmul/backward
 硬件探测；通过后可用于第4臂mass，失败则保留工具/硬件证据并继续原三卡滚动。
@@ -5629,3 +5619,77 @@ LOCAL运行命令/资源身份记录R171=`runs/stages/R1/r1-v71-c41-training-202
 按上述C类现场选卡调整，现准用GPU3运行第4臂mass，同一生产配置/单卡协议。
 预计产物train/mass、logs/c41-t-mass-s13-20261016.log；shuffle继续待首张卡释放。
 原三卡保守成本预算不改判；源码/config/initializer/seed/优化预算/评测规则均不改变。
+
+**后续实际启动与失败快照**：mass按同一命令在GPU3启动，PID1101626，源码HEAD
+2fc1ad2；配置仍e961e3…、实际生产代码51c27eb。成功SSH确认原进程GONE、
+status.json为failed，最后完整epoch39 / 12792 microbatches / 3198 optimizer steps。
+错误为`ValueError('zero mass denominator with nonzero delta')`，调用链从训练
+loss进入`ForestPairObjective._auxiliary`第126行；日志未报告CUDA异常。
+因此不能把此失败归为GPU3硬件故障，也不能把它记为方法负效果；具体数值根因尚未复现。
+原路径/日志/39轮训练轨迹完整保留，LOCAL另存R171/mass_failure_snapshot；不修改
+冻结公式、同路径重试或用容差/默认值掩盖。已有smoke/parity未覆盖此训练后状态。
+
+同次成功SSH：marginal/root/exact分别仍ALIVE（ps约1:27:57/1:27:57/1:27:56），
+末次完整epoch分别70/54/57；GPU0/1/2显存4804/4771/4737MiB，GPU3空闲11MiB。
+shuffle未启动。未读取任何dev分数；不能缺mass就作完整五臂机制裁决。
+下一先做独立命名空间、零模型的饱和概率数值复现与源码追踪，再依据证据决定新的
+修复身份/可比性门；原冻结失败记录不得覆盖，不能调学习率/预算救分。
+
+**执行边界快照**：本轮get_goal实际返回usageLimited，累计tokensUsed830095 /
+timeUsedSeconds13076；不是主动暂停、不是blocked或科学目标完成。保留三项远端
+在途训练，不发送终止信号；本轮只做证据落盘/交接推送，不再发起训练或新研究。
+继续执行须先核Goal状态、三态判活与原路径，不能盲目重启。
+
+### 25.74 C41-D-R准备：D4最近邻与train归属机会（2026-10-16，非正式接队）
+
+**开工自审**：科研价值是为表3-3/KR2.1–2.2排除普通supcon/已有scope/evidence训练
+的重合，并确认原生多事件/支持词标注能否辨认event-anchor归属；不能拿同句不同标签
+直接制造蕴含/反驳或缺cue即负例。可行性为固定MAVEN-FACT public-train原数据/loader
+与一手论文/官方源码，只做轻量本地/远端CPU和检索，不读final-valid、不新训模型。
+这是主表明确允许的C41-T长训练期间准备，正式D4接队/准入仍等C5裁决；单一活动队列不变。
+下一核CoDE/SDIN/scope/近期同任务方法正文及公开实现，字段级train覆盖/稀有类/offset，
+已知24处train evidence offset噪声沿原loader丢弃计数，不把缺失当negative scope监督。
+
+**准备实际结果（未正式D4准入）**：R172=`runs/stages/R1/r1-v72-d4-preparation-20261016/`。
+固定fold-1 train为1747文档；raw train SHA190522b4…，train manifest SHA dbaf7c52…
+（完整值见R172报告）。初版因evidence双null触发TypeError，保留source/failure；
+r2显式计双null、部分null fail-fast，不把缺失变负例；零模型/零optimizer。
+
+| native class | mentions | 有合法evidence | 双null evidence | 非法token offsets |
+|---|---:|---:|---:|---:|
+| CT+ | 41889 | 28 | 41856 | 5 |
+| PS+ | 1357 | 1215 | 141 | 3 |
+| CT- | 897 | 828 | 68 | 4 |
+| PS- | 170 | 167 | 2 | 1 |
+| Uu | 71 | 8 | 63 | 0 |
+
+同句异标签原生pair5539，其中双方均有合法evidence仅162（不重叠111/重叠51）；
+Uu参与双方有evidence的pair仅3。没有负归属、scope边界、source-holder或同事件
+句子/文档双标签。这些是覆盖事实，不是效果/power。**缺/不重叠支持词即负scope的
+版本不可行，卡在数据监督不可辨认**；不能据此否定所有正例辅助训练。
+替代研究问题保留为原生多事件标签归属，须先核普通supcon/排序/条件似然等最近邻、
+强rival与可识别性，不将标准loss换名为创新；目前不实现/不训练、不擅自准入。
+
+一手机制刷新：
+[SDIN2023](https://aclanthology.org/2023.findings-acl.879.pdf)完整13页：§3/Table1/§4
+依赖同事件sentence/document双事实性来构造推理标签，不能拿不同MAVEN事件的
+五类标签替代其NLI监督；代码仅在有限搜索未定位，不宣称不存在。
+[Trucidator2025](https://aclanthology.org/2025.coling-main.139.pdf)完整11页：§2.2/§3
+额外构造并人工核查幻觉语料、跨文档图/全局事件监督，完整流程不适配当前冻结数据；
+也不能将已有graph/多任务机制当新贡献。
+[CoDE2023](https://link.springer.com/chapter/10.1007/978-3-031-30675-4_36)与
+[scope2021](https://link.springer.com/chapter/10.1007/978-3-030-92185-9_34)仅核到出版商摘要，
+全文订阅不可得，不能据摘要排除最近邻重合；
+[EvDEFI2024](https://academic.hep.com.cn/fcs/EN/10.1007/s11704-024-3809-6)仅元数据，
+直接访问403/web PDF返HTML，机制未核。无外部数字比较。
+GitHub作者API403/检索限制不是无代码证据。R172保存两篇PDF/全文、哈希与访问限制。
+正式D4研究接队仍等C5裁决；此次只是T期间已授权准备，不代表D4完成。
+
+**本轮交接证据校验**：R171/mass_failure_snapshot三件原始非权重产物与远端原路径
+逐字节一致；manifest SHA256
+`c39d0a22fb0ffb40d28ec8439314410e619b47e1a303325e766368a1e6d576d5`。
+R172共11件准备产物manifest SHA256
+`23bccf68e236e421ec039330961b175b1583104f6065474352948793e048dffb`。
+两组均LOCAL生成并备份原4090、远端逐件重算PASS；无checkpoint跨机搬运。
+仅文档/交接变化，`uv run python scripts/audit_r1_consistency.py`为36项PASS，
+`git diff --check`通过；未声称新代码测试或科学KR通过。
