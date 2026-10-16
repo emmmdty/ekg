@@ -1,0 +1,27 @@
+{
+  "schema_version": "ekg.c5_accumulation_budget.v1",
+  "seed": 13,
+  "probe_lr": 0.0,
+  "method_admitted": false,
+  "final_valid_accessed": false,
+  "budget_config": "configs/c5_structure_budget_r2_20261014.json",
+  "entrypoint_sha256": "687111e2c8c0e8fee1952bf1e83daa05bf49a53cf25ce5e7e9a9fc78e0500a6c",
+  "shape_report": "runs/stages/R1/r1-v69-c41-budget-20261016/shape_report.json",
+  "fixture_order": [
+    "peak",
+    "worst",
+    "relation_envelope",
+    "structure_envelope"
+  ],
+  "output": "runs/stages/R1/r1-v69-c41-budget-20261016/accumulation",
+  "input_sha256": {
+    "configs/c5_structure_budget_r2_20261014.json": "a168b6a63310a8d24f49a42bf89ca97292eb74184eaf4905a4276b0d1807c0f8",
+    "scripts/profile_c5_structure_budget.py": "ec6ad9edc6ca16e07e6437e1180ec3ad48949016dccfe26700c200a042d48241",
+    "scripts/profile_c5_structure_budget_r2.py": "dd97bb442fe8d0b1cb0cc431e93e91bc1f0f4c93e14e77d97c790f5e6391e4e3",
+    "scripts/profile_original_joint_cost.py": "295ba0de2655ee8f76471a52f0b10744fec57667a21bd8a856e0b567bb5c907a",
+    "docs/phases/PHASE_C5_accumulation_budget_20261016.md": "a6041cde28819af77978b0c4ff162033fbd44a54a0c7253b3241db48b8153afc",
+    "runs/stages/R1/r1-v69-c41-budget-20261016/shape_audit.py": "47e1543c9a71a7dd0f0f6188625307833b380f6c85a7b9102e7cc86bd8d46a82",
+    "runs/stages/R1/r1-v69-c41-budget-20261016/shape_report.json": "2cd463d46a054686c84052023c5286d1f273c760235c2313f9e8e9f46f1ece38",
+    "runs/stages/R1/r1-v69-c41-budget-20261016/shape_documents.jsonl": "ab49391138c214ea1542b88b5e99802d006f3ae0381c57dda146414c41c57c87"
+  }
+}

@@ -5335,3 +5335,47 @@ GPU3历史故障不由NVML查询自动消除。RAM available约483GiB、磁盘�
 Goal状态、本地门、真实torch门转录与待执行命令。manifest SHA为`e6172354de1984ce2dabf9d2247629673efa64ba25ddbd53a7709266d7f12dcc`。
 checkpoint留原机；无新训练、评测、额外seed、5090任务或跨机checkpoint搬运。
 C41-R完成后进入B，不结束长期Goal；本节不计科学KR达成。
+
+### 25.69 C41-B：剩余CUDA成本及完整累积/形状预算（2026-10-16，预声明与wip）
+
+**开工自审**：价值是决定表5-3固定五臂在原单卡/同预算下能否运行，对准KR1.1，
+避免用两次cold/warm伪装accumulation4或只按chunks推显存。可行性为4090原机
+规范initializer/输入、真实optimizer零LR成本，不学习权重、不读取评测标签。
+C41-R已完成（febf26c、§25.68），本地三件套与远端真实torch门通过，method未准入。
+
+按原r2合同先执行剩余五臂×两fixture；第一批peak marginal/root/exact分别
+GPU0/1/2，PID1026547/1026551/1026588，独占原r2 cuda/<fixture>/<arm>。
+完整命令已披露，每条SSH仅一后台任务，setsid nohup、独立logs/c41-b-*-20261016.log，
+输出不覆盖。源代码febf26c，r2配置/入口/核心hash沿§25.63，不改变冻结目标。
+
+**完整train shape静态核查**：输入hash与manifest核一致，2622doc。
+peak/worst两个原fixture的关系pair总数17752/75966，类型cubic代理3124/23544；
+全train按关系pairs取top8的relation-envelope为100418pairs、37chunks，
+按Σtype-block³取top8的structure-envelope为112491代理、29chunks、最大type block28。
+原worst chunk fixture并不覆盖这些shape组合，不能仅用其CUDA峰值判全预算PASS。
+静态数是shape与调度证据，cubic代理不是实测耗时/显存。
+
+**因此预声明独立补验身份**：新增accumulation预算入口/配置/合同与独占namespace，
+不改封存r2代码/输出。固定每臂2个optimizer周期、每周期依次peak/worst/
+relation-envelope/structure-envelope四个8doc microbatch，loss/4逐次backward，
+梯度驻留至第4步；原Adam scorers→AdamW encoder→encoder scheduler顺序，lr严格0，
+第二周期有真实optimizer state，逐参数数值相等与signed-zero完整性收据沿r2记录。
+报告逐microbatch elapsed、allocated/reserved、梯度驻留/state、RAM、输入搬运和audit开销；
+不把完整性instrumentation耗时当production耗时。五臂全部同补验规则，不按分数选病例。
+TDD先核累积数学/清零/非有限拒绝与scheduler计数，真实CPU测试及本地三件套后才能CUDA。
+
+完整预算沿历史实际batch8/accumulation4/100epochs，328 microbatches/epoch、
+8200次optimizer step、scheduler总步数32800、warmup200；不静默改成optimizer步数。
+按全train shape计数与各臂实测保守外推，显式给出RAM/IO/并行和未测学习态方差限制；
+不是完整epoch测量，不声称精确运行时保证。若任何病例OOM/数值变化即保留失败/停止，
+不得偷偷缩batch或改目标。预算闭合后才C41-A设计裁决/生产实现/正式合同。
+
+当前非权重静态证据：`runs/stages/R1/r1-v69-c41-budget-20261016/shape_audit.py`、
+`shape_documents.jsonl`、`shape_report.json`；待代码/合同冻结后补hash与真实结果。
+
+补验工程门：三项TDD最初因新入口不存在真实3 FAIL；实现后LOCAL默认env为torch skip，
+另建`/tmp/ekg-c41-budget-cpu-20261016`隔离uv环境，官方torch2.8.0+cpu实际执行3项全部PASS。
+首次把pytest放PyTorch专用index解析失败、随后环境缺项目pydantic；分别修为分源安装及
+安装项目core依赖后通过，均为环境缺口，不是模型/科研失败。本地不载入模型或运行GPU。
+最终完整本地919 passed/62 skipped（20.04s）、ruff零error、smokeOK、一致性36PASS。
+新入口/配置/合同待本提交push后在4090执行真实CPU测试，再启动CUDA补验；尚未据此判预算PASS。
