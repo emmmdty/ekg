@@ -5808,3 +5808,11 @@ event-level CAUSE/PRECONDITION边6175/26759，官方mention展开后13174/35388�
 丢其他真因，也不能以BEFORE伪造CAUSE。无新方法/效果/power准入，不重开旧hinge。
 D4一手源码访问web已成功核机制，本地curl保存全文TLS EOF失败，source_review.json
 如实记无本地全文archive；不伪称下载成功，也不把网络失败当文献不存在。
+
+§25.76 追加真实端到端合成核验：只用既有P1 fixture gold-self，为七行（五臂+两锚）
+实际调用未修改official wrapper并走独立MUC/profile/paired/guard聚合。共指/三关系均应
+100，且同分不得判突破/归因成功，已实际通过；没有读取方法dev预测。新增e2e测试后
+全套933passed/87skipped，ruff0、ekg-smokeOK；收集器code未改、只增集成覆盖。
+§25.77 R175十件原/修正版CPU分析与源码访问记录已备份4090并逐件hashPASS，manifest
+SHA`f200e86fed49464c20a7f90b7cf5bb07b33391142e34e590aff5f4b0b75e03ce`。
+首次校验在传输尚未结束时缺文件，rsync完成后重核全部PASS；不把首次工具失败冒充成功。
