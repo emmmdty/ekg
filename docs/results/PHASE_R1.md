@@ -5614,3 +5614,18 @@ LOCAL运行命令/资源身份记录R171=`runs/stages/R1/r1-v71-c41-training-202
 这是主表明确允许的C41-T长训练期间准备，正式D4接队/准入仍等C5裁决；单一活动队列不变。
 下一核CoDE/SDIN/scope/近期同任务方法正文及公开实现，字段级train覆盖/稀有类/offset，
 已知24处train evidence offset噪声沿原loader丢弃计数，不把缺失当negative scope监督。
+
+§25.73 操作性资源补充（执行前声明）：GPU3只有历史故障记录，本次恢复后NVML正常
+仍不等于CUDA可用。先在该空卡做独立、限时、无模型/无训练的FP32 matmul/backward
+硬件探测；通过后可用于第4臂mass，失败则保留工具/硬件证据并继续原三卡滚动。
+这是AGENTS的C类选卡/并行调整：不改封存phase文本/config哈希、5臂/seed/输入/精度/
+单卡batch/优化步数或科学判据；原phase的0/1/2三卡安排保留为历史保守预算。
+不复跑任何已完成成本或生产smoke；GPU3实际CUDA通过与新资源选择另记。
+
+§25.73 GPU3限定CUDA探测实际PASS：物理UUID
+`GPU-80141f33-8c8d-b9de-25fa-f9ccdb8a6834`、RTX4090、Torch2.8.0+cu128，
+空卡11MiB后FP32 256×256 matmul与backward有限，峰值allocated18,088,960bytes，
+进程内2.052759秒，无模型/数据/optimizer；并未将NVML正常直接视为CUDA修好。
+按上述C类现场选卡调整，现准用GPU3运行第4臂mass，同一生产配置/单卡协议。
+预计产物train/mass、logs/c41-t-mass-s13-20261016.log；shuffle继续待首张卡释放。
+原三卡保守成本预算不改判；源码/config/initializer/seed/优化预算/评测规则均不改变。
