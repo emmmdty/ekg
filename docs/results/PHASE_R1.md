@@ -5164,3 +5164,85 @@ RESEARCH_PLAN的`Summary`标题加了后缀，破坏已有`#summary`锚点；恢
 23项原始证据SHA逐文件复核均PASS。报告
 `/tmp/ekg-innovation-upgrade-consistency-20261015.json`。
 只改文档/文献清单，未改src/tests/scripts，未声称运行代码变更三件套或真实torch训练。
+
+
+### 25.66 4090恢复与整体OKR任务重排（2026-10-16，仅资源核查/规划）
+
+**作者指令**：4090已恢复，要求从整体任务目标逐层拆解，用OKR做项目管理，参考算法
+实验设计与本项目特点，推进最终指标。该指令覆盖10-15的近期资源安排，不改变既有实验结果。
+
+**开工自审**：科研价值是把表5-3/3-3/4-3的公开主指标与机制证据拆成可验收KR，避免
+把准备、成本PASS或已知规则收益当作方法贡献；依据§25.37、§25.42、§25.49–§25.65。
+可行性是本地文档与已有证据核对、只读SSH资源核查；本轮无需训练或改模型代码。
+真实训练算力预算、生产实现与方法准入仍是后续任务，不能由卡恢复推定通过。
+
+**Git与资源核查**：本地最初`git fetch origin`遇代理TLS handshake失败，
+随后`git -c http.version=HTTP/1.1 fetch origin`成功；开工HEAD为`3a1ed37`且等于
+刷新后的origin/main，工作树干净。没有分支/worktree或新代理队列。
+
+远端在`2026-10-16T08:52:37+08:00`成功响应，hostname=`4090-1`，cwd=`/data/TJK/ekg`。
+执行下列只读命令，exit=0，无torch import、CUDA模型计算或后台任务：
+
+```bash
+ssh -o BatchMode=yes -o ConnectTimeout=12 gpu-4090 \
+  'cd /data/TJK/ekg && date -Iseconds && hostname && nvidia-smi --query-gpu=index,name,uuid,memory.used,memory.total,utilization.gpu --format=csv && nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv && git status -sb && git log -1 --oneline && df -h .'
+```
+
+| GPU index | 名称 | 显存used/total MiB | utilization | compute apps |
+|---|---|---|---|---|
+| 0 | RTX4090 | 78 / 24564 | 0% | 查询为空 |
+| 1 | RTX4090 | 11 / 24564 | 0% | 查询为空 |
+| 2 | RTX4090 | 11 / 24564 | 0% | 查询为空 |
+| 3 | RTX4090 | 11 / 24564 | 0% | 查询为空 |
+
+只说明该时刻NVML查询正常且没有列出的计算进程；不是CUDA模型smoke，也不保证启动时
+仍有空卡。历史GPU3故障不能由本次查询自动认定CUDA已修好，选用前实际smoke仍须通过。
+磁盘`/dev/sdb1`总58T、已用37T、可用19T、67%；没有据此承诺并行训练的RAM/IO预算。
+远端HEAD=`7f26c7ba`，远端本地main与其缓存origin/main一致，但落后本次本地HEAD；
+未跟踪目录为`.cache/`、`.venv-easyecr-glt/`、`.venv-llmere-causal-s13/`、
+`baselines/easyecr/external_code/coval/build/lib/build/`、`lightning_logs/`。
+未检查这些目录来源，未fetch/reset/clean远端，后续C41-R保全核源后再同步代码。
+本轮未连5090、未重核其卡况/资产hash、未转移checkpoint或修改远端文件。
+
+**规划裁决**：4090回主机，原机资产/成本身份复用；原C41-S新5090迁移实现deferred。
+单队列C-41/T087仍wip、C5→D4→A4，下一C41-R原机hash/源码差异、C41-B剩余实际
+成本/optimizer/accumulation4/全train预算，C41-A先设计裁决后生产实现/真实测试/正式
+合同，最终准入后C41-T/V完成固定五臂与归因。不改loss/scale/epoch/seed/decoder。
+后续D4/A4分别有R/A/TV任务与KR映射；新候选仍未准入，文献/train准备可与既有长训练
+重叠。额外seed确认C41-Q保留既有前置与再次授权；C41-F只验现有成果/报告缺口，不增加E3实验。
+
+四个Objective是C5、D4、A4独立贡献与最终证据可复核，各三项KR；主指标、机制、
+护栏、独立评分和有条件的多seed确认分开。KR不能由任务完成率或平均分代替；
+科学目标未达到即标未达，不承诺资源恢复或计划完善能保证正结果。
+10-16—10-18先闭合原机/预算；10-19—11-01 C5，11-02—11-22 D4，
+11-23—12-13 A4，12-14—01-03留有证据替代/报告预算，01月为获准后的确认/总验收，
+02-01—02-21故障/复算缓冲。均为日历风险检查窗，不是已测训练时间；C41-B后再据证据估时。
+
+目标解释卡`docs/research/20261016_project_okr.md`；唯一执行主表仍为
+`docs/EXPERIMENT_PLAN.md` §3.9/§4的10-16切片。HANDOFF/TASKS/TODO/RESEARCH_PLAN
+已同步，constitution/SPEC/旧结果和旧实验合同未改。
+
+**方法参考边界**：本轮核读Google re:Work OKR指南（结果/活动区别、可查验收证据）和
+NeurIPS官方Paper Checklist（复现、实验设置、不确定性、算力），URL在OKR卡。
+不引用新外部效果数字，不声称重新做完10-15全部文献；候选科学依据沿用固定source ledger。
+R1文献技能用于来源边界，hypothesis-generation/scientific-critical-thinking用于
+假设/竞争解释与验收分离，verification-before-completion用于文档验证；技能不是效果证据。
+
+**证据归档**：本地独占根`runs/stages/R1/r1-v67-project-okr-20261016/`，
+`resource_snapshot.json`为成功工具输出的结构化转录，含精确命令、UUID、状态与限制，
+SHA-256=`5f3163194f5820f592f71305b3bf2c3721fbe6f49e2808554dd390ce4ba26985`；
+`artifact_hashes.json` SHA-256=`25c2389ca5cda1c0cdafbaf4831af6d83c71bf81cc44e0265ed0001247df1a4b`。
+原始证据当前仅在LOCAL；没有声称已远端备份。GPU启动仍须新核空卡与完整资产hash。
+
+**本轮状态**：规划交付完成；C-41/T087仍wip、method_admitted=false，尚无新训练、
+方法提分、机制成立或最终确认。本轮仅文档/记录，未改src/tests/scripts；不声称运行
+代码变更三件套或真实torch测试。验证结果在下段按实际命令回填。
+
+
+**文档验证**：`uv run python scripts/audit_r1_consistency.py --output
+/tmp/ekg-project-okr-consistency-20261016.json`输出`PASS: 36 requirements mapped`。
+附加逐项检查首次失败，原因是主表KR使用区间/省略前缀而检查器只识别完整ID；
+按systematic-debugging定位后，将映射列改成12项KR的显式编号，未改科学门槛。
+再次检查4个Objective、12项KR到主表映射、53个本地文件链接、资源转录/manifest的
+SHA以及HANDOFF下一项和Summary锚点均PASS；`git diff --check`通过。
+这些是文档/追溯检查，不替代完整资产SHA、生产torch门或方法效果证据。

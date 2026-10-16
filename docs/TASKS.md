@@ -240,15 +240,18 @@ author delegation releases a new in-scope research queue; it does not reopen old
   the full decoder audit remains pending, authorized only on an empty 5090 GPU.
   Bounded occupancy waiting ended without an audit launch; no automatic watcher remains.
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
-  **2026-10-15 current override:** the author confirmed the 4090 is unavailable with unknown repair time
-  and requested a latest-literature-led innovation upgrade. C41-L review is complete; next C41-S audits
-  local-to-5090 asset identities and prepares a separately identified cost adapter/config/contract,
-  followed by on-machine budget closure, R1 decision and the already authorized post-admission five arms.
-  Do not wait for 4090 or transfer its checkpoints. Follow EXPERIMENT_PLAN §3.8 and its C41 subtable;
-  `research/20261015_innovation_upgrade.md`, its source ledger and R1 §25.65 record the decision.
-  D4 event/evidence binding and A4 target-conditioned multi-positive supervision are research candidates,
-  not admitted methods; preserve C5 → D4 → A4, sealed families, final-valid and resource boundaries.
-  Earlier task history below is retained; historical 4090 waiting and newness-only next steps are superseded.
+  **2026-10-16 current override:** the author confirmed the 4090 has recovered and requested
+  project-wide OKRs, measurable scientific outcomes and top-down task decomposition.
+  Next C41-R audits original-machine asset hashes, source drift and untracked provenance before safe
+  code synchronization; then C41-B closes remaining CUDA/optimizer/accumulation/full-train budget,
+  C41-A decides design admission and freezes tested production code/contract, C41-T/V runs and audits
+  the fixed seed-13 five arms. The new 5090 migration adapter C41-S is deferred, not completed.
+  Follow EXPERIMENT_PLAN §3.9 and the 10-16 C41 subtable; `research/20261016_project_okr.md`
+  maps O1–O4/KRs to C5, D4, A4, conditional confirmation and final traceability tasks.
+  R1 §25.66 records resource evidence; the 10-15 source ledger/candidate science remains valid.
+  Preserve C5 → D4 → A4 and one active queue; chapter preparation may overlap long training.
+  No method admission, extra seeds, weight transfer, new 5090 authorization or E3 experiments follows.
+  Earlier history below is retained and does not supersede the current override.
   → use reliable controls and observed errors to audit distinct mechanisms, runnable public implementations,
   deployable inputs, rivals, falsifiable predictions, strong comparisons, ablations/negative controls and power.
   A4/C5 GPU diagnostics are not a prerequisite for literature research; preserve one active task and all validity/

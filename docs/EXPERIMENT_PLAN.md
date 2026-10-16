@@ -4,6 +4,8 @@
 > **这份文件取代「每周想一遍下周做什么」。** 每周不再重新排任务，只从 §3 的主表里取下一个
 > 未完成项；**时间线与估算基准率见 §3**，预期结果表见 §7。要偏离顺序，**先改本文件再执行**；口头改计划一律无效。
 > 数字仍只写进 `results/PHASE_*.md`，本文件不复制任何实验数字。
+> **2026-10-16当前资源/排期认§3.9，活动任务认§4的10-16切片。§2–3.7为历史基线与排期，
+> 不用旧故障状态、旧Gantt或已撤销应用实验覆盖当前队列。**
 
 ## 0. 防漂移的四条规则
 
@@ -326,7 +328,7 @@ gantt
 给出这组数字 **±.01 的可复现地板**（见 `results/PHASE_D.md`）；② 4090 再出事时的备份线。
 两条线的数字**不相减、不混表**，各自标明机器与 backbone 地址。
 
-## 3.8 4090恢复时间未知：创新研究与5090自足执行（2026-10-15，作者新指令）
+## 3.8 4090恢复时间未知：创新研究与5090自足执行（2026-10-15历史，资源安排已被§3.9覆盖）
 
 作者确认4090当前不可用、修复时间未知，并要求先检索最新论文升级创新方案。
 这是作者触发的资源/研究重点调整，不等待旧Gate重新解释授权。近期关键路径不再依赖
@@ -339,6 +341,39 @@ gantt
 不搬4090 checkpoint，不把新机器同pin推导为数值等价；同机匹配控制重新绑定。
 旧C5五臂loss/endpoint/seed不因迁移调整。既有5090具体授权保持，不从本次规划推导
 新的D4/A4 GPU许可、额外seed、跨机搬运或超过一天任务许可。
+
+## 3.9 4090恢复：以科学结果为验收的OKR执行（2026-10-16，作者指令）
+
+作者确认4090恢复，要求从整体目标逐级拆解、用OKR管理并达成最终指标。
+只读SSH核查事实见R1 §25.66；4090回主执行机，既有原机成本入口与证据可继续使用，
+不再把新建5090迁移adapter作为关键路径。C41-S迁移实现deferred，不伪装完成。
+原冻结五臂、loss/scale、100epochs endpoint、batch8/accumulation4与scheduler语义不改。
+
+**总目标**：2027-02实验截止前，三个方法研究各自取得公开主指标优势及机制证据，
+现有E3证据与局限保留；不改已定论文结构、不追加应用章实验。四个Objective为
+O1/C5联合依赖贡献、O2/D4事实性贡献、O3/A4关系贡献、O4全部主张可复核。
+逐项KR、算法判别设计、负责人、状态和风险见
+[`20261016_project_okr.md`](research/20261016_project_okr.md)。KR验收只能由结果与有效合同支持，
+不把阅读量、审计数、训练次数或GPU利用率当科学进度，不以平均分掩盖一章失败。
+C5突破目标与更严格护栏认当前joint brief；D4/A4及最终确认认§7及未来合法冻结合同。
+
+**顺序与并行**：单一活动研究队列保持C-41/T087，C5→D4→A4。
+同候选准入后，不同臂可按空4090并行，全部seed13且同可见GPU数/有效batch/预算；
+先测CPU/RAM/IO共同负载，不能推导四卡固定可用或改成DDP。
+长训练期间可准备本表D4/A4的文献与train信号，训练准入/正式结果裁决仍按章序。
+5090只保留既有特定许可与原机诊断，额外seed/跨机checkpoint/未授权5090任务边界不变。
+主表baseline广度为报告要求，不把未跑满名册升格为方法pilot准入门；实质强控制仍不可缺。
+
+**日历预算**：10-16—10-18原机恢复/预算/设计裁决；10-19—11-01 C5完整比较与去留；
+11-02—11-22 D4；11-23—12-13 A4；12-14—01-03有证据替代路线及既有报告缺口；
+01-04—01-31满足单seed条件且再次获授权后的确认/合法封存评测与总验收；
+02-01—02-21故障和复算缓冲。实际GPU时长由C41-B实测，窗口不是正结果承诺，
+未达标应标红并记录关键依赖，不缩预算/换split/弱化对照救进度。
+
+每次接手/交接更新主表与results并push，每周五工作会话检查KR证据与最长依赖；
+不建立自动调度器。周检查不自动改研究顺序，Gate/作者指令/证据裁决变更先写主表。
+失败只停止固定候选，代理在现MAVEN任务内用证据选择实质不同替代并回R1；
+已失败家族封存，既有止损和两周期边界不变。资源/实现失败与科学否证分开。
 
 ## 4. 实验主表
 
@@ -395,20 +430,30 @@ gantt
 | **C-38** | **done · 冻结诊断与共享执行接口实现**：D4 matched head、A4 shared loss/gradient、C5 official decoder replay；没有新机制准入，不改旧 sealed bundle | C-37 有明确可行方案；新任务/phase/config 在方法输出前冻结 | 有失败复现/梯度或输入语义测试、完整本地门、baseline parity 证据；没有 torch 的本地 PASS 不替代远端对应测试 | 代码、tests、独立新 runs namespace |
 | **C-39** | **wip · D4/C5 CUDA smoke passed（C5 2026-10-12）**：C5 原机两篇 smoke complete，average parity/六文件 hash PASS；完整 audit 待空卡，A4 未运行。新机制 control/消融/负控/power 另行准入 | C-38 完成 + 源码/manifest/evaluator/strong baseline 门 PASS；作者具体批准 C5 两项、仅空卡 | 完整命令/cwd/预期输出事前披露，真实输入覆盖与重放正确；不复跑已完成 smoke、不扩大授权 | 合同 `PHASE_recovery_validation_20261008.md`；执行源码 `61bc4df`，证据 `results/PHASE_R1.md` §25.38 |
 | **C-40** | **wip · D4 复算与裁决完成（2026-10-10），A4/C5 pending**：D4 linear 重现 frozen anchor，tanh5 退化；保留 linear 匹配控制，不推进五维头、不加 seeds/扫参。下一步仍是现有 A4/C5 冻结诊断 | 对应正式单 seed 产物或命名阻断 | 数字只写 results；如实报告升降，禁止按最终评测改同一合同或重开已封存实验；新 D4 信号另过准入 | `results/PHASE_R1.md` §25.37；实验源码 `61bc4df` |
-| **C-41** | **wip · 当前C5（10-14）**：given-type stronger control保留，主指标/四护栏及残余profile已核（§25.40–§25.43）。固定双向、frozen-null三臂、forest posterior-score、同head decision-unit均实际完成并由双端独立scorer复现，未形成突破，停止固定动作而不扫参（§25.44–§25.48）。当前转 exact joint 训练目标R1：shared-ancestry递推/穷举与same toy/surrogate 的wrong-link梯度抵消差异已由CPU autograd/有限差分验证（§25.46/§25.49）；这不是数据集效果/全面新颖性/方法准入。下一拟议路线从相同pretrained initializer训练完整原架构，保持backbone/数据/seed13/类型policy，比official marginal/root-product/exact/ancestry-shuffle；先以完整train gold/冻结mention顺序核共享误祖先机会与类型分块规模，再核官方完整训练损失/优化接口及零optimizer CPU成本（新发现fill_expand对非单例首mention不置dummy：先以autograd/全train覆盖验证，原joint首提及dummy监督盲区已由真实autograd确认；固定teacher/同MLP起点/预算的legacy-versus-corrected CPU适配完整完成，双端独立评分未胜strong control且停止（§25.50），该已知目标修正不当作创新，未来full-model控制仍用规范目标）；这些R1审查不读final-valid，不当作效果/power。新方法目标预声明为相对strongest control至少+3pp MUC（突破目标，不是预期承诺），先用零数据数学审查核exact−root-product协方差的非负性/分解，并核同总概率量的global-inflation对照以区分局部依赖与分数整体膨胀；再用既有真实配对控制的document bootstrap噪声作prospective location-model功效敏感性，报告1/1.5/2倍噪声；不以oracle修复覆盖或数学PASS造power。完整train原tokenizer/chunk census与固定8doc峰值/最坏输入已实测完成（§25.53）；仅有input规模，不把type块或CPU/未钉选卡的历史耗时当单卡budget PASS。original-joint零optimizer profiler与两fixture CPU完整四头loss/backward/checkpointing等价已完成；同入口/fixture的原架构两个CUDA成本病例已complete，重算parity与单卡峰值已核（§25.62），不重跑、不创建GPU等待启动器。10-14较早成功核卡4090/5090均有他人任务；工具失败不作科研失败。本次再冻结同一pair-F1 auxiliary/五臂设计，绑定first-dummy完成后的五组真实配对噪声；主规划采用最坏已观测1×noise并保留1.5/2×敏感性及未知full-model方差风险（§25.55），不得用proposed得分改规划假设。同loss/五臂/endpoint已冻结，完成控制后的条件design power已绑定；原架构两个固定输入CPU完整反向/checkpointing梯度等价通过（§25.54），等卡期间已完成LOCAL隔离CPU-only uv环境的loss边界/float32-vs64/最大type块求导审查，复用已验证Torch矩阵递推，零model/optimizer（§25.56）；仅train gold/冻结mention顺序的label密度及uniform parent先验风险全量审查也完成（§25.57，r2修复空pair mask，原失败/source保留），不改loss/scale，不推断部署效果或方向；按10-14本轮新增授权可用5090空卡做原joint cost及准入后的五臂seed13训练（≤一天任务，权重不跨机）；先核本机source/train/P1/pretrain身份与tokenization可比性，独立config/输出，不能套原4090路径或改封存代码（§25.59）。继续仅train的逐合法候选partial-gradient审查，检查wrong shared-parent边上exact/root/mass与规范marginal的信号差异，common-bias不足以识别局部归属；零模型/更新、不把prototype当MUC/power（§25.60）。5090完整train token/label投影与旧参考、原两fixture CPU成本/initializer已核一致（§25.59）；全train构造梯度审查完成（§25.58/§25.60），未证明exact胜canonical。5090 CPU固定peak8同pretrain原模型的规范marginal/四aux/关系loss head/encoder梯度量级、夹角和耗时审查已complete（§25.61，零optimizer，source/log与非权重双端SHA核一致），不依uniform gradient判NN更新或胜出；原架构CUDA已核，结构aux/真实optimizer CUDA预算及正式合同仍未闭合，不能启动proposed训练。作者报告4090释放，成功核卡空闲后已按§25.62完成原入口peak/worst单卡CUDA成本（分别GPU1/2，原输入/合同/容差不变，零optimizer/更新）；通过后按§25.63在新research成本身份测固定五臂/两个fixture的checkpointed四头反向及实际AdamW/Adam cold/warm step（lr严格0、两次API调用如实计数、参数SHA不变、无epoch/评测；首个CPU病例因native lr0改signed-zero字节失败，保留原身份，r2完整原Model CPU已complete，逐值相等审计只恢复零符号并单列CPU审计开销，真实数值变化仍FAIL；固定10个CUDA结构/optimizer病例仍待空卡），独立闭合optimizer/结构aux预算和正式合同，不把成本PASS当MUC。旧弱observer/role家族不复活，原5090 decoder audit等空卡，后续C5→D4→A4 | 作者委托科研裁决并要求持续推进至可复核突破；单活动任务，原5090 C5 audit与10-14新增C-41空卡成本/准入后五臂seed13授权均保持，单任务≤一天，其他范围不扩大。新窗口按 HANDOFF 的 PI 角色与 §0.3.5 接续，任务身份不变 | 保留旧 frozen anchor，把给定类型控制列为 stronger alternative 并明确类型 policy；新方法须文献差异、可部署输入、同协议强对照、单变量消融/负控与目标 power 闭合后才生成训练合同。控制提分/候选失败不等于章节创新完成 | `HANDOFF.md` §0.3.5；`results/PHASE_R1.md` §25.40–§25.63；`research/20261013_c5_joint_connectivity.md` / `research/20261013_c5_newness_admission.md`；complete configs/contracts仅作身份，不覆盖重跑 |
+| **C-41** | **wip · 当前C5（10-16）**：4090恢复，下一C41-R→B→A→T/V，完整KR/任务认下方10-16切片及§3.9；5090迁移S deferred，方法仍未准入。以下10-14证据史保留：given-type stronger control保留，主指标/四护栏及残余profile已核（§25.40–§25.43）。固定双向、frozen-null三臂、forest posterior-score、同head decision-unit均实际完成并由双端独立scorer复现，未形成突破，停止固定动作而不扫参（§25.44–§25.48）。当前转 exact joint 训练目标R1：shared-ancestry递推/穷举与same toy/surrogate 的wrong-link梯度抵消差异已由CPU autograd/有限差分验证（§25.46/§25.49）；这不是数据集效果/全面新颖性/方法准入。下一拟议路线从相同pretrained initializer训练完整原架构，保持backbone/数据/seed13/类型policy，比official marginal/root-product/exact/ancestry-shuffle；先以完整train gold/冻结mention顺序核共享误祖先机会与类型分块规模，再核官方完整训练损失/优化接口及零optimizer CPU成本（新发现fill_expand对非单例首mention不置dummy：先以autograd/全train覆盖验证，原joint首提及dummy监督盲区已由真实autograd确认；固定teacher/同MLP起点/预算的legacy-versus-corrected CPU适配完整完成，双端独立评分未胜strong control且停止（§25.50），该已知目标修正不当作创新，未来full-model控制仍用规范目标）；这些R1审查不读final-valid，不当作效果/power。新方法目标预声明为相对strongest control至少+3pp MUC（突破目标，不是预期承诺），先用零数据数学审查核exact−root-product协方差的非负性/分解，并核同总概率量的global-inflation对照以区分局部依赖与分数整体膨胀；再用既有真实配对控制的document bootstrap噪声作prospective location-model功效敏感性，报告1/1.5/2倍噪声；不以oracle修复覆盖或数学PASS造power。完整train原tokenizer/chunk census与固定8doc峰值/最坏输入已实测完成（§25.53）；仅有input规模，不把type块或CPU/未钉选卡的历史耗时当单卡budget PASS。original-joint零optimizer profiler与两fixture CPU完整四头loss/backward/checkpointing等价已完成；同入口/fixture的原架构两个CUDA成本病例已complete，重算parity与单卡峰值已核（§25.62），不重跑、不创建GPU等待启动器。10-14较早成功核卡4090/5090均有他人任务；工具失败不作科研失败。本次再冻结同一pair-F1 auxiliary/五臂设计，绑定first-dummy完成后的五组真实配对噪声；主规划采用最坏已观测1×noise并保留1.5/2×敏感性及未知full-model方差风险（§25.55），不得用proposed得分改规划假设。同loss/五臂/endpoint已冻结，完成控制后的条件design power已绑定；原架构两个固定输入CPU完整反向/checkpointing梯度等价通过（§25.54），等卡期间已完成LOCAL隔离CPU-only uv环境的loss边界/float32-vs64/最大type块求导审查，复用已验证Torch矩阵递推，零model/optimizer（§25.56）；仅train gold/冻结mention顺序的label密度及uniform parent先验风险全量审查也完成（§25.57，r2修复空pair mask，原失败/source保留），不改loss/scale，不推断部署效果或方向；按10-14本轮新增授权可用5090空卡做原joint cost及准入后的五臂seed13训练（≤一天任务，权重不跨机）；先核本机source/train/P1/pretrain身份与tokenization可比性，独立config/输出，不能套原4090路径或改封存代码（§25.59）。继续仅train的逐合法候选partial-gradient审查，检查wrong shared-parent边上exact/root/mass与规范marginal的信号差异，common-bias不足以识别局部归属；零模型/更新、不把prototype当MUC/power（§25.60）。5090完整train token/label投影与旧参考、原两fixture CPU成本/initializer已核一致（§25.59）；全train构造梯度审查完成（§25.58/§25.60），未证明exact胜canonical。5090 CPU固定peak8同pretrain原模型的规范marginal/四aux/关系loss head/encoder梯度量级、夹角和耗时审查已complete（§25.61，零optimizer，source/log与非权重双端SHA核一致），不依uniform gradient判NN更新或胜出；原架构CUDA已核，结构aux/真实optimizer CUDA预算及正式合同仍未闭合，不能启动proposed训练。作者报告4090释放，成功核卡空闲后已按§25.62完成原入口peak/worst单卡CUDA成本（分别GPU1/2，原输入/合同/容差不变，零optimizer/更新）；通过后按§25.63在新research成本身份测固定五臂/两个fixture的checkpointed四头反向及实际AdamW/Adam cold/warm step（lr严格0、两次API调用如实计数、参数SHA不变、无epoch/评测；首个CPU病例因native lr0改signed-zero字节失败，保留原身份，r2完整原Model CPU已complete，逐值相等审计只恢复零符号并单列CPU审计开销，真实数值变化仍FAIL；固定10个CUDA结构/optimizer病例仍待空卡），独立闭合optimizer/结构aux预算和正式合同，不把成本PASS当MUC。旧弱observer/role家族不复活，原5090 decoder audit等空卡，后续C5→D4→A4 | 作者委托科研裁决并要求持续推进至可复核突破；单活动任务，原5090 C5 audit与10-14新增C-41空卡成本/准入后五臂seed13授权均保持，单任务≤一天，其他范围不扩大。新窗口按 HANDOFF 的 PI 角色与 §0.3.5 接续，任务身份不变 | 保留旧 frozen anchor，把给定类型控制列为 stronger alternative 并明确类型 policy；新方法须文献差异、可部署输入、同协议强对照、单变量消融/负控与目标 power 闭合后才生成训练合同。控制提分/候选失败不等于章节创新完成 | `HANDOFF.md` §0.3.5；`results/PHASE_R1.md` §25.40–§25.63；`research/20261013_c5_joint_connectivity.md` / `research/20261013_c5_newness_admission.md`；complete configs/contracts仅作身份，不覆盖重跑 |
 
-#### C-41/T087 · 10-15覆盖切片：先审创新，再闭合5090执行
+#### C-41/T087 · 10-16覆盖切片：4090执行与项目OKR
 
-此表细化既有C-41，不新开活动研究队列；覆盖本行旧叙述中的“等空4090”接续。
-资源迁移只改变执行身份，不改已冻结五臂科学设计；D4/A4新候选留§8，未准入训练。
+此表为唯一活动C-41的分解，覆盖10-15的5090优先安排；总任务仍wip、method未准入。
+设计依据与KR映射见§3.9及OKR卡，所有实测只写results。各行未完成不得越依赖启动训练。
 
-| 子项 | 状态/优先级 | 交付与验收 | 资源/边界 |
+| 子项 / KR | 状态/依赖 | 交付与完成判据 | 资源/停止边界 |
 |---|---|---|---|
-| C41-L | done · 本次文献升级审查 | 新近论文正文/公式与官方code状态、竞争解释和逐章候选卡；来源/局限可追溯，不能称创新已证实 | 本地静态/文献；R1 §25.65与升级卡 |
-| C41-S | todo · 下一动作 | 5090自足资产与新成本适配合同：原地initializer/source/train/P1/评测非权重资产逐项SHA；调查未跟踪文件；列出新source delta、精确命令与独占输出 | 先CPU，不依赖4090；现r2硬编码4090，独立适配不改封存源码；GPU成本范围核10-14原授权 |
-| C41-B | pending · S后 | 本机固定五臂×两fixture实际CUDA/optimizer成本，及accumulation4、全train关系head/type块shape、各臂完整预算与≤一天可执行性 | 空5090且对应任务许可明确；超限不以切碎同一训练绕授权，不偷改epoch/有效batch |
-| C41-A | pending · B后 | 汇总新颖性边界、输入、强控制、条件power与预算，作R1明确裁决，冻结生产phase/code/config/input | method_admitted仍false；仅成本PASS不准入 |
-| C41-T | pending · A后 | 同机seed13冻结五臂与官方评分/配对/护栏/误差交换，exact-vs-root/mass分离依赖贡献 | 沿用10-14准入后五臂许可和单任务时限；不按中途分数改设计；不复跑已完成控制 |
+| C41-L / 全部创新KR | done · 10-15文献升级 | 最近邻机制/官方代码状态/候选卡与来源边界已落地；不代表全面新颖性已证实 | 新章节接队刷新最近邻，不重读代替决定性实验 |
+| C41-S / O4 | deferred · 原5090迁移切片 | 保存已有资产存在性证据；本轮不继续新迁移adapter/config/合同 | 4090恢复，不需搬权重；未来若不可达先更新主表 |
+| **C41-R / KR1.1、KR4.2** | **todo · 唯一下一项** | 原4090源码/initializer/source/train/P1/cost报告非权重证据逐项hash；核远端落后与未跟踪来源并保全；列CPU/torch gate及剩余成本确切命令、独占输出 | 原机现成r2与CUDA证据复用；本轮只完成资源快照，未冒称完整资产闭合 |
+| C41-B / KR1.1 | pending · R后 | 五臂×两fixture剩余CUDA结构/真实optimizer成本；accumulation4驻留、全train关系head/type块shape、每臂GPU时/峰值/RAM/IO和并行总预算，给出可执行性裁决 | 空4090；已完成原架构CUDA和r2 CPU不复跑；不以cold/warm两步冒充完整训练预算 |
+| C41-A / KR1.1、KR1.2 | pending · B后 | 新颖性边界、输入、强控制、条件power、预算先作设计准入；通过后TDD生产实现/CPU回放、本地三件套、远端真实torch与CUDA smoke；最后冻结phase/code/config/input与method准入 | 两段缺任一则method_admitted=false；不在设计未清时写新机制，不改封存源码，不拿local skip充PASS |
+| C41-T / KR1.1、KR1.2 | pending · A正式准入后 | 固定seed13五臂从同initializer至固定endpoint，完整预测/共指及三个关系指标；失败产物保留，不按中途分数改设计 | 4090空卡不同臂滚动并行，一条SSH一个任务；同机匹配输入/精度/预算，不跨机checkpoint |
+| C41-V / KR1.1、KR1.2、KR4.2 | pending · T后 | 独立official复算、paired document差异/区间、强控制/核心消融/负控/护栏/错误交换裁决；每条KR标是否达成并回填结果/主表 | exact必须胜root/mass且shuffle更弱；失败停固定配置并有证据回R1，不扫参救分 |
+| C41-D-R / KR2.1、KR2.2 | pending · 正式研究接队在C5裁决后；T运行期间可准备 | 刷新CoDE/SDIN/scope/普通supcon等最近邻，train-only归属/稀有类/offset机会；候选明确准入或具体拒绝证据 | 不读评测标签选配对，不假造source/scope监督；失败则先写替代再推进 |
+| C41-D-A / KR2.1、KR2.2 | pending · D-R后 | 可识别创新、最小loss/强rival/消融/负控、条件power/预算和冻结phase；TDD实现、本地门及真实torch smoke后正式放行 | 保留可靠linear与相同全文通路，独立新身份；不复活cue/causal-residual |
+| C41-D-TV / KR2.1、KR2.2、KR4.2 | pending · D-A后 | seed13完整五折/各臂OOF；pooled官方主指标/少数类护栏/归因与独立复算，裁决并回填 | 按空4090并行不同臂或不同fold，同seed不等于额外seed；实现/协议失败另封存 |
+| C41-A-R / KR3.1、KR3.2 | pending · 正式研究接队在D4裁决后；既有长训练时可准备 | 刷新SVRECI/多正例/条件排序最近邻，train-only目标×方向×subtype分组/多正例/假负例；明确创新/数据可行性裁决 | 不裁评测候选，不单原因softmax、不把BEFORE当CAUSE；已有有限梯度诊断不阻断研究 |
+| C41-A-A / KR3.1、KR3.2 | pending · A-R后 | 强rival、核心消融、归属负控、机制可识别性、条件power/预算和冻结phase；TDD实现/本地门/真实torch smoke后放行 | 不续修masked/retained hinge；4090执行，无新增5090授权 |
+| C41-A-TV / KR3.1、KR3.2、KR4.2 | pending · A-A后 | seed13完整候选各臂、official causal P/R/F1和关系护栏、恢复/损失正例、独立复算与去留 | 不按保守全None或子集分数宣布改进；负结果仍交付 |
+| C41-Q / KR1.3、KR2.3、KR3.3 | pending · 本轮所有待比单seed方案超过各自baseline/护栏且作者再次明确授权 | 依各有效合同执行matched seeds与聚类配对确认，记录均值/SD/区间；合法封存程序另核其许可与历史访问 | 未满足前置或授权不得跑seed17/42；单seed成功不能记成最终确认 |
+| C41-F / KR4.1、KR4.2、KR4.3 | pending · 各章结果陆续可审；最终结论待Q/合法封存门 | 名册主表/可得性障碍/FR-016完整、原始预测可独立复算、ID/commit/config/checkpoint可追踪；E3只核现有成果/限制，不追加实验 | 复用C-30等已完成证据，不重跑全部baseline；未达科学KR如实列出，O4不能替代O1–O3 |
 
 **2026-10-08 非 GPU 执行切片（C-37–C-39）**：先交付三个可证伪的诊断包：
 D4 marked-CLS 输入与训练配方固定，仅比较 linear / 五维 tanh head；
@@ -441,7 +486,7 @@ G-11a 才能在 5090 上按 §3.4 推论 2 的意图提前滚起来。
 「它读的文件在某台有 GPU 的机器上」不是 GPU 依赖——那是 scp 或 ssh 的事。A4.1 就是这样被误归了两天
 （详见 `results/PHASE_A.md` 的 A4.1 节）。**新任务进表时逐条问一句：它 import torch 吗？**
 
-### 4.2 GPU 泳道（长任务阻断在 G-0；smoke 可走 5090，见 §3.5）
+### 4.2 GPU 泳道（以下为历史任务；当前恢复后的执行认§3.9/§4.1的C-41切片）
 
 | ID | 实验 | 依赖 | 粗估 | 完成 = |
 |---|---|---|---|---|

@@ -7,7 +7,22 @@
 | Spec | [`SPEC.md`](SPEC.md) |
 | Status | Working design; method hypotheses remain revisable until their phase protocol is frozen. |
 
-## 2026-10-15 current design amendment
+## 2026-10-16 execution and outcome amendment
+
+The author confirmed recovery of the 4090 and requested project-level OKRs with outcome-based
+acceptance. The 4090 is again the primary execution machine; C41-R original-machine asset/source
+verification, C41-B remaining real budget, and C41-A design admission plus tested production contract
+precede fixed five-arm C5 training and independent attribution. The new 5090 migration implementation
+is deferred. This supersedes only the resource/scheduling instructions of the 10-15 amendment below.
+
+The [project OKR card](research/20261016_project_okr.md) defines C5/D4/A4 scientific results and
+final traceability separately from activities; EXPERIMENT_PLAN §3.9/§4 remains the only executable
+queue. The leading candidate mechanisms and their unadmitted status remain unchanged. Single-seed
+outcomes, mechanism attribution and separately authorized confirmation are distinct gates.
+C5 → D4 → A4, sealed families, the agreed thesis structure and E3 boundaries remain unchanged.
+No positive effect or eventual success is inferred from restored compute or planning completeness.
+
+## 2026-10-15 design amendment (resource instructions superseded on 10-16)
 
 The author confirmed that the 4090 is unavailable with no repair date and requested innovation work
 guided by current primary literature. The active C-41/T087 remains C5 first, then D4 and A4;
@@ -22,8 +37,8 @@ with ordinary contrastive learning and prior graph/verification methods as stron
 
 Primary-source findings, the candidate boundaries, falsifiable contrasts and feasibility/stop rules
 are in [`research/20261015_innovation_upgrade.md`](research/20261015_innovation_upgrade.md).
-Only [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md) §3.8/§4 controls execution. Its next item C41-S
-prepares a self-contained 5090 identity without transferring 4090 checkpoints; source/input hashes,
+The following execution instructions are historical and superseded by §3.9/§4 on 10-16. At that time C41-S
+was to prepare a self-contained 5090 identity without transferring 4090 checkpoints; source/input hashes,
 actual full-model budget and a formal R1 contract remain required. No new GPU authorization or
 method admission follows from this design amendment; empirical facts remain in R1 §25.65.
 

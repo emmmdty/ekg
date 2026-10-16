@@ -1,14 +1,15 @@
 # EKG 实时状态
 
-> 更新于 **2026-10-15**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-10-16**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
-**10-15最新覆盖**：作者确认4090不可用、恢复时间未知，要求先升级创新方案。
-C41-L文献/源码审查完成；唯一下一项为主表C41-S：5090自足资产/hash与独立成本合同，
-再接本机预算、R1裁决与获准五臂，不等4090或搬checkpoint。研究与取舍见
-[`创新升级卡`](research/20261015_innovation_upgrade.md)，证据R1 §25.65。
-D4事件锚点—承诺证据绑定、A4多正例条件监督仅为待准入候选，未取得训练许可或效果证据。
-下方10-14工程史保留；其中等待4090的安排被本段/主表§3.8覆盖，既有授权不扩大。
+**10-16最新覆盖**：作者确认4090恢复，要求整体目标→OKR→任务→证据的项目管理。
+4090成功只读核查，回主执行机；下一C41-R原机hash/源码与未跟踪保全，B实际成本/完整预算，
+A设计准入→生产实现/真实测试/正式合同，T/V固定五臂与归因。原5090迁移S deferred；
+既有许可不变、不搬checkpoint。主表§3.9/§4为唯一队列，
+[项目OKR](research/20261016_project_okr.md)给三章KR/时窗，事实R1 §25.66。
+D4/A4候选仍未准入，后续C5→D4→A4；E3不加实验，单seed/封存/资源边界保持。
+下方历史工程记录不覆盖本段，不把准备完成当最终指标达成。
 
 **本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；原tokenization census与两组固定输入的完整四头CPU反向/checkpointing梯度等价均完成（§25.53–§25.54）；五臂loss/固定endpoint/最坏已观测噪声的条件power规划假设已绑定（§25.55）。本次已继续完成LOCAL隔离CPU的固定aux数值/求导边界与全train label/构造先验风险审查（§25.56–§25.57），均不构成模型提分。新增common-bias/逐候选审查与5090完整输入等价/原CPU重计算完成（§25.58–§25.60）；真实四aux的head/encoder梯度连通性及量级审查已完成（§25.61），参数未更新、尚未分辨exact独有收益。原架构两fixture CUDA parity/峰值已complete（§25.62）；结构目标/真实optimizer CUDA预算与正式合同仍待完成（§25.63），原CPU成本失败封存、r2完整Model CPU exact/peak数值/实际optimizer状态复核已complete，CUDA结构/optimizer成本待空卡，method未准入。C5切片保持wip，D4/A4未接队。
 
