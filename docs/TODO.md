@@ -5,18 +5,18 @@
 
 **新窗口执行方式**：作者明确要求使用长期Goal。先按HANDOFF §0.0核本线程目标、
 创建/接续并确认活动状态，再从C41-R连续推进；阶段汇报/提交/候选失败不结束总目标。
-本线程已创建长期Goal；作者报告客户端active，工具仍返回usageLimited，按作者继续指令执行。C41-R/B/A/T/V已完成，五个有效端点及双端独立评分一致；固定exact候选科学门FAIL并停止，不扫参/加seed，原mass失败与修复精度限制保留。当前正式C41-D-R；C5数字只见PHASE_C末节，接队及证据R1 §25.82。D4 native共享正关联已拒绝exclusive binding、UR-HAT/conditional contrast已核（§25.83）；下一原strong linear固定train重放诊断（§25.84），不更新模型。
+本线程已创建长期Goal；作者报告客户端active，工具仍返回usageLimited，按作者继续指令执行。C41-R/B/A/T/V已完成，C5固定exact候选科学门FAIL并停止（PHASE_C末节/§25.82）。D4当前绑定模板R1未准入；原train重放/输入可见性已闭合，未启动拟议方法训练（§25.83–§25.86）。当前正式C41-A-R，复用native多原因/coref重复与普通SupCon准备，不更新模型。
 证据见R1 §25.68–§25.72；固定seed13五臂已准入，科学KR尚未达成，无新增资源授权。
 
 **10-16最新覆盖**：作者确认4090恢复，要求整体目标→OKR→任务→证据的项目管理。
 4090回主执行机；C41-R原机hash/源码与未跟踪保全完成，B实际成本/完整预算完成（§25.69），当前
-A设计/生产/真实测试/正式合同完成（§25.72），T/V完整负结果已裁决，当前D4-R。原5090迁移S deferred；
+A设计/生产/真实测试/正式合同完成（§25.72），T/V完整负结果及D4当前模板R1已裁决，当前A4-R。原5090迁移S deferred；
 既有许可不变、不搬checkpoint。主表§3.9/§4为唯一队列，
 [项目OKR](research/20261016_project_okr.md)给三章KR/时窗，事实R1 §25.66。
-D4/A4候选仍未准入；当前D4-R，后A4；E3不加实验，单seed/封存/资源边界保持。
+D4当前模板未准入，A4当前正式研究；E3不加实验，单seed/封存/资源边界保持。
 下方历史工程记录不覆盖本段，不把准备完成当最终指标达成。
 
-**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；原tokenization census与两组固定输入的完整四头CPU反向/checkpointing梯度等价均完成（§25.53–§25.54）；五臂loss/固定endpoint/最坏已观测噪声的条件power规划假设已绑定（§25.55）。本次已继续完成LOCAL隔离CPU的固定aux数值/求导边界与全train label/构造先验风险审查（§25.56–§25.57），均不构成模型提分。新增common-bias/逐候选审查与5090完整输入等价/原CPU重计算完成（§25.58–§25.60）；真实四aux的head/encoder梯度连通性及量级审查已完成（§25.61），参数未更新、尚未分辨exact独有收益。原架构两fixture CUDA parity/峰值已complete（§25.62）；结构目标/真实optimizer CUDA与accumulation4/全train保守预算现已完成（§25.69）；原CPU失败封存，正式生产/合同已完成（§25.72），method仅准入seed13探索，当前T/V，未获科学收益证据。以上为C5执行史；最新T/V已完成、固定候选停止（PHASE_C末节），当前正式D4-R，A4仍待接队。
+**本次接续（作者要求实际结果）**：固定双向、frozen-null、forest posterior-score、同head decision-unit与first-dummy适配五类控制均完整实测/独立复算，没有突破，固定动作全部停止（§25.44–§25.50）。原joint首提及dummy目标盲区真实存在，但修正适配没有部署收益；不扫预算挽救。当前C-41为exact joint结构学习R1：完整train机会、真实模型梯度、covariance分解与总概率量匹配rival已核（§25.49/§25.52），前瞻功效敏感性完成（§25.51）。数学/条件power不是MAVEN提分；原tokenization census与两组固定输入的完整四头CPU反向/checkpointing梯度等价均完成（§25.53–§25.54）；五臂loss/固定endpoint/最坏已观测噪声的条件power规划假设已绑定（§25.55）。本次已继续完成LOCAL隔离CPU的固定aux数值/求导边界与全train label/构造先验风险审查（§25.56–§25.57），均不构成模型提分。新增common-bias/逐候选审查与5090完整输入等价/原CPU重计算完成（§25.58–§25.60）；真实四aux的head/encoder梯度连通性及量级审查已完成（§25.61），参数未更新、尚未分辨exact独有收益。原架构两fixture CUDA parity/峰值已complete（§25.62）；结构目标/真实optimizer CUDA与accumulation4/全train保守预算现已完成（§25.69）；原CPU失败封存，正式生产/合同已完成（§25.72），method仅准入seed13探索，当前T/V，未获科学收益证据。以上为C5执行史；最新T/V已完成、固定候选停止（PHASE_C末节），D4当前模板R1也已拒绝准入，当前正式A4-R。
 
 ## 当前正式活动阶段
 
@@ -28,7 +28,7 @@ G-22 D4 十折训练、CPU 配对汇总与对应 C-40 裁决已完成：linear �
 ESC 退出本轮硬前置；不换 MAVEN 主任务、不重写旧失败数字、不开未准入 GPU 实验。
 科研选择不再等待作者；5090/跨机 checkpoint/额外 seeds 的资源边界保持。
 10-12 路线评估已入 `HANDOFF.md` §0.3.4：旧机制停止续修，有限诊断与新方法贡献分开；
-作者随后明确要求逐章执行；主表 **C-41 / T087 为 wip，当前 D4-R（C5固定候选已裁决）**，顺序 C5 → D4 → A4。
+作者随后明确要求逐章执行；主表 **C-41 / T087 为 wip，当前 A4-R（C5固定候选/D4当前模板已裁决）**，顺序 C5 → D4 → A4。
 先核可靠控制与时间身份候选的信号可行性，再形成实质不同的方法合同；诊断不等于提分。
 A4 GPU 待授权、C5 audit 等空卡不是文献/CPU 研究硬前置；尚无新机制准入或训练启动。
 研究卡 `research/20261012_chapterwise_optimization.md`，证据 `results/PHASE_R1.md` §25.38 起。

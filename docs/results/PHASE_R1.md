@@ -6064,3 +6064,111 @@ train IDs，assert与selection-dev/evaluation ID集合不交；不将它们的�
 已LOCAL/4090独立生成并重算一致；没有从LOCAL传checkpoint。原入口未修改。
 启动前本地完整pytest exit0（torch用例skip，不冒充真实Torch通过）、ruff0、ekg-smokeOK、
 consistency36PASS及diff --check通过；该配置只准只读推理诊断，不准新方法训练。
+
+§25.84 冻结配置/文档6c5d72c已push。首次远端git fetch因gh-proxy.com DNS失败而未同步；
+只读getent随后已解析，显式重试成功同步6c5d72c，未修改网络设置/代码。CPU预检全部
+source/input/checkpoint与输出独占门PASS；成功核GPU0空闲、无compute apps后，披露完整
+命令并发起一次setsid nohup推理。PID1307277，日志
+`logs/d4-anchor-fold1-train-replay-20261016.log`，成功SSH核ALIVE；预期标签/report/status
+在R183。没有optimizer、checkpoint重选或额外训练；尚未宣称重放完成。
+
+### 25.85 D4-R输入anchor可见性检查自审（2026-10-16，wip）
+
+**科研价值**：区分“模型不会绑定”与“冻结输入已丢失目标锚点”。真实源码
+`marked_sentence`只取触发句并插星号，`pool_mentions`在CLS模式以max_length128做
+prefix truncation后直接取hidden[:,0]；它没有检查target span是否还可见。不能将
+“marked-CLS”一词当作每条输入必然带目标的证据，也不称它是全文档模型。
+若同语境不同事件在预算后得到相同token IDs，其不同标签不能由该确定性输入区分。
+这会改变后续机制/强控制的判断；修输入即使有益也只能算控制修复，不能算创新贡献。
+
+**可行性**：只用R183已投影的固定1747篇train、原checkpoint tokenizer和未改marked_sentence，
+隐藏CUDA、不加载encoder/optimizer，CPU批量比较full与原128budget offset/IDs；
+预先记录complete/partial/absent target、同句相同input的多标签冲突以及各类覆盖。该工作
+不改旧contract/checkpoint/输入，不读取selection-dev/evaluation实例，不跑新效果结果。
+
+§25.84 只读CUDA重放已complete，成功SSH确认PID1307277 GONE；固定1747篇/44384个
+namespaced mention全覆盖，labels SHA
+`695b45992746a52238651fe981226338b2ee1bd4e7afc245075e1e435245463e`，
+report SHA`36c5ac085bb9a736337490ffcff32867b25d6d68b4f77791414c2a08fb82c172`。
+原checkpoint目录content digest前后均4d19dd58…fc9b，参数/配置无写入。
+
+| 类别 | train gold数 | 正确数 | 预测该类数 | train F1 |
+|---|---:|---:|---:|---:|
+| CT+ | 41889 | 41247 | 41270 | 0.992003 |
+| PS+ | 1357 | 1340 | 1717 | 0.871828 |
+| CT− | 897 | 876 | 1120 | 0.868617 |
+| PS− | 170 | 165 | 177 | 0.951009 |
+| Uu | 71 | 71 | 100 | 0.830409 |
+
+train macro-F1=0.9027732534973214，独立Counter按每类2TP/(N_gold+N_pred)重算与
+原report在1e-12内一致。这是in-sample拟合诊断，不是新的OOF/方法成绩，不能与
+§25.37不同population的OOF直接相减作效果。label-only baseline的evidence F1为零是
+未预测证据的定义，不当成其标签错误原因。
+
+| 预定bucket（可重叠） | CT+错误/数目 | PS+ | CT− | PS− | Uu |
+|---|---:|---:|---:|---:|---:|
+| 全train | 642/41889 | 17/1357 | 21/897 | 5/170 | 0/71 |
+| 同句存在异标签事件 | 162/4153 | 14/1148 | 19/805 | 5/158 | 0/69 |
+| 有有效正support | 8/28 | 12/1215 | 8/828 | 5/167 | 0/8 |
+| support被多个mention共享 | 3/8 | 2/350 | 3/165 | 1/58 | 0/0 |
+| support被异标签mention共享 | 3/8 | 1/30 | 0/11 | 1/22 | 0/0 |
+
+5539对同句原生异标签pair中，5210对两者均正确、325对仅一者正确、4对均错；227对
+被预测成同标签。保留类别分母，不能以bucket粗错误率识别因果绑定失败。结果支持
+“可靠linear已经能拟合绝大多数异锚区分”，不支持以“同句一向只能给一个label”当其
+普遍能力缺陷；仍不能排除局部或泛化层面的归属问题。
+
+第一次临时`residuals.py`将raw mention ID直接查namespaced预测，KeyError即停止；原
+脚本和failure记录保留。查到loader明确`doc_id::mention_id`后，新`residuals_r2.py`用
+该精确ID与新输出名，全部ID集合/类计数/独立指标PASS；未改预测或重跑GPU。
+R183十二件封存manifest SHA
+`81b0bdca737bc853b79bca75c02a69475d707d298bf545177dd0eb4b868786e8`，双端hashPASS。
+
+§25.85 CPU tokenizer检查已complete：44384个train mention中44374个目标完整可见、
+10个目标全被截断（CT+7、PS+3），没有partial；CT−/PS−/Uu目标均完整。出现两个
+同句相同input-ID组，其中一个含5个不同标签mention，确定性输入的最少强制错误数为2。
+与只读重放逐mention精确ID连接后，absent10条错2条，其余完整44374条错683条。
+因此截断问题确实存在，但**本train结果不支持它是当前主瓶颈或PS−/Uu问题的解释**；
+不据此改旧输入或启动centered-window训练，也不将输入修复当创新。旧strong checkpoint
+保持原身份，未来若改变打包仍需透明匹配控制。
+
+CPU精确命令（cwd `/data/TJK/ekg`）：`CUDA_VISIBLE_DEVICES=-1 TOKENIZERS_PARALLELISM=false
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONPATH=src .venv/bin/python -u
+runs/stages/R1/r1-v84-d4-anchor-visibility-20261016/visibility.py`。无encoder/optimizer。
+R184四件manifest SHA
+`969a9ecedca7a6154dbdb1c0a2e7de1d721437a5e12950dc45116ecfb7080ecf`，双端hashPASS。
+
+### 25.86 D4当前绑定候选R1裁决：未准入；接续A4-R（2026-10-16）
+
+科研价值是对表3-3/KR2.1–2.2给出明确去留，避免无限准备或把已知目标换名训练。
+可行性依据§25.74/§25.77/§25.80/§25.83–§25.85的原生train与一手机制证据；没有
+拟议D4训练或新OOF结果，不能把此次拒绝说成新方法效果被实验证伪。
+
+| 当前具体版本 | 准入裁决与命名障碍 |
+|---|---|
+| 缺/不重叠support即负scope、跨事件标签即NLI | 拒绝【数据】；没有这些gold，不能伪造 |
+| one-token/one-event排他绑定 | 拒绝【数据】；原生正关联允许distinct事件/标签共享 |
+| 普通按语境/标签条件化或supcon | 不作新方法准入【新颖性】；CMLE、SupCon、conditional denominator均有明确先行机制 |
+| 将预测evidence再池化给标签头 | 不重新立项【封存边界】；属于已停止D3方向，不能换名复活 |
+| 单纯positive support→attention辅助 | 不准入当前新方法【实质差异未闭合】；可行性未被否定，但没有超出已有rationale/evidence supervision的明确新干预与可识别竞争解释 |
+
+[R2A2018 §3.3–3.4](https://aclanthology.org/D18-1216.pdf)明确学习rationale到attention的
+映射，再以label loss+attention距离监督target classifier；§4.2还含直接rationale监督
+attention的RA-TRANS对照。它的跨域source/target/未标注数据前提不直接移入MAVEN；
+此处只界定“rationale辅助attention”并非新概念，没有复现/比较其外部成绩或集成代码。
+不从这一邻居推导所有未来positive-only设计都无创新；当前没有一个已定义、可独立
+验收的新机制通过门，所以`method_admitted=false / no_admitted_candidate`。
+
+train重放削弱了“strong linear普遍无法分辨同句事件”的动机；它没有测泛化，所以也
+不能以train高分证明D4无研究空间。单seed诊断、覆盖率、输入计数与阅读量均不达成
+KR2.1/2.2；KR2.3前置不成立。本次关闭的是10-15当前绑定模板的准入回合，**不是
+整个D4章、所有证据方法或一个已训练机制家族**。
+
+按已授权章序/主表，D4-A/TV在没有候选时不启动；正式接队**C41-A-R**，复用§25.77/
+§25.80的native distinct多原因/coref重复与普通multi-positive强rival。优先裁明“按目标
+组织的已知对比学习”和真正新干预的差别，不拿单正例softmax/弱set-pool作对手。
+后续D4替代须新证据与实质差异回R1，保留全文通路/强linear与原五类协议；不交作者重选题。
+
+§25.86 R185裁决记录manifest SHA
+`27e401ffbb876822da174103f5a773779aed3fc0e957fe7e02fc31f6af451c65`，
+已备份4090并双端hashPASS；R183/R184逐件身份与原checkpoint前后不变已核。
