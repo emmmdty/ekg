@@ -5246,3 +5246,43 @@ SHA-256=`5f3163194f5820f592f71305b3bf2c3721fbe6f49e2808554dd390ce4ba26985`；
 再次检查4个Objective、12项KR到主表映射、53个本地文件链接、资源转录/manifest的
 SHA以及HANDOFF下一项和Summary锚点均PASS；`git diff --check`通过。
 这些是文档/追溯检查，不替代完整资产SHA、生产torch门或方法效果证据。
+
+
+### 25.67 新窗口长期Goal执行交接（2026-10-16，仅文档）
+
+**作者指令**：整理交接，让下一窗口使用目标持续推进，不在每个中间步骤后停下等待。
+本轮明确仅做交接，不执行后续研究；原C-41/T087仍wip，下一项仍C41-R，
+method_admitted=false，无新GPU作业、方法得分或授权。
+
+**开工自审**：科研价值是将主表R→B→A→T/V和O1–O4的验收贯穿多轮执行，避免
+准备/报告被误当成方法贡献或任务终点；依据§25.66与主表§3.9/§4。
+可行性是本地文档/已有Goal工具契约核对，无需模型或远端命令。
+开工`git -c http.version=HTTP/1.1 fetch origin`成功，HEAD=`7c46b0a`等于
+刷新后的origin/main，工作树干净；没有分支/worktree/新代理。
+
+**交接变更**：HANDOFF新增§0.0，要求新窗口开工对齐后get_goal检查本线程目标，
+无未完成目标时create_goal显式创建完整研究目标，再核返回状态并执行C41-R。
+已存在一致活动目标则接续，不覆盖其他未完成/用户暂停目标；作者未指定token预算，
+不擅自设置。工具不可用时诚实说明并给出客户端/goal正文，已授权工作仍继续，
+不得声称已启用自动续跑。目标保存于具体线程，不能由仓库OKR或别的线程自动推定。
+
+§0.0提供完整objective、各阶段出口与停止边界：读完计划就实际核资产；必要门通过
+进入下一项；正式准入后直接执行获准实验；启动后监测/做合法并行准备；全臂完成即
+独立复算/归因；候选失败只停候选并先改主表选合法替代。push/汇报不完成Goal，
+不等待作者反复说“继续”。真正的授权/有效性/系统预算/用户停止条件保持；Goal状态
+更新遵守实际工具契约，不能把失败或预算耗尽记作成功。同步主表执行说明及TODO入口，
+未改科学顺序、指标、旧结果、冻结合同、5090/跨机/seed授权。
+
+**来源**：按openai-docs技能检索并实际读取
+[OpenAI官方Using Goals in Codex](https://developers.openai.com/cookbook/examples/codex/using_goals_in_codex)
+的Quickstart、线程状态/继续执行/证据完成边界（2026-10-16）。具体get_goal/create_goal/
+update_goal状态操作以本会话暴露的工具契约为准；未升级/安装Codex、未改客户端配置。
+本窗口没有调用create_goal，未替新窗口启用研究自动续跑；实际启动待新窗口操作并核状态。
+
+
+**验证**：一致性审计`uv run python scripts/audit_r1_consistency.py --output
+/tmp/ekg-goal-handoff-consistency-20261016.json`为`PASS: 36 requirements mapped`。
+附加检查确认Goal生命周期/阶段出口/停止边界、43个本地链接与四个仅文档改动；
+主表§4及其后的科学任务/验收内容与本轮基线逐字相同。检查器首次把开头的§0.0引用
+误写为标题字符串断言，定位后只纠正检查器并重新PASS，未改动科学设计。
+`git diff --check`通过；本轮没有代码变更，未运行或声称通过训练/torch测试和代码三件套。
