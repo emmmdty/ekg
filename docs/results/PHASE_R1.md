@@ -5877,3 +5877,34 @@ R178=`runs/stages/R1/r1-v78-c41-training-continued-20261016/`保存命令/资源
 marginal endpoint已闭合，root/exact/shuffle继续原身份；全部有效臂完成后立即按冻结
 新overlay评分并双端独立复算，不提前选分，不把启动或工程修复记作科学KR。
 R177标注policy记录已原4090逐件hashPASS；无PDF/权重搬运或新模型训练。
+
+### 25.80 A4普通multi-positive强rival机制准备（2026-10-16，非正式接队）
+
+**开工自审**：科研价值是表4-3/KR3.2避免拿单正例/弱set-pool充强对照；§25.77已证
+native多原因及coref重复可分，下一须区分每个正例与只奖集合总mass。可行性是
+[SupCon2020/2021v5 §3.2 Eq2–3](https://arxiv.org/pdf/2004.11362v5)与正文脚注链接的
+[作者PyTorch reference](https://github.com/HobbitLong/SupContrast)，先核真实源码/许可/
+固定revision，再轻量CPU构造公式/原criterion检查；零encoder/optimizer/评测标签。
+这是已授权T期间文献/可行性准备，不准入A4新机制或训练，不声称复现ImageNet/CIFAR。
+
+paper核到23页v5，外log逐正例均值与内log集合均值是已比较过的不同目标，不能以
+“容纳多正例”本身立新意。作者reference HEAD通过git ls-remote实查
+66a8fe53880d6a1084b2e4e0db0a019024d6d41a；下一下载原loss/README/LICENSE并核模块。
+TensorFlow仓库web访问InternalError，不代表无实现；作者PyTorch文件/README已可读。
+
+§25.80 作者原loss/许可证已按固定commit取回，未修改；README curl TLS EOF，web正文
+可读，未伪称三文件全部下载。BSD-2-Clause原notice保留；loss SHA
+`a432e24bdff118aa0ab3013a4c85a4b099871ebef554177054d91fe6fca616db`。
+仅原SupConLoss在CPU合成4×2×3 normalized features/labels上实跑forward/backward，
+finite；无encoder/参数权重/optimizer/真实数据输入，不算完整图像benchmark复现或A4适配。
+R179=`runs/stages/R1/r1-v79-a4-contrast-preparation-20261016/`保存源码、许可、probe/report。
+
+另外按原Eq2–3在合成logits[3,-3,0]、前两项均positive核梯度：内log set-pool的弱正例
+梯度-0.0001169901，逐positive外log均值为-0.4976443669；强正例在外log梯度为
++0.4503302117，说明它也含正例间平衡，不能声称完全无competition或保证causal recall。
+这是已知目标的构造差异，不是我们新颖性/数据效果。未来rival不能只奖positive集合mass；
+还应包含逐正例目标及重复/coref权重控制。保留独立CE与完整候选，不能单winner解码。
+作者criterion的denominator覆盖整个batch；只改positive mask并不移除其他target，不能
+把普通batch SupCon冒称严格target条件化。A4 adapter/full pipeline尚未实现或准入。
+四件manifest SHA
+`dc6d7248210b61aee6bda8bd9dde43dbf1e67c95328e90aed7c973b8d9a09ada`；双端备份后另核。

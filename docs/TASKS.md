@@ -247,7 +247,8 @@ author delegation releases a new in-scope research queue; it does not reopen old
   C41-A completed both design and production admission (R1 §25.70–§25.72, release51c27eb);
   C41-T is now active and V follows: run and audit
   the fixed seed-13 five arms. Original mass failed numerically; isolated complement repair gates
-  are in progress, and original shuffle is running (R1 §25.75). The new 5090 migration adapter C41-S is deferred, not completed.
+  passed full-model parity/CUDA export smoke and repair training is running; original shuffle
+  is running and marginal reached endpoint (R1 §25.78–§25.79). The new 5090 migration adapter C41-S is deferred, not completed.
   Follow EXPERIMENT_PLAN §3.9 and the 10-16 C41 subtable; `research/20261016_project_okr.md`
   maps O1–O4/KRs to C5, D4, A4, conditional confirmation and final traceability tasks.
   R1 §25.66 records resource evidence; the 10-15 source ledger/candidate science remains valid.
