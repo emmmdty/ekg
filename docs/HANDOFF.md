@@ -4,9 +4,9 @@
 > 唯一活动研究队首：**C-41 / T087，C5切片，wip**；后续 **D4 → A4**。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.72。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.74。本文只给状态、资产与接续动作。
 
-**本线程接续（2026-10-16）**：长期Goal已创建并核实active；C41-R/B/A已完成，当前C41-T固定seed13五臂。
+**本线程接续（2026-10-16）**：长期Goal已创建并核实active；C41-R/B/A已完成，当前C41-T固定seed13五臂：marginal/root/exact首批运行，mass/shuffle待空卡。
 原4090 pins/initializer/封存证据、未跟踪保全及源码同步与真实CPU torch门见R1 §25.68；
 预算已闭合（§25.69），A两段准入及真实CPU/五臂CUDA生产smoke已完成（§25.70–§25.72）。
 `method_admitted=true`仅准许固定seed13探索；当前T→V，尚无新方法效果或科学KR达成。完成子项后继续下一项。

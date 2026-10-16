@@ -5579,3 +5579,38 @@ LOCAL及4090逐项重算46份非权重文件均匹配，含最终protocol/admiss
 raw cache/完整train-smoke预测与原始日志；远端再读admission/protocol SHA与上方完全一致。
 源码未改、Git仅本次文档回填，R1 consistency36PASS、diff --check通过。
 C41-A准入证据已封存；接下来push本外部可信锚、同步已push文档/评分计划，再按空卡启动T。
+
+### 25.73 C41-T：固定五臂正式训练首批启动（2026-10-16，wip）
+
+**开工自审**：科研价值是实际检验表5-3的预声明主指标/归因/护栏，而非继续把数学、
+成本或准入当效果；可行性是§25.72两段准入与已push可信身份、原机完整资源/生产门。
+seed13/100epochs/五臂/末步与统一评分规则不变，无final-valid、额外seed或5090任务。
+
+外部可信准入锚已push为50e4fd1，原生产代码51c27eb、配置e961e3…不变。
+4090安全同步main后，默认`--stage train --arm exact`（无execute）预检PASS；
+成功核GPU0/1/2无compute apps、显存78/11/11MiB/util0后，完整命令/cwd/输出已披露。
+每条SSH仅一个setsid nohup独立任务，未创建自动等卡/重试启动器。
+
+| arm | 4090 GPU | PID | 独立log | 独占输出（新phase根下） |
+|---|---:|---:|---|---|
+| marginal | 0 | 1097108 | logs/c41-t-marginal-s13-20261016.log | train/marginal |
+| root | 1 | 1097110 | logs/c41-t-root-s13-20261016.log | train/root |
+| exact | 2 | 1097148 | logs/c41-t-exact-s13-20261016.log | train/exact |
+
+2026-10-16T12:37:30+08:00成功SSH核三PID均ALIVE（ps约43–44秒，Rsl），
+GPU0/1/2显存4178/3761/3761MiB、util66/54/87%；GPU3未用。
+这些只是启动/运行事实，不是正式epoch/endpoint完成或MUC结果。
+mass/shuffle尚未启动，按空卡滚动接续；不读先结束臂的dev分数。
+新phase根`runs/stages/C5/c5-joint-dependence-20261016/`，checkpoint均留4090。
+LOCAL运行命令/资源身份记录R171=`runs/stages/R1/r1-v71-c41-training-20261016/launches.json`。
+队首C41-T保持wip，全部endpoint后立即V；训练启动不结束长期Goal。
+
+### 25.74 C41-D-R准备：D4最近邻与train归属机会（2026-10-16，非正式接队）
+
+**开工自审**：科研价值是为表3-3/KR2.1–2.2排除普通supcon/已有scope/evidence训练
+的重合，并确认原生多事件/支持词标注能否辨认event-anchor归属；不能拿同句不同标签
+直接制造蕴含/反驳或缺cue即负例。可行性为固定MAVEN-FACT public-train原数据/loader
+与一手论文/官方源码，只做轻量本地/远端CPU和检索，不读final-valid、不新训模型。
+这是主表明确允许的C41-T长训练期间准备，正式D4接队/准入仍等C5裁决；单一活动队列不变。
+下一核CoDE/SDIN/scope/近期同任务方法正文及公开实现，字段级train覆盖/稀有类/offset，
+已知24处train evidence offset噪声沿原loader丢弃计数，不把缺失当negative scope监督。
