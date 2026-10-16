@@ -17,7 +17,9 @@ is deferred. This supersedes only the resource/scheduling instructions of the 10
 
 The [project OKR card](research/20261016_project_okr.md) defines C5/D4/A4 scientific results and
 final traceability separately from activities; EXPERIMENT_PLAN §3.9/§4 remains the only executable
-queue. The leading candidate mechanisms and their unadmitted status remain unchanged. Single-seed
+queue. C41-R/B and both C41-A gates are now complete (R1 §25.68–§25.72); C5 exact joint
+is admitted for its frozen seed13 five-arm exploration, with production release51c27eb and final
+protocol/admission hashes anchored in §25.72. C41-T/V now follows; D4/A4 remain unadmitted. Single-seed
 outcomes, mechanism attribution and separately authorized confirmation are distinct gates.
 C5 → D4 → A4, sealed families, the agreed thesis structure and E3 boundaries remain unchanged.
 No positive effect or eventual success is inferred from restored compute or planning completeness.

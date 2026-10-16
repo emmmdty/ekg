@@ -26,7 +26,7 @@
 
 | Objective / 负责人 | 三项Key Result及证据 | 当前状态 |
 |---|---|---|
-| **O1：C5身份消解形成独立方法贡献**；持有队列的Codex | **KR1.1** 固定seed13下超过冻结主锚、given-type强锚及同预算强控制，满足当前exact的预声明+3pp MUC突破目标；**KR1.2** exact-vs-root/mass、assignment-shuffle及预定错误交换支持联合依赖归因，B³/CEAFe/BLANC守住当前brief的更严格护栏，三个关系任务代价完整报告；**KR1.3** 条件满足且另获授权后，达到§7.3既有matched-seed确认门，主表可从raw clusters独立复算 | 三项均待达成；exact仍未准入，不把已知类型控制计入创新 |
+| **O1：C5身份消解形成独立方法贡献**；持有队列的Codex | **KR1.1** 固定seed13下超过冻结主锚、given-type强锚及同预算强控制，满足当前exact的预声明+3pp MUC突破目标；**KR1.2** exact-vs-root/mass、assignment-shuffle及预定错误交换支持联合依赖归因，B³/CEAFe/BLANC守住当前brief的更严格护栏，三个关系任务代价完整报告；**KR1.3** 条件满足且另获授权后，达到§7.3既有matched-seed确认门，主表可从raw clusters独立复算 | 三项均待达成；exact已准入固定seed13探索（R1 §25.72），待T/V效果与归因，不把准入/已知类型控制计入创新 |
 | **O2：D4事实性识别形成独立方法贡献**；持有队列的Codex | **KR2.1** 完整冻结五折pooled OOF的五类macro-F1超过CLS、DMRoBERTa及可用同协议强竞争方案；**KR2.2** 核心消融/归属负控排除普通supcon、类别重加权和容量解释，PS−/Uu及所有非零类满足§7.1护栏；**KR2.3** 条件满足且另获授权后，达到§7.1既有mean delta≥0.030、2/3 seed正、document paired CI下界>0的确认门 | 三项均待达成；linear已恢复，候选监督设计未准入 |
 | **O3：A4关系抽取形成独立方法贡献**；持有队列的Codex | **KR3.1** 官方完整候选causal P/R/F1中F1超过冻结主锚与同协议强竞争方案；**KR3.2** 核心消融/目标归属负控区分普通hard-negative、多正例contrast和预测更保守等解释，CAUSE/PRECONDITION及subevent/temporal与recall护栏完整验收；**KR3.3** 条件满足且另获授权后，达到§7.2既有mean delta≥0.010、2/3 seed正、document paired CI下界>0的确认门 | 三项均待达成；目标条件监督未准入，不续修旧masked/retained家族 |
 | **O4：最终主张有完整、可信、可交接的证据**；持有队列的Codex | **KR4.1** 三章主表所有要求行均有同协议可比性与FR-016身份；不可运行者显式列障碍，缺失分数不冒充比较胜利；**KR4.2** 进入结论的表格100%可回查commit/config/data/evaluator/raw prediction/checkpoint位置并独立复算，所需ID无静默缺失；**KR4.3** 每个进入最终结论的主张通过其有效合同与封存评测程序，E3不追加实验且不越过现有对手不对齐限制 | 历史资产部分具备，最终验收未完成；证据只认results |

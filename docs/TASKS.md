@@ -244,13 +244,15 @@ author delegation releases a new in-scope research queue; it does not reopen old
   project-wide OKRs, measurable scientific outcomes and top-down task decomposition.
   C41-R completed original-machine pins/initializer/manifests, source synchronization and untracked
   preservation plus real CPU torch tests (R1 §25.68); C41-B completed ten CUDA cost cases and five-arm accumulation/shape/budget closure (R1 §25.69);
-  C41-A is now active: it decides design admission and freezes tested production code/contract, C41-T/V runs and audits
+  C41-A completed both design and production admission (R1 §25.70–§25.72, release51c27eb);
+  C41-T is now active and V follows: run and audit
   the fixed seed-13 five arms. The new 5090 migration adapter C41-S is deferred, not completed.
   Follow EXPERIMENT_PLAN §3.9 and the 10-16 C41 subtable; `research/20261016_project_okr.md`
   maps O1–O4/KRs to C5, D4, A4, conditional confirmation and final traceability tasks.
   R1 §25.66 records resource evidence; the 10-15 source ledger/candidate science remains valid.
   Preserve C5 → D4 → A4 and one active queue; chapter preparation may overlap long training.
-  No method admission, extra seeds, weight transfer, new 5090 authorization or E3 experiments follows.
+  C5 now has admission for the frozen seed13 exploration only; no extra seeds, weight transfer,
+  new 5090 authorization or E3 experiments follows.
   Earlier history below is retained and does not supersede the current override.
   → use reliable controls and observed errors to audit distinct mechanisms, runnable public implementations,
   deployable inputs, rivals, falsifiable predictions, strong comparisons, ablations/negative controls and power.

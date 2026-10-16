@@ -3,7 +3,15 @@
 > 权威研究约束见 [`../SPEC.md`](../SPEC.md)，实时位置见 [`../TODO.md`](../TODO.md)，实验事实只认
 > [`../results/`](../results/README.md)。本目录中的 runnable phase 是单会话可执行契约；历史 phase 只作证据。
 
-## 当前依赖图（计划层，可修订）
+## 2026-10-16当前入口
+
+唯一活动C-41当前C41-T：C5 joint-dependence固定seed13五臂已准入探索，
+契约[PHASE_C5_joint_dependence_20261016.md](PHASE_C5_joint_dependence_20261016.md)，
+最终protocol/admission SHA的外部可信锚见R1 §25.72。先核完整hash/空卡再启动；
+全部endpoint后统一评分，尚无科学KR达成。旧role/cue/证据家族保持封存。
+下方旧依赖图/索引是历史设计，不能覆盖HANDOFF与EXPERIMENT_PLAN当前主表；E3不追加实验。
+
+## 历史依赖图（当前入口见上方）
 
 ```text
 P1 协议冻结 ─→ A3 旧机制分账与失败交接 ─┐

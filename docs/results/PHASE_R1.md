@@ -5525,3 +5525,57 @@ internal-dev预测/分数时冻结：沿§25.51的旧strongest typed-control+3pp
 明确是对joint brief原并列条件的操作化，不将突破目标改成额外要求对每个新控制+3pp。
 使用既有official scorer/error profile/文档MUC计数，不重写指标；所有endpoint完成才执行。
 单seed区间未调整、历史internal-dev反复使用及未知训练方差继续披露，final-valid封存。
+
+
+### 25.72 C41-A两段准入完成与最终训练身份（2026-10-16）
+
+**科研价值与可行性裁决**：设计问题/竞争解释/条件power沿§25.70及固定brief，
+工程/预算沿§25.68–§25.71；当前交付的是可信的单seed探索执行身份，不是MUC提升、
+机制成立或创新证明。原三章最终科学KR均未验收；本轮未动final-valid或旧封存结果。
+
+五臂生产CUDA smoke全部complete/GONE，均同config/initializer与原架构、
+非零scorer/encoder学习率配方、四microbatch后实际一次optimizer周期；原warmup第一步
+encoder LR按历史scheduler从0起，不把它伪称encoder已发生非零幅更新。
+各臂完整Model raw SHA实际改变，无zero-LR hooks；只导出8篇train去identity/relation
+金标后的given-type/span输入，包含共指及三个关系任务。source decoder与纯CPU缓存回放
+逐doc完全相同，LOCAL另从raw probabilities独立回放均匹配，没有算train/dev指标。
+
+| arm | PID | peak allocated / reserved GiB | report SHA-256 |
+|---|---:|---:|---|
+| marginal | 1092358 | 4.798126 / 5.416016 | `f53296854d317a5699dfa7e83a68d2a5cdc765dbecf2be52eb000224e7ba42be` |
+| root | 1092397 | 4.799122 / 5.316406 | `2b0aa3a5075ab34287352cc0cd7127af03764b8bbcf063297533cdfa5c1b892b` |
+| exact | 1092436 | 4.798126 / 5.416016 | `a2508b1562422357ebc63cfca17e48e0e234de5d9d9acceb85c063ad440e7b52` |
+| mass | 1093985 | 4.798126 / 5.416016 | `97526b5030aec53b06ecbc50ede4d2cc1a7f0c1df6e3c40e332768fffde41c2e` |
+| shuffle | 1094044 | 4.798126 / 5.416016 | `e188091bbe95bf4d10430d585504c8e7422175d26c07dd7209f1027bb8ded6fc` |
+
+本地925 passed/76 skipped、真实LOCAL CPU20项/4090 CPU20项通过，完整Model五臂
+loss/221参数梯度strict parity及五臂CUDA非零更新/导出smoke均闭合；代码集合在
+这些检查后未变（release51c27eb）。两段准入全部满足，裁决`method_admitted=true`，
+**仅准许当前固定seed13五臂单轮探索**。额外seed、final-valid与设备/搬权重授权均不放开。
+
+**最终可信身份**（完整原文位于LOCAL及4090同相对路径；外部可信锚为本节Git提交）：
+- phase根：`runs/stages/C5/c5-joint-dependence-20261016/`。
+- 生产config SHA：`e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b`。
+- `protocol.json` SHA：`b13729633578f9aee62b5e7b438f29680b1f76867367be5c4111900ca5b69528`。
+- `admission.json` SHA：`8d266760ecb878e2d719a72c920d8da8d7c99e3bf2e7868d98bd1a7ac1cf34e6`。
+- admission绑定32项parity/smoke文件、原生产code集合、上述协议及统一评分计划；
+  P1绑定r15/1e31a9…，完整train/dev/原source/规范initializer/candidate/evaluator身份在protocol内。
+- `configs/c5_joint_dependence_evaluation_20261016.json`冻结于d856d8e，结果前已固定；
+  旧typed强锚+3pp和胜同预算正对照为并列要求，不抬高或降低原突破目标。
+
+协议与admission不以自有hash自证可信根，须从本节Git记录反查上述完整hash；
+入口在正式训练前还会重核config/code/输入、CPU parity和全五臂smoke文件。
+完整五臂100epochs、同原batch8/accumulation4/原scheduler计数与末步，无选dev档；
+每臂末步才导出一次internal-dev预测，**全臂endpoint后**才统一官方评分/配对/归因。
+无训练中选模、scale/threshold扫描，checkpoint留4090。任何科学门失败停固定候选。
+
+C41-A done，下一C41-T，随后V；D4/A4正式接队仍按C5裁决后，长训练期间可准备已有主表
+允许的文献/train信号。长期Goal保持active，不把准入、提交或GPU启动当科学KR完成。
+非权重证据R170与新phase文件的最终双端SHA核验在下段补记后再push/正式启动。
+
+§25.72 最终双端封账：R170 `completion_sha256.json` SHA
+`0db862acd8be8c7aa2c9acc171ebda8f1e8712a3dfe4f2fc774955e0441cd4b9`，
+LOCAL及4090逐项重算46份非权重文件均匹配，含最终protocol/admission、全部CPU/CUDA门、
+raw cache/完整train-smoke预测与原始日志；远端再读admission/protocol SHA与上方完全一致。
+源码未改、Git仅本次文档回填，R1 consistency36PASS、diff --check通过。
+C41-A准入证据已封存；接下来push本外部可信锚、同步已push文档/评分计划，再按空卡启动T。

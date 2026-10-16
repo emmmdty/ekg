@@ -448,8 +448,8 @@ C5突破目标与更严格护栏认当前joint brief；D4/A4及最终确认认§
 | C41-S / O4 | deferred · 原5090迁移切片 | 保存已有资产存在性证据；本轮不继续新迁移adapter/config/合同 | 4090恢复，不需搬权重；未来若不可达先更新主表 |
 | **C41-R / KR1.1、KR4.2** | **done · febf26c** | 原4090源码/initializer/source/train/P1/cost报告非权重证据逐项hash；核远端落后与未跟踪来源并保全；列CPU/torch gate及剩余成本确切命令、独占输出 | 原机pins/六manifest/initializer、源码保全同步与真实CPU门已核；结果§25.68，提交见git log本行 |
 | C41-B / KR1.1 | done · 1f03ab1 | 五臂×两fixture剩余CUDA结构/真实optimizer成本；accumulation4驻留、全train关系head/type块shape、每臂GPU时/峰值/RAM/IO和并行总预算，给出可执行性裁决 | §25.69十r2病例+五臂完整累积/shape envelope、真实state及保守RAM/IO/工期已闭合；代码e7e3709，成本不替代方法准入 |
-| C41-A / KR1.1、KR1.2 | wip · 设计已准入，生产门未闭合 | 新颖性边界、输入、强控制、条件power、预算先作设计准入；通过后TDD生产实现/CPU回放、本地三件套、远端真实torch与CUDA smoke；最后冻结phase/code/config/input与method准入 | §25.70/design admission卡已裁决第一段通过；第二段TDD/生产/真实测试/正式合同现在执行，method仍false，不改封存源码 |
-| C41-T / KR1.1、KR1.2 | pending · A正式准入后 | 固定seed13五臂从同initializer至固定endpoint，完整预测/共指及三个关系指标；失败产物保留，不按中途分数改设计 | 4090空卡不同臂滚动并行，一条SSH一个任务；同机匹配输入/精度/预算，不跨机checkpoint |
+| C41-A / KR1.1、KR1.2 | done · 本次最终准入提交 | 新颖性边界、输入、强控制、条件power、预算先作设计准入；通过后TDD生产实现/CPU回放、本地三件套、远端真实torch与CUDA smoke；最后冻结phase/code/config/input与method准入 | §25.70–§25.72两段通过；51c27eb生产、真实CPU全模型parity/五臂CUDA smoke与最终protocol/admission已冻结；method=true仅单seed探索 |
+| C41-T / KR1.1、KR1.2 | wip · A已准入，唯一下一项 | 固定seed13五臂从同initializer至固定endpoint，完整预测/共指及三个关系指标；失败产物保留，不按中途分数改设计 | 4090空卡不同臂滚动并行，一条SSH一个任务；同机匹配输入/精度/预算，不跨机checkpoint |
 | C41-V / KR1.1、KR1.2、KR4.2 | pending · T后 | 独立official复算、paired document差异/区间、强控制/核心消融/负控/护栏/错误交换裁决；每条KR标是否达成并回填结果/主表 | exact必须胜root/mass且shuffle更弱；失败停固定配置并有证据回R1，不扫参救分 |
 | C41-D-R / KR2.1、KR2.2 | pending · 正式研究接队在C5裁决后；T运行期间可准备 | 刷新CoDE/SDIN/scope/普通supcon等最近邻，train-only归属/稀有类/offset机会；候选明确准入或具体拒绝证据 | 不读评测标签选配对，不假造source/scope监督；失败则先写替代再推进 |
 | C41-D-A / KR2.1、KR2.2 | pending · D-R后 | 可识别创新、最小loss/强rival/消融/负控、条件power/预算和冻结phase；TDD实现、本地门及真实torch smoke后正式放行 | 保留可靠linear与相同全文通路，独立新身份；不复活cue/causal-residual |
