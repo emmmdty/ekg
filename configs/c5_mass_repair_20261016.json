@@ -1,0 +1,19 @@
+{
+  "schema_version": "ekg.c5_mass_repair.v1",
+  "base_config": "configs/c5_joint_dependence_20261016.json",
+  "base_config_sha256": "e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b",
+  "output": "runs/stages/C5/c5-mass-repair-20261016",
+  "admission": "runs/stages/C5/c5-mass-repair-20261016/admission.json",
+  "seed": 13,
+  "final_valid_accessed": false,
+  "method_admitted": false,
+  "code_sha256": {
+    "scripts/run_c5_mass_repair.py": "4cace4aa17bde4468d7719eb0b0b14d6585bec3b61a6ad7735b89e209ed4b723",
+    "src/ekg/core/mass_connectivity.py": "d8a188ca3a5b7f21be70dd488dd1209e13cebf7d92234c6e059624105ee9e32e"
+  },
+  "input_sha256": {
+    "docs/phases/PHASE_C5_mass_repair_20261016.md": "ba38b8b1280f9667868a295b8c916a067b5ef065957ff95f0c4f24645d23b6ec",
+    "runs/stages/R1/r1-v73-c41-mass-numerics-20261016/reproduction.json": "0c8fde789b1e19bbb68a32274ed26d5ed1d0a0f3f05a8c31df31a9eaf5095906",
+    "runs/stages/R1/r1-v73-c41-mass-numerics-20261016/complement_review.json": "d03cb3cb114d586310070ffe65eb38c7ec9dd6a6ad5e2f2c0eb6e1df8172a87c"
+  }
+}

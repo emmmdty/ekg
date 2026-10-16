@@ -5723,3 +5723,21 @@ seed13固定100epoch；不从第39轮补权重，不动仍运行的其他臂源�
 接续成功SSH：marginal/root/exact均ALIVE，最后完整epoch72/56/59；mass GONE/failed，
 GPU3空闲11MiB、无compute apps。shuffle尚未启动，按原冻结配置/同精度和预算接GPU3；
 这仅是C类空卡选用调整，原phase/config/五臂科学判据不变。
+
+§25.75 正数complement审查已执行：24forest独立穷举的E/R误差均1.11e-16；
+60个一般float64病例相对原公式最大value误差4.44e-16、所有logit梯度误差1.38e-14、
+总量误差3.55e-15；原饱和反例及0/12/30/60/100/300/1000构造logits的值/梯度有限。
+原训练现场未重放。新合同`PHASE_C5_mass_repair_20261016.md`先冻结等价式、仅aux
+float64差异及独立门；实现尚未准入训练。TDD新增11例已见缺组件FAIL（R173/tdd_red.log）。
+shuffle已按原配置GPU3启动PID1128804，确认运行状态另补；未改其他臂。
+
+§25.75 新生产实现：`core.mass_connectivity` registry惰性torch组件、独立
+`run_c5_mass_repair.py`入口复用旧prepare/joint loss/train loop/export/CPU replay，
+只复制fit接线以显式注入新目标，不修改原封存代码。新config SHA
+`a88e9f0bdbd2cd1f9766cedf98f4986365f8296364598d0c433a200233897d3c`。
+11个目标测试+3个入口测试先缺组件/脚本FAIL、后隔离CPU Torch全部14实际通过；
+全项目uv pytest928passed/87skipped（21.83s），ruff0、ekg-smokeOK、consistency36PASS。
+R173本地数学/失败复现/TDD与全套日志共9件，completion manifest SHA
+`f994ed884c2e197d66b64e92aae681bda32afc08804bcc815678f750ad62a38a`；原39epoch失败数据不改，远端完整模型门未跑，仍不得新训mass。
+shuffle PID1128804已成功SSH核ALIVE/Rsl、status running（cbffc21/original config）；
+随后继续原四臂，不读取任何dev分数。
