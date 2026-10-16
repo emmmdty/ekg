@@ -5286,3 +5286,52 @@ update_goal状态操作以本会话暴露的工具契约为准；未升级/安�
 主表§4及其后的科学任务/验收内容与本轮基线逐字相同。检查器首次把开头的§0.0引用
 误写为标题字符串断言，定位后只纠正检查器并重新PASS，未改动科学设计。
 `git diff --check`通过；本轮没有代码变更，未运行或声称通过训练/torch测试和代码三件套。
+
+### 25.68 C41-R：长期Goal接队、原4090资产与源码保全（2026-10-16）
+
+**开工自审**：科研价值是保障表5-3的固定五臂共享initializer、训练输入与执行身份，
+对准KR1.1/KR4.2及C41-B/A的R1前置；证据是§25.62–§25.63的已封存成本/输入包。
+可行性为原4090只读hash、文件清单与真实CPU测试，无模型更新、评测或权重搬运。
+不因成本可执行推定MUC收益或方法创新。
+
+按HANDOFF §0.0创建长期Goal，工具get_goal复核`status=active`，无token预算；
+线程`01a14247-6fa6-75d1-bc10-aa0acd59d35c`，当前从C41-R接续，目标跨C5→D4→A4。
+初始main/origin/main=`ccaf418`，fetch成功、工作树干净，一致性36项PASS，无子代理/分支/worktree。
+
+**原机核查通过**：hostname=4090-1、cwd=/data/TJK/ekg；r2配置全部16项input pins、
+r2入口/core源码、规范initializer内容digest `2c7ff1f10496f2df54ed5590693c38c6bc2385bebf29e37b26e4833407349736`
+实核相等。逐项重算r2 CPU、原CPU失败、规范tokenization及原peak/worst CUDA包的
+6份manifest/17项引用，均匹配；r2 CPU四次API完整性收据的逐值不变/raw恢复SHA核通过。
+原失败未改判，已完成模型/输入实验没有重跑；cuda结构输出仍为空。
+
+**保全与同步**：同步前远端HEAD=`7f26c7ba`，已跟踪diff为空；fetch确认至`ccaf418`
+只改变10个文档文件，不与未跟踪路径相撞。未跟踪60,740个文件的路径/size/mtime/mode清单、
+pyvenv.cfg、包METADATA/direct_url与Lightning hparams的内容hash先归档，再同步已push代码。
+来源证据：两venv的pyvenv.cfg分别指向系统Python3.10.12和项目Python3.10.20；
+LLMERE环境与scripts/run_llmere_causal_adapter.sh等相符，EasyECR环境与HANDOFF既有命令相符；
+.cache/pip为包缓存，coval/build/lib/build为构建副本，Lightning日志来源与
+AI_RESEARCH_WORKFLOW_AUDIT既有prediction副作用记录相符。它们是历史资产，不是新方法源码；
+未完整倒推每个缓存文件的创建命令。没有clean、删除或覆盖这些目录。
+同步后完整路径清单与stat digest复核一致
+`4caf47f03172f613b733b3ce4e4aa3f8e2a3efc02200109aeb1468a692994f53`，
+关键来源文件另有内容hash；这是元数据保全核验，不冒称逐字节重hash全部虚拟环境。
+远端已跟踪diff仍为空，HEAD=`ccaf418d26ee6f05f9ecfcf89efcb0367bda63c6`。
+
+**验证**：LOCAL `uv run pytest`为919 passed/59 skipped（20.53s），
+`uv run ruff check src tests scripts`零error、`uv run ekg-smoke` OK；
+HANDOFF当前r2/原CUDA非权重核验PASS。
+4090以CUDA_VISIBLE_DEVICES=-1、项目.venv/bin/python真实执行
+`-m pytest -q tests/scripts/test_structure_budget.py tests/scripts/test_structure_budget_integrity.py`，
+11项全部执行通过、exit=0，没有把LOCAL torch skip算PASS。
+
+成功资源快照GPU0/1/2/3显存78/11/11/11MiB、无列出的compute app；启动前仍须重核，
+GPU3历史故障不由NVML查询自动消除。RAM available约483GiB、磁盘余19TiB，仅作现场快照。
+下一C41-B按既定r2固定10病例执行（0/1/2滚动，避免GPU3历史故障）；确切命令/cwd/独占
+输出及本地/真实torch门已列于`remaining_commands.json`，启动前仍逐批披露并核空卡。
+另需正式accumulation4、全train relation/type shape与完整预算；method_admitted=false。
+
+**资产**：LOCAL与4090同相对路径
+`runs/stages/R1/r1-v68-c41-resume-20261016/`，包括执行audit源码、原机报告、同步后保全、
+Goal状态、本地门、真实torch门转录与待执行命令。manifest SHA为`e6172354de1984ce2dabf9d2247629673efa64ba25ddbd53a7709266d7f12dcc`。
+checkpoint留原机；无新训练、评测、额外seed、5090任务或跨机checkpoint搬运。
+C41-R完成后进入B，不结束长期Goal；本节不计科学KR达成。

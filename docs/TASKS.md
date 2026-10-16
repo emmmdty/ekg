@@ -242,8 +242,8 @@ author delegation releases a new in-scope research queue; it does not reopen old
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
   **2026-10-16 current override:** the author confirmed the 4090 has recovered and requested
   project-wide OKRs, measurable scientific outcomes and top-down task decomposition.
-  Next C41-R audits original-machine asset hashes, source drift and untracked provenance before safe
-  code synchronization; then C41-B closes remaining CUDA/optimizer/accumulation/full-train budget,
+  C41-R completed original-machine pins/initializer/manifests, source synchronization and untracked
+  preservation plus real CPU torch tests (R1 §25.68); C41-B now closes CUDA/optimizer/accumulation/full-train budget,
   C41-A decides design admission and freezes tested production code/contract, C41-T/V runs and audits
   the fixed seed-13 five arms. The new 5090 migration adapter C41-S is deferred, not completed.
   Follow EXPERIMENT_PLAN §3.9 and the 10-16 C41 subtable; `research/20261016_project_okr.md`
