@@ -1,0 +1,84 @@
+{
+  "schema_version": "ekg.c5_joint_dependence_evaluation.v1",
+  "final_valid_accessed": false,
+  "production_config": "configs/c5_joint_dependence_20261016.json",
+  "production_config_sha256": "e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b",
+  "requires_all_endpoint_reports": true,
+  "seed": 13,
+  "paired_unit": "document",
+  "rng": 13,
+  "bootstrap_resamples": 2000,
+  "bootstrap_interval": [
+    0.025,
+    0.975
+  ],
+  "exploratory_unadjusted_single_seed": true,
+  "historical_internal_dev_reuse": true,
+  "primary_attribution_comparisons": [
+    [
+      "exact",
+      "root"
+    ],
+    [
+      "exact",
+      "mass"
+    ]
+  ],
+  "attribution_ci_lower_bound_must_exceed_zero": true,
+  "negative_control": "exact muc_f1 strictly exceeds shuffle",
+  "guardrails": [
+    "b_cubed_f1",
+    "ceaf_f1",
+    "blanc_f1"
+  ],
+  "guardrail_reference_arms": [
+    "typed_strong_anchor",
+    "marginal"
+  ],
+  "relations": [
+    "temporal",
+    "causal",
+    "subevent"
+  ],
+  "anchors": {
+    "frozen_anchor": "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/predictions.jsonl",
+    "typed_strong_anchor": "runs/stages/R1/r1-v63-c5-20261013/type_control/predictions.jsonl"
+  },
+  "gold": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl",
+  "evaluator": "data/protocols/v6/tools/maven_ere_evaluate.py",
+  "source_lock": "data/protocols/v6/source_lock.json",
+  "candidate_digest": "15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910",
+  "manifest": "data/protocols/v6/manifests/maven_ere_internal-dev.json",
+  "output": "runs/stages/C5/c5-joint-dependence-20261016/evaluation",
+  "reuse_implementations": [
+    "scripts/score_maven_ere_official.py",
+    "scripts/report_coref_error_profile.py",
+    "scripts/report_r1_prospective_power.py"
+  ],
+  "limitations": [
+    "Intervals describe paired evaluation-document uncertainty, not training-seed variation.",
+    "GLT FR-016(b) descriptive U row remains reported with original weak/near-singleton limitation; do not relabel as a strong rival.",
+    "No proposed predictions or scores exist at plan freeze; baseline development history is retained."
+  ],
+  "input_sha256": {
+    "runs/stages/R1/r1-v63-c5-20261013/official_joint_cpu/full/predictions.jsonl": "66ff04bac5a11ab179ef50eeca51d56dbb613b7b04eaa04b749dd99ea82ffc42",
+    "runs/stages/R1/r1-v63-c5-20261013/type_control/predictions.jsonl": "0189be77150ee5f8946d3a1b09dbe5436c953451c350ec3acd41c710be984f37",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/valid.jsonl": "bb8c6b486196c97560cba49516324b3f69541023bfbe5cc09590d2bb265ce7e3",
+    "data/protocols/v6/tools/maven_ere_evaluate.py": "32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598",
+    "data/protocols/v6/source_lock.json": "d0d7d848bfc276ccccf1ab8e442628296612f17e47b7e3b8b425985dc4589231",
+    "data/protocols/v6/manifests/maven_ere_internal-dev.json": "f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f",
+    "scripts/score_maven_ere_official.py": "2e20d6b1093d085a81b86d0fb5566521b442eaa9ca75144c5f46d8f104f1b862",
+    "scripts/report_coref_error_profile.py": "4fabb2cfcae9c0a7584fa6dee82f69c337da0fd2dfc063478f84873e408b6c29",
+    "scripts/report_r1_prospective_power.py": "3cccd3fe8c1b61a3f697425c9ea19aa16d3c32dea2f7adf896250739f9849d56"
+  },
+  "target_muc_gain_points_over_frozen_strong_control": 3.0,
+  "target_reference": "typed_strong_anchor",
+  "must_exceed_positive_controls": [
+    "frozen_anchor",
+    "typed_strong_anchor",
+    "marginal",
+    "root",
+    "mass"
+  ],
+  "target_interpretation": "Existing strongest-control breakthrough target plus separate strict superiority over all same-budget positive controls; preserves brief conjunctive rule."
+}

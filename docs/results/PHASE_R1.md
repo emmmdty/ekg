@@ -5501,3 +5501,27 @@ TDD：组件最初11 FAIL（缺模块）、入口3 FAIL（缺入口）、无标�
 train/<arm>各exclusive-create，status/源码身份/输入/CPU cache与完整预测可复查。
 本地准备证据R170=`runs/stages/R1/r1-v70-c41-production-20261016/`。
 源码/config更新只在新生产身份，不修改r2/原CPU失败/旧方法输出；本次未发起正式训练。
+
+§25.71 远端真实CPU门与完整Model parity实际完成：source release51c27eb、生产config
+SHA `e961e3ca47cccf7d75bfdebe23a448619fb50548df31edd63c83277778a9796b`。
+4090新增20项CPU测试全部执行通过（非skip）。完整Model CPU/parity PID1040306已成功
+SSH核GONE，五臂各与封存research比较总loss/每项loss严格相等，221个有梯度参数
+最大absolute error全部0.0（原容差rtol1e-4/atol1e-6未放宽），无optimizer。
+初始化/结束SHA均`5b67cbba9d07f1fb3408b9623833a65f7d8eecaa4799a8b6a0021be3d44a53d6`，
+与前期规范initializer生成的完整Model一致。report SHA
+`41945117fee07db434627037e8c63b26053d4ef1a1745af2f311829d914d1431`，
+LOCAL回传依原status artifact SHA核一致；首次rsync因LOCAL父目录不存在失败，
+建独占父目录后重传成功，失败仅属传输，不改远端实验结论。
+
+生产CUDA smoke第一批marginal/root/exact PID1092358/1092397/1092436已complete，
+各1 optimizer周期/4 microbatches，initializer相同、权重实际更新、无zero-LR hook，
+train去金标输入导出与CPU cache/source decoder parity均通过，未评分。
+第二批mass/shuffle已按同合同发起（日志/PID另补），全部通过前不建最终admission。
+
+统一评分计划`configs/c5_joint_dependence_evaluation_20261016.json`在无任何proposed
+internal-dev预测/分数时冻结：沿§25.51的旧strongest typed-control+3pp目标，
+另须超过所有同预算正对照；主要归因exact-root、exact-mass的正差及95%配对区间
+下界>0，shuffle更弱，三共指护栏不低于typed及marginal，三个关系任务完整报告。
+明确是对joint brief原并列条件的操作化，不将突破目标改成额外要求对每个新控制+3pp。
+使用既有official scorer/error profile/文档MUC计数，不重写指标；所有endpoint完成才执行。
+单seed区间未调整、历史internal-dev反复使用及未知训练方差继续披露，final-valid封存。
