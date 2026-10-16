@@ -6172,3 +6172,58 @@ KR2.1/2.2；KR2.3前置不成立。本次关闭的是10-15当前绑定模板的�
 §25.86 R185裁决记录manifest SHA
 `27e401ffbb876822da174103f5a773779aed3fc0e957fe7e02fc31f6af451c65`，
 已备份4090并双端hashPASS；R183/R184逐件身份与原checkpoint前后不变已核。
+
+### 25.87 C41-A-R正式接队自审（2026-10-16，wip）
+
+**科研价值**：对准表4-3/KR3.1–3.2，当前“目标条件多正例”只能在排除普通per-positive
+contrast、已知listwise/learned-threshold、coref重复权重和更保守预测后讨论新贡献。
+native真实多原因机会与重复分离已由§25.77闭合，普通SupCon的outside/inside-log及
+batch denominator限制已由§25.80闭合；不重做它们，也不拿“有多个正例”当新意。
+
+**可行性**：仅复用固定2622篇train分组、可读一手论文/作者代码与轻量CPU构造审查，
+不读取held-out/final-valid标签或启动新模型。下一核已知多标签/排序阈值与decoupled
+contrast的真实公式/实现，以及conditional目标的group-offset/全None校准边界；明确
+source assumptions、input unit与适配差异，不能把DocRE relation-label轴直接冒称A4
+target×candidate轴。强控制缺口先补证据；没有实质差异/有效合同前不准入A4训练。
+
+§25.87 已核[ATLOP2021 Adaptive Thresholding公式及Localized Context Pooling](https://ojs.aaai.org/index.php/AAAI/article/download/17717/17524)
+与[作者loss源码1db77ab](https://github.com/wzhouad/ATLOP/blob/1db77ab8bc4fe5f7f8c23067ea17055d58b310a3/losses.py)：
+其TH排序目标能处理多正例和无正例，不需dev扫阈值；entity mention logsumexp与pair
+localized context也已有。原criterion SHA
+`f830ad0e52a88e57ab708733553bdb32f71dd0fb6d31560a998cc5ad6b450502`。
+第一次ls-remote TLS失败，显式重试后固定HEAD已核；只在/tmp读取原实现，未发现根许可，
+不集成/复制成项目方法。CPU原ATLoss/get_label无改动、合成logits前向/反向与多正例/
+None分支实际通过；未加载encoder/optimizer、未复现DocRED或声称MAVEN adapter准入。
+
+原ATLoss写入传入labels[:,0]，probe显式传clone而保留源标签；两正例logits
+[TH=0,strong=3,weak=−3,negative=0]，两positive梯度分别+0.900660/−0.995289，
+故不能把此已知目标也称“positive完全不竞争”。默认get_label可同时返回多个positive，
+不需single-winner。原轴为entity-pair内的relation labels，A4拟议轴为同target的candidate
+events；移轴需透明适配，不能把已有阈值目标换名当新意，也不能在推理中用gold coref
+冒充task-given entity IDs。
+
+[DCL2022 §3 Proposition2 Eq8–10](https://arxiv.org/html/2110.06848v3)明确去掉denominator
+positive项；因此“移除positive竞争/解耦分母”本身已有先行性。其监督分类附录也不
+保证优于CE，不能拿视觉SSL收益承诺causal recall。原ECCV PDF后续访问timeout，arXiv
+v3 HTML机制成功读取；不混同DeACL/后续DSCL，未核作者完整runnable code。
+
+合成relative per-positive loss在candidate scores[−1,−2,−3]统一+8后保持
+0.90760596444438，而相对固定零阈值的positive个数从0到3：说明**纯组内相对目标
+不能识别group offset/绝对None校准**，不是数据集效果或新loss。复核R175原十件seal
+f200e86…后重用已有train统计，所有61362个event-target group均有其他event候选；
+incoming有20405组包含任一causal subtype，40957组两者都无；outgoing为13051/48311。
+单subtype无positive组更多（原计数见§25.77），不能误称每个“无CAUSE”都是全None。
+候选不能仅在有positive组上优化relative objective后声称解决完整causal任务，必须保留
+原CE/绝对校准和全候选；annotation-None仍不是世界因果否定。
+
+新近[CLECI2026](https://www.mdpi.com/2078-2489/17/4/321)已读publisher §3.1–3.2的
+context-to-label/contrastive/GAN框架；后续429、官方PDF CDN工具不可访问，完整公式与
+作者可运行代码未核，不把它填成完整方法审查或声称无代码。无外部成绩被搬入主表。
+以上证据R186=`runs/stages/R1/r1-v86-a4-objective-neighbors-20261016/`，A4仍R1 wip，
+没有proposed训练或新方法效果。
+
+§25.87 R186五件封存manifest SHA
+`4209e7611a717b74c93992b240c397aaf230fbd7a4672a16dfbdf0ffc41897fa`，
+已备份原4090逐件双端hashPASS。当前边界/下一机制审查整理为
+`research/20261016_a4_target_supervision_review.md`；先核event/mention监督单位与已有
+joint/multi-instance机制差异，不把普通loss、重复重加权或旧aux移轴当新方法准入。
