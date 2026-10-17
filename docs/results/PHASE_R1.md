@@ -6452,3 +6452,46 @@ R190=`runs/stages/R1/r1-v90-a4-context-20261017/`，预处理plan SHA
 八项通过。首个分析器单测的sibling import接线问题已改为main内导入；probe lint PASS。
 最新全仓三件套仍933passed/87skipped、ruff 0、smoke OK，一致性36项/diff通过。
 该门仅准许已声明的CPU预处理/观察性统计，不放行encoder、optimizer或新方法训练。
+
+### 25.93 A4上下文合并诊断闭合：不准入窗口新方法（2026-10-17）
+
+原tokenizer CPU预处理已完成/进程1675092成功SSH核GONE：2622篇、4799窗口、892998
+nonpad tokens、81713个event+TIMEX端点，**全部trigger内容与完整span精确核对通过**。
+预处理44.1656秒，无encoder/optimizer。复用R188全部冻结预测；每个context/distance/
+联合表可逐项加回同一3×3混淆，subtype×源事件重复机会的边际也与R188完全一致。
+local/4090独立执行的四个统计文件字节相同，不是复制报告后称独立复算。
+
+| train context | candidates | gold positive | TP | P / R / F1（%） |
+|---|---:|---:|---:|---|
+| same_window_same_sentence | 156898 | 12434 | 8014 | 78.3000 / 64.4523 / 70.7045 |
+| same_window_different_sentence | 977236 | 23388 | 20596 | 80.3151 / 88.0623 / 84.0104 |
+| different_window_different_sentence | 1163350 | 12740 | 11737 | 79.3041 / 92.1272 / 85.2360 |
+| different_window_same_sentence | 40 | 0 | 0 | 0.0000 / 0.0000 / 0.0000 |
+
+同句跨窗口组无gold positive，表中零为官方式zero-division约定，不解读为测到零recall
+或无任务难度。跨窗口异句原始recall较高，**不是跨窗口改善的处理效应**，其距离、
+类型、重复机会与文本均不同。原source在窗口内编码并池化span，再用两个事件向量
+评分；没有跨窗口token attention不等于无法组合两个局部表示。
+
+| gold event-edge观察性配对 | stratum数 / distinct edges | cross更好 / within更好 / 相同 | mean(cross-within) recall（pp） |
+|---|---:|---:|---:|
+| same_event_edge | 1994 / 1994 | 34 / 76 / 1884 | -1.788699 |
+| same_event_edge_exact_sentence_distance | 408 / 318 | 2 / 3 / 403 | -0.245098 |
+
+精确句距配对的within为477/483正确、cross为449/457正确；408个strata中仅5个不等。
+它们按gold关系/重复mention机会选入，不能随机化词义/位置，也不代表single-mention
+source的目标人群。没有用此表声明无效应、等效、泛化性能或已达到power；当前没有
+足够特异的train证据把“缺共同窗口”立为新方法的主要识别机制。已有span均完整，不
+复跑窗口平移/更大context来追分，不将普通cross-attention/graph换名准入。
+
+**裁决与接续**：本轮合并诊断关闭，无新方法准入。A4-R继续，先将已确认真实代码的
+ERGO作为**强rival native可行性**审查：核原缓存/CV单位与fidelity、全候选native编码能否
+留在原Longformer长度内、原模型/损失的透明接口补丁及真实预算。它本身是已知方法，
+不作本项目创新；只有新独立干预与强对照/消融/负控、power及合同闭合后才进A-A。
+此处不授权ERGO训练或GPU成本任务，先改主表，再完成可行性/输入准备。
+
+R190全28件seal SHA `b29a9fd21768d7ee105f5c46a1fbc6aeaf2cca5090423cd3e22fd639a6321cb0`；
+报告SHA `47f1934e72357b7c4bb91f3e22314613bb37e438a69f8d276297bec03382f322`，
+per-doc SHA `918713a2839a71936e322bd7cb80d831d65e57ab5f6aa9cfb25d216d7c3e44e4`。
+R190全部28件及manifest已在原4090逐项核hash一致；独占八项测试本地/远端通过，
+完整三件套最新933passed/87skipped、ruff零错误、smoke OK，一致性36项/diff通过。
