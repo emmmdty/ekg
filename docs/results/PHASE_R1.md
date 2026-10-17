@@ -6434,3 +6434,21 @@ per-doc SHA `ff99ca9381d7cf4953b151b1d775d7e3d6c2071b587cd8d15e95997dfb9a0bb6`�
 原R2统计失败、R3修复/测试与历史ALIVE快照均保留；最新`completion.json`记GONE。
 R188全44件与manifest已备份原4090并逐项双端SHA核一致；本地三件套复核为933passed/
 87skipped、ruff零错误、ekg-smoke OK，17项独占probe测试通过，一致性36项/diff检查通过。
+
+### 25.92 A4上下文/表示新R1问题自审（2026-10-17，wip）
+
+**科研价值**：对准表4-3/KR3.1–3.2，以§25.91真实残余检查共同语境与窗口交互机会，
+排除仅按距离/重复机会说故事；不是先造新模块。**可行性**：原机仅重放官方tokenizer，
+复用封存R188全部classes/无label输入与native train；没有encoder/optimizer/GPU或新seed。
+主表已先更新，[新问题卡](../research/20261017_a4_context_residual_review.md)界定一次合并
+诊断与停止条件。先TDD覆盖endpoint/span/全集和同event-edge配对统计，再执行原机CPU
+预处理；与R188全集/混淆逐项对齐，未知ID/空span/漂移即失败，不逐slice重跑模型。
+
+R190=`runs/stages/R1/r1-v90-a4-context-20261017/`，预处理plan SHA
+`f164e8cbad3196d0e137c97b02e8f072e35b2d2d67ef9cae69254453d4ec56a9`。
+只钉实际使用的tokenizer metadata文件及其文件集合，不为纯tokenizer任务读模型权重；
+原R188 checkpoint身份不变。TDD覆盖完整trigger token内容/空span/缺ID、None误报、
+同event-edge及同精确句距配对、空配对记UNKNOWN与macro/pooled权重差别；有效RED后
+八项通过。首个分析器单测的sibling import接线问题已改为main内导入；probe lint PASS。
+最新全仓三件套仍933passed/87skipped、ruff 0、smoke OK，一致性36项/diff通过。
+该门仅准许已声明的CPU预处理/观察性统计，不放行encoder、optimizer或新方法训练。

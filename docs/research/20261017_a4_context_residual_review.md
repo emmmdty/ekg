@@ -20,7 +20,8 @@ schema/hash、文档/mention/pair全集必须与R188一致；未知/空span或ID
 - 对完整native causal候选按同句/异句同窗口/跨窗口报告原3×3混淆、P/R及机会数，
   不忽略None误报，不把更低positive base rate当模型机制。
 - 在同一个gold event-edge内部，比较其不同mention-pair context，保留subtype与
-  原生identity，核是否有同时覆盖多个context类别的真实配对机会。它仍是观察性对照，
+  原生identity，并另列相同精确sentence-distance的配对，核是否有同时覆盖多个context
+  类别的真实机会。它仍是观察性对照，
   mention措辞/位置并未随机化，不把原始差异作为处理效应。
 - 分开one-distinct/single-mention、one-distinct/coref与multiple-distinct组；复用既有
   完整残余，不为每个切片重跑模型，也不凭一个小slice选择threshold/新模块。
