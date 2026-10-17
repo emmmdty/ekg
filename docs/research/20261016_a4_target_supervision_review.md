@@ -39,10 +39,16 @@ ATLOP原criterion可运行仅指CPU合成logits；没有原benchmark复现、完
 **普通target-group contrast、positive分母改写或learned-null的简单组合不作新方法准入。**
 当前A4-R仍wip；需要提出可识别的实质变化，不能把已知目标组合自动当贡献。
 
-下一机制审查从已观测的native“distinct原因 vs coref重复”出发，核event/mention层
-监督单位、可部署identity假设与已有joint coref/relation、multi-instance pooling的差别。
-先写清普通重复重加权/硬cluster池化可以解释什么，以及候选还增加了哪条可证伪假设。
-这只是R1的问题，不预先指定森林/图/最优传输模块，不把旧失败aux迁到A4就当独立创新。
+上述机制审查已落地R1 §25.88：Gao2019的coref替换/软约束、JEREX预测簇MIL、GC2022
+显式邻接兼容、ERGO隐含coref与MTEI任务级uncertainty已区分。普通重复重加权与
+max-pool幂等性已有；同causal邻接也不能反推identity。它们不构成当前候选的独立差异。
+
+下一项改为**有界strong-anchor train残余诊断**：先核checkpoint/冻结train/source身份与
+现有export入口；只读推理、完整candidate/None与native subtype，按已定义的distinct原因/
+coref重复分组统计遗漏、误报及subtype混淆。结果只定位拟议机制的真实机会与竞争解释，
+不用train指标宣称泛化，不读held-out选规则。先完成CPU/source/成本与执行合同，再披露
+4090确切命令；不启动optimizer、不改模型/threshold，不预先指定新模块。若同身份缓存
+已存在则复用核hash，不重跑。后续只有实质新假设通过R1才进入方法实现。
 
 准入仍须最近邻机制差异、输入可行性、同协议强控制/核心消融/归属负控、条件power与
 预算，再进入TDD生产门。现阶段没有新A4模型效果，也没有满足确认或额外seed前置。

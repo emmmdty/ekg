@@ -4,12 +4,12 @@
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.87；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.88；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
 
-**本线程接续（2026-10-16）**：长期Goal已创建；作者报告客户端已恢复active，但get_goal仍返回usageLimited，当前按作者继续指令执行，未声称工具自动续跑已恢复。C41-R/B/A/T/V均已闭合；五个有效端点完成/进程GONE，双端独立official/paired/profile完整报告一致。固定exact/pair-F1候选科学门FAIL，停止该配置、不扫参/加seed；旧mass失败和新mass aux float64限制保留。C5科学O1未完成。D4当前绑定模板已完成R1裁决：strong linear原train重放/128预算输入诊断和最近邻审查闭合，当前没有可准入的独立新干预（§25.83–§25.86）；未启动拟议D4训练、不把诊断当新方法效果FAIL。**当前正式接队C41-A-R**，复用native多原因/coref重复与普通multi-positive强rival证据（§25.77/§25.80），已核ATLOP/DCL/纯relative目标的None校准边界（§25.87）；下一event/mention监督单位与已有joint/multi-instance机制差异，入口[A4审查卡](research/20261016_a4_target_supervision_review.md)。C5裁决/资产见R1 §25.82及PHASE_C末节。
+**本线程接续（2026-10-16）**：长期Goal已创建；作者报告客户端已恢复active，但get_goal仍返回usageLimited，当前按作者继续指令执行，未声称工具自动续跑已恢复。C41-R/B/A/T/V均已闭合；五个有效端点完成/进程GONE，双端独立official/paired/profile完整报告一致。固定exact/pair-F1候选科学门FAIL，停止该配置、不扫参/加seed；旧mass失败和新mass aux float64限制保留。C5科学O1未完成。D4当前绑定模板已完成R1裁决：strong linear原train重放/128预算输入诊断和最近邻审查闭合，当前没有可准入的独立新干预（§25.83–§25.86）；未启动拟议D4训练、不把诊断当新方法效果FAIL。**当前正式接队C41-A-R**，复用native多原因/coref重复与普通multi-positive强rival证据（§25.77/§25.80），已核ATLOP/DCL/纯relative目标的None校准边界（§25.87）；identity/MIL审查已闭合（§25.88），下一有界strong-anchor固定train残余诊断，入口[A4审查卡](research/20261016_a4_target_supervision_review.md)。C5裁决/资产见R1 §25.82及PHASE_C末节。
 原4090 pins/initializer/封存证据、未跟踪保全及源码同步与真实CPU torch门见R1 §25.68；
 预算已闭合（§25.69），A两段准入及真实CPU/五臂CUDA生产smoke已完成（§25.70–§25.72）。
-原`method_admitted=true`只准许固定seed13探索；该探索已完且未过科学门。当前D4-R，完成子项后继续下一项。
+原`method_admitted=true`只准许固定seed13探索；该探索已完且未过科学门。当前A4-R，完成子项后继续下一项。
 
 **作者追加要求：新窗口使用长期Goal持续执行。** 上一窗口只整理交接；本线程Goal及C41-R实际状态见上方接续。
 新窗口按§0.0显式建立/接续线程Goal；完成资产核对、成本审查、提交或阶段汇报后，
@@ -37,8 +37,8 @@ r2只在严格数值相等后恢复signed-zero字节并记录全过程；成功�
 
 **下一必要动作（10-16接续）**：正式执行主表C41-A-R，复用R175 native分组及R179
 普通SupCon及ATLOP/DCL强rival（R1 §25.77/§25.80/§25.87），按
-[A4审查卡](research/20261016_a4_target_supervision_review.md)核event/mention监督单位、
-可部署identity与既有joint/multi-instance机制，裁决实质新干预。D4当前模板准入拒绝见§25.86，后续替代仍须
+[A4审查卡](research/20261016_a4_target_supervision_review.md)推进strong-anchor固定train残余；
+身份/MIL审查及原生邻接非identity证据见§25.88，当前仍无新方法准入。D4当前模板准入拒绝见§25.86，后续替代仍须
 新证据回R1；不取消D4章、不复跑原train诊断或对当前模板扫参。
 C5全部完成产物不重跑、不覆盖；checkpoint留4090，旧失败不清理。
 

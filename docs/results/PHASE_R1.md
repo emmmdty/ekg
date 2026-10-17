@@ -6227,3 +6227,50 @@ context-to-label/contrastive/GAN框架；后续429、官方PDF CDN工具不可�
 已备份原4090逐件双端hashPASS。当前边界/下一机制审查整理为
 `research/20261016_a4_target_supervision_review.md`；先核event/mention监督单位与已有
 joint/multi-instance机制差异，不把普通loss、重复重加权或旧aux移轴当新方法准入。
+
+### 25.88 A4身份与监督单位审查（2026-10-17）
+
+**科研价值**：对准表4-3/KR3.1–3.2，排除“共指替换/簇聚合/邻接一致性本身是新机制”
+及“相同因果邻接就是真实同一事件”的竞争解释；不重复§25.77的多原因计数。
+**可行性**：固定train IDs、已有官方loader、作者公开实现的静态审查及轻量CPU代数；
+不加载模型/optimizer，不读held-out标签，不作新方法效果或训练准入声明。
+
+执行前界定：核原生event关系的mention展开、普通组均值与逆重复权重的等价性、
+有非空causal邻接但仍为distinct events的同邻接实例。后者仅检查gold注释上的可识别性，
+不是世界因果完整性，也不把gold profile当部署输入。结果留在R187独占namespace。
+
+| 一手来源 | 核实机制与可比边界 |
+|---|---|
+| [Gao等NAACL2019 §4.2/§5.2 Eq13–15](https://aclanthology.org/N19-1179.pdf) | 已用预测coref作跨句→同句max-score替换，并以带惩罚slack的约束鼓励coref/causal互斥和邻接一致；并非全部硬约束。任务是过滤事件类别后的ESL无向causal，不移植外部成绩 |
+| [JEREX EACL2021 §3.1(b,d)/Eq12](https://aclanthology.org/2021.eacl-main.319v1.pdf)、[作者源码](https://github.com/lavis-nlp/jerex/tree/85851dfcbb485d9bfa2bf662b8073e826c760d7f) | 推理预测complete-linkage簇，再max-pool mention-pair表示；训练用entity簇/关系bag。MIT，实质代码及fetch入口存在，当前仅静态核查，未复现原benchmark或验证权重URL可达。DocRED严格entity指标不同于MAVEN完整mention候选 |
+| [Xu/Choi NAACL2022 §2.2 Eq4–6](https://aclanthology.org/2022.naacl-main.395.pdf) | GC以关系邻接L1差异修正coref分数，加contrastive距离loss；训练影响双向，不能只称共享feature。原DocRED/DWIE、邻接pruning与本协议有差别；作者可运行代码本次未定位，UNKNOWN而非不存在 |
+| [ERGO COLING2022 §3 footnote2/§5](https://aclanthology.org/2022.coling-1.185.pdf) | 明确是PLM隐含coref assistance，显式coref建模留作future；不得反写成已有gold/predicted coref模块。作者repo已定位，本次未运行 |
+| [MTEI2026 §4.3/§4.6–4.7](https://link.springer.com/article/10.1007/s44443-026-00624-7) | 关系/共指双阈值alignment图、任务级Kendall uncertainty权重、HAC与majority vote；不是事件partition后验边缘化。DocRED/Re-DocRED且dev选阈值，不照搬训练协议；源码/runtime未核 |
+
+H2C-Net及UAIGR2026目前只核publisher abstract/metadata，未完整核公式/代码，仍作待核
+邻居而非已排除重合。H2C-Net同名OCTA仓库不是ECI实现；UAIGR页面open失败与可检索
+摘要分开记录。没有因此声称文献空白；没有将任何外部数字加入本项目主表。
+
+官方loader `joint/src/data.py:130–151`明确将event关系展开为Cartesian mention pairs，
+其他ordered pair记annotation-NONE；gold event identity仅作训练/诊断监督。
+构造CPU检查：group-mean CE为0.65，inverse-multiplicity weighted展开CE同为0.65，
+普通展开mean为0.60；max pooling已有精确重复幂等性。因此这些变化本身不提供独立新颖性。
+这是代数fixture，不是MAVEN效果、JEREX执行或原模型梯度结论。
+
+仅固定2622篇train，61362个event中29782个有非空双向、分subtype的causal邻接。
+按完整邻接分组后，1912篇含3578组**邻接相同但gold身份不同**的events，共10839个
+events/20313对，其中2063对连event type也相同。空邻接全部排除；以原始边独立重建
+签名PASS。故“相同causal邻接⇒同一事件”在注释层不成立，不能用关系profile替代identity
+gold；不据此宣布GC预测失败，文本、learned scores与单向约束仍有额外信息。
+annotation不完整的边界保持，这不是世界因果不可能性证明。
+
+**裁决**：target多正例/learned-None/重复重加权/硬cluster MIL/一致性的简单组合仍不准入；
+没有定义或证明新的posterior机制，没有A4新模型效果。A4-R继续，但结束泛列邻居阶段：
+下一先核强anchor在固定train上的真实残余、subtype混淆和coref重复分组错误，形成具体
+瓶颈后再定干预。主表先更新，禁止在诊断输出前预选模块/扫threshold/追加训练。
+
+R187=`runs/stages/R1/r1-v87-a4-identity-neighbors-20261017/`，23件封存manifest SHA
+`85d4fe4aae8ddc469a97a3ec873543a7d066687d9c8efaad3106858cd58f91a4`。
+命令：`uv run python <R187>/identity_scope.py`，退出0；R175十件seal先完整重验。
+工具路径查找失败及GC提取文本含NUL均如实记录，未影响输入/输出或被算成科学失败。
+R187已备份原4090，23件及manifest双端逐项SHA一致；本地一致性门36项PASS、diff检查PASS。
