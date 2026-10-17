@@ -6375,3 +6375,62 @@ R189已备份原4090，六件与manifest双端SHA一致；一致性36项及diff�
 栈还有明确环境接线缺口，不能因tiny AST通过就标整体runnable。补充单独封存，不改六件
 原seal：`supplement_manifest.json` SHA
 `fe027a9130604edb200a00f11da464b767988db50a46e69c54d0993efed735d9`。
+
+### 25.91 A4强锚全train残余闭合与当前模板裁决（2026-10-17）
+
+**科研价值**：用固定train真实错误裁明当前目标条件模板的动机，对准表4-3/KR3.1–3.2；
+不是把训练集分数当新方法优势。**可行性**：原机CPU只读重放、完整候选、原causal_predict/
+causal_dump与双端独立官方核算均完成；未训练新模型、未改threshold或读取held-out选规则。
+
+R188 full-cpu已完成，PID1657823成功SSH核GONE。原checkpoint前后SHA不变，权重留4090；
+2622篇/66744 mentions/2297524 ordered causal candidates，candidate digest
+`ce10549172550addb67059550d89c9fc04dc5cb6452560a5ccf42169e679d766`。
+原predictor forward约563秒，输入preflight之后总616.4597秒；GPU未使用、optimizer step零。
+官方causal P/R/F1与独立3×3计数逐项一致，local/4090完整report与per-doc文件字节相同。
+CPU数值边界保留；不把该train得分与历史internal-dev主锚直接相减，不作泛化结论。
+
+| train causal指标 | P / R / F1（%） |
+|---|---|
+| 全部positive micro | 79.612857 / 83.083481 / 81.311152 |
+| PRECONDITION | 77.772671 / 81.284616 / 79.489872 |
+| CAUSE | 84.583364 / 87.915591 / 86.217293 |
+
+| gold\pred（native class） | NONE | PRECONDITION | CAUSE |
+|---|---:|---:|---:|
+| NONE | 2239239 | 7788 | 1935 |
+| PRECONDITION | 6447 | 28765 | 176 |
+| CAUSE | 1159 | 433 | 11582 |
+
+| native positive stratum（按subtype的incoming distinct source） | gold mention-pairs | correct | predicted NONE | wrong subtype | recall（%） |
+|---|---:|---:|---:|---:|---:|
+| CAUSE:multiple_distinct | 4489 | 4149 | 266 | 74 | 92.4259 |
+| CAUSE:one_distinct_single_mention | 2626 | 1516 | 783 | 327 | 57.7304 |
+| CAUSE:one_distinct_with_coref | 6059 | 5917 | 110 | 32 | 97.6564 |
+| PRECONDITION:multiple_distinct | 19811 | 17025 | 2700 | 86 | 85.9371 |
+| PRECONDITION:one_distinct_single_mention | 10312 | 6776 | 3464 | 72 | 65.7099 |
+| PRECONDITION:one_distinct_with_coref | 5265 | 4964 | 283 | 18 | 94.2830 |
+
+同event-edge展开中，PRECONDITION all/some/no correct为20414/191/6154，CAUSE为
+4678/64/1433。`no correct`不是`all NONE`；可能含错subtype。完整gold-positive漏/错
+8215对，其中7606为NONE、609为换subtype；one-distinct/single-mention-source组占
+4646个漏/错。所有strata含target mention重复，multiple-distinct组也可能含source
+重复；计数按公开mention-pair任务，不能用event-level bag个数替代主指标。
+
+**当前模板裁决**：没有支持“多个distinct原因在强锚中普遍无法共存”的train证据；它们的
+原始recall在此反而更高，CE也没有跨candidate winner分母（§25.89）。这不是控制实验，
+不宣称多原因使任务更容易或问题已解决。普通target contrast/learned-null、重加权、硬MIL
+与邻接一致性目前仍无独立新干预，**关闭10-15当前A4目标模板准入回合，不启动A-A/TV**；
+不是新方法效果FAIL，不取消A4章，也不证明所有未来target方法无效。
+
+下一由执行代理在同一C41-A-R内选择**上下文交互/表示残余的新R1问题**：一次合并核原
+256窗口中endpoint可见性/共同窗口与sentence距离，并用同gold event-edge的不同mention
+context作有界配对诊断，区分窗口/上下文与重复机会，不从原始分层差异直接推因果。
+先更新主表/新问题卡，再执行；不预选attention/graph模块，不把已知ATLOP/ERGO机制换名。
+没有实质机制差异、强rival、power与合同前无新训练。当前三个科学Objective仍未达成。
+
+R188全44件seal SHA `d7127246a0e78afd03bf42455f1303a46da193d050aec3a822328bca6e6220b9`；
+独立full报告SHA `13ddf4587a8d5388b0599f23f1b955341c105c6acdae9f089c88064584eb7dbf`，
+per-doc SHA `ff99ca9381d7cf4953b151b1d775d7e3d6c2071b587cd8d15e95997dfb9a0bb6`。
+原R2统计失败、R3修复/测试与历史ALIVE快照均保留；最新`completion.json`记GONE。
+R188全44件与manifest已备份原4090并逐项双端SHA核一致；本地三件套复核为933passed/
+87skipped、ruff零错误、ekg-smoke OK，17项独占probe测试通过，一致性36项/diff检查通过。

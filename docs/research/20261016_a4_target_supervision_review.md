@@ -34,21 +34,20 @@ held-out/final-valid标签选组，没有新encoder/optimizer/seed或额外5090�
 ATLOP原criterion可运行仅指CPU合成logits；没有原benchmark复现、完整MAVEN adapter
 或新方法准入。作者源码未发现根许可，当前只读研究，不集成成项目实现。
 
-## 当前决定与下一项
+## 当前模板裁决（2026-10-17）
 
-**普通target-group contrast、positive分母改写或learned-null的简单组合不作新方法准入。**
-当前A4-R仍wip；需要提出可识别的实质变化，不能把已知目标组合自动当贡献。
+**关闭10-15当前目标监督模板的准入回合，未准入新方法；不是新方法效果FAIL。**
+普通target-group contrast、positive分母改写、learned-null/重加权/硬MIL的简单组合没有
+独立差异；完整原train残余与当前裁决见R1 §25.91。整个A4章与总Goal仍未完成。
 
 上述机制审查已落地R1 §25.88：Gao2019的coref替换/软约束、JEREX预测簇MIL、GC2022
 显式邻接兼容、ERGO隐含coref与MTEI任务级uncertainty已区分。普通重复重加权与
 max-pool幂等性已有；同causal邻接也不能反推identity。它们不构成当前候选的独立差异。
 
-下一项改为**有界strong-anchor train残余诊断**：先核checkpoint/冻结train/source身份与
-现有export入口；只读推理、完整candidate/None与native subtype，按已定义的distinct原因/
-coref重复分组统计遗漏、误报及subtype混淆。结果只定位拟议机制的真实机会与竞争解释，
-不用train指标宣称泛化，不读held-out选规则。原机真实CPU smoke与双端官方复算已通过，
-全train只读CPU重放正在执行（R1 §25.89，资源选择认主表）；不启动optimizer、不改模型/
-threshold，不预先指定新模块。后续只有实质新假设通过R1才进入方法实现。
+原strong-anchor全train只读重放已完成，双端独立official/计数复算完全一致，原checkpoint
+不变/进程GONE（R1 §25.89/§25.91）。它不提供held-out新效果，也没有独立证明任一机制。
+同章下一问题见[上下文/表示残余卡](20261017_a4_context_residual_review.md)，先写主表再执行；
+不改threshold、不预选模块，实质新假设通过R1才进入方法实现。
 
 原strong-anchor的CE按pair分解，归一化在同pair的三类轴；没有跨原因candidate的
 single-winner denominator。因此不得预先把错误归因为该不存在的竞争。共享参数的

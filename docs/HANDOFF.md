@@ -1,12 +1,12 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-16（+08:00，4090恢复；OKR执行与新窗口长期Goal交接）**。
+> 更新于 **2026-10-17（+08:00，A4全train残余闭合；上下文/表示问题接续）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.90；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.91；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
 
-**本线程接续（2026-10-16）**：长期Goal已创建；作者报告客户端已恢复active，但get_goal仍返回usageLimited，当前按作者继续指令执行，未声称工具自动续跑已恢复。C41-R/B/A/T/V均已闭合；五个有效端点完成/进程GONE，双端独立official/paired/profile完整报告一致。固定exact/pair-F1候选科学门FAIL，停止该配置、不扫参/加seed；旧mass失败和新mass aux float64限制保留。C5科学O1未完成。D4当前绑定模板已完成R1裁决：strong linear原train重放/128预算输入诊断和最近邻审查闭合，当前没有可准入的独立新干预（§25.83–§25.86）；未启动拟议D4训练、不把诊断当新方法效果FAIL。**当前正式接队C41-A-R**，复用native多原因/coref重复与普通multi-positive强rival证据（§25.77/§25.80），已核ATLOP/DCL/纯relative目标的None校准边界（§25.87）；identity/MIL审查已闭合（§25.88），原机CPU smoke与双端独立official核算已通过（§25.89），全train4线程CPU只读重放正在运行，入口[A4审查卡](research/20261016_a4_target_supervision_review.md)。C5裁决/资产见R1 §25.82及PHASE_C末节。
+**本线程接续（2026-10-16）**：长期Goal已创建；作者报告客户端已恢复active，但get_goal仍返回usageLimited，当前按作者继续指令执行，未声称工具自动续跑已恢复。C41-R/B/A/T/V均已闭合；五个有效端点完成/进程GONE，双端独立official/paired/profile完整报告一致。固定exact/pair-F1候选科学门FAIL，停止该配置、不扫参/加seed；旧mass失败和新mass aux float64限制保留。C5科学O1未完成。D4当前绑定模板已完成R1裁决：strong linear原train重放/128预算输入诊断和最近邻审查闭合，当前没有可准入的独立新干预（§25.83–§25.86）；未启动拟议D4训练、不把诊断当新方法效果FAIL。**当前正式接队C41-A-R**，复用native多原因/coref重复与普通multi-positive强rival证据（§25.77/§25.80），已核ATLOP/DCL/纯relative目标的None校准边界（§25.87）；identity/MIL审查已闭合（§25.88），全train原机CPU重放/双端独立official核算已完成、PID1657823已核GONE（§25.91），关闭当前目标模板准入回合；同章下一为[上下文/表示残余卡](research/20261017_a4_context_residual_review.md)，无新方法准入。C5裁决/资产见R1 §25.82及PHASE_C末节。
 原4090 pins/initializer/封存证据、未跟踪保全及源码同步与真实CPU torch门见R1 §25.68；
 预算已闭合（§25.69），A两段准入及真实CPU/五臂CUDA生产smoke已完成（§25.70–§25.72）。
 原`method_admitted=true`只准许固定seed13探索；该探索已完且未过科学门。当前A4-R，完成子项后继续下一项。
@@ -37,8 +37,8 @@ r2只在严格数值相等后恢复signed-zero字节并记录全过程；成功�
 
 **下一必要动作（10-17接续）**：正式执行主表C41-A-R，复用R175 native分组及R179
 普通SupCon及ATLOP/DCL强rival（R1 §25.77/§25.80/§25.87），按
-[A4审查卡](research/20261016_a4_target_supervision_review.md)接续strong-anchor固定train CPU重放（PID1657823，原机4090；三态监测），完成后立刻独立复算/分组残余；
-身份/MIL审查及原生邻接非identity证据见§25.88，当前仍无新方法准入。D4当前模板准入拒绝见§25.86，后续替代仍须
+[新问题卡](research/20261017_a4_context_residual_review.md)一次合并核原窗口/共同语境、sentence距离与同gold event-edge的mention context配对；
+全train残余及目标模板未准入裁决见§25.91；身份/MIL边界见§25.88，当前仍无新方法准入。D4当前模板准入拒绝见§25.86，后续替代仍须
 新证据回R1；不取消D4章、不复跑原train诊断或对当前模板扫参。
 C5全部完成产物不重跑、不覆盖；checkpoint留4090，旧失败不清理。
 
@@ -95,7 +95,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 
 | 项 | 值 |
 |---|---|
-| **活动任务** | **C-41/T087 · A4-R · wip**：C5固定候选T/V科学门失败并停止（PHASE_C末节/§25.82）；D4当前绑定模板R1未准入（§25.86），无拟议训练/新效果结果。当前A4最近邻/监督设计审查；科学KR未达，E3不加实验。 |
+| **活动任务** | **C-41/T087 · A4-R · wip**：C5固定候选T/V科学门失败并停止（PHASE_C末节/§25.82）；D4当前绑定模板R1未准入（§25.86），无拟议训练/新效果结果。当前A4目标模板准入回合关闭；原train全量复算闭合，下一上下文/表示R1；科学KR未达，E3不加实验。 |
 | ✅ **旧 D4 路线裁决（§25.24–§25.25）** | 旧 causal-residual 第二周期不投入，oracle 没有支持“只需更好边”的解释；该机制不复跑。实质不同的新家族按 R1 准入，不用改名、扫参或更大 backbone 绕过止损。 |
 | ✅ **C-28 收口结论** | 官方 `THU-KEG/MAVEN-FACT trainEFD --add_relation` 的 gold / predicted 两行均为 FR-016 **(b)**，gold 行不可部署，**都不进任何通过门**。本次适配未见 gold 结构优势；但两行都启用关系输入，没有 text-matched/no-relation 臂，故不得把原论文增益唯一归因给文本或结构。完整边界见 `results/PHASE_R1.md` §25.27。 |
 | ⚠️ **旧 D4 配置敏感性** | 打包规则带来的波动曾超过机制差异，不能用单折臂序或配置改变后的分数认定提分。原始对照及解释边界见 `results/PHASE_R1.md` §25.23。 |
@@ -372,10 +372,10 @@ A4 仍待诊断。三个方法章均未形成新方法贡献，不能用旧“�
 固定exact/pair-F1候选未过门并停止（R1 §25.82；PHASE_C末节），不得扫参挽救。
 D4当前绑定模板的R1/train诊断已裁决未准入（§25.86），准备卡保留完整拒绝边界。
 当前正式执行C41-A-R：复用§25.77 native distinct原因/coref重复与§25.80普通SupCon，
-ATLOP/DCL/None及identity/MIL边界已核（§25.87–§25.88）；原机CPU smoke和双端独立
-official核算通过，full-train4线程CPU重放正在执行（PID1657823，§25.89）。下一三态监测，
-完成后立即独立复算/分组残余，裁实质新意后再决定A-A；ERGO仅可得性准备（§25.90），
-没有新方法训练准入或A4新GPU合同。
+ATLOP/DCL/None及identity/MIL边界已核；全train4线程CPU重放/双端official独立复算
+已完成，原checkpoint不变、PID1657823核GONE（§25.91）。当前目标模板未准入且回合关闭；
+按新问题卡一次合并核256窗口/共同语境与同event-edge的mention context配对，裁实质新意
+后再决定A-A。ERGO仅可得性准备（§25.90），没有新方法训练准入或A4新GPU合同。
 C5/D4已完成诊断不重跑，下方C5旧命令均仅供追溯。
 
 **10-16原顺序**：读[项目OKR](research/20261016_project_okr.md)及主表§3.9/§4的
