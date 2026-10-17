@@ -6370,3 +6370,8 @@ R189=`runs/stages/R1/r1-v89-ergo-source-20261017/`，六件seal SHA
 `3915b043ed3707f2accf18348460de82c07fbcd00da584fb4c32abb41e4d1b48`；tiny原类/criterion
 命令为隔离CPU Python运行`probe_r2.py`，退出0，实际runtime边界见probe report。
 R189已备份原4090，六件与manifest双端SHA一致；一致性36项及diff检查通过。
+原4090只读依赖探测补充：torch2.8.0/transformers4.53.3，LongformerModel export存在，
+`transformers.AdamW`不存在、lxml spec不存在；未安装包或加载encoder。故原CLI在当前
+栈还有明确环境接线缺口，不能因tiny AST通过就标整体runnable。补充单独封存，不改六件
+原seal：`supplement_manifest.json` SHA
+`fe027a9130604edb200a00f11da464b767988db50a46e69c54d0993efed735d9`。
