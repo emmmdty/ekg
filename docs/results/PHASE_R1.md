@@ -6303,3 +6303,22 @@ TDD先见12项缺入口失败，再12项通过，覆盖漏文档/候选、非法
 初次独占probe lint的import/列宽问题已修正，最终probe lint PASS。全仓`uv run pytest`
 实际933 passed/87 skipped（本地无torch，未把skip当真模型通过）、ruff 0、ekg-smoke OK、
 一致性36项PASS及diff检查PASS。下一实际原机CPU模型smoke，尚无推理/科学效果结果。
+
+原机CPU smoke已完成，PID1652491已成功SSH核GONE：八篇/10760个causal候选，
+forward 6.12秒（23个token chunks），输入preflight之后总56.1539秒；原predictor/独立
+class-index parity、无label输入及checkpoint前后不变全部通过。原四卡分别有他人
+vLLM进程，未启动GPU。主表已先调整为**原机4线程CPU full**：4799个chunks按实测
+线性估计forward约21分钟，留2倍加IO/startup约50分钟；64逻辑CPU、load约15–17、
+可用内存约470GiB，成本许可可行。估计不是时长保证，CPU诊断不声称复现GPU逐位数值。
+
+首次统计器R2实际失败：把`candidate_population_digest()`返回的tuple当dict；双端
+实际smoke复现TypeError，未产生统计输出、不算模型效果失败。原文件/失败和pre-full
+seal保留，独立R3仅解包API、放开full-cpu并换输出namespace；native文件级fixture先
+有效RED再GREEN，验证wrong subtype同时计FP/FN且原official evaluator一致。初次测试
+collection的sibling import错误另记，未冒充有效RED；所有17项probe tests最终通过。
+具体身份/修正见R188的`analysis_revision_r2.json`与`cpu_full_admission.json`；重放入口、
+配置、checkpoint均未改变，统计器修复不需重复模型smoke。
+
+远端origin网络fetch超时，未在失败后执行reset；改用已push提交的git bundle传代码，
+双端bundle SHA `3896d210ebf62eba7bfa9863b18e0fe94fb4aa67de2c60f8159cd074e79e94fc`，
+验证旧HEAD prerequisite/新HEAD及tracked clean后才fetch/reset到`c6f735f`。未搬权重。
