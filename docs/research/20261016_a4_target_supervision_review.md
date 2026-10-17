@@ -46,9 +46,13 @@ max-pool幂等性已有；同causal邻接也不能反推identity。它们不构�
 下一项改为**有界strong-anchor train残余诊断**：先核checkpoint/冻结train/source身份与
 现有export入口；只读推理、完整candidate/None与native subtype，按已定义的distinct原因/
 coref重复分组统计遗漏、误报及subtype混淆。结果只定位拟议机制的真实机会与竞争解释，
-不用train指标宣称泛化，不读held-out选规则。先完成CPU/source/成本与执行合同，再披露
-4090确切命令；不启动optimizer、不改模型/threshold，不预先指定新模块。若同身份缓存
-已存在则复用核hash，不重跑。后续只有实质新假设通过R1才进入方法实现。
+不用train指标宣称泛化，不读held-out选规则。原机真实CPU smoke与双端官方复算已通过，
+全train只读CPU重放正在执行（R1 §25.89，资源选择认主表）；不启动optimizer、不改模型/
+threshold，不预先指定新模块。后续只有实质新假设通过R1才进入方法实现。
+
+原strong-anchor的CE按pair分解，归一化在同pair的三类轴；没有跨原因candidate的
+single-winner denominator。因此不得预先把错误归因为该不存在的竞争。共享参数的
+梯度干扰与机会权重仍可能存在，需真实证据，不能用logit loss分解替代参数因果分析。
 
 准入仍须最近邻机制差异、输入可行性、同协议强控制/核心消融/归属负控、条件power与
 预算，再进入TDD生产门。现阶段没有新A4模型效果，也没有满足确认或额外seed前置。
