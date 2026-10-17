@@ -6322,3 +6322,51 @@ collection的sibling import错误另记，未冒充有效RED；所有17项probe 
 远端origin网络fetch超时，未在失败后执行reset；改用已push提交的git bundle传代码，
 双端bundle SHA `3896d210ebf62eba7bfa9863b18e0fe94fb4aa67de2c60f8159cd074e79e94fc`，
 验证旧HEAD prerequisite/新HEAD及tracked clean后才fetch/reset到`c6f735f`。未搬权重。
+
+在查看full残余前另核强锚目标本身：原`main.py:252/309–321`是逐ordered-pair三类
+CrossEntropyLoss，再按全batch有效pair取均值；softmax denominator位于同pair的
+NONE/PRECONDITION/CAUSE类轴，**没有跨candidate的single-winner归一化**。所以不能把
+强锚错误预先说成“多个原因在同一个softmax里竞争”；新target-relative loss反而可能
+引入原CE没有的competition。此处只指独立logit坐标上的loss分解；共享encoder/参数
+梯度、类别与重复机会权重仍可耦合，不能将其偷换成“没有优化干扰”。本次train诊断
+用于定位真实残余，不自动支持任何contrast新颖性或因果解释。
+
+### 25.90 A4等待只读重放期间的强rival可运行性核查（2026-10-17）
+
+**科研价值**：对准表4-3/KR3.1–3.2及FR-016，核已定位的ERGO官方实现能否作为完整
+候选MAVEN适配的强rival，避免把代码存在、其他基准成绩或已知图机制当本项目成功。
+**可行性**：本地仅clone/静态读code与原论文，必要时远端只读依赖import；不安装包、
+不运行encoder/训练、不触碰full-cpu产物。重点核label方向/候选全集、原始基准及评价、
+graph形状/算力、许可/权重和实际trainer。主表当前A4-R的强控制准备内执行，不插队。
+
+[ERGO作者实现](https://github.com/chenmeiqii/ERGO/tree/afa3d347ec360242c01d15a34b1f1ae63714c789)
+固定`afa3d347ec360242c01d15a34b1f1ae63714c789`；已取完整可见两commit历史，确有
+model、trainer/CV和ESL缓存，**不是README-only**。`train.py`导入`processor_esl`，
+当前树/可见历史只提供`processor.py`，pickle opcode也引用前者；这是具体接线缺口，
+可记录rename/alias透明补丁，不等于整个方法不可适配。仅解析pickle opcodes，未执行
+反序列化或把外部标签带入MAVEN。根许可、训练后权重/fetch未定位，不声称不存在。
+
+正文[§3.1–3.3/§4.1](https://aclanthology.org/2022.coling-1.185.pdf)含BERT窗口与Longformer
+两种encoder；当前公开model/train仅有Longformer类和cached ESL输入，raw feature/mask
+生成器及BERT-window实现未在该树/历史定位。其binary ECI与native directed
+CAUSE/PRECONDITION口径分开，不继承原CV/metric或拿换head作为忠实复现。
+
+原`utils.compute_f1([1],[2])`在真实CPU返回P/R/F1全1：它按nonzero合并是原binary任务的
+定义，**不用于评价native三类subtype**；native换型应计FP+FN。原Norm/RGTLayer以未改
+AST类体、显式torch/math/F依赖做tiny CPU前后向，valid mask下finite、禁边概率零；
+全mask attention行非finite，实际adapter必须明确mask/self/padding合同。第一次wrapper
+漏供F引起NameError已原样保留，r2补原依赖通过；不是模型效果FAIL，也不是完整module/
+encoder/trainer已运行。隔离CPU环境无transformers，未为此安装依赖。
+
+源码在criss-cross mask**之前**分配dense QK。对本native上界109 mentions/11772个ordered
+pair nodes、4heads，单FP32 attention tmp为2217279744字节；不含softmax/dropout/反传/
+encoder。故mask不能自动视为稀疏省显存，但该下界也不证明24GB卡必OOM。完整预算仍待
+合法空卡测量，不能裁评测候选掩盖成本。
+
+裁决：列入有界可得性准备，**尚非同协议可运行强控制/FR-016已完成行**；没有ERGO训练
+或新方法准入。后续若采用须先闭合原语料/fidelity、特征与方向/子类/全部候选适配、源码/
+依赖/权重/许可与真实成本，不重写缺失encoder后冒称原实现。新颖性仍不来自RGT/focal。
+R189=`runs/stages/R1/r1-v89-ergo-source-20261017/`，六件seal SHA
+`3915b043ed3707f2accf18348460de82c07fbcd00da584fb4c32abb41e4d1b48`；tiny原类/criterion
+命令为隔离CPU Python运行`probe_r2.py`，退出0，实际runtime边界见probe report。
+R189已备份原4090，六件与manifest双端SHA一致；一致性36项及diff检查通过。
