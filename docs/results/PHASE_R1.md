@@ -6274,3 +6274,32 @@ R187=`runs/stages/R1/r1-v87-a4-identity-neighbors-20261017/`，23件封存manife
 命令：`uv run python <R187>/identity_scope.py`，退出0；R175十件seal先完整重验。
 工具路径查找失败及GC提取文本含NUL均如实记录，未影响输入/输出或被算成科学失败。
 R187已备份原4090，23件及manifest双端逐项SHA一致；本地一致性门36项PASS、diff检查PASS。
+
+### 25.89 A4强锚固定train重放准入准备（2026-10-17，wip）
+
+**科研价值**：对准表4-3/KR3.1–3.2，区别真实distinct原因遗漏、coref重复与subtype混淆，
+不从已有目标组合臆测瓶颈。**可行性**：原4090的official joint `best_CAUSAL`已成功只读
+核存在及历史SHA一致；不是C5用的`best_COREFERENCE`，不能混用二者冒充主锚。
+限定train、现有原版causal_predict/causal_dump、不改权重/threshold/seed；先TDD适配验证、
+本地门和远端真实CPU smoke/成本，再依既有4090许可披露命令、核卡并执行只读推理。
+这不是proposed训练准入，后续假设仍须实质创新、power与方法合同。
+
+checkpoint=`gpu-4090:/data/TJK/ekg/runs/stages/A3/a3-v6-baselines-r10/official_joint/seed-13/`
+`workspace/source/joint/output/13/MAVEN-ERE/best_CAUSAL`，517260581字节，SHA
+`b1bba654f4b7ca52e491a1c87ec4ef2a85434fbe7fa82676a77c7ff7f575b84e`；
+原main.py SHA `9440d825029f19c78246f7ae8b37319a652aeb7a6de31bd38206fa2b33ca4939`。
+在原R163与original_joint/seed-13两个限定根下按train+causal/prediction名核缓存未找到
+可复用产物；这是有界路径检索，不声称全盘无缓存。没有启动GPU或搬运checkpoint。
+
+只读replay配置`configs/a4_anchor_train_replay_20261017.json`已冻结，SHA
+`860adb2279b9d372d639de9bd3d5ae5ab02685e2f0b9a514cb41cd68378c577a`。
+R188=`runs/stages/R1/r1-v88-a4-anchor-train-20261017/`；复用原causal_predict与causal_dump，
+全部模型输入先投影为无label test格式；独立forward hook检查finite logits、None/ignore
+输入mask与class-index parity，逐文档完整candidate含None，执行前后核checkpoint不变。
+smoke固定原census的peak batch八篇；full须同配置真实CPU smoke及逐件hash通过。
+非causal字段仅为原dump占位，不冒充另三任务预测；不更改官方源码。
+
+TDD先见12项缺入口失败，再12项通过，覆盖漏文档/候选、非法class、gold泄漏与重复ID；
+初次独占probe lint的import/列宽问题已修正，最终probe lint PASS。全仓`uv run pytest`
+实际933 passed/87 skipped（本地无torch，未把skip当真模型通过）、ruff 0、ekg-smoke OK、
+一致性36项PASS及diff检查PASS。下一实际原机CPU模型smoke，尚无推理/科学效果结果。
