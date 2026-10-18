@@ -6780,3 +6780,56 @@ R194全部14件（含worst原traceback/启动status与新增失败完成审计�
 仅成本实现/合同，不启动epoch或CUDA。
 最新完整三件套954passed/91skipped（24.64秒）、ruff零错误、smoke OK；一致性36项/diff通过。
 原机真实测试后才push/执行R195；当前无epoch/非零lr/GPU任务。
+
+### 25.104 ERGO internal-dev无标签输入准备自审（2026-10-18，wip）
+
+**科研价值**：对准表4-3/FR-016(b)，在任何baseline epoch/选档前固定同协议完整internal-dev
+输入/候选与官方evaluator，避免只核train而漏掉评测方向/缺文档。**可行性**：复用原A3
+已冻结的无标签test-shaped projection（并非public final-valid），无模型/encoder/optimizer/
+预测或gold关系读取；固定manifest与P1根，运行官方Longformer tokenizer检验完整词/
+markers/候选容量并准备原4096 cache-global特征。source最少2/最多110mentions，291篇
+与internal-dev manifest集合相同，未含events或relations；这仅元数据，不是性能。
+
+源`runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl`，2459581bytes，
+SHA `c358da8b04bdeca9477bd26a1a7fa325b634ea62a488b85b28119be8cce2a891`。
+其title/sentences与给定mention type/type_id不进模型特征，只保留完整tokens/mentions/
+TIMEX供ID口径。使用同manifest `maven_ere_internal-dev` 与官方候选digest
+`15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910`，不读valid710或
+更改split。主表已先允许预算期间这项独立准备；R195仍仅CPU成本，无baseline训练准入。
+
+### 25.105 ERGO原完整4096 CPU形状成本闭合；准备备用GPU成本提案（2026-10-18）
+
+R195代码`e81ca79`，25项相关原机测试全通过后push执行，三个PID
+2538769/2538733/2538740已成功SSH核GONE；完整4096 inputs原样传入，所有病例padding
+parity applied=false而非伪报PASS。原模型/focal/legacy AdamW类体未改，六次lr0 API、
+无epoch/非零lr/held-out访问；target不影响logits，loss/非空梯度有限、参数数值不变。
+
+| 原完整padding CPU12threads | cold / warm秒 | 峰RSS KiB |
+|---|---|---:|
+| typical | 29.332519 / 25.871265 | 13608464 |
+| worst candidates | 50.890709 / 42.538120 | 24336256 |
+| longest text | 49.236314 / 38.625496 | 22036324 |
+
+optimizer state均1486817304bytes，186442755参数；两个未用pooler参数继续点名，零符号
+字节变化与数值摘要分别报告。并发/线程影响吞吐，不能从这些数准确承诺epoch耗时；
+仅取typical warm恒定外推原20epoch×2622=52440steps已约15.7天，说明CPU全训的时间
+量级，而非可用训练预算PASS。不把R194优化版的较快结果用于此外推。
+R195全部8件seal SHA `d0e7a4b939e02a5e0785a7e9ef03d3722e3a3a3e8a3b53fdddad15100f811466`，
+原4090逐项核SHA与本地一致；无baseline成绩/训练。
+
+**只读资源新事实**：4090四卡仍为他人vllm（各约17GiB，PID2284611–2284614），不挤占。
+5090已恢复可达，单RTX5090/32607MiB、已用316MiB、util0、无compute-app；UUID
+`GPU-07af326b-f41d-a706-2150-bc560c7db304`。原机torch2.8.0+cu128/
+transformers4.53.3与4090一致，P1 r15 SHA相同，官方Longformer镜像HEAD302及LFS SHA/
+597257159bytes一致。远端HEAD `f6399be348485cc1d9a019cef017444464c87476`是本地主干
+祖先，tracked无改动；untracked `mk_probe_contract.py`必须保全。仅做连接/环境/文件/
+HEAD请求元数据，**未运行5090模型或GPU计算，未同步/搬运checkpoint**。
+
+**下一任务开工自审**：科研价值仍是表4-3强rival原完整候选真实CUDA预算，不拿优化失败
+或CPU长工期换弱对手。数据/代码已闭合、资源上备用GPU可用；卡在【授权】：现有5090
+C5许可不覆盖新A4，AGENTS要求逐次许可。由代理先准备可审查的5090成本移植代码/
+固定三病例合同/命令与非权重staging，再请求一次范围明确的许可；只有许可后才在空卡
+准备公共权重并执行有界GPU成本。不得把“继续”或旧C5许可暗改成新A4 GPU授权。
+提案仅固定seed13、三个原完整4096病例各两次lr0，GPU suite总墙钟≤20分钟，完整
+baseline epoch/新方法训练另门；权重从官方镜像直下，不跨机搬本项目已训checkpoint。
+等待许可期间继续§25.104无标签输入/协议准备，不结束总Goal或等待作者科研选题。
