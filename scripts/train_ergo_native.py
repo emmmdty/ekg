@@ -75,6 +75,19 @@ def require_production_evidence(cfg):
         raise ValueError("original-function native CUDA production smoke required")
 
 
+def native_train_batch(batch):
+    import torch
+    from profile_ergo_native_cost import model_inputs
+
+    if len(batch) != 1:
+        raise ValueError("original batch1 required")
+    feature, target = batch[0]
+    packed = model_inputs(feature, target, torch.device("cpu"))
+    return tuple(packed[key] for key in (
+        "enc_input_ids", "enc_mask_ids", "global_attention_mask", "t1_pos", "t2_pos",
+        "mh_self_attention_mask", "target"))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True, type=Path)
@@ -184,18 +197,9 @@ def main():
     schedule = load_linear_scheduler(optimizer_source, cfg["pins"][str(optimizer_source)])(
         optimizer, num_warmup_steps=len(train) * 20 * 0.1, num_training_steps=len(train) * 20)
 
-    def collate(batch):
-        if len(batch) != 1:
-            raise ValueError("original batch1 required")
-        feature, target = batch[0]
-        packed = model_inputs(feature, target, torch.device("cpu"))
-        return tuple(packed[key] for key in (
-            "enc_input_ids", "enc_mask_ids", "global_attention_mask", "t1_pos", "t2_pos",
-            "mh_self_attention_mask", "target"))
-
     loader = torch.utils.data.DataLoader(
         train, batch_size=1, sampler=torch.utils.data.RandomSampler(train),
-        collate_fn=collate, num_workers=0)
+        collate_fn=native_train_batch, num_workers=0)
     epoch_fn = load_train_epoch(Path(cfg["train_source"]), cfg["pins"][cfg["train_source"]],
                                 BinaryPrefixMeter())
     model_args = SimpleNamespace(device=torch.device("cuda"), gradient_accumulation_steps=1,

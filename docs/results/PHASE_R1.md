@@ -6985,3 +6985,33 @@ GPU成本与完整训练效果仍未知，不以代码存在认定生产通过�
 manifest顺序和缺文档/丢候选拒绝，CPU报告拒作CUDA；原HF scheduler函数body加载及源
 漂移拒绝。隔离CPU Torch3项通过。本地全量961passed/93skipped（26.14秒）、ruff零错误、
 smoke OK；原机新入口/调度器实际测试待补，一致性36项/diff待最终复核。
+
+
+§25.111实际原机门：`b6cdde8`在4090 tracked-clean保护下Git部署，新训练入口/原scheduler
+六项真实CPU测试通过后push；未翻admission、未载encoder或启动native epoch。完整生产
+smoke尚缺，不能将这些unit tests当CUDA/epoch预算通过。
+
+### 25.112 ERGO原机CPU真实原epoch接线/最大dev smoke自审（2026-10-18，wip）
+
+**科研价值**：对准表4-3/FR-016(b)，在空卡受阻时闭合已实现原trainer接线，验证真实原
+Longformer/RGT/focal经实际native collator/原train_epoch能完成有限的lr0 batch；最大dev
+无标签输入验证真实model接口，不生成分数或给后续方法反馈。**可行性**：原4090模型/
+R192 train/R196 dev及RAM可用，前述原完整模型CPU成本已成功。本次只运行原机CPU：
+原完整4096、seed13/float32、固定两个train fixture各一次原函数lr0、一个最大dev文档
+no-grad/target独立性；不处理完整train epoch、不读dev gold、无预测/classes保存或checkpoint。
+原函数/模型/损失/optimizer/scheduler数学不变；参数数值保持、零符号字节变化单列。
+
+主表先允许该CPU smoke。科研/训练效果仍未知；它只补生产接口证据，不能代替最大dev
+CUDA显存或CUDA生产门。5090成本现有许可仍只原三例suite；本项不运行CUDA、不消耗该
+GPU预算、不用GPU等卡器。后续GPU preflight需独立准入/相应许可，不暗加到本次20分钟。
+
+§25.112实现冻结：[CPU smoke合同](../phases/PHASE_A4_ergo_native_cpu_preflight_20261018.md)，
+配置SHA `730390e7570b057a67164a638d656112eaeebd8a57f2b6b321e2e5e4290e9d1e`。
+最大dev文档`1b5754feb1a6d79412f539ce6a4b38d3`，11990pairs/1411真实tokens；两个train
+fixture为原short/typical（配置钉ID与候选数），始终完整4096。共两个lr0 API、无完整
+native epoch；源train_epoch末尾清梯度，故unused名单必须在optimizer hook前捕获，
+不从清零后状态把全部参数误判未使用。CUDA明确不准入，外层CPU墙钟600秒/清理30秒。
+
+native collator与CUDA preflight拒绝两用例先真实RED，再GREEN；隔离CPU Torch下5项
+入口测试通过。完整本地三件套962passed/94skipped（26.12秒）、ruff零错误、smoke OK，
+一致性36项/diff待最终复核。原机8项实际tests/CPU完整模型执行仍待完成。
