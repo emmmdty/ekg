@@ -6850,3 +6850,29 @@ baseline epoch/新方法训练另门；权重从官方镜像直下，不跨机�
 `3fd153bb81b8aa3fb6fe692939fc0f96986994824511b90e3b7b350d6c0df902`；
 不含本项目checkpoint，upstream代码独立Git bundle，公开权重拟在许可后由目标机直下镜像。
 5090只读确认curl/timeout/setsid/git存在；尚未向该机写代码/数据或运行模型/GPU。
+
+§25.106后续验证：代码`bf616b1`以Git bundle在4090 tracked-clean保护下部署，真实
+CPU Torch相关26项测试全通过（含原optimizer加载与native模型输入），再push；没有在
+本地或5090加载encoder。公开ERGO原Git bundle SHA
+`5f1d30fc3a0f90f40d04b62fa3ead5b7d1686479a43acecfa145aa70c974142c`；
+从5090旧HEAD到提案代码的Git增量780KiB，SHA
+`269977e0dc10a1c9a30dfebed8c3f96e6a70990eaced4625819d38811e592871`。
+已向作者请求仅本合同的新A4 5090许可，待答复；未部署/启动5090任务。
+
+### 25.107 ERGO无标签internal-dev特征入口实现（2026-10-18，wip）
+
+开工科研价值/可行性见§25.104，主表已先允许该独立输入准备。
+`scripts/prepare_ergo_unlabeled.py`只读已有test-shaped projection，拒绝gold/未知顶层
+字段；去掉title/sentences及mention type/type_id/trigger metadata，保留完整tokens、
+MID/span/TIMEX。物理marker次序对应完整有向候选，不生成targets，不读gold、不运行
+encoder/预测/evaluator。冻结internal-dev manifest、候选全集、P1及官方evaluator身份；
+完整tokenizer4096/cache-global（BOS/EOS）词典同R192，不截断，溢长/缺marker即失败。
+
+两个用例先真实RED（入口缺失），再GREEN：gold拒绝/类型元数据隔离、不修改原source；
+源mention逆序时实际marker位置/双方向/完整padding与缺endpoint/过长失败。配置
+`configs/ergo_unlabeled_dev_20261018.json` SHA
+`225f46db1fad16ca9e2374a092c49ae9399ba69f08b68779a5acbb006c256e4a`。
+只运行远端CPU tokenizer，无本地encoder或GPU；运行/封存待完成，不能提前宣称容量通过。
+
+§25.107实现门：完整三件套957passed/91skipped（23.65秒）、ruff零错误、smoke OK，
+一致性36项/diff通过。原机实际入口用例及tokenizer容量验证仍待执行。

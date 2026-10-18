@@ -1,0 +1,40 @@
+{
+  "candidate_digest": "15a3b1a548625624642130190b39411e6346866ff8594c2af2020cfbdac10910",
+  "expected_population": {
+    "documents": 291,
+    "event_mentions": 7195,
+    "relation_pairs": 234870,
+    "timex": 1719
+  },
+  "final_valid_accessed": false,
+  "global_attention_policy": "BOS_EOS_from_released_cache",
+  "input_sha256": {
+    "data/protocols/v6/manifests/maven_ere_internal-dev.json": "f5457b302be57663f8e618d977c492909c3210682804cb486bd67ccc8c171b5f",
+    "data/protocols/v6/tools/maven_ere_evaluate.py": "32919e86d98c6fafae6aa9505579e2c356caee12c32c1a8c719910acec359598",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl": "c358da8b04bdeca9477bd26a1a7fa325b634ea62a488b85b28119be8cce2a891",
+    "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895/config.json": "d0a64aa58d1b43c0d38000fa3083c142533c59fa151043e5c8113bcbee106d82",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895/tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895/vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/cache_global_details_report.json": "bf95c3c9547182b00179f3d5f6ff793e6c268797ea28997d26a16ac7eb5056e4",
+    "scripts/prepare_ergo_unlabeled.py": "ca7aa81fd4157d0fafae624aea07625a3dc9bdcdf4bb7784a34f11337ff2a5c9",
+    "src/ekg/core/protocol.py": "3e5d60d6b5e74382ad4953f92868a312d0beaf45ab11cabff28c89242a1bfcb5",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/relations/ergo_adapter.py": "7f8829119725554c7deb12520562d9a3c2d079806fde75c473140a81b4c86351",
+    "src/ekg/relations/maven_ere_official.py": "8df2f5487daa223c797a8a0950a8cde47c070866cd6f1fd04dbda0ae9a0a05c8"
+  },
+  "manifest": "data/protocols/v6/manifests/maven_ere_internal-dev.json",
+  "max_length": 4096,
+  "output": "runs/stages/R1/r1-v96-ergo-unlabeled-dev-20261018/native_internal-dev",
+  "schema_version": "ekg.ergo_unlabeled_features.v1",
+  "source": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/test.jsonl",
+  "split": "internal-dev",
+  "tokenizer": "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895",
+  "tokenizer_files": [
+    "config.json",
+    "merges.txt",
+    "tokenizer.json",
+    "vocab.json"
+  ]
+}
