@@ -64,3 +64,9 @@ CPU短文完整成本已过（R1 §25.99），原模型/optimizer类体真实执
 PAD-only变长parity/CPU预算合同；真实词/marker/候选保留、原类不改，源Longformer
 自动补齐window。不以eval梯度parity声称train随机流一致。CPU baseline训练仍待预算/
 合同；GPU未启动。
+
+
+R194的最大候选未过事前梯度等价门，当前PAD-only执行版本停止；全部四病例与失败边界
+见R1 §25.102。没有放宽容差/删掉该文档，不把它当ERGO方法效果失败。下一R195恢复
+原完整4096 padding、保留全部词/候选，测CPU真实完整模型成本；不采用失败版本的较快
+耗时外推原版本预算。训练与CUDA仍未放行。
