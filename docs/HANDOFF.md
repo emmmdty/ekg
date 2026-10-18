@@ -1,12 +1,12 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-18（+08:00，ERGO原完整padding CPU形状闭合；5090成本提案待新许可；无标签输入准备）**。
+> 更新于 **2026-10-18（+08:00，ERGO原完整padding CPU形状闭合；5090有界成本获准/部署中；无标签输入闭合）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.105；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.108；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
 
-**本线程接续（2026-10-16）**：长期Goal已创建；作者报告客户端已恢复active，但get_goal仍返回usageLimited，当前按作者继续指令执行，未声称工具自动续跑已恢复。C41-R/B/A/T/V均已闭合；五个有效端点完成/进程GONE，双端独立official/paired/profile完整报告一致。固定exact/pair-F1候选科学门FAIL，停止该配置、不扫参/加seed；旧mass失败和新mass aux float64限制保留。C5科学O1未完成。D4当前绑定模板已完成R1裁决：strong linear原train重放/128预算输入诊断和最近邻审查闭合，当前没有可准入的独立新干预（§25.83–§25.86）；未启动拟议D4训练、不把诊断当新方法效果FAIL。**当前正式接队C41-A-R**，复用native多原因/coref重复与普通multi-positive强rival证据（§25.77/§25.80），已核ATLOP/DCL/纯relative目标的None校准边界（§25.87）；identity/MIL审查已闭合（§25.88），全train原机CPU重放/双端独立official核算已完成、PID1657823已核GONE（§25.91），关闭当前目标模板准入回合；上下文诊断亦闭合（§25.93），无新方法准入；同章当前[ERGO强rival native透明适配卡](research/20261017_a4_ergo_native_review.md)：接口/原机权重和完整CPU短文成本已闭合（§25.97–§25.99），PAD-only最大候选未过预定梯度门并停止；原完整padding CPU形状已闭合（§25.105），下一准备5090有界成本提案与internal-dev无标签输入，取得新A4许可前不运行5090计算；无epoch训练。C5裁决/资产见R1 §25.82及PHASE_C末节。
+**本线程接续（2026-10-16）**：长期Goal已创建；作者报告客户端已恢复active，但get_goal仍返回usageLimited，当前按作者继续指令执行，未声称工具自动续跑已恢复。C41-R/B/A/T/V均已闭合；五个有效端点完成/进程GONE，双端独立official/paired/profile完整报告一致。固定exact/pair-F1候选科学门FAIL，停止该配置、不扫参/加seed；旧mass失败和新mass aux float64限制保留。C5科学O1未完成。D4当前绑定模板已完成R1裁决：strong linear原train重放/128预算输入诊断和最近邻审查闭合，当前没有可准入的独立新干预（§25.83–§25.86）；未启动拟议D4训练、不把诊断当新方法效果FAIL。**当前正式接队C41-A-R**，复用native多原因/coref重复与普通multi-positive强rival证据（§25.77/§25.80），已核ATLOP/DCL/纯relative目标的None校准边界（§25.87）；identity/MIL审查已闭合（§25.88），全train原机CPU重放/双端独立official核算已完成、PID1657823已核GONE（§25.91），关闭当前目标模板准入回合；上下文诊断亦闭合（§25.93），无新方法准入；同章当前[ERGO强rival native透明适配卡](research/20261017_a4_ergo_native_review.md)：接口/原机权重和完整CPU短文成本已闭合（§25.97–§25.99），PAD-only最大候选未过预定梯度门并停止；原完整padding CPU形状已闭合（§25.105），internal-dev无标签输入已闭合，作者已授权本次5090有界成本（§25.108），当前核空卡/部署，实际完整训练另门；无epoch训练。C5裁决/资产见R1 §25.82及PHASE_C末节。
 原4090 pins/initializer/封存证据、未跟踪保全及源码同步与真实CPU torch门见R1 §25.68；
 预算已闭合（§25.69），A两段准入及真实CPU/五臂CUDA生产smoke已完成（§25.70–§25.72）。
 原`method_admitted=true`只准许固定seed13探索；该探索已完且未过科学门。当前A4-R，完成子项后继续下一项。
@@ -37,7 +37,7 @@ r2只在严格数值相等后恢复signed-zero字节并记录全过程；成功�
 
 **下一必要动作（10-17接续）**：正式执行主表C41-A-R，复用R175 native分组及R179
 普通SupCon及ATLOP/DCL强rival（R1 §25.77/§25.80/§25.87），按
-[ERGO可行性卡](research/20261017_a4_ergo_native_review.md)接续透明接口/TDD与原4090镜像权重准备；原缓存/CV/fidelity及完整native编码容量已闭合（§25.95），接口/权重及cache-global差异见§25.96；新全局mask身份已闭合（§25.97），完整CPU短文成本已闭合（§25.99），PAD-only最大候选未过预定梯度门并停止；原完整padding CPU形状闭合（§25.105），下一准备5090有界成本提案与internal-dev无标签输入；新A4许可前不运行5090计算，无epoch训练；
+[ERGO可行性卡](research/20261017_a4_ergo_native_review.md)接续透明接口/TDD与原4090镜像权重准备；原缓存/CV/fidelity及完整native编码容量已闭合（§25.95），接口/权重及cache-global差异见§25.96；新全局mask身份已闭合（§25.97），完整CPU短文成本已闭合（§25.99），PAD-only最大候选未过预定梯度门并停止；原完整padding CPU形状闭合（§25.105），internal-dev无标签输入闭合；作者已授权本次5090有界成本（§25.108），核空卡/部署后执行，无epoch训练；
 全train残余及目标模板未准入裁决见§25.91；身份/MIL边界见§25.88，当前仍无新方法准入。D4当前模板准入拒绝见§25.86，后续替代仍须
 新证据回R1；不取消D4章、不复跑原train诊断或对当前模板扫参。
 C5全部完成产物不重跑、不覆盖；checkpoint留4090，旧失败不清理。
@@ -110,7 +110,7 @@ final-valid 不作选模反馈，单 seed 13、三轴可比性、封存结果与
 | 🔴 **读表 6-2 的前提** | 评测文档捷径和训练图中的金标边覆盖造成系统差异，不能按 MRR 排序解读，也**不得写“我们超过 CSProm-KG / SimKGC”**。具体证据见 §0.4c 与 `results/PHASE_E.md`。 |
 | **⚠️ 开工前必读** | 每个新任务先答「科研价值 / 可行性」两问。不可行点名类别与一手证据，停止该路线；按 10-08 委托由执行代理在现有主任务内选择下一路线，先改主表再执行。有效性与未授权资源动作仍不可绕过。 |
 | **⚠️ 唯一权威计划** | **[`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)** 的 §4 主表与 §5 Gate。本文 §0.3 只是它的当周切片，**不得出现主表以外的新任务**；要偏离顺序**先改主表**。Gate 之间产生的想法进主表 §8 候补区，**不插队**。 |
-| **GPU**（细则§E.3） | **4090**：10-16恢复且成功只读核查，回主执行机；snapshot不等于CUDA模型验证，启动前重核空卡。**5090**：原机特定C5许可保持，不新增迁移/搬权重；本轮只读核空闲，新A4计算待单独许可。最新资源事实R1 §25.105，无自动启动器。 |
+| **GPU**（细则§E.3） | **4090**：10-16恢复且成功只读核查，回主执行机；snapshot不等于CUDA模型验证，启动前重核空卡。**5090**：原机特定C5许可保持，不新增迁移/搬权重；本轮只读核空闲，本次有界A4成本已获许可，完整训练未授权。最新资源事实R1 §25.105，无自动启动器。 |
 | ⚠️ **只在 4090 上的大件** | `runs/factuality/predicted_edges_valid.jsonl`（133 MB，**`.1583` 的真上游**）、`predicted_labels_valid.json`、`ch4_sedgpl.pt`（1.5 G）、两个对手的 checkpoint、**C5 三个周期的 checkpoint**。**本地那份 `runs/relations/supervised_dump.jsonl` 是另一份 dump，别拿它当上游。** |
 | 截止与排期 | 实验须在 **2027-02** 前完成；排期与**估算基准率**见 `EXPERIMENT_PLAN.md` §3（按 git 里同类事件的真实起止天数估，不按计算耗时估）。 |
 | 完成后必须做什么 | 按 **§6** 五步回填：产物落地 → 写结果页 → 改主表行状态与 commit → 推进队列 → commit + **push**。**没 push 就没交接。** |
@@ -376,8 +376,8 @@ ATLOP/DCL/None及identity/MIL边界已核；全train4线程CPU重放/双端offic
 已完成，原checkpoint不变、PID1657823核GONE（§25.91）。当前目标模板未准入且回合关闭；
 原窗口/配对诊断亦闭合（§25.93），当前不立项窗口方法。ERGO来源/完整native容量、
 透明接口、原机权重及完整模型CPU短文成本已闭合（§25.95–§25.99）；PAD-only最大候选梯度门
-未过且停止（§25.102）；原完整padding CPU形状已闭合（§25.105），下一准备5090有界成本
-提案与internal-dev无标签输入（§25.104），取得新A4许可前不运行5090计算。原类、真实词/
+未过且停止（§25.102）；原完整padding CPU形状已闭合（§25.105），无标签输入已闭合，作者已授权本次5090有界成本
+（§25.108），当前核空卡/部署；完整训练仍未放行。原类、真实词/
 全部候选保持，epoch/新方法训练未放行，无自动启动器。
 C5/D4已完成诊断不重跑，下方C5旧命令均仅供追溯。
 

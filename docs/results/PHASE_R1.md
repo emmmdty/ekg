@@ -6876,3 +6876,28 @@ encoder/预测/evaluator。冻结internal-dev manifest、候选全集、P1及官
 
 §25.107实现门：完整三件套957passed/91skipped（23.65秒）、ruff零错误、smoke OK，
 一致性36项/diff通过。原机实际入口用例及tokenizer容量验证仍待执行。
+
+### 25.108 ERGO无标签internal-dev准备闭合与5090成本获准（2026-10-18）
+
+R196代码`a9dacaf`，原机两个实际入口用例通过后push执行；PID2703338已成功SSH核GONE。
+全部291篇、7195event mentions/1719TIMEX、234870有向候选，digest与既有协议逐位相同。
+无gold/encoder/预测/optimizer/evaluator执行；只运行CPU tokenizer和纯接口。
+max非PAD tokens2214、max mentions110、max pairs11990、总非PAD tokens124278，全部
+完整保留且在4096预算内。评测最大候选比train11772稍大，因此三train病例的成本不冒充
+评测容量实测；完整训练准入前仍须对最大internal-dev无标签输入核no-grad容量。
+
+R196全部6件seal SHA
+`cb3a9a384c53b9b5774c07bb755739bbced977c13489d3f398956c3040d3d9b8`；
+report SHA `07e5d3fde5d336c2afb75b3253ff5ce6e31546649dd2a86d4df5c8f758f7ca40`，
+features SHA `9fd8992821b38f23de12b7b8ec6782345e77d736de5dc690503f1818808f5e04`，
+documents SHA `66443ccfafafaad6694abdcc78e4e276aaac0a27adf77d9fc3bb765fd0d1e015`。
+原4090和本地逐项SHA一致；本地另外用标准库逐篇核manifest顺序、MID物理排序、全部
+marker/双方向配对位置、完整padding/BOS/EOS globals及token witness SHA，没有复用
+打包函数生成期望结果；独立candidate digest/总pairs一致。
+
+作者已明确答复**“授权本次20分钟成本验证”**，范围为§25.106提案合同，仅5090三train
+病例/六次lr0、无完整训练/额外seed/本项目checkpoint搬运。冻结配置仍保存原提案时的
+许可待定字样，许可事实以本段/独立authorization记录为准，不改写提案hash；技术
+cuda_admitted不替代本次真实授权。开始核空卡、Git部署和公共镜像权重直下，尚未启动
+GPU计算。当前本地主干`a9dacaf`，对5090旧HEAD的已发布Git增量SHA
+`7bbb7d8f6b9f386548fe7cabba4f4e7c9c797edd64af6b905c41261d75ca4ad2`。
