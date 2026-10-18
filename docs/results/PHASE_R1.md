@@ -6712,3 +6712,21 @@ typical/worst/longest预算；无epoch/新方法训练/CUDA许可，原R193不�
 隔离CPU Torch三个helper通过、原optimizer loader因缺transformers单独skip，原机待补。
 最新完整三件套953passed/91skipped（24.96秒）、ruff零错误、smoke OK；一致性36项/diff通过。
 原机实际测试与真实padding parity仍待执行，不把本地skip当完成。
+
+### 25.101 ERGO PAD-only完整短文parity通过，继续固定CPU形状预算（2026-10-18）
+
+代码`0a76f13`，24项相关原机测试全通过后push并启动。PID2528270成功SSH核GONE。
+同一完整初始化模型/CPU12线程，full4096对trimmed109（库内部补至512）：logits与loss
+误差均为0，283个有梯度参数的最大绝对误差5.960464477539063e-08；所有项通过事前
+abs1e-6/rel1e-4门，梯度集合相同，无容差修改。原模型/图层/优化器未改。
+
+train-mode两个lr0 API cold2.336174秒、warm1.764547秒，峰RSS9392172KiB；数值参数
+不变，零符号引起的字节变化继续单列，没有恢复签名或权重。target独立性通过，无epoch/
+held-out或效果测量。由于线程同时由4增至12，不把与R193的全部耗时差归因PAD；eval
+parity不等于相同training dropout流。所有真实词/mention/候选/目标与R192保持。
+
+后续仍是已冻结R194配置的CPU typical/worst/longest三个病例，每个同完整词/全部候选
+及同parity/两次lr0门。原机只读核到64CPU、load11.37/12.85/12.61、可用481097MiB；
+允许三个独占输出的12线程CPU预算病例并行（36threads，非多seed），每条SSH只起一项，
+不创建后台重试/等卡器。运行时并发会影响耗时，报告此限制，不将fixture耗时当精确epoch
+承诺；baseline完整训练仍须预算与正式合同，不由短文PASS直接启动。
