@@ -7021,7 +7021,7 @@ native collator与CUDA preflight拒绝两用例先真实RED，再GREEN；隔离C
 
 **科研价值**：对准表4-3的三轴可比性，确保正式训练在任何epoch前使用固定候选和已经
 做过成本的完整4096特征，不仅验证配置自报的hash。**可行性**：只需纯CPU metadata
-校验；默认未准入，尚无native训练或结果受影响。主表先补此门，不改变模型/损失/数据。
+校验；默认未准入，尚无native训练或结果受影响。按主表现有完整输入/冻结协议要求补实现门，不改变路线/模型/损失/数据。
 
 回归用例构造三件status=complete的CUDA形状报告，其余门满足，成本config钉old-features
 SHA、训练config钉另一SHA；当前入口**未拒绝**（DID NOT RAISE）。根因是成本门核报告/
@@ -7065,3 +7065,15 @@ cache-global/padding、所有物理marker与完整有向pair位置、MID顺序�
 smoke、设备/墙钟及（若选5090）完整训练的独立授权。
 完整本地三件套964passed/94skipped（29.10秒）、ruff零错误、smoke OK；原机新10项
 实际测试待补，不能把本地skip或CPU full-model通过当CUDA门通过。
+
+§25.115原机验证：`088651d`以Git bundle部署4090，新训练入口/原函数/原scheduler/全输入
+联核共10项实际CPU测试全通过后push；没有重跑R199已封存模型smoke或翻训练admission。
+一致性36项、diff检查通过。联核是既有v6/完整输入约束的实现补齐，不新增科学路线或重排Gate。
+
+末次成功SSH核资源仍是4090四卡（PID2284611–2284614，约17270/17203/17203/17203MiB）
+与5090单卡（PID3021288，28436MiB/util100）被他人vllm占用，不能共享；本轮A4 GPU
+成本模型/optimizer调用仍0、native epoch0。所有已安排独立CPU输入/原模型/原trainer/
+完整候选/默认拒绝执行与元数据回放均已产出证据。后续队首必要步是已授权GPU成本，
+不能以重复CPU准备或只改审查报告替代其结果；有空卡后仍须即时再核并按冻结合同执行。
+未设置等卡/自动重试或跨机搬本项目checkpoint。Goal复核仍usageLimited（830095/
+13076，updatedAt未刷新），未声称自动续跑恢复、未新建重复Goal或标完整科学目标成功。
