@@ -72,3 +72,21 @@ pinned身份。CPU/toy记录不能代替这些门。5090 full20epoch权限由独
 MID顺序与固定train/dev digest，并将实际训练features/targets SHA与成本config输入SHA
 相等联核；同内容路径变化可接受，改变内容需要重新通过相应门。此版本增加有效性门，
 不改变原模型/训练数学，R199真实CPU smoke仍用其冻结e7de4fa重放。
+
+
+## 10-18阶段收尾补充（不准入执行）
+
+当前源码对应审查配置另存`configs/ergo_native_training_unadmitted_v2_close_20261018.json`；
+旧v1/v2提案保留各自固定源码身份。三个admission均false，未来另冻正式配置。
+新`preflight_ergo_native.py` v2可产出CUDA容量/production报告：原函数两次lr0后保持
+optimizer状态驻留再测最大dev；CUDA路径尚未实测，不能将接口存在当作报告通过。
+R199 CPU v1重放仍用e7de4fa，不用新入口冒充旧证据。
+
+原函数加载另加透明fail-fast绑定：`clip_grad_norm_(error_if_nonfinite=True)`，在有限
+元素的全局范数溢出时拒绝静默清零；健康数学路径仍调用同一Torch函数，旧结果不改写。
+独立复算入口`scripts/verify_ergo_native_checkpoint.py`只接受完整20epoch report和配置/
+checkpoint SHA身份，通过完整三类classes逐值对齐后交官方scorer核分；当前未有真实
+checkpoint可复算。checkpoint留原训练机，5090还须新许可明确覆盖独立验证。
+
+作者本轮要求阶段收尾，现仅交付软件与CPU验证，证据及限制见R1 §25.116–§25.117。
+已授权三例成本尚未执行；无新增训练/推理许可、无自动等卡器。

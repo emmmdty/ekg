@@ -1,12 +1,21 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-18（+08:00，ERGO真实原trainer/最大dev CPU闭合；v2入口未准入；5090成本获准待空卡）**。
+> 更新于 **2026-10-18（+08:00，按作者要求阶段收尾；CPU准备闭合，GPU成本获准但未执行）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.115；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.117；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
 
-**10-18最新接续（覆盖下方旧资源/部署快照）**：C41-A-R继续，C5/D4/当前A4目标模板裁决不变，三个科学O仍未达。ERGO原完整CPU形状/无标签dev、原函数toy回放与真实原trainer两个固定fixture lr0、最大dev无标签no-grad均已闭合；产物逐项双端一致、所有进程GONE（R1 §25.105/§25.108/§25.111/§25.114），不重跑这些封存准备或失败PAD版。完整训练入口v2已实现、默认未准入；实际完整特征/MID/候选digest及成本输入SHA必须在任何epoch前联核（§25.115），审查配置为`configs/ergo_native_training_unadmitted_v2_20261018.json`，不能只翻flag启动。
+**10-18本轮阶段出口（覆盖下方自动继续措辞）**：作者明确回复“没空卡。完成阶段性任务收尾”。
+本轮只完成既有代码验证、回填与提交推送，到此交接；没有新增GPU调用或无人值守等卡器。
+CUDA preflight v2及选中checkpoint独立复算入口的软件准备已落地，实际CUDA/真实checkpoint
+重载尚未验证，不构成准入。当前审查配置另存
+`configs/ergo_native_training_unadmitted_v2_close_20261018.json`，三个admission仍false；
+旧配置/旧结果保持原身份。代码/测试与阶段核验见R1 §25.116–§25.117。
+原5090成本许可保留，后续从成功核空卡并执行已授权成本接续；production/完整训练及5090
+独立推理须各自相应证据与许可。长期科学Goal未完成，工具仍usageLimited，未改为complete。
+
+**10-18最新接续（覆盖下方旧资源/部署快照）**：C41-A-R继续，C5/D4/当前A4目标模板裁决不变，三个科学O仍未达。ERGO原完整CPU形状/无标签dev、原函数toy回放与真实原trainer两个固定fixture lr0、最大dev无标签no-grad均已闭合；产物逐项双端一致、所有进程GONE（R1 §25.105/§25.108/§25.111/§25.114），不重跑这些封存准备或失败PAD版。完整训练入口v2已实现、默认未准入；实际完整特征/MID/候选digest及成本输入SHA必须在任何epoch前联核（§25.115），阶段收尾审查配置见上段（旧v2提案仅供历史追溯），不能只翻flag启动。
 
 作者已明确**授权本次5090三例20分钟成本验证**；[冻结合同/确切命令](phases/PHASE_A4_ergo_5090_cost_20261018.md)不变，Git/数据/公共权重均就绪，许可不重复询问。但启动前发现5090被他人vllm占用，4090四卡也均被占；尚无本轮A4 GPU调用，无自动等卡/重试器。下一必要动作是成功核空卡后执行已获准成本；完整baseline epoch仍须CUDA成本/最大dev容量/production、设备工期与（选5090时）新训练许可，不将CPU通过当CUDA或科学收益。checkpoint不搬，final-valid封存，额外seed不开放。
 

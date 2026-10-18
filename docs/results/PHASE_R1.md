@@ -7121,3 +7121,31 @@ checkpoint，当前仅完成运行状态/文件身份/候选覆盖与类一致�
 完整本地验证：968passed/95skipped（26.20秒），ruff零错误、ekg-smoke OK，协议一致性
 36项通过及diff无误。项目环境的Torch跳过项不冒充通过；独立CPU Torch环境对原函数/
 scheduler、训练入口及checkpoint门共15项实际通过。原4090同组CPU测试待部署核验。
+
+
+### 25.117 作者要求阶段收尾与交接边界（2026-10-18）
+
+作者回复原话：“没空卡。完成阶段性任务收尾”。本轮据此只完成已有软件准备、验证、
+文档回填与提交推送，不扩展新研究/CPU encoder任务，不再找空卡或建自动启动器。
+§25.116代码冻结`460cafc3ea459178a585bb04a2b992fa4c30b7b8`；Git bundle SHA
+`45c0f2e8e1c2097d0ebff24667feed5f6a6c205f3bb8e8086154d37de99dfe46`双端校验后部署
+原4090，保全所有未跟踪文件。实际命令：
+
+```bash
+# cwd: /data/TJK/ekg；CPU tests，无encoder/GPU模型运行
+CUDA_VISIBLE_DEVICES=-1 .venv/bin/python -m pytest \
+  tests/relations/test_ergo_training.py tests/scripts/test_ergo_native_training.py \
+  tests/scripts/test_ergo_checkpoint_verify.py -q
+```
+
+15项实际通过；Torch相关用例没有依赖本地skip充数。完整本地三件套与一致性结果见
+§25.116，当前源码与新review配置代码pins一致，R197成本源码pins亦仍匹配；没有修改
+封存CPU结果或原成本合同。v2 CUDA producer和checkpoint verifier仍只具备代码/CPU
+门证据，尚未真实GPU验证/从ERGO训练权重复算。
+
+本轮A4 GPU成本模型/optimizer调用仍0、native完整epoch0，无新增预测/分数或checkpoint，
+不读取final-valid、不扩大seed或跨机搬项目权重。R197三例20分钟许可有效且未用；已
+封存准备全部保留。接续先即时成功核空卡再按原确切命令执行已授权cost suite；production/
+完整训练与5090独立推理必须满足各自新合同、证据与资源许可，不因本次软件准备自动放行。
+C41-A-R/T087仍wip，三章科学O/KR未达；Goal工具复核仍usageLimited，未创建重复Goal、
+未标complete或声称自动续跑恢复。本轮按作者要求收尾，后续状态优先读HANDOFF首段。

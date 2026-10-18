@@ -252,6 +252,10 @@ author delegation releases a new in-scope research queue; it does not reopen old
   D4 own-train anchor replay/input visibility and source review completed; current binding template
   has no admitted candidate (R1 §25.83–§25.86), without a proposed training/effect claim. Formal
   current work is C41-A-R. Identity/MIL priors and native identifiability are closed (R1 §25.88); full-train CPU replay and independent official scoring closed, PID1657823 is GONE; current target template not admitted, context diagnosis also closed (§25.93); ERGO native capacity/source review closed (§25.95); transparent interfaces, original-4090 weights and cache-global inputs closed (§25.97); full-model CPU short cost closed (§25.99); PAD-only worst-case parity failed and stopped (§25.102); canonical full-padding CPU shapes closed (§25.105); unlabeled internal-dev inputs closed and bounded 5090 A4 cost explicitly authorized, staging/weights ready but no empty GPU; original-trainer toy and real CPU native/max-dev smoke closed (§25.111/§25.114), v2 input/evidence gates implemented but training unadmitted (§25.115); no epoch/training or GPU launch. No optimizer/model admission. ERGO remains availability preparation (§25.90). Scientific O1/O2 remain unmet; future D4 alternatives require new R1 evidence.
+  2026-10-18 stage close requested by the author: no empty GPU. CUDA preflight and independent
+  selected-checkpoint verification interfaces have CPU gate tests; actual CUDA/reload remains
+  unverified (R1 §25.116–§25.117). The new v2_close review config keeps all admissions false.
+  The existing 5090 cost permission remains valid; no watcher or new research starts this turn.
   The new 5090 migration adapter C41-S is deferred, not completed.
   Follow EXPERIMENT_PLAN §3.9 and the 10-16 C41 subtable; `research/20261016_project_okr.md`
   maps O1–O4/KRs to C5, D4, A4, conditional confirmation and final traceability tasks.

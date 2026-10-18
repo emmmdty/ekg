@@ -1,7 +1,13 @@
 # EKG 实时状态
 
-> 更新于 **2026-10-16**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-10-18**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
+
+**10-18阶段收尾**：作者确认无空卡并要求完成本轮收尾。CUDA preflight/选中checkpoint
+独立复算的软件入口及非有限梯度范数fail-fast已落地，CPU验证/限制见R1 §25.116–§25.117；
+真实CUDA和checkpoint重载尚未执行。新审查配置为`ergo_native_training_unadmitted_v2_close_20261018.json`，
+三个admission仍false。当前C41-A-R/T087保持wip，已授权5090成本留待空卡后接续，许可无需重复问。
+本轮结束不表示科学Goal完成，不启动等卡器或新研究任务。
 
 **新窗口执行方式**：作者明确要求使用长期Goal。先按HANDOFF §0.0核本线程目标、
 创建/接续并确认活动状态，再从C41-R连续推进；阶段汇报/提交/候选失败不结束总目标。
