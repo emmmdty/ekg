@@ -10,6 +10,7 @@ import json
 import math
 import os
 import resource
+import socket
 import time
 import typing
 from pathlib import Path
@@ -103,7 +104,8 @@ def trim_trailing_padding(feature):
 def execution_feature(feature, config):
     """Dispatch explicit frozen cost versions; canonical v3 never trims its input."""
     modes = {"ekg.ergo_native_cost.v2": ("drop_only_verified_trailing_pad", True),
-             "ekg.ergo_native_cost.v3": ("retain_all_4096", False)}
+             "ekg.ergo_native_cost.v3": ("retain_all_4096", False),
+             "ekg.ergo_native_cost.v4": ("retain_all_4096", False)}
     if config["schema_version"] not in modes:
         raise ValueError("unknown padding contract version")
     policy, parity = modes[config["schema_version"]]
@@ -112,26 +114,47 @@ def execution_feature(feature, config):
     return trim_trailing_padding(feature) if parity else feature
 
 
+def validate_execution_scope(config, case, *, cwd, visible, available, hostname):
+    """Bind this bounded CUDA proposal to its actual backup server, not a fake 4090."""
+    if (config["schema_version"] != "ekg.ergo_native_cost.v4"
+            or config["server"] != "gpu-5090"
+            or cwd != "/mnt/aidata/tongjiakai/ekg"
+            or hostname != "server-System-Product-Name"
+            or visible != "0" or not available or case["device"] != "cuda"
+            or config["cuda_admitted"] is not True or config["training_admitted"] is not False):
+        raise ValueError("bounded 5090 cost requires its pinned host/root/card and no training")
+    return "RTX 5090", "GPU-07af326b-f41d-a706-2150-bc560c7db304"
+
+
 def run(config_path, case_name):
     import torch
     from profile_original_joint_cost import compare_gradients, require_empty_gpu, validate_device
 
     config = json.loads(config_path.read_text())
     case = config["cases"][case_name]
-    if (str(Path.cwd()) != "/data/TJK/ekg" or config["seed"] != 13
+    if (config["seed"] != 13
             or config["final_valid_accessed"] is not False
             or config["optimizer_api_calls"] != 2 or config["learning_rate"] != 0.0
             or config["cpu_threads"] != 12):
         raise ValueError("remote frozen zero-lr cost scope required")
-    validate_device(case["device"], os.environ.get("CUDA_VISIBLE_DEVICES"),
-                    torch.cuda.is_available(), "gpu-4090")
+    expected_name, expected_uuid = "RTX 4090", None
+    if config["schema_version"] == "ekg.ergo_native_cost.v4":
+        expected_name, expected_uuid = validate_execution_scope(
+            config, case, cwd=str(Path.cwd()), visible=os.environ.get("CUDA_VISIBLE_DEVICES"),
+            available=torch.cuda.is_available(), hostname=socket.gethostname())
+    else:
+        if str(Path.cwd()) != "/data/TJK/ekg":
+            raise ValueError("original cost requires the primary server root")
+        validate_device(case["device"], os.environ.get("CUDA_VISIBLE_DEVICES"),
+                        torch.cuda.is_available(), "gpu-4090")
     gpu = None
     if case["device"] == "cuda":
         if config["cuda_admitted"] is not True:
             raise ValueError("CUDA cost needs a separate admission after the CPU result")
         gpu = require_empty_gpu(os.environ["CUDA_VISIBLE_DEVICES"])
-        if "RTX 4090" not in torch.cuda.get_device_name(0):
-            raise ValueError("4090 GPU model required")
+        if (expected_name not in torch.cuda.get_device_name(0)
+                or (expected_uuid is not None and gpu["uuid"] != expected_uuid)):
+            raise ValueError("pinned GPU model/UUID required")
     output = Path(config["output"]) / case_name
     if output.exists():
         raise FileExistsError(output)
@@ -270,7 +293,7 @@ def run(config_path, case_name):
               "final_valid_accessed": False,
               "limitations": ["Eval gradient parity does not imply equal training dropout streams.",
                               "Fixture cost only, no epoch budget or ERGO performance claim.",
-                              "CPU cost does not establish CUDA feasibility."]}
+                              "Full epochs and performance remain untested."]}
     (output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     (output / "status.json").write_text(
         json.dumps({"status": "complete", "pid": os.getpid()}) + "\n")

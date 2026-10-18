@@ -6833,3 +6833,20 @@ C5许可不覆盖新A4，AGENTS要求逐次许可。由代理先准备可审查�
 提案仅固定seed13、三个原完整4096病例各两次lr0，GPU suite总墙钟≤20分钟，完整
 baseline epoch/新方法训练另门；权重从官方镜像直下，不跨机搬本项目已训checkpoint。
 等待许可期间继续§25.104无标签输入/协议准备，不结束总Goal或等待作者科研选题。
+
+### 25.106 ERGO备用5090有界成本提案实现（2026-10-18，待新A4许可）
+
+开工科研价值/可行性见§25.105；主表先行。[提案合同](../phases/PHASE_A4_ergo_5090_cost_20261018.md)
+固定原完整4096/float32/三train病例，各两次lr0；GPU suite串行、TERM1200秒/清理30秒，
+不含epoch/非零lr/held-out/模型保存。v4仅接受5090真实root/hostname/卡0/固定UUID，
+拒绝错误目录、卡号、多卡、无CUDA或training_admitted=true；原4090 helper不改。
+`cuda_admitted=true`是CPU门后的技术成本范围，配置另明确作者许可未取得，不是授权。
+
+新环境准入用例先真实RED（函数缺失），GREEN后验证拒绝越界与完整输入原样传递；
+本地完整三件套955passed/91skipped（24.18秒），ruff零错误、smoke OK；原机真实Torch
+相关测试待部署补齐，不能把本地skip作PASS。脚本部署/推送后才提交具体许可请求。
+配置SHA `8745ddd6a6e5446a5476e1cc29c6cce743ecf04504fe1d03c367b5c0c7926461`。
+本地暂存11件已封存输入/证据tar.gz，4322362bytes、SHA
+`3fd153bb81b8aa3fb6fe692939fc0f96986994824511b90e3b7b350d6c0df902`；
+不含本项目checkpoint，upstream代码独立Git bundle，公开权重拟在许可后由目标机直下镜像。
+5090只读确认curl/timeout/setsid/git存在；尚未向该机写代码/数据或运行模型/GPU。

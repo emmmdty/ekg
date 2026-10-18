@@ -101,3 +101,29 @@ def test_canonical_cost_cannot_silently_trim_or_claim_padding_parity():
                   {**config, "schema_version": "unknown"}):
         with pytest.raises(ValueError, match="padding contract"):
             script().execution_feature(f, wrong)
+
+
+def test_5090_cost_rejects_wrong_host_root_card_and_training_scope():
+    module = script()
+    config = {"schema_version": "ekg.ergo_native_cost.v4", "server": "gpu-5090",
+              "cuda_admitted": True, "training_admitted": False,
+              "padding_policy": "retain_all_4096", "padding_parity_required": False}
+    case = {"device": "cuda"}
+    environment = {"cwd": "/mnt/aidata/tongjiakai/ekg", "visible": "0", "available": True,
+                   "hostname": "server-System-Product-Name"}
+    assert module.validate_execution_scope(config, case, **environment) == (
+        "RTX 5090", "GPU-07af326b-f41d-a706-2150-bc560c7db304")
+    for changed in ({"cwd": "/data/TJK/ekg"}, {"visible": "0,1"},
+                    {"visible": "1"}, {"available": False}, {"hostname": "localhost"}):
+        with pytest.raises(ValueError, match="5090"):
+            module.validate_execution_scope(config, case, **(environment | changed))
+    for changed in ({"server": "gpu-4090"}, {"cuda_admitted": False},
+                    {"training_admitted": True}):
+        with pytest.raises(ValueError, match="5090"):
+            module.validate_execution_scope(config | changed, case, **environment)
+    with pytest.raises(ValueError, match="5090"):
+        module.validate_execution_scope(config, {"device": "cpu"}, **environment)
+    f = feature()
+    assert module.execution_feature(f, config) is f
+    with pytest.raises(ValueError, match="padding contract"):
+        module.execution_feature(f, config | {"padding_parity_required": True})
