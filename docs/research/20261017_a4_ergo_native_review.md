@@ -27,3 +27,17 @@ pair-graph + focal方法约束未来创新归因。R1 §25.91–§25.93不支持
 此项若可行，只支持后续强rival适配/预算合同；baseline训练与新方法训练均未获本卡
 放行。若不可行，记录具体类别与一手证据，再由执行代理先改主表选择下一公开强rival。
 原A3 ATLoss、A4 masked/retained及其他封存结果身份保持；所有科学KR仍待验收。
+
+
+## 10-18接续裁决
+
+来源/全train容量审查已闭合，数字/hash/原缓存tiny数值障碍仅见R1 §25.95。
+选择FR-016(b)透明适配路径，尚非已复现/成绩行。保留全部ordered pairs、原RGT/focal
+与diagonal mask；native类别0=NONE/1=PRECONDITION/2=CAUSE，映射必须fixture锁定。
+原ESL无序二类/CV、native有向三类/固定manifest、metric、依赖、模型checkpoint可得性
+逐项披露；不修原mask来冒充原基准成功。Longformer与旧RoBERTa锚的差异不能归因于graph。
+
+当前允许最小接口实现与CPU tiny类体测试、原4090镜像权重获取（原机存留、不跨机）。
+先冻结成本合同，再独立裁决encoder/CUDA预算；目前仍不运行encoder/optimizer/GPU/训练。
+透明接口负责MIDs→marker位置、完整候选/标签、dtype/全邻居mask与official export，
+不改原模型/损失类体，不恢复未发布BERT模型。性能与新颖性仍未验收。

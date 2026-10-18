@@ -251,7 +251,7 @@ author delegation releases a new in-scope research queue; it does not reopen old
   mass completed under a separate float64-auxiliary identity, with the precision limitation disclosed.
   D4 own-train anchor replay/input visibility and source review completed; current binding template
   has no admitted candidate (R1 §25.83–§25.86), without a proposed training/effect claim. Formal
-  current work is C41-A-R. Identity/MIL priors and native identifiability are closed (R1 §25.88); full-train CPU replay and independent official scoring closed, PID1657823 is GONE; current target template not admitted, context diagnosis also closed (§25.93); next same-chapter ERGO native input/fidelity feasibility, no encoder/optimizer/GPU cost. No optimizer/model admission. ERGO remains availability preparation (§25.90). Scientific O1/O2 remain unmet; future D4 alternatives require new R1 evidence.
+  current work is C41-A-R. Identity/MIL priors and native identifiability are closed (R1 §25.88); full-train CPU replay and independent official scoring closed, PID1657823 is GONE; current target template not admitted, context diagnosis also closed (§25.93); ERGO native capacity/source review closed (§25.95); next transparent native interfaces/TDD and original-4090 mirror weight preparation, no encoder/optimizer/GPU cost. No optimizer/model admission. ERGO remains availability preparation (§25.90). Scientific O1/O2 remain unmet; future D4 alternatives require new R1 evidence.
   The new 5090 migration adapter C41-S is deferred, not completed.
   Follow EXPERIMENT_PLAN §3.9 and the 10-16 C41 subtable; `research/20261016_project_okr.md`
   maps O1–O4/KRs to C5, D4, A4, conditional confirmation and final traceability tasks.

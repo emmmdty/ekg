@@ -6495,3 +6495,75 @@ R190全28件seal SHA `b29a9fd21768d7ee105f5c46a1fbc6aeaf2cca5090423cd3e22fd639a6
 per-doc SHA `918713a2839a71936e322bd7cb80d831d65e57ab5f6aa9cfb25d216d7c3e44e4`。
 R190全部28件及manifest已在原4090逐项核hash一致；独占八项测试本地/远端通过，
 完整三件套最新933passed/87skipped、ruff零错误、smoke OK，一致性36项/diff通过。
+
+### 25.94 ERGO native强rival可行性自审（2026-10-17，wip）
+
+**科研价值**：对准表4-3/KR3.1–3.2/FR-016，以已发表pair-graph/focal强rival排除已知
+结构与类别不平衡解释，不把它当我们的创新。原论文[Table1/2](https://aclanthology.org/2022.coling-1.185.pdf)
+ESL同BERT下ERGO/RichGCN intra F1为59.0/55.2、intra+inter为48.1/46.6；公开实现的
+Longformer variant在Table2为50.9。这些是**原文不同基准**的数字，仅作选择证据，
+不与MAVEN主锚相减，也不把paper显著性声明视为本项目复核。
+
+**可行性**：R189已有真实源码/缓存与静态缺口。下一只核原缓存/CV单位、原始fidelity
+障碍和完整native marker输入的tokenizer容量；原模型不加载，源码不打补丁，package
+不安装，encoder/optimizer/GPU成本仍未放行。公开缓存元数据读取不等于原benchmark
+训练或native适配完成；缺失、过长或未知mask/fold映射如实记录，不裁候选补洞。
+
+缓存接口审查发现原mask排除self且有single-pair记录；下一仅用原RGT类体的tiny CPU
+控制复现全masked row的数值行为，核具体记录/根因，不加载encoder、不修原mask、不跑
+原benchmark。该调试与native tokenizer容量并列，用于去留/保真度裁决，不作方法效果。
+
+### 25.95 ERGO缓存与native容量闭合；准入透明接口准备（2026-10-17，10-18接续）
+
+R191=`runs/stages/R1/r1-v91-ergo-native-20261017/`。仅在原4090运行CPU tokenizer、
+闭白名单缓存解码及width4原RGT类体，不加载encoder/权重、不训练。PID1698236已成功
+SSH核GONE，命令退出0；本地/远端六项marker测试通过，实际入口/marker builder lint通过。
+早期缓存诊断脚本存在行宽/import格式问题，未改写已执行身份；不声称整个诊断目录lint全绿。
+
+**原基准边界**：作者代码固定`afa3d347ec360242c01d15a34b1f1ae63714c789`，原缓存
+dev为25篇（topic37/41）、train为233篇（20topics）。train负/正对55996/5069，dev
+8958/556；每篇一条feature、无重复(topic,doc)。原代码default seed42仅重放KFold
+**索引计算**，未初始化/运行任何seed42模型；五折有18–20个shared topics，但没有shared
+(topic,doc)。论文§4.1未明确要求topic-disjoint CV，故不据此指控泄漏或违反原协议。
+
+缓存节点全部是n(n−1)/2无序位置对，t1/t2并非总按文内先后；不能从方向字段猜原关系
+方向。掩码off-diagonal恰为不共享端点即屏蔽，diagonal全部屏蔽。真实train缓存的
+`4_6ecbplus.xml.xml`（topic4/label0）与`5_3ecbplus.xml.xml`（topic5/label1）各只有
+一个pair节点、mask=[[True]]。在当前torch2.8.0+cu128以固定向量/原Norm和RGT类体
+复现，attention及输出非有限；仅诊断性取消mask后有限。未修原mask/缓存，未跑完整
+encoder/trainer；这证明当前可得输入/栈的数值障碍，**不证明论文当年运行此配置或结果
+无效**。完整native ordered pairs最少有两个reciprocal节点，保留屏蔽self也有邻居；
+tiny对应控制有限，仍不等于全模型预算/训练可行。
+
+**FR-016裁决**：原数字路径(a)尚未完成。当前拟议native行采用**(b)透明适配路径**，
+并列障碍：`processor_esl`导入名缺失、当前transformers无旧AdamW导出/缺lxml、原缓存
+single-node数值问题、公开模型只有Longformer而无论文BERT窗口variant、未找到训练
+checkpoint。原warmup正文8%/源码10%差异保留。没有原根LICENSE文件不等于虚构禁用
+判定；不重新分发原源码。此处是适配路径裁定，**不是已完成外部复现或已测成绩**。
+
+**完整native容量见证**：官方`allenai/longformer-base-4096` revision
+`301e6a42cb0d9976a6d6a26a079fef81c18aa895`，仅四个tokenizer/config文件；保留全部
+原words与事件marker，不加gold coref/type/关系输入。2622篇、66744事件提及、2297524
+有向候选，digest精确为`ce10549172550addb67059550d89c9fc04dc5cb6452560a5ccf42169e679d766`。
+总1131221tokens，最长2080（doc54995af8da07c1b490d9a5ccd5df9d73），无>4096文档、
+无截断/mention重叠。marker位置和input_ids摘要逐篇留存。该见证尚非完整ERGO adapter。
+最大109mentions/11772pair节点；每epoch所有文档pair-square和6074629688。dense图
+训练成本仍未知；单FP32四头attention矩阵最大2217279744bytes只是下界，不报OOM。
+
+**下一裁决**：输入长度路线可行，继续同一C41-A-R，先改主表，实施最小透明native
+feature接口及原类调用/三类export测试，冻结成本合同。保持原RGT/focal类体、完整有向
+候选与diagonal mask，不修single-node作为native必要补丁；原binary scorer替换为官方
+subtype-sensitive evaluator，明确错误subtype同时FP/FN。原ESL CV改为冻结MAVEN
+train/internal-dev、seed13；不可把Longformer/全文差异的收益归因于graph或新方法。
+先做接口/TDD与原机镜像权重可得性（只在4090下载、无跨机搬运），再独立准入encoder/
+GPU成本；**本节不放行encoder、optimizer、GPU或训练**。无独立新干预，O1–O3未达成。
+
+容量report SHA `c1694c83d8522a50cdf7576740bc2e371df7eea1964b85d6bebd713631d2443a`，
+逐篇SHA `dd53ea310b123fb705341d5d0df68cfd9d2c1fc6a3676932e543534d3e2ca3d3`；
+真实mask probe SHA `78373885cd00b79ff5c461fcc0144530d2db1e97b014be36776bced4dab5145e`。
+
+R191全部20件（不含可再生成pycache）seal SHA
+`b5cd6c89d9200b404380fa819d9a87e770b11d44bf12bf135d93d553e512e97e`；
+原4090对全部20件逐项重算SHA并核seal，与本地一致。
+本次完整三件套933passed/87skipped（24.32秒）、ruff零错误、ekg-smoke OK；
+一致性36项和diff检查通过。87个skip仍非真实Torch验证；本项6个marker测试原机另验。
