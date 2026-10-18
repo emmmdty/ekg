@@ -6567,3 +6567,22 @@ R191全部20件（不含可再生成pycache）seal SHA
 原4090对全部20件逐项重算SHA并核seal，与本地一致。
 本次完整三件套933passed/87skipped（24.32秒）、ruff零错误、ekg-smoke OK；
 一致性36项和diff检查通过。87个skip仍非真实Torch验证；本项6个marker测试原机另验。
+
+### 25.96 ERGO透明接口实施自审（2026-10-18，wip）
+
+**科研价值**：对准表4-3/FR-016(b)/KR3.1–3.2，将已知强rival接入同manifest/全候选/
+官方子类型口径，防止二类metric与无序节点改写任务；不是新方法或效果证据。
+**可行性**：§25.95全文容量通过，当前仅纯Python接口和tiny CPU原类/掩码测试；原模型/
+focal继续引用外部hash固定源码，不复制重写。本地无torch，相关用例需原机真实执行。
+主表已先授权接口与原机镜像权重准备；encoder/optimizer/CUDA成本另立合同，当前不运行。
+R192=`runs/stages/R1/r1-v92-ergo-interface-20261018/`；先stub产生真实NotImplemented
+RED，再实现全量MIDs/markers/有向pairs、Cartesian targets与official export；数据gold只在
+独立监督函数使用，给定mention type不进模型文本。封存R191不改写。
+
+接口实现本地完整三件套951passed/88skipped（25.78秒）、ruff零错误、smoke OK；
+19项接口用例中18项本地通过、掩码Torch用例在项目环境skip，隔离CPU Torch环境实际
+执行该用例通过。原机对应全19项及真实class probe尚待执行，未以本地skip替代。
+feature配置SHA `f6c95712a872df5d00be4b216df9ec78e989f1327010a27f9ee692bf5b56ab49`，
+只有train输入/tokenizer/target侧车，没有encoder；正式全train准备待真实测试后执行。
+原4090镜像HEAD直链返回302及与官方blobs元数据一致的权重LFS SHA/字节数，正在原机
+下载；未从本地或5090传权重，尚未校验完成，不宣称checkpoint已可用。

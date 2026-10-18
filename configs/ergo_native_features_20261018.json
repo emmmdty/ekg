@@ -1,0 +1,39 @@
+{
+  "candidate_digest": "ce10549172550addb67059550d89c9fc04dc5cb6452560a5ccf42169e679d766",
+  "expected_class_counts": {
+    "0": 2248962,
+    "1": 35388,
+    "2": 13174
+  },
+  "final_valid_accessed": false,
+  "gold": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl",
+  "input_sha256": {
+    "data/protocols/v6/manifests/maven_ere_train.json": "47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl": "20ea01ebe71fb8c8e4f207368673cc71f29840a290698eefe15de3a24a3b6f05",
+    "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+    "runs/stages/R1/r1-v88-a4-anchor-train-20261017/full-cpu/data/test.jsonl": "97353e5e6561b5aec758f360172d237be379565822e0477091a832ce51980ebf",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895/config.json": "d0a64aa58d1b43c0d38000fa3083c142533c59fa151043e5c8113bcbee106d82",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895/tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895/vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655",
+    "runs/stages/R1/r1-v91-ergo-native-20261017/native_capacity/documents.jsonl": "dd53ea310b123fb705341d5d0df68cfd9d2c1fc6a3676932e543534d3e2ca3d3",
+    "scripts/prepare_ergo_native.py": "91ff3e84a7a369d12bf0e5a345bb33e3dfaf79b04bfe0ff651d603fa8b610a3d",
+    "src/ekg/core/protocol.py": "3e5d60d6b5e74382ad4953f92868a312d0beaf45ab11cabff28c89242a1bfcb5",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/relations/ergo_adapter.py": "54ad34bb5feb29c3e187433ef775b9eb200f4d8a5f0b819940476fef9e386a2d",
+    "src/ekg/relations/maven_ere_official.py": "8df2f5487daa223c797a8a0950a8cde47c070866cd6f1fd04dbda0ae9a0a05c8"
+  },
+  "manifest": "data/protocols/v6/manifests/maven_ere_train.json",
+  "max_length": 4096,
+  "output": "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train",
+  "reference_documents": "runs/stages/R1/r1-v91-ergo-native-20261017/native_capacity/documents.jsonl",
+  "schema_version": "ekg.ergo_native_features.v1",
+  "tokenizer": "runs/stages/R1/r1-v91-ergo-native-20261017/longformer-tokenizer/301e6a42cb0d9976a6d6a26a079fef81c18aa895",
+  "tokenizer_files": [
+    "config.json",
+    "merges.txt",
+    "tokenizer.json",
+    "vocab.json"
+  ],
+  "unlabeled": "runs/stages/R1/r1-v88-a4-anchor-train-20261017/full-cpu/data/test.jsonl"
+}
