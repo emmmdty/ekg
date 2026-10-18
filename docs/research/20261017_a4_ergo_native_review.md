@@ -47,3 +47,13 @@ pair-graph + focal方法约束未来创新归因。R1 §25.91–§25.93不支持
 准备已保留于af5c656及原config/output，不运行encoder；后续用独立cache-global配置/
 输出匹配真实cache，测试锁定EOS处于最后nonpad位置。原机已直下官方Longformer权重并
 核LFS SHA，未跨机搬运。接口CPU准备完成不等于真实完整模型成本通过。
+
+
+## 透明输入阶段出口与成本阶段（10-18）
+
+新cache-global输入/全量差异审计完成，原机真实测试通过，完整封存见R1 §25.97。
+初始“不运行encoder/optimizer”的范围到此闭合；主表下一允许**合同冻结/门通过后**
+原4090 CPU完整原模型成本：短文fixture、原类及原legacy AdamW，两次lr0 cold/warm
+API，数值参数不变并区分signed-zero字节变化，无epoch/held-out/效果。
+GPU须另核空卡/披露/CPU门通过；当前四卡有他人任务，不运行CUDA、不造等卡启动器。
+baseline训练仍未放行，未来新方法更须独立差异/强对照/power合同。

@@ -6615,3 +6615,34 @@ cache-matched新配置SHA
 `23d44f75ed42f6166280cbdabb66ed7e6d41b2cbc58b619f07478d4efd2e81c8`；
 新增EOS/无padding attention测试先真实RED、再GREEN，最新全仓952passed/88skipped
 （24.77秒）、ruff零错误、smoke OK。一致性36项/diff通过；原机全20项及新特征待执行。
+
+### 25.97 ERGO透明输入准备完成，进入真实原模型成本合同（2026-10-18）
+
+R192新cache-global全train已完成、PID2516503成功SSH核GONE。原机20项测试通过。
+新特征SHA `c4c018269fe69515579e15eb6dcaea38ebd96610bbfa9f1d4d891ff54733aeb0`，
+新report SHA `5d10b34a77ea1ca0d160bfa5036ccb6f0d82491372c8d8bf0806216a4d4856f4`。
+2622篇逐字段复核：**只新增真实EOS的global位**，全文IDs/attention mask/marker位置/
+全部候选均与旧准备字节所表达的值一致，没有padding global；全部targets与旧版和本地
+canonical gold侧车三份字节一致。原CLS-only身份/报告/config及RED均保留。
+代码`4b0fa53`，旧准备`af5c656`，前者全仓952passed/88skipped、ruff零错误、smoke OK；
+20项原机实际Torch通过，原RGT/focal tiny报告见R192，未跑任何encoder或optimizer。
+
+作者ERGO代码已通过Git从同一固定checkout保全到原4090持久路径
+`runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/`，HEAD及model.py SHA与
+§25.90一致；原tmp源未改。Longformer权重路径/身份见§25.96。新baseline仍无成绩行。
+本次原4090四卡占用17246/17181/17181/17183MiB，四个他人vllm PID
+2284611/2284612/2284613/2284614；CPU load9.27/11.75/12.85、可用480853MiB。
+这是本次只读快照，不是后续选卡许可；无GPU启动/等卡自动器。
+
+**下一任务开工自审**：科研价值是让表4-3强rival从接口正确走到真实原模型可运行/
+可预算，避免把tiny图层或mask稀疏度当训练可行性。可行性是权重/输入完整且原机CPU
+内存足够；GPU当前卡在【算力/资源】他人占用，CPU完整模型可独立推进。先改主表、
+冻结R193成本合同，再在原4090以短文fixture、原encoder/RGT/focal与原HF4.11.3 AdamW
+类体做CPU完整前向/反向、target无关输出与两次lr0 cold/warm API/参数数值不变检查；
+如signed zero变字节需单独计数，不伪装字节不变。无epoch、无held-out/效果或checkpoint
+写回。CPU门通过且空4090后才单独放行原完整候选CUDA成本；不挤卡，不自动启动。
+这仍非新方法准入/训练，也不构成O1–O3已达成。
+
+R192全部24件（含两版完整features/targets、保留失败/RED与原依赖源，不含pycache）seal
+SHA `7c201a73d6cb7cad336588fd9bbfc4ecfed343a531236cf320fe5517d89ea6a6`；
+原4090对全部24件逐项重算SHA并核seal，与本地一致。来源/输入阶段闭合，CPU成本尚未执行。
