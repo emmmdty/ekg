@@ -1,0 +1,18 @@
+{
+  "final_valid_accessed": false,
+  "optimizer_source": "runs/stages/R1/r1-v92-ergo-interface-20261018/hf_optimization_v4_11_3.py",
+  "output": "runs/stages/R1/r1-v98-ergo-trainer-replay-20261018/tiny-cpu",
+  "pins": {
+    "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/train.py": "551a24b88e5dcdf35f8b17680547045107b4c56ed6b329b1063c33afe658303f",
+    "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/utils.py": "0574f341e4edb1ba68ee87750d69f8f61261f296d43ba2d20b587bd7141d8074",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/hf_optimization_v4_11_3.py": "2ebfecd42a53245c4e72fd8e267efbef7679adfd10bcf14b8510f6830c8fd36e",
+    "scripts/profile_ergo_native_cost.py": "ca9d805faf071cd0aaf9cfb7dceb414fcc0b667bf7f92511c4a84cb81dc0cc65",
+    "scripts/replay_ergo_trainer.py": "74ddf719ae8dc24146d26c60b840177806dbc426b77079368535d6cd10a0ffa1",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/relations/ergo_training.py": "289a06ae07f73252fe06eb128ee6f37f01ae1d122d894b889d10fde45ebe69b5"
+  },
+  "schema_version": "ekg.ergo_trainer_replay.v1",
+  "seed": 13,
+  "train_source": "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/train.py",
+  "utils_source": "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/utils.py"
+}

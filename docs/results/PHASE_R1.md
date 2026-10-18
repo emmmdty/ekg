@@ -6901,3 +6901,35 @@ marker/双方向配对位置、完整padding/BOS/EOS globals及token witness SHA
 cuda_admitted不替代本次真实授权。开始核空卡、Git部署和公共镜像权重直下，尚未启动
 GPU计算。当前本地主干`a9dacaf`，对5090旧HEAD的已发布Git增量SHA
 `7bbb7d8f6b9f386548fe7cabba4f4e7c9c797edd64af6b905c41261d75ca4ad2`。
+
+
+### 25.109 ERGO等卡期间原trainer/native合同准备自审（2026-10-18，wip）
+
+**科研价值**：对准表4-3/FR-016(b)，已知公开强rival必须有原训练数学与native统一选模，
+不能仅因模型可forward而称复现。**可行性**：官方`train.py`真实train_epoch/20epoch/
+AdamW/clip1/linear10%warmup可核，接口/cache-global/train targets与无标签dev均已闭合。
+当前仅准备薄接线、固定单seed/官方causal选模合同与tiny CPU回放；不运行encoder/epoch，
+完整预算、最大dev no-grad容量及对应执行机资源许可未过前不启训。5090本次只获成本许可。
+
+一手源码`train.py` SHA `551a24b88e5dcdf35f8b17680547045107b4c56ed6b329b1063c33afe658303f`：
+train_epoch逐doc batch1/loss.backward/clip/optimizer/scheduler/model.zero_grad的真实函数
+可原样加载，避免重写已发布训练器。原依赖缺失只提取该函数体，模型/focal与AdamW同已验
+成本入口；native loader只接规定batch字段。原训练过程compute_f1每batch重扫累积前缀，
+且将两种positive交换算对；只能作为原binary日志诊断，绝不能用于native选模。若替换
+日志累计方式，必须在tiny数据对原函数逐值核同，训练函数/梯度步骤保持，逐项披露。
+选择仍为现协议internal-dev官方三类causal F1；不读final-valid，不预定赢家或以此方法
+声称创新。原论文8%/代码10%warmup差异、5fold→冻结native split、42→13seed以及binary
+到三类/候选全集等FR-016(b)差异延续，不恢复原5seed/CV或缺失BERT-window变体。
+
+§25.109实现：新增`ergo_training.load_train_epoch`按SHA只编译真实函数体，避开缺失ESL
+导入、不改变训练函数；`BinaryPrefixMeter`只增量算原binary日志，正例交换仍按上游算对，
+显式禁止用于native选模。两个用例先真实RED，再在隔离CPU Torch下2项GREEN；本地
+全量958passed/92skipped（26.78秒）、ruff零错误、smoke OK，一致性/diff待最终复核。
+[训练/选模草案](../phases/PHASE_A4_ergo_native_training_20261018.md)固定20epoch/原超参/
+代码10%warmup、internal-dev官方causal F1严格优于才换档；源`>=`到本地`>`列透明差异。
+该草案不放行epoch，GPU成本/最大dev no-grad/生产smoke/正式资源配置尚缺。
+
+R198 toy回放配置SHA `5099cc784fb36ff38eedc18647e01dda3775ab68381e70a9c18df2e317c15c8d`；
+仅九参数linear、两次toy pass，逐值比较原binary scorer与增量日志，以及原函数两种日志
+callback下的参数/optimizer/scheduler。非MAVEN epoch、无encoder、无科学效果或checkpoint。
+真实原机回放尚待执行，不能把隔离tiny测试当原完整模型/训练预算PASS。
