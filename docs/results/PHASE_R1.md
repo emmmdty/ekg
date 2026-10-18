@@ -6666,3 +6666,32 @@ SHA `7c201a73d6cb7cad336588fd9bbfc4ecfed343a531236cf320fe5517d89ea6a6`；
 optimizer loader因无transformers单独skip；原机全部真实用例待补，不能以skip作PASS。
 最新完整三件套952passed/91skipped（23.48秒）、ruff零错误、smoke OK；CPU encoder
 成本尚未执行。其后只有真实原机测试通过才push并启动本合同CPU短文病例。
+
+### 25.99 ERGO真实完整模型CPU短文成本闭合（2026-10-18）
+
+R193原CPU病例已完成，PID2522674成功SSH核GONE；代码`b4e0e16`，23项相关原机测试
+通过后push并执行合同。完整stdout审查无未解释encoder载入缺失/shape警告。实际加载
+官方Longformer和原RGT/focal、原HF4.11.3 AdamW类体，186442755个参数；pooler的
+weight/bias未参与任务，单独列出，不强称所有参数更新。原源码/权重前后hash不变。
+
+固定两次lr0 API：cold30.727681秒、warm31.751231秒（含梯度有限性检查、checksum在外）；
+峰RSS13704624KiB，optimizer state1486817304bytes；无epoch/非零lr/held-out或新预测
+效果。loss/logits/非空梯度均有限，eval更改target后logits逐值相同，参数**数值不变**。
+原始参数字节变化，负零数36→2→1；规范零符号后的SHA全程相同，原始SHA逐次单列，
+没有修改或恢复零符号来伪装byte parity。两次loss/grad norm仅作数值诊断，完整见report。
+这是短文正确性/实测成本，不是CUDA/最大候选或全epoch预算PASS。
+
+**下一开工自审与裁决**：科研价值仍是使已选公开强rival可运行并完成表4-3/FR-016(b)，
+不因成本把它换成更弱对手。可行性目前受【算力/资源】空GPU缺失限制；原CPU短文
+实际只有109nonpad却处理4096padding，长时间不能从此外推全train。成熟Longformer
+本身支持变长与按window自动pad，下一只在新身份验证**去掉尾部PAD**：所有真实word/
+marker/候选/监督与BOS/EOS位保持，max context不增、不改原模型/图层/损失/优化器。
+先同一初始化下eval logits/loss及全部非空参数梯度parity（dropout关闭，abs1e-6/
+rel1e-4；不能据此声称train dropout随机流相同）；通过后以train mode测CPU形状预算，
+据实选择CPU执行可行性或等待合法GPU，不写自动等卡任务、不使用未授权5090。
+新成本合同/主表在执行前冻结，原R193保持；仍未放行baseline epoch或新方法训练。
+
+R193全部5件seal SHA
+`cded90e8554654fcca8f7490e2255685ffb4f304004c205fa4cde385f38b9c75`，
+原4090逐项核SHA与本地一致；report SHA
+`a9730ec28c8f3f2e508f641702a530614b1b4db916fd3f1c6a0408adb6470cb9`。

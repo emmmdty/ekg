@@ -57,3 +57,10 @@ pair-graph + focal方法约束未来创新归因。R1 §25.91–§25.93不支持
 API，数值参数不变并区分signed-zero字节变化，无epoch/held-out/效果。
 GPU须另核空卡/披露/CPU门通过；当前四卡有他人任务，不运行CUDA、不造等卡启动器。
 baseline训练仍未放行，未来新方法更须独立差异/强对照/power合同。
+
+
+CPU短文完整成本已过（R1 §25.99），原模型/optimizer类体真实执行，参数数值不变而
+零符号字节变化如实保留。固定4096 padding的CPU成本不宜直接外推，主表下一为独立
+PAD-only变长parity/CPU预算合同；真实词/marker/候选保留、原类不改，源Longformer
+自动补齐window。不以eval梯度parity声称train随机流一致。CPU baseline训练仍待预算/
+合同；GPU未启动。
