@@ -374,8 +374,10 @@ D4当前绑定模板的R1/train诊断已裁决未准入（§25.86），准备卡
 当前正式执行C41-A-R：复用§25.77 native distinct原因/coref重复与§25.80普通SupCon，
 ATLOP/DCL/None及identity/MIL边界已核；全train4线程CPU重放/双端official独立复算
 已完成，原checkpoint不变、PID1657823核GONE（§25.91）。当前目标模板未准入且回合关闭；
-原窗口/配对诊断亦闭合（§25.93），当前不立项窗口方法。下一按ERGO可行性卡核原缓存/
-CV/fidelity及全候选native输入容量，只读准备；没有encoder/optimizer/GPU成本放行。
+原窗口/配对诊断亦闭合（§25.93），当前不立项窗口方法。ERGO来源/完整native容量、
+透明接口、原机权重及完整模型CPU短文成本已闭合（§25.95–§25.99）；下一冻结PAD-only
+尾部padding移除的确定性logit/loss/全梯度parity与CPU预算合同。原类、真实词/全部候选
+保持，epoch/新方法训练未放行，CUDA当前被占且无自动启动器。
 C5/D4已完成诊断不重跑，下方C5旧命令均仅供追溯。
 
 **10-16原顺序**：读[项目OKR](research/20261016_project_okr.md)及主表§3.9/§4的

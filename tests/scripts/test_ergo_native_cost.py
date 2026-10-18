@@ -71,3 +71,20 @@ def test_real_model_inputs_use_complete_pairs_and_bool_original_mask():
     bad["t1_pos"] = [2, 4]  # A word is not an event start marker.
     with pytest.raises(ValueError, match="marker"):
         script().model_inputs(bad, [0, 2], torch.device("cpu"))
+
+
+def test_trim_only_trailing_padding_preserves_all_words_markers_pairs_and_input():
+    f = feature()
+    padded = {**f, "enc_input_ids": f["enc_input_ids"] + [1] * 8,
+              "enc_mask_ids": [1] * 8 + [0] * 8,
+              "global_attention_mask": f["global_attention_mask"] + [0] * 8}
+    trimmed = script().trim_trailing_padding(padded)
+    assert trimmed == f
+    assert len(padded["enc_input_ids"]) == 16
+    assert script().trim_trailing_padding(f) == f
+    bad = {**padded, "enc_input_ids": f["enc_input_ids"] + [999] + [1] * 7}
+    with pytest.raises(ValueError, match="padding"):
+        script().trim_trailing_padding(bad)
+    bad = {**padded, "global_attention_mask": f["global_attention_mask"] + [1] + [0] * 7}
+    with pytest.raises(ValueError, match="padding"):
+        script().trim_trailing_padding(bad)

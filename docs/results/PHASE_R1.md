@@ -6695,3 +6695,20 @@ R193全部5件seal SHA
 `cded90e8554654fcca8f7490e2255685ffb4f304004c205fa4cde385f38b9c75`，
 原4090逐项核SHA与本地一致；report SHA
 `a9730ec28c8f3f2e508f641702a530614b1b4db916fd3f1c6a0408adb6470cb9`。
+
+### 25.100 ERGO PAD-only成本配置自审/冻结（2026-10-18，wip）
+
+科研价值/可行性已在§25.99开工自审，主表先更新后实施。
+[新合同](../phases/PHASE_A4_ergo_padding_cost_20261018.md)冻结同一模型下full4096与
+仅去trailing PAD的eval logit/loss/全部非空参数梯度parity；abs1e-6/rel1e-4，不事后放宽。
+只移三个序列数组的已masked后缀，真实词/markers、BOS/EOS、候选/标签不变；官方库
+自动window pad。关闭dropout的parity不能证明训练随机流一致；FR-016仍(b)透明适配。
+
+配置SHA `db47033ea17cc92b6cb6d8025344ad9a1b187cad537020938dd927451fea3274`，
+R194=`runs/stages/R1/r1-v94-ergo-padding-cost-20261018/`，CPU12threads、其余原类/权重/
+超参/seed13不变。CPU线程与padding同时改，耗时差不全归因PAD。短文先过门，再测固定
+typical/worst/longest预算；无epoch/新方法训练/CUDA许可，原R193不覆盖。
+新trim helper先stub真实RED，再验证只去PAD/不改输入/拒绝伪PAD及padding全局位；
+隔离CPU Torch三个helper通过、原optimizer loader因缺transformers单独skip，原机待补。
+最新完整三件套953passed/91skipped（24.96秒）、ruff零错误、smoke OK；一致性36项/diff通过。
+原机实际测试与真实padding parity仍待执行，不把本地skip当完成。

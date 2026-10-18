@@ -86,16 +86,31 @@ def read_document(path, doc_id):
     raise ValueError(f"cost fixture absent: {doc_id}")
 
 
+def trim_trailing_padding(feature):
+    """Remove only verified masked padding; Longformer handles its window padding."""
+    keys = ("enc_input_ids", "enc_mask_ids", "global_attention_mask")
+    mask = feature["enc_mask_ids"]
+    size = sum(mask)
+    if (not 2 <= size <= len(mask) or any(len(feature[k]) != len(mask) for k in keys)
+            or mask != [1] * size + [0] * (len(mask) - size)
+            or feature["enc_input_ids"][size:] != [1] * (len(mask) - size)
+            or any(feature["global_attention_mask"][size:])):
+        raise ValueError("non-trailing or invalid padding")
+    return feature | {key: feature[key][:size] for key in keys}
+
+
 def run(config_path, case_name):
     import torch
-    from profile_original_joint_cost import require_empty_gpu, validate_device
+    from profile_original_joint_cost import compare_gradients, require_empty_gpu, validate_device
 
     config = json.loads(config_path.read_text())
     case = config["cases"][case_name]
     if (str(Path.cwd()) != "/data/TJK/ekg" or config["seed"] != 13
-            or config["schema_version"] != "ekg.ergo_native_cost.v1"
+            or config["schema_version"] != "ekg.ergo_native_cost.v2"
             or config["final_valid_accessed"] is not False
-            or config["optimizer_api_calls"] != 2 or config["learning_rate"] != 0.0):
+            or config["optimizer_api_calls"] != 2 or config["learning_rate"] != 0.0
+            or config["padding_policy"] != "drop_only_verified_trailing_pad"
+            or config["padding_parity_required"] is not True or config["cpu_threads"] != 12):
         raise ValueError("remote frozen zero-lr cost scope required")
     validate_device(case["device"], os.environ.get("CUDA_VISIBLE_DEVICES"),
                     torch.cuda.is_available(), "gpu-4090")
@@ -125,7 +140,7 @@ def run(config_path, case_name):
     output.mkdir(parents=True, exist_ok=False)
     (output / "status.json").write_text(
         json.dumps({"status": "running", "pid": os.getpid()}) + "\n")
-    torch.set_num_threads(4)
+    torch.set_num_threads(config["cpu_threads"])
     torch.manual_seed(13)
     torch.backends.cuda.matmul.allow_tf32 = False
     device = torch.device(case["device"])
@@ -141,8 +156,31 @@ def run(config_path, case_name):
     model.to(device)
     if any(p.dtype != torch.float32 for p in model.parameters()):
         raise ValueError("full original float32 model required")
-    inputs = model_inputs(feature, target, device)
+    trimmed = trim_trailing_padding(feature)
+    inputs = model_inputs(trimmed, target, device)
+    full_inputs = model_inputs(feature, target, device)
     model.eval()
+    print(json.dumps({"phase": "padding_parity", "case": case_name}), flush=True)
+    reference_loss, reference_logits = model(**full_inputs)
+    reference_loss.backward()
+    gradients = {n: p.grad.detach().cpu().clone() for n, p in model.named_parameters()
+                 if p.grad is not None}
+    reference_loss = reference_loss.detach().cpu()
+    reference_logits = reference_logits.detach().cpu()
+    model.zero_grad(set_to_none=True)
+    trimmed_loss, trimmed_logits = model(**inputs)
+    trimmed_loss.backward()
+    parity = compare_gradients(model, gradients, torch)
+    parity["loss_absolute_error"] = float((trimmed_loss.detach().cpu() - reference_loss).abs())
+    parity["logits_max_absolute_error"] = float(
+        (trimmed_logits.detach().cpu() - reference_logits).abs().max())
+    if (not parity["passed"] or not torch.allclose(trimmed_loss.detach().cpu(), reference_loss,
+                                                  rtol=1e-4, atol=1e-6)
+            or not torch.allclose(trimmed_logits.detach().cpu(), reference_logits,
+                                  rtol=1e-4, atol=1e-6)):
+        raise ValueError(f"padding loss/logits/full-gradient parity failed: {parity}")
+    del gradients, reference_loss, reference_logits, trimmed_loss, trimmed_logits, full_inputs
+    model.zero_grad(set_to_none=True)
     print(json.dumps({"phase": "target_independence", "case": case_name}), flush=True)
     with torch.no_grad():
         _, first = model(**inputs)
@@ -200,6 +238,10 @@ def run(config_path, case_name):
     report = {"status": "complete", "case": case_name, "fixture": case,
               "config_sha256": sha256_file(config_path), "device": case["device"], "gpu": gpu,
               "torch_version": torch.__version__, "original_classes_unchanged": True,
+              "padding_parity": parity, "cpu_threads": config["cpu_threads"],
+              "API_input_length": len(trimmed["enc_input_ids"]),
+              "Longformer_internal_window_padded_length": (
+                  (len(trimmed["enc_input_ids"]) + 511) // 512 * 512),
               "resize_added_embeddings_mean_resizing": False,
               "target_independent_logits": True, "optimizer_api_calls": 2, "nonzero_lr_steps": 0,
               "epoch_count": 0, "parameter_values_unchanged": True,
@@ -212,7 +254,8 @@ def run(config_path, case_name):
                    if isinstance(v, torch.Tensor)),
               "cpu_peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
               "final_valid_accessed": False,
-              "limitations": ["Fixture cost only, no epoch budget or ERGO performance claim.",
+              "limitations": ["Eval gradient parity does not imply equal training dropout streams.",
+                              "Fixture cost only, no epoch budget or ERGO performance claim.",
                               "CPU cost does not establish CUDA feasibility."]}
     (output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     (output / "status.json").write_text(
