@@ -99,6 +99,19 @@ def trim_trailing_padding(feature):
     return feature | {key: feature[key][:size] for key in keys}
 
 
+
+def execution_feature(feature, config):
+    """Dispatch explicit frozen cost versions; canonical v3 never trims its input."""
+    modes = {"ekg.ergo_native_cost.v2": ("drop_only_verified_trailing_pad", True),
+             "ekg.ergo_native_cost.v3": ("retain_all_4096", False)}
+    if config["schema_version"] not in modes:
+        raise ValueError("unknown padding contract version")
+    policy, parity = modes[config["schema_version"]]
+    if config["padding_policy"] != policy or config["padding_parity_required"] is not parity:
+        raise ValueError("inconsistent padding contract")
+    return trim_trailing_padding(feature) if parity else feature
+
+
 def run(config_path, case_name):
     import torch
     from profile_original_joint_cost import compare_gradients, require_empty_gpu, validate_device
@@ -106,11 +119,9 @@ def run(config_path, case_name):
     config = json.loads(config_path.read_text())
     case = config["cases"][case_name]
     if (str(Path.cwd()) != "/data/TJK/ekg" or config["seed"] != 13
-            or config["schema_version"] != "ekg.ergo_native_cost.v2"
             or config["final_valid_accessed"] is not False
             or config["optimizer_api_calls"] != 2 or config["learning_rate"] != 0.0
-            or config["padding_policy"] != "drop_only_verified_trailing_pad"
-            or config["padding_parity_required"] is not True or config["cpu_threads"] != 12):
+            or config["cpu_threads"] != 12):
         raise ValueError("remote frozen zero-lr cost scope required")
     validate_device(case["device"], os.environ.get("CUDA_VISIBLE_DEVICES"),
                     torch.cuda.is_available(), "gpu-4090")
@@ -137,6 +148,7 @@ def run(config_path, case_name):
             or sum(feature["enc_mask_ids"]) != case["nonpad_tokens"]
             or len(feature["enc_input_ids"]) != 4096):
         raise ValueError("frozen complete fixture dimensions differ")
+    model_feature = execution_feature(feature, config)
     output.mkdir(parents=True, exist_ok=False)
     (output / "status.json").write_text(
         json.dumps({"status": "running", "pid": os.getpid()}) + "\n")
@@ -156,31 +168,32 @@ def run(config_path, case_name):
     model.to(device)
     if any(p.dtype != torch.float32 for p in model.parameters()):
         raise ValueError("full original float32 model required")
-    trimmed = trim_trailing_padding(feature)
-    inputs = model_inputs(trimmed, target, device)
-    full_inputs = model_inputs(feature, target, device)
+    inputs = model_inputs(model_feature, target, device)
     model.eval()
-    print(json.dumps({"phase": "padding_parity", "case": case_name}), flush=True)
-    reference_loss, reference_logits = model(**full_inputs)
-    reference_loss.backward()
-    gradients = {n: p.grad.detach().cpu().clone() for n, p in model.named_parameters()
-                 if p.grad is not None}
-    reference_loss = reference_loss.detach().cpu()
-    reference_logits = reference_logits.detach().cpu()
-    model.zero_grad(set_to_none=True)
-    trimmed_loss, trimmed_logits = model(**inputs)
-    trimmed_loss.backward()
-    parity = compare_gradients(model, gradients, torch)
-    parity["loss_absolute_error"] = float((trimmed_loss.detach().cpu() - reference_loss).abs())
-    parity["logits_max_absolute_error"] = float(
-        (trimmed_logits.detach().cpu() - reference_logits).abs().max())
-    if (not parity["passed"] or not torch.allclose(trimmed_loss.detach().cpu(), reference_loss,
-                                                  rtol=1e-4, atol=1e-6)
-            or not torch.allclose(trimmed_logits.detach().cpu(), reference_logits,
-                                  rtol=1e-4, atol=1e-6)):
-        raise ValueError(f"padding loss/logits/full-gradient parity failed: {parity}")
-    del gradients, reference_loss, reference_logits, trimmed_loss, trimmed_logits, full_inputs
-    model.zero_grad(set_to_none=True)
+    parity = {"applied": False, "reason": "Canonical complete4096 input retained unchanged."}
+    if config["padding_parity_required"]:
+        full_inputs = model_inputs(feature, target, device)
+        print(json.dumps({"phase": "padding_parity", "case": case_name}), flush=True)
+        reference_loss, reference_logits = model(**full_inputs)
+        reference_loss.backward()
+        gradients = {n: p.grad.detach().cpu().clone() for n, p in model.named_parameters()
+                     if p.grad is not None}
+        reference_loss = reference_loss.detach().cpu()
+        reference_logits = reference_logits.detach().cpu()
+        model.zero_grad(set_to_none=True)
+        trimmed_loss, trimmed_logits = model(**inputs)
+        trimmed_loss.backward()
+        parity = compare_gradients(model, gradients, torch)
+        parity["loss_absolute_error"] = float((trimmed_loss.detach().cpu() - reference_loss).abs())
+        parity["logits_max_absolute_error"] = float(
+            (trimmed_logits.detach().cpu() - reference_logits).abs().max())
+        if (not parity["passed"] or not torch.allclose(trimmed_loss.detach().cpu(), reference_loss,
+                                                      rtol=1e-4, atol=1e-6)
+                or not torch.allclose(trimmed_logits.detach().cpu(), reference_logits,
+                                      rtol=1e-4, atol=1e-6)):
+            raise ValueError(f"padding loss/logits/full-gradient parity failed: {parity}")
+        del gradients, reference_loss, reference_logits, trimmed_loss, trimmed_logits, full_inputs
+        model.zero_grad(set_to_none=True)
     print(json.dumps({"phase": "target_independence", "case": case_name}), flush=True)
     with torch.no_grad():
         _, first = model(**inputs)
@@ -239,9 +252,10 @@ def run(config_path, case_name):
               "config_sha256": sha256_file(config_path), "device": case["device"], "gpu": gpu,
               "torch_version": torch.__version__, "original_classes_unchanged": True,
               "padding_parity": parity, "cpu_threads": config["cpu_threads"],
-              "API_input_length": len(trimmed["enc_input_ids"]),
+              "padding_policy": config["padding_policy"],
+              "API_input_length": len(model_feature["enc_input_ids"]),
               "Longformer_internal_window_padded_length": (
-                  (len(trimmed["enc_input_ids"]) + 511) // 512 * 512),
+                  (len(model_feature["enc_input_ids"]) + 511) // 512 * 512),
               "resize_added_embeddings_mean_resizing": False,
               "target_independent_logits": True, "optimizer_api_calls": 2, "nonzero_lr_steps": 0,
               "epoch_count": 0, "parameter_values_unchanged": True,

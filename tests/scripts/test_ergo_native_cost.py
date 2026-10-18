@@ -85,6 +85,19 @@ def test_trim_only_trailing_padding_preserves_all_words_markers_pairs_and_input(
     bad = {**padded, "enc_input_ids": f["enc_input_ids"] + [999] + [1] * 7}
     with pytest.raises(ValueError, match="padding"):
         script().trim_trailing_padding(bad)
+
     bad = {**padded, "global_attention_mask": f["global_attention_mask"] + [1] + [0] * 7}
     with pytest.raises(ValueError, match="padding"):
         script().trim_trailing_padding(bad)
+
+
+def test_canonical_cost_cannot_silently_trim_or_claim_padding_parity():
+    f = feature()
+    config = {"schema_version": "ekg.ergo_native_cost.v3", "padding_policy": "retain_all_4096",
+              "padding_parity_required": False}
+    assert script().execution_feature(f, config) is f
+    for wrong in ({**config, "padding_parity_required": True},
+                  {**config, "padding_policy": "drop_only_verified_trailing_pad"},
+                  {**config, "schema_version": "unknown"}):
+        with pytest.raises(ValueError, match="padding contract"):
+            script().execution_feature(f, wrong)

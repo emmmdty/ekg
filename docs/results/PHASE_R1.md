@@ -6763,3 +6763,20 @@ optimizer调用，R194仅三个成功病例各2次lr0 API，总6次，均无参�
 R194全部14件（含worst原traceback/启动status与新增失败完成审计）seal SHA
 `faec3bbeced31e64558d54c22f01148bf44580740f0937480abb1db7dbfe5167`；
 原4090逐项核SHA与本地一致。候选版本未准入、所有进程GONE，不把物理执行闭合当科学成功。
+
+### 25.103 ERGO恢复原完整padding CPU预算合同（2026-10-18，wip）
+
+科研价值/可行性已在§25.102开工自审，主表已先更新。
+[新合同](../phases/PHASE_A4_ergo_canonical_cost_20261018.md)对应R195=
+`runs/stages/R1/r1-v95-ergo-canonical-cost-20261018/`；配置SHA
+`a2af02e042ce817f2fb7e2b9848974d2c220fe3c60a7e2dc4c6c9f8be4da3b34`。
+原R192完整4096 tensors原样输入，seed13/float32/原模型、focal、legacy AdamW不变，
+只用CPU12threads、固定典型/最大候选/最长三病例，预算API各两次lr0。无PAD优化/等价
+主张，报告parity applied=false；R194仍为FAIL，不改其数值门/结果。
+
+新增v3策略检查先stub真实RED，再验证完整输入对象原样保留、schema/policy/parity标记
+不一致即拒绝；旧v2 helper/原门保留供冻结版本追溯，当前不再执行它。隔离CPU Torch
+四项helper通过、原optimizer loader因缺transformers单独skip；真实原机待补。当前
+仅成本实现/合同，不启动epoch或CUDA。
+最新完整三件套954passed/91skipped（24.64秒）、ruff零错误、smoke OK；一致性36项/diff通过。
+原机真实测试后才push/执行R195；当前无epoch/非零lr/GPU任务。
