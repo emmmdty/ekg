@@ -7077,3 +7077,47 @@ smoke、设备/墙钟及（若选5090）完整训练的独立授权。
 不能以重复CPU准备或只改审查报告替代其结果；有空卡后仍须即时再核并按冻结合同执行。
 未设置等卡/自动重试或跨机搬本项目checkpoint。Goal复核仍usageLimited（830095/
 13076，updatedAt未刷新），未声称自动续跑恢复、未新建重复Goal或标完整科学目标成功。
+
+
+### 25.116 CUDA production与独立checkpoint复算入口准备自审（2026-10-18）
+
+**科研价值**：对准表4-3/FR-016(b)与KR4.2，在真实GPU成本具备后可实际产出训练入口
+要求的CUDA容量/原函数production证据，并从选中checkpoint独立复算，避免靠手填gate
+或仅缓存分数验收。**可行性**：原模型/原函数真实CPU链已验证，device移植不改数学；
+当前仅代码与CPU tests，不运行新CUDA/encoder inference。主表先允许这些软件准备，
+不是另起科学路线，仍无新方法/epoch准入。
+
+GPU production与完整训练/独立推理属于后续独立范围，5090本次20分钟三例成本许可不
+覆盖它们；默认CUDA preflight false，不能套R197许可记录。新producer需在原函数两个
+lr0 batch后再测最大dev，记录optimizer state仍驻留时的no-grad峰值，避免把裸模型容量
+当实际训练验证容量。已封R199 CPU顺序/报告不改写，重放用e7de4fa。
+
+独立复算必须在完整运行report/checkpoint/config/选中epoch身份满足后才读dev gold/
+载模型，完整有向候选/MID及官方三类scorer保持；没有checkpoint时默认拒绝。额外seed/
+final-valid/跨机checkpoint不开放，当前所有软件tests仍不替代GPU或科学门。
+
+
+§25.116软件落地：`preflight_ergo_native.py`新增v2 CPU/CUDA producer，旧CPU v1身份不改；
+CUDA必须匹配主机根、单卡型号/UUID及空卡，5090仅接受独立production/full20 scope，
+R197成本许可不能代用。先执行原函数两个lr0 fixture，再保持AdamW状态驻留测试最大dev，
+分别记录训练/验证CUDA峰值；这段CUDA路径尚未实测，未产出任何CUDA报告。
+
+`verify_ergo_native_checkpoint.py`要求完整20epoch report、配置与选中checkpoint SHA匹配，
+在训练原机严格载入state_dict；覆盖全dev并逐篇比较三类argmax，再读internal-dev gold
+交官方scorer核分。正例子类型交换也会失败，不依赖原binary日志。没有真实ERGO训练
+checkpoint，当前仅完成运行状态/文件身份/候选覆盖与类一致性门测试，尚无真实权重重载
+或encoder复算结果；选5090还须新许可明确覆盖独立验证。
+
+另补非有限global norm门：即使每个gradient元素有限，平方求和仍可溢出，原默认clip
+可能将梯度静默清零。回归先得到DID NOT RAISE后修复；保留原train_epoch函数体，只将
+其`nn.utils.clip_grad_norm_`绑定为`error_if_nonfinite=True`，健康分支仍调用同一Torch
+实现。此为透明fail-fast差异，旧R198/R199固定源码与证据不改写、不倒推已测此门。
+
+阶段审查配置另存`configs/ergo_native_training_unadmitted_v2_close_20261018.json`，SHA
+`3c198cbc3836b101e54e7b7c8a971d6ef05d8de02cc90e5167fbc528c13741c1`；三个准入均false，
+绑定当前工具及独立复算源码。旧b249e0…提案保留历史身份，不用新源码冒充旧pin执行。
+正式设备、预算、CUDA容量/production及相应授权齐备后仍须另冻执行配置。
+
+完整本地验证：968passed/95skipped（26.20秒），ruff零错误、ekg-smoke OK，协议一致性
+36项通过及diff无误。项目环境的Torch跳过项不冒充通过；独立CPU Torch环境对原函数/
+scheduler、训练入口及checkpoint门共15项实际通过。原4090同组CPU测试待部署核验。

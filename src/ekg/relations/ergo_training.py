@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import ast
 import logging
+from functools import partial
 from pathlib import Path
+from types import SimpleNamespace
 
 from ekg.core.stage_bundle import sha256_file
 
@@ -53,7 +55,10 @@ def load_train_epoch(path: Path, expected_sha: str, compute_f1):
              if isinstance(n, ast.FunctionDef) and n.name == "train_epoch"]
     if len(nodes) != 1:
         raise ValueError("expected exactly one original train_epoch")
-    namespace = {"torch": torch, "nn": torch.nn, "np": np, "logging": logging,
+    # Original body/math retained; reject nonfinite norms before clipping can erase them.
+    guarded_nn = SimpleNamespace(utils=SimpleNamespace(clip_grad_norm_=partial(
+        torch.nn.utils.clip_grad_norm_, error_if_nonfinite=True)))
+    namespace = {"torch": torch, "nn": guarded_nn, "np": np, "logging": logging,
                  "logger": logging.getLogger("external_ergo_train"), "compute_f1": compute_f1}
     exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), "exec"), namespace)
     return namespace["train_epoch"]

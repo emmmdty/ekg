@@ -145,3 +145,29 @@ def test_training_features_must_match_the_costed_input_identity(tmp_path, monkey
 
     pins['new-features'] = pins['old-features']
     script(monkeypatch).require_production_evidence(cfg)
+
+
+def preflight_script():
+    spec = importlib.util.spec_from_file_location(
+        'ergo_preflight_scope', Path('scripts/preflight_ergo_native.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_cuda_preflight_scope_requires_real_host_card_and_new_backup_scope():
+    module = preflight_script()
+    args = {'device': 'cuda', 'server': 'gpu-5090', 'cwd': '/mnt/aidata/tongjiakai/ekg',
+            'visible': '0', 'available': True, 'cuda_admitted': True,
+            'authorization_scope': 'ERGO_native_production_smoke'}
+    assert module.validate_preflight_environment(**args) == 'RTX 5090'
+    for update in [{'authorization_scope': 'three train fixtures cost only'},
+                   {'visible': '1'}, {'visible': '0,1'}, {'available': False},
+                   {'cwd': '/data/TJK/ekg'}, {'cuda_admitted': False}]:
+        with pytest.raises(ValueError):
+            module.validate_preflight_environment(**(args | update))
+    cpu = {'device': 'cpu', 'server': 'gpu-4090', 'cwd': '/data/TJK/ekg', 'visible': '-1',
+           'available': False, 'cuda_admitted': False, 'authorization_scope': None}
+    assert module.validate_preflight_environment(**cpu) is None
+    with pytest.raises(ValueError):
+        module.validate_preflight_environment(**(cpu | {'visible': '0', 'available': True}))

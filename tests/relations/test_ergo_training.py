@@ -56,3 +56,16 @@ def test_legacy_scheduler_loader_keeps_frozen_function_and_rejects_drift(tmp_pat
     path.write_text(path.read_text().replace('step / 2', 'step / 3'))
     with pytest.raises(ValueError, match="source drift"):
         module().load_linear_scheduler(path, digest)
+
+
+def test_original_epoch_rejects_overflowed_global_gradient_norm(tmp_path):
+    torch = pytest.importorskip('torch')
+    path = tmp_path / 'train.py'
+    path.write_text('def train_epoch(args, model, train_loader, optimizer, scheduler):\n'
+                    '    return nn.utils.clip_grad_norm_(model.parameters(), 1.0)\n')
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    model = torch.nn.Linear(2, 1, bias=False)
+    model.weight.grad = torch.full_like(model.weight, 1e30)
+    epoch = module().load_train_epoch(path, digest, module().BinaryPrefixMeter())
+    with pytest.raises(RuntimeError, match='non-finite'):
+        epoch(None, model, None, None, None)
