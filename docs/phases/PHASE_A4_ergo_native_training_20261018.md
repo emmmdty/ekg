@@ -65,3 +65,10 @@ OOM/非有限值或超预算如实保留，不删最大文档、缩候选、降b
 数值不变）、最大dev的CUDA no-grad/target独立性、原epoch真实CUDA生产smoke与相应
 pinned身份。CPU/toy记录不能代替这些门。5090 full20epoch权限由独立scope记录核验，
 既有20分钟cost授权不匹配该scope。
+
+训练前实际输入/成本联核已进入v2入口：当前审查配置为
+`configs/ergo_native_training_unadmitted_v2_20261018.json`，仍默认不可执行。旧v1提案
+及其源码b6cdde8保持追溯。正式运行前须逐篇核完整4096/BOS/EOS padding、所有候选位置/
+MID顺序与固定train/dev digest，并将实际训练features/targets SHA与成本config输入SHA
+相等联核；同内容路径变化可接受，改变内容需要重新通过相应门。此版本增加有效性门，
+不改变原模型/训练数学，R199真实CPU smoke仍用其冻结e7de4fa重放。

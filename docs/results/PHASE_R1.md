@@ -7015,3 +7015,53 @@ native epoch；源train_epoch末尾清梯度，故unused名单必须在optimizer
 native collator与CUDA preflight拒绝两用例先真实RED，再GREEN；隔离CPU Torch下5项
 入口测试通过。完整本地三件套962passed/94skipped（26.12秒）、ruff零错误、smoke OK，
 一致性36项/diff待最终复核。原机8项实际tests/CPU完整模型执行仍待完成。
+
+
+### 25.113 native训练入口审查：成本与实际特征身份联核（2026-10-18，修复前）
+
+**科研价值**：对准表4-3的三轴可比性，确保正式训练在任何epoch前使用固定候选和已经
+做过成本的完整4096特征，不仅验证配置自报的hash。**可行性**：只需纯CPU metadata
+校验；默认未准入，尚无native训练或结果受影响。主表先补此门，不改变模型/损失/数据。
+
+回归用例构造三件status=complete的CUDA形状报告，其余门满足，成本config钉old-features
+SHA、训练config钉另一SHA；当前入口**未拒绝**（DID NOT RAISE）。根因是成本门核报告/
+config/server身份，但未把cost config内features/targets哈希与训练实际文件绑定。
+另一新用例要求完整4096/BOS/EOS padding/候选顺序在训练前对冻结digest，当前没有该
+汇总核验函数；不能只等模型首个forward或epoch后评分才发现。先见RED再修，不把unit
+临时假报告当任何真实CUDA证据；科学状态/既有封存结果不改。
+
+### 25.114 R199真实CPU原trainer接线与最大dev前向闭合（2026-10-18）
+
+代码`e7de4fa`，原4090八项实际Torch测试通过后push执行；timeout PID2726397与worker
+PID2726398均成功SSH核GONE，完整stdout无未解释载入/shape警告。最大dev候选11990/
+真实1411tokens、API始终完整4096；两次no-grad只改placeholder target，logits逐值相同
+且有限，耗时15.466144秒，无gold/optimizer或预测保存。
+
+两个固定train fixture通过共用native七字段collator进入**原样train_epoch函数**，原模型/
+focal/legacy AdamW/原linear schedule，实际两次lr0、非零lr0次、完整native epoch0。
+训练部分49.377311秒，整个进程峰RSS13343536KiB；两个batch的非空梯度均有限，
+只有原pooler dense weight/bias无gradient（在optimizer前捕获，未错用清零后状态）。
+全部参数数值不变，负零数36→1，raw字节变化如实单列，未恢复或修改参数签名。
+
+无dev gold/evaluator/分数、无预测/classes或checkpoint；CPU报告明确不准入CUDA容量/
+production。它验证真实原trainer/native接口，不能当完整epoch、GPU预算或科学收益。
+R199全部5件seal SHA `ef63d3a960d4e50191fb66caeb6c35e7e3d399265721fd00874bfd58ba8711bf`，
+原4090/本地逐项一致；capacity report SHA
+`6fd492fd2d5c2ef9fb32017df58f6e552e7e49f27524bf19cf17267763a487e6`，
+production report SHA `ed6865815cfba115da6fdf5e5dd9906ac0bd9aa628c735887f8c27a3b2311a6b`。
+重放必须用冻结`e7de4fa`与其配置，后续训练入口门增加不改写本次CPU证据。
+
+### 25.115 native训练前输入/成本身份门修复（2026-10-18）
+
+§25.113两项先RED后GREEN。入口v2在任何epoch前逐篇验证真实完整4096三数组、BOS/EOS
+cache-global/padding、所有物理marker与完整有向pair位置、MID顺序及冻结候选digest；
+成本config钉的features/targets SHA必须等于实际训练文件SHA，同内容搬路径可接受，
+不同内容不能用旧成本报告准入。全量实际train2622/dev291特征本地纯CPU metadata核验
+通过，digest分别逐位匹配既有ce105491…/15a3b1a5…，未载encoder/读取新gold或生成分数。
+
+新审查配置`configs/ergo_native_training_unadmitted_v2_20261018.json` SHA
+`b249e0b2d3b08630361f3e317b41729623a1d18ee5cc4a7b3bc2ebe82e39537e`；旧v1/b6cdde8提案
+保留追溯，二者都未准入，不翻flag启动。当前v2仍缺CUDA成本、最大dev容量/真实production
+smoke、设备/墙钟及（若选5090）完整训练的独立授权。
+完整本地三件套964passed/94skipped（29.10秒）、ruff零错误、smoke OK；原机新10项
+实际测试待补，不能把本地skip或CPU full-model通过当CUDA门通过。

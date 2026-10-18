@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -14,7 +15,7 @@ from types import SimpleNamespace
 
 from ekg.core.protocol import load_manifest_ids
 from ekg.core.stage_bundle import sha256_file
-from ekg.relations.ergo_adapter import export_causal_classes
+from ekg.relations.ergo_adapter import export_causal_classes, longformer_inputs
 from ekg.relations.ergo_training import BinaryPrefixMeter, load_linear_scheduler, load_train_epoch
 from ekg.relations.maven_ere_official import (
     candidate_population_digest,
@@ -43,6 +44,40 @@ def aligned_training_data(features_path, targets_path, manifest_path):
     return rows
 
 
+def validate_feature_population(features, expected_digest):
+    """Check real complete tensors and canonical candidate order before any epoch."""
+    if len({f["id"] for f in features}) != len(features):
+        raise ValueError("duplicate feature document")
+    digest = hashlib.sha256()
+    for f in sorted(features, key=lambda row: row["id"]):
+        mids = f["mention_ids"]
+        if len(mids) < 2 or len(set(mids)) != len(mids):
+            raise ValueError("complete unique native mentions required")
+        keys = ("enc_input_ids", "enc_mask_ids", "global_attention_mask")
+        if any(len(f[key]) != 4096 for key in keys):
+            raise ValueError("complete4096 features required")
+        encoded = f["enc_input_ids"][:sum(f["enc_mask_ids"])]
+        expected = longformer_inputs(encoded, padded_length=4096)
+        if any(f[key] != value for key, value in expected.items()):
+            raise ValueError("canonical padding/global mask identity drift")
+        positions = [i for i,v in enumerate(encoded) if v == 50265]
+        if len(positions) != len(mids) or encoded.count(50266) != len(mids):
+            raise ValueError("complete marker coverage required")
+        n = len(mids)
+        if len(f["t1_pos"]) != n*(n-1) or len(f["t2_pos"]) != n*(n-1):
+            raise ValueError("complete candidate positions required")
+        k = 0
+        for i,h in enumerate(mids):
+            for j,t in enumerate(mids):
+                if i != j:
+                    if f["t1_pos"][k] != positions[i] or f["t2_pos"][k] != positions[j]:
+                        raise ValueError("native pair order/marker identity drift")
+                    digest.update(f"{f['id']}::{h}->{f['id']}::{t}\n".encode())
+                    k += 1
+    if digest.hexdigest() != expected_digest:
+        raise ValueError("frozen actual feature candidate digest mismatch")
+
+
 def require_production_evidence(cfg):
     reports = [json.loads(Path(name).read_text()) for name in cfg["cost_reports"]]
     if any(r["status"] != "complete" or r["device"] != "cuda" for r in reports):
@@ -58,6 +93,10 @@ def require_production_evidence(cfg):
             or json.loads(cost_config.read_text())["server"] != cfg["server"]
             or any(r["config_sha256"] != sha256_file(cost_config) for r in reports)):
         raise ValueError("cost report identity/server mismatch")
+    cost = json.loads(cost_config.read_text())
+    for cost_key, train_key in (("features", "train_features"), ("targets", "train_targets")):
+        if cost["pins"][cost[cost_key]] != cfg["pins"][cfg[train_key]]:
+            raise ValueError("costed training input identity mismatch")
     for name in [*cfg["cost_reports"], cfg["dev_capacity_report"], cfg["production_smoke_report"]]:
         if name not in cfg["pins"]:
             raise ValueError("pinned evidence required")
@@ -96,7 +135,7 @@ def main():
     if not all(cfg[k] is True for k in (
             "training_admitted", "budget_admitted", "dev_capacity_admitted")):
         raise ValueError("training not admitted: budget, dev capacity and production gates needed")
-    if (cfg["schema_version"] != "ekg.ergo_native_training.v1" or cfg["seed"] != 13
+    if (cfg["schema_version"] != "ekg.ergo_native_training.v2" or cfg["seed"] != 13
             or cfg["epochs"] != 20 or cfg["learning_rate"] != 2e-5
             or cfg["final_valid_accessed"] is not False):
         raise ValueError("frozen native training contract required")
@@ -136,9 +175,11 @@ def main():
         raise ValueError("pinned training GPU identity required")
     train = aligned_training_data(Path(cfg["train_features"]), Path(cfg["train_targets"]),
                                   Path(cfg["train_manifest"]))
+    validate_feature_population([f for f, _ in train], cfg["train_digest"])
     dev_ids = load_manifest_ids(Path(cfg["dev_manifest"]))
     dev = records_by_id(map(json.loads, Path(cfg["dev_features"]).read_text().splitlines()),
                         source="dev features")
+    validate_feature_population(list(dev.values()), cfg["dev_digest"])
     raw = records_by_id((project_unlabeled(json.loads(line)) for line in
                          Path(cfg["dev_raw"]).read_text().splitlines()), source="dev raw")
     gold = records_by_id(map(json.loads, Path(cfg["dev_gold"]).read_text().splitlines()),

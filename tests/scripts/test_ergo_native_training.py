@@ -89,3 +89,59 @@ def test_preflight_cannot_use_cost_permission_as_cuda_smoke_admission(tmp_path):
     assert result.returncode != 0
     assert 'CUDA preflight not admitted' in result.stderr
     assert not output.exists()
+
+
+def test_full4096_population_rejects_padding_mask_and_mid_order_drift(monkeypatch):
+    import copy
+    import hashlib
+
+    f = {'id': 'd', 'mention_ids': ['a', 'b'],
+         'enc_input_ids': [0, 50265, 8, 50266, 50265, 9, 50266, 2] + [1] * 4088,
+         'enc_mask_ids': [1] * 8 + [0] * 4088,
+         'global_attention_mask': [1, 0, 0, 0, 0, 0, 0, 1] + [0] * 4088,
+         't1_pos': [1, 4], 't2_pos': [4, 1]}
+    digest = hashlib.sha256(b'd::a->d::b\nd::b->d::a\n').hexdigest()
+    script(monkeypatch).validate_feature_population([f], digest)
+    for field, value in [('enc_input_ids', f['enc_input_ids'][:8]),
+                         ('global_attention_mask', [1] + [0] * 4095),
+                         ('mention_ids', ['b', 'a']), ('t2_pos', [1, 4])]:
+        bad = copy.deepcopy(f)
+        bad[field] = value
+        with pytest.raises(ValueError):
+            script(monkeypatch).validate_feature_population([bad], digest)
+
+
+def test_training_features_must_match_the_costed_input_identity(tmp_path, monkeypatch):
+    import hashlib
+
+    pins = {'old-features': '1' * 64, 'old-targets': '3' * 64,
+            'new-features': '2' * 64, 'new-targets': '3' * 64}
+
+    def write(name, data):
+        path = tmp_path / name
+        path.write_text(json.dumps(data))
+        pins[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
+        return str(path)
+
+    cost = write('config.json', {'server': 'gpu-5090', 'features': 'old-features',
+                                'targets': 'old-targets', 'pins': dict(pins)})
+    reports = [write(f'{case}.json', {
+        'status': 'complete', 'device': 'cuda', 'case': case, 'config_sha256': pins[cost],
+        'padding_policy': 'retain_all_4096', 'parameter_values_unchanged': True,
+        'nonzero_lr_steps': 0, 'optimizer_api_calls': 2, 'epoch_count': 0})
+        for case in ['cuda_typical', 'cuda_worst', 'cuda_longest']]
+    capacity = write('capacity.json', {'status': 'complete', 'device': 'cuda', 'max_pairs': 11990,
+                                     'gold_accessed': False, 'optimizer_api_calls': 0,
+                                     'target_independent_logits': True})
+    smoke = write('smoke.json', {'status': 'complete', 'device': 'cuda',
+                                'original_train_epoch_unchanged': True,
+                                'parameter_values_unchanged': True, 'nonzero_lr_steps': 0})
+    cfg = {'cost_reports': reports, 'cost_config': cost, 'server': 'gpu-5090', 'pins': pins,
+           'train_features': 'new-features', 'train_targets': 'new-targets',
+           'dev_capacity_report': capacity, 'production_smoke_report': smoke,
+           'dev_max_pairs': 11990}
+    with pytest.raises(ValueError, match='costed training input'):
+        script(monkeypatch).require_production_evidence(cfg)
+
+    pins['new-features'] = pins['old-features']
+    script(monkeypatch).require_production_evidence(cfg)
