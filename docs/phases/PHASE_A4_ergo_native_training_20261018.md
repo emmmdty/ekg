@@ -57,3 +57,11 @@ ERGO只有causal head，其他family占位不是护栏效果，主表应标不�
 
 OOM/非有限值或超预算如实保留，不删最大文档、缩候选、降backbone或放宽数值门救分。
 完整预算未闭合不承诺完工时间，单seed分数也不完成本项目创新/确认KR；科学门如实裁决。
+
+完整入口已实现于`scripts/train_ergo_native.py`，审查配置为
+`configs/ergo_native_training_unadmitted_20261018.json`。默认三个admission=false，且设备/
+预算/容量/生产smoke均待实际证据；运行该提案会在读数据/载模型前拒绝。未来使用另冻
+正式配置，不能只翻flag；入口要求三件完整CUDA costs（固定原full4096、两次lr0且参数
+数值不变）、最大dev的CUDA no-grad/target独立性、原epoch真实CUDA生产smoke与相应
+pinned身份。CPU/toy记录不能代替这些门。5090 full20epoch权限由独立scope记录核验，
+既有20分钟cost授权不匹配该scope。

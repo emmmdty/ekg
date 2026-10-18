@@ -35,3 +35,24 @@ def test_epoch_loader_executes_only_pinned_function_without_missing_processor_im
     path.write_text(path.read_text().replace('model, 3', 'model, 4'))
     with pytest.raises(ValueError, match="source drift"):
         module().load_train_epoch(path, digest, module().BinaryPrefixMeter())
+
+
+def test_legacy_scheduler_loader_keeps_frozen_function_and_rejects_drift(tmp_path):
+    torch = pytest.importorskip("torch")
+    path = tmp_path / "optimization.py"
+    path.write_text("raise RuntimeError('unrelated import must not run')\n"
+                    "def get_linear_schedule_with_warmup(optimizer: Optimizer, "
+                    "num_warmup_steps, num_training_steps, last_epoch=-1):\n"
+                    "    return LambdaLR(optimizer, lambda step: step / 2, last_epoch)\n")
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    factory = module().load_linear_scheduler(path, digest)
+    param = torch.nn.Parameter(torch.tensor(1.0))
+    optimizer = torch.optim.SGD([param], lr=0.2)
+    schedule = factory(optimizer, 0, 4)
+    assert optimizer.param_groups[0]["lr"] == 0.0
+    optimizer.step()
+    schedule.step()
+    assert optimizer.param_groups[0]["lr"] == 0.1
+    path.write_text(path.read_text().replace('step / 2', 'step / 3'))
+    with pytest.raises(ValueError, match="source drift"):
+        module().load_linear_scheduler(path, digest)

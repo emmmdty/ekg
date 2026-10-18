@@ -57,3 +57,19 @@ def load_train_epoch(path: Path, expected_sha: str, compute_f1):
                  "logger": logging.getLogger("external_ergo_train"), "compute_f1": compute_f1}
     exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), "exec"), namespace)
     return namespace["train_epoch"]
+
+
+def load_linear_scheduler(path: Path, expected_sha: str):
+    """Use the original HF linear schedule function alongside its original AdamW."""
+    if sha256_file(path) != expected_sha:
+        raise ValueError("original scheduler source drift")
+    import torch
+
+    nodes = [n for n in ast.parse(path.read_text()).body
+             if isinstance(n, ast.FunctionDef) and n.name == "get_linear_schedule_with_warmup"]
+    if len(nodes) != 1:
+        raise ValueError("expected exactly one original linear scheduler")
+    namespace = {"Optimizer": torch.optim.Optimizer,
+                 "LambdaLR": torch.optim.lr_scheduler.LambdaLR}
+    exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), "exec"), namespace)
+    return namespace["get_linear_schedule_with_warmup"]

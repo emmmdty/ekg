@@ -6933,3 +6933,55 @@ R198 toy回放配置SHA `5099cc784fb36ff38eedc18647e01dda3775ab68381e70a9c18df2e
 仅九参数linear、两次toy pass，逐值比较原binary scorer与增量日志，以及原函数两种日志
 callback下的参数/optimizer/scheduler。非MAVEN epoch、无encoder、无科学效果或checkpoint。
 真实原机回放尚待执行，不能把隔离tiny测试当原完整模型/训练预算PASS。
+
+
+### 25.110 ERGO完整native训练入口准备自审（2026-10-18，未准入执行）
+
+**科研价值**：对准表4-3/FR-016(b)，将已核原训练函数与完整native数据/官方选模接通，
+使GPU可用后能执行可审查的固定单seed强对手，不能以准备审计替代方法价值。
+**可行性**：原模型/全部输入/源码可用，原函数toy回放已成功；实现上可复用原函数/原
+AdamW与原linear scheduler，只新增数据接线与官方选模/持久化。当前只实现并测试入口，
+实际20epoch仍卡在【算力/资源】空卡、CUDA预算/最大dev容量和生产smoke；5090完整
+训练还卡【授权】，本次成本许可不扩大。默认admission=false，缺任何门即在读数据/
+载模型前失败。主表已先允许完整入口准备，不提前读gold或启动native epoch。
+
+### 25.111 ERGO备用机准备与原trainer toy回放闭合；完整入口实现门（2026-10-18）
+
+**R197仅准备闭合，GPU成本未执行**。作者许可后在5090以Git bundle部署`b3f4063`，
+tracked保护及输入包双端SHA均通过，untracked `mk_probe_contract.py`保留；28项CPU实际
+测试通过。五件官方公开Longformer文件由5090直接镜像下载、逐件SHA匹配后原子rename，
+目标`/mnt/aidata/tongjiakai/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/`。
+下载PID3024709成功SSH核GONE；无encoder/GPU执行，未跨机搬运本项目checkpoint。
+
+启动前重核发现5090已被他人vllm占用（PID3021288，约28430MiB/util100），未共享或启动
+GPU模型。原4090四卡亦持续被占。本次20分钟许可有效但资源未满足，**GPU API0、native
+train epoch0**，不是模型/科研失败；没有等卡或自动启动/重试任务。下一需成功核空卡再按
+原三例合同执行，不再询问同一许可；不能因其获准延伸为完整训练许可。
+R197准备4件seal SHA `6399df3df0aa76d3fa64e93893324b02d6344279b07875603c479a6fb04b5f5f`，
+原5090/本地逐项一致。此seal只封准备/许可/资源快照，不是GPU成本完成证明。
+
+**R198闭合**：`09e7cae`原4090两个真实Torch用例与实际toy回放均通过后push；两个toy
+pass、每变体4次原legacy AdamW调用，九参数linear确有数值更新，原函数不同日志callback
+的参数/optimizer/scheduler状态及全部日志返回值逐值相同。没有encoder/native数据epoch/
+GPU或checkpoint。原函数体保持，binary交换正例计对仅是上游日志，不是官方三类指标。
+两件seal SHA `ded81ca4dcf1646804fb36cdafde50dccd4c5e2c94d0d9cda05afabe233739d3`，
+report SHA `eefa305d78987fb111306f4a8c1c5ef68275d229b8fe205730802e93af5379da`，
+双端逐项一致；重放R198必须使用其冻结`09e7cae`（后续helper增量有新身份）。
+
+**完整入口实现**：`scripts/train_ergo_native.py`使用原epoch/原AdamW/原scheduler，
+完整train/manifest/targets与dev无标签输入分离，gold只交官方causal scorer；argmax三类、
+每epoch官方选模、严格改善才换best、保留全部epoch预测/classes与原机checkpoint身份。
+明确检查三病例CUDA成本、最大dev CUDA容量与原函数production smoke；CPU报告不能
+充作CUDA门。候选/manifest/gold覆盖在训练前检查，非有限值/墙钟/输入漂移均失败，
+不新增fallback、阈值或seed。其他family占位不当护栏效果。
+
+默认配置`configs/ergo_native_training_unadmitted_20261018.json` SHA
+`cf97f5b77aa98844ce3c29d67af8e5f4db2d722a7336d3b4bca7bb7eb03a5a00`，
+三个admission=false，设备/预算/容量/生产smoke未赋可执行身份；它是不可执行的审查提案，
+未来需另冻正式配置，不以修改flag跳过成本/授权。当前未启动native epoch/完整模型smoke，
+GPU成本与完整训练效果仍未知，不以代码存在认定生产通过或KR3.1达成。
+
+新用例先RED后GREEN：未准入时在读数据/载encoder前拒绝且不建输出，完整targets/
+manifest顺序和缺文档/丢候选拒绝，CPU报告拒作CUDA；原HF scheduler函数body加载及源
+漂移拒绝。隔离CPU Torch3项通过。本地全量961passed/93skipped（26.14秒）、ruff零错误、
+smoke OK；原机新入口/调度器实际测试待补，一致性36项/diff待最终复核。
