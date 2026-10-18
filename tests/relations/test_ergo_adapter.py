@@ -8,6 +8,7 @@ from ekg.relations.ergo_adapter import (
     causal_targets,
     criss_cross_mask,
     export_causal_classes,
+    longformer_inputs,
     marked_document,
     native_pair_features,
 )
@@ -33,6 +34,19 @@ def test_marker_text_preserves_words_and_orders_endpoints_without_type_input():
     assert raw == before
     raw["event_mentions"][0]["type"] = "another type"
     assert marked_document(raw) == (text, markers)
+
+
+def test_longformer_global_boundaries_match_released_cache_without_padding_attention():
+    f = longformer_inputs([0, 50265, 99, 50266, 2], padded_length=8)
+    assert f == {
+        "enc_input_ids": [0, 50265, 99, 50266, 2, 1, 1, 1],
+        "enc_mask_ids": [1, 1, 1, 1, 1, 0, 0, 0],
+        "global_attention_mask": [1, 0, 0, 0, 1, 0, 0, 0],
+    }
+    assert longformer_inputs([0, 99, 2], padded_length=3)["global_attention_mask"] == [1, 0, 1]
+    for wrong in ([0, 99, 3], [1, 99, 2], [0, 1, 99, 2], [0, 99, 99, 99, 2]):
+        with pytest.raises(ValueError):
+            longformer_inputs(wrong, padded_length=4)
 
 
 def test_overlapping_and_coincident_mentions_are_all_preserved():

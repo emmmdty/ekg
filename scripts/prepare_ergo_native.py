@@ -12,7 +12,12 @@ from pathlib import Path
 
 from ekg.core.protocol import load_manifest_ids
 from ekg.core.stage_bundle import sha256_file
-from ekg.relations.ergo_adapter import causal_targets, marked_document, native_pair_features
+from ekg.relations.ergo_adapter import (
+    causal_targets,
+    longformer_inputs,
+    marked_document,
+    native_pair_features,
+)
 from ekg.relations.maven_ere_official import candidate_population_digest, records_by_id
 
 
@@ -23,7 +28,8 @@ def main() -> None:
     config = json.loads(args.config.read_text())
     if (os.environ.get("CUDA_VISIBLE_DEVICES") != "-1"
             or config["schema_version"] != "ekg.ergo_native_features.v1"
-            or config["final_valid_accessed"] is not False or config["max_length"] != 4096):
+            or config["final_valid_accessed"] is not False or config["max_length"] != 4096
+            or config["global_attention_policy"] != "BOS_EOS_from_released_cache"):
         raise ValueError("CPU-only frozen feature scope required")
     for path, expected in config["input_sha256"].items():
         if sha256_file(Path(path)) != expected:
@@ -53,7 +59,8 @@ def main() -> None:
     if {p.name for p in assets.iterdir()} != set(config["tokenizer_files"]):
         raise ValueError("tokenizer file-set drift")
     tokenizer = LongformerTokenizerFast.from_pretrained(assets, local_files_only=True)
-    if tokenizer.add_tokens(["<t>", "</t>"]) != 2 or len(tokenizer) != 50267:
+    if (tokenizer.add_tokens(["<t>", "</t>"]) != 2 or len(tokenizer) != 50267
+            or tokenizer.pad_token_id != 1):
         raise ValueError("original marker vocabulary drift")
     start, end = tokenizer.convert_tokens_to_ids(["<t>", "</t>"])
     output.mkdir(parents=True, exist_ok=False)
@@ -81,12 +88,9 @@ def main() -> None:
                 raise ValueError("target/candidate population mismatch")
             size = len(encoded)
             maximum = max(maximum, size)
-            padding = config["max_length"] - size
             feature = {
                 "id": doc_id, "mention_ids": mids,
-                "enc_input_ids": encoded + [tokenizer.pad_token_id] * padding,
-                "enc_mask_ids": [1] * size + [0] * padding,
-                "global_attention_mask": [1] + [0] * (config["max_length"] - 1),
+                **longformer_inputs(encoded, padded_length=config["max_length"]),
                 "t1_pos": pair_features["t1_pos"], "t2_pos": pair_features["t2_pos"],
             }
             features_file.write(json.dumps(feature, separators=(",", ":")) + "\n")
@@ -98,7 +102,8 @@ def main() -> None:
         "status": "complete", "scope": "Native train features only; not ERGO inference/training",
         "candidate_digest": digest, "population": population, "max_encoded_tokens": maximum,
         "class_counts": dict(class_counts), "padding_length": config["max_length"],
-        "global_attention_policy": "CLS only", "targets_in_model_text": False,
+        "global_attention_policy": config["global_attention_policy"],
+        "targets_in_model_text": False,
         "encoder_loaded": False, "optimizer_steps": 0, "final_valid_accessed": False,
         "config_sha256": sha256_file(args.config),
         "artifact_sha256": {p.name: sha256_file(p) for p in output.iterdir()},

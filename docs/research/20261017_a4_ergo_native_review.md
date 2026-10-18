@@ -41,3 +41,9 @@ pair-graph + focal方法约束未来创新归因。R1 §25.91–§25.93不支持
 先冻结成本合同，再独立裁决encoder/CUDA预算；目前仍不运行encoder/optimizer/GPU/训练。
 透明接口负责MIDs→marker位置、完整候选/标签、dtype/全邻居mask与official export，
 不改原模型/损失类体，不恢复未发布BERT模型。性能与新颖性仍未验收。
+
+
+公开cache进一步核查发现BOS/EOS两处global与正文BOS-only不同（R1 §25.96）。原CLS-only
+准备已保留于af5c656及原config/output，不运行encoder；后续用独立cache-global配置/
+输出匹配真实cache，测试锁定EOS处于最后nonpad位置。原机已直下官方Longformer权重并
+核LFS SHA，未跨机搬运。接口CPU准备完成不等于真实完整模型成本通过。

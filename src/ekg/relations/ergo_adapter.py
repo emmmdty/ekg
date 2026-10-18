@@ -135,3 +135,18 @@ def criss_cross_mask(pairs: Sequence[tuple[str, str]]):
             & (tail[:, None] != head[None, :]) & (tail[:, None] != tail[None, :]))
     mask.fill_diagonal_(True)
     return mask
+
+
+def longformer_inputs(encoded: Sequence[int], *, padded_length: int) -> dict:
+    """Match released ERGO cache: only BOS/EOS global, padding always masked."""
+    size = len(encoded)
+    if (not 2 <= size <= padded_length or encoded[0] != 0 or encoded[-1] != 2
+            or 1 in encoded):
+        raise ValueError("invalid Longformer BOS/EOS/padding sequence")
+    global_mask = [0] * padded_length
+    global_mask[0] = global_mask[size - 1] = 1
+    return {
+        "enc_input_ids": list(encoded) + [1] * (padded_length - size),
+        "enc_mask_ids": [1] * size + [0] * (padded_length - size),
+        "global_attention_mask": global_mask,
+    }

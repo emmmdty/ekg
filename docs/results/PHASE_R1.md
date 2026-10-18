@@ -6586,3 +6586,32 @@ feature配置SHA `f6c95712a872df5d00be4b216df9ec78e989f1327010a27f9ee692bf5b56ab
 只有train输入/tokenizer/target侧车，没有encoder；正式全train准备待真实测试后执行。
 原4090镜像HEAD直链返回302及与官方blobs元数据一致的权重LFS SHA/字节数，正在原机
 下载；未从本地或5090传权重，尚未校验完成，不宣称checkpoint已可用。
+
+原机19项接口测试全通过、原Norm/RGT/focal类体tiny前后向有限，原源码SHA未变。
+完整train准备完成/成功SSH核无进程：特征仅做tokenizer/接口计算；本地canonical train
+另生成的targets与远端原joint gold源生成文件**字节相同**，SHA
+`cb3ab49f07f51b3e6fde96581715ff0ed9c88345eb1121af7a9e4f4c3b38b211`。
+全部冻结anchor causal export逐篇集合一致，完整candidate digest及三类计数与§25.95相符。
+这不是新模型预测/效果；native_train中CLS-only策略仅是已完成的第一版准备身份。
+
+**新来源差异/修订决定**：§3.1正文规定BOS全局/其余local，而公开233train+25dev缓存
+**全部且仅BOS、EOS两位置全局，padding没有全局位**；完整元数据核查无例外。
+此前将native CLS-only称作“保持原实现”过宽：它与正文一致，与可运行缓存有差异。
+没有悄改旧feature/report/config；在方法/encoder运行前，主表先改，另建cache-matched
+BOS/EOS准备身份，新增EOS应落在最后一个nonpad token而非padding末尾的测试。
+当前无encoder/optimizer训练效果，也不以此来源差异否定原论文；FR-016(b)明确并列。
+
+原4090下载权重597257159bytes，SHA
+`06c56757f0510de87c231acd03650ca204c5ed65c281cd1081b98288183f2468`与官方Hub
+immutable revision/LFS元数据相符；原机路径
+`/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/`。
+四个metadata原机复制/逐项核hash，无跨机权重搬运、无encoder加载。旧HF4.11.3 AdamW
+[官方源文件](https://raw.githubusercontent.com/huggingface/transformers/v4.11.3/src/transformers/optimization.py)
+已获取/Apache2头保留，SHA
+`2ebfecd42a53245c4e72fd8e267efbef7679adfd10bcf14b8510f6830c8fd36e`；未安装/执行，
+不把torch.optim.AdamW与其数值等价当作已知事实，后续成本/训练需固定实际optimizer。
+
+cache-matched新配置SHA
+`23d44f75ed42f6166280cbdabb66ed7e6d41b2cbc58b619f07478d4efd2e81c8`；
+新增EOS/无padding attention测试先真实RED、再GREEN，最新全仓952passed/88skipped
+（24.77秒）、ruff零错误、smoke OK。一致性36项/diff通过；原机全20项及新特征待执行。
