@@ -6646,3 +6646,23 @@ canonical gold侧车三份字节一致。原CLS-only身份/报告/config及RED�
 R192全部24件（含两版完整features/targets、保留失败/RED与原依赖源，不含pycache）seal
 SHA `7c201a73d6cb7cad336588fd9bbfc4ecfed343a531236cf320fe5517d89ea6a6`；
 原4090对全部24件逐项重算SHA并核seal，与本地一致。来源/输入阶段闭合，CPU成本尚未执行。
+
+### 25.98 ERGO完整模型CPU成本合同/实现（2026-10-18，wip）
+
+科研价值/可行性见§25.97开工自审；[完整合同](../phases/PHASE_A4_ergo_native_cost_20261018.md)
+已冻结，R193=`runs/stages/R1/r1-v93-ergo-cost-20261018/`。固定seed13/float32/batch1/
+4096 padding，CPU4threads，最少事件且最短文档fixture为
+`d0a037b11d4428ed3ff218f98c3e6073`（2候选/109nonpad）；GPU典型/最大候选/最长全文
+病例也事前锁定，但`cuda_admitted=false`、代码拒绝，当前不启动CUDA。
+
+配置SHA `dbae7be07d03569feb5683e31f6b21564d6c4663584c5d314746691522dbdbc1`。
+原模型完整导入/原HF AdamW类体加载，两个marker显式mean_resizing=False；先eval两次
+改变target核logits相同，再train-mode两次cold/warm lr0 API。数值摘要只消除零符号差异，
+不修改model；原始摘要/负零数单列。输入/模型文件集合/原源码和权重前后hash均需核，
+无epoch/held-out，optimizer状态变化如实记2次API，不写“零optimizer调用”。
+
+三个helper用例先stub真实RED：optimizer类提取/源漂移拒绝、参数零符号与真实数值变化
+区分且不改模型、原布尔mask/完整候选及真实marker检查。隔离CPU Torch两项通过，
+optimizer loader因无transformers单独skip；原机全部真实用例待补，不能以skip作PASS。
+最新完整三件套952passed/91skipped（23.48秒）、ruff零错误、smoke OK；CPU encoder
+成本尚未执行。其后只有真实原机测试通过才push并启动本合同CPU短文病例。
