@@ -7262,3 +7262,42 @@ CUDA容量/production、完整预算与合法资源许可裁决baseline训练；
 
 本次只改本节与HANDOFF；`audit_r1_consistency.py`实跑PASS（36 requirements mapped），
 `git diff --check`通过。未改代码，不重跑三件套，不把§25.116的历史测试称作本次新验证。
+
+### 25.119 GitHub自主科研工具核查与项目执行适配（2026-10-19）
+
+**作者目标**：由AI自主完成论文实验；指标上不去时自己检索论文、验证方法、找baseline，
+研究深度和既定毕业要求贯穿执行。不是让作者看懂项目或先学习文献管理软件。
+**科研价值**：对准O1–O4与三个方法主表，把失败反馈接到真实的候选/实验决策，避免
+把工程准备、检索量或LLM自评当方法贡献。**可行性**：本次只读公开官方仓库、核现有
+执行入口并作项目指令适配；无新依赖、GPU训练、外部模型调用或数据上传，不改变评测。
+
+已查官方README及实际关键源码：RD-Agent的data_science loop/feedback及general_model
+入口；AI-Researcher的run_infer_idea、judge/experiment analyser及paper_search；
+Orchestra autoresearch/两项ideation正文；Karpathy program.md；Sakana v2及PaperQA。
+工具定位、直接入口、适配限制与未实跑状态见[RESEARCH_SKILLS 10-19节](../RESEARCH_SKILLS.md)。
+其中RD-Agent固定树`484776c211e4fbbeef03e0ec00d6bbee7362a4f4`，Orchestra固定树
+`773a52944ba4747a18bd4ae9ade53fff041adcbc`；其余为当日main/master所见，未作可复现
+安装身份。公开成绩不与本项目指标比较，工具的功能介绍不等于MAVEN效果已验证。
+
+**裁决**：采用Orchestra内外双循环及RD-Agent真实实验反馈的工作流思想，复用现有工具/
+R1与训练评测入口；不整体迁移外部框架、不另建训练系统、不全装技能。新增窄项目skill
+`.agents/skills/ekg-research-loop/SKILL.md`；HANDOFF接续与主表执行方式链接已同步，
+唯一活动任务仍C41-A-R，ERGO完整训练仍未准入。
+
+**同代理封存案例/当前状态走查（非独立前测）**：
+
+| 输入事实 | 新入口必须导向的动作 | 当前走查 |
+|---|---|---|
+| C5 exact未胜typed/root/mass，shuffle较弱 | 否决固定候选，不能因负控通过而报贡献；后续新候选按队列回R1 | 与PHASE_C末节裁决一致 |
+| D4 linear已parity、绑定监督/最近邻差异未闭合 | 不重复修已恢复baseline，不伪造scope负标签，回当前候选准入问题 | 与§25.85–§25.86一致 |
+| A4 CPU准备封存、CUDA成本缺证据且无空卡 | 保留未准入状态，执行解锁仍为空卡/原合同；不加CPU准备充进度 | 与§25.114–§25.118一致 |
+| 框架生成高创新性评分或写出完整报告 | 不能替代同协议主指标/强控制/消融/护栏/合法确认 | 不改变科学KR |
+
+这次是行为指令与路由适配，不是RD-Agent/AI-Researcher的部署，不是新的独立研究团队，
+也没有证明技能能提高研究能力或指标。真正的前瞻验收必须来自之后的论文/代码证据与
+完整同协议实验；毕业标准不由框架的CONCLUDE条件或LLM评审自动决定。当前既定O/KR
+仍未达成，没有新增科学分数或新候选效果。未新建Goal、定时器、GPU等卡器或外部通信。
+
+验证：skill-creator的`quick_validate.py .agents/skills/ekg-research-loop`实际返回
+`Skill is valid!`；`audit_r1_consistency.py`返回`PASS: 36 requirements mapped`，
+`git diff --check`通过。只改指令/文档，未改训练代码，不把历史三件套当新运行。

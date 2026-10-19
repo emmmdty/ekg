@@ -4,7 +4,14 @@
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.118；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.119；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**10-19作者澄清科研工具目标**：要求AI自主把论文实验推进到既定方法贡献验收；指标停滞
+时主动查论文/核方法/找baseline并以实测更新路线，不把任务转交作者学习工具。新项目入口
+[ekg-research-loop](../.agents/skills/ekg-research-loop/SKILL.md)按当前主表状态调度研究外环与
+实验内环；来源核查/接入边界见[RESEARCH_SKILLS](RESEARCH_SKILLS.md)。这是执行方式适配，
+不是新训练准入、指标改善或后台自主服务；当前A4-R和已获准成本的下一步不变。接续执行
+方法研究时读该入口；仅状态查询不激活研究。新证据见R1 §25.119。
 
 **10-19作者要求只读状态/卡点核查**：两机SSH成功、项目HEAD与官方远端main一致；
 当次4090四卡是他人的GRPO训练，5090是他人的vLLM服务，均无空卡，未见本项目计算worker。
