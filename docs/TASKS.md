@@ -240,6 +240,12 @@ author delegation releases a new in-scope research queue; it does not reopen old
   the full decoder audit remains pending, authorized only on an empty 5090 GPU.
   Bounded occupancy waiting ended without an audit launch; no automatic watcher remains.
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
+  **2026-10-19 resource exit:** current independent CPU preparation is closed. Successful SSH
+  checks still show both hosts occupied, no ERGO workers and no new CUDA cost outputs. The same
+  resource dependency spans three Goal turns; the blocking audit is R1 §25.124. Thread Goal moves
+  to blocked after handoff, while T087 remains wip and scientific outcomes unmet. Resume at the
+  existing cost contract on a newly verified free GPU; no watcher, repeated smoke or new permission
+  request for the already authorized cost scope.
   **2026-10-19 current override:** the author explicitly requested concrete experiment planning
   followed by actual CPU work while GPUs are unavailable, superseding the 10-18 stage-close-only
   limit. The existing master table/OKR now specify controls, ablations, guardrails, dependencies

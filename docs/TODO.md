@@ -3,6 +3,11 @@
 > 更新于 **2026-10-19**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
+**10-19本轮出口**：当前独立CPU切片已收口，两机成功SSH实核仍无空卡、无本项目ERGO
+worker或CUDA报告；本回合无新科研进展。相同资源阻断已跨三个Goal回合，阻断审计见
+R1 §25.124，提交后按工具契约转blocked，最终返回认线程记录。C41-A-R/T087保持wip，
+科学目标未完成；恢复时接既有成本，原许可保留，无自动等卡器。
+
 **10-19续令已执行**：已把现在CPU可做与GPU恢复后的实验对照/依赖/护栏/失败分支写入
 主表及[既有OKR卡](research/20261016_project_okr.md)，并完成R100 train冻结预测方向/
 subtype分解与守恒复算（R1 §25.122）。不支持以纯方向/已输出边类别修复作为主要瓶颈
