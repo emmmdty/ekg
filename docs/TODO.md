@@ -3,6 +3,13 @@
 > 更新于 **2026-10-19**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
+**10-19续令已执行**：已把现在CPU可做与GPU恢复后的实验对照/依赖/护栏/失败分支写入
+主表及[既有OKR卡](research/20261016_project_okr.md)，并完成R100 train冻结预测方向/
+subtype分解与守恒复算（R1 §25.122）。不支持以纯方向/已输出边类别修复作为主要瓶颈
+立项；不推广为held-out因果结论。Goal本线程已按授权建立、实核active；唯一C41-A-R
+不变，CPU分析器可复用于ERGO结果，下一GPU仍既有成本合同。此续令覆盖下方10-18仅收尾，
+不重跑封存CPU准备或自动等卡。
+
 **10-19质量与完成度核查**：作者要求最终质量、实验设计与结果优于四篇CAJ硕士论文。
 原件转换/核心方法与主表核读已完成，参照、局限和当前差距见
 [`质量对照与实验树`](research/20261019_thesis_quality_and_experiment_tree.md)、R1 §25.120–§25.121。

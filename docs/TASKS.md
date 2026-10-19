@@ -240,6 +240,13 @@ author delegation releases a new in-scope research queue; it does not reopen old
   the full decoder audit remains pending, authorized only on an empty 5090 GPU.
   Bounded occupancy waiting ended without an audit launch; no automatic watcher remains.
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
+  **2026-10-19 current override:** the author explicitly requested concrete experiment planning
+  followed by actual CPU work while GPUs are unavailable, superseding the 10-18 stage-close-only
+  limit. The existing master table/OKR now specify controls, ablations, guardrails, dependencies
+  and failure branches. R100 cached-train direction/subtype residual analysis and conservation/
+  set-based recomputation completed (R1 §25.122); no model calls, new score or admission. The thread
+  Goal was created and verified active from current C41-A-R; no watcher. Next GPU action remains
+  the existing bounded ERGO cost contract; full training and confirmation retain their gates.
   **2026-10-16 current override:** the author confirmed the 4090 has recovered and requested
   project-wide OKRs, measurable scientific outcomes and top-down task decomposition.
   C41-R completed original-machine pins/initializer/manifests, source synchronization and untracked

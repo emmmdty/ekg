@@ -7405,3 +7405,89 @@ final-valid调试、额外seed或新资源授权。下一队列仍C41-A-R及既�
 实返`PASS: 36 requirements mapped`，`git diff --check`通过。本轮只改文档/来源清单，
 未重跑训练代码三件套；没有新增模型训练、完整epoch、科学分数、独立同行评审或毕业质量
 达标结论。上述核验通过的是来源与文档，不是新方法科学门。
+
+### 25.122 先规划再执行：无GPU任务与A4方向残余CPU实测（2026-10-19）
+
+**作者续令**：先规划现在能做的工作和后续实验，再使用CPU/无GPU条件实际完成；不是
+停留在论文质量盘点或反复等作者选题。此令覆盖10-18本轮只收尾，不扩大有效性/资源权限。
+**科研价值**：对准A4表4-3/KR3.1–3.2，以固定强锚的真实残余裁决“方向/类别修复”是否
+有足够动机，给将来ERGO结果提供一致的错误比较入口；不因PPAT/iLIF强调图/方向就选模型。
+**可行性**：R188完整train官方预测已在本地，native train与manifest可读，无需encoder、
+新模型推理或GPU；原文/源码边界复用§25.120，原上下文/多原因诊断不重跑。
+
+**先规划**：已先在EXPERIMENT_PLAN §4当前C41-A-R内增加10-19执行切片：实验规格→
+train错误分解→候选/对手解释裁决→空卡后原成本→准入后完整实验→Q/F。既有OKR卡
+补A4/D4/C5逐包的主要比较、核心消融、简单竞争解释、负控/护栏、资源依赖和失败分支。
+没有准入候选处明确缺证，不虚构loss、臂数、GPU小时或预计提分，不重排单队列。
+本线程`get_goal`实查为空后依作者既有长期Goal要求建立并复核`active`，从当前A4-R接续，
+不按旧模板重跑C41-R；未声称后台常驻或科学目标已完成。
+
+**输入/范围在输出前冻结**：
+
+- R100=`runs/stages/R1/r1-v100-a4-direction-20261019/`，`plan.json`绑定R188原train
+  gold、完整官方预测、train manifest及原confusion报告的逐项SHA；
+- manifest为冻结2622篇train，不含internal-dev/final-valid；候选digest沿用
+  `ce10549172550addb67059550d89c9fc04dc5cb6452560a5ccf42169e679d766`；
+- 事前规定FN/FP均互斥拆为同向错subtype、仅反向同subtype、仅反向异subtype、双向无
+  positive；同向错类优先，另保留任意反向边的重叠诊断，不能加进总错误重复计数。
+
+新增复用官方转换/验证器的`report_a4_direction_errors.py`，不写新scorer，不改变
+预测、不做gold纠错后报分或扫threshold。CLI先核manifest只允许train/internal-dev，
+拒绝final-valid角色后才读取gold；ID集合、候选digest漂移立即失败。R188其余任务字段
+是placeholder，当前只解释causal，不把这些字段当新关系护栏成绩。
+
+**实际执行**：
+
+```bash
+uv run python scripts/report_a4_direction_errors.py \
+  --gold runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl \
+  --pred runs/stages/R1/r1-v88-a4-anchor-train-20261017/full-cpu/predictions.jsonl \
+  --manifest data/protocols/v6/manifests/maven_ere_train.json \
+  --candidate-digest ce10549172550addb67059550d89c9fc04dc5cb6452560a5ccf42169e679d766 \
+  --output runs/stages/R1/r1-v100-a4-direction-20261019/report.json
+```
+
+退出0；复用全部2297524个ordered候选，gold positive48562、predicted50679、TP40347，
+与R188原统计一致。新分解如下，均是**训练描述性诊断，不是新模型效果**：
+
+| 互斥错误类别 | FN | FP |
+|---|---:|---:|
+| 同方向错subtype | 609 | 609 |
+| 仅反向同subtype | 5 | 12 |
+| 仅反向异subtype | 0 | 0 |
+| 双向无positive（FP侧是双向无注释positive） | 7601 | 9711 |
+| 总计 | 8215 | 10332 |
+
+任意反向预测涉及FN5，任意反向gold涉及FP12；这些为子集，不能与上表再相加。FP中的
+反向数大于FN可以发生，因为某个gold方向已预测正确时仍可多输出反向边。annotation-NONE
+不等于世界不存在关系，不能把FP双向无注释一概当作已确认语义假关系。
+
+**核算**：完整3×3 confusion与R188逐项相等，每项FN/FP均守恒。另以native event边
+直接Cartesian展开、正例三元组集合差集重算，与新分析器逐桶一致；这是同代理的另一
+实现复算，不冒称独立同行评审。四项输入SHA重验不变，未载入或修改checkpoint。
+report SHA `95ff5e7923aa71470d0f67f7182a7539cfe367648ea5fd5e9b128687e646fc01`。
+
+**实际裁决与下一步**：
+
+1. 仅翻转强锚现有反向边，能对应的train FN只有很小部分；只改已输出正例的subtype也
+   不能覆盖大多数训练漏例。当前拒绝以“方向错误占主要瓶颈”或“只修subtype就足够”为
+   立项理由，不把修正后oracle分数伪装可实现收益。
+2. 该证据不否定方向表示能帮助检出新边，也不证明held-out误差同样分布，更不证明
+   None阈值/不均衡/信息缺失中的某一个是唯一原因。阈值、类权重、focal或普通对比目标
+   仍是既有机制/简单rival，不因漏检多就变成本项目创新。
+3. ERGO继续作为当前强rival，不改队首。将来按同协议比较其恢复/损失正例、误报、
+   subtype及方向分布；Longformer/backbone差异使任何分差不能唯一归因RGT。候选必须
+   提供能检出真实新关系的推理可用信号、最近邻差异与可证伪对照，再过A-A；现未准入。
+4. D4/C5后续包已补实验安排，不为排满日程复活绑定/exact，不越队做其他章新训练；
+   E3不加实验。下一GPU动作仍原有成本合同，完整训练与确认保持各自证据/许可依赖。
+
+**验证**：TDD先见8项分解/全集测试因明确未实现失败，新增manifest拒绝测试也先见失败，
+再实现后9项全过。全仓`uv run pytest`为977 passed/95 skipped，skip为当前本地无torch的
+相关测试；本次分析器纯stdlib及现有协议代码，九项未跳过。`uv run ruff check src tests scripts`
+零错误，`uv run ekg-smoke`实际OK。未用这些CPU检查代替CUDA容量或方法科学门。
+
+R100的plan/report/verification及实际执行脚本、测试共五文件已备份原4090同相对目录；
+双端逐项SHA/大小一致，seal SHA
+`37a697eb3d1983a0a580aff17576adcedfa533ab93c5e732772e5bc60f53e3e0`。
+这是CPU产物备份，不是第二台独立执行分析，也没有checkpoint搬运或GPU调用。
+`audit_r1_consistency.py`实际返回`PASS: 36 requirements mapped`，diff检查通过。
