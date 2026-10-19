@@ -1,0 +1,85 @@
+{
+  "review_date": "2026-10-19",
+  "scope": "static source and primary-paper review only; no model imports, datasets or GPU runs",
+  "sources": [
+    {
+      "repository": "https://github.com/HITsz-TMG/PPAT",
+      "revision": "66495d25a04dca1a3d7b86eb9271e53ff410421e",
+      "scope": "source only, no datasets or model execution",
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "e0f00164042bb10f9474437a2fab1d02940067a79b77d4c94eabbba34458b141",
+          "bytes": 1270
+        },
+        {
+          "path": "PPATbert/PPATbert_dataset.py",
+          "sha256": "07df5d6c2abdcffa12f153b6fdd35655326bf65ee2a85895284ef9069a189ed6",
+          "bytes": 10867
+        },
+        {
+          "path": "PPATbert/PPATbert_framework.py",
+          "sha256": "5f2c1522a898d6889548e33cb64b097ec827a62e4b86bd828f38afd970e1646f",
+          "bytes": 19733
+        },
+        {
+          "path": "PPATbert/PPATbert_graph_build.py",
+          "sha256": "f08a9b927cf5a17a5e1b9c296dd2e5fa2b75ea6aa74af3a741fbab5608a3c26e",
+          "bytes": 8260
+        },
+        {
+          "path": "PPATbert/PPATbert_model.py",
+          "sha256": "8bb70b27872a27774a38dd06e76053d09c08ec2ef95d064cdbacc39a656fa05b",
+          "bytes": 16668
+        },
+        {
+          "path": "PPATbert/PPATbert_option.py",
+          "sha256": "4b270fb9cba50c2855da3fd43d65af4ffe41a68238228dd95e47ad6512cca084",
+          "bytes": 11823
+        }
+      ]
+    },
+    {
+      "revision": "d89b0267051183da52d59ac5bb8d2b3fa775c8eb",
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "862ac365a89e64d80c63b5b280af02f7a7dcf330bf782aaadbf20846b76ad191"
+        },
+        {
+          "path": "main.py",
+          "sha256": "f71198d1642eebcdb67ced9831dd33dafee26a8f0b5d7a0f0055e127aee1d7e2"
+        },
+        {
+          "path": "parameter.py",
+          "sha256": "7ba9df9b4d5122e8664e4596b517423bb608d5f684a2a4151b1a79de81fe6f5a"
+        },
+        {
+          "path": "requirements.txt",
+          "sha256": "c1d1616d95f9646b42e5b46ef02caf45a5273f2a53858f8128c58421bc573e84"
+        },
+        {
+          "path": "model/CGE.py",
+          "sha256": "fdede4ed80343cbde1bc84e409037ab7c5458f992bfd42e9e86c056b36b94072"
+        },
+        {
+          "path": "model/__init__.py",
+          "sha256": "4e8174bf7ec353ef201a4e6a14f2cf3672030fefdd9ad0943de40888d4c4e31e"
+        },
+        {
+          "path": "model/model.py",
+          "sha256": "ea1a8f6d280cdc8311fdf09971de79cc094658b40b8a6dd000cbea9324d41198"
+        },
+        {
+          "path": "data/process_esc_csr.py",
+          "sha256": "4cc1a3a64a6a90deba431ddce3918cb2e42dcbc6c8af6176da8d036f065da2a2"
+        },
+        {
+          "path": "utils.py",
+          "sha256": "e46bb6f4dc0f4006ee09d04d1cda8d4a4972567808548002976293395d651165"
+        }
+      ],
+      "repository": "https://github.com/LchengC/iLIF"
+    }
+  ]
+}

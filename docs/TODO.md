@@ -1,7 +1,14 @@
 # EKG 实时状态
 
-> 更新于 **2026-10-18**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-10-19**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
+
+**10-19质量与完成度核查**：作者要求最终质量、实验设计与结果优于四篇CAJ硕士论文。
+原件转换/核心方法与主表核读已完成，参照、局限和当前差距见
+[`质量对照与实验树`](research/20261019_thesis_quality_and_experiment_tree.md)、R1 §25.120–§25.121。
+三个方法正向贡献仍均未过门，E3仅既有首轮/历史v5上游；不报无依据的完成百分比。
+PPAT/iLIF固定源码静态核查和H2失效前提对齐已完成，不新增baseline运行、训练准入或
+E3实验。当前唯一C41-A-R不变，下一实质执行仍是核空卡后既有ERGO成本合同。
 
 **10-18阶段收尾**：作者确认无空卡并要求完成本轮收尾。CUDA preflight/选中checkpoint
 独立复算的软件入口及非有限梯度范数fail-fast已落地，CPU验证/限制见R1 §25.116–§25.117；

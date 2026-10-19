@@ -1,0 +1,74 @@
+{
+  "converter": "caj2pdf/caj2pdf@6c4bc32b15ce748d211f45d536f5d5511ef9f368",
+  "papers": [
+    {
+      "id": "lina",
+      "source": "/mnt/d/FilesData/ChromeFiles/基于图神经网络的时序知识图谱推理方法研究_李娜.caj",
+      "source_sha256": "28f2767dd34080c07a793c82c06dbfe7577bf4b2db9a531ae5688c01f0e83be7",
+      "conversion_exit": 0,
+      "pdf": "/mnt/d/FilesData/ChromeFiles/ekg_thesis_review_20261019/lina/thesis.pdf",
+      "pdf_sha256": "39fc68e3e177e0eb68680e178d4aef7f137716ac51b6586f60b69c08716b42d5",
+      "pages": 107,
+      "characters": 152373,
+      "text_empty_pages": [],
+      "text": "/mnt/d/FilesData/ChromeFiles/ekg_thesis_review_20261019/lina/text.txt",
+      "text_sha256": "9b33fe4343799fbe68021e7374876454497fe3791a73ded1e6092534763d655a"
+    },
+    {
+      "id": "yuyichen",
+      "source": "/mnt/d/FilesData/ChromeFiles/基于大语言模型的广告法律法规知识图谱构建技术研究_余羿辰.caj",
+      "source_sha256": "51223f99d24b3f81aa219c6a77a544d24f7b5212b67130820154e0c9a5de153e",
+      "conversion_exit": 0,
+      "pdf": "/mnt/d/FilesData/ChromeFiles/ekg_thesis_review_20261019/yuyichen/thesis.pdf",
+      "pdf_sha256": "da6a45364aa431fcd87200a020217988a6148c8caab81f9952ba2ec4f1a72b5c",
+      "pages": 61,
+      "characters": 81572,
+      "text_empty_pages": [],
+      "text": "/mnt/d/FilesData/ChromeFiles/ekg_thesis_review_20261019/yuyichen/text.txt",
+      "text_sha256": "16996b5f36751e3fc1b6b2d16b491fff81e49fab147068353a30add2bb632340"
+    },
+    {
+      "id": "zhuruobin",
+      "source": "/mnt/d/FilesData/ChromeFiles/网络安全知识图谱构建关键技术研究_朱若彬.caj",
+      "source_sha256": "f7fc14b6c7757efbf77a2ef972b95b3e13b778d991779a39365c30c792e78eec",
+      "conversion_exit": 0,
+      "pdf": "/mnt/d/FilesData/ChromeFiles/ekg_thesis_review_20261019/zhuruobin/thesis.pdf",
+      "pdf_sha256": "8f139f959a1dde0c80b73e3343889b34888d7ed30474a35c2af3ba8478243333",
+      "pages": 65,
+      "characters": 86165,
+      "text_empty_pages": [],
+      "text": "/mnt/d/FilesData/ChromeFiles/ekg_thesis_review_20261019/zhuruobin/text.txt",
+      "text_sha256": "67f6f63b39b8579fdb4ccfa8a0631eccd6d65bd50c8e4e6aab09f01cab227a78"
+    },
+    {
+      "id": "lijiawei",
+      "source": "/mnt/d/FilesData/ChromeFiles/面向军事辅助决策的事件知识图谱构建_李佳蔚.caj",
+      "source_sha256": "6b02a1b400be9e635e4c040b6d58106d279ad6c9608405dc5f999f79bde6b260",
+      "conversion_exit": 0,
+      "pdf": "/mnt/d/FilesData/ChromeFiles/ekg_thesis_review_20261019/lijiawei/thesis.pdf",
+      "pdf_sha256": "e5f3c75e86e71c581a7ec8d128ff1090bee93327d55294d5029c68eba49c5d83",
+      "pages": 108,
+      "characters": 135969,
+      "text_empty_pages": [],
+      "text": "/mnt/d/FilesData/ChromeFiles/ekg_thesis_review_20261019/lijiawei/text.txt",
+      "text_sha256": "dd1a11ae6fb197e600555ef965462befcbe695583b43938805e603eb5f5e0135"
+    }
+  ],
+  "review_scope": "Full text extracted; focused reading of abstracts, contents, selected method/experiment/discussion pages; visual checks of primary tables. No independent reproduction.",
+  "visually_checked_pdf_pages": {
+    "lina": [
+      75
+    ],
+    "yuyichen": [
+      30
+    ],
+    "zhuruobin": [
+      46
+    ],
+    "lijiawei": [
+      89
+    ]
+  },
+  "review_date": "2026-10-19",
+  "toc_note": "Converter bookmark output is retained only in the local full manifest; report citations use checked PDF and printed page numbers."
+}
