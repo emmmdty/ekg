@@ -7491,3 +7491,102 @@ R100的plan/report/verification及实际执行脚本、测试共五文件已备�
 `37a697eb3d1983a0a580aff17576adcedfa533ab93c5e732772e5bc60f53e3e0`。
 这是CPU产物备份，不是第二台独立执行分析，也没有checkpoint搬运或GPU调用。
 `audit_r1_consistency.py`实际返回`PASS: 36 requirements mapped`，diff检查通过。
+
+### 25.123 A4检出残余原文案例与最近机制核查（2026-10-19）
+
+**科研价值**：对准表4-3/KR3.1–3.2，在R100只排除纯方向修复动机后，阅读双向未检出
+及双向无注释误报的原始上下文，找推理时可用的差异信号；不能从“NONE多”直接选focal、
+阈值或新图模块。案例将改变候选机制/强简单解释的选择，不能证明新方法有增益。
+**可行性**：本地冻结2622篇train/R188 predictions均存在，纯CPU查表与原文阅读，无需
+新标注、模型调用、GPU或外部数据传输；final-valid保持封存。抽样只代表探索性案例。
+
+主表已先补当前A-R候选裁决行范围：按`SHA256(doc_id|subtype|head|tail|bucket)`排序，
+FN双向无预测及FP双向无gold，各12例，每个bucket每文档至多一例；排除同向错类/反向
+已有边，使用官方gold Cartesian展开。保存原始两端所在句及相邻句、完整文档文本、native
+类型/offset/ID；不按阅读后的“典型”程度挑案例，不从小样本推总比例/因果结论。正式
+阅读前记录输入SHA/抽样计划，若无机制差异则如实否决/待证，不启动新方法训练。
+
+**资源复查**：本轮两机SSH均成功，4090四卡有PID3151299–3151302任务、各约17GiB显存，
+5090为新vLLM PID3122565、约28GiB；均非空卡。本轮未执行ERGO成本，未自动等卡。
+选卡只认未来调用前的新快照；同资源阻断本轮仍有合法案例/文献工作，不标Goal blocked。
+
+#### 实际抽样与原文核查
+
+R101=`runs/stages/R1/r1-v101-a4-case-review-20261019/`。`plan.json`先冻结范围/SHA后，
+执行`uv run python <R101>/extract.py > <R101>/cases_reading.txt`退出0。官方转换/全集
+验证下，FN双向未检出7601、FP双向无注释9711，与R100对应桶完全一致；每桶按固定hash
+选12例、每文档至多一例，共24例。保存完整文本、两端附近句、类型/offset和事件身份，
+逐例自审写`review.json`；不是新gold、独立标注或总体错误率。原四输入SHA再核不变。
+case文件SHA `a2441899ca2d56caed7a69ab671da4f6cc980dd9f3eeaba7aa68216314e1aac1`。
+
+| 固定案例索引 | 原文/原生标注观察 | 对候选推理的限制 |
+|---|---|---|
+| FN #1：`eb3e8624…` | relieved所在句意为撤职，native type为Cure；关系为aftermath→relieved的PRECONDITION | 类型/词义表面错位可见，但匹配R188原源码SHA的causal路径只消费token/span池化表示，无event-type输入；不能把该type直接当成已识别模型致错原因 |
+| FN #7：`890d6ac4…` | 同句contributed to连接murders与hostilities，模型双向未检出；gold为PRECONDITION | 已有显式表达仍会漏检；不支持“补一个因果词表就能解释全部漏例”，不自行将gold改成CAUSE |
+| FN #5/#6/#11 | 叙述时间、程序性条件与具体事件范围不总直观；保持各自native金标 | 不能以同代理的直觉调换方向/重标，也不能把before/随后直接当因果监督 |
+| FP #14：`9756eccb…` | 列车caught与derailed语义看似有关，gold无对应直接边，只有二者各与set off的PRECONDITION | 无边不自动证明世界负因果；LLM“合理性”不能替换任务标签，未独立裁定数据错误 |
+| FP #19：`6ef6bfa1…` | gold为occurred句0→died句1的CAUSE，另有crash句5→killed句5的PRECONDITION；选中crash→died无边 | 指称与关系边身份必须保留，词义接近不能硬置coref或补关系 |
+| FP #22：`125e2e2a…` | gold为Campaign句1→dead句2；选中Battle句0属于另一native event，所选边未标注 | 更宽泛的事件因果看似合理，不等于命中本任务边界；不能以世界常识“修复”评测集 |
+
+其他固定案例包含程序/结构前提、局部谓词、报道行为/被报道事实、概括事件与局部实例等
+不同情形，全部24例保留，不只报告上表例子。以上是探索性读法，不是互斥的总体归因；
+没有正例匹配控制或随机干预，不能据此判断哪种机制总体占优、数据噪声比例或模型上限。
+类型错位、标注范围疑问不改变冻结label/evaluator，不以清洗/删例获得新分数。
+
+原强锚`model.py`/`data.py`采用R168已封存本地副本，与R188输入pin的SHA分别精确一致：
+`03aa41ea…dbc734`/`8375a8a2…f9e982`。检索原指定源码路径本地不存在后使用该已核副本，
+不是猜测路径存在或搬运checkpoint。
+
+#### 原始定义与最近邻的机制/真实实现
+
+重新核[MAVEN-ERE §2.3/附录B](https://aclanthology.org/2022.emnlp-main.60.pdf)：CAUSE与
+PRECONDITION区分结果充分性/反事实必要性；因果标注以已标BEFORE/OVERLAP对为范围，
+人工最小边之后按规则补全。它不是以任意“语义上有关”给关系，也不能由本轮案例断言
+数据集无穷尽性/遗漏率；规则闭包已属数据构建，不能作为本项目创新，更不重标冻结gold。
+
+围绕隐含检出、语义净化、事件概念/知识检索，核以下正文与作者实现；没有外部论文
+成绩与本项目相减。日期/检索边界、固定源码文件SHA、阅读范围见
+[来源清单](../research/20261019_a4_detection_sources.json)。
+
+| 最近邻 | 核到的实际机制/源码 | 可运行性与本轮裁决 |
+|---|---|---|
+| [SemDI，EMNLP2024 §3–4](https://aclanthology.org/2024.emnlp-main.87.pdf)；[作者代码](https://github.com/hrlics/SemDI/tree/1c54a16d36f793f638c836f8f35595c2740869fc) | 共享MLM编码、遮一个事件后填词、重编码生成句，再以生成token查询原语境attention分类；`model.py`真实实现，`train.py`/`utils.py`/原shell训练配置均已读 | MIT、真实trainer/公开checkpoint路径存在但未取数据/权重。原binary头/metric、逐pair输入与旧torch/transformers、原test-fold选best均需适配/预算；`groundtruth`实为去label的tagged输入，不能因变量名就声称gold泄漏。仅静态/AST通过，未import或实跑；不换ERGO队首，也不借参考恢复封存masked/retained家族 |
+| [LKCER，COLING2025 §3.2–3.4](https://aclanthology.org/2025.coling-main.495.pdf) | WordNet概念/mention异构图、ConceptNet匹配、COMET生成并由LLM筛扩知识、共享MLM的联合prompt | 正文机制已存在，不能将泛称概念聚合/知识增强当创新；论文链接与题名/GitHub检索未闭合官方代码，仅为有限检索，非“无代码”的全面断言。未调用LLM或下载新知识库 |
+| [CaSR，2026 §4.3–4.6](https://link.springer.com/article/10.1007/s44443-026-00531-x)；[作者仓库](https://github.com/jinghaipeng/Causal-Semantics-Refinement-Model/tree/20804fc0f03adf9128605424a8e77a9f398c675e) | 检索正负样本、潜表示扰动/重建及相似性/瓶颈正则；已读正文公式与当前树/README | 当前树仅Partial数据/README/LICENSE，作者明确只公开部分数据；【代码】缺真实model/trainer，当前不可直接复用。只核当前树，不声称所有历史均无实现；方法仍是语义净化/检索对比的最近邻，不从论文重写后称复现 |
+
+SemDI固定`1c54a16d36f793f638c836f8f35595c2740869fc`七文件hash已封存；原trainer确实
+对其`test_fold`每epoch评估并依`test_f1`存best。本项目若未来透明适配，必须使用独立
+selection及冻结完整evaluation，不能照搬此选择口径。原metric把任意nonzero视为同一
+positive，也不得代替native subtype官方计分。多个encoder前向/逐pair构造在native全
+候选上尚无实际成本证据，不凭“simple”就放行。名册仅补可得性行，不列成绩或FR-016(a)。
+
+辅助HTTP下载中止前已保留MAVEN论文及SemDI/CaSR正文缓存；较慢LKCER PDF/仓库API
+批次由本代理显式终止，进程实查exit143；LKCER改用浏览器正文，仓库改用Git固定树。
+该网络/读取边界不作方法不可行或科学FAIL。未执行远端模型，不因下载慢重启模型任务。
+
+#### 本轮决定与下一个能改变科学结论的实验
+
+- **不准入纯cue补充、类型表面纠错、LLM语义重标、泛化语义净化/填词查询或概念聚合
+  的模板**：前几项缺可识别动机/有效标签，后几项有直接机制先行性；不能组合模块换名。
+  这不是宣称所有未来语义方法都无效，而是当前尚无独立新干预。没有新主指标或方法准入。
+- **强rival实验保持优先**：ERGO完整候选/全文图方法在本任务能恢复哪些漏检、又增加哪些
+  无注释边，必须由完整训练及合法评测决定，静态论文/样例读法不替代结果。保留backbone
+  混淆、错误交换/方向/subtype/护栏解释预案；不事后只看修复样例。SemDI作为更直接的
+  语义询问最近邻记录可得性，不自动追加训练、预处理或重复CPU smoke。
+- **后续新方法的缺证已具体化**：须定义能在推理中区分具体事件实例/局部关系与宽泛
+  主题因果的可用信号，并相对已知cloze/概念图/对比/知识模块给出实质不同的决定机制及
+  最强简单控制。当前不能把这一问题表述冒称方法已设计完成；先等强rival实证更新残余，
+  或新的一级机制证据，再按主表回R1，不自行降低创新门/换任务/扩大backbone。
+
+R101在本地完成，无模型/optimizer调用、无final-valid访问；科研目标仍未达成。后续
+资源解锁仍为成功核空卡后既有ERGO成本合同，完整训练/确认的许可与科学门不变。
+
+**本轮核验/归档**：另按每文档最小hash重新计算抽样，所选案例与初次提取一致；输入
+SHA、固定仓库文件SHA、Python AST、来源JSON及相关相对链接均核过。
+`audit_r1_consistency.py`实返`PASS: 36 requirements mapped`，`git diff --check`通过。
+未改生产代码，不重跑全仓三件套，不把§25.122的测试称作本轮新跑。额外检查一次性
+归档extractor时有一处104字符行（E501），原样保留实际执行源码，不宣称所有归档源码
+lint全绿；这不改变抽样或科学结论。R101共25件及seal已备份原4090同相对目录，双端
+逐项SHA/大小一致；seal SHA
+`dd45660cb67afb0336f03f08afc2e881150537b4defff8bc4c21e9891b1c6e74`。
+这里只是复制备份，不是远端独立执行或GPU调用。

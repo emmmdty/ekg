@@ -247,6 +247,10 @@ author delegation releases a new in-scope research queue; it does not reopen old
   set-based recomputation completed (R1 §25.122); no model calls, new score or admission. The thread
   Goal was created and verified active from current C41-A-R; no watcher. Next GPU action remains
   the existing bounded ERGO cost contract; full training and confirmation retain their gates.
+  R101 fixed train case review, native annotation-definition and direct mechanism/source checks
+  also completed (R1 §25.123). SemDI is availability-only, CaSR's pinned current tree has partial
+  data only; neither is a newly runnable native baseline. No relabeling or generic semantic-module
+  proposal was admitted. Independent CPU preparation is closed; do not fabricate more smoke tasks.
   **2026-10-16 current override:** the author confirmed the 4090 has recovered and requested
   project-wide OKRs, measurable scientific outcomes and top-down task decomposition.
   C41-R completed original-machine pins/initializer/manifests, source synchronization and untracked

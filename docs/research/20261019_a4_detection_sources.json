@@ -1,0 +1,104 @@
+{
+  "review_date": "2026-10-19",
+  "scope": "Original-text train case review and primary-method/source audit; no new model, data or checkpoint execution.",
+  "search_queries": [
+    "MAVEN ERE annotation guidelines PRECONDITION cause event relation exhaustive annotation",
+    "event causality identification event trigger ambiguity sense disambiguation 2024 2025",
+    "event causality identification retrieval augmented hard negatives 2025 2024",
+    "\"LKCER\" \"github\"",
+    "\"SemDI\" github event causality"
+  ],
+  "sampling_plan": "runs/stages/R1/r1-v101-a4-case-review-20261019/plan.json",
+  "papers": [
+    {
+      "name": "MAVEN-ERE",
+      "url": "https://aclanthology.org/2022.emnlp-main.60.pdf",
+      "reviewed": "Section 2.3 and Appendix B/table 11; definitions, temporal annotation scope and closure."
+    },
+    {
+      "name": "SemDI",
+      "url": "https://aclanthology.org/2024.emnlp-main.87.pdf",
+      "reviewed": "Sections 3-4 and actual official model/trainer/metric; no scores imported."
+    },
+    {
+      "name": "LKCER",
+      "url": "https://aclanthology.org/2025.coling-main.495.pdf",
+      "reviewed": "Sections 3.2-3.4; conceptual graph, knowledge generation/filtering and joint prompts.",
+      "code_status": "Not located within title/GitHub query and paper link search; not a universal absence claim."
+    },
+    {
+      "name": "CaSR",
+      "url": "https://link.springer.com/article/10.1007/s44443-026-00531-x",
+      "reviewed": "Sections 4.3 onward on retrieval/perturbation/bottleneck; author repository current tree/README."
+    }
+  ],
+  "repositories": [
+    {
+      "repository": "https://github.com/hrlics/SemDI",
+      "revision": "1c54a16d36f793f638c836f8f35595c2740869fc",
+      "scope": "Static implementation review only; no corpora/checkpoints fetched, model imports or runs.",
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "5c201743d4822ec7a995e832d2c37e268d5f42b651f6b8f9390df14c3f991337",
+          "bytes": 3763
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "408a58f9908923ea1cfd80ccce3254912db8dfe3614ed630dacba3a4bc0cf044",
+          "bytes": 1061
+        },
+        {
+          "path": "requirements.txt",
+          "sha256": "135752271301bb12791ed13ea5e059f62800a71ff8d1da078c6f592749a5379a",
+          "bytes": 110
+        },
+        {
+          "path": "src/model.py",
+          "sha256": "8ac9639fd0591c4cf4d2c57986dcb64f90752da87ce7f276e67e909cf409f085",
+          "bytes": 4023
+        },
+        {
+          "path": "src/train.py",
+          "sha256": "ba830d50d5c2f1750a6b51db1a630fd7f31771fd96582f3f3dcfe4798db6c08d",
+          "bytes": 9749
+        },
+        {
+          "path": "src/utils.py",
+          "sha256": "e5fa34297e73fe01094cfc741ce65ad1e2a6f0846810bd27948da93dfa0ec6f5",
+          "bytes": 947
+        },
+        {
+          "path": "src/scripts/train_ESC.sh",
+          "sha256": "c97ba61679b3792897d2b33a4329cfe34a904a8304ff26f55b538da58a68d82b",
+          "bytes": 328
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/jinghaipeng/Causal-Semantics-Refinement-Model",
+      "revision": "20804fc0f03adf9128605424a8e77a9f398c675e",
+      "scope": "Current tree only; no data/checkpoints/model execution.",
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "620d3768bc6d2459e67b5f7f85f12555dd3b3b11c294899b6b7750b3197d883d"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+        }
+      ]
+    }
+  ],
+  "frozen_anchor_source_checks": {
+    "model.py": "03aa41ea0da3b0d14fe51096fd263cee22a2336c19c0bfb8f4786296f9dbc734",
+    "data.py": "8375a8a2bbf277098111213ec831f559226f16d3938f8381216e4a51c2f9e982"
+  },
+  "limits": [
+    "Static syntax is not runnable or reproduction evidence.",
+    "Current CaSR tree and declaration are checked, not full repository history.",
+    "No public scores compared to MAVEN native protocol.",
+    "No novel mechanism or method admission established."
+  ]
+}

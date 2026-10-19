@@ -77,8 +77,15 @@ transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能�
 | 4 | A3.6 fallback | — | 本文 | **不适用**：本文前期方法，`failed` 身份须在表头标明 | 已有 |
 | 5 | LLM 对照（Qwen3-8B 等） | — | 自建 | **不适用** | 待建 |
 | 6 | ERGO（COLING 2022，可得性准备） | ESL / Causal-TimeBank binary ECI | 作者真实RGT/trainer/ESL缓存已核；固定`afa3d347…4c789` | **(b)路径，未完成**：原数字/依赖/真实cache数值障碍已核；native接口/输入及原完整CPU短文已通过，完整CPU形状/无标签dev与真实原trainer CPU smoke闭合，5090成本获准待空卡，v2入口未准入，训练仍待闭合 | **非已复现/非主表成绩行**；具体缺口、CPU及新软件入口限制见`PHASE_R1.md` §25.90/§25.95–§25.117；本行不授权epoch训练 |
+| 7 | SemDI（EMNLP 2024，仅机制/可得性审查） | ESC / ESC* / CTB，binary ECI | [作者源码](https://github.com/hrlics/SemDI/tree/1c54a16d36f793f638c836f8f35595c2740869fc)，MIT；真实MLM/cloze/attention模型、trainer及公开checkpoint路径存在，未取数据/权重或实跑 | 未闭合：原生二类/逐pair句子输入、旧环境与原test-fold选checkpoint均需透明适配；native方向/subtype、完整候选、独立selection和实际成本尚未验证 | **非已复现/非分数行，不换ERGO队首**。R1 §25.123及来源清单；已知语义依赖/填词询问不是本项目创新，不借此恢复旧masked/retained机制 |
 
 **不可运行，进可得性表**：RESIJ、KnowQA、2025 two-stage ERE、MAQInstruct（口径可引用但无同协议复现）。
+
+**10-19补充代码障碍**：CaSR（2026）作者仓库当前`20804fc0f03adf9128605424a8e77a9f398c675e`
+仅有Partial数据/README/LICENSE，README明确只公开部分数据；无当前模型/trainer可供复用，
+不从论文重写后冒称复现，不列已跑成绩。仅核当前树，不声称全历史都无代码；机制仍属
+最近邻。LKCER只核论文机制，有限检索未闭合官方实现，不把它当已就绪baseline。
+证据与边界见R1 §25.123、[来源清单](research/20261019_a4_detection_sources.json)。
 
 ### 2.1 ✅ LLMERE 的保真度路径已裁定（作者 2026-09-15）：取 (b) Unverifiable
 
