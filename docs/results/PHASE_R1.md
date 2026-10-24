@@ -7790,3 +7790,10 @@ adapter、方向profile和numpy，复用其原生展开及每doc TP/FP/FN，不�
 smoke OK、R1一致性36项PASS；官方scorer在toy无预测正例时原样给UndefinedMetricWarning，
 不压制，也不当真实模型分数。新分析没有改运行中任何pinned文件，未重跑旧模型准备。
 Taco预测现已备份到主机计划同路径，双端SHA与首评分前固定值一致，无checkpoint搬运。
+
+**原机分析入口部署/轻量核验**：增量Git bundle SHA
+`bf50f9d85566a5217826b106fdf01a0db3aedf15d5391e7ae6239c405d699a75`，同步至`bf596f1`。
+部署前用Git变更集合证实没有任何运行中pinned路径或正式配置变动，之后逐项重核tracked
+source/config pins不变。隐藏CUDA运行新增分析五项CPU测试，实返5 passed；只更新文档/
+新增分析程序，不重启原训练或改变其启动身份。该时实际worker13841仍ALIVE，首epoch
+未完；源码运行根仍是其固定配置/pins，而非把后续文档commit当启动commit。
