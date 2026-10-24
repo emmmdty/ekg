@@ -4,7 +4,13 @@
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.127；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.128；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**10-24作者要求并行**：同队C41-A-R增加原ERGO论文两项单变量控制，卡0 complete-graph、
+卡2 gamma0；卡1原full不动，卡3保留。主表/独立[合同](phases/PHASE_A4_ergo_parallel_controls_20261024.md)
+已先冻；新增入口复用原三入口AST，仅在唯一模型构造后安装控制，原pinned文件不改。
+当前先做原机真实CPU测试和各自最大train/驻留最大无标签dev CUDA生产，再据实测预算
+放行完整seed13。来源/科研自审/真实状态只见R1 §25.128；不是新方法创新或额外seed。
 
 **10-24正式训练接续**：R102三例CUDA成本及R103原函数两最大train批次/驻留最大
 无标签dev实际通过、exit0/GONE、双端hash一致（R1 §25.125–§25.126）。R104预算和

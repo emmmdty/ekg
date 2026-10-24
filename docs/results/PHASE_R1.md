@@ -7797,3 +7797,49 @@ Taco预测现已备份到主机计划同路径，双端SHA与首评分前固定�
 source/config pins不变。隐藏CUDA运行新增分析五项CPU测试，实返5 passed；只更新文档/
 新增分析程序，不重启原训练或改变其启动身份。该时实际worker13841仍ALIVE，首epoch
 未完；源码运行根仍是其固定配置/pins，而非把后续文档commit当启动commit。
+
+### 25.128 作者要求并行：ERGO原论文两项同backbone控制（2026-10-24，执行前冻结）
+
+**科研价值**：对准A4表4-3/错误分层及KR3强rival解释，补原full与同输入/同backbone的
+complete-graph、gamma0，分别识别criss-cross连接约束和focal难例因子，而非把Longformer
+比RoBERTa的差值当图贡献。这些是已知方法控制，不算本项目创新，也不宣称已改善指标。
+作者明确要求可在其他GPU并行以缩短整体工期；同队C41-A-R主表已先补该切片。
+
+**证据**：[ERGO COLING 2022正文§4.5](https://aclanthology.org/2022.coling-1.185.pdf)
+明列complete-graph与gamma=0消融。本轮不引用该表外部分数，不以ESL分数代本项目native。
+原作者固定revision的`model.py`逐行实核：RGT对bool mask填-inf后softmax；原adapter
+mask为共享端点邻接且对角True。complete控制只将所有非对角置False、对角仍True，保留
+RGT/参数/dropout与所有候选，不新建GCN或重写公开模型。gamma0设置原`focal_loss.gamma`
+为0，保留alpha=.75（NONE权重.25、两正类各.75）；这是加权CE，**不是去类别权重的普通
+CE**，不把两个变化揉成一个干预。两个控制均独立与full比较，不增加二者组合第四臂。
+
+**可行性**：完整数据/权重/原函数/官方scorer均原地可用，主机实际卡0/2无compute-app，
+卡1训练ALIVE，卡3保留。两项只改变原模型中一个mask或一个现有loss标量，模型参数形状/
+初始化RNG/所有输入、训练预算和选模规则均可保持；不需要新标注、额外seed或跨机权重。
+不过新执行路径仍须实际最大train反传/驻留最大无标签dev CUDA报告，不能拿full报告
+直接翻控制训练flag；原成本作为同形状参考，实际工期另用控制production测量封口。
+
+**假设与证伪**：full优于complete且错误交换合理时仅支持该固定配方下邻接约束的贡献；
+full优于gamma0时仅支持该加权目标中的focusing因子；相等或反向均保留，不能事后换阈值/
+seed/epoch或选更弱主锚。三个都不胜joint也不能唯一归因backbone/数据，须先核训练/适配
+有效性与残余。单seed、选中dev区间不含训练方差，不当独立机制创新或最终确认。
+
+**时间顺序**：原full已于§25.127启动，本轮末次成功观察epoch完成数仍为0、尚无完整
+epoch分数；追加控制不是声称原三臂事前预注册。保留固定full配置/pins/源码和已有结果，
+不重启full。新入口只对原项目脚本内唯一模型构造之后注入控制安装调用，原文件不改；
+AST必须精确匹配唯一构造，记录执行的派生源码SHA及原入口SHA；其余模型/原训练函数/
+梯度/选模/核分代码逐字复用。独立重载应用同一控制安装，避免训练与推理mask不一致。
+
+**实现/本地门**：新入口`run_ergo_native_control.py` SHA
+`f042b19ab4b1748f361b73185ddfaab845e306a4576641eeb746e10763ce161a`，原三入口实际AST均
+精确匹配一个模型构造；其余AST由测试验证相同。先缺实现RED，再实现GREEN：本地3过/
+1Torch skip；新增试验测试的是mask/权重/RNG及gamma/alpha/准入，不是只断言写了某行代码。
+全仓985 passed/96 skipped（本地缺Torch，真实mask测试须原机补）、ruff零错误、CPU
+smoke OK。原full的pinned源码/配置未改，不影响其最终身份核验。
+
+R105两配置及[并行合同](../phases/PHASE_A4_ergo_parallel_controls_20261024.md)已冻。
+complete_graph卡0配置SHA
+`10c63ffb183b7dc140522d8c40327489c76674ce944d7e4757ac4374ed3c11f9`；gamma0卡2配置SHA
+`33140aa24e4b2f86cceee0d4313fd16a9a9eab9f0f1d3a739b0ebef71c7b2dc2`。目前待原机CPU
+真实测试与各自CUDA production，尚未放行控制完整训练。后续各有独占输出/执行记录，
+原full结果保留原身份，追加控制不能替换主表强锚或将已知消融当新方法贡献。
