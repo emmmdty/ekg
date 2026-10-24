@@ -7711,3 +7711,55 @@ shadow-target forward。float32/原类/损失/候选与seed13保持，无epoch�
 timeout1200秒+30秒清理，无自动重试。合同见
 [CUDA生产/容量](../phases/PHASE_A4_ergo_cuda_production_20261024.md)。成本/输入/当前代码
 SHAs先联核，实际相关CPU单测后启动；结果尚未产生，不提前写admission或完整预算。
+
+#### R103实际执行与裁决
+
+配置SHA `5cdfc57d7039bf2dcee34726295382b558dd8e68a3e8727cdd75e6f9a8c55cf1`。
+代码以增量Git bundle同步到`01b86e318d3cb12485cffac17b12e4db62fe818b`，bundle SHA
+`f77571e77e30f3c05c9425aa45d51ac02bf4e1995cec42322ec549ecbf974841`；相关原机CPU生产/
+训练测试12项实过。两最大train输入的原函数lr0运行及驻留optimizer dev均实际CUDA完成。
+
+| 实际阶段 | 耗时（秒） | peak allocated / reserved（GiB） | 结果 |
+|---|---|---|---|
+| 原train_epoch两个最大train批次 | 3.5773740150034428（合计） | 16.812426 / 19.398438 | complete |
+| 最大候选dev两次shadow-target前向 | 0.6578549784608185（合计） | 9.711623 / 21.541016 | complete，logits逐值一致 |
+
+optimizer state共1486817304字节，dev期间保持驻留；没有读取dev gold、epoch训练或保存
+checkpoint。参数数值SHA不变，raw bytes signed-zero从36个负零变2个，未修复/隐瞒；
+仅预训练pooler weight/bias无梯度。dev固定为最大候选图，不声称单独测了最长dev文本；
+全人口实际full4096/marker/MID/候选身份仍由正式训练入口在首epoch前联核。
+
+wrapper PID6675/worker6676，实际SSH等待exit0、成功ps核GONE，未重启。R103完整归档
+`runs/stages/R1/r1-v103-ergo-cuda-production-20261024/`已回本地逐件SHA一致；manifest SHA
+`28655d9955dcf620f93277125cc208d5900e23b5cedd72b37f1d311d9f2c0218`。当前原生产/驻留
+容量门通过，不推论主指标；下一闭合预算并执行原公开强rival的完整seed13 baseline。
+
+### 25.127 ERGO完整单seed基线预算与正式执行（2026-10-24，首评分前冻结）
+
+**科研价值**：对准A4表4-3/FR-016(b)及KR3强对手证据，把ERGO原完整图方法在本协议下
+真正训练完，判断其新增检出/误报与方向/subtype交换，给后续独立新方法提供更强残余。
+这是公开已知方法，不是创新贡献；不把Longformer与RoBERTa差异当RGT因果证据。
+**可行性**：R102/R103真实CUDA、原函数/全候选/驻留优化器门均通过，现有全部train/
+internal-dev/官方scorer/公共权重位于主4090；无新增标注或跨机checkpoint。4090空卡可
+按作者授权自用，不套用5090成本许可。当前不新增机制/seed，不撤销科学验收。
+
+**完整预算**：以两个最大train批次的平均原函数耗时乘2622×20，加最大图两次dev前向
+平均耗时乘291×20，保守proxy为26.586973516864237小时；乘1.5并加3600秒IO/身份核验
+余量后向上整日取48小时，内部wall_seconds=172800，外部173400秒后TERM/60秒清理。
+这是fixture外推而非工期保证或所有动态显存上界。原机资源快照free disk
+20925547163648字节、MemAvailable505642232kB，启动前再核空卡；不足或非有限值如实
+失败、不重试/缩输入。原函数20完整epoch保持，不依据初期评分提前停止或改选模规则。
+
+R104=`runs/stages/R1/r1-v104-ergo-native-budget-20261024/`，budget/comparison_plan先
+冻结，seal SHA `acbeb20db3a9292867500e06a3dc78e90182e1970229643975388ea9a8f91322`。
+主对照为原official_joint；A3 fallback与Taco-inspired透明适配作为既有补充，预测SHA
+逐项在comparison_plan固定。前两份原机预测实查匹配；Taco预测本地SHA匹配，原机目标
+路径暂缺，后续复制预测做分析并双端hash，不涉及权重。历史A3可信根保留原身份，
+不把它重绑为新P1；本轮manifest/候选/evaluator三轴及gold SHA与该主锚一致。
+
+冻结后完整291doc逐doc TP/FP/FN配对bootstrap10000次、rng13、百分位95%区间及
+subtype/方向/FN/FP交换；只反映选定dev单seed差异，不含训练随机性，不充确认或机制归因。
+不把Taco适配当另一个原版公开复现，不换成更弱主锚；其他family不适用。首评分之前
+独立[4090正式合同](../phases/PHASE_A4_ergo_native_training_4090_20261024.md)/配置已冻，
+配置SHA `5743397bd4f4f1d452a6e6ec9d692dba5c590ce1d58c27859681185806ee5f41`；旧未准入
+提案保持。当前只是已获准的baseline完整训练，O1–O4仍未满足；没有读取final-valid。

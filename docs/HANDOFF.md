@@ -1,17 +1,18 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-24（+08:00，ERGO原完整CUDA成本通过；接容量/production）**。
+> 更新于 **2026-10-24（+08:00，ERGO成本/生产/容量通过；接完整单seed基线）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.126；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.127；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
 
-**10-24成本后接续**：R102三个固定train病例在4090独立完成、exit0/GONE、双端hash一致，
-原完整执行版CUDA成本通过（§25.125），不是科学效果。当前R103按
-[生产/驻留容量合同](phases/PHASE_A4_ergo_cuda_production_20261024.md)在卡1调用原训练
-函数两个最大固定输入的lr0批次，再带驻留optimizer检查最大无标签dev；无epoch/gold/
-评分/checkpoint，不重做已闭合CPU全模型。通过后才闭合完整预算/正式训练配置；当前
-仍未放行20epoch。原4090配置/模型/输入及所有失败/5090记录保持，C41-A-R不换队。
+**10-24正式训练接续**：R102三例CUDA成本及R103原函数两最大train批次/驻留最大
+无标签dev实际通过、exit0/GONE、双端hash一致（R1 §25.125–§25.126）。R104预算和
+三对照在首评分前固定（§25.127），当前接[4090正式训练合同](phases/PHASE_A4_ergo_native_training_4090_20261024.md)，
+原ERGO full4096/float32/全候选/seed13完整20epoch；正式配置另存，不改旧未准入提案。
+启动前实际全人口digest/pins/空卡联核，输出独占；完成后原机独立重载/官方分数及配对
+错误交换。ERGO为已知强rival的FR-016(b)，不是方法创新；三个科学O仍未达。
+checkpoint留4090，final-valid/额外seed/5090均不开放。当前状态以最新实际运行段为准。
 
 **10-24作者恢复（覆盖10-19资源出口）**：“4090已可用，继续后续任务”。已成功SSH核
 无compute-app，当前接既有ERGO成本，三个固定train病例在卡1/2/0独占并行，卡3保留；
