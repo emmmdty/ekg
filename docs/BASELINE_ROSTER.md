@@ -76,7 +76,7 @@ transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能�
 | 3 | LLMERE-causal（COLING 2025） | MAVEN-ERE official valid 710 篇，自写评测器，causal 36.04 | ⚠️ 有数据构造/评测器/**已发布预测**，无 trainer/inference entry point | **(b) Unverifiable**（作者 2026-09-15 裁决），障碍＝「保真度验证需读取封存 final-valid，按 A 类红线放弃」 | **(b) 已成立；无 U 分数。** 作者 2026-10-02 取甲：项目恢复方案的 target-third-line stop 读取 internal-dev gold，故按【协议】收口为命名可得性障碍；不写/不跑新 driver |
 | 4 | A3.6 fallback | — | 本文 | **不适用**：本文前期方法，`failed` 身份须在表头标明 | 已有 |
 | 5 | LLM 对照（Qwen3-8B 等） | — | 自建 | **不适用** | 待建 |
-| 6 | ERGO（COLING 2022，可得性准备） | ESL / Causal-TimeBank binary ECI | 作者真实RGT/trainer/ESL缓存已核；固定`afa3d347…4c789` | **(b)路径，未完成**：原数字/依赖/真实cache数值障碍已核；native接口/输入及原完整CPU短文已通过，完整CPU形状/无标签dev与真实原trainer CPU smoke闭合，5090成本获准待空卡，v2入口未准入，训练仍待闭合 | **非已复现/非主表成绩行**；具体缺口、CPU及新软件入口限制见`PHASE_R1.md` §25.90/§25.95–§25.117；本行不授权epoch训练 |
+| 6 | ERGO（COLING 2022，native单seed训练中） | ESL / Causal-TimeBank binary ECI | 作者真实RGT/trainer/ESL缓存已核；固定`afa3d347…4c789` | **(b)路径，未完成**：原数字/依赖/cache障碍保留；原完整4090 CUDA成本/production/驻留最大dev通过，预算和对照冻结，正式seed13训练中；待完整结果与独立重载 | **非原基准复现成功/暂无主表成绩**；证据与当前独立正式执行身份见`PHASE_R1.md` §25.125–§25.127；原任务/输入/backbone差异保持披露 |
 | 7 | SemDI（EMNLP 2024，仅机制/可得性审查） | ESC / ESC* / CTB，binary ECI | [作者源码](https://github.com/hrlics/SemDI/tree/1c54a16d36f793f638c836f8f35595c2740869fc)，MIT；真实MLM/cloze/attention模型、trainer及公开checkpoint路径存在，未取数据/权重或实跑 | 未闭合：原生二类/逐pair句子输入、旧环境与原test-fold选checkpoint均需透明适配；native方向/subtype、完整候选、独立selection和实际成本尚未验证 | **非已复现/非分数行，不换ERGO队首**。R1 §25.123及来源清单；已知语义依赖/填词询问不是本项目创新，不借此恢复旧masked/retained机制 |
 
 **不可运行，进可得性表**：RESIJ、KnowQA、2025 two-stage ERE、MAQInstruct（口径可引用但无同协议复现）。
@@ -87,9 +87,9 @@ transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能�
 最近邻。LKCER只核论文机制，有限检索未闭合官方实现，不把它当已就绪baseline。
 证据与边界见R1 §25.123、[来源清单](research/20261019_a4_detection_sources.json)。
 
-**10-24 ERGO接续**：原完整4090三fixture CUDA成本已通过/GONE，当前R103原函数CUDA
-production/驻留最大dev容量；完整训练与FR-016(b)成绩仍未闭合。数值/身份见R1 §25.125–
-§25.126，不覆盖上表较早阶段的封存证据或把成本称复现成功。
+**10-24 ERGO接续**：原完整4090 CUDA成本、原函数production与驻留最大dev通过，
+预算/三对照已冻，当前正式完整seed13训练正在原机运行，尚无完整主表成绩。见R1
+§25.125–§25.127；不把工程PASS当复现成功/创新，不覆盖旧失败或旧未准入提案身份。
 
 ### 2.1 ✅ LLMERE 的保真度路径已裁定（作者 2026-09-15）：取 (b) Unverifiable
 
