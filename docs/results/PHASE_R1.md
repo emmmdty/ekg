@@ -7843,3 +7843,56 @@ complete_graph卡0配置SHA
 `33140aa24e4b2f86cceee0d4313fd16a9a9eab9f0f1d3a739b0ebef71c7b2dc2`。目前待原机CPU
 真实测试与各自CUDA production，尚未放行控制完整训练。后续各有独占输出/执行记录，
 原full结果保留原身份，追加控制不能替换主表强锚或将已知消融当新方法贡献。
+
+#### R105实际生产/容量结果与控制裁决
+
+代码bundle SHA `84a1b2aaf7016fcc2525633236c3cde9e2623b78594dc969c3ecad494ca7a41d`，
+主机同步`be171fba454030495d82606d34d77e3d701ecd4b`；部署变更集合与原full所有pins无交集。
+首次SSH banner超时，未执行部署；之后成功SSH实核原HEAD，再执行一次部署/实际CPU
+四项测试全过。两CUDA预检各实际一次，wrapper22406/22402、worker22410/22409，SSH
+等待各exit0，成功完整ps核GONE，原full13841仍ALIVE并已完整通过首epoch。
+
+| 控制 / 卡 | 两最大train批次秒 | train peak reserved GiB | 最大dev两前向秒 | dev peak reserved GiB |
+|---|---|---|---|---|
+| complete_graph / 0 | 2.476975627243519 | 19.529296875 | 0.6273805405944586 | 21.671875 |
+| gamma0 / 2 | 2.307109875138849 | 19.3984375 | 0.6401774389669299 | 21.541015625 |
+
+两项均full4096/float32/全部候选/原train_epoch两批lr0、optimizer驻留、target-shadow logits
+严格一致，无gold/评分/checkpoint；初始raw/numeric参数SHA与R103 full精确相同，参数
+数值更新后仍不变。signed-zero变化分别36→0、36→1，未修复/隐瞒。complete_graph实际
+mask hook共调用4次，原模型/初始化/图层参数不变；gamma0保留原graph，mask_calls=0。
+不是以mask形状推测已执行，而是保存实际执行记录和派生源码SHA。
+
+R105完整GPU证据seal SHA
+`b74a2639029dce4673eafe2423cf62948f88ed897d5aae144b33bb0ca7f78972`；本地镜像逐件SHA/
+大小一致。补充真实作者focal_loss的CPU代数核验（含±100饱和logits），gamma0与alpha
+加权、按样本数平均CE的loss及梯度差均0、梯度有限；SHA
+`2433e64b0648e59752fac91d03f31e83f4bc86265036aab83bef4dd5abf991cb`，独立math seal保存，
+不改已封GPU seal。初次补充记录器将梯度矩阵直接转float报错，代数断言此前已过；修正
+为max归约后重跑该CPU小核验，不重跑任何CUDA任务。归一化是样本数，不是sum weights；
+不能用`CrossEntropyLoss(weight, reduction=mean)`的另一归一化偷换此消融。
+
+**裁决**：两项真实CUDA生产、驻留容量、参数初始身份门均过，可以进入同队的已知
+控制完整训练；不是方法科学PASS。原full已开始，追加控制时序不抹，未据其分数挑控制。
+
+#### R106完整并行预算/对照冻结
+
+R106=`runs/stages/R1/r1-v106-ergo-parallel-budget-20261024/`；以各自production批次均时
+×2622×20及驻留dev前向均时×291×20，得到complete_graph proxy66771.97831945494秒、
+gamma0 proxy62355.33727353439秒；同样1.5安全系数+3600秒后整日取整，并保留原full
+172800秒预算下限，两项均48小时内部上限，外部173400秒后TERM/60秒清理。只是外推，
+不保证动态内存或实际工期；不按初期score提早终止或改epoch预算。
+
+首控制评分前冻结primary contrasts full−complete_graph、full−gamma0，各20epoch完整
+官方dev独立选档；保留原joint/A3/Taco固定名册。full对照由已冻配置SHA、完整report和
+独立重载逐值parity唯一确定所选预测，未来补其实际SHA只做身份解析，不按分数换对手。
+所有paired按相同291doc/10000resamples/rng13/pooled micro-F1，不含训练随机性，
+不能由邻接约束消融宣称删除全部图消息、由gamma0宣称取消类别权重，更不能当创新。
+
+R106 seal SHA `962308455c01d7d0c6e8e8872e2205aed90dec0eb02a2bc6fc37e5691114b34a`。
+正式complete_graph配置SHA
+`962af7b03839954eedacb1cdddddd8a98617918a9687b1d5efa4da5f938b6778`；gamma0配置SHA
+`4d3d7425142518f8c954de2cd40a56717539ad49b80f0a76ab3e714c96743fac`。两项本地实际通过
+原有production gates+新增自身control smoke执行记录/同一wrapper身份联核，不只翻flag。
+下一部署/预算产物双端SHA、再核卡0/2空卡后启动；卡1 full仍保持原配置/源码/输出，
+单seed/final-valid/5090/跨机checkpoint边界均保持。当前科学O1–O4仍未满足。

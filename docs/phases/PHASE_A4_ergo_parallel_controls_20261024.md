@@ -43,3 +43,26 @@ setsid nohup env CUDA_VISIBLE_DEVICES=2 PYTHONPATH=src:scripts OMP_NUM_THREADS=1
 预期各自`runs/stages/R1/r1-v105-ergo-parallel-production-20261024/{complete_graph,gamma0}/`
 下production/capacity/status，旁侧各`*-execution/`存派生原入口和执行身份。初始参数数值SHA
 须与R103 full一致；失败保留各自证据，不取消已启动的另一独立任务、不自动重试。
+
+## R106正式训练（R105两项真实CUDA门通过后）
+
+R1 §25.128给出实际CUDA及预算证据；两个新正式配置分别为
+`configs/ergo_control_complete_graph_training_20261024.json`（SHA
+`962af7b03839954eedacb1cdddddd8a98617918a9687b1d5efa4da5f938b6778`）和
+`configs/ergo_control_gamma0_training_20261024.json`（SHA
+`4d3d7425142518f8c954de2cd40a56717539ad49b80f0a76ab3e714c96743fac`）。
+主机/cwd仍为gpu-4090 `/data/TJK/ekg`，先成功核卡0/2空卡，各独立一条SSH：
+
+```bash
+setsid nohup env CUDA_VISIBLE_DEVICES=0 PYTHONPATH=src:scripts OMP_NUM_THREADS=12 TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 timeout --signal=TERM --kill-after=60s 173400s .venv/bin/python -u scripts/run_ergo_native_control.py --operation train --config configs/ergo_control_complete_graph_training_20261024.json > logs/ergo-control-complete-graph-training-20261024.log 2>&1 < /dev/null &
+```
+
+```bash
+setsid nohup env CUDA_VISIBLE_DEVICES=2 PYTHONPATH=src:scripts OMP_NUM_THREADS=12 TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 timeout --signal=TERM --kill-after=60s 173400s .venv/bin/python -u scripts/run_ergo_native_control.py --operation train --config configs/ergo_control_gamma0_training_20261024.json > logs/ergo-control-gamma0-training-20261024.log 2>&1 < /dev/null &
+```
+
+预期各`runs/stages/A4/a4-ergo-control-{complete-graph,gamma0}-20261024/seed-13/`
+保存原训练器的config/status/20epoch预测classes/best.pt/完整report；旁侧seed-13-execution
+保存本次原/派生入口身份。checkpoint留原机。SSH parent等待实际退出码，网络失败不推
+任务死亡。真实完成后用同一wrapper `--operation verify`独立重载，不能用裸原入口漏装
+control；执行前另披露验证命令。不根据较早分数缩预算/调参数；四卡不是必须全部填满。
