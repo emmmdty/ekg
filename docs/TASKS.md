@@ -240,6 +240,12 @@ author delegation releases a new in-scope research queue; it does not reopen old
   the full decoder audit remains pending, authorized only on an empty 5090 GPU.
   Bounded occupancy waiting ended without an audit launch; no automatic watcher remains.
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
+  **2026-10-24 resumed by author:** free primary 4090 GPUs verified; resume the existing ERGO
+  cost decision in C41-A-R with a separate full4096 v3 primary-server config/contract. Three fixed
+  train fixtures run independently on GPUs1/2/0, seed13 and two lr0 calls each; GPU3 retained.
+  No repeated full CPU preparation, no epoch admission or new scientific result. See R1 §25.125.
+  Goal API still reports old blocked; work follows the explicit resume instruction without a new
+  replacement Goal or a false active-state claim. Fresh blocking audit starts on this resume.
   **2026-10-19 resource exit:** current independent CPU preparation is closed. Successful SSH
   checks still show both hosts occupied, no ERGO workers and no new CUDA cost outputs. The same
   resource dependency spans three Goal turns; the blocking audit is R1 §25.124. Thread Goal moves

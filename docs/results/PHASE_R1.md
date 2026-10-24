@@ -7636,3 +7636,31 @@ R100/R101或原smoke。科学主指标、归因、护栏及合法确认均仍未
 
 本轮只改状态文档；`audit_r1_consistency.py`实返`PASS: 36 requirements mapped`，
 `git diff --check`通过。未重跑代码三件套或模型，不把该核查算科研增益。
+
+### 25.125 4090恢复后ERGO完整输入CUDA成本（2026-10-24，执行前冻结）
+
+**作者指令**：“4090已可用，继续后续任务”。本轮SSH实核四卡无compute-app，卡0有少量
+显示显存、卡1/2空闲；主表已先更新当前C41-A-R恢复切片，不另换科研队列。
+**科研价值**：对准A4表4-3/FR-016(b)，用真实CUDA成本裁定公开强rival的完整候选可行性，
+为后续完整训练提供缺失证据，不把工程运行当方法创新或指标提升。
+**可行性**：原4090已持有完整R192输入/原源码/官方预训练权重与CPU证据，现v3入口原生
+支持4090 CUDA，无需把5090身份伪装成主机、无需改原模型或搬checkpoint。新配置/输出
+独立，固定typical/worst/longest三个train病例、完整4096 float32、原RGT/focal/legacy
+AdamW、seed13、每例两次lr0；不裁PAD/候选、不启AMP/TF32/checkpointing、不增加seed。
+
+运行前先冻结[4090成本合同](../phases/PHASE_A4_ergo_4090_cost_20261024.md)及
+`configs/ergo_native_4090_cost_20261024.json`。三病例在卡1/2/0独占并行，单例timeout
+1200秒后TERM、30秒清理后KILL；不重复失败病例、不因一个失败覆盖/取消其他已启动
+独立病例。初始最多六次lr0 API，真实失败前调用数如实记录；无epoch/模型保存或评分。
+卡3保留；选卡/源码/全部pins在实际启动前再核，原机untracked目录保留，代码通过Git。
+
+当前远端HEAD仍为10-18的`2692817`，tracked干净，只有已知cache/venv/build/log目录未
+跟踪；需先按Git同步并核祖先关系，不清理remote-only资产。已有CPU全模型准备不重跑，
+只执行所需实际环境单测与pins；新成本结果尚未产生，不提前放行容量/production/训练。
+Goal实查仍返回旧`blocked`；用户已明确恢复，执行继续，不新建/覆盖原目标，不声称
+工具状态已经active。该恢复之后按新一轮阻断审计计数，原科学O1–O4仍未完成。
+
+配置SHA `be790b48509814b9c3a99da8b5726f770001c286de19d4c60e5a568a8430bf29`；仅增加
+原主机CUDA执行身份/资源安排，原CPU v3及5090 v4文件不修改。本次本地三件套实跑：
+977 passed/95 skipped（本地缺Torch相关项），ruff零错误、ekg-smoke OK；不以skip替代
+原机真实Torch或CUDA门。当前尚待原机相关CPU单测、pins/输出独占和成本运行。

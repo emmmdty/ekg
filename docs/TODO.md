@@ -1,7 +1,12 @@
 # EKG 实时状态
 
-> 更新于 **2026-10-19**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
+> 更新于 **2026-10-24**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
+
+**10-24作者恢复4090**：实际核无compute-app，沿当前C41-A-R冻结主机独立成本配置/
+合同，卡1/2/0并行原三个病例、两次lr0各例；不重做已闭合CPU准备，成本后仍须容量/
+production/完整预算才能训练。R1 §25.125记录实际门/运行；此段覆盖下方旧资源出口。
+Goal工具仍旧blocked，执行按作者继续指令，不声称工具active或创建替代目标。
 
 **10-19本轮出口**：当前独立CPU切片已收口，两机成功SSH实核仍无空卡、无本项目ERGO
 worker或CUDA报告；本回合无新科研进展。相同资源阻断已跨三个Goal回合，阻断审计见

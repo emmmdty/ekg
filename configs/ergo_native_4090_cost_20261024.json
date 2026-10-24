@@ -1,0 +1,87 @@
+{
+  "cases": {
+    "cuda_longest": {
+      "device": "cuda",
+      "doc_id": "54995af8da07c1b490d9a5ccd5df9d73",
+      "nonpad_tokens": 2080,
+      "pairs": 10302
+    },
+    "cuda_typical": {
+      "device": "cuda",
+      "doc_id": "040c910df0e044e14e4b68cc4ea8c1a9",
+      "nonpad_tokens": 369,
+      "pairs": 420
+    },
+    "cuda_worst": {
+      "device": "cuda",
+      "doc_id": "d2b256945da96b92915adec7b523f11a",
+      "nonpad_tokens": 1897,
+      "pairs": 11772
+    }
+  },
+  "cpu_threads": 12,
+  "cuda_admitted": true,
+  "features": "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/features.jsonl",
+  "final_valid_accessed": false,
+  "learning_rate": 0.0,
+  "limitations": [
+    "Independent primary-server execution identity; preserves old CPU and 5090 configurations/results.",
+    "Same three train fixtures, complete4096 float32 original model, graph, focal and legacy AdamW; no trimming, AMP, TF32 or checkpointing.",
+    "Each fixture seed13, two zero-lr API calls with unchanged numeric parameter values; signed-zero changes reported separately.",
+    "One physical card per case; cuda_typical=1, cuda_worst=2, cuda_longest=0; GPU3 retained. Parallel cases are not extra seeds.",
+    "Each case TERM at 1200 seconds and KILL after 30 cleanup seconds. No retry or overwrite; independently started cases finish even if a sibling fails.",
+    "Cost only; no epoch, scoring, final-valid access or checkpoint save. Complete training needs capacity, production and full-budget evidence."
+  ],
+  "model_args": {
+    "class_weight": 0.75,
+    "dropout_att": 0.1,
+    "dropout_emb": 0.3,
+    "gamma": 2,
+    "loss_type": "focal",
+    "num_heads": 4,
+    "y_class": 3
+  },
+  "model_files": [
+    "config.json",
+    "merges.txt",
+    "pytorch_model.bin",
+    "tokenizer.json",
+    "vocab.json"
+  ],
+  "model_source": "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/model.py",
+  "optimizer_api_calls": 2,
+  "optimizer_source": "runs/stages/R1/r1-v92-ergo-interface-20261018/hf_optimization_v4_11_3.py",
+  "output": "runs/stages/R1/r1-v102-ergo-4090-cost-20261024",
+  "padding_parity_required": false,
+  "padding_policy": "retain_all_4096",
+  "pins": {
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/config.json": "d0a64aa58d1b43c0d38000fa3083c142533c59fa151043e5c8113bcbee106d82",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/pytorch_model.bin": "06c56757f0510de87c231acd03650ca204c5ed65c281cd1081b98288183f2468",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655",
+    "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/model.py": "fb254c5ea4275561a8973d35abd988ee6902fd1f8db9552679237d3f1fb56ea7",
+    "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/completion_manifest.json": "7c201a73d6cb7cad336588fd9bbfc4ecfed343a531236cf320fe5517d89ea6a6",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/hf_optimization_v4_11_3.py": "2ebfecd42a53245c4e72fd8e267efbef7679adfd10bcf14b8510f6830c8fd36e",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/model_acquisition.json": "71cfa4187981116b63af2e2ad74487d5b07bd676a019881305a4ff4529752bf4",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/features.jsonl": "c4c018269fe69515579e15eb6dcaea38ebd96610bbfa9f1d4d891ff54733aeb0",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/report.json": "5d10b34a77ea1ca0d160bfa5036ccb6f0d82491372c8d8bf0806216a4d4856f4",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/targets.jsonl": "cb3ab49f07f51b3e6fde96581715ff0ed9c88345eb1121af7a9e4f4c3b38b211",
+    "runs/stages/R1/r1-v93-ergo-cost-20261018/completion_manifest.json": "cded90e8554654fcca8f7490e2255685ffb4f304004c205fa4cde385f38b9c75",
+    "runs/stages/R1/r1-v93-ergo-cost-20261018/cpu_short/report.json": "a9730ec28c8f3f2e508f641702a530614b1b4db916fd3f1c6a0408adb6470cb9",
+    "runs/stages/R1/r1-v94-ergo-padding-cost-20261018/completion_manifest.json": "faec3bbeced31e64558d54c22f01148bf44580740f0937480abb1db7dbfe5167",
+    "scripts/profile_ergo_native_cost.py": "ca9d805faf071cd0aaf9cfb7dceb414fcc0b667bf7f92511c4a84cb81dc0cc65",
+    "scripts/profile_original_joint_cost.py": "295ba0de2655ee8f76471a52f0b10744fec57667a21bd8a856e0b567bb5c907a",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/relations/ergo_adapter.py": "7f8829119725554c7deb12520562d9a3c2d079806fde75c473140a81b4c86351",
+    "runs/stages/R1/r1-v95-ergo-canonical-cost-20261018/completion_manifest.json": "d0e7a4b939e02a5e0785a7e9ef03d3722e3a3a3e8a3b53fdddad15100f811466"
+  },
+  "pretrained": "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895",
+  "schema_version": "ekg.ergo_native_cost.v3",
+  "seed": 13,
+  "targets": "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/targets.jsonl",
+  "training_admitted": false,
+  "server": "gpu-4090",
+  "authorization_status": "4090 standing authorization; author explicitly resumed on 2026-10-24"
+}
