@@ -240,6 +240,12 @@ author delegation releases a new in-scope research queue; it does not reopen old
   the full decoder audit remains pending, authorized only on an empty 5090 GPU.
   Bounded occupancy waiting ended without an audit launch; no automatic watcher remains.
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
+  **2026-10-24 parallel GPU request:** published ERGO complete-graph and gamma0 controls are
+  frozen within C41-A-R, not a second queue. Both actual CUDA preflights completed exit0/GONE,
+  optimizer-resident max-dev and exact initial-parameter parity passed. R106 own budget/configs
+  admitted; GPUs0/2 workers25466/25461 now train full20epochs seed13 alongside original GPU1
+  worker13841. Await each complete run and independent controlled checkpoint replay/official
+  paired comparison. No new seed/final-valid/5090/transfer; not novel method evidence (§25.128).
   **2026-10-24 resumed by author:** free primary 4090 GPUs verified; resume the existing ERGO
   cost decision in C41-A-R with a separate full4096 v3 primary-server config/contract. Three fixed
   train fixtures run independently on GPUs1/2/0, seed13 and two lr0 calls each; GPU3 retained.

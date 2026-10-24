@@ -7896,3 +7896,26 @@ R106 seal SHA `962308455c01d7d0c6e8e8872e2205aed90dec0eb02a2bc6fc37e5691114b34a`
 原有production gates+新增自身control smoke执行记录/同一wrapper身份联核，不只翻flag。
 下一部署/预算产物双端SHA、再核卡0/2空卡后启动；卡1 full仍保持原配置/源码/输出，
 单seed/final-valid/5090/跨机checkpoint边界均保持。当前科学O1–O4仍未满足。
+
+#### R106实际完整训练启动（2026-10-24 11:25:53 +08:00快照）
+
+正式代码bundle SHA `a8bd2d6d08099e0fbae56c3f361c73e889ab31dd02dfe050fe7763ccf088e9cb`，
+主机同步至`54139db640ba4d53c5a5ac5f650bd7ffe5213ddf`。R106 budget/plan/seal双端SHA及
+两个配置全部pins、各自实际CUDA记录、原生完整production gate、独占输出均实核通过；
+启动前卡0/2无compute-app，原卡1 full仍在跑。原full跟踪源码与配置没有部署变动。
+
+| 物理卡 / 任务 | 实际worker / timeout / 等待shell | 实际状态 |
+|---|---|---|
+| 0 / complete_graph | 25466 / 25465 / 25463 | ALIVE、CUDA18598MiB、status running，首epoch已进入 |
+| 1 / 原full | 13841 / 13840 / 13838 | ALIVE、CUDA17980MiB，已有1个完整epoch，按原配置继续 |
+| 2 / gamma0 | 25461 / 25460 / 25458 | ALIVE、CUDA18598MiB、status running，首epoch已进入 |
+
+两新进程约运行1分57秒，完整输入/digest/ID/参数/官方候选门都在其status创建前通过。
+此时控制epochs_completed=0，不提前写分数或完成；各独立SSH仍等待其实际终态退出码。
+空日志是原trainer未配置INFO，不改运行中入口加日志，也不误判为进程死亡。卡3保留，
+不以填满所有卡替代科学价值。三项均完整20epoch、seed13；本轮并行不增加确认seed。
+
+完整报告及checkpoint均留原机。终态成功还须各自独立重载，控制必须继续用wrapper
+安装相同干预并核完整classes parity；之后才实例化预定full对照预测SHA、官方评分与
+paired错误交换。两已知单变量控制不自动形成新的方法贡献，O1–O4仍未满足。新增控制
+使用公开组件/边界适配，对角mask保留原cache policy，未声称复现原论文消融数字。

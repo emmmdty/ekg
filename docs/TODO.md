@@ -3,6 +3,12 @@
 > 更新于 **2026-10-24**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
+**10-24三卡并行**：作者要求其他卡同步推进；R105原论文两项控制的CPU/CUDA/初始参数
+同一性门已过，R106预算/对照/配置冻结后，卡0 complete_graph25466、卡2 gamma0
+25461已进入完整seed13首epoch，卡1原full13841继续。详细状态/成本只见R1 §25.128，
+下一各自完整20epoch及原机独立重载/official/paired分析；不增seed、不改原full、不拿已知
+消融当创新。卡3留余量，未准入D4/C5不因空卡直接开训。
+
 **10-24作者恢复4090**：实际核无compute-app，沿当前C41-A-R冻结主机独立成本配置/
 合同，卡1/2/0并行原三个病例、两次lr0各例；不重做已闭合CPU准备，成本后仍须容量/
 production/完整预算才能训练。R1 §25.125记录实际门/运行；此段覆盖下方旧资源出口。

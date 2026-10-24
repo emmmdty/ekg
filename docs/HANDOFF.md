@@ -10,8 +10,15 @@
 卡2 gamma0；卡1原full不动，卡3保留。主表/独立[合同](phases/PHASE_A4_ergo_parallel_controls_20261024.md)
 已先冻；新增入口复用原三入口AST，仅在唯一模型构造后安装控制，原pinned文件不改。
 R105原机真实CPU四项及两控制最大train/驻留最大无标签dev CUDA均已通过，exit0/
-GONE、双端SHA一致，初始参数与full相同；R106预算/正式配置已冻，当前接卡0/2完整
-seed13训练。来源/科研自审/真实状态只见R1 §25.128；不是新方法创新或额外seed。
+GONE、双端SHA一致，初始参数与full相同；R106预算/正式配置已冻，卡0/2完整
+seed13训练已实际进入首epoch（worker25466/25461），原卡1 full13841已完成首epoch。来源/科研自审/真实状态只见R1 §25.128；不是新方法创新或额外seed。
+
+**三卡运行快照（10-24）**：卡0 complete_graph PID25466、卡1原full PID13841、卡2
+gamma0 PID25461均已成功SSH核ALIVE/实际CUDA/status running。原full已有完整epoch，
+两个控制已进入首epoch；当前没有三个完整端点，勿重复启动。具体配置/日志/输出/
+终态判据见[并行合同](phases/PHASE_A4_ergo_parallel_controls_20261024.md)与R1 §25.128。
+三个checkpoint留4090；分别完整20epoch后才独立重载核分，controls必须用wrapper
+`--operation verify`以保持训练/推理干预一致。单队C41-A-R，不并行未准入D4/C5新机制。
 
 **10-24正式训练接续**：R102三例CUDA成本及R103原函数两最大train批次/驻留最大
 无标签dev实际通过、exit0/GONE、双端hash一致（R1 §25.125–§25.126）。R104预算和
