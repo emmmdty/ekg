@@ -246,6 +246,10 @@ author delegation releases a new in-scope research queue; it does not reopen old
   No repeated full CPU preparation, no epoch admission or new scientific result. See R1 §25.125.
   Goal API still reports old blocked; work follows the explicit resume instruction without a new
   replacement Goal or a false active-state claim. Fresh blocking audit starts on this resume.
+  R102 all three original-input CUDA cost cases completed with exit0/GONE and mirrored hashes
+  (R1 §25.125). R103 now freezes the original-trainer two-largest-input lr0 production plus
+  optimizer-resident max-unlabeled-dev capacity check; full native training remains unadmitted
+  until this evidence and the measured budget close (R1 §25.126).
   **2026-10-19 resource exit:** current independent CPU preparation is closed. Successful SSH
   checks still show both hosts occupied, no ERGO workers and no new CUDA cost outputs. The same
   resource dependency spans three Goal turns; the blocking audit is R1 §25.124. Thread Goal moves

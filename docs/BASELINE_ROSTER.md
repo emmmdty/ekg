@@ -87,6 +87,10 @@ transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能�
 最近邻。LKCER只核论文机制，有限检索未闭合官方实现，不把它当已就绪baseline。
 证据与边界见R1 §25.123、[来源清单](research/20261019_a4_detection_sources.json)。
 
+**10-24 ERGO接续**：原完整4090三fixture CUDA成本已通过/GONE，当前R103原函数CUDA
+production/驻留最大dev容量；完整训练与FR-016(b)成绩仍未闭合。数值/身份见R1 §25.125–
+§25.126，不覆盖上表较早阶段的封存证据或把成本称复现成功。
+
 ### 2.1 ✅ LLMERE 的保真度路径已裁定（作者 2026-09-15）：取 (b) Unverifiable
 
 **裁决**：保持 `HANDOFF.md` §E.1a 第 6 条，**不为一个 (a) 标记去读封存的 final-valid**。

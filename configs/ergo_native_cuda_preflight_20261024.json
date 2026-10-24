@@ -1,0 +1,76 @@
+{
+  "cuda_admitted": true,
+  "dev_features": "runs/stages/R1/r1-v96-ergo-unlabeled-dev-20261018/native_internal-dev/features.jsonl",
+  "dev_max": {
+    "id": "1b5754feb1a6d79412f539ce6a4b38d3",
+    "nonpad_tokens": 1411,
+    "pairs": 11990
+  },
+  "device": "cuda",
+  "final_valid_accessed": false,
+  "model_files": [
+    "config.json",
+    "merges.txt",
+    "pytorch_model.bin",
+    "tokenizer.json",
+    "vocab.json"
+  ],
+  "model_source": "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/model.py",
+  "optimizer_source": "runs/stages/R1/r1-v92-ergo-interface-20261018/hf_optimization_v4_11_3.py",
+  "output": "runs/stages/R1/r1-v103-ergo-cuda-production-20261024",
+  "pins": {
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/config.json": "d0a64aa58d1b43c0d38000fa3083c142533c59fa151043e5c8113bcbee106d82",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/pytorch_model.bin": "06c56757f0510de87c231acd03650ca204c5ed65c281cd1081b98288183f2468",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655",
+    "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/model.py": "fb254c5ea4275561a8973d35abd988ee6902fd1f8db9552679237d3f1fb56ea7",
+    "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/train.py": "551a24b88e5dcdf35f8b17680547045107b4c56ed6b329b1063c33afe658303f",
+    "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/hf_optimization_v4_11_3.py": "2ebfecd42a53245c4e72fd8e267efbef7679adfd10bcf14b8510f6830c8fd36e",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/features.jsonl": "c4c018269fe69515579e15eb6dcaea38ebd96610bbfa9f1d4d891ff54733aeb0",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/report.json": "5d10b34a77ea1ca0d160bfa5036ccb6f0d82491372c8d8bf0806216a4d4856f4",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/targets.jsonl": "cb3ab49f07f51b3e6fde96581715ff0ed9c88345eb1121af7a9e4f4c3b38b211",
+    "runs/stages/R1/r1-v96-ergo-unlabeled-dev-20261018/completion_manifest.json": "cb3a9a384c53b9b5774c07bb755739bbced977c13489d3f398956c3040d3d9b8",
+    "runs/stages/R1/r1-v96-ergo-unlabeled-dev-20261018/native_internal-dev/features.jsonl": "9fd8992821b38f23de12b7b8ec6782345e77d736de5dc690503f1818808f5e04",
+    "runs/stages/R1/r1-v96-ergo-unlabeled-dev-20261018/native_internal-dev/report.json": "07e5d3fde5d336c2afb75b3253ff5ce6e31546649dd2a86d4df5c8f758f7ca40",
+    "runs/stages/R1/r1-v96-ergo-unlabeled-dev-20261018/unlabeled_source.jsonl": "c358da8b04bdeca9477bd26a1a7fa325b634ea62a488b85b28119be8cce2a891",
+    "scripts/preflight_ergo_native.py": "7e21892753997a3c254a8825b0b512e27e1a925110ba7f35310238ce7b61d840",
+    "scripts/profile_ergo_native_cost.py": "ca9d805faf071cd0aaf9cfb7dceb414fcc0b667bf7f92511c4a84cb81dc0cc65",
+    "scripts/train_ergo_native.py": "0832aafab593812ad02a58d19f4a624803ed016cfaef177c3d70ab64d266e4ea",
+    "src/ekg/core/protocol.py": "3e5d60d6b5e74382ad4953f92868a312d0beaf45ab11cabff28c89242a1bfcb5",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/relations/ergo_adapter.py": "7f8829119725554c7deb12520562d9a3c2d079806fde75c473140a81b4c86351",
+    "src/ekg/relations/ergo_training.py": "d971e05d88e0ece59c60a96e828cbe407ca78065b99d30a0f3139e345065dc78",
+    "src/ekg/relations/maven_ere_official.py": "8df2f5487daa223c797a8a0950a8cde47c070866cd6f1fd04dbda0ae9a0a05c8",
+    "configs/ergo_native_4090_cost_20261024.json": "be790b48509814b9c3a99da8b5726f770001c286de19d4c60e5a568a8430bf29",
+    "runs/stages/R1/r1-v102-ergo-4090-cost-20261024/completion_manifest.json": "144d97758b50004825eebc28ae58c5484a65ea2645af064f62b7125823bcd7eb",
+    "runs/stages/R1/r1-v102-ergo-4090-cost-20261024/cuda_typical/report.json": "83ee6ad756b52e74297c81ebe68519ac7b9734a8ce6058be1acd4e3540c569aa",
+    "runs/stages/R1/r1-v102-ergo-4090-cost-20261024/cuda_worst/report.json": "7e321f9db818350151c5174df923af32065d5f3033a22d56a681aa2d24da1a16",
+    "runs/stages/R1/r1-v102-ergo-4090-cost-20261024/cuda_longest/report.json": "26942ec4afa82612539a10a81346092ea327a6caacf6389251ccd391ad67e603"
+  },
+  "pretrained": "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895",
+  "schema_version": "ekg.ergo_native_preflight.v2",
+  "seed": 13,
+  "train_features": "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/features.jsonl",
+  "train_fixtures": [
+    {
+      "id": "d2b256945da96b92915adec7b523f11a",
+      "pairs": 11772
+    },
+    {
+      "id": "54995af8da07c1b490d9a5ccd5df9d73",
+      "pairs": 10302
+    }
+  ],
+  "train_source": "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/train.py",
+  "train_targets": "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/targets.jsonl",
+  "server": "gpu-4090",
+  "gpu_uuid": "GPU-45597c42-fba9-d40a-dccb-0c423b160150",
+  "limitations": [
+    "CUDA production and maximum unlabeled dev capacity only; no epoch, gold scoring, checkpoint or full-training admission.",
+    "Same full4096 float32 model and seed13; original train_epoch, optimizer and complete native candidates.",
+    "Worst and longest fixed train cases, one zero-lr batch each; optimizer remains resident for max-dev shadow-target forwards.",
+    "Primary 4090 GPU1 under standing and resumed authorization; no extra seed or cross-machine checkpoint."
+  ]
+}

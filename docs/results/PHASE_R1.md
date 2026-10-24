@@ -7664,3 +7664,50 @@ Goal实查仍返回旧`blocked`；用户已明确恢复，执行继续，不新�
 原主机CUDA执行身份/资源安排，原CPU v3及5090 v4文件不修改。本次本地三件套实跑：
 977 passed/95 skipped（本地缺Torch相关项），ruff零错误、ekg-smoke OK；不以skip替代
 原机真实Torch或CUDA门。当前尚待原机相关CPU单测、pins/输出独占和成本运行。
+
+#### R102实际执行与结果
+
+代码以Git增量bundle同步主机，SHA
+`f77b035df3524bc66758c697314de727477ad1de104cb2734fbd5ba1440bbe4e`；先核tracked干净/
+祖先关系，保留原untracked目录。首次部署期望commit SHA录入错误，被守卫拒绝且未
+reset；使用本地`git rev-parse`实值纠正后同步到`3fc4896c3c2130c1a85cef20a41de351db4f9e79`。
+真实原机相关CPU测试26项通过，配置全部pins及预训练精确file-set核过；没有重跑旧CPU
+全模型准备。上述合同三条GPU命令实际各执行一次，各SSH等待同一后台任务返回exit0。
+
+| 固定病例 / 物理卡 | cold / warm（秒） | peak allocated / reserved（GiB） | 结果 |
+|---|---|---|---|
+| typical / 1 | 3.800033 / 0.433621 | 9.450791 / 10.105469 | complete |
+| worst / 2 | 4.816719 / 0.770981 | 18.878928 / 21.417969 | complete |
+| longest / 0 | 3.628828 / 0.703343 | 16.773953 / 18.275391 | complete |
+
+GiB由原report字节换算，精确字节/报告在R102归档。各例均完整4096 float32、原target
+独立性通过、梯度及范数有限、两次lr0、零epoch/非零lr；optimizer state各1486817304
+字节。参数数值SHA不变，原始bytes均有signed-zero差异，按原合同单列，未修复或隐去。
+没有new seed、dev/final-valid访问、性能评分或模型保存，不能从这张表推主指标提升。
+
+主进程PID907/910/908，对应worker912/911/913，成功SSH用完整`ps -eo`核均GONE。
+一次监控在进程已退出时用`ps -p`返回1，仅为监控命令约定，随后实查消除歧义；不是
+成本任务失败或重启。三例report/config/输入pins/实际GPU UUID均已逐项核对。
+
+R102=`runs/stages/R1/r1-v102-ergo-4090-cost-20261024/`，完整归档已回本地并逐项SHA
+一致；completion_manifest SHA
+`144d97758b50004825eebc28ae58c5484a65ea2645af064f62b7125823bcd7eb`。
+**裁决**：原完整执行版在该三fixture的4090 CUDA成本通过；不再把24GB卡当未证实的
+不可行。下一仍须最大dev/原函数真实生产门及完整预算，三fixture不保证所有训练动态
+或full epoch工期，不将max allocated误作实际全部进程显存/无OOM保证。
+
+### 25.126 ERGO原函数CUDA生产与驻留最大dev容量（2026-10-24，执行前冻结）
+
+**科研价值**：对准A4表4-3/FR-016(b)，在真实三例CUDA成本后补缺的原trainer/完整
+collate/驻留optimizer与更大dev候选证据，才能裁完整训练，不以独立forward冒充生产门。
+**可行性**：R102最大train已在4090完成，原v2生产入口、R192特征/targets与R196无标签
+dev全部存在；无需新模型实现、数据/标注或checkpoint搬运。主表已先接同一A-R下一项。
+
+冻结独立`configs/ergo_native_cuda_preflight_20261024.json`/R103输出，卡1/固定UUID。
+调用原train_epoch于worst/longest两个固定train doc，各一批lr0；选择最大病例而非原CPU
+tiny/typical，是为同时测真实native collate及大候选驻留成本，不据得分/标签选择。模型/
+optimizer保留，随后最大无标签internal-dev（11990 pairs、1411 nonpad、API4096）两次
+shadow-target forward。float32/原类/损失/候选与seed13保持，无epoch、gold、评分或保存。
+timeout1200秒+30秒清理，无自动重试。合同见
+[CUDA生产/容量](../phases/PHASE_A4_ergo_cuda_production_20261024.md)。成本/输入/当前代码
+SHAs先联核，实际相关CPU单测后启动；结果尚未产生，不提前写admission或完整预算。

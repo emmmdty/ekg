@@ -505,6 +505,15 @@ precision或旧5090合同。先本地三件套与原机CPU相关单测/全部输
 科研价值/可行性与运行事实只落R1 §25.125。Goal工具仍显示原blocked，按作者明确恢复
 继续已授权工作，不创建替代Goal、不声称工具自动续跑已恢复；恢复后的阻断审计重新计数。
 
+**10-24成本后接续**：原完整4090三病例均完成、六次lr0调用、数值参数不变，进程已实核
+GONE，R102双端hash一致（R1 §25.125）。当前进入同一A-R的R103容量/production门：
+在卡1运行原`train_epoch`两个固定最大train病例（worst/longest）的lr0批次，再保持模型/
+optimizer状态驻留检查最大无标签internal-dev两次target-shadow forward；固定full4096、
+float32、完整候选、原函数/损失不变。使用v2生产入口与独立配置/输出，先核实际相关CPU
+测试及pins，再按`phases/PHASE_A4_ergo_cuda_production_20261024.md`执行。此项无完整
+epoch、无dev gold/评分、无checkpoint；通过后才以真实整批耗时/容量闭合完整预算及
+正式训练配置。输入/冻结依据及运行事实见R1 §25.126，不因成本PASS直接翻训练flag。
+
 | 子项 / KR | 状态/依赖 | 交付与完成判据 | 资源/停止边界 |
 |---|---|---|---|
 | C41-L / 全部创新KR | done · 10-15文献升级 | 最近邻机制/官方代码状态/候选卡与来源边界已落地；不代表全面新颖性已证实 | 新章节接队刷新最近邻，不重读代替决定性实验 |
@@ -517,7 +526,7 @@ precision或旧5090合同。先本地三件套与原机CPU相关单测/全部输
 | C41-D-R / KR2.1、KR2.2 | done · 当前10-15绑定模板未准入（§25.86），非效果FAIL | native共享正关联/强linear原train残余与128预算可见性、最近邻正文源码已核；假负scope/NLI、exclusive绑定和普通conditional目标均有具体拒绝依据；positive-only尚无可识别独立新干预 | 关闭本次准入回合，不取消D4章/所有证据方法；新替代需新证据回R1，不复活旧家族；诊断不算KR2.1/2.2通过 |
 | C41-D-A / KR2.1、KR2.2 | deferred · 当前无准入候选；新替代先回D-R | 可识别创新、最小loss/强rival/消融/负控、条件power/预算和冻结phase；TDD实现、本地门及真实torch smoke后正式放行 | 保留可靠linear与相同全文通路，独立新身份；不复活cue/causal-residual |
 | C41-D-TV / KR2.1、KR2.2、KR4.2 | deferred · D-A未放行，不运行拟议训练 | seed13完整五折/各臂OOF；pooled官方主指标/少数类护栏/归因与独立复算，裁决并回填 | 按空4090并行不同臂或不同fold，同seed不等于额外seed；实现/协议失败另封存 |
-| **C41-A-R / KR3.1、KR3.2** | **wip · 10-19续令实验安排/CPU残余审查已完成；GPU成本仍待空卡（§25.122）** | ERGO公开强rival FR-016(b)：原Longformer/RGT/focal/AdamW/epoch函数与完整4096/native全有向候选保持；cache BOS/EOS与正文CLS-only差异逐条披露。两机公共预训练权重均各自镜像直下，不跨机搬本项目checkpoint；已知对手不算创新，新方法仍回R1 | R194 PAD-only数值失败保持；R195完整CPU形状、R196无标签dev、R198原函数toy回放及R199真实CPU原trainer/最大dev smoke均已闭合/GONE（§25.105/§25.108/§25.111/§25.114），不重跑封存产物。R197已获本次20分钟三例成本许可，Git/输入/权重就绪，但4090四卡与5090单卡均被他人占用，GPU成本尚未执行，无等卡/自动重试。下一成功核空卡后按已授权合同执行，不重复问同一许可；4090若空可另冻同协议成本配置自用。训练入口v2默认未准入，须在任何epoch前联核实际完整padding/MID/候选digest及成本features/targets SHA（§25.115）；仍缺CUDA成本/最大dev容量/原函数production与正式设备/工期，5090完整训练另须许可。新gold/评分/final-valid未读，单seed保持，不缩候选/改原图或重建缺失BERT，不将CPU/工程PASS当科学KR；已安排CPU输入/原函数准备均有真实证据；CUDA preflight及选中checkpoint独立复算入口的软件/CPU门已补齐（§25.116–§25.117），实际CUDA/真实权重重载未验证，审查配置v2_close仍全false；10-18仅收尾已由10-19续令覆盖：实验安排及R100冻结预测方向分析已实做（§25.122），未重跑原诊断/CPU smoke，不启动等卡器；当前成本/训练仍按原有效门 |
+| **C41-A-R / KR3.1、KR3.2** | **wip · 10-24原完整CUDA三例通过；R103容量/production待执行（§25.125–§25.126）** | ERGO公开强rival FR-016(b)：原Longformer/RGT/focal/AdamW/epoch函数与完整4096/native全有向候选保持；cache BOS/EOS与正文CLS-only差异逐条披露。两机公共预训练权重均各自镜像直下，不跨机搬本项目checkpoint；已知对手不算创新，新方法仍回R1 | R194 PAD-only数值失败保持；R195完整CPU形状、R196无标签dev、R198原函数toy回放及R199真实CPU原trainer/最大dev smoke均已闭合/GONE（§25.105/§25.108/§25.111/§25.114），不重跑封存产物。R197已获本次20分钟三例成本许可，Git/输入/权重就绪，但4090四卡与5090单卡均被他人占用，GPU成本尚未执行，无等卡/自动重试。下一成功核空卡后按已授权合同执行，不重复问同一许可；4090若空可另冻同协议成本配置自用。训练入口v2默认未准入，须在任何epoch前联核实际完整padding/MID/候选digest及成本features/targets SHA（§25.115）；仍缺CUDA成本/最大dev容量/原函数production与正式设备/工期，5090完整训练另须许可。新gold/评分/final-valid未读，单seed保持，不缩候选/改原图或重建缺失BERT，不将CPU/工程PASS当科学KR；已安排CPU输入/原函数准备均有真实证据；CUDA preflight及选中checkpoint独立复算入口的软件/CPU门已补齐（§25.116–§25.117），实际CUDA/真实权重重载未验证，审查配置v2_close仍全false；10-18仅收尾已由10-19续令覆盖：实验安排及R100冻结预测方向分析已实做（§25.122），未重跑原诊断/CPU smoke，不启动等卡器；当前成本/训练仍按原有效门 |
 | C41-A-A / KR3.1、KR3.2 | deferred · 当前无准入候选；新替代先回A-R | 强rival、核心消融、归属负控、机制可识别性、条件power/预算和冻结phase；TDD实现/本地门/真实torch smoke后放行 | 不续修masked/retained hinge；4090执行，无新增5090授权 |
 | C41-A-TV / KR3.1、KR3.2、KR4.2 | deferred · A-A未放行，不运行拟议训练 | seed13完整候选各臂、official causal P/R/F1和关系护栏、恢复/损失正例、独立复算与去留 | 不按保守全None或子集分数宣布改进；负结果仍交付 |
 | C41-Q / KR1.3、KR2.3、KR3.3 | pending · 本轮所有待比单seed方案超过各自baseline/护栏且作者再次明确授权 | 依各有效合同执行matched seeds与聚类配对确认，记录均值/SD/区间；合法封存程序另核其许可与历史访问 | 未满足前置或授权不得跑seed17/42；单seed成功不能记成最终确认 |
