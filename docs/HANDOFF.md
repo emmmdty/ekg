@@ -14,6 +14,15 @@
 错误交换。ERGO为已知强rival的FR-016(b)，不是方法创新；三个科学O仍未达。
 checkpoint留4090，final-valid/额外seed/5090均不开放。当前状态以最新实际运行段为准。
 
+**R104实际运行中**：主机正式训练worker PID13841、timeout13840、等待shell13838；
+成功SSH核ALIVE、status running，已进入首epoch，当前尚无完整epoch评分。代码启动身份
+`3c2b733`、配置及全部输入pins核过；日志`logs/ergo-native-4090-20261024.log`，输出
+`runs/stages/A4/a4-ergo-native-20261024/seed-13/`。原函数INFO日志未开启，首个epoch前
+空日志不算失败；核ps/status/GPU三者，不启动重复任务。训练结束才运行原机独立重载，
+再用新增`compare_a4_causal_predictions.py`按R104 plan作官方/配对/错误交换（§25.127）。
+启动SSH等待句柄只属于本执行窗口，跨窗口以远端真实进程/状态判活。Goal API仍旧blocked，
+不据此误判worker或冒称已恢复自动续跑。
+
 **10-24作者恢复（覆盖10-19资源出口）**：“4090已可用，继续后续任务”。已成功SSH核
 无compute-app，当前接既有ERGO成本，三个固定train病例在卡1/2/0独占并行，卡3保留；
 独立[4090合同](phases/PHASE_A4_ergo_4090_cost_20261024.md)/配置，不改旧5090提案或原CPU

@@ -252,6 +252,8 @@ author delegation releases a new in-scope research queue; it does not reopen old
   comparators are frozen before scores; next execute the separate admitted primary-4090 full
   seed13/20epoch config, then independently reload/officially score and compare errors (§25.127).
   Original inputs/math remain; no extra seed, final-valid or checkpoint transfer.
+  Actual training worker13841 is ALIVE in epoch1; no complete epoch score yet. Frozen
+  comparison entrypoint is implemented/tested, waiting for the completed checkpoint verification.
   **2026-10-19 resource exit:** current independent CPU preparation is closed. Successful SSH
   checks still show both hosts occupied, no ERGO workers and no new CUDA cost outputs. The same
   resource dependency spans three Goal turns; the blocking audit is R1 §25.124. Thread Goal moves

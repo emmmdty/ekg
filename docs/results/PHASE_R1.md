@@ -7763,3 +7763,30 @@ subtype/方向/FN/FP交换；只反映选定dev单seed差异，不含训练随�
 独立[4090正式合同](../phases/PHASE_A4_ergo_native_training_4090_20261024.md)/配置已冻，
 配置SHA `5743397bd4f4f1d452a6e6ec9d692dba5c590ce1d58c27859681185806ee5f41`；旧未准入
 提案保持。当前只是已获准的baseline完整训练，O1–O4仍未满足；没有读取final-valid。
+
+**实际启动**：R104代码bundle SHA
+`d78b793d9668c59d5d5a9e0cb34f20b55a7bd8489631349837093d7cce971caf`，主机以Git同步至
+`3c2b7336d61f495db4dda7fe30b95850d54be675`，全部pins/输出独占及R104 seal双端核过。
+启动前4090四卡无compute-app；该次free disk20914460569600字节、MemAvailable505107080kB。
+正式入口worker PID13841/timeout13840/SSH等待子shell13838，已实核ALIVE；status running、
+epochs_completed=0，卡1实际CUDA显存已占用。全人口输入身份联核在创建该status之前完成。
+目前没有完整epoch评分/完成报告，不宣称CUDA启动已经提高分数。命令如正式合同，原SSH
+等待保留实际最终退出码；连接失败不作为进程死亡。初始日志空是原trainer未配INFO输出，
+不据此断定任务无进展，也不改运行中的源码加日志。
+
+**训练期间仅补既定结果分析入口**：科研价值是让本节已冻的主表/错误交换与配对区间
+真正可执行，并对官方scorer作守恒核验；不是另一轮CPU模型准备。可行性为现成官方
+adapter、方向profile和numpy，复用其原生展开及每doc TP/FP/FN，不新增模型/数据/训练。
+现无通用A4三对照配对入口；新增小入口及有区分力的toy测试，运行中被pins钉住的源码/
+配置/数据保持。正式ERGO比较仍须完整训练及独立checkpoint验证后执行，不偷跑改选模。
+
+**分析入口软件验证**：`scripts/compare_a4_causal_predictions.py`复用既有native方向profile/
+原生Cartesian展开及R1计数bootstrap，按本节固定plan核三对照SHA、manifest/gold/evaluator；
+双侧pooled counts须与原官方causal F1一致，输出doc配对及真边得失。拒绝final-valid和
+覆盖已有分析文件；不读取训练权重。实现SHA
+`0d38e16a65bc532907941ba33c547a940b30a65c47d90280bd6cf02ec7ca104d`。
+先运行缺实现的四项测试实际失败，再实现；五项测试现过，另有真实官方scorer toy CLI
+及对照被改拒绝。全仓实际982 passed/95 skipped（本地缺Torch）、ruff零错误、CPU
+smoke OK、R1一致性36项PASS；官方scorer在toy无预测正例时原样给UndefinedMetricWarning，
+不压制，也不当真实模型分数。新分析没有改运行中任何pinned文件，未重跑旧模型准备。
+Taco预测现已备份到主机计划同路径，双端SHA与首评分前固定值一致，无checkpoint搬运。
