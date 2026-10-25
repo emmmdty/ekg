@@ -8040,3 +8040,78 @@ CPU/budget admission seal
 20epoch report、R107独立证明、R108 dev混淆、原完整train features/targets/manifest及
 全部源码、真实CPU证明和预算；非单纯翻flag。source/checkpoint仍原身份，数据标签只
 在forward外使用。当前尚待部署该正式配置/预算双端SHA、核卡/披露命令及实际GPU前向。
+
+#### R109真实执行、独立计数与裁决（2026-10-25）
+
+正式配置Git bundle SHA
+`104858b5968c663866929dd3e0d1b42ecc5fad0f5096a4183657b96447915556`，主机同步至
+`178e79a91651100befe81e4ccb1be453bae2a722`；admission seal双端核一致，部署小文件
+pins核过，大预训练文件/checkpoint由实际入口前后全量核，不重复只读大文件审计。
+启动前GPU1无compute-app，free disk20902228901888字节、MemAvailable505754464kB。
+已披露的单条GPU命令实际执行一次，wrapper878798/worker878801，SSH等待实返exit0，
+成功ps核均GONE。源/人口/配置/checkpoint前后身份门通过，未修改任何旧pinned源或权重。
+作者随后暂停又说“继续”；恢复时实查已完整完成，不重复模型调用。Goal工具仍返回
+paused，当前按作者最新继续指令推进当前会话，不冒称工具active或重建/完成总目标。
+
+固定full选中checkpoint，2,622doc/2,297,524候选，完整3×3混淆：
+
+| gold \\ predicted | NONE | PRECONDITION | CAUSE |
+|---|---:|---:|---:|
+| NONE | 2208112 | 27803 | 13047 |
+| PRECONDITION | 7571 | 27462 | 355 |
+| CAUSE | 944 | 201 | 12029 |
+
+| native train诊断 | P | R | F1 | TP | FP | FN |
+|---|---:|---:|---:|---:|---:|---:|
+| full冻结选中权重 | 48.816396 | 81.320786 | 61.009277 | 39491 | 41406 | 9071 |
+
+对应dev原生分数只认PHASE_A末节full行；同权重train−dev的P/R/F1差分别为
++20.970953/+39.848726/+27.689904个百分点。**不是配对效应**：两者数据人口不同，
+train是in-sample、checkpoint按dev选定，不能由该差值直接推唯一过拟合机制。
+实际forward250.25478473119438秒、含加载/hash全程268.2775159352459秒，低于原预算。
+0 optimizer/0 epoch，forward target全零placeholder，labels只在前向外计数，未访问final-valid。
+
+本地另一实现按doc ID联表原冻结targets与落盘classes、逐doc用bincount重建混淆，
+再用sklearn micro labels=[1,2]直接复核P/R/F1，全部在1e-10内相同；2,622doc/
+2,297,524候选与每doc矩阵严格一致。GPU输出7件seal
+`362c0993b7dfcb5d6489581b8ee6f2b1fe79242a3f3e19f7b7e0e799959f997f`；CPU独立重计数
+seal `e2c5b8c5d64d15891c41924a7995e237f2ade512348ec9f6a05a2272abdbd18e`。原targets SHA
+`cb3ab49f07f51b3e6fde96581715ff0ed9c88345eb1121af7a9e4f4c3b38b211`、预测SHA
+`f25c4a6c3f948649d8632cc2473118e3a3ea7eaf8150aa389d1574b1dee4123d`，GPU结果回本地
+逐件SHA/大小一致；未搬checkpoint。CPU重计数源码也封存，不把同一GPU报告复述算独立核验。
+
+**进一步的描述性分解（事后解释，不作新检验/新选模）**：
+
+| 描述量（%） | train | internal-dev |
+|---|---:|---:|
+| gold正例比例 | 2.113667 | 2.041981 |
+| annotation-NONE被判正率 | 1.816394 | 2.131053 |
+| 忽略subtype的正例检出召回 | 82.465714 | 46.705588 |
+| PRECONDITION exact recall | 77.602577 | 36.538984 |
+| CAUSE exact recall | 91.308638 | 57.757848 |
+
+**科研裁决**：现在可优先查“新文档的正关系检出/泛化”，而非继续把主要缺证当作
+CUDA未跑通、训练完全无法拟合或单纯调focal即可解决。两split整体正例比例接近，但
+这不排除条件分布/难度/标注差异。训练precision仍不足且有大量FP，不能宣称训练已
+完美拟合或优化问题已被排除。现有证据尚不能区分词面对记忆、实例语境辨别与其他
+分布差异，不能直接准入一个新模块/阈值/更大backbone。方法贡献及O1–O4仍未满足。
+
+### 25.131 R110：泛化缺口的训练词面对照与最近邻机制（2026-10-25，执行前）
+
+**科研价值**：R109真实同口径拟合已闭合，不再造模型准备任务。下一检验要区分
+“词面熟悉度不足”与“在熟悉事件词面对上仍无法分辨具体语境”；它决定后续干预是否
+需新泛化信号，而非据误报总数盲加contrast/语义模块。对准A4-R/表4-3设计准入，不能
+把描述性分层当因果证明/新方法效果。结合新一手机制/代码核查后作候选取舍，不把
+SemDI/LKCER/CaSR等已覆盖的机制换名当创新。
+**可行性**：已有原train/内部dev原文、mention ID/offset、完整native目标/特征、R107
+冻结full预测及原joint预测，均在本地；无需新encoder、标签或GPU。保留三轴/源SHA，
+dev只用于既有预测的诊断，final-valid封存。原R101只是旧train固定案例审查，不回答
+当前ERGO held-out词面对表现；旧闭合样例/模型smoke不重做。
+
+**预定范围**：只用train构建ordered trigger surface对的监督覆盖，casefold+空格归一，
+不lemmatize/改分桶阈值。dev按train-positive-seen / train-NONE-only-seen / unseen三层，
+再按同句/跨句两层描述。分层由训练缓存/原文和dev无标签位置决定，不用dev关系标签
+划分；最后才用既有dev gold核TP/FP/FN。比较冻结full与冻结joint的同人口分层，不添
+弱锚或调prediction。词面未见不等于语义未见，NONE-only不等于世界无因果；严格保留
+这一解释边界。新增最近邻只核正文机制/官方代码与数据/协议/机器可行性，不凭摘要
+或仓库存在准入。不取final-valid或新训练；结果改变路线才计科学进展。

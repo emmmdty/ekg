@@ -550,6 +550,13 @@ R1 §25.129保存验收事实。停止本固定三臂，不扫gamma/lr、不延e
 CPU门/源与完整人口/预算，再披露命令后原机空卡执行；不恢复旧方法，不先开新训练。
 科学价值/可行性/范围见R1 §25.130，当前尚未有R109输出。新方法仍须独立R1准入。
 
+**10-25 R109完成/接R110**：冻结full权重的原train全人口零更新前向及另一实现重计数
+已完成、exit0/GONE；原生拟合与dev之间存在明显落差，同时训练FP仍多，详数只见
+R1 §25.130，不将它当新主表成绩或唯一过拟合成因。相同模型/数据/权重不重跑。
+同队下一R110以train-only词面对照划分既有dev预测的熟悉度×句距，比较full与原joint，
+并刷新最近邻正文/官方实现以裁候选机制；预定信号/层级/可行性见R1 §25.131。无新GPU/
+encoder/数据/seed，不能根据该分层自动准入contrast或已知语义模块；先完可证伪判别。
+
 | 子项 / KR | 状态/依赖 | 交付与完成判据 | 资源/停止边界 |
 |---|---|---|---|
 | C41-L / 全部创新KR | done · 10-15文献升级 | 最近邻机制/官方代码状态/候选卡与来源边界已落地；不代表全面新颖性已证实 | 新章节接队刷新最近邻，不重读代替决定性实验 |
@@ -562,7 +569,7 @@ CPU门/源与完整人口/预算，再披露命令后原机空卡执行；不恢
 | C41-D-R / KR2.1、KR2.2 | done · 当前10-15绑定模板未准入（§25.86），非效果FAIL | native共享正关联/强linear原train残余与128预算可见性、最近邻正文源码已核；假负scope/NLI、exclusive绑定和普通conditional目标均有具体拒绝依据；positive-only尚无可识别独立新干预 | 关闭本次准入回合，不取消D4章/所有证据方法；新替代需新证据回R1，不复活旧家族；诊断不算KR2.1/2.2通过 |
 | C41-D-A / KR2.1、KR2.2 | deferred · 当前无准入候选；新替代先回D-R | 可识别创新、最小loss/强rival/消融/负控、条件power/预算和冻结phase；TDD实现、本地门及真实torch smoke后正式放行 | 保留可靠linear与相同全文通路，独立新身份；不复活cue/causal-residual |
 | C41-D-TV / KR2.1、KR2.2、KR4.2 | deferred · D-A未放行，不运行拟议训练 | seed13完整五折/各臂OOF；pooled官方主指标/少数类护栏/归因与独立复算，裁决并回填 | 按空4090并行不同臂或不同fold，同seed不等于额外seed；实现/协议失败另封存 |
-| **C41-A-R / KR3.1、KR3.2** | **wip · R107/R108三端点与配对验收完成，无确认收益；R109软件/真实CPU/预算已过，待原机train-fit前向（§25.129–§25.130）** | ERGO公开强rival FR-016(b)：原Longformer/RGT/focal/AdamW/epoch函数与完整4096/native全有向候选保持；cache BOS/EOS与正文CLS-only差异逐条披露。两机公共预训练权重均各自镜像直下，不跨机搬本项目checkpoint；已知对手不算创新，新方法仍回R1 | 既有训练/CPU/CUDA产物封存；R107三项独立checkpoint重载及官方classes/分数一致，R108预定配对/错误交换和另一实现复核完成，详数只见PHASE_A末节。固定三臂不再训练/扫参/扩seed，checkpoint留4090、final-valid封存。下一R109冻结full选中权重，原train2622doc仅eval/no-grad，以native三类计数诊断拟合差距；先复用/实现薄入口、CPU门/源/人口/预算，再核空卡披露命令。不是新方法准入、重选档或旧R100复跑；新机制仍须差异/强rival/power/消融/负控门 |
+| **C41-A-R / KR3.1、KR3.2** | **wip · R109拟合诊断/独立核算完成，接R110词面泛化对照/最近邻（§25.130–§25.131）** | ERGO公开强rival FR-016(b)：原Longformer/RGT/focal/AdamW/epoch函数与完整4096/native全有向候选保持；cache BOS/EOS与正文CLS-only差异逐条披露。两机公共预训练权重均各自镜像直下，不跨机搬本项目checkpoint；已知对手不算创新，新方法仍回R1 | R107/R108已封存，固定full及两控制不再训练/扫参/扩seed；R109原train完整人口零更新前向和独立计数通过，数字只见R1 §25.130。当前接R110：train-only词面监督覆盖×同句/跨句分层既有dev预测，对比full/joint，核新最近邻机制及可行性后裁下一干预；不把熟悉度当因果、诊断当新方法或已有模块换名。source/ID/协议/原预测不变，无新encoder/seed/final-valid/搬权重；新方法仍须独立R1差异/强控制/power/消融/负控门 |
 | C41-A-A / KR3.1、KR3.2 | deferred · 当前无准入候选；新替代先回A-R | 强rival、核心消融、归属负控、机制可识别性、条件power/预算和冻结phase；TDD实现/本地门/真实torch smoke后放行 | 不续修masked/retained hinge；4090执行，无新增5090授权 |
 | C41-A-TV / KR3.1、KR3.2、KR4.2 | deferred · A-A未放行，不运行拟议训练 | seed13完整候选各臂、official causal P/R/F1和关系护栏、恢复/损失正例、独立复算与去留 | 不按保守全None或子集分数宣布改进；负结果仍交付 |
 | C41-Q / KR1.3、KR2.3、KR3.3 | pending · 本轮所有待比单seed方案超过各自baseline/护栏且作者再次明确授权 | 依各有效合同执行matched seeds与聚类配对确认，记录均值/SD/区间；合法封存程序另核其许可与历史访问 | 未满足前置或授权不得跑seed17/42；单seed成功不能记成最终确认 |

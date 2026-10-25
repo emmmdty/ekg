@@ -240,6 +240,12 @@ author delegation releases a new in-scope research queue; it does not reopen old
   the full decoder audit remains pending, authorized only on an empty 5090 GPU.
   Bounded occupancy waiting ended without an audit launch; no automatic watcher remains.
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
+  **R109 now complete:** fixed selected full checkpoint predicted the entire original train
+  population without updates; actual exit0/GONE, bincount/sklearn independent replay passed.
+  Results and limits R1 §25.130. Next R110: train-only lexical pair exposure by sentence locality
+  over frozen full/joint dev predictions, plus nearest-neighbor mechanism/code review (§25.131).
+  No new encoder/labels/seed; no automatic new method admission. Author resumed conversation;
+  Goal API still paused, not represented as active.
   **2026-10-25 completed endpoints and verification:** R107 all three selected-checkpoint
   replays passed exact full-population classes/official-score parity, actual exit0/GONE. R108
   all pre-frozen contrasts, document CIs/error exchanges and explicit independent resampling

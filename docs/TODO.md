@@ -3,6 +3,11 @@
 > 更新于 **2026-10-24**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 
+**最新：R109已闭合，接R110**：完整train零更新预测和另一实现计数完成，未重训或搬权重；
+fit/dev落差和限制只见R1 §25.130。当前train-only词面对照×句距分层既有full/joint dev
+预测，并核最近邻机制；范围见主表/R1 §25.131，不把诊断当新贡献。作者已说继续，工具
+仍paused，按会话继续、不冒称自动active；O1–O4未完成。
+
 **10-25验收/裁决**：三项完整训练及R107独立重载已过，全部classes/官方分数一致，
 R108预定区间和错误交换及另一实现复核完成；无确认的主指标收益或新方法贡献（数字
 只见PHASE_A末节）。固定三臂不重起/扫参/扩seed，Goal active、三个科学O未达。
