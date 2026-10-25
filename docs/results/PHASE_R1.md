@@ -8004,3 +8004,24 @@ native类别定义的TP/FP/FN/3×3混淆衡量拟合，诊断数字不当新主�
 结果若train高而dev低，优先查泛化与可部署关系信号；若train也低，先查优化/表示；
 任一都不唯一证明原因，更不授权调参或新机制训练。此处只是已定下一判别任务，
 尚无R109实现/GPU输出或新候选准入；可行性实现失败须点名证据并先改主表裁下一路线。
+
+#### R109实现范围冻结（2026-10-25）
+
+原入口检索仅有train/dev选模和独立dev重载，没有当前ERGO选中权重的完整train-only
+零更新出口。新增独立薄脚本，复用`load_completed_native_run`、`aligned_training_data`、
+`validate_feature_population`、`model_inputs`与原公开LongformerCausalModel，不改旧pinned
+源码或EventNode。native三类计数先与真实官方scorer toy及既有R107/R108 dev混淆核等价；
+子类型交换必须同时算FP/FN，不能复用binary日志。真实标签仅在forward之外计数，
+forward始终零placeholder、eval/no-grad；有意义的CPU测试后再补正式配置/GPU预算。
+
+**R109软件门**：新增薄入口218行，SHA
+`dd92c30a08df51045659a0d03e2523340e4dfd5f128c885b1c6f0fe39f882c10`；其TDD测试先因
+缺实现RED，现本地10过/1Torch skip；forward标签隔离/no-grad/参数不变的真实Torch
+测试须原机补。真实R107/R108 dev混淆用新native公式复算，与官方独立P/R/F1均在
+1e-10内相同；错subtype的toy另经原官方scorer核等价。新版不修改旧源码/模型数学。
+
+本轮代码后全仓995 passed/97 skipped（本地缺Torch），ruff零错误、ekg-smoke OK；
+原机CPU门尚未执行，不把skip算过。无新GPU/model调用。预算proxy为R103两次最大
+无标签dev forward均时×2622 =862.4478767621331秒；1.5倍加1200秒加载/hash读盘余量
+=2493.6718151431996秒，取3600秒内部、3660秒外部/60秒清理；正式配置待真实CPU门后。
+合同`PHASE_A4_ergo_train_fit_20261025.md`冻结人口/前向/标签隔离/失败与解释边界。
