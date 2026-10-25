@@ -1,10 +1,25 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-24（+08:00，ERGO成本/生产/容量通过；接完整单seed基线）**。
+> 更新于 **2026-10-25（+08:00，ERGO三端点/独立配对完成；接train拟合判别）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.129；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.130；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**10-25最新验收覆盖**：三项20epoch已完成，R107原机独立重载、完整classes/官方分数
+一致，实际exit0/GONE；R108预定配对/错误交换及另一实现复核通过。**没有确认的主指标
+收益或新方法贡献**；主表/区间/错误桶只见[PHASE_A末节](results/PHASE_A.md)，验收/hash/
+限制见R1 §25.129。固定三臂不重起、不扫gamma/lr、不扩seed。checkpoint全留4090，
+final-valid未访问；不存在本轮训练或验证活任务，Goal实核active，O1–O4未完成。
+
+**直接接续R109（尚待实现/CPU/预算，不是已跑）**：仍C41-A-R/T087，冻结full选中
+checkpoint，在原train2622doc做eval/no-grad native三类拟合诊断，与已有dev原生分数
+区分“训练拟合不足”与“泛化差距”。原binary train log和旧R100不回答当前ERGO问题；
+不由误报桶直接选新模块。先找复用入口/薄接口、TDD/local/真实CPU门、源/完整人口/
+预算，再成功核空卡并披露GPU命令。自审和范围见R1 §25.130、主表最新覆盖段。不得
+改旧pinned源码、用新诊断重选epoch/threshold、复跑旧模型或冒称新机制已准入。
+
+下方10-24“三卡运行中”和10-25“独立核分未过”均为历史快照，不覆盖本段。
 
 **10-25当前覆盖**：三项训练均有完整20epoch报告，成功ps确认原worker GONE，卡0/1/2
 当前空；**禁止重复训练**。当前接R107[独立重载合同](phases/PHASE_A4_ergo_independent_20261025.md)，

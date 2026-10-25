@@ -7942,3 +7942,65 @@ R107=`runs/stages/R1/r1-v107-ergo-independent-20261025/`，full物理卡1、comp
 使用同一`run_ergo_native_control.py --operation verify`安装同样干预，不能漏掉mask/
 gamma。期望每项独立checkpoint SHA、完整classes逐值parity、同官方分数和新预测。
 当前先冻结执行身份，验证结果尚未产生；实际主表分数及统计后续只写PHASE_A对应节。
+
+#### R107/R108实际完成与科学裁决（2026-10-25）
+
+原独立入口未改；合同Git bundle SHA
+`f2d4c62672ac235a080d42fccac950527e8e0088955c87a804f25a71683197aa`，主机同步至
+`2207152b84a99ea2feddc396b85708c48d9ce800`，部署变更与三个训练config/pins无交集。
+独立验证wrapper849839/849795/849796，worker849842/849802/849801；三条SSH实际均
+返回exit0，成功完整ps核GONE。完整291doc classes parity及官方分数逐项一致，两个
+control保持同一干预、complete_graph独立hook实际291次。无更新、epoch或新seed。
+
+预查询曾启动重复的全量hash只读审计（846233），耗时偏长后成功ps核其ALIVE，主动
+终止该重复读盘；不当训练或独立重载失败，不假称拿到其全部hash结果。必要的checkpoint/
+source/input/config checks全部由正式独立入口在前后执行。随后对验证PID读/proc证实
+`folio_wait_bit_common`/disk sleep，打开的是各自best.pt；这是实际读盘等待，未改代码/
+超时合同，三项最终正常结束。旧原训练本地handle已不存在，仍不声称原训练shell退出码。
+
+R107 seal `f4efd4bed160e3dbaba5fe2163579dea8faba2db2c5476372e732764be8bfb56`；21件
+独立证据及131件训练metadata（seal
+`87983e609f46bb92e6c6771a046d31173544c42761ebe385b2c166215cf22d47`）已回本地逐件
+SHA/大小一致。只同步json/jsonl/py/log，没有搬任何checkpoint，权重仍全在4090。
+
+R108按原R106已冻的full/controls身份及原三external锚解析实际预测SHA，不按得分换
+对照；原CLI实际完成11个预定对比。epoch日志20行/各前缀strict earliest-best逐项核验
+与报告一致；另一真实数据实现直接抽doc索引并求和，对压缩multiplicity矩阵的所有
+区间/点值在1e-12内相同，TP交换、混淆、FN/FP桶守恒。没有修改scorer或生产代码，
+故不重跑全仓三件套；此次实际CPU/官方计数与显式bootstrap检查认上述新证据，不把
+10-24三件套冒称本轮新跑。R108 seal
+`bf19e52bb099d71b493089da84ae7740f89dac967b7471efba08fdf6f0e13d63`。
+
+**主表数字、全部区间、实耗时及错误交换唯一详表**见PHASE_A末节“A4.ERGO native强rival
+及两项同backbone控制”。**裁决**：执行/独立核分完成，所有预定配对区间跨0，原full
+相对主锚的微小点增益不构成稳定改进；邻接点值较高亦尚无确认区间，focusing因子未获
+额外收益证据。不能拿已知baseline/消融当方法贡献、只胜弱锚、扩大seed或事后扫参数。
+研究结论为未取得正向方法收益，而不是工具失败；不宣称原论文方法普遍无效。
+
+误差交换支持关注新增检出与误报权衡；纯方向/已检出边subtype不是当前主要桶，但
+不能据此自动认定某个语义模块可纠正这些错误。三臂共享暂时训练动态亦不是其成因
+证明。upstream binary日志不等于native三类官方fit，尚不能从该日志直接宣布过拟合。
+Goal保持active，O1–O4及优于四篇学位论文的最终验收均未完成。
+
+R108十件封存文件已备份原4090，逐件SHA/大小与本地seal完全一致；只是备份，
+不冒称服务器重新执行本轮显式bootstrap。R107原机/本地官方核算与R108本地另一统计
+实现是不同的验证范围，均已分别给出实测证据。
+
+### 25.130 下一判别：ERGO冻结选中checkpoint的train拟合（2026-10-25，待准备）
+
+**科研价值**：对准A4-R的原因判别，而非再造一个泛化图/focal模块。R107/R108已确认
+完整执行与dev错误交换，但无法区分“训练也未拟合”与“训练拟合后不能泛化”；原日志
+binary F1忽略正类subtype交换，不能代替这个缺证。原R100使用另一旧checkpoint的
+train诊断也不能回答当前ERGO的拟合。冻结full已选档，不按新诊断重选epoch/阈值。
+**可行性**：full checkpoint、原train2622doc完整features及独立targets都在原4090，
+已有完整forward/marker/MID/候选与训练监督来源门；native三类目标可用于外部计数，
+forward继续零placeholder、eval/no-grad。无需新标注、backbone、训练、seed或搬权重。
+最大train已通过真实CUDA，模型/数值不变，新增的是对当前选中权重的真实train预测。
+
+**下一范围/验收**：R109仅选中full的原train完整人口，保留既有dev独立结果；用同一
+native类别定义的TP/FP/FN/3×3混淆衡量拟合，诊断数字不当新主表成绩/新选模反馈。
+先找可复用入口，补薄接口/TDD、local门及原机真实CPU门、源/数据/配置/预算；GPU
+启动前披露确切命令并成功核空卡。不重复旧全模型smoke、R100或已封存控制训练。
+结果若train高而dev低，优先查泛化与可部署关系信号；若train也低，先查优化/表示；
+任一都不唯一证明原因，更不授权调参或新机制训练。此处只是已定下一判别任务，
+尚无R109实现/GPU输出或新候选准入；可行性实现失败须点名证据并先改主表裁下一路线。

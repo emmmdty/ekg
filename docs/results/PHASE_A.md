@@ -2247,3 +2247,125 @@ vs 17.6/13.4/13.8/14.2/19.0/17.9/4.2），也与 gold 全体相同。**机制没
 ### 下一步
 
 不触发执行动作。A4 第二设计周期是否开、以什么形态开，属于 Gate 2 的改纲裁决。
+
+
+## A4.ERGO native强rival及两项同backbone控制（2026-10-24训练 / 10-25独立验收）
+
+### 研究问题、协议与验收身份
+
+本节对准表4-3/FR-016(b)，衡量公开ERGO在本项目native三类causal任务上的竞争力，
+并检查criss-cross邻接约束与focal focusing因子。**这是已知强对手及已知控制，不是本
+项目创新方法**；三个方法章的正向贡献仍未达成。主锚保持原official joint，不事后更换。
+
+原ERGO revision `afa3d347ec360242c01d15a34b1f1ae63714c789`；Longformer/RGT/focal类、
+原train_epoch、旧HF AdamW保持，透明native三类适配。full/complete_graph/gamma0各
+seed13、完整20epoch、float32/full4096/全有向event mention候选；alpha=.75、原10%warmup
+及独立marker初始化保持。complete_graph仅放开非对角边，对角仍mask；gamma0仅将
+原focal exponent2改0，保留alpha和按样本数平均，为加权CE，不是无权CE或sum-weight
+归一化。原论文ESL/CTB二类及原基准数字未复现，三行均FR-016(b)，不声称原消融数值复现。
+
+train2622doc；internal-dev291doc/234870有向候选、gold4796条正关系。P1可信根r15，
+protocol SHA `1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655`；
+manifest/candidate/evaluator三轴与冻结主锚一致。历史A3根保留其原身份，不重绑。只用
+internal-dev官方三类causal F1严格`>`选档、相等取最早；final-valid未访问。
+两个控制在full启动后追加，时序披露于R1 §25.128，不能称整个三臂均早于full预注册。
+
+三项完整20epoch、各20个predictions/classes文件均留存。R107用各自选中best.pt在原
+4090重新启动进程，完整291doc classes逐值一致且官方分数与训练报告完全一致；
+两控制重载时用相同wrapper安装干预。三个独立验证实际exit0/ps GONE，无新训练/seed。
+131件训练metadata双端SHA一致；checkpoint均留训练原机，不回本地/不跨服务器搬运。
+
+### 主表（官方causal百分数；同一internal-dev）
+
+| 系统 | P | R | F1 | 选中epoch |
+|---|---:|---:|---:|---:|
+| official joint 冻结主锚 | 34.369410 | 32.047540 | 33.167890 | 原冻结档 |
+| A3 fallback（历史方法） | 22.346780 | 56.943286 | 32.097314 | 原冻结档 |
+| Taco-inspired（透明适配，非原代码） | 23.484701 | 50.250209 | 32.009563 | 原冻结档 |
+| ERGO full | 27.845443 | 41.472060 | 33.319373 | 9 |
+| ERGO complete_graph | 29.465593 | 33.569641 | 31.384016 | 16 |
+| ERGO gamma0（保留alpha） | 28.062678 | 41.075897 | 33.344617 | 8 |
+
+### 预定文档配对区间（百分点）
+
+全部使用同291doc、10000次bootstrap、rng13，重采样后先汇总TP/FP/FN再求micro-F1；
+不是平均每doc F1。以下均为未经多比较校正的描述性95% percentile区间，不含训练随机性，
+也不消除dev逐epoch选模带来的乐观性，不能代替合法确认。R108另一实现直接采样doc
+索引并求和，11组与压缩multiplicity矩阵实现的点估计/区间在1e-12内相同，计数守恒通过。
+
+| 左 − 右 | ΔF1 | 95% CI |
+|---|---:|---|
+| ERGO full − official joint 冻结主锚 | +0.151484 | [-2.102897, +2.443470] |
+| ERGO full − A3 fallback（历史方法） | +1.222059 | [-0.565457, +3.064520] |
+| ERGO full − Taco-inspired（透明适配，非原代码） | +1.309810 | [-0.399988, +2.953189] |
+| ERGO full − ERGO complete_graph | +1.935358 | [-0.008512, +3.935358] |
+| ERGO full − ERGO gamma0（保留alpha） | -0.025244 | [-1.556381, +1.438778] |
+| ERGO complete_graph − official joint 冻结主锚 | -1.783874 | [-3.983076, +0.442427] |
+| ERGO complete_graph − A3 fallback（历史方法） | -0.713299 | [-2.984099, +1.620204] |
+| ERGO complete_graph − Taco-inspired（透明适配，非原代码） | -0.625547 | [-2.538604, +1.302259] |
+| ERGO gamma0（保留alpha） − official joint 冻结主锚 | +0.176728 | [-2.012941, +2.478049] |
+| ERGO gamma0（保留alpha） − A3 fallback（历史方法） | +1.247303 | [-0.948720, +3.516006] |
+| ERGO gamma0（保留alpha） − Taco-inspired（透明适配，非原代码） | +1.335054 | [-0.719535, +3.426504] |
+
+**所有预定区间均跨0。** full相对complete_graph下界为−0.008512个百分点，虽接近0，
+仍不能四舍五入为正或宣称确认的邻接贡献。full相对主锚仅+0.151484；gamma0相对主锚
+仅+0.176728，均未提供稳定改进证据。不能把“F1略高”写成新方法达标或进入额外seed确认。
+
+### 错误交换：召回收益被误报代价抵消
+
+| 系统 | TP | FP | FN | 预测正例 |
+|---|---:|---:|---:|---:|
+| official joint 冻结主锚 | 1537 | 2935 | 3259 | 4472 |
+| ERGO full | 1989 | 5154 | 2807 | 7143 |
+| ERGO complete_graph | 1610 | 3854 | 3186 | 5464 |
+| ERGO gamma0（保留alpha） | 1970 | 5050 | 2826 | 7020 |
+
+相对主锚，full保留1208条共同TP，新增检出781条TP、同时丢失329条，**净TP+452**；
+FP由2935变5154，**净FP+2219**。因此不能把召回提升直接当成功，也不能把这批差异
+唯一归因Longformer、RGT或全局语义，ERGO与joint的backbone/输入/训练数学同时不同。
+原邻接full相对complete_graph净TP+379、净FP+1300，点分优势来自召回/误报权衡，不能
+写成“约束已经证实减少误报”。full相对gamma0净TP+19、净FP+104，整体几乎相同；
+这不是证明任意focal设置都无用，也不是gamma0已稳定胜出。
+
+full的2807条FN分解为：同方向错subtype251、仅反向同subtype12、仅反向错subtype1、
+两方向均未判正2543；5154条FP分解为251/17/2/4884。反向重叠另按原profile记录，
+不重复计入主桶。误差主要仍在“有无标注关系”的判别，而非仅将已检出边改方向或
+subtype。annotation-NONE不等于世界语义为假，不能自动用LLM/常识重标或修gold。
+
+full/gamma0的3×3混淆顺序均为NONE/PRECONDITION/CAUSE，精确矩阵及逐doc交换在R108。
+各系统全部混淆和为234870，FN/FP桶分别守恒；本节描述不证明错误可被某个新信号纠正。
+
+### 训练动态及后续裁决
+
+三臂原日志均完整20epoch，strict best/earliest-tie逐epoch核一致。三者都在epoch4出现
+暂时F1下降，随后恢复；这是共同训练动态的观察，尚无逐batch机制证据，不能唯一归因
+warmup、数据次序或优化器，也不据此扫lr/gamma或追加epoch。训练日志的upstream binary
+F1忽略正类subtype交换，**不能拿它与dev三类causal F1的差距直接证明过拟合**。
+
+**本轮裁决**：公开强rival与两控制的执行/独立评测交付完成，但没有方法贡献或确认收益；
+保留三端点和最强有效控制，不用更弱锚充数、不新增seed或阈值搜索。下一判别任务是
+冻结full选中epoch9，在原train2622doc做零更新native三类拟合诊断，与本节dev残余分开
+报告，区分低训练拟合与泛化差距；不是复跑旧R100模型、不是新方法训练，仍须先补其
+输入/源/预算与CPU门。若train拟合高则优先查泛化/可部署关系信号；若train亦低则先查
+优化/表示，不从单一观察直接挑模块。新方法仍须新颖差异、强rival、power/消融/负控门。
+其他family为不适用，不能用空占位宣称通过跨关系护栏。O1–O4均未完成。
+
+### 产物、时间与复核入口
+
+以下耗时由原机config保存至完成report的mtime计算，不含此前的模型加载；rsync保留
+源mtime。三组训练均在10-24完成，独立重载/配对分析于本次10-25执行，不声称昨晚已自动核分。
+
+- ERGO full：训练6.732705小时，10-24 17:39:51（+08:00）完成；配置`configs/ergo_native_training_4090_20261024.json`，checkpoint在`gpu-4090:/data/TJK/ekg/runs/stages/A4/a4-ergo-native-20261024/seed-13/best.pt`。
+- ERGO complete_graph：训练6.660500小时，10-24 18:04:06（+08:00）完成；配置`configs/ergo_control_complete_graph_training_20261024.json`，checkpoint在`gpu-4090:/data/TJK/ekg/runs/stages/A4/a4-ergo-control-complete-graph-20261024/seed-13/best.pt`。
+- ERGO gamma0（保留alpha）：训练6.611927小时，10-24 18:01:11（+08:00）完成；配置`configs/ergo_control_gamma0_training_20261024.json`，checkpoint在`gpu-4090:/data/TJK/ekg/runs/stages/A4/a4-ergo-control-gamma0-20261024/seed-13/best.pt`。
+
+- R107=`runs/stages/R1/r1-v107-ergo-independent-20261025/`，各子目录report/predictions/classes；
+  seal `f4efd4bed160e3dbaba5fe2163579dea8faba2db2c5476372e732764be8bfb56`。
+- 训练metadata seal `87983e609f46bb92e6c6771a046d31173544c42761ebe385b2c166215cf22d47`，
+  原配置/三checkpoint SHA可从R107 reports反查，原训练来源/部署commit见R1 §25.127–§25.129。
+- R108=`runs/stages/R1/r1-v108-ergo-comparison-20261025/`，原R106计划解析为固定三个
+  `*-plan.json`，三套`*-comparisons.json`、summary与独立检查/确切源码；seal
+  `bf19e52bb099d71b493089da84ae7740f89dac967b7471efba08fdf6f0e13d63`。
+- GPU独立重载合同：`docs/phases/PHASE_A4_ergo_independent_20261025.md`；CPU复核：
+  `uv run python runs/stages/R1/r1-v108-ergo-comparison-20261025/independent_bootstrap_check.py`
+  （已封输出不会覆盖；在新审计目录复制其输入再复核）。不运行模型或读取final-valid。

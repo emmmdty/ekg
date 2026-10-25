@@ -240,6 +240,13 @@ author delegation releases a new in-scope research queue; it does not reopen old
   the full decoder audit remains pending, authorized only on an empty 5090 GPU.
   Bounded occupancy waiting ended without an audit launch; no automatic watcher remains.
 - [ ] **T087 [RS-001–RS-003] / C-41** In progress: chapterwise next-method R1 research (2026-10-12; C5 first)
+  **2026-10-25 completed endpoints and verification:** R107 all three selected-checkpoint
+  replays passed exact full-population classes/official-score parity, actual exit0/GONE. R108
+  all pre-frozen contrasts, document CIs/error exchanges and explicit independent resampling
+  completed; no confirmed gain/new contribution (authoritative table PHASE_A, R1 §25.129).
+  Do not restart/sweep/reseed these runs. Next R109: frozen full checkpoint, complete original
+  train population, no-grad native-three-class fit diagnosis; software/CPU/budget admission
+  still to prepare (§25.130), no new method training. Goal active, scientific O1–O4 unmet.
   **2026-10-24 parallel GPU request:** published ERGO complete-graph and gamma0 controls are
   frozen within C41-A-R, not a second queue. Both actual CUDA preflights completed exit0/GONE,
   optimizer-resident max-dev and exact initial-parameter parity passed. R106 own budget/configs
