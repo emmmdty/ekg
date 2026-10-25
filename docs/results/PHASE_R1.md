@@ -8025,3 +8025,18 @@ forward始终零placeholder、eval/no-grad；有意义的CPU测试后再补正�
 无标签dev forward均时×2622 =862.4478767621331秒；1.5倍加1200秒加载/hash读盘余量
 =2493.6718151431996秒，取3600秒内部、3660秒外部/60秒清理；正式配置待真实CPU门后。
 合同`PHASE_A4_ergo_train_fit_20261025.md`冻结人口/前向/标签隔离/失败与解释边界。
+
+**真实CPU门/正式配置冻结**：软件Git bundle SHA
+`cd7bf4978cae234119ceb84a6616fb3067f22d602c8f63c9fb8c931a18f1ece6`，主机同步至
+`ab6a9069e253d795570fa1f393dbfe375299edcb`；与三已封训练config/source pins无交集。
+新增11项测试原机隐藏CUDA实际11过、0fail/0error/0skip，Torch metadata2.8.0；未加载
+encoder或checkpoint。真实dev native计数与R107官方指标等价CPU门也过，CPU guard与
+JUnit XML已取回、源码/测试/XML SHA逐一匹配。前一Goal回合R107/R108为实质进展，
+当前续接R109，不把状态复述当新科学收益。
+
+正式配置SHA `851ee47723d1be6fa8634eaa7692f0f0d4b2135740b546488260c16e77f888e9`，
+CPU/budget admission seal
+`025b7f6990ace490d5274bc841fea5fd60d7806f6020554ef6f6f12bc3048e67`。已绑定原full config/
+20epoch report、R107独立证明、R108 dev混淆、原完整train features/targets/manifest及
+全部源码、真实CPU证明和预算；非单纯翻flag。source/checkpoint仍原身份，数据标签只
+在forward外使用。当前尚待部署该正式配置/预算双端SHA、核卡/披露命令及实际GPU前向。

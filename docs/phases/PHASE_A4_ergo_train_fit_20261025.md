@@ -43,3 +43,21 @@ CPU独立计数核算。开始/结束均核源、输入及checkpoint/config SHA�
 训练fit高而dev低时支持优先研究泛化/部署可用信号；训练fit也低时先查优化/表示；两种
 结果都不能唯一识别原因，或自动准入某个语义模块。原训练日志binary指标不可跨口径
 对比。诊断不为任何新机制提供创新、power、核心消融/负控或确认seed准入。
+
+## 正式执行身份（真实CPU门之后冻结）
+
+原机隐藏CUDA的11项CPU测试全部通过、零skip，真实dev混淆对照官方结果亦通过；详证据
+见R1 §25.130。正式配置`configs/ergo_native_train_fit_20261025.json`，SHA
+`851ee47723d1be6fa8634eaa7692f0f0d4b2135740b546488260c16e77f888e9`。
+CPU证明/预算单独封存于`runs/stages/R1/r1-v109-ergo-fit-admission-20261025/`，seal
+`025b7f6990ace490d5274bc841fea5fd60d7806f6020554ef6f6f12bc3048e67`。
+
+主机`gpu-4090`，cwd `/data/TJK/ekg`，实际启动前再核卡1及UUID，命令为：
+
+```bash
+setsid nohup env CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src:scripts OMP_NUM_THREADS=12 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 timeout --signal=TERM --kill-after=60s 3660s .venv/bin/python -u scripts/diagnose_ergo_native_fit.py --config configs/ergo_native_train_fit_20261025.json > logs/ergo-native-train-fit-20261025.log 2>&1 < /dev/null &
+```
+
+单条SSH只发一个后台任务，parent保存PID并wait其真实退出码。SSH失败只记UNKNOWN，
+用成功ps/实际报告判活，不重启。预测结束后以冻结targets和落盘classes/逐doc矩阵做
+CPU独立重计数，再过源、人口与checkpoint身份门，结果才可用于研究裁决。
