@@ -4,7 +4,13 @@
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.128；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.129；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**10-25当前覆盖**：三项训练均有完整20epoch报告，成功ps确认原worker GONE，卡0/1/2
+当前空；**禁止重复训练**。当前接R107[独立重载合同](phases/PHASE_A4_ergo_independent_20261025.md)，
+同原机/同控制重载best.pt，完整classes逐值对齐并官方重算，再做既定配对与残余分析。
+当前只是训练报告已结束，独立核分未过，不能把微小dev差值当突破。结果只落PHASE_A，
+科学自审/运行事实见R1 §25.129。Goal工具现已实核active，覆盖下方旧blocked历史快照。
 
 **10-24作者要求并行**：同队C41-A-R增加原ERGO论文两项单变量控制，卡0 complete-graph、
 卡2 gamma0；卡1原full不动，卡3保留。主表/独立[合同](phases/PHASE_A4_ergo_parallel_controls_20261024.md)

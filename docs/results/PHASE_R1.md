@@ -7919,3 +7919,26 @@ R106 seal SHA `962308455c01d7d0c6e8e8872e2205aed90dec0eb02a2bc6fc37e5691114b34a`
 安装相同干预并核完整classes parity；之后才实例化预定full对照预测SHA、官方评分与
 paired错误交换。两已知单变量控制不自动形成新的方法贡献，O1–O4仍未满足。新增控制
 使用公开组件/边界适配，对角mask保留原cache policy，未声称复现原论文消融数字。
+
+### 25.129 ERGO三端点完成后独立重载/配对验收（2026-10-25，执行前自审）
+
+**科研价值**：对准A4表4-3/KR3强rival及KR4可复核性，核已冻三个20epoch端点的实际
+checkpoint与完整291doc classes/官方causal分数，并按R104/R106已冻对照和两个单变量
+差值分析。小幅选中dev分数不直接当突破，已知消融不算本项目新方法；O1–O4未完成。
+**可行性**：三项报告/status均complete20，成功SSH完整ps未见原worker13841/25466/25461，
+主机卡0/1/2无compute-app；权重全留原机，原独立验证入口及controls wrapper均存在并
+已在配置pins钉住，不改代码、选档或数据，不增seed/阈值/新训练。当前Goal实查为active，
+覆盖旧blocked快照，不重建目标；此前三臂训练启动是实质进展，本轮接终态验收。
+
+查询报告时一段临时状态脚本的shell引号破坏f-string条件，报NameError；不当GPU失败，
+改为stdin文件脚本补查。旧本地SSH等待handle现已不存在，因此**不声称取得原训练shell
+实际退出码**；用成功ps GONE、完整报告/20个classes和predictions文件、control执行记录
+和独立重载判终态。初始日志报告原版/complete/gamma0都complete；完整pins/hash另核，
+独立验证自身也会在加载模型前/结束后联核身份。不重跑已经完成的训练。
+
+R107=`runs/stages/R1/r1-v107-ergo-independent-20261025/`，full物理卡1、complete_graph
+卡0、gamma0卡2，分别独占新输出；同一原机CUDA并行，无新seed/训练。每项外部timeout
+1800秒后TERM/60秒清理。full用原`verify_ergo_native_checkpoint.py`；两个control必须
+使用同一`run_ergo_native_control.py --operation verify`安装同样干预，不能漏掉mask/
+gamma。期望每项独立checkpoint SHA、完整classes逐值parity、同官方分数和新预测。
+当前先冻结执行身份，验证结果尚未产生；实际主表分数及统计后续只写PHASE_A对应节。
