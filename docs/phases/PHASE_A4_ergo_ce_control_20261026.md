@@ -40,3 +40,9 @@ setsid nohup env CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src:scripts OMP_NUM_THREADS=1
 对照，选中checkpoint在4090独立重载、classes逐值/official分数/配对复核后才验收。
 控制即便提高公开指标仍是FR-016(b)已知透明适配，不抵三个独立方法贡献。权重原机留存，
 final-valid、额外seed、5090和跨机checkpoint权限不扩大。
+
+原机真实CPU门已完成、0 skip，证据见R1 §25.135。正式CUDA配置已冻结：
+`configs/ergo_ce_preflight_20261026.json` SHA
+`00e184864c55699e426dde28f30b708db8718aa163324b285e88bd4b5ab64073`。
+CPU-only清单SHA `42c90d03731d1532e99371c81c7a444d38dbe6edba621727a61344686c3cb6dc`。
+下一部署/核卡后执行上列固定GPU1命令；该段不构成完整训练准入。

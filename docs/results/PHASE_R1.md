@@ -8309,3 +8309,18 @@ joint/full/gamma0及既有强rival配对比较，不从已见结果换主锚或�
 [独立CE合同](../phases/PHASE_A4_ergo_ce_control_20261026.md)已写，先原机真实CPU再
 生成带CPU证据pin的CUDA配置；当前没有CE GPU调用/完整训练准入。成功SSH核4090四卡
 无compute-app、tracked工作树干净；部署前远端HEAD为178e79a，不能把本地软件当已部署。
+
+§25.135 原机CPU门已实际通过：4090隐藏CUDA，相关8项测试全部通过、0 skip，
+Torch2.8.0+cu128；原官方forward/RGT/loss配tiny替代encoder，CE与官方CrossEntropy
+逐值相等、logits/state不变、反传有限，真实gamma0权重比也核为3。无预训练encoder/
+checkpoint载入或GPU核；不是原大模型训练。XML/日志/guard已双端SHA对应，CPU-only
+seal `42c90d03731d1532e99371c81c7a444d38dbe6edba621727a61344686c3cb6dc`。
+软件部署真实HEAD `436e65c5f37424a1e1ebfbd3148aecb78ad559db`；一次部署末尾的
+commit断言填错完整值，已按Git实际值只读复核，没有重新reset或启动训练。
+R111原25件与2项来源更正也已4090逐件hash/size核过。
+
+据此冻结`configs/ergo_ce_preflight_20261026.json`，SHA
+`00e184864c55699e426dde28f30b708db8718aa163324b285e88bd4b5ab64073`，
+同时pin原helper、新extension/测试及实际CPU三件/清单；仅准空GPU1原函数两个lr0
+最大train/驻留optimizer最大无标签dev CUDA，timeout1200s。下一先部署本配置和CPU
+清单并双端核SHA、再次核空卡，再按CE合同命令执行；当前尚无CUDA结果/训练准入。
