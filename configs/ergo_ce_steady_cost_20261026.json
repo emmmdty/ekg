@@ -1,0 +1,82 @@
+{
+  "cases": {
+    "cuda_worst": {
+      "device": "cuda",
+      "doc_id": "d2b256945da96b92915adec7b523f11a",
+      "nonpad_tokens": 1897,
+      "pairs": 11772
+    }
+  },
+  "cpu_threads": 12,
+  "cuda_admitted": true,
+  "features": "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/features.jsonl",
+  "final_valid_accessed": false,
+  "learning_rate": 0.0,
+  "limitations": [
+    "Only one max train fixture; original cost entry directly selects author built-in CE via model_args.loss_type.",
+    "Two zero-lr optimizer calls with separate cold/warm timings and finite gradients/unchanged numeric parameters; no epochs/checkpoint/dev or final-valid.",
+    "Disambiguate cold two-batch production timing from steady cost to freeze feasible full20epoch budget; no alpha/gamma/lr changes.",
+    "Physical primary GPU1 only; independent new output, previous raw preflight/costs immutable; timeout1200, kill30."
+  ],
+  "model_args": {
+    "class_weight": 0.75,
+    "dropout_att": 0.1,
+    "dropout_emb": 0.3,
+    "gamma": 2,
+    "loss_type": "ce",
+    "num_heads": 4,
+    "y_class": 3
+  },
+  "model_files": [
+    "config.json",
+    "merges.txt",
+    "pytorch_model.bin",
+    "tokenizer.json",
+    "vocab.json"
+  ],
+  "model_source": "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/model.py",
+  "optimizer_api_calls": 2,
+  "optimizer_source": "runs/stages/R1/r1-v92-ergo-interface-20261018/hf_optimization_v4_11_3.py",
+  "output": "runs/stages/R1/r1-v113-ergo-ce-steady-cost-20261026",
+  "padding_parity_required": false,
+  "padding_policy": "retain_all_4096",
+  "pins": {
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/config.json": "d0a64aa58d1b43c0d38000fa3083c142533c59fa151043e5c8113bcbee106d82",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/merges.txt": "1ce1664773c50f3e0cc8842619a93edc4624525b728b188a9e0be33b7726adc5",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/pytorch_model.bin": "06c56757f0510de87c231acd03650ca204c5ed65c281cd1081b98288183f2468",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/tokenizer.json": "847bbeab6174d66a88898f729d52fa8d355fafe1bea101cf960dd404581df70e",
+    "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895/vocab.json": "9e7f63c2d15d666b52e21d250d2e513b87c9b713cfa6987a82ed89e5e6e50655",
+    "runs/external/ERGO/afa3d347ec360242c01d15a34b1f1ae63714c789/model.py": "fb254c5ea4275561a8973d35abd988ee6902fd1f8db9552679237d3f1fb56ea7",
+    "runs/stages/P1/p1-v6-20260904-r15/protocol.json": "1e31a9acef39261f776f7ed4069fd73f4531e8d12b55779bfc0fbd74c67f9655",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/completion_manifest.json": "7c201a73d6cb7cad336588fd9bbfc4ecfed343a531236cf320fe5517d89ea6a6",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/hf_optimization_v4_11_3.py": "2ebfecd42a53245c4e72fd8e267efbef7679adfd10bcf14b8510f6830c8fd36e",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/model_acquisition.json": "71cfa4187981116b63af2e2ad74487d5b07bd676a019881305a4ff4529752bf4",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/features.jsonl": "c4c018269fe69515579e15eb6dcaea38ebd96610bbfa9f1d4d891ff54733aeb0",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/report.json": "5d10b34a77ea1ca0d160bfa5036ccb6f0d82491372c8d8bf0806216a4d4856f4",
+    "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/targets.jsonl": "cb3ab49f07f51b3e6fde96581715ff0ed9c88345eb1121af7a9e4f4c3b38b211",
+    "runs/stages/R1/r1-v93-ergo-cost-20261018/completion_manifest.json": "cded90e8554654fcca8f7490e2255685ffb4f304004c205fa4cde385f38b9c75",
+    "runs/stages/R1/r1-v93-ergo-cost-20261018/cpu_short/report.json": "a9730ec28c8f3f2e508f641702a530614b1b4db916fd3f1c6a0408adb6470cb9",
+    "runs/stages/R1/r1-v94-ergo-padding-cost-20261018/completion_manifest.json": "faec3bbeced31e64558d54c22f01148bf44580740f0937480abb1db7dbfe5167",
+    "scripts/profile_ergo_native_cost.py": "ca9d805faf071cd0aaf9cfb7dceb414fcc0b667bf7f92511c4a84cb81dc0cc65",
+    "scripts/profile_original_joint_cost.py": "295ba0de2655ee8f76471a52f0b10744fec57667a21bd8a856e0b567bb5c907a",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/relations/ergo_adapter.py": "7f8829119725554c7deb12520562d9a3c2d079806fde75c473140a81b4c86351",
+    "runs/stages/R1/r1-v95-ergo-canonical-cost-20261018/completion_manifest.json": "d0e7a4b939e02a5e0785a7e9ef03d3722e3a3a3e8a3b53fdddad15100f811466",
+    "configs/ergo_ce_preflight_20261026.json": "00e184864c55699e426dde28f30b708db8718aa163324b285e88bd4b5ab64073",
+    "scripts/run_ergo_ce_control.py": "95a6fa0e4c2b67dbdc73927e80e0d1df42b9a29cd83323e275a287c688544209",
+    "scripts/run_ergo_native_control.py": "f042b19ab4b1748f361b73185ddfaab845e306a4576641eeb746e10763ce161a",
+    "runs/stages/R1/r1-v112-ergo-ce-admission-20261026/cpu_guard.json": "b8de91257e644fe9b4880261b482ab953e49baceeacfa9d85377d95fb90999f4",
+    "runs/stages/R1/r1-v112-ergo-ce-production-20261026/ce/production_report.json": "b13edce501ee5065d6d92a70c90babfe04abb47bb37c4768723a413fbb1e1ff5",
+    "runs/stages/R1/r1-v112-ergo-ce-production-20261026/ce/capacity_report.json": "c9bd97068e14fd6fe7d04fd8a82943c39e468a5cfa0513a0c5c60aba6be6e82e",
+    "runs/stages/R1/r1-v112-ergo-ce-production-20261026/ce-execution/execution.json": "78f024c338059a838f3845a4f2cce31808aef086e05df514112336b1d3c7e806",
+    "runs/stages/R1/r1-v112-ergo-ce-production-20261026/completion_manifest.json": "0bcdbdc862a7d8ca6776d1efa76ff2041ec3a45e6874baf899542641dccd3bf8"
+  },
+  "pretrained": "/data/TJK/models/local/longformer-base-4096/301e6a42cb0d9976a6d6a26a079fef81c18aa895",
+  "schema_version": "ekg.ergo_native_cost.v3",
+  "seed": 13,
+  "targets": "runs/stages/R1/r1-v92-ergo-interface-20261018/native_train_cache_global/targets.jsonl",
+  "training_admitted": false,
+  "server": "gpu-4090",
+  "authorization_status": "Primary4090 standing authorization; R112 actual CE CUDA production passed; one original cost cold/warm probe only.",
+  "gpu_uuid": "GPU-45597c42-fba9-d40a-dccb-0c423b160150"
+}

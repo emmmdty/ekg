@@ -8324,3 +8324,47 @@ R111原25件与2项来源更正也已4090逐件hash/size核过。
 同时pin原helper、新extension/测试及实际CPU三件/清单；仅准空GPU1原函数两个lr0
 最大train/驻留optimizer最大无标签dev CUDA，timeout1200s。下一先部署本配置和CPU
 清单并双端核SHA、再次核空卡，再按CE合同命令执行；当前尚无CUDA结果/训练准入。
+
+### 25.136 R112 CUDA通过；R113一次稳态成本/完整预算（2026-10-26）
+
+原CE最大两个train lr0 batch及optimizer驻留最大无标签dev均实际完成，exit0；成功SSH
+进程查询确认launcher1135685/worker1135686 GONE。官方criterion selector安装一次，
+初始参数与原full一致，参数数值不变、梯度有限，shadow target logits逐值不变。
+
+| 实测 | 值 | 限制 |
+|---|---:|---|
+| 原函数两个最大train batch时间 | 9.182340676896274 s | 含首批/首次optimizer等开销，不能直接当稳态 |
+| 最大无标签dev两次forward | 0.6511806822381914 s | 保持optimizer驻留，非全dev计时 |
+| train peak reserved | 19.3984375 GiB | 实际GPU1/full4096/float32 |
+| dev peak reserved | 21.541015625 GiB | 无gold/epoch/checkpoint |
+
+7件原始GPU产物已双端SHA/size一致，根
+`runs/stages/R1/r1-v112-ergo-ce-production-20261026/`，seal
+`0bcdbdc862a7d8ca6776d1efa76ff2041ec3a45e6874baf899542641dccd3bf8`。
+当前只是CUDA可行性通过，不是完整CE训练/指标结果。
+
+**预算校核自审**：科研价值是确保表4-3固定CE强替代能在实际排期内完成20epoch，
+而不是据一个含首批开销的短测把它误判为不可行/需要多日，或拿偏低估计开任务。
+可行性是原`profile_ergo_native_cost.py`已支持`model_args.loss_type='ce'`，无需新脚本、
+修改pinned source或重做已完成CPU/生产门。只一个11772-pair最大train病例，原入口
+分别记录cold/warm两个lr0 step，参数不变；不跑epoch/读取dev或final-valid。
+旧gamma0两个production batch为2.307109875138849s，当前与之不同，原因尚未定位；
+不能先宣称CE慢四倍，也不能说已证明只是冷启动。
+
+另外只读原full/gamma0完整run各epoch prediction-file的服务器mtime：epoch2–20
+平均相邻间隔为1209.3710885424364/1187.0368555094067s，含原训练、dev及间歇存档等。
+这是旧run实际工时的事后参考，非CE未来保证、不是未记录的新epoch，也没有用其
+选择分数。来源`r1-v112-ergo-ce-admission-20261026/prior_runtime.json`；正式预算应
+结合新warm成本和此经验，声明代理估计/冷启动/IO边界。若成本不支持完整范围，应
+在训练前裁资源可行性，不以减少epoch或改变精度完成一个假终点。
+
+**R113唯一成本配置**：`configs/ergo_ce_steady_cost_20261026.json` SHA
+`4872d658af229a1b0617e7b3e43c4f947bce301fea0301f25a6013dd78aa5e3b`；
+只case `cuda_worst`/GPU1，pin R112实际CUDA/CPU及原model/profile/optimizer/数据。
+直接作者原CE分支，seed13/lr0/两个API calls；这是成本，不是额外训练seed或alpha搜索。
+主表先更新，执行前另披露确切命令；当前尚未启动该cost或正式CE训练。
+
+CE未来五对照比较已在首评分前冻结，`r1-v112-ergo-ce-admission-20261026/comparison_plan.json`
+SHA `648ccaf1c9c23f885021c9e33f8186311d78f1f9146891274eb8741e2b550b27`：joint主锚、A3、
+Taco透明适配、full、gamma0全部报告；保持原291篇/official evaluator/document bootstrap。
+不将单seed选中dev比较当确认、不把训练CE替代的差值全归于类别权重因果效应。

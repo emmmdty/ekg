@@ -46,3 +46,22 @@ final-valid、额外seed、5090和跨机checkpoint权限不扩大。
 `00e184864c55699e426dde28f30b708db8718aa163324b285e88bd4b5ab64073`。
 CPU-only清单SHA `42c90d03731d1532e99371c81c7a444d38dbe6edba621727a61344686c3cb6dc`。
 下一部署/核卡后执行上列固定GPU1命令；该段不构成完整训练准入。
+
+## 一次已有成本入口的cold/warm核验
+
+R112实际CUDA已过；两个production batch含首批成本，与旧gamma0短测差异较大，
+R1 §25.136记录为何尚不能直接预算。原`profile_ergo_native_cost.py`本来支持
+`model_args.loss_type`，故直接使用CE配置，不写新cost脚本或改旧入口。
+只一个最大train病例、两个lr0 call，timeout1200/kill30，不是epoch或新增seed。
+
+配置`configs/ergo_ce_steady_cost_20261026.json`，SHA
+`4872d658af229a1b0617e7b3e43c4f947bce301fea0301f25a6013dd78aa5e3b`。
+再次核空GPU1并在执行前披露：
+
+```bash
+setsid nohup env CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src:scripts OMP_NUM_THREADS=12 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 timeout --signal=TERM --kill-after=30s 1200s .venv/bin/python -u scripts/profile_ergo_native_cost.py --config configs/ergo_ce_steady_cost_20261026.json --case cuda_worst > logs/ergo-ce-steady-cost-20261026.log 2>&1 < /dev/null &
+```
+
+主机/cwd仍gpu-4090 `/data/TJK/ekg`，预期
+`runs/stages/R1/r1-v113-ergo-ce-steady-cost-20261026/cuda_worst/{report,status}.json`。
+完成后合并原机完整run实际工时/本次warm计时作正式预算，预算前不启动完整训练。

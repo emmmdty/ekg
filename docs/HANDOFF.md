@@ -1,10 +1,12 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-26（+08:00，R111信号/最近邻完成；接R112已知CE强控制）**。
+> 更新于 **2026-10-26（+08:00，R112 CE CUDA通过；接R113一次稳态成本/预算）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.135；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.136；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**10-26最新：R112 CE CUDA已过、exit0/GONE**：最大两train lr0/驻留最大无标签dev、初始化/参数/logits检查均过，实测/7件双端seal只见R1 §25.136。现R113仅按CE合同执行原已有cost入口的一次最大train cold/warm计时（source本来支持loss_type=ce，无新代码），再裁正式20epoch预算。当前无CE完整训练；不复跑R112、旧三臂或普通matching/contrast。五个既定对照在首评分前已冻。
 
 **10-26当前接R112**：R111原train监督机会/独立SQL闭合，但CNC已覆盖普通同偏置异类hard-negative contrast；拒绝generic matching创新表述，不借CoRE复活mask。数字/源码裁决只见R1 §25.134。下一原作者内置unweighted CE已知简单强控制（§25.135）：现gamma0仍是weighted CE，不能拿它排除pointwise class-pressure解释。独立薄入口复用旧frozen runner/原模型，仅选CE，不改旧pinned源码；先软件三件套、原机CPU、实际最大train/无标签dev CUDA及预算，才放行seed13/20epoch完整控制。一个固定配置，不扫alpha/gamma/lr、重起旧三臂或声称新机制准入。checkpoint留4090，final-valid封存；当前没有新训练启动。
 
