@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-26",
+  "scope": "CPU diagnostic interpretation and primary nearest-neighbor mechanism review only; no external scores adopted",
+  "queries": [
+    "event causality debiasing",
+    "event causality counterfactual",
+    "event causality identification (repositories sorted updated)",
+    "Structural Example Retrieval (exact repository search)",
+    "event causality identification (OpenAlex, from 2024, discovery only)"
+  ],
+  "access": "GitHub app and web tool transport failed; local HTTPS GitHub REST/raw and ACL PDFs succeeded; Google/DDG challenge unusable",
+  "papers": [
+    {
+      "name": "ICCL",
+      "url": "https://aclanthology.org/2024.emnlp-main.51.pdf",
+      "sections": "3.2-3.3,5.2",
+      "repository": "https://github.com/ChaoLiang-HUST/ICCL",
+      "revision": "a7e3b3479040b17baf87f96c5de6df5291ae91c7",
+      "finding": "Random label-balanced demonstrations and event-representation contrast; not semantic nearest-neighbor retrieval; known contrast is not novelty."
+    },
+    {
+      "name": "HOTECI",
+      "url": "https://aclanthology.org/2024.lrec-main.711.pdf",
+      "sections": "2.1-2.3",
+      "repository": "https://github.com/hieum98/HOTECI",
+      "revision": "8d0b7f28449657e0ee44992d4ef51d68edd74ffe",
+      "finding": "Hierarchical sentence/word OT, RL and T5; no manually annotated evidence words needed; native three-class/full-candidate interface and cost unclosed."
+    },
+    {
+      "name": "SERE",
+      "url": "https://aclanthology.org/2026.findings-acl.2126.pdf",
+      "sections": "3.3-3.5/Algorithm1",
+      "finding": "ConceptNet path and syntactic tree edit distance, predicted causal pattern and balanced examples; official runnable code not located within recorded boundary, no universal absence claim."
+    },
+    {
+      "name": "FrECI",
+      "url": "https://aclanthology.org/2026.acl-long.2173.pdf",
+      "sections": "2-3",
+      "repository": "https://github.com/jinzhao3611/freci",
+      "revision": "c7732b9664daf744b9ab599f49335e453784b7b0",
+      "finding": "Different framing-aware schema and supervision; not native MAVEN relation detection."
+    },
+    {
+      "name": "Synthetic Control",
+      "url": "https://aclanthology.org/2024.emnlp-main.103.pdf",
+      "sections": "2-3",
+      "finding": "Potential-outcome COPES-hard estimand not annotation-edge task; klodiand99 GitHub student notebook is not author implementation."
+    }
+  ],
+  "inference_calls": 0,
+  "external_project_data_uploads": 0,
+  "final_valid_accessed": false
+}

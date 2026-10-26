@@ -8115,3 +8115,103 @@ dev只用于既有预测的诊断，final-valid封存。原R101只是旧train固
 弱锚或调prediction。词面未见不等于语义未见，NONE-only不等于世界无因果；严格保留
 这一解释边界。新增最近邻只核正文机制/官方代码与数据/协议/机器可行性，不凭摘要
 或仓库存在准入。不取final-valid或新训练；结果改变路线才计科学进展。
+
+### 25.132 R110完成：训练词面覆盖不能单独解释ERGO dev缺口（2026-10-26）
+
+执行前范围见§25.131；新入口`report_a4_surface_generalization.py`只处理CPU缓存，
+训练索引和dev无标签分层在打开dev gold之前固定。所有既有输入SHA与冻结配置一致；
+正例词面对优先于NONE-only，保持方向，不词干化。完整291篇/234870有向候选和原
+full/joint混淆完全守恒；2622篇train产生920200种有向词面对，其中27112种见过任一
+causal正类。无模型调用、参数/epoch/阈值/预测变化，final-valid未访问。
+
+| train-only覆盖 / 句距 | candidates | gold positive | full TP / FP / FN | full P / R / F1 (%) | joint TP / FP / FN | joint P / R / F1 (%) |
+|---|---:|---:|---|---|---|---|
+| positive-seen / 同句 | 2035 | 327 | 173 / 193 / 154 | 47.26776 / 52.90520 / 49.92785 | 154 / 150 / 173 | 50.65789 / 47.09480 / 48.81141 |
+| positive-seen / 跨句 | 21993 | 1517 | 887 / 1959 / 630 | 31.16655 / 58.47067 / 40.66010 | 745 / 1208 / 772 | 38.14644 / 49.11009 / 42.93948 |
+| NONE-only-seen / 同句 | 8423 | 532 | 194 / 325 / 338 | 37.37958 / 36.46617 / 36.91722 | 149 / 189 / 383 | 44.08284 / 28.00752 / 34.25287 |
+| NONE-only-seen / 跨句 | 112239 | 1047 | 282 / 1234 / 765 | 18.60158 / 26.93410 / 22.00546 | 196 / 628 / 851 | 23.78641 / 18.72015 / 20.95136 |
+| unseen / 同句 | 6340 | 533 | 188 / 333 / 345 | 36.08445 / 35.27205 / 35.67362 | 118 / 190 / 415 | 38.31169 / 22.13884 / 28.06183 |
+| unseen / 跨句 | 83840 | 840 | 265 / 1110 / 575 | 19.27273 / 31.54762 / 23.92777 | 175 / 570 / 665 | 23.48993 / 20.83333 / 22.08202 |
+
+合并positive-seen为24028候选/1844正例，full F1 41.93037975、joint 43.84296513；
+合并unseen为90180/1373，full 27.71489752、joint 24.15498763。全部同句为16798/1392，
+full/joint F1 39.67119371/35.95217763；跨句218072/3404为31.37512307/32.22639330。
+这些是预定描述分层，不是分层显著性/处理效应或新的主表收益。全局权威分数仍见PHASE_A。
+
+**独立复核**：另一脚本不用原训练target/cache分桶函数，直接从原train event-edge展开
+48562个positive mention-pair并构建all/positive词面集合；独立双层循环核全部dev membership、
+12张native混淆和逐格F1一致。独立实现使用lower而非casefold，实际人口全部membership
+一致，非任意Unicode的普遍等价声明。原始逐文档矩阵、分层、配置和双实现均留存。
+
+**科研裁决**：不能把“未见词对”当唯一解释或直接选知识补全。full在已见正例的跨句组
+相对joint增加142个TP，也增加751个FP，该组F1下降；其他组提高recall仍伴随precision
+下降。支持继续检验具体语境的判别监督，**未证明词面shortcut、某种因果机制或唯一病因**。
+同句/跨句在内容、先验等均不同，不把其分差当句距干预。NONE只认标注，未见只认准确词面。
+
+**验证/追溯**：TDD新增6项先因入口缺失失败，导入路径按现有脚本测试fixture修正后全过。
+完整`uv run pytest`=1001 passed/97 skipped；skip主要因本地缺Torch，不能冒称CUDA通过。
+既有官方评分toy触发1项sklearn无预测样本UndefinedMetricWarning，不改评测器掩盖。
+`ruff check src tests scripts`零错误，`ekg-smoke` OK。config SHA
+`74e78a1810b7bdf9fa413f7f36b861986e6b890b71126f763f8f34a04e218f4a`；
+产物`runs/stages/R1/r1-v110-a4-surface-generalization-20261026/`，10件seal
+`171b641a3e8262f59d466e250abd3888f77cc46126690787f950c611c6613e9b`。
+
+**最近邻正文/源码裁决（本次有界检索，非无先行性的证明）**：
+
+- [ICCL §3.2–3.3及§5.2](https://aclanthology.org/2024.emnlp-main.51.pdf)与作者
+  [model.py](https://github.com/ChaoLiang-HUST/ICCL/blob/a7e3b3479040b17baf87f96c5de6df5291ae91c7/model.py)：
+  正负示例按标签随机取，事件表示作对比，prompt作预测；正文不是“语义最近邻检索”。
+  泛称示例+contrast不能立新意。其缺输入/折分旧障碍认§25.33，不再重做旧E协议审计。
+- [HOTECI §2.1–2.3](https://aclanthology.org/2024.lrec-main.711.pdf)及
+  [作者源码](https://github.com/hieum98/HOTECI/tree/8d0b7f28449657e0ee44992d4ef51d68edd74ffe)：
+  句/词两层OT、T5生成及REINFORCE联合训练，ConceptNet句子也进入选择。
+  重要词由OT取得，**不需要人工证据词标注**，不可照搬DREEAM的数据阻断理由。
+  `HOTEERE.py`144–184、`selector.py`及`preprocessor.py`核到机制；原binary Yes/No、
+  每pair生成/外部知识预处理尚未闭合native三类/全候选/成本，未运行或准入。
+  普通重要上下文筛选已有先行性；本轮不造另一个rival adapter充当创新。
+- [SERE 2026 §3.3–3.5/Algorithm1](https://aclanthology.org/2026.findings-acl.2126.pdf)：
+  ConceptNet路径编辑距离、句法树编辑距离和LLM causal-pattern filtering已有明确机制。
+  不能把结构化/语境示例检索本身立新意。正文负例pattern置No，与同pattern且平衡正负
+  的组合有待代码澄清；不是据此宣判原论文无效。论文/ACL页面未找到作者代码链接，
+  GitHub精确标题检索0项，宽检索多为同名无关项目；只是本次边界内未定位可执行实现。
+  没有付费模型调用、重写复现或借其binary表格数字给native三类背书。
+- [FrECI 2026 §2–3](https://aclanthology.org/2026.acl-long.2173.pdf)与
+  [作者仓库](https://github.com/jinzhao3611/freci/tree/c7732b9664daf744b9ab599f49335e453784b7b0)：
+  责任主体、评价framing、来源、epistemic字段是另一任务的额外监督；当前MAVEN没有
+  这些标注。当前路线卡【数据/协议】，不换主任务、不把这篇最新论文直接列可运行强锚。
+- [Synthetic Control §2–3](https://aclanthology.org/2024.emnlp-main.103.pdf)研究COPES-hard
+  的时序事件/潜在结果，以历史控制文本合成、embedding inversion估计treatment effect。
+  这不等于当前标注关系检测或同词面不同语境；卡【协议】，不以真实世界因果重定义金标。
+  GitHub命中的Kl. Dervishi硕士notebook不是该文作者实现，不能冒称官方复现。
+
+检索走GitHub connector/web均传输失败后，实际用本地HTTPS读取GitHub API/固定raw及ACL
+PDF；Google/DDG为challenge未得有效结果，不伪称其完成检索。OpenAlex只用于发现题名，
+机制结论回到正文/官方代码。来源文件/hash/有界查询另存研究ledger；无本项目数据外传。
+当前仍未建立独立新机制、≥80% power与完整准入；不能因工程PASS标科学O完成。
+来源ledger：`docs/research/20261026_a4_context_sources.json`；原文/源码52件封存于
+`runs/stages/R1/r1-v110-a4-context-neighbors-20261026/`，seal
+`5fa4debb7d8cddbdfbb51cfe957f0de7f6c3be9b85926b04c66b89a33d5ed67d`。
+
+### 25.133 R111：同词面对的异语境监督机会及最近邻审查（2026-10-26，执行前）
+
+**科研价值**：由§25.132探索性结果产生候选，检验是否有足够“同一有向trigger词面、
+不同文档语境、causal与标注NONE分歧”的原生训练监督。它决定能否把语境判别作为
+可识别训练干预，而不是泛称语义增强或词对知识。对准A4-R/表4-3设计门，不称自然
+匹配是随机化/真实反事实，不以ranking、offset抵消或更换负采样本身宣称原创。
+**可行性**：完整原train raw/targets/features和coref事件ID都在本地；只CPU统计，
+无dev outcome新增查看、encoder、optimizer、seed/机器/搬权重或final-valid访问。
+训练coref只作监督单位去重/审计，推理不得消费gold coref。
+
+**预定检查**：复用R110固定词面规范；同时保留native mention-pair和去重event-edge
+两套分母，点名coref重复。不把同一文档内的对立标签当跨语境机会；不同doc ID但
+全文tokens完全一致者不算不同语境。按causal(1/2)对NONE(0)跨文档/不同文本的支持
+计mixed surface组、参与doc/event-edge/mention-pair及各原生类覆盖；CAUSE与PRECONDITION
+冲突另报，不能冒称是causal-vs-NONE。记录exact全文+端点位置相同却标签矛盾的输入。
+无正负跨语境机会即数据不可行；有机会也不自动过机制门。无需再分dev筛模块。
+
+**待裁候选/反证**：若可用，考察在保留原三类CE/完整候选绝对校准前提下，同词面
+异语境的相对判别监督；最强替代包括等样本量普通跨词面监督/对比、匹配本身重加权
+及原ICCL式标签对比。不把group-relative目标缺乏None校准的问题重犯。核词面去偏/
+matched hard-negative/已知ECI因果模式的公式和官方代码；有相同机制或无法把语境配对
+与普通hard sampling区分，就拒绝当前创新表述，不由CPU计数准入GPU。当前只准上述
+信号/机制审查；正式干预仍需R1差异、强对照、核心消融、负控、power和实际成本。

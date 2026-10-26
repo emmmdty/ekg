@@ -1,10 +1,14 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-25（+08:00，R109拟合诊断完成；接R110词面对照/最近邻）**。
+> 更新于 **2026-10-26（+08:00，R110词面对照/最近邻完成；接R111信号审查）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.131；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.133；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**10-26最新接续：R110已完成并封存**：完整dev分层和另一实现的12张native混淆一致，global分母/预测不变；数字/来源/限制见R1 §25.132。正文/官方代码已核ICCL、HOTECI及2026 SERE/FrECI等，不把已知机制换名，不启动新模型。
+
+**当前直接接R111**：主表/R1 §25.133，只在原train核同词面对异文档/异文本、causal对标注NONE的机会；同时保留mention-pair与去coref重复event-edge分母，再核matched监督/去偏/ECI最近邻。普通ranking/contrast/采样不自动成立新意；无新GPU或方法准入。R109/R110不重做；下方“当前接R110”是历史快照。
 
 **最新接续：R109已实际完成并独立重计数**（覆盖下方尚待GPU段）：原full冻结权重
 的原train完整人口已eval/no-grad预测、实际exit0/GONE，原生计数和sklearn另一实现一致。

@@ -486,3 +486,5 @@ coverage, but they cannot be checked complete until the corresponding executable
   identity, not for the withdrawn factorial.
 - Within method phases, baseline reproduction and engineering tests may run in parallel only when they do not
   expose confirmatory results early or share mutable experimental state.
+
+**2026-10-26 R110闭合/接R111**：C41-A-R/T087仍wip。原dev完整词面×句距分层和独立12张native矩阵一致；最近邻裁决/数字见R1 §25.132。当前只原train同词面对异语境监督机会、去重复和最近邻审查（§25.133）；不是新方法准入，不重跑既有dev或模型。O1–O4未达。
