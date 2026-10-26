@@ -8300,3 +8300,12 @@ CE与weighted CE还存在loss scale/优化过程差异，固定原LR的比较回
 joint/full/gamma0及既有强rival配对比较，不从已见结果换主锚或只报胜者。现仅软件/
 真实CPU/CUDA可行性获准；完整训练须记录实际资源/预算后再放行。final-valid封存，
 不增加seed。O1–O4仍未满足，known CE提分也不能代替方法贡献。
+
+§25.135 软件已落地：新增独立CE薄入口复用原frozen runner；3项本地可运行测试通过、
+1项实际Torch/original-forward检查因本地缺Torch待原机实跑。实际消费runner的toy入口
+测试先发现namespace `__file__` 相对/绝对路径冲突，已用解析到extension绝对路径修正，
+旧pinned helper不改；消费测试确实执行selector、保存initializer/extension SHA，不只
+检查源码常量。完整pytest=1009 passed/98 skipped/既有1警告，ruff0、CPU smoke OK。
+[独立CE合同](../phases/PHASE_A4_ergo_ce_control_20261026.md)已写，先原机真实CPU再
+生成带CPU证据pin的CUDA配置；当前没有CE GPU调用/完整训练准入。成功SSH核4090四卡
+无compute-app、tracked工作树干净；部署前远端HEAD为178e79a，不能把本地软件当已部署。
