@@ -8368,3 +8368,60 @@ CE未来五对照比较已在首评分前冻结，`r1-v112-ergo-ce-admission-202
 SHA `648ccaf1c9c23f885021c9e33f8186311d78f1f9146891274eb8741e2b550b27`：joint主锚、A3、
 Taco透明适配、full、gamma0全部报告；保持原291篇/official evaluator/document bootstrap。
 不将单seed选中dev比较当确认、不把训练CE替代的差值全归于类别权重因果效应。
+
+### 25.137 R113成本/正式CE完整预算闭合（2026-10-26）
+
+一次原cost入口已实际完成，exit0；成功ps核launcher1140344/worker1140346 GONE。
+原CE/config SHA一致、init与R112/full相同，两个lr0 API call参数数值不变且全梯度
+有限，无epoch/dev/checkpoint。4件raw cost已双端核SHA/size，根
+`runs/stages/R1/r1-v113-ergo-ce-steady-cost-20261026/`，seal
+`4d00c50f967c30c3fd791551fd05b91f6040c1ecbfd68195a88f328e39620662`。
+
+| CE原model成本 | 首步 | 第二步warm |
+|---|---:|---:|
+| 含梯度验证step时间(s) | 0.8572048810310662 | 0.780991202685982 |
+| peak reserved(GiB) | 19.349609375 | 21.41796875 |
+
+旧full focal同最大case第二步为0.7709811120294034s，本次/旧=1.0129835744357338。
+仅一个case的模型/梯度计算接近，不支持“CE算子让全程慢四倍”；原trainer短测还含
+数据装配/移送等，**不能据该表宣称差异已唯一归于冷启动**。不再重复探针，进入完整
+已知强控制。R112 raw bytes不等、negative-zero数36→1，数值SHA严格一致；原identity
+函数仅在副本归一signed-zero，未恢复/改写模型参数，不能冒称原始字节未变。
+
+**固定预算**（`r1-v113-ergo-ce-budget-20261026/budget.json`）：
+
+- warm模型×2622train×20 + 最大dev两forward/2×291×20代理为42850.11445416603s，
+  不含完整数据装配，不能直接当真实工时。
+- 旧完整native实际epoch间隔推20epoch为24187.421770848727s；再用本次CE与旧gamma0
+  原trainer两批时间比3.9800188000771537保守缩放，为96266.39337337337s。
+- 取两代理较大者×1.5+3600=147999.59006006006s，按日上取整且保留旧48h下限，
+  冻结wall172800s、外层timeout173400s/kill60。不是最坏情况上界或保证；用实际原trainer
+  全人口历史校正，不假定每个文档都等于最大fixture。
+- 日程粗估7–9h，仅据旧完整run及当前模型warm比率并加IO余量，**不是置信区间**。
+  首个完整CE epoch后校正预计时间；不据早期分数改epoch/参数。epoch未实测前不承诺。
+
+原机资源快照GPU1无进程/11MiB，空闲磁盘20781779812352B、MemAvailable
+518332817408B；快照不代表未来预约，启动前再次核卡。预算4件seal
+`c88103c591a056017c543b37485323ce6ee46cfed287d9717a261192d42675d5`；
+budget SHA `bf2b9f57bf8423a45bb1adef864daa02d9b30db3570d8eb15edc285a1bcfa136`。
+
+据实际CPU/CUDA/init/cost/resource/预算与已冻五对照，准入**一个已知unweighted_ce**
+完整seed13/20epoch。正式配置`configs/ergo_ce_training_20261026.json` SHA
+`c52cac10be678bc4840bd9ee91e5f643e1c5183a1a2d525a1ba39b6f0edf6e9f`；
+不改任何旧pinned源码/三臂，也不开放新原创候选、额外seed或final-valid。
+本地用真实artifact执行原`require_control_evidence`/`require_production_evidence`两guard
+通过；remote-only pretrained/data pins仍须原机严格全核。R102三份focal历史cost只作
+架构/输入证据，实际CE生产/容量/稳态来自R112/R113，不将旧报告改名冒称CE。
+下一部署本配置/预算四件及清单、双端SHA/空卡核验后按合同披露/启动。当前尚未启动
+完整CE epoch；即使控制提分，仍是已知训练替代，不抵独立方法贡献，O1–O4未达。
+
+
+§25.137 为把同一个固定控制做到独立核分和五对照，补有限三步shell，模型/配置值不改：
+`run_ergo_ce_pipeline_20261026.sh` SHA
+`568a677314bf26c39ebf5954c8cab33cac3f8ab1b83f991c5be0b4c762593135`。
+四项TDD从入口缺失失败到通过；只以stub外部命令验证失败传播/阻断未验收比较与旧日志
+保全，不冒称GPU训练测试。最新完整pytest=1013 passed/98 skipped/既有1警告，ruff0、
+CPU smoke OK、bash语法通过。旧CE selector/source的实际8项CPU及CUDA证明保持原身份；
+本次只新增有限编排，不复跑模型preflight。操作入口改为CE合同中的一条setsid --wait
+后台pipeline，完成训练后才核分、核分后才比较，无自动重试/新实验或常驻服务。
+编排源码由Git/pipeline SHA/launch audit追溯；训练配置c52cac…本身不变。

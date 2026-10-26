@@ -1,10 +1,12 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-26（+08:00，R112 CE CUDA通过；接R113一次稳态成本/预算）**。
+> 更新于 **2026-10-26（+08:00，R113 CE成本/预算通过；接固定完整CE强控制）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.136；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.137；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**10-26当前直接接固定CE完整训练**：R113一次成本/所有实际门与完整预算已过、原进程GONE；证据/限制只见R1 §25.137。原guard读真实artifacts也过。按[CE合同](phases/PHASE_A4_ergo_ce_control_20261026.md)先部署正式配置/预算、严格全pin/空卡核验，再以有限三步shell执行原seed13/20epoch→成功后独立核分→核验后五对照；失败即停、不重试。配置SHA/预算/命令都已冻；现尚无CE完整epoch。已知强替代不算创新，完整后同CE wrapper原机独立重载/五对照；不重跑探针、旧三臂、扫参/扩seed或访问final-valid。checkpoint留4090。
 
 **10-26最新：R112 CE CUDA已过、exit0/GONE**：最大两train lr0/驻留最大无标签dev、初始化/参数/logits检查均过，实测/7件双端seal只见R1 §25.136。现R113仅按CE合同执行原已有cost入口的一次最大train cold/warm计时（source本来支持loss_type=ce，无新代码），再裁正式20epoch预算。当前无CE完整训练；不复跑R112、旧三臂或普通matching/contrast。五个既定对照在首评分前已冻。
 

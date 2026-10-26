@@ -550,6 +550,8 @@ R1 §25.129保存验收事实。停止本固定三臂，不扫gamma/lr、不延e
 CPU门/源与完整人口/预算，再披露命令后原机空卡执行；不恢复旧方法，不先开新训练。
 科学价值/可行性/范围见R1 §25.130，当前尚未有R109输出。新方法仍须独立R1准入。
 
+**10-26 R113完整CE准入**：一次CE最大case cold/warm成本已实际过、进程GONE，完整预算及五对照闭合，R1 §25.137/CE合同。准入一个已知unweighted_ce原seed13/20epoch/full4096float32训练，以有限三步pipeline顺序执行训练→独立核分→五对照，任一步失败即停；先部署/全pin/空卡联核，现尚未启动epoch。已知控制不抵创新，不扫超参，不增seed/final-valid/其他机器权限；R112/R113探针不重做。
+
 **10-26 R112 CUDA通过/接R113预算**：真实CPU/CE最大train和驻留最大无标签dev CUDA均过、原进程GONE；R1 §25.136。短测尚未拆首批/稳态，下一只原已有成本入口一次CE最大病例cold/warm两lr0 step，配置已冻，不改source/参数/候选。用它及既有完整run工时裁完整20epoch预算；无新方法/额外seed准入，不重跑封存准备。
 
 **10-26 R111完成/接R112**：原train异文本对立监督确实可得，计数/独立SQL及CNC/CoRE裁决见R1 §25.134；不把matching或旧mask换名准入。下一是原ERGO内置unweighted CE单一已知强控制（§25.135），因为现gamma0仍保留alpha权重。只准CPU/实际CUDA可行性，预算后再放行完整训练；不扫描超参，不更改封存三臂或新方法门。
@@ -575,7 +577,7 @@ encoder/数据/seed，不能根据该分层自动准入contrast或已知语义�
 | C41-D-R / KR2.1、KR2.2 | done · 当前10-15绑定模板未准入（§25.86），非效果FAIL | native共享正关联/强linear原train残余与128预算可见性、最近邻正文源码已核；假负scope/NLI、exclusive绑定和普通conditional目标均有具体拒绝依据；positive-only尚无可识别独立新干预 | 关闭本次准入回合，不取消D4章/所有证据方法；新替代需新证据回R1，不复活旧家族；诊断不算KR2.1/2.2通过 |
 | C41-D-A / KR2.1、KR2.2 | deferred · 当前无准入候选；新替代先回D-R | 可识别创新、最小loss/强rival/消融/负控、条件power/预算和冻结phase；TDD实现、本地门及真实torch smoke后正式放行 | 保留可靠linear与相同全文通路，独立新身份；不复活cue/causal-residual |
 | C41-D-TV / KR2.1、KR2.2、KR4.2 | deferred · D-A未放行，不运行拟议训练 | seed13完整五折/各臂OOF；pooled官方主指标/少数类护栏/归因与独立复算，裁决并回填 | 按空4090并行不同臂或不同fold，同seed不等于额外seed；实现/协议失败另封存 |
-| **C41-A-R / KR3.1、KR3.2** | **wip · R112 CE实际CUDA通过，接R113一次cold/warm成本及正式预算（§25.136）** | ERGO公开强rival FR-016(b)：原Longformer/RGT/focal/AdamW/epoch函数与完整4096/native全有向候选保持；cache BOS/EOS与正文CLS-only差异逐条披露。两机公共预训练权重均各自镜像直下，不跨机搬本项目checkpoint；已知对手不算创新，新方法仍回R1 | R107/R108已封存，固定full及两控制不再训练/扫参/扩seed；R109原train完整人口零更新前向和独立计数通过，数字只见R1 §25.130。R110描述分层/12张矩阵独立复核已闭合；R111真实监督机会已独立核算；普通matching/contrast创新表述已拒绝。当前R112原作者内置unweighted CE的CPU/实际CUDA已过，R113只用已有成本入口的一次cold/warm计时闭合完整预算；仍仅一个固定CE配置，预算后才能完整训练，不改旧pinned源码，不扫alpha/gamma/lr，不把控制提分当原创。source/ID/协议/原预测不变，无新encoder/seed/final-valid/搬权重；新方法仍须独立R1差异/强控制/power/消融/负控门 |
+| **C41-A-R / KR3.1、KR3.2** | **wip · R113 CE实际成本/完整预算已过，准入固定seed13/20epoch强控制（§25.137）** | ERGO公开强rival FR-016(b)：原Longformer/RGT/focal/AdamW/epoch函数与完整4096/native全有向候选保持；cache BOS/EOS与正文CLS-only差异逐条披露。两机公共预训练权重均各自镜像直下，不跨机搬本项目checkpoint；已知对手不算创新，新方法仍回R1 | R107/R108已封存，固定full及两控制不再训练/扫参/扩seed；R109原train完整人口零更新前向和独立计数通过，数字只见R1 §25.130。R110描述分层/12张矩阵独立复核已闭合；R111真实监督机会已独立核算；普通matching/contrast创新表述已拒绝。当前R113原作者内置unweighted CE的CPU/实际CUDA/init/cost/资源/完整预算已过；准入一个固定seed13/20epoch强控制，先严格部署/核pins/空卡再按CE合同执行，完整后原机独立重载及五对照，不改旧pinned源码，不扫alpha/gamma/lr，不把控制提分当原创。source/ID/协议/原预测不变，无新encoder/seed/final-valid/搬权重；新方法仍须独立R1差异/强控制/power/消融/负控门 |
 | C41-A-A / KR3.1、KR3.2 | deferred · 当前无准入候选；新替代先回A-R | 强rival、核心消融、归属负控、机制可识别性、条件power/预算和冻结phase；TDD实现/本地门/真实torch smoke后放行 | 不续修masked/retained hinge；4090执行，无新增5090授权 |
 | C41-A-TV / KR3.1、KR3.2、KR4.2 | deferred · A-A未放行，不运行拟议训练 | seed13完整候选各臂、official causal P/R/F1和关系护栏、恢复/损失正例、独立复算与去留 | 不按保守全None或子集分数宣布改进；负结果仍交付 |
 | C41-Q / KR1.3、KR2.3、KR3.3 | pending · 本轮所有待比单seed方案超过各自baseline/护栏且作者再次明确授权 | 依各有效合同执行matched seeds与聚类配对确认，记录均值/SD/区间；合法封存程序另核其许可与历史访问 | 未满足前置或授权不得跑seed17/42；单seed成功不能记成最终确认 |

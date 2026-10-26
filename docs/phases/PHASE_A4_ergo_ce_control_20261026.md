@@ -65,3 +65,46 @@ setsid nohup env CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src:scripts OMP_NUM_THREADS=1
 主机/cwd仍gpu-4090 `/data/TJK/ekg`，预期
 `runs/stages/R1/r1-v113-ergo-ce-steady-cost-20261026/cuda_worst/{report,status}.json`。
 完成后合并原机完整run实际工时/本次warm计时作正式预算，预算前不启动完整训练。
+
+## R113实际门通过后的正式训练
+
+实测与保守预算见R1 §25.137，CPU/CUDA/init/成本/资源/原guard均闭合。
+正式配置`configs/ergo_ce_training_20261026.json` SHA
+`c52cac10be678bc4840bd9ee91e5f643e1c5183a1a2d525a1ba39b6f0edf6e9f`，
+budget SHA `bf2b9f57bf8423a45bb1adef864daa02d9b30db3570d8eb15edc285a1bcfa136`。
+只准一个已知CE、seed13、20epoch；epoch范围/数据/graph/float32/selection全部保持。
+粗估7–9h，首个真实epoch后校正；wall48h只是保守操作预算，非保证。原R102 cost作为
+旧架构证据，实际CE生产/稳态来自本轮，不混称为新的三份CE cost。
+
+主机`gpu-4090`，cwd `/data/TJK/ekg`；先部署/严格核pins/空GPU1，执行前披露：
+
+```bash
+setsid nohup env CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src:scripts OMP_NUM_THREADS=12 TOKENIZERS_PARALLELISM=false HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 timeout --signal=TERM --kill-after=60s 173400s .venv/bin/python -u scripts/run_ergo_ce_control.py --operation train --config configs/ergo_ce_training_20261026.json > logs/ergo-ce-training-20261026.log 2>&1 < /dev/null &
+```
+
+预期`runs/stages/A4/a4-ergo-control-unweighted-ce-20261026/seed-13/`有config/status、
+全部20epoch classes/predictions、原机best.pt及完整report；旁侧`seed-13-execution/`
+保存派生入口/selector/init/源码身份。失败/断线按真实ps/日志三态核查，不重复启动。
+完整训练后同CE wrapper原机独立重载及五项同轴配对，之后才验收分数。本文不表示
+epoch已开始或有科学收益；实际运行事实后补R1/HANDOFF。
+
+## 有限三步执行入口（覆盖上方单独启动方式）
+
+同一个已准入实验按依赖执行：训练成功→同CE wrapper原机独立重载→核验成功后的
+五项CPU比较；失败即停，不自动重跑/调参/选新方案。不是等卡器或常驻科研服务。
+新增`scripts/run_ergo_ce_pipeline_20261026.sh`，SHA
+`568a677314bf26c39ebf5954c8cab33cac3f8ab1b83f991c5be0b4c762593135`。
+原模型/selector/训练配置SHA保持不变；本shell只串接三个已验证接口，Git/launch audit
+另外记录其身份。四项TDD用stub命令检查成功链、两种失败中断与旧日志保全，非真实GPU证明。
+
+主机/cwd仍为gpu-4090 `/data/TJK/ekg`，严格核预算、五对照文件与空GPU1后执行前披露：
+
+```bash
+setsid --wait nohup bash scripts/run_ergo_ce_pipeline_20261026.sh > logs/ergo-ce-pipeline-20261026.log 2>&1 < /dev/null &
+```
+
+`--wait`让launcher可返回真实子任务退出码；训练/独立重载/CPU比较分别受173400/3600/300s
+及kill60约束。原逐项命令在shell中完整保存，GPU阶段固定1、CPU比较显式隐藏CUDA。
+附加预期输出：`runs/stages/R1/r1-v114-ergo-ce-independent-20261026/ce/`和
+`runs/stages/R1/r1-v115-ergo-ce-comparison-20261026/report.json`、pipeline `.exit`状态。
+只做这个固定控制的完整验收；即使exit0仍须科学解释，不能当原创/毕业门通过。
