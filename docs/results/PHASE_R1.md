@@ -8215,3 +8215,88 @@ PDF；Google/DDG为challenge未得有效结果，不伪称其完成检索。Open
 matched hard-negative/已知ECI因果模式的公式和官方代码；有相同机制或无法把语境配对
 与普通hard sampling区分，就拒绝当前创新表述，不由CPU计数准入GPU。当前只准上述
 信号/机制审查；正式干预仍需R1差异、强对照、核心消融、负控、power和实际成本。
+
+### 25.134 R111完成：语境对立监督可得，普通匹配对比不构成新意（2026-10-26）
+
+§25.133范围内完整train-only执行；新增`audit_a4_matched_contexts.py`，每一原始事件关系
+展开为全部native候选，保留None、原方向与三个类别。同词面正/负必须来自不同全文
+tokens的文档；不以doc ID不同充当语境改变。本文event-pair分母是native候选诱导的
+(doc,event_head,event_tail)去重单位，**包含同coref内部的self单位**，不与标准event-edge
+图的无self候选混称。
+
+| 人口 | NONE | PRECONDITION | CAUSE |
+|---|---:|---:|---:|
+| 完整native mention-pair | 2248962 | 35388 | 13174 |
+| 完整native诱导event-pair去重 | 1913100 | 26759 | 6175 |
+| 有异文档/异全文对立支持的native mention-pair | 210972 | 22459 | 10953 |
+| 上行按原event-pair去重 | 152929 | 16736 | 4845 |
+
+27112个positive surface组中15124个有可用causal对NONE异语境支持，参与2594篇文档。
+参与正例33412/48562=68.80276760%；参与子集正例比例13.67192615%，原完整人口为
+2.11366671%。**不能只训练这个子集**后把正类比例改变冒称语境监督效果。590个词面对
+在train有CAUSE与PRECONDITION两种正类，单独报告，不冒充causal-vs-NONE反例。
+全文+端点位置签名的跨标签冲突为0；该签名未编码其他mention的marker布局，不能由此
+声称整个encoder输入等价或金标无噪声。标签分歧不等于世界因果变化，全文不同也不能
+隔离究竟哪个语义因素改变。
+
+**独立核算**：另一实现直接从原gold按event关系展开positive key；用SQLite `EXISTS`
+定义异全文且causal/NONE相反的支持，SQL distinct核每个词面对的类计数、全部15124组、
+参与doc和event去重分母，与主实现逐项一致；完整event分母另用event数/重复mention
+公式复算。未用原audit函数、没有模型调用。数据可行性通过，**不是方法效果/创新通过**。
+
+**最近邻与裁决**：
+
+- [Correct-N-Contrast §4/A.2，作者arXiv完整HTML v2](https://arxiv.org/html/2203.01517)及
+  [作者criterion/sampler/trainer](https://github.com/HazyResearch/correct-n-contrast/tree/eaa1c664fd2002ed4dd45344353583dbce31fac0)：
+  以ERM预测推断spurious分组，同类不同组为hard positive、异类同组为hard negative，
+  监督对比与CE联合已有正文/源码。Apache-2.0，包含BERT文本任务而非只有图像。
+  因此**拒绝“同词面异标签做hard-negative contrast就是新方法”这一创新表述**。
+  把pseudo group换成trigger词面不自动产生独立机制；没有以计数准入其MAVEN训练。
+- [CoRE §3.2–3.3](https://aclanthology.org/2022.naacl-main.224.pdf)及
+  [作者core.py](https://github.com/vanoracai/CoRE/blob/c98d69472110d2514458e3b58a6a82f9793974aa/core.py)：
+  context-masking和entity/label-bias扣分、二维系数选取已有机制；公开runner还按gold
+  挑challenge子集。它不满足本项目原封全候选评测，推理mask路线又属于封存家族，
+  **不借“去偏”之名恢复**。并非称作者原任务的challenge分析无效；不运行此runner。
+- [Learning from Context or Names? §2–4](https://aclanthology.org/2020.emnlp-main.298.pdf)
+  已区分names/context及迁移局限。RE实体名不是本任务event trigger；不能据其他任务
+  的名字偏置，断言当前模型已经被证明有同一种shortcut。
+
+**下一路线裁决**：不继续将generic matching/contrast写成原创候选，也不训练选择子集
+或调匹配阈值。先补一个真正缺失的**已知简单强替代：原模型内置unweighted CE**。
+新查原pinned ERGO `model.py`的`focal_loss`：scalar alpha=.75生成[.25,.75,.75]，
+所以既有gamma0仍是weighted CE，不能把它叫普通CE或据其结果排除class-pressure解释。
+内置`ce_loss=CrossEntropyLoss(mean)`本来存在；这里没有发现实现bug，不改官方focal。
+此选择由可竞争解释和强控制缺口驱动，**不是成本低或alpha/gamma扫参**。该控制即便
+提分仍是已知方法，不满足独立方法章创新；如果不提分也如实封存。先改主表再执行。
+
+**验证/追溯**：新增5项TDD从入口缺失失败到通过；完整pytest=1006 passed/97 skipped、
+既有1项sklearn UndefinedMetricWarning，ruff零错误、CPU smoke OK。config SHA
+`2bde2868a317a5ae9a77b4a7c23ebcab22caab756d2f2e66d219dbebe53a7d25`；
+产物`runs/stages/R1/r1-v111-a4-matched-context-20261026/`，25件初始seal
+`7eddbeeac0806a893558c90bb9979b74836dfe8971e20246f9d27d322b8dc555`。
+来源ledger：`docs/research/20261026_a4_matched_context_sources.json`。发布前校对更正
+ERGO仓库owner为chenmeiqii；保留原来源staging ledger/原seal，以
+`source_ledger_corrected.json`及`metadata_correction.json`更正元数据，原始源码SHA与
+所有科学计数不变。CNC大PDF下载超时，实际核完整官方HTML，未把partial PDF称原文。
+R110两根产物的10/52件均已备份4090并逐项双端SHA/size核过，不是GPU验收。
+
+### 25.135 R112：原生unweighted CE已知强控制（2026-10-26，执行前）
+
+**科研价值**：对准A4-R/表4-3的简单强替代，分辨当前positive-pressure的pointwise
+训练选择与增加图/泛语义监督的必要性。现full/complete_graph/gamma0三臂已封存；
+gamma0保留alpha权重，尚未提供普通CE控制。原作者实现直接包含CE分支，数据/图/
+backbone/全候选/seed13保持；不把该臂当本项目原创，也不声称已唯一识别alpha因果效应。
+CE与weighted CE还存在loss scale/优化过程差异，固定原LR的比较回答已知训练替代
+是否更强，不能把任何差值都归于“偏置被清除”。
+**可行性**：同4090的原数据/预训练/模型/trainer和完整人群已可运行，CE原criterion
+可直接复用。新独立薄入口只在唯一model构造后选择`loss_type='ce'`；不改任何旧pinned
+源码，不重写原CE，不改graph/参数/optimizer/阈值。先实际CPU等价与本地三件套，
+原机CPU测试及同最大train/无标签dev CUDA production/capacity，然后才预算/训练准入。
+无新模型代码/encoder参数或跨机checkpoint；失败点名保留，不以熟悉架构免去实际核验。
+
+**固定范围**：只一个unweighted_ce控制，原seed13/20epoch、float32/full4096及完整native
+候选；既有三臂不重起，不开alpha/gamma/lr/epoch搜索。先核空4090并按合同披露确切GPU
+命令，5090无新授权。独立重载保持CE训练/推理一致；同人口官方native scorer，与冻结
+joint/full/gamma0及既有强rival配对比较，不从已见结果换主锚或只报胜者。现仅软件/
+真实CPU/CUDA可行性获准；完整训练须记录实际资源/预算后再放行。final-valid封存，
+不增加seed。O1–O4仍未满足，known CE提分也不能代替方法贡献。

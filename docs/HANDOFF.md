@@ -1,10 +1,12 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-26（+08:00，R110词面对照/最近邻完成；接R111信号审查）**。
+> 更新于 **2026-10-26（+08:00，R111信号/最近邻完成；接R112已知CE强控制）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.133；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.135；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**10-26当前接R112**：R111原train监督机会/独立SQL闭合，但CNC已覆盖普通同偏置异类hard-negative contrast；拒绝generic matching创新表述，不借CoRE复活mask。数字/源码裁决只见R1 §25.134。下一原作者内置unweighted CE已知简单强控制（§25.135）：现gamma0仍是weighted CE，不能拿它排除pointwise class-pressure解释。独立薄入口复用旧frozen runner/原模型，仅选CE，不改旧pinned源码；先软件三件套、原机CPU、实际最大train/无标签dev CUDA及预算，才放行seed13/20epoch完整控制。一个固定配置，不扫alpha/gamma/lr、重起旧三臂或声称新机制准入。checkpoint留4090，final-valid封存；当前没有新训练启动。
 
 **10-26最新接续：R110已完成并封存**：完整dev分层和另一实现的12张native混淆一致，global分母/预测不变；数字/来源/限制见R1 §25.132。正文/官方代码已核ICCL、HOTECI及2026 SERE/FrECI等，不把已知机制换名，不启动新模型。
 

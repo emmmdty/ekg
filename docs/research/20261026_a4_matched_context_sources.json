@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-26",
+  "scope": "Native train-only matched-context opportunity and nearest mechanism; no method effect",
+  "discovery_queries": [
+    "relation extraction contrastive same entity pair context",
+    "relation extraction contrastive hard negatives entity bias",
+    "correct-n-contrast (GitHub repositories)"
+  ],
+  "primary_sources": [
+    {
+      "name": "Learning from Context or Names?",
+      "url": "https://aclanthology.org/2020.emnlp-main.298.pdf",
+      "scope": "Context/name distinction and experimental definitions; RE entity names are not ECI triggers."
+    },
+    {
+      "name": "CoRE",
+      "url": "https://aclanthology.org/2022.naacl-main.224.pdf",
+      "scope": "3.2-3.3 masking and coefficient-based score correction; official core.py challenge-set filtering; not run",
+      "repository": "https://github.com/vanoracai/CoRE",
+      "revision": "c98d69472110d2514458e3b58a6a82f9793974aa"
+    },
+    {
+      "name": "Correct-N-Contrast",
+      "url": "https://arxiv.org/html/2203.01517",
+      "version": "v2 (2024-12-11), ICML2022 paper",
+      "scope": "4, A.2 and official sampler/criterion/trainer; same inferred-spurious group/different class hard negatives are known.",
+      "repository": "https://github.com/HazyResearch/correct-n-contrast",
+      "revision": "eaa1c664fd2002ed4dd45344353583dbce31fac0"
+    },
+    {
+      "name": "ERGO original objective",
+      "repository": "https://github.com/chenmeiqii/ERGO",
+      "revision": "afa3d347ec360242c01d15a34b1f1ae63714c789",
+      "local_snapshot": "sources/ERGO-model.py",
+      "sha256": "fb254c5ea4275561a8973d35abd988ee6902fd1f8db9552679237d3f1fb56ea7",
+      "scope": "native pinned original focal_loss and built-in ce_loss; source identity checked, no encoder call."
+    }
+  ],
+  "failures": [
+    "CoRE GitHub tree API HTTP403; raw pinned source and git HEAD succeeded.",
+    "CNC guessed ucbdrive path404; actual official HazyResearch repository confirmed.",
+    "CNC24MB PDF requests timed out; full official arXiv HTML succeeded and used; partial PDFs excluded."
+  ],
+  "final_valid_accessed": false,
+  "model_calls": 0
+}
