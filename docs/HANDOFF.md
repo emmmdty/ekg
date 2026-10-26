@@ -1,10 +1,25 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-26（+08:00，R113 CE成本/预算通过；接固定完整CE强控制）**。
+> 更新于 **2026-10-26（+08:00，CE固定20epoch流水线实际CUDA运行中）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.137；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.138；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**当前已在实际训练，先判活，不重新启动**：CE有限pipeline launcher1152477、train
+worker1152480，GPU1已成功SSH核ALIVE/实际CUDA。源commit94e30e6、配置C52cac…，
+实测/启动五件双端seal只见R1 §25.138；首轮进行中，暂无完整验证分数或验收。
+
+**直接接续**：读`logs/ergo-ce-pipeline-20261026.log`阶段及同名`.exit`，联核真实相关
+进程、`runs/stages/A4/a4-ergo-control-unweighted-ce-20261026/seed-13/status.json`。
+有限链训练成功后自动同CE wrapper独立核分，核验成功后自动五对照；目标分别在
+`runs/stages/R1/r1-v114-ergo-ce-independent-20261026/ce/`及
+`runs/stages/R1/r1-v115-ergo-ce-comparison-20261026/report.json`。
+**train旧PID GONE不等于全链结束**，可能已切verify/CPU；SSH失败不等于任务死。
+首次epoch前原INFO log空是预期，不重启补日志。失败先读原始log/exit保留证据，不自动
+重跑。所有20epoch/独立证明/五比较齐后才验收并将分数写PHASE_A，升降如实；已知CE
+不算原创，O1–O4仍未达。原三臂/探针不重做，active pinned源码/预算/配置保持不动，
+checkpoint留4090，final-valid/额外seed/5090/跨机搬档权限不扩大。下方“尚未启动”均为历史。
 
 **10-26当前直接接固定CE完整训练**：R113一次成本/所有实际门与完整预算已过、原进程GONE；证据/限制只见R1 §25.137。原guard读真实artifacts也过。按[CE合同](phases/PHASE_A4_ergo_ce_control_20261026.md)先部署正式配置/预算、严格全pin/空卡核验，再以有限三步shell执行原seed13/20epoch→成功后独立核分→核验后五对照；失败即停、不重试。配置SHA/预算/命令都已冻；现尚无CE完整epoch。已知强替代不算创新，完整后同CE wrapper原机独立重载/五对照；不重跑探针、旧三臂、扫参/扩seed或访问final-valid。checkpoint留4090。
 

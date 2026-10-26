@@ -76,7 +76,7 @@ transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能�
 | 3 | LLMERE-causal（COLING 2025） | MAVEN-ERE official valid 710 篇，自写评测器，causal 36.04 | ⚠️ 有数据构造/评测器/**已发布预测**，无 trainer/inference entry point | **(b) Unverifiable**（作者 2026-09-15 裁决），障碍＝「保真度验证需读取封存 final-valid，按 A 类红线放弃」 | **(b) 已成立；无 U 分数。** 作者 2026-10-02 取甲：项目恢复方案的 target-third-line stop 读取 internal-dev gold，故按【协议】收口为命名可得性障碍；不写/不跑新 driver |
 | 4 | A3.6 fallback | — | 本文 | **不适用**：本文前期方法，`failed` 身份须在表头标明 | 已有 |
 | 5 | LLM 对照（Qwen3-8B 等） | — | 自建 | **不适用** | 待建 |
-| 6 | ERGO（COLING 2022，native三臂完成；内置CE已准入待运行） | ESL / Causal-TimeBank binary ECI | 作者真实RGT/trainer/ESL缓存已核；固定`afa3d347…4c789` | **(b)透明native适配完成**：原数字/依赖/cache障碍保留；full及两单变量控制各完整seed13训练、全人口独立checkpoint/classes/官方核分与预定配对分析均已闭合 | 原基准数字未复现；本协议主表与统计见`PHASE_A.md`末节，身份与限制见R1 §25.129；已知对手/消融不算创新 |
+| 6 | ERGO（COLING 2022，native三臂完成；内置CE运行中） | ESL / Causal-TimeBank binary ECI | 作者真实RGT/trainer/ESL缓存已核；固定`afa3d347…4c789` | **(b)透明native适配完成**：原数字/依赖/cache障碍保留；full及两单变量控制各完整seed13训练、全人口独立checkpoint/classes/官方核分与预定配对分析均已闭合 | 原基准数字未复现；本协议主表与统计见`PHASE_A.md`末节，身份与限制见R1 §25.129；已知对手/消融不算创新 |
 | 7 | SemDI（EMNLP 2024，仅机制/可得性审查） | ESC / ESC* / CTB，binary ECI | [作者源码](https://github.com/hrlics/SemDI/tree/1c54a16d36f793f638c836f8f35595c2740869fc)，MIT；真实MLM/cloze/attention模型、trainer及公开checkpoint路径存在，未取数据/权重或实跑 | 未闭合：原生二类/逐pair句子输入、旧环境与原test-fold选checkpoint均需透明适配；native方向/subtype、完整候选、独立selection和实际成本尚未验证 | **非已复现/非分数行，不换ERGO队首**。R1 §25.123及来源清单；已知语义依赖/填词询问不是本项目创新，不借此恢复旧masked/retained机制 |
 
 **不可运行，进可得性表**：RESIJ、KnowQA、2025 two-stage ERE、MAQInstruct（口径可引用但无同协议复现）。
@@ -278,3 +278,5 @@ gold .1802 / rewired .1185 / no_graph .0811，见 `results/PHASE_E.md`）。
 跑不了的**必须**进可得性表并写明具体障碍，不得静默省略。
 
 **10-26 ERGO内置CE控制**：R1 §25.134–§25.137/CE合同已核普通matching先行性与weighted/普通CE区别；原作者内置unweighted CE仅作同ERGO家族已知强控制，实际CPU/CUDA/预算通过，完整训练尚未启动。沿用FR-016(b)，仍非原ESL数字复现，不增加独立外部方法数量，也不抵方法创新。唯一固定seed/范围及五对照见主表和CE合同。
+
+**10-26运行覆盖**：上述固定内置CE已在4090实际CUDA训练，后继独立核分/五对照已按有限依赖链安排，当前尚无完整验收分数；见R1 §25.138。仍是ERGO家族控制/FR-016(b)，不增加独立方法计数。

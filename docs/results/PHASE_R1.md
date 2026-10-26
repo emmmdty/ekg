@@ -8425,3 +8425,39 @@ CPU smoke OK、bash语法通过。旧CE selector/source的实际8项CPU及CUDA�
 本次只新增有限编排，不复跑模型preflight。操作入口改为CE合同中的一条setsid --wait
 后台pipeline，完成训练后才核分、核分后才比较，无自动重试/新实验或常驻服务。
 编排源码由Git/pipeline SHA/launch audit追溯；训练配置c52cac…本身不变。
+
+### 25.138 固定CE有限流水线已启动（2026-10-26，运行中，未验收）
+
+实际启动源commit `94e30e6bc21e4bf44a4d7c2fdf051769df8fdd71`，训练配置保持C52cac…，
+有限shell保持568a677…；原机四项编排CPU测试全部通过/零skip。启动前严格核过全部
+真实input/source pins、原production/control guard、预算四件和全部五个comparator文件
+SHA、GPU1空闲。不是仅改admission flags启动。
+
+成功SSH核ALIVE/CUDA：launcher1152477，train worker1152480（父timeout1152479），
+`phase=train`，启动快照完成0/20epoch、无完整report；首次实际GPU应用行对应唯一固定
+UUID `GPU-45597c42-fba9-d40a-dccb-0c423b160150`，后一次快照占用22878MiB。
+这是NVML占用，不能与上方Torch reserved直接混为同一计量。当前首轮进行中，**还没有
+本轮验证分数/效果结论**。原INFO日志未开启，首epoch结束前train log空不等于失败。
+
+`r1-v114-ergo-ce-runtime-20261026/`的prelaunch audit、实际编排XML/log、launcher.pid、
+running audit五件已双端核SHA/size；startup-only seal
+`69f5872bd0f5aa4cfd2333d314a01ea22ccaecea8e96f8a2cbbfda331785f478`。
+它只封启动快照，不包含未来变化的epoch/status/模型；动态进度以原机真实查询为准。
+
+实际有限链及产物：
+
+1. 训练：`runs/stages/A4/a4-ergo-control-unweighted-ce-20261026/seed-13/`；
+   log `logs/ergo-ce-training-20261026.log`，20epoch/同一seed13/原机best.pt。
+2. 仅训练成功后同CE wrapper独立重载：
+   `runs/stages/R1/r1-v114-ergo-ce-independent-20261026/ce/`；
+   log `logs/ergo-ce-independent-20261026.log`，exact classes/official核分。
+3. 仅核验成功后五个冻结CPU比较：
+   `runs/stages/R1/r1-v115-ergo-ce-comparison-20261026/report.json`；
+   log `logs/ergo-ce-comparison-20261026.log`。
+
+总阶段见`logs/ergo-ce-pipeline-20261026.log`，终态退出码在同名`.exit`。失败即停止后续，
+没有自动重试、等卡服务或新方案。**train PID变GONE可能只是进入verify/CPU阶段**；
+接续应联核阶段、相关进程、`.exit`和各report，不据单个旧PID或SSH失败重启训练。
+首次正式epoch后再校正工期；目前7–9h仅为§25.137事前日程估计。所有分数必须等完整
+端点/独立核算后写PHASE_A，升降如实。已知CE控制即便提高F1也不等于新方法贡献；
+当前O1–O4仍未满足，final-valid/额外seed/5090/跨机checkpoint权限不扩大。
