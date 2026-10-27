@@ -1,0 +1,20 @@
+{
+  "schema_version": "ekg.a4_native_motif_audit.v1",
+  "manifest": "data/protocols/v6/manifests/maven_ere_train.json",
+  "train_raw": "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl",
+  "expected_native_class_counts": [
+    2248962,
+    35388,
+    13174
+  ],
+  "output": "runs/stages/R1/r1-v118-a4-native-motifs-20261027",
+  "final_valid_accessed": false,
+  "pins": {
+    "data/protocols/v6/manifests/maven_ere_train.json": "47d19cc9a17e38259bfbb7f9206c675c7362f41252d23f414ea6cfd46015ca68",
+    "runs/stages/A3/a3-v6-baselines-r10/preflight/data/MAVEN_ERE/train.jsonl": "20ea01ebe71fb8c8e4f207368673cc71f29840a290698eefe15de3a24a3b6f05",
+    "scripts/audit_a4_native_motifs.py": "4a52718a3bbdc171024beb499a483e1b7a9fdf5f4b0235ae9d472b9184cc503e",
+    "tests/scripts/test_audit_a4_native_motifs.py": "62c61a007c976b35a021bc4122d1cd65815b6c6a7c742004dba323d422a7aaa1",
+    "src/ekg/core/stage_bundle.py": "96b906ffc1363e4cc3ce4784beab0fc1991b412e3d4c0759dc07398e30d9cadf",
+    "src/ekg/relations/maven_ere_official.py": "8df2f5487daa223c797a8a0950a8cde47c070866cd6f1fd04dbda0ae9a0a05c8"
+  }
+}

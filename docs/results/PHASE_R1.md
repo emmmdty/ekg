@@ -8533,3 +8533,87 @@ oracle可行性，不能直接用于未来推理。无encoder/optimizer/付费AP
 “pattern必蕴含边”的硬规则，不依反例多少挑阈值。软相关不是新方法准入或效果，
 没有差异就不为此启动通用图训练。结果须另一实现从原始边枚举见证复核、分母守恒，
 且保留来源、输入/代码hash、命令和限制。
+
+#### R117/R118实际完成与裁决（2026-10-27，暂停后按作者“继续”接续）
+
+**R117一手源码已核**：SERE固定`ab662f8a28f5424b82ea047b6f596285f6a65223`的完整
+tree及README、sere.py、retriever/preprocess/prompt/syntactic/requirements已取回。
+此前§25.132“未定位代码”仍保留为当次检索边界，现在已定位真实实现，不能再写无代码。
+源码预处理`dataset_preprocess.py:328`默认只抽最多50条，末尾写回该切片；最终二分类
+推理遇解析失败置No。原API/ConceptNet/Neo4j链及本项目native三类/完整人口未闭合，
+不运行、不新增FR-016已完成行。固定tree未见根LICENSE，未把这等同不可取得许可。
+
+实际仅导入未改的纯Python官方retriever，对两组fixture回放：缓存只有两个正例ID时
+`k=2`输出标签[1,1]；缓存含一正一负时输出[1,0]。它证明最终选样器不能在缓存缺负例
+时保证正负平衡，不是论文benchmark失效证明。源码中的正例pattern筛选只消费train
+标签；query pattern独立推断，本次未发现或声称测试标签泄漏。五个PY仅AST语法检查，
+完整pipeline未运行，encoder/LLM调用均零；来源ledger为
+`docs/research/20261027_a4_instance_mechanism_sources.json`。快照CRLF→LF标准化，
+其文件SHA不是上游Git blob SHA；revision/tree保留原身份，差异明确披露。
+
+**R118完整train实测**：2622篇、61362 distinct events、66744 mentions；全部原生有向
+mention候选2297524，NONE/PRECONDITION/CAUSE=[2248962,35388,13174]，与既有冻结
+人口一致。distinct-event有向非self计数=[1910862,26759,6175]；同coref的28022个有向
+mention self-pairs另列NONE（涉及2238个event self单位），不塞进三事件结构。
+
+下表使用**无向两端任一方向有边**口径，避免将SERE的binary existence误当native
+方向/subtype。三行有重叠；“NONE”只认两方向均无标注边，不是世界因果否定。
+
+| gold其他边构成的见证结构 | 无向distinct event-pairs：两向NONE / 任一正类 | 正类占比 | mention展开：两向NONE / 任一正类 |
+|---|---:|---:|---:|
+| 任一方向chain | 195 / 8690 | 97.805290% | 267 / 11294 |
+| fork（共享原因） | 52351 / 7979 | 13.225593% | 55150 / 9501 |
+| collider（共享结果） | 3625 / 6176 | 63.013978% | 6258 / 8512 |
+
+有向完整16种chain/reverse-chain/fork/collider重叠mask和每doc计数落盘。另一实现
+不导入主audit，直接从原始边按见证节点作edge join，逐doc全部16格、全局展开权重、
+三种无向存在计数及原生分母完全一致。每种结构的具体反例ID/见证ID均保留在report，
+不是只报合计；没有调用模型、读取新dev切片或改变既有预测。
+
+**裁决**：直接把任一结构当“两端必须有native关系”的硬规则不可行，卡【数据/协议】；
+连gold其他边也有反例，不能靠部署预测图消除该逻辑障碍。fork尤其不能当普遍补边理由。
+chain有很强的oracle标注关联，但其中可能含语料补全规则，不能算本项目创新、因果
+机制或可部署收益。该结果不否定软结构推理，也不证明能纠正现有held-out错误。
+停止硬蕴含版本，不编码另一个通用图/三元contrast。O1–O4仍未达，无新方法准入。
+
+**实现/验证**：8项TDD先因缺入口有效失败，后全部通过。正式配置SHA
+`6b840fb81beed97b4f3b75c5f584d54e748fd23d20e275f4ff1266af57409ba6`；脚本SHA
+`4a52718a3bbdc171024beb499a483e1b7a9fdf5f4b0235ae9d472b9184cc503e`。暂停前uv缓存
+只读导致smoke/配置命令未启动；恢复后确认配置已落地、旧测试句柄失效，重新验证：
+完整pytest=1021 passed/98 skipped（本地缺Torch，不冒充Torch/CUDA通过），原官方
+scorer toy有1项UndefinedMetricWarning；ruff0、ekg-smoke OK、一致性36PASS、diff检查
+通过。metadata生成曾把source_probe导入产生的__pycache__目录当文件而失败；定位后
+仅按regular source files作hash，失败记录保留，不重跑模型或改计数。
+
+确切CPU命令（cwd项目根）：
+`uv run python scripts/audit_a4_native_motifs.py --config configs/a4_native_motif_audit_20261027.json`；
+`uv run python runs/stages/R1/r1-v118-a4-native-motifs-20261027/independent_check.py`；
+`uv run python runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/source_probe.py`。
+各一次实际exit0；结果根R117/R118，源/输入身份和原始报告保留。Git镜像fetch TLS失败，
+使用一次性URL重写从官方GitHub成功fetch，HEAD/origin/main/FETCH_HEAD原同76c34e6，
+未改全局Git设置。作者恢复后Goal工具实查仍paused，本会话按明确续令执行，不冒称
+工具active或创建替代Goal；科学目标未完成。下一仅按主表R119核软结构的独立机制。
+
+**归档验收**：R117声明14件非权重产物，completion manifest SHA
+`8175586969672727a1d8f0d73a4d07db1abd247ebc2a49352e2152f9791490aa`；R118声明8件，
+manifest SHA`35899eea40469a31898f54b30d9e12961d625b98018ba3655412e16d20b0dd3d`。
+均已rsync到`gpu-4090:/data/TJK/ekg/`同名根，远端Python逐件SHA/size与manifest核
+一致，再将两份manifest SHA与本地比对一致。补充backup_receipt.json的双端SHA也为
+`255ab4f4289c1e0fc6390a79ed1f8634759a4dbec2de27469a1115f0d2a137cf`；该receipt为
+seal后传输凭证，不回写原manifest或原配置。没有传checkpoint、没有远端模型调用。
+目标/检查计划提交`b1c9475`已push；实现/裁决提交身份从本节git历史反查。
+
+### 25.142 R119：同见证关系联合可靠性的机制审查（2026-10-27，执行前）
+
+**科研价值**：表4-3/KR3.1–3.2需要一种能同时解释检出与误报的新干预。R118排除硬
+结构蕴含，却没有回答预测的两条见证关系能否同时可靠。当前研究候选收窄为：对同一
+中间事件w，区分联合预测`q(r_uw,r_wv|text)`与两个边缘分布乘积提供的结构证据。
+它必须超出普通有向图、单边entropy/置信度、三元分类/对比与简单辅助监督；换9类head
+或声称“考虑依赖”本身不构成新方法。当前是待否证的机制问题，不是已认定的新颖性。
+
+**可行性/缺口**：原train三类边可提供两条关系的联合标签，推理只有原文/给定mention，
+不得用gold identity或其他gold边；文献/数学审查可CPU完成，不需新标注/encoder。
+先核iLIF/PPAT/UAIGR及概率结构学习的实际计算，与直接联合分类、乘积/保边缘独立化
+的强替代是否可区分，并审查训练/推理信息与成本。尚未闭合最近邻差异、条件power或
+生产预算，故无数据模型新前向/正式训练准入。若只是已有联合分类/概率图换轴，明确
+拒绝，不能用更多train计数挽救新颖性；若有实质差异，再先改主表准入下一缺证检查。

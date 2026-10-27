@@ -8,6 +8,11 @@ ESC is no longer a mandatory predecessor. Old sealed failures and resource/valid
 
 ## Format
 
+**2026-10-27 / T087最新覆盖**：R117官方SERE来源/纯检索器回放、R118原train结构
+规则与独立edge-join核算完成；硬结构蕴含版本拒绝，结果与限制R1 §25.141。C41-A-R
+仍wip，当前R119同见证联合可靠性机制审查（§25.142），只按主表§4执行。不得将
+该数据/协议否决当方法效果FAIL或正向贡献；无新模型/额外seed/final-valid许可。
+
 `[ID] [P?] [Scenario] Description → verification`
 
 - `[P]` means the task can run in parallel because it does not share mutable files or experimental dependencies.

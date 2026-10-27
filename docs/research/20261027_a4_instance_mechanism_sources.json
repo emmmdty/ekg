@@ -1,0 +1,99 @@
+{
+  "review_date": "2026-10-27",
+  "task": "C41-A-R / R117-R118",
+  "scope": "primary-source review and original-train oracle feasibility; no proposed method admitted",
+  "search_boundary": {
+    "queries": [
+      "event causality identification contextual dependence semantic relatedness false positives SemDI",
+      "event causality identification factuality modality negation uncertainty method",
+      "event causality identification 2025 2026 causal pattern generalization context bias",
+      "event causality identification fork collider",
+      "event causality identification motif",
+      "relation extraction non-backtracking",
+      "link prediction FakeEdge paper",
+      "event causality identification joint probability",
+      "event relation extraction higher-order factor"
+    ],
+    "limits": [
+      "Bounded search, not proof of universal absence.",
+      "Search-result abstracts are discovery only; no external benchmark numbers used.",
+      "No project text or data sent to external services."
+    ]
+  },
+  "sources": [
+    {
+      "id": "SERE",
+      "paper": "https://aclanthology.org/2026.findings-acl.2126.pdf",
+      "repository": "https://github.com/DMIRLAB-Group/SERE",
+      "revision": "ab662f8a28f5424b82ea047b6f596285f6a65223",
+      "mechanism_evidence": [
+        "utils/prompt.py:4-97 and 103-196: explicit Direct/Coreference/Chain/Fork/Collider patterns",
+        "utils/dataset_preprocess.py:302-373: positive-pattern filtering, score complement, default random sample cap 50",
+        "utils/retrievers.py:8-33: selection can lack the requested negative example",
+        "sere.py:35-65: binary answer and parse-failure No fallback"
+      ],
+      "new_availability_fact": "Official implementation located now; previous not-located statement was the 10-26 search boundary, not nonexistence.",
+      "protocol_status": "NOT_RUN; original binary task, external paid API plus ConceptNet/Neo4j preprocessing, 50-record default incompatible with unmodified complete native population",
+      "fidelity_status": "No original benchmark or native adaptation executed; not an added completed FR-016 baseline",
+      "license": "No root license found in the fixed complete tree; not an assertion about external permission",
+      "snapshot_format": "UTF-8 snapshots normalized CRLF to LF; snapshot SHA256 is not upstream Git blob identity",
+      "runtime": "Only unchanged dependency-free retriever on synthetic fixtures; full pipeline not executed"
+    },
+    {
+      "id": "iLIF",
+      "paper": "https://aclanthology.org/2024.acl-long.210.pdf",
+      "repository": "https://github.com/LchengC/iLIF",
+      "revision": "d89b0267051183da52d59ac5bb8d2b3fa775c8eb",
+      "mechanism_evidence": "Paper sections 3.2-3.3: directed iterative predicted graph updates; existing fixed source review R1 25.120 and docs/research/20261019_a4_neighbors_sources.json",
+      "limit": "Existing source review reused, no new runtime or dataset adapter; ordinary directed graph reasoning is prior work."
+    },
+    {
+      "id": "FakeEdge",
+      "paper": "https://proceedings.mlr.press/v198/dong22a/dong22a.pdf",
+      "mechanism_evidence": "Introduction/section 3: adding/removing the focal edge to address topological train/test discrepancy",
+      "limit": "Primary paper mechanism reviewed, no software or benchmark runtime verified; simple focal-edge removal is not a new contribution."
+    }
+  ],
+  "files": [
+    {
+      "path": "runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/sources/SERE-README.md",
+      "bytes": 1831,
+      "sha256": "09eeb84e52bf4bbd17b80784afe64852a8fa3474365bc3415449039e147001c7"
+    },
+    {
+      "path": "runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/sources/SERE-requirements.txt",
+      "bytes": 125,
+      "sha256": "dfc8fe8cb0b80f898ec8694bd607e4823779fe45b8e13d6a71401f30eebf288a"
+    },
+    {
+      "path": "runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/sources/SERE-sere.py",
+      "bytes": 2922,
+      "sha256": "a34c46edf3a36691df925f9ebeea73f7579aa81d9d78fa238c857595c0cb495a"
+    },
+    {
+      "path": "runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/sources/SERE-tree.json",
+      "bytes": 3330,
+      "sha256": "3d309836585b54aaef13ebfba13875f8b3672f5ffd72e6e04431d6f49287010d"
+    },
+    {
+      "path": "runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/sources/SERE-utils__dataset_preprocess.py",
+      "bytes": 18502,
+      "sha256": "288910b3640f7fc1df6511c8a038f5aed80db9cf1d3f8cacf4790000dcd91f15"
+    },
+    {
+      "path": "runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/sources/SERE-utils__prompt.py",
+      "bytes": 19859,
+      "sha256": "94242eced63d6e9e3ff427ab2d8e8f706b97722b92638321329ed4acc3125e63"
+    },
+    {
+      "path": "runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/sources/SERE-utils__retrievers.py",
+      "bytes": 1396,
+      "sha256": "b0e9e5c6b9432a9aed3e5bb3a92f84980125842b2c9a733241ba154ad8ab5f91"
+    },
+    {
+      "path": "runs/stages/R1/r1-v117-a4-instance-mechanism-20261027/sources/SERE-utils__syntactic.py",
+      "bytes": 6469,
+      "sha256": "28e35b72611196f7524102f061d95565c898b2918f806bcb41e8a6e259c876cb"
+    }
+  ]
+}
