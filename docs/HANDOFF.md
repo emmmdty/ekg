@@ -6,6 +6,10 @@
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
 > [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.145；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
 
+**R122实际进度**：五臂计算/强替代/负控/原joint静态接口草案已落地，仍未design_admitted。
+下一按主表裁独立研究价值/高阶近邻差异，有差异才接条件power/原机成本与合同；
+原单删FP的旧power不能直接复用为此次门。证据R1 §25.145；不重做人口/toy/旧模型。
+
 **阶段交付**：R119–R121实现/来源/结果提交`80d5017`，非权重产物双端核验见R1归档验收；
 当前R122仍wip，科学Goal未完成。
 

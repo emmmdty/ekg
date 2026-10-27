@@ -8767,7 +8767,7 @@ R119 `source_access_failures.json`保留边界；无外部成绩搬入主表。
 的裁决：不能。尚无独立方法贡献、没有新模型/训练准入。下一R122完成这一收窄版本
 的有界design brief/最近邻差异决策；不能继续用同样toy或人口审计充进度。
 
-### 25.145 R122：交互残差与完整联合读出的设计裁决（2026-10-27，待执行）
+### 25.145 R122：交互残差与完整联合读出的设计裁决（2026-10-27，wip）
 
 **科研价值**：表4-3/KR3.1–3.2。需要区分“真正有用的是交互项”与“只是新增联合监督/
 非线性容量”。R119–R121已给出两者可不同但尚未证明价值。下一必须先写出D-only、
@@ -8779,3 +8779,30 @@ full-Q、product、aux-only、pair-attachment shuffle的同监督同容量计算
 **可行性**：原生两腿监督/完整候选已核，推理仅原文/mentions；原joint路径可保留
 其他关系，但新增修正会经共享encoder影响护栏，不能声称“causal-only无需检查”。
 此项只需既有代码与一手来源的设计核查；实际Torch/CUDA和全训练仍必须另过门。
+
+
+#### R122本轮实际推进（wip，未准入）
+
+五臂可识别设计草案已写入既有上下文研究卡：D-only、full-Q、product、aux-only及
+pair归属shuffle；没有新增规划文件或第二队列。明确相同参数集合不等于aux-only的
+每个参数均有同样梯度；负控保doc修正总量，但不保证每pair改变，也不独自识别协方差。
+定义完整候选/无见证空和、doc内平均、反传/最大形状成本与纠错交换，未冻结Q头维度/
+aux scale或训练预算，不得从本草案启动模型。
+
+静态读canonical `data/protocols/v6/sources/MAVEN-ERE/joint/src/model.py`：encoder的
+mention输出供四个scorer共享，PairScorer枚举全部有向非self候选；canonical SHA
+`e3c6f2c847224ae5b92dcb7fdd4d1af048401e0832ffea8d4b1beb4da37a2a36`。原frozen
+workspace本地不存在，不能把canonical当同hash生产源码；该项如实记入R122
+`source_interface.json`，没有导入Torch/加载encoder或改旧source。原机源绑定与实际
+成本仍待正式门。新设计不读取gold identity/其他gold边，其他任务因共享encoder
+仍会受训练影响，护栏不能免除。
+
+**未闭合**：独立研究价值/一般高阶模型近邻差异、条件power/噪声、实际预算与完整
+method合同。旧R1单删FP注入power不回答本干预的TP/FP双向变化。R122仍wip；下一
+就在上述具体五臂下裁准入/否决，不继续同样统计或另造baseline adapter充进度。
+
+
+R122草案checkpoint两件已备份4090同名根，原机逐件SHA/size与本地一致；manifest
+SHA `ffb8b3d6350282181d1d2632fedddd5391c661ca7f1db5ed3fceaa729a1c1675`，核验exit0。
+这只封存当前设计版本，不表示R122或科学目标完成。设计变更另存版本，不改此seal。
+本次只追加文档，R1一致性36PASS/diff检查通过，无新增生产代码或模型调用。
