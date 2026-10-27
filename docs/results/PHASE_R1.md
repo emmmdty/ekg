@@ -8714,6 +8714,8 @@ manifest SHA `4cf14e8a7fe0c99dc47196faa9e3eae6bd02b7d381babef39eb98285e446333b`�
 均已rsync至`gpu-4090:/data/TJK/ekg/`同名根；首次SSH核验DNS临时失败，第二次成功
 逐件SHA/size及两份manifest SHA核等，exit0，不把第一次网络失败伪装成验证结论。
 原权重未搬运、无GPU任务。seal后的补充backup_receipt独立于原manifest。
+补充receipt双端SHA均为`2e61dd1e4eb763a6f62acaa7681d7f131e8a9cdffa7588b90052cd7f6bc3dbf3`；
+实现/来源/阶段结果提交`80d5017`，本次只回填交接身份，不改任何原seal。
 规范源码复跑配置另跟踪为`configs/a4_joint_witness_targets_replay_20261027.json`，
 与R120归档replay配置逐字相同；未执行第二次人口计数。Git fetch初遇TLS失败后以
 HTTP/1.1官方通路成功fetch，HEAD/origin/FETCH_HEAD同73a7822，未改全局配置。

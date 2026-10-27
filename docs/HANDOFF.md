@@ -6,6 +6,9 @@
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
 > [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.145；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
 
+**阶段交付**：R119–R121实现/来源/结果提交`80d5017`，非权重产物双端核验见R1归档验收；
+当前R122仍wip，科学Goal未完成。
+
 **10-27当前接续覆盖**：R119一手源码、R120完整原train联合标签与独立三维网格核验、
 R121精确代数/estimand裁决已完成，证据及限制只见R1 §25.142–§25.144。普通full-Q
 读出直接报创新的版本拒绝；one-hot极限不能否定所有软结构。当前同队C41-A-R/T087
