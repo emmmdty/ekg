@@ -8461,3 +8461,31 @@ running audit五件已双端核SHA/size；startup-only seal
 首次正式epoch后再校正工期；目前7–9h仅为§25.137事前日程估计。所有分数必须等完整
 端点/独立核算后写PHASE_A，升降如实。已知CE控制即便提高F1也不等于新方法贡献；
 当前O1–O4仍未满足，final-valid/额外seed/5090/跨机checkpoint权限不扩大。
+
+### 25.139 CE完成状态核查与结果回填（2026-10-27，状态任务）
+
+**核查价值**：把已完成的固定CE强控制及自动独立核分/五对照如实纳入表4-3，判断
+是否有稳定主指标提升；不将pipeline成功当新机制成立。**可行性/范围**：只读原机
+终态、既有report/日志及文本预测，做CPU一致性检查与归档，不新增GPU调用、训练、
+seed或路线取舍。checkpoint留原4090，仅同步不含权重的metadata与文本产物。
+
+§25.139 已实际核完：20epoch、最早最大选档、原机独立replay/cached classes/official
+scores、五个预定文档比较均完成，pipeline阶段complete、`.exit=0`；成功SSH/ps确认
+launcher1152477/train1152480 GONE，无相关CE子进程。真实结束时间/耗时/全部主指标/
+误差交换/区间及其限制只见**PHASE_A最新CE节**，不在本页复制分数。卡1在本次查询
+空闲，0/2有其他计算进程，未挤占也未启动新任务。
+
+R116=`runs/stages/R1/r1-v116-ergo-ce-completion-20261027/`：57件文本metadata/日志
+seal `e4f965955243889c358cab6cf5c97c1adc5854d1f2a343ae5aaf793eb6567a70`，本地与原机
+每件SHA/size一致。只传JSON/JSONL/PY/日志；明确排除best.pt及其他权重。
+另在CPU按原始gold/verified prediction重计native混淆、选中epoch两套classes/predictions
+逐ID一致，五组点估计/TP交换守恒通过，结果`local_cpu_check.json`；脚本SHA
+`74178523eb4b84ea2954760710f3d08bf4b42b06c95b135dfbbdc0050bd11103`，没有新模型加载、
+没有第二种bootstrap重采样或final-valid访问。本次只验收已有pipeline和更新状态，
+不冒称重新执行了Torch/CUDA测试，也不由其exit0推出新方法有效。
+
+**当前状态**：固定CE实验交付闭合，点差不足以证明稳定胜过已冻强对照。它仍是已知
+ERGO家族控制/FR-016(b)，不增加独立对手数量/原创贡献，不触发额外seed许可或毕业门。
+C41-A-R/T087科学工作保持wip，当前无已准入新机制/活动CE GPU任务；不复跑已封存的
+CE/三臂/探针，不在这次状态问题下自动另开训练或替作者改变论文标准。后续研究仍按
+唯一主表和既有R1有效性/资源边界推进。

@@ -2369,3 +2369,82 @@ F1忽略正类subtype交换，**不能拿它与dev三类causal F1的差距直接
 - GPU独立重载合同：`docs/phases/PHASE_A4_ergo_independent_20261025.md`；CPU复核：
   `uv run python runs/stages/R1/r1-v108-ergo-comparison-20261025/independent_bootstrap_check.py`
   （已封输出不会覆盖；在新审计目录复制其输入再复核）。不运行模型或读取final-valid。
+
+## 2026-10-27 · ERGO内置unweighted CE强控制完成（10-26原机结束）
+
+本次只补已知CE训练替代，不是本项目原创方法或新增独立外部方法。原单seed13、完整
+20epoch、float32/full4096、原RGT/Longformer/AdamW/train_epoch、全部291篇internal-dev/
+234870有向候选与官方三类causal evaluator保持；仅选择原作者内置无权重CE，已在首评分
+前固定与joint/A3/Taco/full/gamma0的五项比较。三类顺序仍NONE/PRECONDITION/CAUSE。
+原三臂及其旧结论不改；本节是后续独立控制，final-valid未访问。
+
+### 官方端点与五项预定比较
+
+| 控制 | P (%) | R (%) | F1 (%) | 选中epoch | 末轮20 F1 (%) |
+|---|---:|---:|---:|---:|---:|
+| ERGO unweighted CE | 36.479218 | 31.109258 | 33.580914 | 15 | 32.627704 |
+
+严格按20个epoch内部dev F1最大、最早tie选中15，原机独立重载完整classes逐值一致、
+官方分数完全一致；不是只取train log分数。57件文本产物/日志双端SHA与size一致，
+本地CPU另核selected train/independent classes及predictions、native混淆和五组点差/TP
+交换守恒；没有声称本次又以第二种bootstrap实现重采样。
+
+| CE − 冻结对照 | ΔF1（百分点） | 描述性95% CI |
+|---|---:|---|
+| official joint 主锚 | +0.413024 | [-1.770226, +2.776338] |
+| A3 fallback（历史方法） | +1.483599 | [-1.417986, +4.485288] |
+| Taco-inspired（透明适配） | +1.571351 | [-0.988667, +4.214077] |
+| ERGO full focal | +0.261540 | [-2.049114, +2.623340] |
+| ERGO gamma0（weighted CE） | +0.236296 | [-1.831511, +2.321332] |
+
+五组均为原冻结291篇文档、10000次bootstrap、rng13、先汇总TP/FP/FN再求micro F1；
+区间全部跨0。它们不含训练随机性，不消除dev逐epoch选模的乐观性，不是最终确认。
+**点分微升，尚无稳定优于这些强对照的证据，不能报新方法突破或毕业要求已满足。**
+
+### 误报与漏检的权衡
+
+CE的TP/FP/FN为1492/2598/3304，预测正例4090。相对原full的1989/5154/2807，FP减少
+2556、TP减少497、FN增加497。精确率由27.845443%到36.479218%，召回由41.472060%
+到31.109258%，改善误报的同时损失检出，F1只增加0.261540个百分点。
+
+同原full共同正确1227条，新增正确265条，丢失762条，净TP−497；与主锚共同正确
+1022条、新增470、丢失515，净TP−45/FP−337。不能把减少误报直接当整体关系判别
+已改善，也不能把这一捆训练目标/scale/优化路径差异唯一归因于alpha或词面偏置。
+
+CE的精确native混淆为：
+
+```text
+              pred NONE  PRECONDITION  CAUSE
+true NONE       227638          1791    645
+true PRECOND      2553          1032     96
+true CAUSE         589            66    460
+```
+
+三行相加234870，gold positive4796；错subtype仍同时计FP/FN。原trainer的binary train
+F1不区分正类subtype，不拿它与本节三类dev F1直接相减证明过拟合。
+
+**范围结论**：固定CE控制执行/独立核分/预定比较已完成，未形成稳定主指标收益或原创
+方法贡献。单换这个标准CE未解决当前F1瓶颈；这不是证明所有训练目标无价值或CE与
+full等效。不扫alpha/gamma/lr/threshold、不追加epoch/seed，不重跑封存控制。A4-R/
+C41/T087科学目标仍未满足，新干预仍须原R1门，本次状态核查不另启动实验。
+
+### 追溯与实际耗时
+
+- 全流水线于2026-10-26 19:34:30（+08:00）结束，exit0；从prelaunch算6.882479小时，
+  训练config写盘至report为6.848695小时。独立验证19:34:18结束、五比较19:34:29结束。
+  10-27成功SSH/ps核launcher/train及所有相关CE进程均GONE，卡1已释放。
+- 原训练与checkpoint：`gpu-4090:/data/TJK/ekg/runs/stages/A4/a4-ergo-control-unweighted-ce-20261026/seed-13/`；
+  checkpoint SHA `efd840db6405c902b5f623d9792087a9d2cef13207841d65d7f8b65b49b6ea06`，
+  权重留原机，未回传本地或跨服务器。
+- `configs/ergo_ce_training_20261026.json` SHA
+  `c52cac10be678bc4840bd9ee91e5f643e1c5183a1a2d525a1ba39b6f0edf6e9f`；
+  启动源commit94e30e6，运行中只同步文档至d6c5f3d，模型/配置/finite shell未改。
+- 独立证明：`runs/stages/R1/r1-v114-ergo-ce-independent-20261026/ce/report.json`，SHA
+  `20cfe885c76499e6aba80dbe1571c050d0cdaa24219aad2eec63ba3140a897b7`。
+- 五比较：`runs/stages/R1/r1-v115-ergo-ce-comparison-20261026/report.json`，SHA
+  `5631a1d85c35af0e2daff2edebbcca809c804d75769367a6f57dbaa84e66580a`；
+  其prediction SHA `067ff4e2bee936d0d7f181959a54f9c8d7b2d657574f0b2dd3ec0be70ec92409`。
+- 完成归档：`runs/stages/R1/r1-v116-ergo-ce-completion-20261027/`，57件原始文本seal
+  `e4f965955243889c358cab6cf5c97c1adc5854d1f2a343ae5aaf793eb6567a70`；
+  另有本次`local_cpu_check.py/json`，源SHA和边界见R1 §25.139。合同/资源/原输入身份
+  仍认R1 §25.135–§25.138与`PHASE_A4_ergo_ce_control_20261026.md`。

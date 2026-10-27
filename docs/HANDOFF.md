@@ -1,10 +1,20 @@
 # 交接文档 · 新窗口从这里开始
 
-> 更新于 **2026-10-26（+08:00，CE固定20epoch流水线实际CUDA运行中）**。
+> 更新于 **2026-10-27（+08:00，CE全链完成，未证稳定收益）**。
 > 唯一活动研究队首：**C-41 / T087，A4-R切片，wip**；C5固定候选T/V及D4当前绑定模板R1已裁决。
 > 新窗口承担下方PI角色，先读**§0.0长期Goal启动约定**，按§0.1/§E.0对齐后创建/接续Goal，再直接执行 **§0.3.5**。
 > 唯一权威计划：[EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md) §4；实测数字、hash及限制：
-> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.138；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+> [PHASE_R1.md](results/PHASE_R1.md) §25.40–§25.139；C5最新指标只见[PHASE_C末节](results/PHASE_C.md)。本文只给状态、资产与接续动作。
+
+**最新覆盖：CE已完整结束并验收，当前没有CE活任务**：固定训练、同CE wrapper原机
+独立核分及五项比较全部完成，pipeline exit0、相关进程成功ps核GONE。主指标、区间、
+误报/漏检权衡只见[PHASE_A末节](results/PHASE_A.md)；身份/57件双端归档/CPU复核见
+R1 §25.139。已知CE点分微升但没有稳定收益证据，也不构成新方法贡献。权重仍在4090。
+
+**接续**：C41-A-R/T087科学目标仍wip、O1–O4未达，尚无新机制准入。本次只状态核查，
+没有新增实验/改路线；后续方法研究回唯一主表及R1，不重跑已完成CE/旧三臂/探针，
+不扫参数/扩seed或访问final-valid。下方“运行中/先判活”均为历史快照，不能据此重起。
+卡1已释放，其余实时资源须重新查。所有sealed配置/结果保持，checkpoint不跨机。
 
 **当前已在实际训练，先判活，不重新启动**：CE有限pipeline launcher1152477、train
 worker1152480，GPU1已成功SSH核ALIVE/实际CUDA。源commit94e30e6、配置C52cac…，
