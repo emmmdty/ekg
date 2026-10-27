@@ -1,5 +1,13 @@
 # EKG 实时状态
 
+
+**10-27当前接续覆盖**：R119一手源码、R120完整原train联合标签与独立三维网格核验、
+R121精确代数/estimand裁决已完成，证据及限制只见R1 §25.142–§25.144。普通full-Q
+读出直接报创新的版本拒绝；one-hot极限不能否定所有软结构。当前同队C41-A-R/T087
+进入R122的D-only vs full-Q/product/aux-only/pair归属负控设计裁决（§25.145）；不重做
+人口、toy、旧模型或CE。新方法/训练尚未准入，UAIGR全文缺口未冒充闭合，O1–O4
+仍未完成。Goal工具此前仍paused；按作者继续指令执行，不冒称自动active或新建Goal。
+
 > 更新于 **2026-10-24**。新会话先读 [`HANDOFF.md`](HANDOFF.md)，再读唯一权威计划
 > [`EXPERIMENT_PLAN.md`](EXPERIMENT_PLAN.md)；数字以 [`results/`](results/README.md) 为唯一事实源。
 

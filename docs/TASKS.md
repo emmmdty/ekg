@@ -1,5 +1,13 @@
 # Tasks: EKG Thesis Research Program
 
+
+**10-27当前接续覆盖**：R119一手源码、R120完整原train联合标签与独立三维网格核验、
+R121精确代数/estimand裁决已完成，证据及限制只见R1 §25.142–§25.144。普通full-Q
+读出直接报创新的版本拒绝；one-hot极限不能否定所有软结构。当前同队C41-A-R/T087
+进入R122的D-only vs full-Q/product/aux-only/pair归属负控设计裁决（§25.145）；不重做
+人口、toy、旧模型或CE。新方法/训练尚未准入，UAIGR全文缺口未冒充闭合，O1–O4
+仍未完成。Goal工具此前仍paused；按作者继续指令执行，不冒称自动active或新建Goal。
+
 **Input**: [`SPEC.md`](SPEC.md), [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md)
 **Current executable scope**: the author delegated scientific route selection and improvement decisions on
 2026-10-08. C-35–C-40/G-22 now govern root-cause diagnostics, GitHub skills, primary research, implementation,

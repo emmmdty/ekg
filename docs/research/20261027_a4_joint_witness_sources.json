@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-27",
+  "task": "C41-A-R / R119",
+  "snapshot_format": "UTF-8; CRLF normalized to LF; SHA is snapshot identity, not upstream Git blob",
+  "sources": [
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/Copula-README.md",
+      "repository": "jinkyusung/CopulaLSP",
+      "revision": "da9a1477de90e15fc64078082ae0f2fb9e837a7e",
+      "upstream_path": "README.md",
+      "sha256": "97b7220bdaf674b777ea4d0b163cbdc060c6871b6f529bfc2ff84226a661f9f4",
+      "bytes": 1898
+    },
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/Copula-model__CopulaLSP.py",
+      "repository": "jinkyusung/CopulaLSP",
+      "revision": "da9a1477de90e15fc64078082ae0f2fb9e837a7e",
+      "upstream_path": "model/CopulaLSP.py",
+      "sha256": "697d60d572bdcfbf4f3ffaae915e83da37aa1b2c07b60efc7b1d5d06c00cbd56",
+      "bytes": 9323
+    },
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/Copula-probability__LowRankGaussianCopula.py",
+      "repository": "jinkyusung/CopulaLSP",
+      "revision": "da9a1477de90e15fc64078082ae0f2fb9e837a7e",
+      "upstream_path": "probability/LowRankGaussianCopula.py",
+      "sha256": "9b4228d8c86bed777b08e2c63c553ad08aa4cc0fe1260e89bdc82fca6779d854",
+      "bytes": 5196
+    },
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/Copula-trainer__CopulaTrainer.py",
+      "repository": "jinkyusung/CopulaLSP",
+      "revision": "da9a1477de90e15fc64078082ae0f2fb9e837a7e",
+      "upstream_path": "trainer/CopulaTrainer.py",
+      "sha256": "e44282fe2e4fd55034bb1bb5f0887984ff3685690054ed3f2a233a71693c362e",
+      "bytes": 5380
+    },
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/SPEECH-LICENSE",
+      "repository": "zjunlp/SPEECH",
+      "revision": "60c61b09cb33933f1237ded62626dc03278c2874",
+      "upstream_path": "LICENSE",
+      "sha256": "315327d22d34417a0f13650ac51d1857bc481e5677804472e9f62b83adb4d685",
+      "bytes": 1064
+    },
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/SPEECH-README.md",
+      "repository": "zjunlp/SPEECH",
+      "revision": "60c61b09cb33933f1237ded62626dc03278c2874",
+      "upstream_path": "README.md",
+      "sha256": "b199940517552f79b4f31d3c6e950982978a32a7ee2ac2316235471a85f635af",
+      "bytes": 8938
+    },
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/SPEECH-data_utils.py",
+      "repository": "zjunlp/SPEECH",
+      "revision": "60c61b09cb33933f1237ded62626dc03278c2874",
+      "upstream_path": "data_utils.py",
+      "sha256": "3ca0e0c3e1dbc3dc09593cac3d579e8286f10ab02e33fc0747e91e7f95f8d89e",
+      "bytes": 27296
+    },
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/SPEECH-run_speech.py",
+      "repository": "zjunlp/SPEECH",
+      "revision": "60c61b09cb33933f1237ded62626dc03278c2874",
+      "upstream_path": "run_speech.py",
+      "sha256": "45dbf90730c8384f9a6d27157dcc7888c95d441272eef5474472783a76677467",
+      "bytes": 49661
+    },
+    {
+      "snapshot": "runs/stages/R1/r1-v119-a4-joint-witness-20261027/sources/SPEECH-speech_roberta.py",
+      "repository": "zjunlp/SPEECH",
+      "revision": "60c61b09cb33933f1237ded62626dc03278c2874",
+      "upstream_path": "speech_roberta.py",
+      "sha256": "97955ab50d8af637ba636bed4ac34cc0bb6b540942b6ae394710ed8bd1105481",
+      "bytes": 41730
+    }
+  ],
+  "papers": [
+    {
+      "url": "https://arxiv.org/html/2601.19175v1",
+      "mechanism": "Gaussian copula separates marginals/dependencies; observed same-graph training signs condition inference; not native complete directed NONE/PRECONDITION/CAUSE",
+      "revision": "v1; OpenReview challenge not claimed read"
+    },
+    {
+      "url": "https://aclanthology.org/2023.acl-long.21.pdf",
+      "mechanism": "Section 3.6 Eq9-10; static speech_roberta.py436-440 W relation_size x relation_size acts separately on pair columns; shared document encoder remains",
+      "limits": "No original benchmark runtime or native fidelity closure"
+    }
+  ],
+  "license": {
+    "SPEECH": "MIT snapshot retained",
+    "CopulaLSP": "No root LICENSE in fixed tree; not a legal-permission conclusion"
+  },
+  "runtime": "Static review only; no source execution or model calls",
+  "novelty_boundary": "No first joint/covariance/graph claim. Narrow residual candidate not admitted. No proof of universal absence.",
+  "calibration_source": {
+    "url": "https://papers.neurips.cc/paper/5658-calibrated-structured-prediction.pdf",
+    "sections": "2.2 and 3",
+    "finding": "Normalized model probabilities alone do not establish empirical calibration; structured probability queries predate this candidate."
+  },
+  "unresolved_neighbor": "UAIGR full mechanism not obtained; access attempts recorded; not excluded"
+}

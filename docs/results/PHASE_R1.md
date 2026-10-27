@@ -8617,3 +8617,163 @@ seal后传输凭证，不回写原manifest或原配置。没有传checkpoint、�
 的强替代是否可区分，并审查训练/推理信息与成本。尚未闭合最近邻差异、条件power或
 生产预算，故无数据模型新前向/正式训练准入。若只是已有联合分类/概率图换轴，明确
 拒绝，不能用更多train计数挽救新颖性；若有实质差异，再先改主表准入下一缺证检查。
+
+#### R119一手来源/候选计算审查（2026-10-27）
+
+**一手边界**：[CopulaLSP arXiv v1 §2–3 Eq13–20](https://arxiv.org/html/2601.19175v1)
+正文完整可读；OpenReview PDF入口challenge，未冒称读到该入口的camera-ready全文。
+作者repo`jinkyusung/CopulaLSP`固定`da9a1477de90e15fc64078082ae0f2fb9e837a7e`，
+静态核model/trainer/LowRankGaussianCopula/README。其`predict`65–88读取同图train
+边的sign标签形成`cond_u`，再conditional_sample；正文也明确已存在边的sign预测，
+不是native完整有向候选上的NONE/PRECONDITION/CAUSE。故直接移入卡【数据/协议】；
+不将本项目预测标签当金标条件，也不因任务不同宣判该论文无效。该来源同时说明
+“边间依赖/边缘与依赖分开建模”不是新概念。只静态核查，无原benchmark/runtime。
+
+[SPEECH ACL2023 §3.6 Eq9–10](https://aclanthology.org/2023.acl-long.21.pdf)及MIT作者
+repo`zjunlp/SPEECH`固定`60c61b09cb33933f1237ded62626dc03278c2874`的RoBERTa模型/
+runner/data_utils/README/LICENSE已核。`Document.doc_energy_function`436–440的W
+尺寸是relation_size×relation_size，Y为pair×relation_size，`W @ Y.T`逐pair列运算后
+总和；其label项不是在两个不同event-pair label变量间直接构造联合分布。文档上下文
+表示仍可能共享信息，不把这条代数边界说成模型完全不建文档信息。默认mention cap
+及其完整native保真未闭合，未运行/新增对手。通用结构能量/label coupling不可报新颖性。
+
+**候选裁决**：拒绝“换9类head/已有copula移轴即创新”的简单版本；仍允许研究卡中
+更窄的同见证两腿联合读出与边缘乘积读出比较。令Q为文本条件的3×3预测联合分布，
+`D=Q-Q_row⊗Q_col`只表示可学习关联；两种相同兼容读出的差为`<D,K>`。行/列零和
+是标准代数，不是新数学或科学效果；不声称保持最终输出边缘，又声称改变同一argmax。
+关键待证的是这种两腿归属是否在native任务提供额外判别，超出乘积、普通联合辅助
+监督/容量与doc级先验。相同Q监督的乘积读出与无修正臂必须保留；w内置换在均值
+读出下恒等，不能当有效负控，负控应打乱向量与待判pair归属并保留doc内总量。
+
+本次只是具体候选和来源边界，不是新方法准入。尚缺联合监督覆盖/重复/规模、条件
+power、实际实现/预算及有效新合同。未运行encoder/optimizer、未读取新held-out切片。
+来源snapshot/identity另在R119根，不能用正文可读或候选公式替代科学KR。
+
+### 25.143 R120：原生两腿联合监督/可识别性与规模（2026-10-27，执行前）
+
+**科研价值**：对准表4-3/KR3.1–3.2中R119具体候选，判断原train是否有同时约束两腿
+联合分布与待判类别的原生监督，以及普通重复/类别压力能否解释拟议变化。R118只核
+gold positive见证结构及硬规则，不回答完整三类×三类（含NONE）联合监督的分布和
+all-mention实现规模；不重复它的结构表或模型前向。既有研究卡规定最近邻差异/控制，
+计数只可拒绝数据/预算版本，不能通过新颖性/效果或完整方法门。
+
+**可行性**：用同一原2622篇train的native targets，distinct mention三元组为(i,w,j)，
+只排除相同mention ID，保留同coref不同mention并另列其重复分母，不使用gold identity
+构造推理输入。四种有向两腿形态各报告3×3×3（两腿×待判边）人口，边标签只在
+forward之外；每类待判边在每doc重复n−2次的计数恒等必须独立复核，n=2无见证另列。
+报告全人口及最大文档的triple数、直接物化tensor体积，不把它当通用下界或CUDA已过。
+现仅CPU/no encoder，正式模型/optimizer/新dev分层均未准入。若无可识别支持或
+只能靠改标签/排native候选才成立则停止，不能扫采样比例找好看的正类分布。
+
+
+#### R120实际结果与裁决（2026-10-27）
+
+冻结配置SHA `b1cfc2240c59e42aca46da90651fc6c1162e91a3f78f2a382a7feb23f1ea95a7`，
+实际CPU命令（cwd项目根）：
+`uv run python scripts/audit_a4_joint_witness_targets.py --config configs/a4_joint_witness_targets_20261027.json`。
+一次执行exit0，无encoder/optimizer/dev访问。原train2622doc，native三类计数仍为
+`[2248962,35388,13174]`。四种有向形态各完整保留27格表，在R120 `report.json`；
+不能因有三类标签便声称所有27格非零，更不能从共现推断条件相关或方法效果。
+
+| 人口/规模量 | 实测 |
+|---|---:|
+| ordered distinct-mention三元组 | 103015458 |
+| ordered distinct-event三元组 | 80700828 |
+| mention三元组中三个owner互异 | 100087974 |
+| 没有第三mention可作见证的native候选 | 6 |
+| 最大文档mention数 / 三元组数 | 109 / 1259604 |
+| 最大文档每三元组直接复制三个768维fp32向量 | 11608510464 bytes |
+| 最大文档直接存四个3×3 fp32联合表 | 181382976 bytes |
+
+最大doc `59d35dfd8d9fe91d66d11497d051aba5`。以上字节只对应列明张量的直接物化，
+不是所有实现的内存下界；未含encoder/反传/优化器，也不是实测CUDA峰值。未来若
+仍推进该候选必须精确分块/流式全人口，不能偷偷采样或去coref改变原候选口径。
+
+**独立复核**：`R120/independent_check.py`不导入主审计；从raw gold重建event矩阵和
+mention展开，用完整三维索引网格而非主实现逐w切片，逐doc逐形态27格、两套人口及
+全局逐值相等，`independent_check.json` pass。所有待判类别每doc出现n−2次的守恒
+通过；同coref不同mention只诊断，不构造推理gold输入。
+
+**实现追溯**：7项TDD先因缺脚本有效失败，后通过。正式计数已执行后发现一行E501，
+只把相邻字符串换行；原执行脚本SHA `3839b84ba5ee4003c61f586f56e1a45ebd71beebf62cf9f928a46224cb7b0eda`
+保存在R120 `executed_audit.py`。规范脚本SHA
+`7ce8bad66ef555c5eb05f11171f52a80bc1e94d02d415b7117486764899f0cde`，去位置信息AST
+完全相等，证明/新source pin仅在`source_format_amendment.json`及`replay_config.json`。
+原配置/原输出未改、不重跑人口；原配置pin原执行源码，复跑用归档replay配置的新根。
+完整最终pytest 1028 passed/98 skipped（本地无Torch；原scorer toy一项已知warning），
+ruff0、smokeOK；独立复核已实际完成，不能把Torch/CUDA skip说成通过。
+
+**科学裁决**：原标签/ID与全人口计算可得，否定“根本无两腿原生监督”；尚不支持
+联合分布可泛化、可靠性已校准或主指标会升。R119只是具体候选，不能以本表给新颖性/
+power/成本盖章。下一R121先核标签关联与预测共同正确性的estimand是否一致，以及
+联合监督极限/强替代能否识别拟议贡献；这会直接决定候选去留，不再追加相同人口计数。
+
+**归档验收（R119–R121）**：R119来源/代数根声明20件非权重产物，manifest SHA
+`880755c28cc95688769f240632f8a2b8009e49109a97da8b363c898077672e91`；R120声明13件，
+manifest SHA `4cf14e8a7fe0c99dc47196faa9e3eae6bd02b7d381babef39eb98285e446333b`。
+均已rsync至`gpu-4090:/data/TJK/ekg/`同名根；首次SSH核验DNS临时失败，第二次成功
+逐件SHA/size及两份manifest SHA核等，exit0，不把第一次网络失败伪装成验证结论。
+原权重未搬运、无GPU任务。seal后的补充backup_receipt独立于原manifest。
+规范源码复跑配置另跟踪为`configs/a4_joint_witness_targets_replay_20261027.json`，
+与R120归档replay配置逐字相同；未执行第二次人口计数。Git fetch初遇TLS失败后以
+HTTP/1.1官方通路成功fetch，HEAD/origin/FETCH_HEAD同73a7822，未改全局配置。
+
+### 25.144 R121：联合关联候选的可识别性裁决（2026-10-27，执行前）
+
+**科研价值**：对准表4-3/KR3.2。R119称“同见证联合可靠性”，但实际Q监督是两个
+原生关系标签，尚未证明其残差D测的是预测共同正确而非普通标签共现/不确定性。
+必须在投入encoder训练前裁清论断与计算是否一致；不能靠R120大人口替代机制。
+
+**可行性**：只做候选公式的精确代数反例与一手校准定义核查，CPU/无语料前向。
+核one-hot与非退化Q、相同边缘不同关联、相同Q不同正确性事件；同时保留“有限样本
+可学习相关特征”的可能，不能因one-hot极限为零证明所有软图无效。不从这些toy
+估计corpus效应/power。若只支持普通标签协方差而独立贡献链不闭合，停止这个精确
+候选的准入，刷新文献选择下一实质路线；不换名为可靠性模块继续编码。
+
+
+#### R121实际裁决：代数可区分，贡献未成立（2026-10-27）
+
+R119根`joint_residual_check.py`以Fraction精确计算，实际exit0；9种one-hot均D=0，
+相同边缘的两种Q可有相反关联，纯加性兼容K=a(row)+b(col)+c被D完全消掉，而真正
+交互K可产生不同读出。前两点不证明模型效果；最后一点要求未来K有交互自由度，
+否则拟议“机制”对logits恒为零，必须在实现前发现。
+
+**纠正一个可能的错误否决**：固定预测类别(â,b̂)时，Q[â,b̂]本来可以表示模型的共同
+正确概率，D[â,b̂]是相对于乘积的协方差修正。因此不能把原生两腿标签监督本身说成
+estimand必然错误，也不能因one-hot极限为零宣布所有软结构无用。该数值能否反映
+实际频率仍须校准/held-out证据；D含负数，不是可靠性概率。一个toy中Q共同正确预测
+3/5，乘积16/25，D=-1/25，同一预测分布也可能碰到正确或错误实例，均非corpus估计。
+
+[Calibrated Structured Prediction NIPS2015 §2.2/§3](https://papers.neurips.cc/paper/5658-calibrated-structured-prediction.pdf)
+区分归一概率与实际频率校准，结构预测的概率查询本来就是已知概念。它不证明我们的
+新Q已经校准。“关联隔离/协方差/联合正确性”概念均不能单独报新颖性。
+
+**当前版本的去留**：只把Q全表线性读出改称“联合可靠性新模块”的版本拒绝；它仍是
+普通联合分类/期望兼容读出，给乘积控制不自动使其成为新方法。候选仅保留更明确、
+尚未准入的研究问题：在绝对原生判别旁，仅以D中的交互项修正，是否比完整Q、乘积
+以及只加辅助监督更能泛化；必须把完整Q当强替代，不能只与乘积比后宣称排除联合
+辅助/容量。相同Q监督/参数/初始化/预算、有效pair归属负控及其他关系护栏均不能省。
+这改变的是具体待验干预，不是复活已失败的masked/retained或硬蕴含家族。
+
+**来源缺口如实保留**：UAIGR publisher仅摘要可读；再次打开正文显示JS验证，stamp
+入口不可访问。官方ICASSP议程可核题名/作者，但“View Manuscript”未提供工具可取
+正文；直接urllib TLS失败，不冒充读到公式。GitHub search接口两次返回无结构化
+content，解析失败，不能记零搜索结果/无代码。未用摘要排除其与候选的重合。
+R119 `source_access_failures.json`保留边界；无外部成绩搬入主表。
+
+**结论**：R121完成“是否代数不可能”的裁决：不是；完成“普通Q读出能否直接报创新”
+的裁决：不能。尚无独立方法贡献、没有新模型/训练准入。下一R122完成这一收窄版本
+的有界design brief/最近邻差异决策；不能继续用同样toy或人口审计充进度。
+
+### 25.145 R122：交互残差与完整联合读出的设计裁决（2026-10-27，待执行）
+
+**科研价值**：表4-3/KR3.1–3.2。需要区分“真正有用的是交互项”与“只是新增联合监督/
+非线性容量”。R119–R121已给出两者可不同但尚未证明价值。下一必须先写出D-only、
+full-Q、product、aux-only、pair-attachment shuffle的同监督同容量计算和可证伪预测，
+并逐项与已核SERE/iLIF/ERGO/CopulaLSP/SPEECH机制比较。若剩下只有普通9类head/
+已知概率结构方法换轴，停止该精确提案；若差异成立才接原R1条件power/预算/合同，
+不先写一个通用模块。不能从UAIGR全文未取得推出无重合或原创已过。
+
+**可行性**：原生两腿监督/完整候选已核，推理仅原文/mentions；原joint路径可保留
+其他关系，但新增修正会经共享encoder影响护栏，不能声称“causal-only无需检查”。
+此项只需既有代码与一手来源的设计核查；实际Torch/CUDA和全训练仍必须另过门。
