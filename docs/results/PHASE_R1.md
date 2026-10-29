@@ -9254,3 +9254,140 @@ manifest SHA `bfd23f89c47ae543f18628611dc3af5e5ff739fb9086d70bcea9b6dfb5ee9a14`�
 R1一致性审查`status=pass / findings=[] / 36 mapped`，研究状态仍
 `preparation_partial_blocked`。三个Python文件仅AST，不执行第三方代码；未运行
 pytest/ruff/smoke（本轮只改文档/JSON），形式核验不等于科学门通过。
+
+### 25.150 · 数据优先的子问题筛选与递进框架重构（2026-10-29—30）
+
+**开工自审**：作者已纠正前轮先绑方法/章节的顺序。科研价值是先找出可形成至少
+两至三个独立公开基准的事件图谱子问题，再核该问题内部已有研究分支与比较方法，
+据此组织递进论文框架；旧A/B不作选题前提。对齐同C41-A-R/T087的研究路线裁决。
+可行性：本轮只查公开论文/作者实现/数据及CPU静态输入，不训练或新写模型；可
+横向比较论元抽取、共指、时序/因果关系、事件检测和补全等方向。数据任务不相同、
+受限源文不可得或缺少正式对照时点名排除，不用多个同源split凑数据集数。原数据
+审计、封存结果保留；不重启旧TKG/旧机制，不读final-valid。新路线仅作前瞻提案。
+
+#### 数据筛选结论：优先研究事件节点身份归并
+
+横向比较了跨文档事件共指、文档级论元抽取、时间关系、因果识别与事件补全。
+当前优先推荐**给定事件提及条件下的跨文档事件共指消解（gold-mention CDCR）**。
+它的监督直接回答“这些文本表述是不是同一个现实事件”，属于事件图谱构建中的
+节点身份归并；不需要另补人工实体、论元、时间或关系标注才能形成最终评价。
+选择依据是独立数据、同任务监督与可分解错误链，不能解释为为了获得较高分数。
+
+EAE仍为强备选：PAIE、TabEAE、DEEIA有真实trainer及RAMS/WikiEvents/MLEE下载路径；
+本轮没有逐件取得这三份原件，不能将“未验收”写成“不可获得”。MLEE嵌套生物事件
+和dev安排需协议适配；MAVEN-Arg官方test隐藏且评分不同，不直接补第三同协议列。
+时间关系有MATRES/TB-Dense/NarrativeTime/OmniTemp，但同源TimeBank不能直接算独立
+数据；OmniTemp较新且完整标注，规模小，相关全局对手还有API依赖。因果旧协议及
+CGEP补全旧缺口保留，不由旧A/B倒推新总题。详细筛选入口为
+`research/20261030_data_first_scope/README.md`。
+
+#### 三份公共原件实际取得及原划分审查
+
+下表是**原始数据的CPU结构计数，不是模型成绩**；每格为文档/事件提及/身份簇。
+三个语料分别训练和评价同一方法方案，不把三个split当三个独立数据集。
+
+| 语料 | train | dev | test | 采用的原划分与边界 |
+|---|---:|---:|---:|---|
+| ECB+ | 574 / 3,808 / 1,527 | 196 / 1,245 / 409 | 206 / 1,780 / 805 | 原selected sentences过滤＋UKPLab既有topic划分；原zip有982 XML，过滤后评价人口976文档 |
+| GVC | 358 / 5,313 / 991 | 78 / 977 / 228 | 74 / 1,008 / 194 | 原incident分组；train/dev/test分别170/37/34 incident，全部510文档恰好分配一次 |
+| WEC-Eng | 34,132 / 40,529 / 7,042 | 1,194 / 1,250 / 233 | 1,803 / 1,893 / 322 | 原Train与命名Dev/Test_validated；训练主要自动构造，开发/测试人工验证 |
+
+ECB+全量检查token引用/过滤人口，三split文档无重叠；WEC提及跨度合法，文档、
+mention ID与身份簇跨split均无交集。GVC文档/incident分组互斥，但**身份簇ID0在
+各split间出现**；原README未解释其特殊含义，不能据此宣称所有事件身份完全未见，
+不擅自重标/删除。保留原划分及标签，ID不作为推理输入。GVC/WEC另用SQL分组路线
+重计，与主要审计一致；这是同一原件的独立计算路径，不是独立同行评审。
+
+两处加载风险已前置发现：
+
+- UKPLab原GVC split CSV没有header；EasyECR当前splitter以默认header读并按
+  `event-id`合并。不能直接执行这个默认组合；后续需透明格式适配、维持完全相同
+  membership，不生成新随机划分，也不将此静态风险冒称真实执行报错。
+- WEC网页自动dataset视图可能合并同目录JSON；必须使用三个明确命名原文件，
+  不能使用默认合并后的train作为作者原划分。
+
+原件保存在Git忽略的`data/raw/research/cdcr-20261030/`，10件共110,988,175字节；
+其manifest SHA-256为`e2d054de8a81ad0f322ab12586a950566c2b8e83d647ae3f57293685aefcd001`。
+ECB+两个原件经已缓存官方ESC源archive恢复，逐件Git blob与ECB+上游相同；GVC原
+CoNLL从作者codeload取得并核blob；WEC原train核LFS SHA，dev/test核Git blob。
+直接传输失败不冒充数据不可得，恢复来源不隐去。公开test结构、ID及gold membership
+用于本轮元数据审计，**没有模型选型、预测或最终指标评分**；旧MAVEN final-valid未读。
+
+#### 近期成绩与复现证据：不是“全部必须70以上”
+
+原论文CohTP（ACL2026，正文Table1，PDF第7页）自己的行已核原表及渲染图：
+
+| 原论文语料 | Pairwise F1 | CoNLL F1 |
+|---|---:|---:|
+| ECB+ | 77.4 | 88.9 |
+| GVC | 80.4 | 87.7 |
+| WEC | 59.7 | 66.7 |
+
+这些是**外部原设定的背景成绩**，不是本项目复现、同协议主锚或预期保证。不能
+混淆Pairwise和CoNLL，也不能由前两列高分推导WEC必须超过70。该方法使用NLI时间图、
+图精炼和时间段内共指，正文还含GPT-4介入；截至本次固定revision，官方CohTP仓库
+仅有`Comming soon`，因此只能作机制近邻/背景对标，不能计作可运行baseline。
+
+EasyECR原文Table4又报告：DCT的原发表/该库复现CoNLL分别85.70/73.07，CDCR-E2E
+81.00/78.40，CRL 81.80/72.08，LemmaECR 80.30/78.31。这里“原发表”是**EasyECR
+表内转述**，不冒称逐个原作者表已另核；证据作用是提示保真度差距，不能认定较弱
+实现代表公开方法能力上限。其Table5显示gold子主题和单例设置影响很大；Table10
+显示更换decoder也会改完整pipeline结果。共同设置需事前固定，不能按高分挑设置。
+
+原件较早并非独立否决理由：CohTP2026仍用ECB+/GVC/WEC。新近ECB+META是同源
+改写，不计独立新语料；FrECo2025的同事件且框架不同是复合标签，仅核摘要/README，
+不能直接替换普通共指gold；WEC-Zh全量原件未取得，不宣称已闭合第四数据集。
+
+#### 一个任务内部的递进框架与真实比较来源
+
+建议总题为《面向事件图谱构建的跨文档事件共指消解方法研究》。三层分别针对
+**漏召回→误链接→聚类错误连锁**，共同最终主指标为
+`CoNLL F1 = mean(MUC F1, B³ F1, CEAFe F1)`，三章共用以上三语料及相同提及人口。
+
+| 问题位 | 已有直接研究与实际源码依据 | 每章最终比较要求 |
+|---|---|---|
+| 候选召回中的词面差异/覆盖损失 | DCT（Held等2021）的表示检索；Lemma/LemmaECR（Ahmed等2023）的启发式过滤/判别；EasyECR对应阶段 | 固定精判与聚类，比较同预算召回替换后的完整CoNLL，R@k/候选量只作诊断 |
+| 相似语境不同事件的精判混淆 | DCT cross-encoder、CDLM、LemmaECR、CRL；真实模型/trainer路径已定位 | 固定候选及decoder，比较完整CoNLL；不能只展示二分类F1 |
+| 局部误边导致的全局误合并/碎裂 | DCT/LemmaECR的CC，CDCR-E2E/CRL的agglomerative及EasyECR真实decoder；CohTP全局约束作近邻 | 固定候选图及pair分数，比较公共聚类对照、参数控制、结构消融及最终CoNLL |
+
+EasyECR正文支持召回/排序/聚类分解和固定其他阶段的比较要求。DCT、LemmaECR、
+CDCR-E2E的实际源码路径及EasyECR reader/decoder已核；4件Python仅AST，未导入/
+执行。源码经插件文本传输时行尾被规范化，恢复原行尾后逐件Git blob匹配；不将
+保存文本的hash不一致误称源漂移。仓库存在/语法通过均不等于原基准复现完成。
+
+簇级研究另补CORE2018作者摘要及实际`kiankd/events`源码，训练目标中的同簇/异簇
+距离正则、凝聚聚类可核，但Python2/Theano旧栈未运行；ROEC/CKD（NAACL2024）官方
+摘要与`csu-signal/llama_cdcr`模型/训练文件确实存在。两者改变表示学习，不能当
+固定pair分数的纯decoder对照；未转抄其成绩。Joint Trees2021只核官方摘要，联合
+实体输入条件在GVC/WEC未闭合，不直接放共同主表。这是第三层的研究近邻与待审
+边界，非已经验证其运行或方法创新。细节见凭证`cluster_neighbours.json`。
+
+三层是**有研究依据的问题位，尚不是三项已证实创新**。通用混合检索、普通对比
+学习、调阈值和标准聚类不能原样报贡献。每章可以小改进，但要有具体残余错误、
+直接近邻差异及主指标增量。完整架构/损失/消融只有在具体机制审查后签发，不先填
+三个模块名再找动机。共同输入、候选人口、scorer、单例/主题设置前置；优先不使用
+gold主题作推理阻断。该前瞻设定未冒称与CohTP等原设定完全相同，绝对目标暂不能
+由不同协议原分转抄；后续有效公共主锚重跑后才能设可信挑战值。
+
+另核VU博士论文《Event coreference in the news: Who, what, where and when?》
+官方摘要，其从数据代表性到身份、时间、参与者的研究组织可参考；本轮未读全文，
+也不移用其自建数据工作。未声称已穷尽国内外优秀学位论文或独立专家审查。
+
+**裁决与接续**：当前推荐CDCR，旧ECI A/B/构建提案转历史，原事实保留。目录
+`research/20261030_data_first_scope/`放调研/框架，来源边界见`sources.json`。
+同C41-A-R/T087下一闭合公共reader/scorer/候选及原作者baseline保真度，再用训练/
+开发证据裁首章具体干预；后两章问题方向现在明确，具体干预随前章残余错误冻结。
+不执行旧R122，不新建代码仓库/分支/worktree；生效SPEC、constitution及旧实测未改。
+本轮没有模型实现/训练、GPU推理、API模型调用、额外seed/机器或日历。
+
+凭证：`runs/stages/R1/r1-v127-data-first-scope-20261030/`，10件JSON＋manifest，
+manifest SHA-256 `ca699dca8d8319b36acb9c72bb5900e6a9536b587fe8575645c65652b88ff57f`。
+含原件库存、全split文档清单/计数、不同计算路径复核、源revision/源码身份及逐项
+文献阅读范围。原始数据/PDF/第三方源码不提交；无以形式PASS代替研究有效性。
+
+**实际验证**：10件receipt的manifest、10件原件完整SHA/上游blob或LFS身份、5件
+静态源文件身份（其中4件Python AST）、GVC/WEC的第二计算路径、121个相对链接
+与旧R1前缀只追加核验通过。`git diff --check`通过；R1一致性审查
+`status=pass / findings=[] / 36 mapped`，科研状态仍`preparation_partial_blocked`。
+本轮仅文档/JSON与公共原件元数据，未运行pytest/ruff/smoke、第三方模型或GPU任务；
+数据原件/静态语法可得与模型实际运行、方法效益分别报告。

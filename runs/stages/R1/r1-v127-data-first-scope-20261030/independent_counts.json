@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "scope": "independent SQL grouping of the same original public files; not independent peer review or model evidence",
+  "WEC_counts": {
+    "dev": {
+      "documents": 1194,
+      "mentions": 1250,
+      "event_clusters": 233
+    },
+    "test": {
+      "documents": 1803,
+      "mentions": 1893,
+      "event_clusters": 322
+    },
+    "train": {
+      "documents": 34132,
+      "mentions": 40529,
+      "event_clusters": 7042
+    }
+  },
+  "GVC_counts": {
+    "dev": {
+      "documents": 78,
+      "mentions": 977,
+      "event_clusters": 228
+    },
+    "test": {
+      "documents": 74,
+      "mentions": 1008,
+      "event_clusters": 194
+    },
+    "train": {
+      "documents": 358,
+      "mentions": 5313,
+      "event_clusters": 991
+    }
+  },
+  "same_raw_counts_as_primary_audits": true
+}

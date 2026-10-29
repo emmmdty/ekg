@@ -1,0 +1,45 @@
+[
+  {
+    "id": "CORE2018",
+    "url": "https://arxiv.org/abs/1805.10985",
+    "code": "https://github.com/kiankd/events",
+    "scope": "Primary author abstract and actual neural_cluster_model.py/clustering.py inspected; training objective pulls same-cluster and pushes different-cluster embeddings before agglomerative clustering. Python2/Theano/Lasagne legacy implementation; not executed or admitted runnable. Changes representation training, so not a fixed-pair-score decoder comparator.",
+    "repository_tree_response_sha": "ea9910b2e92fca42fa15ad0073167863225a308b",
+    "relevant_source_blobs": [
+      {
+        "path": "python/clustering.py",
+        "sha1": "f3734da846f1d3f44bb5dbc8e17a20f34413c43d"
+      },
+      {
+        "path": "python/neural_cluster_model.py",
+        "sha1": "5d92ac9e852c3303a121bb2fd9e0cd92fc22c6f5"
+      }
+    ]
+  },
+  {
+    "id": "ROEC_CKD2024",
+    "url": "https://aclanthology.org/2024.naacl-long.218/",
+    "code": "https://github.com/csu-signal/llama_cdcr",
+    "scope": "Primary abstract and model source/tree inspected; rationale-supervised clustering and knowledge distillation change representation/training. Not a fixed-score decoder; data, teacher and runtime requirements not closed. No paper score quoted.",
+    "repository_tree_response_sha": "b37fd361c0facb74f5b7d9bcc4b966f84adc2424",
+    "relevant_source_blobs": [
+      {
+        "path": "clustering_IM_rationale.py",
+        "sha1": "df19adbae1346f94d5159d90b339635f5e39b059"
+      },
+      {
+        "path": "teacher_student_modelling.py",
+        "sha1": "a2ad8031d2960e902675fb488c66a495e3c75a4a"
+      },
+      {
+        "path": "training.py",
+        "sha1": "5248adc85e6aa074cd02bae75f2c9859aeff96d8"
+      }
+    ]
+  },
+  {
+    "id": "JointTrees2021",
+    "url": "https://aclanthology.org/2021.crac-1.11/",
+    "scope": "Official abstract only: hierarchical uncertainty and alternating event/entity clustering. Joint gold/input availability on GVC/WEC unverified, so not direct three-corpus comparator."
+  }
+]

@@ -1,5 +1,9 @@
 # SPEC修订提案：事件因果关系构建的两方法研究与工程验证
 
+**2026-10-30：SUPERSEDED_SCOPE_PROPOSAL。** 本提案从未生效；数据优先筛选后的
+当前推荐见[共指子问题框架](../20261030_data_first_scope/THESIS_FRAMEWORK.md)。保留
+下文为历史，不按其A/B/构建章结构签发实验；活SPEC与旧封存未被此状态改写。
+
 提案版本：0.4.0。状态：**DRAFT，未生效，未准入实现/训练**。
 **逐章准入表覆盖**：[数据/划分/主指标/对手/目标/阻断](ADMISSION_AND_BENCHMARKS.md)
 已补。ESC发布五折membership实核，CTB十折doc级为透明提案；新增学位论文原文证据。

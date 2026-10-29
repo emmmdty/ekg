@@ -1,0 +1,66 @@
+{
+  "scope": "named original train and manually validated dev/test files only; no HF automatic split concatenation",
+  "revision": "84bc4ab1c9c6399e8d6f01c458bd9ef71fe8d397",
+  "counts": {
+    "train": {
+      "documents": 34132,
+      "mentions": 40529,
+      "event_clusters": 7042
+    },
+    "dev": {
+      "documents": 1194,
+      "mentions": 1250,
+      "event_clusters": 233
+    },
+    "test": {
+      "documents": 1803,
+      "mentions": 1893,
+      "event_clusters": 322
+    }
+  },
+  "invalid_spans": {},
+  "source_files": [
+    {
+      "file": "Train_Event_gold_mentions.json",
+      "bytes": 90177027,
+      "sha256": "719e8e476a05b9c6abb01cd51f641c3ace67c6214e60f076dc5d1f26ef63c3a5",
+      "upstream_oid": "0960fb702f7c5f0e13377db1d1d636850859fb61",
+      "upstream_lfs_oid": "719e8e476a05b9c6abb01cd51f641c3ace67c6214e60f076dc5d1f26ef63c3a5",
+      "identity_pass": true
+    },
+    {
+      "file": "Dev_Event_gold_mentions_validated.json",
+      "bytes": 2713689,
+      "sha256": "08ab71161aa693445cdce555a891440d84ffebfcf8fdf3ebd635f606466bbf80",
+      "upstream_oid": "ed9e801d3fdc20a3aaa836199f2629ed8529890b",
+      "upstream_lfs_oid": null,
+      "identity_pass": true
+    },
+    {
+      "file": "Test_Event_gold_mentions_validated.json",
+      "bytes": 4093981,
+      "sha256": "5213803a51b47151ec3caa5d41c995169cf0635eb8ae86fd7bfa784f39b5521a",
+      "upstream_oid": "45eea41fab237212ea845b5b30cdb7fc0e712c57",
+      "upstream_lfs_oid": null,
+      "identity_pass": true
+    }
+  ],
+  "overlaps": {
+    "train-dev": {
+      "documents": 0,
+      "mention_ids": 0,
+      "event_clusters": 0
+    },
+    "train-test": {
+      "documents": 0,
+      "mention_ids": 0,
+      "event_clusters": 0
+    },
+    "dev-test": {
+      "documents": 0,
+      "mention_ids": 0,
+      "event_clusters": 0
+    }
+  },
+  "status": "metadata_audit_pass"
+}

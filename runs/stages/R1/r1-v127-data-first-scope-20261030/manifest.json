@@ -1,0 +1,56 @@
+{
+  "schema": "ekg.research_receipts.v1",
+  "scope": "metadata/source evidence only; no model execution",
+  "files": [
+    {
+      "path": "cluster_neighbours.json",
+      "bytes": 2025,
+      "sha256": "802fa93822f11d0ae33d51c8771f1ec2a9f3296e34cb9c9af93bfb4e193377c1"
+    },
+    {
+      "path": "dataset_inventory.json",
+      "bytes": 3037,
+      "sha256": "e2d054de8a81ad0f322ab12586a950566c2b8e83d647ae3f57293685aefcd001"
+    },
+    {
+      "path": "ecb_audit.json",
+      "bytes": 23442,
+      "sha256": "d8513251836db3e644e3c2c308997b3176ce2447f9ed86e54f841d5563d5e285"
+    },
+    {
+      "path": "gvc_audit.json",
+      "bytes": 22128,
+      "sha256": "206412c2ffbed8e7d4b8302266e3ec17d7374a15ff5d9e19b6f197a2abb88a50"
+    },
+    {
+      "path": "independent_counts.json",
+      "bytes": 817,
+      "sha256": "ab2de9df97c8327954774ec01df2120c6be2074ec8becd09d9cad22991bea6ae"
+    },
+    {
+      "path": "papers.json",
+      "bytes": 1213,
+      "sha256": "9dadcc50de9e3c859c2c146fa75727e800c6fbfba81540521a78674bf68af967"
+    },
+    {
+      "path": "repository_pins.json",
+      "bytes": 1303,
+      "sha256": "c4d13a2117133d4dda29b6ddf62d04b14ccc15c12bc90c930f78da86407c0001"
+    },
+    {
+      "path": "source_review.json",
+      "bytes": 7870,
+      "sha256": "b5a29182eeb0f8b5a461eb3be2ecd34606c91991ef20d3ff39f642f177384faa"
+    },
+    {
+      "path": "static_source_verification.json",
+      "bytes": 2717,
+      "sha256": "6bb575077b8c15b9a6941b73b8c97492c8ef81e3a233822cbc4028dded5d2af1"
+    },
+    {
+      "path": "wec_audit.json",
+      "bytes": 1852,
+      "sha256": "81fb94767c2c67b289f0cde5d95a62d2797ed1a6e432f7a316a27e47c519e70e"
+    }
+  ]
+}

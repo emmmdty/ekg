@@ -1,0 +1,42 @@
+[
+  {
+    "id": "TabEAE",
+    "url": "https://aclanthology.org/2023.acl-long.701.pdf",
+    "sha256": "28f85efe3af25020594131e6199578f5b6e9908f21de3338ecde948a1fc16a6a",
+    "bytes": 1083749,
+    "pages": 15
+  },
+  {
+    "id": "CohTP",
+    "url": "https://aclanthology.org/2026.acl-long.1345.pdf",
+    "sha256": "46ff25112e6f8de64a4ac6c1742c9e819da8c30ebb26099f9c08bf95571504d2",
+    "bytes": 644551,
+    "pages": 18
+  },
+  {
+    "id": "EasyECR",
+    "url": "https://arxiv.org/pdf/2406.14106",
+    "sha256": "e2e76fbd68369eb9c3f32f05f67754d952337e184eb36897eeae331567fa8f6d",
+    "bytes": 501325,
+    "pages": 14
+  },
+  {
+    "id": "GlobalTRE",
+    "url": "https://aclanthology.org/2025.emnlp-main.1601.pdf",
+    "sha256": "49cde1f7b94ac2a2b278d7d69fd6dac210e617d00f99c8b4977431080128cb5f",
+    "bytes": 2755102,
+    "pages": 19
+  },
+  {
+    "id": "DEEIA",
+    "url": "https://aclanthology.org/2024.findings-acl.564.pdf",
+    "sha256": "9983d82803ad0ab1e6699a08d78c9c39238ad84b4f594b6144e3afc0bced6528",
+    "bytes": 4843095,
+    "pages": 18
+  },
+  {
+    "id": "PAIE",
+    "url": "https://aclanthology.org/2022.acl-long.466.pdf",
+    "error": "<urlopen error _ssl.c:1063: The handshake operation timed out>"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "repo": "hqyang/EasyECR",
+    "revision": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "path": "easyecr/ecr_data/datasets/ecb_plus/ecb_plus.py",
+    "upstream_blob_sha1": "af884f512869e939037637bc9af60acf281e3a2f",
+    "identity_pass": true,
+    "sha256": "58c65f35ba51460acf1c22404228798f7cd66503b2021737a106179614a3f848",
+    "transport_note": "Plugin text saved with normalized LF; original line endings/trailing LF restored only where exact upstream Git blob verifies.",
+    "syntax_check": "AST parse only; no imports/execution"
+  },
+  {
+    "repo": "hqyang/EasyECR",
+    "revision": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "path": "easyecr/ecr_data/datasets/gvc/gvc.py",
+    "upstream_blob_sha1": "45f3f15f7a8e05f15920bf7054e7733e39d793dc",
+    "identity_pass": true,
+    "sha256": "e635c434fa2651829e076f528de322cc197d02e7a6e2a985be4507504ee2f54c",
+    "transport_note": "Plugin text saved with normalized LF; original line endings/trailing LF restored only where exact upstream Git blob verifies.",
+    "syntax_check": "AST parse only; no imports/execution"
+  },
+  {
+    "repo": "hqyang/EasyECR",
+    "revision": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "path": "easyecr/ecr_data/datasets/gvc/gvc_split.py",
+    "upstream_blob_sha1": "304a86dfca29c10e8b44a738f2a0d592bbb68d28",
+    "identity_pass": true,
+    "sha256": "34f45bd1d7ae3af9f3e31fbd98f40c898526cd47d269c65c5b2711ea89884797",
+    "transport_note": "Plugin text saved with normalized LF; original line endings/trailing LF restored only where exact upstream Git blob verifies.",
+    "syntax_check": "AST parse only; no imports/execution"
+  },
+  {
+    "repo": "hqyang/EasyECR",
+    "revision": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "path": "easyecr/ecr_model/cluster/cluster_model.py",
+    "upstream_blob_sha1": "c3d052ed9a81a4d40d384854010087e93a38f084",
+    "identity_pass": true,
+    "sha256": "3bc603f1bb57bae6947d44bf4094aa20ca135395b453990328fc7886a235ca15",
+    "transport_note": "Plugin text saved with normalized LF; original line endings/trailing LF restored only where exact upstream Git blob verifies.",
+    "syntax_check": "AST parse only; no imports/execution"
+  },
+  {
+    "repo": "UKPLab/cdcr-beyond-corpus-tailored",
+    "revision": "1f60cafbcf5eeb723c46ed68a1b3ee4fc0fcdc26",
+    "path": "resources/scripts/prepare.makefile",
+    "upstream_blob_sha1": "5ee64c783e24f4cca4f64c9a99c7be72067a259b",
+    "identity_pass": true,
+    "sha256": "6b63e07e929ced25bdb4b4a4e2f460652e36fa66ce1b83d1b5db68a6e8a18961",
+    "transport_note": "Plugin text saved with normalized LF; original line endings/trailing LF restored only where exact upstream Git blob verifies.",
+    "syntax_check": "not Python"
+  }
+]

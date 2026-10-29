@@ -1,0 +1,11 @@
+{
+  "status": "pass",
+  "receipt_files_checked": 10,
+  "raw_files_checked": 10,
+  "raw_bytes": 110988175,
+  "relative_links_checked": 121,
+  "old_R1_prefix_preserved": true,
+  "production_code_changed": false,
+  "parent_SPEC_constitution_changed": false,
+  "scope": "source/metadata/document checks, not model execution or scientific admission"
+}

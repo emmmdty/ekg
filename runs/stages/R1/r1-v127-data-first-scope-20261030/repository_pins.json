@@ -1,0 +1,46 @@
+[
+  {
+    "repo": "hqyang/EasyECR",
+    "commit": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "tree": "428b96b0bec144f8d723c2036a030e6be976f4da",
+    "branch": "main"
+  },
+  {
+    "repo": "UKPLab/cdcr-beyond-corpus-tailored",
+    "commit": "1f60cafbcf5eeb723c46ed68a1b3ee4fc0fcdc26",
+    "tree": "20245171ca31f3475a6fd7f6266fdc6d14cbb46f",
+    "branch": "master"
+  },
+  {
+    "repo": "cltl/ecbPlus",
+    "commit": "3aa071e12fd08fc0705b16bb1841e7a9c5c22420",
+    "tree": "9973599b436392ad810ed47408230dab8c35c7a3",
+    "branch": "master"
+  },
+  {
+    "repo": "ahmeshaf/lemma_ce_coref",
+    "commit": "55cc6185b5ae901d9f5375bc90cb96820aa38581",
+    "tree": "600fb04f8a135f234fbe8be2f5f9969d6e78638e",
+    "branch": "main"
+  },
+  {
+    "repo": "Stardust-hyx/TabEAE",
+    "commit": "7704ae0081a460c05477a21e2652242b148fda91",
+    "tree": "3dd208560aa9b4d555b3eb8dc0620e8a5c4cc5cb",
+    "branch": "main"
+  },
+  {
+    "repo": "chenxinyu-nlp/CohTP",
+    "commit": "3843ad0a4dcdb9f4761f134894b935d4ed74d19b",
+    "tree": "329ececa9b3c07ef9f381cb596ba4dd44c8be6a0",
+    "branch": "main"
+  },
+  {
+    "repo": "Helw150/event_entity_coref_ecb_plus",
+    "commit": "3c5c03a9c57bfa49bffebd0c54da44f6b53cb016"
+  },
+  {
+    "repo": "ariecattan/coref",
+    "commit": "b81397a971ce520637f05c4bd332d5389af4e465"
+  }
+]

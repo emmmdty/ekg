@@ -1,5 +1,11 @@
 # EKG 实时状态
 
+**10-30数据优先选题覆盖**：推荐跨文档事件共指消解，ECB+/GVC/WEC三份原件已实得，
+源身份/原split/元数据核验见R1 §25.150。召回→精判→归并的问题框架在
+`research/20261030_data_first_scope/`；旧A/B与ECI提案转历史，不沿其预设章节继续。
+当前只有选题/框架，不是模型准入或三项贡献；同C41-A-R/T087下一先原始baseline/
+reader/scorer与首章具体差异，父规范未改、无代码/训练/资源扩展。
+
 **10-29逐章准入最新覆盖**：数据/划分/主指标/目标表与相关学位借鉴已落地，入口
 `research/20261029_eci_spec_review/ADMISSION_AND_BENCHMARKS.md`。ESC发布五折实际核等；
 CTB十折doc级为透明提案。Arg/ERE原train事件人口/类型不一，停止直接拼接；同ERE

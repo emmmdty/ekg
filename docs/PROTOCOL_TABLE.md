@@ -1,6 +1,11 @@
 # 统一评测协议表（论文第 2 章素材）
 
-**2026-10-29 前瞻提案入口**：作者当前审查“两个ECI方法＋构建验证”，新多语料
+**2026-10-30 数据优先提案覆盖**：当前优先推荐跨文档事件共指消解，三公共语料原件
+与递进问题框架见[新提案](research/20261030_data_first_scope/THESIS_FRAMEWORK.md)。
+数据/原split已核不等于reader/scorer/模型准入；gold主题阻断、单例与候选范围须事前
+明确。下方10-29为历史入口，其ECI章节预设不再沿用；原四章冻结协议/封存保持。
+
+**2026-10-29 历史前瞻提案入口**：作者当时审查“两个ECI方法＋构建验证”，新多语料
 与逐章指标/启动表见[准入提案](research/20261029_eci_spec_review/ADMISSION_AND_BENCHMARKS.md)。
 下文为原四章冻结协议，不把前瞻ESC/CTB或新系统方案伪装成已生效协议。MAVEN原
 manifest/scorer/final-valid身份不变；ESC发布membership已核，CTB新增doc级十折
