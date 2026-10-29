@@ -294,3 +294,12 @@ gold .1802 / rewired .1185 / no_graph .0811，见 `results/PHASE_E.md`）。
 **10-26运行覆盖**：上述固定内置CE已在4090实际CUDA训练，后继独立核分/五对照已按有限依赖链安排，当前尚无完整验收分数；见R1 §25.138。仍是ERGO家族控制/FR-016(b)，不增加独立方法计数。
 
 **10-27 CE完成覆盖**：上述内置CE完整训练/独立核分/五对照已结束，主指标及区间见PHASE_A末节，身份R1 §25.139；原基准数字未复现，保持FR-016(b)和同家族控制身份，不增加独立方法数量。点分微升尚无稳定收益证据，仍非本项目原创贡献。
+
+**10-29构建验证候选来源（非已跑对手）**：MAVEN官方
+`THU-KEG/MAVEN-dataset@71151f6da53bc9df9d6c5718dc81a2e1489651bf`的DMBERT有真实
+model/train/dev及无类型标签candidate reader；只分类提供的span，非原文span proposal。
+根MIT、部分复用源码保留Apache头，旧依赖/实际checkpoint/运行/跨组件ID映射均未验收。
+预拟固定同一检测器＋文本分类器、＋ERGO、＋最终方法，作为同实例预测节点条件对照；
+SEAG §4.3有该类pipeline原文先例，不能照抄其gold-window输入/原表。来源与静态核查
+见R1 §25.148和`research/20261029_eci_spec_review/integrated_sources.json`；不增加方法
+主表的已跑家族计数，FR-016(a)/(b)须等真实复现/透明适配后标记。

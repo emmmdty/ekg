@@ -1,0 +1,116 @@
+{
+  "schema": "ekg.eci_integrated_review.sources.v1",
+  "date": "2026-10-29",
+  "source_commit": "0a33050fb5163e4b4f8eb02966b7c13dac79d64d",
+  "scope": "literature, source-only AST and planning; no imports/model execution/training, final-valid reads or GPU",
+  "repository": {
+    "repo": "THU-KEG/MAVEN-dataset",
+    "revision": "71151f6da53bc9df9d6c5718dc81a2e1489651bf",
+    "retrieval": "connected GitHub fetch; commit, full tree and pinned source files",
+    "license_scope": "root MIT; reused Python files retain Apache-2.0 headers; not a new claim about all dataset usage rights",
+    "files": [
+      {
+        "path": "LICENSE",
+        "blob_sha1": "9de52d6e009d3598070483ca3cf1dc530c8246d0",
+        "sha256": "5ee474ee6c375296524e35cc43c271b28d5c0cc69cdb73ccabe20957f979cfd6",
+        "bytes": 1064,
+        "static_syntax": "not_python"
+      },
+      {
+        "path": "DataFormat.md",
+        "blob_sha1": "aa9a8e4a4768924911d20beded2078349b39ae4a",
+        "sha256": "5f284eb20620277e656bb28332b15c184646e0e38bed7a94f6efdedeed30ba2e",
+        "bytes": 3293,
+        "static_syntax": "not_python"
+      },
+      {
+        "path": "baselines/DMBERT/README.md",
+        "blob_sha1": "63a5a02b22dc8735a3675580a914c56980aae1a5",
+        "sha256": "59237a70db24520a80cb81206aca2a19aef81d5523cf7c17c107286febf62f10",
+        "bytes": 905,
+        "static_syntax": "not_python"
+      },
+      {
+        "path": "baselines/DMBERT/model.py",
+        "blob_sha1": "deef9d6159104c069cbbe59478864061d52fd401",
+        "sha256": "fbcb3c6fdc48c34c61503fc2974fec803522173e4353e8fc407883ffb029a4cf",
+        "bytes": 1857,
+        "static_syntax": "AST_parse_only_pass"
+      },
+      {
+        "path": "baselines/DMBERT/utils_ee.py",
+        "blob_sha1": "4c1079c420b85427e83f400a59cf863532043cb6",
+        "sha256": "e4b07d641a5c8555184984694e26f4ef41adc791451119c33f1882c49e9c5696",
+        "bytes": 17197,
+        "static_syntax": "AST_parse_only_pass"
+      },
+      {
+        "path": "baselines/DMBERT/run_ee.py",
+        "blob_sha1": "cf5272aad575788242a87bc4c051f08b60879b01",
+        "sha256": "0644e900c716d6ffa2138a92484d789ab82e1b67a210c573b7d64a7f3742cbbd",
+        "bytes": 31352,
+        "static_syntax": "AST_parse_only_pass"
+      }
+    ]
+  },
+  "prior_primary_sources": [
+    {
+      "id": "ICGR",
+      "url": "https://aclanthology.org/2026.findings-emnlp.1902.pdf",
+      "sha256": "36d32cca529412876fde86b2c67965881d6cbe82d9ff37c88607199860b1a34b",
+      "review_locator": "section 3.3-3.7 equations 3-17; appendix A.7",
+      "method": "reread previously extracted text; prior PDF/table checks retained in R1 section 25.147"
+    },
+    {
+      "id": "SEAG",
+      "url": "https://aclanthology.org/2023.findings-acl.283.pdf",
+      "sha256": "854977c27cfe4cac5e335a72b8d51db50577ee9400560273ae96b0918b53c012",
+      "review_locator": "sections 4.1-4.3: gold-pair windows; exact event/relation matching; DMBERT pipeline rivals",
+      "method": "reread previously extracted text; prior PDF/table checks retained in R1 section 25.147"
+    },
+    {
+      "id": "EngineeringMasterRequirements",
+      "url": "https://hitgs.hit.edu.cn/_upload/article/files/6d/b7/becef42648bfb058c83ddb87df25/7c3fdc21-c57c-4b76-bfd3-9e5e1963551f.pdf",
+      "sha256": "476272c504c099532cb7dd6237c86c6f840032dfbb18df8e9e405f63d0926f94",
+      "review_locator": "printed pages 2-5; thematic research, depth, contribution and application/validation",
+      "method": "reread previously extracted text; prior PDF/table checks retained in R1 section 25.147"
+    }
+  ],
+  "additional_page_only": {
+    "id": "FrECI2026",
+    "url": "https://aclanthology.org/2026.acl-long.2173/",
+    "reviewed": "official metadata/abstract only; labels differ from current task",
+    "not_reviewed": "full paper, code, metrics or runtime"
+  },
+  "reference_thesis": {
+    "id": "lina",
+    "prior_identity": "docs/research/20261019_thesis_sources.json",
+    "text_sha256": "9b33fe4343799fbe68021e7374876454497fe3791a73ded1e6092534763d655a",
+    "reread": "chapter 4 problem description and section 4.3.2 comparison to chapter 3; structural precedent only"
+  },
+  "local_source_files": [
+    {
+      "path": "src/ekg/nodes/detection.py",
+      "sha256": "6439fc458a563f7be0d5a1afc3cd45601d192afa60c5e3b0cd3df99d7d496294"
+    },
+    {
+      "path": "src/ekg/relations/data/maven_arg.py",
+      "sha256": "9b694603d457396b4855ea03a0dc67a51663b05761e711b6782aa7a0a2e55ca5"
+    },
+    {
+      "path": "src/ekg/relations/pipeline.py",
+      "sha256": "7aeacfd4b4b6476547abdec760737d718ad170f2f796e44492ffa42da5d79fbc"
+    },
+    {
+      "path": "src/ekg/relations/consistency/__init__.py",
+      "sha256": "d4fa44f5595970349c0ab34f64812abb336c802b534a865424fd7671606cc50f"
+    }
+  ],
+  "interpretation_limits": [
+    "candidate classification is not arbitrary-span proposal",
+    "source/AST success is not runtime or checkpoint validation",
+    "B difference from ICGR is a candidate increment, not evidence of novelty or improvement",
+    "no new method effect measured",
+    "new chapter proposal not an effective parent SPEC revision"
+  ]
+}

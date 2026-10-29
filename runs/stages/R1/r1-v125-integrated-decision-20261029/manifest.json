@@ -1,0 +1,12 @@
+{
+  "schema": "ekg.research_receipts.v1",
+  "date": "2026-10-29",
+  "scope": "literature, source-only AST and planning; no imports/model execution/training, final-valid reads or GPU",
+  "files": [
+    {
+      "path": "source_review.json",
+      "sha256": "26487252925ca9d15571421de57e6a34b9767da5f58359e60379e239a9832676",
+      "bytes": 5115
+    }
+  ]
+}

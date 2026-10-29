@@ -1,0 +1,18 @@
+{
+  "status": "pass",
+  "scope": "document/source identity consistency only, not scientific or training admission",
+  "relative_links_checked": 122,
+  "manifest_files": 1,
+  "pinned_source_files": 6,
+  "local_source_hashes_checked": 4,
+  "prior_paper_pdf_hashes_checked": 3,
+  "thesis_identity_matches": true,
+  "R1_prior_text_append_only": true,
+  "no_production_or_parent_spec_edits": true,
+  "R1_consistency_status": "pass",
+  "R1_scientific_status": "preparation_partial_blocked",
+  "R1_scientific_blockers_retained": [
+    "R1 status is preparation_partial_blocked, not pass"
+  ],
+  "model_execution": false
+}

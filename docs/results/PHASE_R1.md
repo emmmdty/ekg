@@ -9045,3 +9045,87 @@ XLSX XML；不安装依赖、不修改原件、不把表格版面转换当学位
 附件与5份转换件hash均核等；MECI另一SQL实现复算通过。既有R1一致性审计实查
 `status=pass / findings=[] / 36 mapped`，`git diff --check`通过。只改文档/JSON凭证，
 没有修改生产代码，未运行pytest/ruff/smoke三件套，也未把文档验证当科学门通过。
+
+### 25.148 · 综合可信度、渐进贡献及逐章推进评估（2026-10-29）
+
+**开工自审（先记录，后核查）**：
+
+1. 科研价值：决定已有两项贡献是否可宣称成立、第二候选是否被过严标准误删，以及
+   第三个研究章哪些可行性不能推迟；服务同C41-A-R/T087的R122设计裁决和未来多语料
+   主表，不以省时为选型理由。证据从PHASE_A最近完成对照、本页§25.145—147、ICGR
+   具体门控/训练控制、SEAG输入/评分及现有事件候选loader取得；不复制旧计数或重新训练。
+2. 可行性：本轮为一手来源、静态源码及研究文档审查，所需文件已可读，可在CPU完成。
+   真正新增方法收益、三语料适配运行、无gold部署输入及实际CUDA预算尚不能在本轮证明；
+   若缺少无标签输入/公开评分，停止相应全自动构建主张，不把代码存在当验收。
+
+**作者澄清适用**：渐进的小改进可立项；前轮仅因通用组件已有而撤下B的推论过强，
+须按具体新增计算、最强替代和实证可归因性重审。此澄清不改变§25.147的原论文事实、
+历史结果或原B尚未获准训练的状态。下续最终核查结论。
+
+#### 本轮综合结论与新增证据
+
+**现有实验的可信边界**：重新核PHASE_A的10-27 CE完成节。原机重载/完整预测/官方
+核分与归档可以支持所报开发集结果；配对区间与错误交换不支持“有稳定的新收益”。
+单seed及逐epoch内部dev选模仍有限制，不是最终确认。没有收益证据不等于证明等效；
+已知控制也不是原创贡献。本轮没有重跑或复制旧分数，没有读取final-valid。
+
+**B裁决纠正**：重新核ICGR §3.3—3.7/附录A.7。其式14的gate从原/去噪latent
+产生额外支持，作用于保留边置信度后进入消息传播；原B的u监督是OOF初始分类是否
+错误，gate对最终分类logits残差作选择性修正。两者不是逐项相同。Stacked Graphical
+Models已覆盖OOF邻域概率，ICGR已有参数匹配MLP/噪声门，故一般组件不能当创新；
+但仅因组件已有就撤销整个渐进改进，推断过强。按作者“小改进可研究”的标准恢复
+**B有条件待审**，加入同错误监督无结构编辑、普通refiner、无错误辅助目标的门等
+归因比较；尚未形成方法贡献，也没有恢复模型实现/训练准入。该决定覆盖§25.147
+原“撤下B席位”的去留部分，不改原论文事实、历史计数和结果身份。
+
+**新增公开上游实现**：通过连接GitHub工具核MAVEN作者repo
+`THU-KEG/MAVEN-dataset@71151f6da53bc9df9d6c5718dc81a2e1489651bf`的完整树及
+DataFormat、DMBERT README/model/utils/trainer、LICENSE。六件源码的本地Git blob
+SHA1逐项等于该revision树；三个Python文件仅作AST解析通过，无import/训练/推理。
+根LICENSE为MIT，复用的utils/run保留Apache头，不推断全部数据使用边界已解决。
+README固定旧transformers依赖，真实机器环境/checkpoint/数值尚未验证。
+
+`utils_ee.py`181—209行`MAVENInferProcessor`只读提供的`candidates` span，使用
+占位None标签形成无gold类型输入；DataFormat说明官方test提供候选要求分类。不能
+据此宣称DMBERT从任意原文发现span。`run_ee.py`188—200行按dev F1改best，同时可
+触发test评分；我们不得沿用训练中反复查看最终测试的流程。没有新增任何测试访问。
+
+**工程端点的具体边界**：SEAG §4.3有DMBERT＋BERT/Longformer/ERGO的对照先例，
+§4.2要求事件/关系三元组匹配；§4.1又明确按gold事件对截取连续句段。因此其原表
+不是任意整篇文本部署成绩。允许先设计同一检测器条件下的多关系方法构建对照；
+“给定候选内节点预测”与“任意原文span proposal”要分别写输入合同，不能混称。
+
+本地代码又定位到实际接线风险：`maven_arg._parse_document`从gold events建立
+candidates/nodes，并载入type、arguments和clusters；`EventDetector`接收这些候选，
+类名不能证明无gold输入已隔离。`RelationPipelineConfig`默认`consistency='greedy'`，
+`GreedyConsistencySolver`会删因果环、可作时间闭包。构建导出须明确identity或成对
+固定后处理，并保留原输出；否则工程表变化不能归因于新关系方法。以上只读源码，
+没有据注释认定原生benchmark必定无环，也没有修改代码。
+
+**结构与顺序**：重读工程专硕文件的专题研究条目，重读李娜参照论文第四章的问题
+描述和§4.3.2，其方法沿前章具体不足递进，且把前章方法列作比较。这是递进研究
+的实例，不是我们方法已达标的证明。本轮推荐共同数据/对照/第三章输入与评分
+先闭合，第一方法先完成冻结开发证据，第二方法按残余错误分章冻结，工程实现
+后置；不增加第三方法线，不把第三章所有可行性检查推迟到前两章结束。最终测试
+不得用于第二方法选择。具体D先裁的当前顺序仍同R122，不重做旧计数/toy/控制训练。
+
+**近期数据任务界限**：新增检索FrECI（ACL2026）官方页面，摘要说明扩展责任目标、
+框架、来源及模态标签，因此不直接替换当前ECI同列。只读页面/摘要，不冒称全文、
+原表、代码或运行已核；亦不由此否定该任务本身。主候选仍MAVEN/ESC/CTB，MECI备用，
+至少两个独立语料形成有效主证据、目标三个；目前跨语料输入/协议与运行仍未全验收。
+
+规范提案已更新0.3，父SPEC/constitution仍不变，旧章序不静默改写。综合决策及每章
+问题/对照/前后置边界见`research/20261029_eci_spec_review/INTEGRATED_DECISION.md`。
+研究结论按来源事实、条件判断和未知效果分开，不提供无实证的可信度或完成度百分比。
+
+来源凭证：`runs/stages/R1/r1-v125-integrated-decision-20261029/`，来源记录＋manifest；
+manifest SHA `8c990250d645f879a4e4ae72ce5ab0f0783cf6782b8e0fe9ebffe105fb717560`。
+六件新增第三方源码原件只留临时缓存；repo/revision、blob/hash及本地源码身份保留于
+`integrated_sources.json`。没有独立专家/多代理评审，也没有声称本轮证明新增模型有效。
+
+**文档验证**：新增六件源文件与pinned树的blob身份一致，三件Python仅AST通过；
+本轮122个相对链接、四件本地源码hash、三份既有原始PDFhash、参照论文text身份及
+receipt/manifest均核等。R1原文仅追加，生产代码/活SPEC/constitution/封存PHASE_A
+未改。R1一致性审计实际为`status=pass / findings=[] / 36 mapped`，但其研究状态仍为
+`preparation_partial_blocked`，没有把形式审计通过当科学准入。本次仅文档/JSON，
+未运行模型或pytest/ruff/smoke；核验记录保留于本轮`document_validation.json`。
