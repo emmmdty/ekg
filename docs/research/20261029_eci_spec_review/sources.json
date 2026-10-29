@@ -1,0 +1,470 @@
+{
+  "schema": "ekg.eci_spec_review.sources.v1",
+  "date": "2026-10-29",
+  "scope": "Primary-source and static/data feasibility review; no model execution, production implementation, final-valid scoring, training or API model calls.",
+  "repositories": [
+    {
+      "repo": "paramitamirza/Causal-TimeBank",
+      "url": "https://github.com/paramitamirza/Causal-TimeBank",
+      "revision": "43b593a6bb0dde2dc2e4da7a07bb174f2f7c06ad",
+      "files": [
+        {
+          "path": "README.md",
+          "sha": "76ec8522e09b3cae0bc6b7d73905f34614d7dcb7",
+          "size": 2506
+        }
+      ],
+      "readme_blob": "76ec8522e09b3cae0bc6b7d73905f34614d7dcb7"
+    },
+    {
+      "repo": "tommasoc80/EventStoryLine",
+      "url": "https://github.com/tommasoc80/EventStoryLine",
+      "revision": "46edefee5e82e0917b823abe0a18bf8c7770f15c",
+      "files": [
+        {
+          "path": "ECB+_LREC2014/LICENSEDATA.TXT",
+          "sha": "535c7b70d167d09b13acee885a41ccda927c8c77",
+          "size": 1786
+        },
+        {
+          "path": "ECB+_LREC2014/README.txt",
+          "sha": "dae5912618760235f92a8944f53bea78f4174336",
+          "size": 9857
+        },
+        {
+          "path": "LICENSE.md",
+          "sha": "72b139423c8a1846d399b1eeefc6c872dce2023e",
+          "size": 18559
+        },
+        {
+          "path": "README.md",
+          "sha": "ef2c902a7a285b193329359815f6077fe017c098",
+          "size": 4470
+        },
+        {
+          "path": "annotated_data/v0.9/README.txt",
+          "sha": "4bc719e48c27bc41492ae0a50be90c8f7aec1431",
+          "size": 4184
+        },
+        {
+          "path": "annotated_data/v1.0/README.txt",
+          "sha": "ad4fcbc5d82cc3cde87cdc428b09846de25a5a50",
+          "size": 4526
+        }
+      ],
+      "readme_blob": "ef2c902a7a285b193329359815f6077fe017c098"
+    },
+    {
+      "repo": "nlp-uoregon/meci-dataset",
+      "url": "https://github.com/nlp-uoregon/meci-dataset",
+      "revision": "2fdddd3ed296e60d8122b042183554b1110d055e",
+      "files": [
+        {
+          "path": "README.md",
+          "sha": "996744f3b378f8c0142ab21756d9a58c076d2f68",
+          "size": 1178
+        },
+        {
+          "path": "meci-v0.1-public/causal-en/train/aviation_accidents-week2-nhung-28713097_chunk_6.ann.tsvx",
+          "sha": "73cedda86b7b2c16ceb27d8872e969076fff5b76",
+          "size": 5951
+        }
+      ],
+      "readme_blob": "996744f3b378f8c0142ab21756d9a58c076d2f68"
+    },
+    {
+      "repo": "chenmeiqii/ERGO",
+      "url": "https://github.com/chenmeiqii/ERGO",
+      "revision": "afa3d347ec360242c01d15a34b1f1ae63714c789",
+      "files": [
+        {
+          "path": "README.md",
+          "sha": "522e81e48287171c54b856f77a61cf933a6dfc51",
+          "size": 2256
+        },
+        {
+          "path": "model.py",
+          "sha": "6dc91909ec7ada544116a4dff45a500340955a83",
+          "size": 5814
+        },
+        {
+          "path": "train.py",
+          "sha": "3a0d32d8b105998a7ef3079d84a85a7aaed68d2f",
+          "size": 11145
+        }
+      ],
+      "readme_blob": null
+    },
+    {
+      "repo": "HITsz-TMG/PPAT",
+      "url": "https://github.com/HITsz-TMG/PPAT",
+      "revision": "66495d25a04dca1a3d7b86eb9271e53ff410421e",
+      "files": [
+        {
+          "path": "PPATbert/PPATbert_dataset.py",
+          "sha": "f0b0b0e12df1681e617d1e753533d4037884bfb1",
+          "size": 10867
+        },
+        {
+          "path": "PPATbert/PPATbert_framework.py",
+          "sha": "7942632fa9e5466d3c1298107f5eca08108b70ac",
+          "size": 19733
+        },
+        {
+          "path": "PPATbert/PPATbert_model.py",
+          "sha": "5fa68e882c1d52c613de33f8cdbc381d9050e47e",
+          "size": 16668
+        },
+        {
+          "path": "PPATlong/PPATlong_dataset.py",
+          "sha": "840e2415a893c9ff6de4b7270d87ceebe8d60e98",
+          "size": 9690
+        },
+        {
+          "path": "PPATlong/PPATlong_framework.py",
+          "sha": "ed13a532b2dd9400f7cdaf0d8a509dc61de66b64",
+          "size": 19886
+        },
+        {
+          "path": "PPATlong/PPATlong_model.py",
+          "sha": "602c510999c5b73eb71ed2a45a6c51e6b0ab1ddc",
+          "size": 17107
+        },
+        {
+          "path": "README.md",
+          "sha": "dc2d91ecf38edc51b9f28bcbf61a0fea5bd89fe8",
+          "size": 1270
+        },
+        {
+          "path": "data/CTB_data/1/test.json",
+          "sha": "8d800850b9b9652b506dc7131d33fc9256f2d4f3",
+          "size": 210057
+        },
+        {
+          "path": "data/CTB_data/1/train.json",
+          "sha": "6552437c19bf7da93704da71023fb600a459e6a6",
+          "size": 1874091
+        },
+        {
+          "path": "data/ESL_FOLD5/0/test.json",
+          "sha": "bb969a8361111dca04de0d836c0ac230093ea990",
+          "size": 285173
+        },
+        {
+          "path": "data/ESL_FOLD5/0/train.json",
+          "sha": "62f268c691da1a838c00dca5f12ea95cd5c64b8e",
+          "size": 841292
+        }
+      ],
+      "readme_blob": "dc2d91ecf38edc51b9f28bcbf61a0fea5bd89fe8"
+    },
+    {
+      "repo": "hrlics/SemDI",
+      "url": "https://github.com/hrlics/SemDI",
+      "revision": "1c54a16d36f793f638c836f8f35595c2740869fc",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha": "331625a0a3f2fe6ca9a4e0cde22261a04bb3d34e",
+          "size": 1061
+        },
+        {
+          "path": "README.md",
+          "sha": "7c1ecb0ce9c55b32c5842054947f6c316dc16357",
+          "size": 3763
+        },
+        {
+          "path": "src/model.py",
+          "sha": "25b23f8b37ceb714f936fa692166555d16e8bf0b",
+          "size": 4023
+        },
+        {
+          "path": "src/train.py",
+          "sha": "bd2acf72fd5d3d8d003a4027a5cf2bfbb94c668a",
+          "size": 9749
+        }
+      ],
+      "readme_blob": "7c1ecb0ce9c55b32c5842054947f6c316dc16357"
+    },
+    {
+      "repo": "hieum98/HOTECI",
+      "url": "https://github.com/hieum98/HOTECI",
+      "revision": "8d0b7f28449657e0ee44992d4ef51d68edd74ffe",
+      "files": [
+        {
+          "path": "README.md",
+          "sha": "6eab1c893c0eaa8b6e436fa52c8930dc1fd0f277",
+          "size": 696
+        },
+        {
+          "path": "data_modules/base_dataset.py",
+          "sha": "9088c290cbe1742d96cf5d7d7a3327720918f49c",
+          "size": 1637
+        },
+        {
+          "path": "data_modules/readers.py",
+          "sha": "2d1e05b7f083052bb5020dffccd712d0b2a89ca2",
+          "size": 31642
+        }
+      ],
+      "readme_blob": null
+    },
+    {
+      "repo": "ChaoLiang-HUST/ICCL",
+      "url": "https://github.com/ChaoLiang-HUST/ICCL",
+      "revision": "a7e3b3479040b17baf87f96c5de6df5291ae91c7",
+      "files": [
+        {
+          "path": "README.md",
+          "sha": "539c5e7cd09678566525a60303c402c67245a868",
+          "size": 1029
+        },
+        {
+          "path": "load_data.py",
+          "sha": "5a8ae820642186fc2be95a3e99e688760ff563ea",
+          "size": 4368
+        },
+        {
+          "path": "model.py",
+          "sha": "47e2adce6e70013aa841a0fd57da9778725fa051",
+          "size": 4452
+        }
+      ],
+      "readme_blob": null
+    },
+    {
+      "repo": "DMIRLAB-Group/SERE",
+      "url": "https://github.com/DMIRLAB-Group/SERE",
+      "revision": "ab662f8a28f5424b82ea047b6f596285f6a65223",
+      "files": [
+        {
+          "path": "README.md",
+          "sha": "f3707fc6ea2ebf4a0634a87b4942c6b53a356552",
+          "size": 1860
+        }
+      ],
+      "readme_blob": "f3707fc6ea2ebf4a0634a87b4942c6b53a356552"
+    },
+    {
+      "repo": "yuu-hub-fuu/EHNEM",
+      "url": "https://github.com/yuu-hub-fuu/EHNEM",
+      "revision": "035f0a196abfe63786f0c5339c5f9174ffac14c5",
+      "files": [
+        {
+          "path": "README.md",
+          "sha": "6a7cf7c5dbba094bd1e39b6d8c78d160825f31ae",
+          "size": 95
+        }
+      ],
+      "readme_blob": "6a7cf7c5dbba094bd1e39b6d8c78d160825f31ae"
+    },
+    {
+      "repo": "Ewillingfly/BT-ESupCL",
+      "url": "https://github.com/Ewillingfly/BT-ESupCL",
+      "revision": "e9940cee322b7fe558f5c6d47ca80f17e69bf32e",
+      "files": [
+        {
+          "path": "README.md",
+          "sha": "407bff4c234859a0e5bceee9664866563d9af788",
+          "size": 118
+        }
+      ],
+      "readme_blob": "407bff4c234859a0e5bceee9664866563d9af788"
+    }
+  ],
+  "search_boundary": {
+    "queries": [
+      "event causality identification official dataset code",
+      "MECI official dataset",
+      "PPAT progressive pairwise attention",
+      "SemDI",
+      "ICCL",
+      "HOTECI",
+      "SERE",
+      "SVRECI",
+      "EHNEM",
+      "BT-ESupCL"
+    ],
+    "coverage": "Direct mechanism families and 2025–2026 neighbors; not an exhaustive systematic review.",
+    "limitations": [
+      "No runtime validation of new baselines or proposed methods.",
+      "EHNEM and BT-ESupCL publisher full tables not completely accessible; published numeric claims not adopted.",
+      "SVRECI official runnable implementation not located in bounded exact-name search.",
+      "UAIGR prior full-mechanism gap remains open.",
+      "Current proposal does not supersede active SPEC or admit models."
+    ]
+  },
+  "papers": [
+    {
+      "name": "ERGO",
+      "url": "https://aclanthology.org/2022.coling-1.185.pdf",
+      "sha256": "d2567dd86ab8bd0659013de3c54fd8500b40c4fcc2ba60bdc380a2ce28330432",
+      "pages": 11,
+      "table_pages": [
+        7
+      ]
+    },
+    {
+      "name": "PPAT",
+      "url": "https://www.ijcai.org/proceedings/2023/0572.pdf",
+      "sha256": "79b1b6acb0456bc70493e133fea1d1666161cda689722568324fcb66a6667e16",
+      "pages": 9,
+      "table_pages": [
+        5,
+        6
+      ]
+    },
+    {
+      "name": "SemDI",
+      "url": "https://aclanthology.org/2024.emnlp-main.87.pdf",
+      "sha256": "b3dc225fa8475991b1591c1d636f221021b34f5411dd5e16796e250ae4e5e9d2",
+      "pages": 12,
+      "table_pages": []
+    },
+    {
+      "name": "HOTECI",
+      "url": "https://aclanthology.org/2024.lrec-main.711.pdf",
+      "sha256": "199e9b518ffd16cb5e44d3a16799eba83444483c3f0b26a350be61ef8e0337c7",
+      "pages": 11,
+      "table_pages": [
+        6,
+        7
+      ]
+    },
+    {
+      "name": "ICCL",
+      "url": "https://aclanthology.org/2024.emnlp-main.51.pdf",
+      "sha256": "795170267957c7780b73ca7389a1dfe597c6021cc88345036b3a10ec709a5aad",
+      "pages": 14,
+      "table_pages": []
+    },
+    {
+      "name": "SERE",
+      "url": "https://arxiv.org/pdf/2605.03701",
+      "sha256": "ffc34dcd78cfb23e8b3062489d35fec0c45bcea3ce903533ad759fdff83f406c",
+      "pages": 26,
+      "table_pages": [
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "name": "SVRECI",
+      "url": "https://aclanthology.org/2026.acl-long.871.pdf",
+      "sha256": "da6e1da2f6e768693d2a063944e20be432d2f4e5394a10d85d63b38db64d2078",
+      "pages": 25,
+      "table_pages": []
+    },
+    {
+      "name": "LLMERE",
+      "url": "https://aclanthology.org/2025.coling-main.500.pdf",
+      "sha256": "d05e9756f08133b96178834553e946778e8b59fa599c76b3a6f8dfe9068e8f3b",
+      "pages": 13,
+      "table_pages": [
+        5,
+        7
+      ]
+    }
+  ],
+  "artifact_receipts": {
+    "path": "runs/stages/R1/r1-v123-multidataset-review-20261029",
+    "manifest_sha256": "f815da5f46a8bea21bd4820aaa8b4cbe6f52d2c4f7292be99b73c87d9e2c1ed3"
+  },
+  "data_and_source_downloads": [
+    {
+      "name": "CTB_CAT.zip",
+      "url": "https://raw.githubusercontent.com/paramitamirza/Causal-TimeBank/43b593a6bb0dde2dc2e4da7a07bb174f2f7c06ad/Causal-TimeBank-CAT.zip",
+      "bytes": 892204,
+      "sha256": "0bf4fed1206b273174a962913b8904b4cb069c9e24f60af38cef71a5bf7b4206"
+    },
+    {
+      "name": "PPAT_ESL_train.json",
+      "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/0/train.json",
+      "bytes": 841292,
+      "sha256": "5d932d08c881f395e8cddfe56465a948b04b44c809ee91c238e3ab2d7052d09a"
+    },
+    {
+      "name": "PPAT_CTB_train.json",
+      "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/CTB_data/1/train.json",
+      "bytes": 1874091,
+      "sha256": "269865f1123d896e2e526b0607968e3f38b3c505fde9d7a784f14d4544175537"
+    },
+    {
+      "name": "PPAT_dataset.py",
+      "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/PPATbert/PPATbert_dataset.py",
+      "bytes": 10867,
+      "sha256": "07df5d6c2abdcffa12f153b6fdd35655326bf65ee2a85895284ef9069a189ed6"
+    },
+    {
+      "name": "PPAT_framework.py",
+      "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/PPATbert/PPATbert_framework.py",
+      "bytes": 19733,
+      "sha256": "5f2c1522a898d6889548e33cb64b097ec827a62e4b86bd828f38afd970e1646f"
+    },
+    {
+      "name": "SemDI_train.py",
+      "url": "https://raw.githubusercontent.com/hrlics/SemDI/1c54a16d36f793f638c836f8f35595c2740869fc/src/train.py",
+      "bytes": 9749,
+      "sha256": "ba830d50d5c2f1750a6b51db1a630fd7f31771fd96582f3f3dcfe4798db6c08d"
+    },
+    {
+      "name": "ICCL_main.py",
+      "url": "https://raw.githubusercontent.com/ChaoLiang-HUST/ICCL/a7e3b3479040b17baf87f96c5de6df5291ae91c7/main.py",
+      "bytes": 17939,
+      "sha256": "97483bdeac784c94b33b4836339c336e28efecf46c9735fc1eec7a807f4817fc"
+    },
+    {
+      "name": "HOTECI_readers.py",
+      "url": "https://raw.githubusercontent.com/hieum98/HOTECI/8d0b7f28449657e0ee44992d4ef51d68edd74ffe/data_modules/readers.py",
+      "bytes": 31642,
+      "sha256": "4f85028e737292ec2fda347bcd839e2fae135b44d24f9199f270c23160b63620"
+    },
+    {
+      "name": "PPAT_CTB_test.json",
+      "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/CTB_data/1/test.json",
+      "sha256": "09c5deecb7302aa737a1c62c2324d184d31cd70f89668a8a7ca4c530d43ff281",
+      "bytes": 210057
+    },
+    {
+      "name": "ESL_raw.xml",
+      "url": "https://raw.githubusercontent.com/tommasoc80/EventStoryLine/46edefee5e82e0917b823abe0a18bf8c7770f15c/annotated_data/v0.9/1/1_10ecbplus.xml.xml",
+      "sha256": "cf318fb37b20fd109fa249ad7f7f094d747b2c6d21099d9aab8fccf350402253",
+      "bytes": 23819
+    },
+    {
+      "name": "MECI_en_train.tsvx",
+      "url": "https://raw.githubusercontent.com/nlp-uoregon/meci-dataset/2fdddd3ed296e60d8122b042183554b1110d055e/meci-v0.1-public/causal-en/train/aviation_accidents-week2-nhung-28713097_chunk_6.ann.tsvx",
+      "sha256": "5e28b176c0c59a068a6e4abcecb575b7b133c0739dc6a871f1a2f26b07e0e209",
+      "bytes": 5951
+    },
+    {
+      "name": "PPAT_model.py",
+      "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/PPATbert/PPATbert_model.py",
+      "sha256": "8bb70b27872a27774a38dd06e76053d09c08ec2ef95d064cdbacc39a656fa05b",
+      "bytes": 16668,
+      "ast_parsed_only": true
+    },
+    {
+      "name": "PPAT_option.py",
+      "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/PPATbert/PPATbert_option.py",
+      "sha256": "4b270fb9cba50c2855da3fd43d65af4ffe41a68238228dd95e47ad6512cca084",
+      "bytes": 11823,
+      "ast_parsed_only": true
+    },
+    {
+      "name": "ICCL_model.py",
+      "url": "https://raw.githubusercontent.com/ChaoLiang-HUST/ICCL/a7e3b3479040b17baf87f96c5de6df5291ae91c7/model.py",
+      "sha256": "60e67ebca8f764f5b3477c04f2514d4576a2f34a780f2758a1337ec97391f2bc",
+      "bytes": 4452,
+      "ast_parsed_only": true
+    },
+    {
+      "name": "ICCL_load_data.py",
+      "url": "https://raw.githubusercontent.com/ChaoLiang-HUST/ICCL/a7e3b3479040b17baf87f96c5de6df5291ae91c7/load_data.py",
+      "sha256": "392bf5aff00fdb4c219d9d1926dd2d9753064e5ae568cd0c1c0d8df265b7186c",
+      "bytes": 4368,
+      "ast_parsed_only": true
+    }
+  ]
+}

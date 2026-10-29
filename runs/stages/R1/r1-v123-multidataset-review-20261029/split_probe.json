@@ -1,0 +1,13 @@
+{
+  "source_document_overlap": 80,
+  "train_source_docs": 108,
+  "test_source_docs": 81,
+  "overlap_check_used": [
+    "id only"
+  ],
+  "meci_line_types": {
+    "Text": 1,
+    "Event": 29,
+    "Relation": 91
+  }
+}

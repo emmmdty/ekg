@@ -1,0 +1,73 @@
+[
+  {
+    "name": "ERGO",
+    "url": "https://aclanthology.org/2022.coling-1.185.pdf",
+    "sha256": "d2567dd86ab8bd0659013de3c54fd8500b40c4fcc2ba60bdc380a2ce28330432",
+    "pages": 11,
+    "table_pages": [
+      7
+    ]
+  },
+  {
+    "name": "PPAT",
+    "url": "https://www.ijcai.org/proceedings/2023/0572.pdf",
+    "sha256": "79b1b6acb0456bc70493e133fea1d1666161cda689722568324fcb66a6667e16",
+    "pages": 9,
+    "table_pages": [
+      5,
+      6
+    ]
+  },
+  {
+    "name": "SemDI",
+    "url": "https://aclanthology.org/2024.emnlp-main.87.pdf",
+    "sha256": "b3dc225fa8475991b1591c1d636f221021b34f5411dd5e16796e250ae4e5e9d2",
+    "pages": 12,
+    "table_pages": []
+  },
+  {
+    "name": "HOTECI",
+    "url": "https://aclanthology.org/2024.lrec-main.711.pdf",
+    "sha256": "199e9b518ffd16cb5e44d3a16799eba83444483c3f0b26a350be61ef8e0337c7",
+    "pages": 11,
+    "table_pages": [
+      6,
+      7
+    ]
+  },
+  {
+    "name": "ICCL",
+    "url": "https://aclanthology.org/2024.emnlp-main.51.pdf",
+    "sha256": "795170267957c7780b73ca7389a1dfe597c6021cc88345036b3a10ec709a5aad",
+    "pages": 14,
+    "table_pages": []
+  },
+  {
+    "name": "SERE",
+    "url": "https://arxiv.org/pdf/2605.03701",
+    "sha256": "ffc34dcd78cfb23e8b3062489d35fec0c45bcea3ce903533ad759fdff83f406c",
+    "pages": 26,
+    "table_pages": [
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "name": "SVRECI",
+    "url": "https://aclanthology.org/2026.acl-long.871.pdf",
+    "sha256": "da6e1da2f6e768693d2a063944e20be432d2f4e5394a10d85d63b38db64d2078",
+    "pages": 25,
+    "table_pages": []
+  },
+  {
+    "name": "LLMERE",
+    "url": "https://aclanthology.org/2025.coling-main.500.pdf",
+    "sha256": "d05e9756f08133b96178834553e946778e8b59fa599c76b3a6f8dfe9068e8f3b",
+    "pages": 13,
+    "table_pages": [
+      5,
+      7
+    ]
+  }
+]

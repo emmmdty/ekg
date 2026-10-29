@@ -1,0 +1,48 @@
+[
+  {
+    "name": "PPAT_CTB_test.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/CTB_data/1/test.json",
+    "sha256": "09c5deecb7302aa737a1c62c2324d184d31cd70f89668a8a7ca4c530d43ff281",
+    "bytes": 210057
+  },
+  {
+    "name": "ESL_raw.xml",
+    "url": "https://raw.githubusercontent.com/tommasoc80/EventStoryLine/46edefee5e82e0917b823abe0a18bf8c7770f15c/annotated_data/v0.9/1/1_10ecbplus.xml.xml",
+    "sha256": "cf318fb37b20fd109fa249ad7f7f094d747b2c6d21099d9aab8fccf350402253",
+    "bytes": 23819
+  },
+  {
+    "name": "MECI_en_train.tsvx",
+    "url": "https://raw.githubusercontent.com/nlp-uoregon/meci-dataset/2fdddd3ed296e60d8122b042183554b1110d055e/meci-v0.1-public/causal-en/train/aviation_accidents-week2-nhung-28713097_chunk_6.ann.tsvx",
+    "sha256": "5e28b176c0c59a068a6e4abcecb575b7b133c0739dc6a871f1a2f26b07e0e209",
+    "bytes": 5951
+  },
+  {
+    "name": "PPAT_model.py",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/PPATbert/PPATbert_model.py",
+    "sha256": "8bb70b27872a27774a38dd06e76053d09c08ec2ef95d064cdbacc39a656fa05b",
+    "bytes": 16668,
+    "ast_parsed_only": true
+  },
+  {
+    "name": "PPAT_option.py",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/PPATbert/PPATbert_option.py",
+    "sha256": "4b270fb9cba50c2855da3fd43d65af4ffe41a68238228dd95e47ad6512cca084",
+    "bytes": 11823,
+    "ast_parsed_only": true
+  },
+  {
+    "name": "ICCL_model.py",
+    "url": "https://raw.githubusercontent.com/ChaoLiang-HUST/ICCL/a7e3b3479040b17baf87f96c5de6df5291ae91c7/model.py",
+    "sha256": "60e67ebca8f764f5b3477c04f2514d4576a2f34a780f2758a1337ec97391f2bc",
+    "bytes": 4452,
+    "ast_parsed_only": true
+  },
+  {
+    "name": "ICCL_load_data.py",
+    "url": "https://raw.githubusercontent.com/ChaoLiang-HUST/ICCL/a7e3b3479040b17baf87f96c5de6df5291ae91c7/load_data.py",
+    "sha256": "392bf5aff00fdb4c219d9d1926dd2d9753064e5ae568cd0c1c0d8df265b7186c",
+    "bytes": 4368,
+    "ast_parsed_only": true
+  }
+]

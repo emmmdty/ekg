@@ -1,0 +1,113 @@
+[
+  {
+    "name": "CTB_CAT.zip",
+    "url": "https://raw.githubusercontent.com/paramitamirza/Causal-TimeBank/43b593a6bb0dde2dc2e4da7a07bb174f2f7c06ad/Causal-TimeBank-CAT.zip",
+    "bytes": 892204,
+    "sha256": "0bf4fed1206b273174a962913b8904b4cb069c9e24f60af38cef71a5bf7b4206",
+    "xml_count": 183,
+    "first_xml_sections": [
+      [
+        "Markables",
+        61
+      ],
+      [
+        "Relations",
+        40
+      ]
+    ]
+  },
+  {
+    "name": "PPAT_ESL_train.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/0/train.json",
+    "bytes": 841292,
+    "sha256": "5d932d08c881f395e8cddfe56465a948b04b44c809ee91c238e3ab2d7052d09a",
+    "type": "list",
+    "length": 186,
+    "sample_structure": {
+      "id": [
+        "str",
+        44
+      ],
+      "tokens": [
+        "list",
+        241
+      ],
+      "sentence": [
+        "list",
+        241
+      ],
+      "events": [
+        "list",
+        5
+      ],
+      "causal": [
+        "list",
+        6
+      ],
+      "coref": [
+        "list",
+        2
+      ]
+    }
+  },
+  {
+    "name": "PPAT_CTB_train.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/CTB_data/1/train.json",
+    "bytes": 1874091,
+    "sha256": "269865f1123d896e2e526b0607968e3f38b3c505fde9d7a784f14d4544175537",
+    "type": "list",
+    "length": 1249,
+    "sample_structure": {
+      "id": [
+        "str",
+        22
+      ],
+      "tokens": [
+        "list",
+        99
+      ],
+      "sentence": [
+        "list",
+        99
+      ],
+      "events": [
+        "list",
+        4
+      ],
+      "causal": [
+        "list",
+        0
+      ]
+    }
+  },
+  {
+    "name": "PPAT_dataset.py",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/PPATbert/PPATbert_dataset.py",
+    "bytes": 10867,
+    "sha256": "07df5d6c2abdcffa12f153b6fdd35655326bf65ee2a85895284ef9069a189ed6"
+  },
+  {
+    "name": "PPAT_framework.py",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/PPATbert/PPATbert_framework.py",
+    "bytes": 19733,
+    "sha256": "5f2c1522a898d6889548e33cb64b097ec827a62e4b86bd828f38afd970e1646f"
+  },
+  {
+    "name": "SemDI_train.py",
+    "url": "https://raw.githubusercontent.com/hrlics/SemDI/1c54a16d36f793f638c836f8f35595c2740869fc/src/train.py",
+    "bytes": 9749,
+    "sha256": "ba830d50d5c2f1750a6b51db1a630fd7f31771fd96582f3f3dcfe4798db6c08d"
+  },
+  {
+    "name": "ICCL_main.py",
+    "url": "https://raw.githubusercontent.com/ChaoLiang-HUST/ICCL/a7e3b3479040b17baf87f96c5de6df5291ae91c7/main.py",
+    "bytes": 17939,
+    "sha256": "97483bdeac784c94b33b4836339c336e28efecf46c9735fc1eec7a807f4817fc"
+  },
+  {
+    "name": "HOTECI_readers.py",
+    "url": "https://raw.githubusercontent.com/hieum98/HOTECI/8d0b7f28449657e0ee44992d4ef51d68edd74ffe/data_modules/readers.py",
+    "bytes": 31642,
+    "sha256": "4f85028e737292ec2fda347bcd839e2fae135b44d24f9199f270c23160b63620"
+  }
+]

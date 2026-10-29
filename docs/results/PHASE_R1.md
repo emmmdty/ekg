@@ -8806,3 +8806,97 @@ R122草案checkpoint两件已备份4090同名根，原机逐件SHA/size与本地
 SHA `ffb8b3d6350282181d1d2632fedddd5391c661ca7f1db5ed3fceaa729a1c1675`，核验exit0。
 这只封存当前设计版本，不表示R122或科学目标完成。设计变更另存版本，不改此seal。
 本次只追加文档，R1一致性36PASS/diff检查通过，无新增生产代码或模型调用。
+
+### 25.146 多数据集可行性与章节规范的前置审查（2026-10-29，wip）
+
+**科研价值**：作者要求先审查至少两个、目标三个公开独立语料上的可比性，再准备
+收窄为事件关系构建的两方法章＋一构建验证章的 prospective SPEC/设计。要改变的决定是：
+现有候选的监督/结构前提能否跨语料成立，哪些真实公开实现可以形成每章同口径主表，
+哪些必须停止或只列最近邻；不是用新目录、阅读量或现有基线修复充当方法贡献。
+
+**可行性**：本轮只读一手正文、官方仓库及公开语料结构，用本地CPU作下载/解析核查；
+不导入或执行第三方模型、不安装依赖、不训练、不读MAVEN final-valid、不调用外部模型。
+MAVEN已有native强对照与R122五臂设计复用，不复跑原人口/toy/旧权重。其他数据的版本、
+原文、标注方向、候选、split/selection与评测器逐项核实；未知项保留，不以仓库存在判
+可运行，也不承诺未经验证的两项创新。审查产物在同一队列，不新增模型代码或第二队列。
+
+**作者边界**：本轮不要求后续日历，要求问题—模块—架构—消融—强对标的完整设计与
+SPEC准备。新草案不覆盖封存合同/数字；活规范的范围修订须在前置证据齐全后前瞻地
+版本化，不能将未解决项写成已冻结。下续记录本次实际核查及明确未闭合项。
+
+#### 实际取得的一手材料与CPU核查
+
+已下载ERGO、PPAT、SemDI、HOTECI、ICCL、SERE、SVRECI、LLMERE八篇原始PDF，
+保存URL/页数/SHA；初次layout提取SemDI/ICCL等不完整，改普通文本提取后核到表格，
+没有把空提取当无结果。SemDI PDF页5–6、ICCL页6、SERE页6、SVRECI页7已本地渲染
+目视核表；其余采用原PDF文本表核对，视觉核查范围不冒称全部。EHNEM/BT-ESupCL
+另核出版方页面，未取得完整原表，不采用摘要增益作比较数值。
+
+代码按官方链接与固定revision核真实目录；未导入/执行第三方模型，AST解析不等于
+runtime。已新核PPAT model/dataset/framework/options、SemDI train、ICCL model/
+main/load_data、HOTECI readers。SERE未读取可能含密钥的env.env；未调用任何LLM API。
+
+| CPU数据检查 | 实际结果 | 判读边界 |
+|---|---|---|
+| CTB作者CAT ZIP | 183个XML；全部有token文本；5,118 TLINK、318 CLINK；token-anchor坏引用0 | 发布包结构/计数，不是模型成绩；未宣称全量label语义人工核验 |
+| PPAT ESC fold-0 train发布件 | 186实例/186 source IDs，3,642 mention；184实例≥3事件；有序distinct triples 2,951,790；两腿皆正42,018，涉及177实例 | 对称二类训练标签人口，非native方向监督、非power、更不是收益 |
+| PPAT CTB fold-1 train发布件 | 1,249句子实例；4,438 mention；885实例≥3事件；有序distinct triples 45,360；两腿皆正74，涉及37实例 | 不能拿大量None/None三元组证明联合监督充分 |
+| 上述两份train | token与sentence数组长度错误0 | 只查这两份train，不冒称全语料adapter已过 |
+| PPAT CTB fold-1源doc分组 | train来自108个source docs，test来自81个；交集80 | 仅按id的`/sentence`前缀剥离核metadata；没有计算test模型指标。不适合据此声称未见文档泛化，不推断其原任务所有比较无效 |
+| ESC原XML / MECI-English原TSVX | 作者固定版本各取1个train/结构样本成功；MECI样本含Text/Event/Relation记录 | 取到实际原文/标注，不是完整adapter/runtime或全量候选定义验收 |
+
+三元数用`sum n(n−1)(n−2)`；两腿皆正按对称邻接`sum degree(w)(degree(w)−1)`。
+两语料joint类别总计与全部三元组守恒；MAVEN原R120人口不重复。新检查不运行encoder、
+optimizer、GPU，不接触MAVEN final-valid；新语料test件仅用ID核源doc交集。
+
+#### 已核的外部原始表：仅作背景，不进入本项目统一重跑表
+
+| 原论文/原表 | 原设定中已核的F1(%) | 必须保留的范围 |
+|---|---|---|
+| ERGO COLING2022 表2（PDF页7） | Longformer ESC整体50.9、跨句47.1 | 原ESC/CV/二类口径；不与本项目native三类直接相减 |
+| PPAT IJCAI2023 表1–3（PDF页5–6） | BERT ESC整体56.4、MAVEN整体39.2、CTB句内62.4；Longformer CTB句内66.2 | 后两种backbone不是同一条结果；源码对称二类、原split/选模限制另列 |
+| SemDI EMNLP2024 表2–3（PDF页6） | ESC句内62.0、ESC*句内75.3、CTB句内67.0 | ESC*是同语料不同划分，不是第三数据集。表4 full CTB为67.9，与表3不同；主结果引用表3，不取高值 |
+| HOTECI LREC-COLING2024 表1–2（PDF页6） | ESC句内69.1/跨句55.1/整体56.5，CTB句内68.4；MECI-English66.8 | T5/OT/RL/外部知识；数据/候选/原始口径不同，不跨论文据此直接排榜 |
+| ICCL EMNLP2024 表1（PDF页6） | RoBERTa ESC句内70.4/跨句61.3/整体64.2，CTB句内65.4 | 默认发布loader只接ESC且缺train.npy；不能从表格推出当前已能跑CTB |
+| SERE FindingsACL2026 表2（arXiv PDF页6） | GPT-4o-mini：ESC49.9、CTB20.0、MAVEN42.3 | Gao et al.预处理/API few-shot口径；不是与PPAT/本项目native同协议；CPATT条件另表不混用 |
+| SVRECI ACL2026 表1（PDF页7） | ESC句内71.9/跨句61.9/整体65.0，CTB句内64.5 | 正文已核、作者运行实现未定位；不由缺实现推断机制不存在 |
+| LLMERE COLING2025 表2（PDF页7） | Llama3-8B-base MAVEN causal36.0 | 既有发布/保真度边界保持；不打开其official-valid预测重选方案 |
+
+以上出处/版本/hash见`docs/research/20261029_eci_spec_review/sources.json`与下载凭证。
+数据集、粒度、标签与选模不同，因此这里只能了解任务水平，不能宣称某论文胜另一篇。
+没有新增本项目方法分数、baseline效果或独立贡献。
+
+#### 实现可得性和协议审查的实质发现
+
+1. PPAT `PPATbert_dataset.py`把`causal[e1][e2]`和逆向同时置1；不能直接接MAVEN
+   NONE/PRECONDITION/CAUSE。`PPATbert_framework.py:77`在CTB将dev路径设为test，
+   随后用dev F1保存best。其README命令还含`dev_datapatg`拼写及旧入口路径差异。
+2. SemDI `src/train.py:152,169–174`逐epoch评价test fold并按test F1保存best。
+   本项目统一重跑必须独立selection，标透明适配；不能继承原流程后声称合法确认。
+3. ICCL当前loader需要未随树发布的`train.npy`，默认只接ESC；真实代码不等于完整输入链。
+4. HOTECI真实reader/model/trainer存在，但ConceptNet/检索及实际栈/成本尚未验收。
+   SERE还依赖GPT API/Neo4j与外部处理件，本轮不运行。原ERGO native已有运行证据复用。
+5. 新定位的`yuu-hub-fuu/EHNEM` README自称尝试复现并有处理差异，不是已验证作者实现；
+   `Ewillingfly/BT-ESupCL`当前树只有README。SVRECI精确名检索未定位作者实现；
+   不把这些计作已跑强对手，但它们的先行机制仍约束A/B创新性。
+
+#### 设计交付与裁决
+
+新增建议范围/文献与数据矩阵/SPEC提案/架构消融及冻结阻断清单，入口
+`docs/research/20261029_eci_spec_review/README.md`。不新仓库/分支/worktree，不写模型
+代码，不引入第二执行队列。`SPEC.md`和constitution未改写；两方法＋系统验证仍是
+前瞻提案，未以文档数量宣布原科学目标完成。
+
+**裁决**：公开多语料输入基本可得，聚焦关系构建值得保留；但两方法独立新颖性、
+ESC/CTB统一候选/selection/scorer、当前强对手真实运行与新增模型成本未闭合。
+尤其不能将CTB的二类对称标签直接当R122有向三类联合监督，也不能将普通图纠错
+改名为第二贡献。本轮**不准入模型实现/训练，不宣称完整可行或最终SPEC已冻结**。
+缺口与需在冻结前交付的证据逐项写在DESIGN_AND_REVIEW.md，用户不需替代理选题。
+
+凭证：`runs/stages/R1/r1-v123-multidataset-review-20261029/`，6件JSON及manifest；
+manifest SHA `f815da5f46a8bea21bd4820aaa8b4cbe6f52d2c4f7292be99b73c87d9e2c1ed3`。
+
+**文档验证**：新增目录的相对链接、来源JSON、6件凭证hash/manifest身份及8篇原PDF
+hash核验通过；既有R1一致性审计报告`PASS: 36 mapped`。仅改文档，未运行代码三件套，
+不把文档验证视为模型、运行环境或科学可行性通过。最终提交前另核`git diff --check`
+及上述身份；核查输出保留于本轮凭证`document_validation.json`。

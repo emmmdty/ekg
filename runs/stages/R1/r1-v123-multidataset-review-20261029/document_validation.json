@@ -1,0 +1,16 @@
+{
+  "relative_links": "pass",
+  "receipt_hashes": "pass",
+  "original_pdf_hashes": "pass",
+  "pdf_count": 8,
+  "files_reviewed": [
+    "LITERATURE_AND_DATA.md",
+    "SPEC_PROPOSAL.md",
+    "README.md",
+    "DESIGN_AND_REVIEW.md",
+    "sources.json"
+  ],
+  "model_code_added": false,
+  "runtime_or_scientific_pass_claimed": false,
+  "final_recheck": "pass"
+}

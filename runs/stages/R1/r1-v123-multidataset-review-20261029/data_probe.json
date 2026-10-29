@@ -1,0 +1,77 @@
+{
+  "PPAT_ESL_train.json": {
+    "records": 186,
+    "unique_source_ids": 186,
+    "repeated_source_id_count": 0,
+    "mentions_within_records": 3642,
+    "ordered_distinct_triples": 2951790,
+    "records_with_3_mentions": 184,
+    "max_mentions": 58,
+    "bad_token_sentence_lengths": 0,
+    "first_id": "./annotated_data/v0.9/14/14_1ecbplus.xml.xml",
+    "first_events": [
+      [
+        11
+      ],
+      [
+        26
+      ],
+      [
+        28
+      ]
+    ],
+    "causal_pair_shape": [
+      [
+        [
+          11
+        ],
+        [
+          41
+        ]
+      ],
+      [
+        [
+          11
+        ],
+        [
+          16
+        ]
+      ]
+    ]
+  },
+  "PPAT_CTB_train.json": {
+    "records": 1249,
+    "unique_source_ids": 1249,
+    "repeated_source_id_count": 0,
+    "mentions_within_records": 4438,
+    "ordered_distinct_triples": 45360,
+    "records_with_3_mentions": 885,
+    "max_mentions": 11,
+    "bad_token_sentence_lengths": 0,
+    "first_id": "wsj_0938.col/sentence0",
+    "first_events": [
+      [
+        4
+      ],
+      [
+        17
+      ],
+      [
+        18
+      ]
+    ],
+    "causal_pair_shape": []
+  },
+  "CTB_CAT": {
+    "xml_records": 183,
+    "empty_text_records": 0,
+    "relation_tags": {
+      "TLINK": 5118,
+      "CLINK": 318
+    },
+    "bad_token_refs": 0,
+    "sample_relation_schema": [
+      "<CLINK c-signalID=\"16\" comment=\"\" id=\"10\">\n      <source id=\"15\" />\n      <target id=\"18\" />\n    </CLINK>\n    "
+    ]
+  }
+}

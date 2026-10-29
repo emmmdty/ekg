@@ -1,0 +1,16 @@
+{
+  "schema": "ekg.eci_spec_review.receipts.v1",
+  "scope": "CPU download/parsing/static AST review; not model or reproduction results",
+  "files": {
+    "artifact_fetch.json": "1582aa48bc327b901f6feda486eb6360ecaccbf1ea75147f443a5256f6d319c3",
+    "data_probe.json": "d3c5deedf0dbdc754e4d037c9d671817de382e234e1e705cf129092d1fdaa5b0",
+    "joint_signal_probe.json": "c7e10a911640507c262be3c3bb04f9a64bb87290d46f59d3d35f5fadfbbc1734",
+    "papers.json": "c178aec350c857298d6d51eee4b9d65732085fb93a0779c3caeea2f1df38e0e6",
+    "split_probe.json": "97dff69dc4519ecefff26815fcae5a294fdec603ab2cd29b48bb631ea40af0cb",
+    "supplement_fetch.json": "088ea438851839dbf2ed47ad3fff82e1ed4f7a6fc14db71bea95bbb8f5c5dead"
+  },
+  "local_raw_cache": "/tmp/ekg-eci-spec-review-20261029",
+  "final_valid_accessed": false,
+  "model_execution": false,
+  "training": false
+}

@@ -1,0 +1,22 @@
+{
+  "PPAT_ESL_train.json": {
+    "ordered_triples": 2951790,
+    "joint_class_counts_symmetric_binary": {
+      "positive_positive": 42018,
+      "mixed": 311148,
+      "none_none": 2598624
+    },
+    "records_with_two_positive_legs": 177,
+    "caveat": "Released PPAT training labels only; symmetric binary annotations, not native directional Q supervision; incidence does not establish power or method benefit."
+  },
+  "PPAT_CTB_train.json": {
+    "ordered_triples": 45360,
+    "joint_class_counts_symmetric_binary": {
+      "positive_positive": 74,
+      "mixed": 2720,
+      "none_none": 42566
+    },
+    "records_with_two_positive_legs": 37,
+    "caveat": "Released PPAT training labels only; symmetric binary annotations, not native directional Q supervision; incidence does not establish power or method benefit."
+  }
+}
