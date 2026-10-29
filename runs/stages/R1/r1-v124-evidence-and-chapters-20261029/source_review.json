@@ -1,0 +1,552 @@
+{
+  "schema": "ekg.eci_followup.sources.v1",
+  "date": "2026-10-29",
+  "institution": "Harbin Institute of Technology, School of Astronautics; Electronic Information / Control Engineering; professional master (author-confirmed)",
+  "scope": "Primary literature, school standards, static code and CPU data parsing; no model execution, production code, GPU, final-valid outcomes or API model calls",
+  "repositories": [
+    {
+      "repo": "hieum98/DisfusECI",
+      "revision": "0330e2851eb56198be5af49843b7906561ba75a3",
+      "scope": "Static source review only; original inputs, split roles, metric smoothing and runtime differences retained; no standalone LICENSE in inspected tree.",
+      "files": [
+        "README.md",
+        "config.ini",
+        "diffus_ie/data_modules/data_reader.py",
+        "diffus_ie/data_modules/data_preparer.py",
+        "diffus_ie/data_modules/data_modules.py",
+        "diffus_ie/models/model.py",
+        "diffus_ie/models/trainer.py",
+        "main.py",
+        "setup.py"
+      ],
+      "url": "https://github.com/hieum98/DisfusECI/tree/0330e2851eb56198be5af49843b7906561ba75a3",
+      "source_blobs": [
+        {
+          "path": "README.md",
+          "sha": "88c5cb9797906977ca2ea8d3bd9c128cd4aea7a3",
+          "size": 887
+        },
+        {
+          "path": "config.ini",
+          "sha": "50fb1c6f78460774ad6e96982239f8ebba56f7e6",
+          "size": 762
+        },
+        {
+          "path": "diffus_ie/data_modules/data_modules.py",
+          "sha": "77854dafe32d8ee3c5fcf037f753c353b3da23a8",
+          "size": 9725
+        },
+        {
+          "path": "diffus_ie/data_modules/data_preparer.py",
+          "sha": "6952966001ad6334bd31325063cd4da12e0c4837",
+          "size": 9695
+        },
+        {
+          "path": "diffus_ie/data_modules/data_reader.py",
+          "sha": "dbb48f2ed8281ed878e6424775185ccd6b9c3211",
+          "size": 20092
+        },
+        {
+          "path": "diffus_ie/models/model.py",
+          "sha": "af02e45cacdcf937a8416a85334634feb1569603",
+          "size": 10344
+        },
+        {
+          "path": "diffus_ie/models/trainer.py",
+          "sha": "53068d53d590ceb5b71f80241dded5e945b4f6c3",
+          "size": 15403
+        },
+        {
+          "path": "main.py",
+          "sha": "5685ec291d13c79b3deb437c8b38e89cc0f6338c",
+          "size": 8033
+        },
+        {
+          "path": "setup.py",
+          "sha": "f53d8c8560520b7ccb5a572fc055bc6acc41c9fc",
+          "size": 2067
+        }
+      ]
+    },
+    {
+      "repo": "JZXXX/CRFIE",
+      "revision": "3cc7f975cc1dfc45af5a997c448d13bb78963f01",
+      "scope": "Primary mechanism comparison; MIT; original ACE-style joint IE differs from native ECI; not run or adapted.",
+      "files": [
+        "README.md",
+        "LICENSE",
+        "model.py",
+        "train.py",
+        "config.py"
+      ],
+      "url": "https://github.com/JZXXX/CRFIE/tree/3cc7f975cc1dfc45af5a997c448d13bb78963f01",
+      "source_blobs": [
+        {
+          "path": "LICENSE",
+          "sha": "2ba0b3b5b5a8a8ed2319cc227c940436b32332b7",
+          "size": 1062
+        },
+        {
+          "path": "README.md",
+          "sha": "4bf87c98cdf525bbc14eb86feb7a6e793e61b588",
+          "size": 12477
+        },
+        {
+          "path": "config.py",
+          "sha": "c0e749602f156223d1d54839c420e2ab02e3a15e",
+          "size": 8127
+        },
+        {
+          "path": "model.py",
+          "sha": "6223197e2627e880e5e518d12e892f7a48faa87c",
+          "size": 182428
+        },
+        {
+          "path": "train.py",
+          "sha": "b3f38d454d4ac6f0e3d5041249f9e94d203a7aee",
+          "size": 22135
+        }
+      ]
+    },
+    {
+      "repo": "glare-ni/UAIGR",
+      "revision": "c3494ecb13bc55d0039e6d4b7a9b7e7ed166c729",
+      "scope": "Exact-name candidate repository, only README; author provenance is not fully established; not claimed official executable code.",
+      "files": [
+        "README.md"
+      ],
+      "url": "https://github.com/glare-ni/UAIGR/tree/c3494ecb13bc55d0039e6d4b7a9b7e7ed166c729",
+      "source_blobs": [
+        {
+          "path": "README.md",
+          "sha": "c252a98f23481e922b397ff741d8fe6f44d70477",
+          "size": 251
+        }
+      ]
+    },
+    {
+      "repo": "nlp-uoregon/meci-dataset",
+      "revision": "2fdddd3ed296e60d8122b042183554b1110d055e",
+      "scope": "Author archive; only English train content parsed; dev/test article IDs inferred from paths only; incomplete pair coverage and article overlap disclosed.",
+      "files": [],
+      "url": "https://github.com/nlp-uoregon/meci-dataset/tree/2fdddd3ed296e60d8122b042183554b1110d055e",
+      "source_blobs": []
+    },
+    {
+      "repo": "JohnGiorgi/seq2rel",
+      "revision": "3f15c67d3b1e64033565192bc4a84b9de2d1c345",
+      "scope": "Author README and source tree reviewed, Apache-2.0 identified; CopyNet/AllenNLP source not the T5 adaptation in SEAG; not run.",
+      "files": [
+        "README.md",
+        "LICENSE",
+        "seq2rel/dataset_reader.py",
+        "seq2rel/models/copynet_seq2rel.py",
+        "seq2rel/metrics/fbeta_measure_seq2rel.py"
+      ],
+      "url": "https://github.com/JohnGiorgi/seq2rel/tree/3f15c67d3b1e64033565192bc4a84b9de2d1c345",
+      "source_blobs": [
+        {
+          "path": "LICENSE",
+          "sha": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+          "size": 11357
+        },
+        {
+          "path": "README.md",
+          "sha": "d3fb20b0e27bb4fc3c47a0684b6cbf5cc53014c9",
+          "size": 10657
+        },
+        {
+          "path": "seq2rel/dataset_reader.py",
+          "sha": "cdf5d676ed69fb0bea78fcf13af8923792332c71",
+          "size": 5116
+        },
+        {
+          "path": "seq2rel/metrics/fbeta_measure_seq2rel.py",
+          "sha": "a67405caed7780556cf1879035245ff5a1fa9002",
+          "size": 9387
+        },
+        {
+          "path": "seq2rel/models/copynet_seq2rel.py",
+          "sha": "ce77649f5739125129566f453f5fa8966cc83395",
+          "size": 16093
+        }
+      ]
+    },
+    {
+      "repo": "tommasoc80/EventStoryLine",
+      "revision": "46edefee5e82e0917b823abe0a18bf8c7770f15c",
+      "scope": "Author v0.9/v1.0 README read; TLINK event-time scope rules out assuming event-event temporal labels.",
+      "files": [
+        "annotated_data/v0.9/README.txt",
+        "annotated_data/v1.0/README.txt"
+      ],
+      "url": "https://github.com/tommasoc80/EventStoryLine/tree/46edefee5e82e0917b823abe0a18bf8c7770f15c",
+      "source_blobs": []
+    }
+  ],
+  "repository_searches": [
+    {
+      "query": "UAIGR",
+      "success": true,
+      "returned_repositories": [
+        "glare-ni/UAIGR",
+        "asdfgrda/uaigro",
+        "marcio-daniel/Uaigran",
+        "Brinkgrucrease/uaigrhcl",
+        "olivdmt/uaigrill-system",
+        "Guigui3801/uaiGraosTeste",
+        "judylink-arch/PolyUAIGroupE"
+      ],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "ICGR causality",
+      "success": true,
+      "returned_repositories": [],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "ICGR",
+      "success": true,
+      "returned_repositories": [
+        "cyinbox/iCGR",
+        "sadofrazer/icgroup",
+        "KirolosMagdyGirgs/ICGR_NeuralNetwork",
+        "xhacker/icgrep-devel",
+        "xudoh/icgr",
+        "lordtemish/ICGroup3",
+        "Akshin013/icgroupHTML",
+        "darianmis/ICGradeProjection",
+        "usf-cs360-spring2020/homework4-icgranger9",
+        "Akshin013/icgroupHTML3"
+      ],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "\"Iterative Causal Graph Refinement\"",
+      "success": true,
+      "returned_repositories": [],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "DiffusECI",
+      "success": true,
+      "returned_repositories": [
+        "esmitt/DiffuseCircles"
+      ],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "user:hieum98",
+      "success": true,
+      "returned_repositories": [
+        "hieum98/DisfusECI",
+        "hieum98/lusifer",
+        "hieum98/avae",
+        "hieum98/HOTECI",
+        "hieum98/uoregon-authorship",
+        "hieum98/Counterfactual-Augmentation-for-Robust-Authorship-Representation-Learning",
+        "hieum98/GenC",
+        "hieum98/lusifer2",
+        "hieum98/hieum98.github.io",
+        "hieum98/miners"
+      ],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "\"Diffusion\" \"Event Causality\"",
+      "success": true,
+      "returned_repositories": [
+        "hieum98/DisfusECI",
+        "Alasdey/DisfusECI"
+      ],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "CRFIE",
+      "success": true,
+      "returned_repositories": [
+        "JZXXX/CRFIE",
+        "crfield97/crfield97",
+        "bigai-nlco/CRFIE",
+        "crfield18/crfield18.github.io",
+        "abhisekbakshi/CRFIEKF_Parameter_estimation",
+        "abhijitju06/Parameter_Estimation_CRFIEKF"
+      ],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "\"SEAG\" causality",
+      "success": true,
+      "returned_repositories": [],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "\"Structure-Aware Event Causality Generation\"",
+      "success": true,
+      "returned_repositories": [],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "user:tzwwww",
+      "success": true,
+      "returned_repositories": [
+        "TZWwww/PROPHET",
+        "TZWwww/EV2",
+        "TZWwww/MEEL",
+        "TZWwww/TopicDetectionAndTracking",
+        "TZWwww/xv6-chinese",
+        "TZWwww/WizardEvent",
+        "TZWwww/cnn-dailymail",
+        "TZWwww/CREST",
+        "TZWwww/Knowledge_group",
+        "TZWwww/torch-light"
+      ],
+      "scope": "Returned page only; not proof of global absence"
+    },
+    {
+      "query": "seq2rel in:name",
+      "success": false,
+      "returned_repositories": [],
+      "scope": "Returned page only; not proof of global absence"
+    }
+  ],
+  "partial_primary_sources": [
+    {
+      "name": "UAIGR",
+      "url": "https://ieeexplore.ieee.org/document/11464995",
+      "status": "abstract and conference metadata; full mechanism blocked by publisher JavaScript verification"
+    },
+    {
+      "name": "NCHM",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0893608024010098",
+      "status": "publisher abstract/introduction preview; full equations/table not retrieved"
+    },
+    {
+      "name": "MEA",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0893608025012377",
+      "status": "publisher preview only; not adopted as original-table result"
+    },
+    {
+      "name": "CDHR",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0950705126006404",
+      "status": "publisher preview only; not adopted as original-table result"
+    }
+  ],
+  "author_code_access": [
+    {
+      "repo": "malongxuan/ICGR",
+      "url": "https://github.com/malongxuan/ICGR",
+      "status": "paper-linked repository; GitHub API 404 at lookup, not executable baseline"
+    }
+  ],
+  "school_entry_pages": [
+    {
+      "name": "HIT science/engineering writing guide 2025",
+      "url": "https://hitgs.hit.edu.cn/2025/0331/c17546a365618/page.htm",
+      "locator": "Attachment 1 Table 1; sections 1.4.2, 2.1. Attachment 5 electronic-information row says doctoral, not used as master authorization."
+    },
+    {
+      "name": "Engineering professional master thesis requirements",
+      "url": "https://hitgs.hit.edu.cn/2025/0328/c18904a365423/page.htm",
+      "locator": "Thematic research section; PDF pages 3-6; school-specific guide controls local word planning."
+    },
+    {
+      "name": "Control programme",
+      "url": "https://sa.hit.edu.cn/2022/0902/c7426a280596/page.htm",
+      "locator": "Professional master part PDF pages 10-13; academic-master part not substituted."
+    }
+  ],
+  "local_cache": "/tmp/ekg-eci-review2-20261029",
+  "review_independence": "Single-agent source review; SQLite recount is another implementation, not independent reviewer or peer review.",
+  "retrieved_papers": [
+    {
+      "name": "ICGR",
+      "url": "https://aclanthology.org/2026.findings-emnlp.1902.pdf",
+      "sha256": "36d32cca529412876fde86b2c67965881d6cbe82d9ff37c88607199860b1a34b",
+      "pages": 20,
+      "status": "retrieved"
+    },
+    {
+      "name": "DiffusECI",
+      "url": "https://ojs.aaai.org/index.php/AAAI/article/download/29840/31461",
+      "sha256": "fdb2a7bf45d0f0dd3e63c6341226301ef4f3df3b892e0aa10cc9c3ed1ba5a050",
+      "pages": 9,
+      "status": "retrieved"
+    },
+    {
+      "name": "iLIF",
+      "url": "https://aclanthology.org/2024.acl-long.210.pdf",
+      "sha256": "c8c589f95316ba6f08a0bc6e46adbe3611a860f6849e98eea26a2aa94e263606",
+      "pages": 13,
+      "status": "retrieved"
+    },
+    {
+      "name": "MECI",
+      "url": "https://aclanthology.org/2022.coling-1.206.pdf",
+      "sha256": "cadfa18dbe32fc5b8f41862775d7258db8595824c0ba5b3875674cbd54a354ec",
+      "pages": 11,
+      "status": "retrieved"
+    },
+    {
+      "name": "StackedSequential",
+      "url": "https://www.cs.cmu.edu/~vitor/papers/ijcai05_submitted.pdf",
+      "sha256": "cb5b838b10ee578a59435b58100f51500c3e87fd3d6165dbe45c6c140ab154f7",
+      "pages": 6,
+      "status": "retrieved"
+    },
+    {
+      "name": "SEAG",
+      "url": "https://aclanthology.org/2023.findings-acl.283.pdf",
+      "sha256": "854977c27cfe4cac5e335a72b8d51db50577ee9400560273ae96b0918b53c012",
+      "pages": 14,
+      "status": "retrieved"
+    },
+    {
+      "name": "StackedGraphical",
+      "url": "https://www.cs.cmu.edu/~wcohen/postscript/sdm-2007-stack.pdf",
+      "sha256": "09b1c3c1d2f3bf06fca132a8b192830d221c0cd5036c25e09f4c7ab75b71e59b",
+      "pages": 6,
+      "status": "retrieved"
+    },
+    {
+      "name": "HIT_ControlPlan",
+      "url": "https://sa.hit.edu.cn/_upload/article/files/0a/70/dfb6d2da42bd8a6772e229d0f723/63f86acb-52ec-46df-838e-44b6114092ce.pdf",
+      "sha256": "27999b0d648cf2159a266facd6cf62d41c7f477ac5f898b783f0e94556775266",
+      "pages": 13,
+      "status": "retrieved"
+    },
+    {
+      "name": "HIT_ControlOutcomes",
+      "url": "https://sa.hit.edu.cn/_upload/article/files/b1/25/614b9650463bb70f4220de0258f7/5e59ea38-7bda-4e98-b620-cf70725db6db.pdf",
+      "sha256": "096ba6f05b17fb4c926e67a7caa4e1fa52057040142241eb80145b9b51e7f9e5",
+      "pages": 3,
+      "status": "retrieved"
+    },
+    {
+      "name": "CRFIE",
+      "url": "https://aclanthology.org/2023.acl-long.766.pdf",
+      "sha256": "5eac7420f71e76c59882fa5b3eeb35234c42f0cf6c4f07dabf6f0dd7bc9f8755",
+      "pages": 16,
+      "status": "retrieved"
+    }
+  ],
+  "school_guideline_downloads": [
+    {
+      "name": "HIT_WritingGuide.doc",
+      "url": "https://hitgs.hit.edu.cn/_upload/article/files/9d/52/c937ab6d47bd85bb5cdb44910f27/b3fa1757-140b-412c-b315-3ea9cbb7d779.doc",
+      "bytes": 7073792,
+      "sha256": "7701c89d36531437b778709f48266ffb1559125b3432975ffea7342d16876e27",
+      "status": "retrieved",
+      "magic": "d0cf11e0a1b11ae100000000"
+    },
+    {
+      "name": "HIT_GuideSelection.xlsx",
+      "url": "https://hitgs.hit.edu.cn/_upload/article/files/9d/52/c937ab6d47bd85bb5cdb44910f27/7f432b5f-470f-4deb-8344-6caf80124d61.xlsx",
+      "bytes": 11571,
+      "sha256": "6a1c74ee5dd23f1bf14e04d5534667b070637ec01435d996de908b8dbb2c030b",
+      "status": "retrieved",
+      "magic": "504b03041400060008000000"
+    },
+    {
+      "name": "EngineeringMasterRequirements.pdf",
+      "url": "https://hitgs.hit.edu.cn/_upload/article/files/6d/b7/becef42648bfb058c83ddb87df25/7c3fdc21-c57c-4b76-bfd3-9e5e1963551f.pdf",
+      "bytes": 333337,
+      "sha256": "476272c504c099532cb7dd6237c86c6f840032dfbb18df8e9e405f63d0926f94",
+      "status": "retrieved",
+      "magic": "255044462d312e370d0a25a1"
+    }
+  ],
+  "visual_checks": {
+    "HIT_WritingGuide_rendered_pdf_pages": [
+      6,
+      11
+    ],
+    "HIT_GuideSelection_rendered_pdf_pages": [
+      1
+    ],
+    "ICGR_pdf_pages": [
+      7,
+      8
+    ],
+    "DiffusECI_pdf_pages": [
+      6
+    ],
+    "SEAG_pdf_pages": [
+      6
+    ]
+  },
+  "school_conversions": {
+    "HIT_WritingGuide.docx": "a143d5904607a21584df3250517ba8e4636c567e97e353308d6fc57c031aaca5",
+    "HIT_WritingGuide.pdf": "6fbfce7c5244893c6bfff633cab00d80efad51e1148d5205b181a8381db19e28",
+    "HIT_WritingGuide.txt": "cd9dcde2b6c420614d699f5ef149910e70216f1acd7be6cb6361a6710f18341b",
+    "HIT_GuideSelection.pdf": "0f972f14c4b87ef3c307581108ea7c16480d4512ae66500fd5c99d2088cdee61",
+    "HIT_GuideSelection.json": "5d5b2502d144178c2b1edf7b43dac1f7a87d9c5351861b88843ba7aaefdbe8bf"
+  },
+  "reference_theses": {
+    "source_manifest": "docs/research/20261019_thesis_sources.json",
+    "scope": "Existing original PDFs and extracted contents reused; chapter boundaries re-read, no new conversion or replication."
+  },
+  "static_python_sources": [
+    {
+      "path": "DisfusECI/setup.py",
+      "sha256": "97eaa492748afa146868b1534a6ab4b3d9dd30e53f87c6cbcaa866c4a0a02e82",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "DisfusECI/main.py",
+      "sha256": "f30b07d579a146e263fa9b1fe8be47a4682143d27f3ac17278f8bfb0075ebb83",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "DisfusECI/diffus_ie/models/trainer.py",
+      "sha256": "3e5a508b4ec532cc095dd3d99a29e8766f87148c1ffe1cc0307958ecdd01247c",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "DisfusECI/diffus_ie/models/model.py",
+      "sha256": "0644461758ece6c5a34636eece28824b9df2adff05f4b227669ef99080f1e3aa",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "DisfusECI/diffus_ie/data_modules/data_modules.py",
+      "sha256": "aed7eee9ddcffd86d18adc2a34075d39bbd2240892e94449df72cbc14b9ee188",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "DisfusECI/diffus_ie/data_modules/data_preparer.py",
+      "sha256": "87b030b086e40a9514277a1ac670c57d47d21a4ae73ccbaaa388333b9e8c4c9a",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "DisfusECI/diffus_ie/data_modules/data_reader.py",
+      "sha256": "f130057a657ce163f7ef46071d3e1eb1b532dececcd801e023314cfcfc718b88",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "CRFIE/model.py",
+      "sha256": "13e1e3af76ad57e772e9bb72aa53f05c6daf4d84fb29ece6220574de66a68d89",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "CRFIE/train.py",
+      "sha256": "484215e8f11f64a3740e1279fa9e5bb319d187eaaaa8008ea6b13ceeb2cb155c",
+      "syntax": "pass",
+      "executed": false
+    },
+    {
+      "path": "CRFIE/config.py",
+      "sha256": "3b911d256c6ddd66503caa599438a893fc4775accec2fbac84d367da5c359c6f",
+      "syntax": "pass",
+      "executed": false
+    }
+  ]
+}

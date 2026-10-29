@@ -1,0 +1,1327 @@
+{
+  "scope": "Explicitly annotated unordered target pairs, one witness per unique target and distinct w; binary positive merges CauseEffect/EffectCause only for coverage diagnostic",
+  "counts": {
+    "target_witness_instances_annotated_both_legs": 9411,
+    "target_witness_both_positive": 108,
+    "missing_reverse_records": 9268,
+    "inconsistent_reverse_records": 0,
+    "duplicate_conflicting_pairs": 0
+  },
+  "documents": [
+    {
+      "name": "aviation_accidents-week2-nhung-27753327_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week2-nhung-28713097_chunk_6.ann.tsvx",
+      "both_leg_witnesses": 69,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week2-nhung-40022453_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 45,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week2-nhung-55995071_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week2-nhung-6500103_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week2-nhung-66981070_chunk_10.ann.tsvx",
+      "both_leg_witnesses": 42,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week2-phuong-38151761_chunk_125.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week2-phuong-45597512_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week2-phuong-54018125_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week2-phuong-566633_chunk_18.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week2-phuong-5889217_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week2-phuong-7631057_chunk_15.ann.tsvx",
+      "both_leg_witnesses": 45,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-108257_chunk_104.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1154033_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1179238_chunk_11.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-11811268_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 66,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-11818987_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1330450_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-13445442_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-14448785_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-157155_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1627109_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-16271209_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1693886_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1693886_chunk_11.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-17655420_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-176943_chunk_19.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-177541_chunk_21.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-177541_chunk_38.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-177541_chunk_41.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-177541_chunk_77.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-186642_chunk_47.ann.tsvx",
+      "both_leg_witnesses": 42,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-186642_chunk_57.ann.tsvx",
+      "both_leg_witnesses": 66,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1868710_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 60,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1868710_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 111,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-19200227_chunk_59.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-19200227_chunk_63.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-19200227_chunk_66.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-19305738_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-19305738_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-1933609_chunk_11.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-19651164_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-20431222_chunk_10.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 2
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-21110342_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-21517090_chunk_20.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-21517090_chunk_7.ann.tsvx",
+      "both_leg_witnesses": 39,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-2166718_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-22213149_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-23111607_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-23571580_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-2368180_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-2368180_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-24499211_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-246673_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 93,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-246673_chunk_21.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-246673_chunk_23.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-25118943_chunk_8.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-25695470_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-25695470_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-25959005_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-26049797_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-26938697_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-26980479_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-27167389_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-27320961_chunk_11.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-27320961_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 63,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-27753327_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-27859317_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 42,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-28258027_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-28372684_chunk_118.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-28372684_chunk_136.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-28372684_chunk_17.ann.tsvx",
+      "both_leg_witnesses": 39,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-28372684_chunk_26.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-28372684_chunk_65.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-28372684_chunk_70.ann.tsvx",
+      "both_leg_witnesses": 63,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-28466066_chunk_7.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-29308417_chunk_10.ann.tsvx",
+      "both_leg_witnesses": 117,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-29308417_chunk_8.ann.tsvx",
+      "both_leg_witnesses": 84,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-29450_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-30401333_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-30401333_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-30516632_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-3197399_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-32244244_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-32991955_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-33202155_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-33257871_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 42,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-33709214_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 45,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-34226_chunk_26.ann.tsvx",
+      "both_leg_witnesses": 54,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-34226_chunk_30.ann.tsvx",
+      "both_leg_witnesses": 111,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-34226_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-35114294_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-35114318_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-360887_chunk_24.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-36111405_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-36248432_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-38151761_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 45,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-38151761_chunk_128.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-38151761_chunk_29.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-38151761_chunk_76.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-38151761_chunk_91.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-3845726_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-3845726_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-3845726_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 51,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-38575206_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 78,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-38889212_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-403717_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 39,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-54249836_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-5540794_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-56260634_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-56297607_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-566633_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-57304493_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-578107_chunk_19.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-578107_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 42,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-58073082_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 87,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-5825456_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-5889217_chunk_10.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-58905476_chunk_30.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-58905476_chunk_42.ann.tsvx",
+      "both_leg_witnesses": 51,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-61092122_chunk_6.ann.tsvx",
+      "both_leg_witnesses": 57,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-6500103_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-6500103_chunk_6.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-65417682_chunk_11.ann.tsvx",
+      "both_leg_witnesses": 39,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-66981070_chunk_11.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-67757406_chunk_6.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-68054813_chunk_7.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-68116720_chunk_18.ann.tsvx",
+      "both_leg_witnesses": 75,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-6920241_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-6929929_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-6934150_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-720333_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-7631057_chunk_19.ann.tsvx",
+      "both_leg_witnesses": 78,
+      "positive_positive": 6
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-7946493_chunk_14.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-7946493_chunk_22.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-8179507_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 60,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-840769_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-871790_chunk_10.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-871790_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-8799_chunk_36.ann.tsvx",
+      "both_leg_witnesses": 60,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-92734_chunk_40.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-92734_chunk_8.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-92734_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-928166_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 108,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-nhung-9898016_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 93,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-10225452_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-10312823_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-108257_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-108257_chunk_16.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-108257_chunk_36.ann.tsvx",
+      "both_leg_witnesses": 54,
+      "positive_positive": 1
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-108257_chunk_74.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-108257_chunk_88.ann.tsvx",
+      "both_leg_witnesses": 51,
+      "positive_positive": 0
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-108257_chunk_93.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 3
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-11193504_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 3
+    },
+    {
+      "name": "aviation_accidents-week4-phuong-1422475_chunk_21.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 1
+    },
+    {
+      "name": "conflict-week2-nhung-3163034_chunk_8.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-nhung-351949_chunk_114.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-nhung-48676082_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-nhung-52958138_chunk_23.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-nhung-8772658_chunk_26.ann.tsvx",
+      "both_leg_witnesses": 45,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-nhung-940151_chunk_42.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-phuong-33995032_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-phuong-34952460_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-phuong-40494593_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-phuong-59851379_chunk_116.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week2-phuong-611954_chunk_104.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 3
+    },
+    {
+      "name": "conflict-week2-phuong-8880987_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-nhung-103948_chunk_29.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-nhung-1100220_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 6,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-nhung-12025263_chunk_7.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-103948_chunk_23.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-103948_chunk_24.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 3
+    },
+    {
+      "name": "conflict-week4-phuong-10579212_chunk_14.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-10579212_chunk_16.ann.tsvx",
+      "both_leg_witnesses": 57,
+      "positive_positive": 1
+    },
+    {
+      "name": "conflict-week4-phuong-10579212_chunk_19.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-1059855_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-1100220_chunk_11.ann.tsvx",
+      "both_leg_witnesses": 51,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-1100220_chunk_7.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-11344806_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 75,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-11395584_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 60,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-11395584_chunk_15.ann.tsvx",
+      "both_leg_witnesses": 42,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-11395584_chunk_24.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "conflict-week4-phuong-12242321_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 1
+    },
+    {
+      "name": "conflict-week4-phuong-12773963_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week2-nhung-54503723_chunk_60.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week2-nhung-55140572_chunk_98.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week2-nhung-68202451_chunk_34.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week2-nhung-962356_chunk_17.ann.tsvx",
+      "both_leg_witnesses": 84,
+      "positive_positive": 2
+    },
+    {
+      "name": "disasters-week2-phuong-32912918_chunk_14.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week2-phuong-3700841_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week2-phuong-55140572_chunk_106.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 3
+    },
+    {
+      "name": "disasters-week2-phuong-65398595_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 1
+    },
+    {
+      "name": "disasters-week2-phuong-66710746_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 3,
+      "positive_positive": 1
+    },
+    {
+      "name": "disasters-week2-phuong-68235417_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 54,
+      "positive_positive": 2
+    },
+    {
+      "name": "disasters-week2-phuong-8174794_chunk_24.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week2-phuong-987057_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week4-phuong-108257_chunk_21.ann.tsvx",
+      "both_leg_witnesses": 66,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week4-phuong-108257_chunk_75.ann.tsvx",
+      "both_leg_witnesses": 159,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week4-phuong-108257_chunk_76.ann.tsvx",
+      "both_leg_witnesses": 45,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week4-phuong-11957981_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 63,
+      "positive_positive": 1
+    },
+    {
+      "name": "disasters-week4-phuong-11957981_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week4-phuong-1256043_chunk_0.ann.tsvx",
+      "both_leg_witnesses": 42,
+      "positive_positive": 1
+    },
+    {
+      "name": "disasters-week4-phuong-1256043_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 3
+    },
+    {
+      "name": "disasters-week4-phuong-1375455_chunk_6.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week4-phuong-1375455_chunk_8.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "disasters-week4-phuong-1427990_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 1
+    },
+    {
+      "name": "disasters-week4-phuong-1427990_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week2-nhung-33411940_chunk_24.ann.tsvx",
+      "both_leg_witnesses": 132,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week2-nhung-381602_chunk_19.ann.tsvx",
+      "both_leg_witnesses": 72,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week2-nhung-43971623_chunk_101.ann.tsvx",
+      "both_leg_witnesses": 54,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week2-nhung-502730_chunk_6.ann.tsvx",
+      "both_leg_witnesses": 66,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week2-nhung-61263534_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week2-nhung-63862683_chunk_49.ann.tsvx",
+      "both_leg_witnesses": 72,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week2-phuong-27155419_chunk_8.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week2-phuong-30911176_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week2-phuong-63983988_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 213,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week2-phuong-74234_chunk_3.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week2-phuong-839297_chunk_8.ann.tsvx",
+      "both_leg_witnesses": 24,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week2-phuong-924687_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 66,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_108.ann.tsvx",
+      "both_leg_witnesses": 123,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 141,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_161.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_172.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_175.ann.tsvx",
+      "both_leg_witnesses": 27,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_177.ann.tsvx",
+      "both_leg_witnesses": 21,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_189.ann.tsvx",
+      "both_leg_witnesses": 36,
+      "positive_positive": 0
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_49.ann.tsvx",
+      "both_leg_witnesses": 141,
+      "positive_positive": 1
+    },
+    {
+      "name": "economic_crisis-week4-phuong-10062100_chunk_85.ann.tsvx",
+      "both_leg_witnesses": 108,
+      "positive_positive": 2
+    },
+    {
+      "name": "epidemics-week2-nhung-63374708_chunk_10.ann.tsvx",
+      "both_leg_witnesses": 69,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week2-nhung-63928828_chunk_7.ann.tsvx",
+      "both_leg_witnesses": 135,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week2-nhung-64778691_chunk_18.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week2-nhung-67452988_chunk_2.ann.tsvx",
+      "both_leg_witnesses": 105,
+      "positive_positive": 2
+    },
+    {
+      "name": "epidemics-week2-phuong-63366667_chunk_46.ann.tsvx",
+      "both_leg_witnesses": 135,
+      "positive_positive": 9
+    },
+    {
+      "name": "epidemics-week2-phuong-63453597_chunk_29.ann.tsvx",
+      "both_leg_witnesses": 90,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week2-phuong-63464796_chunk_21.ann.tsvx",
+      "both_leg_witnesses": 51,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week2-phuong-63554423_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 75,
+      "positive_positive": 1
+    },
+    {
+      "name": "epidemics-week2-phuong-63640929_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 51,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week2-phuong-63678830_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 66,
+      "positive_positive": 1
+    },
+    {
+      "name": "epidemics-week2-phuong-64033197_chunk_47.ann.tsvx",
+      "both_leg_witnesses": 39,
+      "positive_positive": 2
+    },
+    {
+      "name": "epidemics-week2-phuong-64719181_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 141,
+      "positive_positive": 4
+    },
+    {
+      "name": "epidemics-week4-phuong-1073824_chunk_8.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week4-phuong-1179505_chunk_4.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week4-phuong-1516915_chunk_22.ann.tsvx",
+      "both_leg_witnesses": 87,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week4-phuong-1516915_chunk_25.ann.tsvx",
+      "both_leg_witnesses": 42,
+      "positive_positive": 0
+    },
+    {
+      "name": "epidemics-week4-phuong-1516915_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-nhung-31417932_chunk_7.ann.tsvx",
+      "both_leg_witnesses": 0,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-nhung-34569548_chunk_13.ann.tsvx",
+      "both_leg_witnesses": 30,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-nhung-54525359_chunk_7.ann.tsvx",
+      "both_leg_witnesses": 57,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-nhung-588689_chunk_37.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 1
+    },
+    {
+      "name": "railway_accidents-week2-nhung-68379595_chunk_1.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-nhung-8226511_chunk_21.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-nhung-8671557_chunk_64.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-phuong-31417932_chunk_35.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-phuong-32529572_chunk_16.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-phuong-44519312_chunk_19.ann.tsvx",
+      "both_leg_witnesses": 33,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-phuong-66459947_chunk_5.ann.tsvx",
+      "both_leg_witnesses": 48,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week2-phuong-67571488_chunk_15.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 1
+    },
+    {
+      "name": "railway_accidents-week4-phuong-1093599_chunk_12.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week4-phuong-1093599_chunk_18.ann.tsvx",
+      "both_leg_witnesses": 15,
+      "positive_positive": 1
+    },
+    {
+      "name": "railway_accidents-week4-phuong-1093599_chunk_37.ann.tsvx",
+      "both_leg_witnesses": 39,
+      "positive_positive": 2
+    },
+    {
+      "name": "railway_accidents-week4-phuong-1119188_chunk_9.ann.tsvx",
+      "both_leg_witnesses": 12,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week4-phuong-11357029_chunk_29.ann.tsvx",
+      "both_leg_witnesses": 18,
+      "positive_positive": 0
+    },
+    {
+      "name": "railway_accidents-week4-phuong-11357029_chunk_34.ann.tsvx",
+      "both_leg_witnesses": 9,
+      "positive_positive": 1
+    }
+  ]
+}

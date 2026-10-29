@@ -1,0 +1,14 @@
+{
+  "status": "pass",
+  "method": "separate SQLite regrouping from raw English-train archive records; no import of prior parser",
+  "mentions": 5249,
+  "labels": {
+    "CauseEffect": 1230,
+    "EffectCause": 1230,
+    "NoRel": 10372
+  },
+  "all_unordered_pairs": 52730,
+  "explicit_unordered_pairs": 11050,
+  "uncovered_pairs": 41680,
+  "heldout_labels_read": false
+}

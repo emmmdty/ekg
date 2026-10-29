@@ -1,0 +1,16 @@
+{
+  "schema": "ekg.eci_followup.receipts.v1",
+  "files": {
+    "HIT_GuideSelection.json": "5d5b2502d144178c2b1edf7b43dac1f7a87d9c5351861b88843ba7aaefdbe8bf",
+    "meci_english_tree.json": "154b1f6bb6f715a41112bdc0a6990ef8c8e32bc76f3701bb9d6697129c7da293",
+    "meci_independent_recount.json": "572e4c686096b90ea29b5c48441bc3f5288b38a9f3d2c2d390a9d4e431c84582",
+    "meci_joint_coverage.json": "158f76b50693d6034a5894b382ebb21830d2aa7133bd35cbd12e2c495e1b8a5b",
+    "meci_split_metadata.json": "7f86e2c52e46194f1481c54f9e61f9a0b9a74b354b74f8440169a67839f6127b",
+    "meci_train_audit.json": "ffa21b08eb35c460f2fe10d777c46b84529d5de14fdb6757de1e8e268b59aa3e",
+    "source_review.json": "1b36b1934ce2319fde23e991ecc08001c36acde1aded07b5c1c67bfce9ce5afc"
+  },
+  "model_code_added": false,
+  "model_execution": false,
+  "gpu_or_training": false,
+  "maven_final_valid_accessed": false
+}

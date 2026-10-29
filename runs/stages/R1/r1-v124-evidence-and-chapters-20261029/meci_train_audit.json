@@ -1,0 +1,3692 @@
+{
+  "summary": {
+    "url": "https://codeload.github.com/nlp-uoregon/meci-dataset/zip/2fdddd3ed296e60d8122b042183554b1110d055e",
+    "archive_sha256": "7e43785d2f3e21d5a1a997da5bb90e9ce2fcbad877b505fb7a5898e601adf4ed",
+    "bytes": 4901707,
+    "scope": "English train only; no dev/test contents parsed",
+    "documents": 263,
+    "label_counts": {
+      "CauseEffect": 1230,
+      "EffectCause": 1230,
+      "NoRel": 10372
+    },
+    "total_mentions": 5249,
+    "full_pair_coverage_docs": 0,
+    "uncovered_pair_count": 41680,
+    "mention_offset_mismatches": 0,
+    "reference_errors": 0,
+    "errors": [],
+    "max_mentions": 36,
+    "documents_at_least_three_mentions": 263
+  },
+  "documents": [
+    {
+      "path": "aviation_accidents-week2-nhung-27753327_chunk_2.ann.tsvx",
+      "events": 14,
+      "relation_records": 18,
+      "unique_unordered_pairs": 15,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 76,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 12
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-nhung-28713097_chunk_6.ann.tsvx",
+      "events": 29,
+      "relation_records": 91,
+      "unique_unordered_pairs": 82,
+      "all_unordered_pairs": 406,
+      "uncovered_pairs": 324,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 85
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-nhung-40022453_chunk_3.ann.tsvx",
+      "events": 22,
+      "relation_records": 55,
+      "unique_unordered_pairs": 47,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 184,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 43
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-nhung-55995071_chunk_4.ann.tsvx",
+      "events": 15,
+      "relation_records": 33,
+      "unique_unordered_pairs": 28,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 77,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-nhung-6500103_chunk_12.ann.tsvx",
+      "events": 15,
+      "relation_records": 30,
+      "unique_unordered_pairs": 26,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 79,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 22
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-nhung-66981070_chunk_10.ann.tsvx",
+      "events": 26,
+      "relation_records": 70,
+      "unique_unordered_pairs": 60,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 265,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 56
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-phuong-38151761_chunk_125.ann.tsvx",
+      "events": 12,
+      "relation_records": 18,
+      "unique_unordered_pairs": 15,
+      "all_unordered_pairs": 66,
+      "uncovered_pairs": 51,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 12
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-phuong-45597512_chunk_2.ann.tsvx",
+      "events": 14,
+      "relation_records": 25,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 71,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 19
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-phuong-54018125_chunk_9.ann.tsvx",
+      "events": 16,
+      "relation_records": 32,
+      "unique_unordered_pairs": 25,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 95,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 22
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-phuong-566633_chunk_18.ann.tsvx",
+      "events": 13,
+      "relation_records": 23,
+      "unique_unordered_pairs": 19,
+      "all_unordered_pairs": 78,
+      "uncovered_pairs": 59,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 15
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-phuong-5889217_chunk_9.ann.tsvx",
+      "events": 19,
+      "relation_records": 46,
+      "unique_unordered_pairs": 38,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 133,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 34
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week2-phuong-7631057_chunk_15.ann.tsvx",
+      "events": 17,
+      "relation_records": 44,
+      "unique_unordered_pairs": 37,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 99,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 30
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-108257_chunk_104.ann.tsvx",
+      "events": 11,
+      "relation_records": 18,
+      "unique_unordered_pairs": 17,
+      "all_unordered_pairs": 55,
+      "uncovered_pairs": 38,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 16
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1154033_chunk_13.ann.tsvx",
+      "events": 23,
+      "relation_records": 55,
+      "unique_unordered_pairs": 50,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 203,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 51
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1179238_chunk_11.ann.tsvx",
+      "events": 14,
+      "relation_records": 21,
+      "unique_unordered_pairs": 18,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 73,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 19
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-11811268_chunk_3.ann.tsvx",
+      "events": 24,
+      "relation_records": 72,
+      "unique_unordered_pairs": 64,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 212,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 66
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-11818987_chunk_1.ann.tsvx",
+      "events": 13,
+      "relation_records": 22,
+      "unique_unordered_pairs": 18,
+      "all_unordered_pairs": 78,
+      "uncovered_pairs": 60,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 16
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1330450_chunk_1.ann.tsvx",
+      "events": 13,
+      "relation_records": 22,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 78,
+      "uncovered_pairs": 58,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 18
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-13445442_chunk_0.ann.tsvx",
+      "events": 15,
+      "relation_records": 19,
+      "unique_unordered_pairs": 17,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 88,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 17
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-14448785_chunk_2.ann.tsvx",
+      "events": 19,
+      "relation_records": 23,
+      "unique_unordered_pairs": 23,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 148,
+      "labels": {
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-157155_chunk_3.ann.tsvx",
+      "events": 18,
+      "relation_records": 31,
+      "unique_unordered_pairs": 26,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 127,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 21
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1627109_chunk_3.ann.tsvx",
+      "events": 17,
+      "relation_records": 24,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 116,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 18
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-16271209_chunk_5.ann.tsvx",
+      "events": 14,
+      "relation_records": 21,
+      "unique_unordered_pairs": 18,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 73,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 17
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1693886_chunk_1.ann.tsvx",
+      "events": 15,
+      "relation_records": 26,
+      "unique_unordered_pairs": 22,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 83,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 20
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1693886_chunk_11.ann.tsvx",
+      "events": 13,
+      "relation_records": 24,
+      "unique_unordered_pairs": 19,
+      "all_unordered_pairs": 78,
+      "uncovered_pairs": 59,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 20
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-17655420_chunk_0.ann.tsvx",
+      "events": 18,
+      "relation_records": 31,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 126,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-176943_chunk_19.ann.tsvx",
+      "events": 14,
+      "relation_records": 16,
+      "unique_unordered_pairs": 14,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 77,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 14
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-177541_chunk_21.ann.tsvx",
+      "events": 21,
+      "relation_records": 50,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 166,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 46
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-177541_chunk_38.ann.tsvx",
+      "events": 21,
+      "relation_records": 45,
+      "unique_unordered_pairs": 42,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 168,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 43
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-177541_chunk_41.ann.tsvx",
+      "events": 17,
+      "relation_records": 34,
+      "unique_unordered_pairs": 30,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 106,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 26
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-177541_chunk_77.ann.tsvx",
+      "events": 19,
+      "relation_records": 36,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 140,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-186642_chunk_47.ann.tsvx",
+      "events": 25,
+      "relation_records": 72,
+      "unique_unordered_pairs": 64,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 236,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 68
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-186642_chunk_57.ann.tsvx",
+      "events": 31,
+      "relation_records": 105,
+      "unique_unordered_pairs": 90,
+      "all_unordered_pairs": 465,
+      "uncovered_pairs": 375,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 95
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1868710_chunk_4.ann.tsvx",
+      "events": 19,
+      "relation_records": 55,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 127,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 39
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1868710_chunk_9.ann.tsvx",
+      "events": 27,
+      "relation_records": 87,
+      "unique_unordered_pairs": 78,
+      "all_unordered_pairs": 351,
+      "uncovered_pairs": 273,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 73
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-19200227_chunk_59.ann.tsvx",
+      "events": 19,
+      "relation_records": 38,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 140,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 26
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-19200227_chunk_63.ann.tsvx",
+      "events": 14,
+      "relation_records": 20,
+      "unique_unordered_pairs": 15,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 76,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 10
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-19200227_chunk_66.ann.tsvx",
+      "events": 16,
+      "relation_records": 30,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 93,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 24
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-19305738_chunk_1.ann.tsvx",
+      "events": 20,
+      "relation_records": 34,
+      "unique_unordered_pairs": 30,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 160,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 28
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-19305738_chunk_12.ann.tsvx",
+      "events": 19,
+      "relation_records": 36,
+      "unique_unordered_pairs": 32,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 139,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-1933609_chunk_11.ann.tsvx",
+      "events": 16,
+      "relation_records": 23,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 100,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 19
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-19651164_chunk_13.ann.tsvx",
+      "events": 21,
+      "relation_records": 50,
+      "unique_unordered_pairs": 46,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 164,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 44
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-20431222_chunk_10.ann.tsvx",
+      "events": 20,
+      "relation_records": 53,
+      "unique_unordered_pairs": 45,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 145,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 39
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-21110342_chunk_12.ann.tsvx",
+      "events": 16,
+      "relation_records": 37,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 93,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-21517090_chunk_20.ann.tsvx",
+      "events": 22,
+      "relation_records": 48,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 187,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 44
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-21517090_chunk_7.ann.tsvx",
+      "events": 23,
+      "relation_records": 56,
+      "unique_unordered_pairs": 52,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 201,
+      "labels": {
+        "NoRel": 56
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-2166718_chunk_1.ann.tsvx",
+      "events": 13,
+      "relation_records": 18,
+      "unique_unordered_pairs": 16,
+      "all_unordered_pairs": 78,
+      "uncovered_pairs": 62,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 16
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-22213149_chunk_1.ann.tsvx",
+      "events": 17,
+      "relation_records": 20,
+      "unique_unordered_pairs": 16,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 120,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 16
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-23111607_chunk_0.ann.tsvx",
+      "events": 16,
+      "relation_records": 31,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 93,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-23571580_chunk_3.ann.tsvx",
+      "events": 19,
+      "relation_records": 39,
+      "unique_unordered_pairs": 34,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 137,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 31
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-2368180_chunk_0.ann.tsvx",
+      "events": 21,
+      "relation_records": 53,
+      "unique_unordered_pairs": 43,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 167,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 41
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-2368180_chunk_1.ann.tsvx",
+      "events": 23,
+      "relation_records": 57,
+      "unique_unordered_pairs": 46,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 207,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 43
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-24499211_chunk_13.ann.tsvx",
+      "events": 17,
+      "relation_records": 27,
+      "unique_unordered_pairs": 24,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 112,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-246673_chunk_12.ann.tsvx",
+      "events": 26,
+      "relation_records": 84,
+      "unique_unordered_pairs": 78,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 247,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 80
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-246673_chunk_21.ann.tsvx",
+      "events": 18,
+      "relation_records": 42,
+      "unique_unordered_pairs": 36,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 117,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 30
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-246673_chunk_23.ann.tsvx",
+      "events": 17,
+      "relation_records": 44,
+      "unique_unordered_pairs": 37,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 99,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 38
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-25118943_chunk_8.ann.tsvx",
+      "events": 14,
+      "relation_records": 13,
+      "unique_unordered_pairs": 11,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 80,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 11
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-25695470_chunk_2.ann.tsvx",
+      "events": 12,
+      "relation_records": 24,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 66,
+      "uncovered_pairs": 46,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 16
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-25695470_chunk_3.ann.tsvx",
+      "events": 24,
+      "relation_records": 56,
+      "unique_unordered_pairs": 51,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 225,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 48
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-25959005_chunk_0.ann.tsvx",
+      "events": 23,
+      "relation_records": 41,
+      "unique_unordered_pairs": 40,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 213,
+      "labels": {
+        "NoRel": 41
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-26049797_chunk_1.ann.tsvx",
+      "events": 16,
+      "relation_records": 25,
+      "unique_unordered_pairs": 23,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 97,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 21
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-26938697_chunk_4.ann.tsvx",
+      "events": 15,
+      "relation_records": 31,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 78,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 25
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-26980479_chunk_0.ann.tsvx",
+      "events": 14,
+      "relation_records": 22,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 71,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 18
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-27167389_chunk_2.ann.tsvx",
+      "events": 14,
+      "relation_records": 20,
+      "unique_unordered_pairs": 18,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 73,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 18
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-27320961_chunk_11.ann.tsvx",
+      "events": 17,
+      "relation_records": 26,
+      "unique_unordered_pairs": 25,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 111,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 24
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-27320961_chunk_3.ann.tsvx",
+      "events": 23,
+      "relation_records": 60,
+      "unique_unordered_pairs": 56,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 197,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 56
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-27753327_chunk_0.ann.tsvx",
+      "events": 17,
+      "relation_records": 34,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 109,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 26
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-27859317_chunk_0.ann.tsvx",
+      "events": 25,
+      "relation_records": 73,
+      "unique_unordered_pairs": 61,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 239,
+      "labels": {
+        "CauseEffect": 10,
+        "EffectCause": 10,
+        "NoRel": 53
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-28258027_chunk_13.ann.tsvx",
+      "events": 23,
+      "relation_records": 51,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 209,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 49
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-28372684_chunk_118.ann.tsvx",
+      "events": 17,
+      "relation_records": 36,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 105,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 28
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-28372684_chunk_136.ann.tsvx",
+      "events": 20,
+      "relation_records": 43,
+      "unique_unordered_pairs": 42,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 148,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 41
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-28372684_chunk_17.ann.tsvx",
+      "events": 27,
+      "relation_records": 71,
+      "unique_unordered_pairs": 64,
+      "all_unordered_pairs": 351,
+      "uncovered_pairs": 287,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 65
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-28372684_chunk_26.ann.tsvx",
+      "events": 20,
+      "relation_records": 39,
+      "unique_unordered_pairs": 36,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 154,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 35
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-28372684_chunk_65.ann.tsvx",
+      "events": 18,
+      "relation_records": 47,
+      "unique_unordered_pairs": 41,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 112,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 35
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-28372684_chunk_70.ann.tsvx",
+      "events": 27,
+      "relation_records": 85,
+      "unique_unordered_pairs": 75,
+      "all_unordered_pairs": 351,
+      "uncovered_pairs": 276,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 69
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-28466066_chunk_7.ann.tsvx",
+      "events": 20,
+      "relation_records": 39,
+      "unique_unordered_pairs": 35,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 155,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 33
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-29308417_chunk_10.ann.tsvx",
+      "events": 29,
+      "relation_records": 103,
+      "unique_unordered_pairs": 90,
+      "all_unordered_pairs": 406,
+      "uncovered_pairs": 316,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 87
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-29308417_chunk_8.ann.tsvx",
+      "events": 25,
+      "relation_records": 72,
+      "unique_unordered_pairs": 62,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 238,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 56
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-29450_chunk_9.ann.tsvx",
+      "events": 16,
+      "relation_records": 29,
+      "unique_unordered_pairs": 25,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 95,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 25
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-30401333_chunk_0.ann.tsvx",
+      "events": 18,
+      "relation_records": 40,
+      "unique_unordered_pairs": 32,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 121,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 26
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-30401333_chunk_1.ann.tsvx",
+      "events": 18,
+      "relation_records": 33,
+      "unique_unordered_pairs": 30,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 123,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 29
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-30516632_chunk_3.ann.tsvx",
+      "events": 16,
+      "relation_records": 35,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 89,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 29
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-3197399_chunk_3.ann.tsvx",
+      "events": 16,
+      "relation_records": 26,
+      "unique_unordered_pairs": 22,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 98,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 22
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-32244244_chunk_3.ann.tsvx",
+      "events": 18,
+      "relation_records": 40,
+      "unique_unordered_pairs": 33,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 120,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 28
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-32991955_chunk_2.ann.tsvx",
+      "events": 22,
+      "relation_records": 50,
+      "unique_unordered_pairs": 43,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 188,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 42
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-33202155_chunk_1.ann.tsvx",
+      "events": 15,
+      "relation_records": 21,
+      "unique_unordered_pairs": 18,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 87,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 15
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-33257871_chunk_5.ann.tsvx",
+      "events": 15,
+      "relation_records": 28,
+      "unique_unordered_pairs": 25,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 80,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 24
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-33709214_chunk_12.ann.tsvx",
+      "events": 23,
+      "relation_records": 66,
+      "unique_unordered_pairs": 59,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 194,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 60
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-34226_chunk_26.ann.tsvx",
+      "events": 22,
+      "relation_records": 60,
+      "unique_unordered_pairs": 55,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 176,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 52
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-34226_chunk_30.ann.tsvx",
+      "events": 26,
+      "relation_records": 84,
+      "unique_unordered_pairs": 77,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 248,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 76
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-34226_chunk_5.ann.tsvx",
+      "events": 24,
+      "relation_records": 49,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 232,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 47
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-35114294_chunk_1.ann.tsvx",
+      "events": 17,
+      "relation_records": 27,
+      "unique_unordered_pairs": 23,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 113,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 21
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-35114318_chunk_0.ann.tsvx",
+      "events": 16,
+      "relation_records": 31,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 93,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-360887_chunk_24.ann.tsvx",
+      "events": 10,
+      "relation_records": 8,
+      "unique_unordered_pairs": 8,
+      "all_unordered_pairs": 45,
+      "uncovered_pairs": 37,
+      "labels": {
+        "NoRel": 8
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-36111405_chunk_3.ann.tsvx",
+      "events": 17,
+      "relation_records": 36,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 105,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 26
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-36248432_chunk_1.ann.tsvx",
+      "events": 17,
+      "relation_records": 37,
+      "unique_unordered_pairs": 33,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 103,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 33
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-38151761_chunk_12.ann.tsvx",
+      "events": 26,
+      "relation_records": 70,
+      "unique_unordered_pairs": 66,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 259,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 64
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-38151761_chunk_128.ann.tsvx",
+      "events": 18,
+      "relation_records": 37,
+      "unique_unordered_pairs": 32,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 121,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 31
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-38151761_chunk_29.ann.tsvx",
+      "events": 14,
+      "relation_records": 23,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 71,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 17
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-38151761_chunk_76.ann.tsvx",
+      "events": 17,
+      "relation_records": 35,
+      "unique_unordered_pairs": 29,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 107,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-38151761_chunk_91.ann.tsvx",
+      "events": 20,
+      "relation_records": 45,
+      "unique_unordered_pairs": 43,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 147,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 41
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-3845726_chunk_2.ann.tsvx",
+      "events": 21,
+      "relation_records": 52,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 161,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 48
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-3845726_chunk_3.ann.tsvx",
+      "events": 15,
+      "relation_records": 34,
+      "unique_unordered_pairs": 30,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 75,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-3845726_chunk_5.ann.tsvx",
+      "events": 19,
+      "relation_records": 47,
+      "unique_unordered_pairs": 42,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 129,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 45
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-38575206_chunk_4.ann.tsvx",
+      "events": 28,
+      "relation_records": 95,
+      "unique_unordered_pairs": 80,
+      "all_unordered_pairs": 378,
+      "uncovered_pairs": 298,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 77
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-38889212_chunk_3.ann.tsvx",
+      "events": 18,
+      "relation_records": 35,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 122,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 31
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-403717_chunk_0.ann.tsvx",
+      "events": 20,
+      "relation_records": 49,
+      "unique_unordered_pairs": 43,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 147,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 45
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-54249836_chunk_2.ann.tsvx",
+      "events": 18,
+      "relation_records": 39,
+      "unique_unordered_pairs": 35,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 118,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 33
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-5540794_chunk_2.ann.tsvx",
+      "events": 21,
+      "relation_records": 42,
+      "unique_unordered_pairs": 40,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 170,
+      "labels": {
+        "NoRel": 42
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-56260634_chunk_3.ann.tsvx",
+      "events": 23,
+      "relation_records": 58,
+      "unique_unordered_pairs": 48,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 205,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 46
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-56297607_chunk_2.ann.tsvx",
+      "events": 16,
+      "relation_records": 32,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 89,
+      "labels": {
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-566633_chunk_5.ann.tsvx",
+      "events": 13,
+      "relation_records": 26,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 78,
+      "uncovered_pairs": 58,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 16
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-57304493_chunk_4.ann.tsvx",
+      "events": 23,
+      "relation_records": 62,
+      "unique_unordered_pairs": 53,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 200,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 56
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-578107_chunk_19.ann.tsvx",
+      "events": 23,
+      "relation_records": 52,
+      "unique_unordered_pairs": 45,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 208,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 50
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-578107_chunk_4.ann.tsvx",
+      "events": 21,
+      "relation_records": 49,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 166,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 43
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-58073082_chunk_1.ann.tsvx",
+      "events": 23,
+      "relation_records": 71,
+      "unique_unordered_pairs": 62,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 191,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 65
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-5825456_chunk_3.ann.tsvx",
+      "events": 21,
+      "relation_records": 52,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 166,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 46
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-5889217_chunk_10.ann.tsvx",
+      "events": 14,
+      "relation_records": 32,
+      "unique_unordered_pairs": 24,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 67,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 20
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-58905476_chunk_30.ann.tsvx",
+      "events": 22,
+      "relation_records": 51,
+      "unique_unordered_pairs": 47,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 184,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 47
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-58905476_chunk_42.ann.tsvx",
+      "events": 23,
+      "relation_records": 55,
+      "unique_unordered_pairs": 50,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 203,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 49
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-61092122_chunk_6.ann.tsvx",
+      "events": 18,
+      "relation_records": 45,
+      "unique_unordered_pairs": 42,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 111,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 41
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-6500103_chunk_0.ann.tsvx",
+      "events": 14,
+      "relation_records": 16,
+      "unique_unordered_pairs": 15,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 76,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 14
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-6500103_chunk_6.ann.tsvx",
+      "events": 21,
+      "relation_records": 44,
+      "unique_unordered_pairs": 36,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 174,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 34
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-65417682_chunk_11.ann.tsvx",
+      "events": 18,
+      "relation_records": 37,
+      "unique_unordered_pairs": 33,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 120,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 29
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-66981070_chunk_11.ann.tsvx",
+      "events": 20,
+      "relation_records": 36,
+      "unique_unordered_pairs": 30,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 160,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-67757406_chunk_6.ann.tsvx",
+      "events": 20,
+      "relation_records": 47,
+      "unique_unordered_pairs": 40,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 150,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 43
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-68054813_chunk_7.ann.tsvx",
+      "events": 21,
+      "relation_records": 45,
+      "unique_unordered_pairs": 41,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 169,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 37
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-68116720_chunk_18.ann.tsvx",
+      "events": 26,
+      "relation_records": 86,
+      "unique_unordered_pairs": 69,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 256,
+      "labels": {
+        "CauseEffect": 10,
+        "EffectCause": 10,
+        "NoRel": 66
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-6920241_chunk_2.ann.tsvx",
+      "events": 20,
+      "relation_records": 52,
+      "unique_unordered_pairs": 47,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 143,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 46
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-6929929_chunk_2.ann.tsvx",
+      "events": 19,
+      "relation_records": 50,
+      "unique_unordered_pairs": 45,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 126,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 44
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-6934150_chunk_0.ann.tsvx",
+      "events": 19,
+      "relation_records": 37,
+      "unique_unordered_pairs": 35,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 136,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 35
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-720333_chunk_4.ann.tsvx",
+      "events": 21,
+      "relation_records": 50,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 166,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 44
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-7631057_chunk_19.ann.tsvx",
+      "events": 23,
+      "relation_records": 73,
+      "unique_unordered_pairs": 62,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 191,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 57
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-7946493_chunk_14.ann.tsvx",
+      "events": 19,
+      "relation_records": 37,
+      "unique_unordered_pairs": 32,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 139,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-7946493_chunk_22.ann.tsvx",
+      "events": 23,
+      "relation_records": 54,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 204,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 52
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-8179507_chunk_2.ann.tsvx",
+      "events": 20,
+      "relation_records": 52,
+      "unique_unordered_pairs": 44,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 146,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 44
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-840769_chunk_9.ann.tsvx",
+      "events": 20,
+      "relation_records": 42,
+      "unique_unordered_pairs": 36,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 154,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-871790_chunk_10.ann.tsvx",
+      "events": 18,
+      "relation_records": 37,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 122,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-871790_chunk_5.ann.tsvx",
+      "events": 12,
+      "relation_records": 13,
+      "unique_unordered_pairs": 11,
+      "all_unordered_pairs": 66,
+      "uncovered_pairs": 55,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 9
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-8799_chunk_36.ann.tsvx",
+      "events": 25,
+      "relation_records": 74,
+      "unique_unordered_pairs": 64,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 236,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 60
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-92734_chunk_40.ann.tsvx",
+      "events": 16,
+      "relation_records": 35,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 89,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-92734_chunk_8.ann.tsvx",
+      "events": 26,
+      "relation_records": 75,
+      "unique_unordered_pairs": 66,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 259,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 63
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-92734_chunk_9.ann.tsvx",
+      "events": 22,
+      "relation_records": 54,
+      "unique_unordered_pairs": 45,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 186,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 38
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-928166_chunk_3.ann.tsvx",
+      "events": 29,
+      "relation_records": 102,
+      "unique_unordered_pairs": 89,
+      "all_unordered_pairs": 406,
+      "uncovered_pairs": 317,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 86
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-nhung-9898016_chunk_2.ann.tsvx",
+      "events": 29,
+      "relation_records": 96,
+      "unique_unordered_pairs": 85,
+      "all_unordered_pairs": 406,
+      "uncovered_pairs": 321,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 80
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-10225452_chunk_9.ann.tsvx",
+      "events": 17,
+      "relation_records": 33,
+      "unique_unordered_pairs": 28,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 108,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-10312823_chunk_1.ann.tsvx",
+      "events": 21,
+      "relation_records": 47,
+      "unique_unordered_pairs": 42,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 168,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 41
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-108257_chunk_1.ann.tsvx",
+      "events": 22,
+      "relation_records": 56,
+      "unique_unordered_pairs": 46,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 185,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 40
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-108257_chunk_16.ann.tsvx",
+      "events": 17,
+      "relation_records": 31,
+      "unique_unordered_pairs": 26,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 110,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 25
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-108257_chunk_36.ann.tsvx",
+      "events": 26,
+      "relation_records": 68,
+      "unique_unordered_pairs": 62,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 263,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 58
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-108257_chunk_74.ann.tsvx",
+      "events": 23,
+      "relation_records": 61,
+      "unique_unordered_pairs": 52,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 201,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 49
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-108257_chunk_88.ann.tsvx",
+      "events": 23,
+      "relation_records": 63,
+      "unique_unordered_pairs": 58,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 195,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 57
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-108257_chunk_93.ann.tsvx",
+      "events": 19,
+      "relation_records": 48,
+      "unique_unordered_pairs": 40,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 131,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 34
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-11193504_chunk_2.ann.tsvx",
+      "events": 16,
+      "relation_records": 39,
+      "unique_unordered_pairs": 30,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 90,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "aviation_accidents-week4-phuong-1422475_chunk_21.ann.tsvx",
+      "events": 19,
+      "relation_records": 42,
+      "unique_unordered_pairs": 33,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 138,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 30
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-nhung-3163034_chunk_8.ann.tsvx",
+      "events": 23,
+      "relation_records": 56,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 204,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 50
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-nhung-351949_chunk_114.ann.tsvx",
+      "events": 12,
+      "relation_records": 13,
+      "unique_unordered_pairs": 11,
+      "all_unordered_pairs": 66,
+      "uncovered_pairs": 55,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 9
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-nhung-48676082_chunk_3.ann.tsvx",
+      "events": 18,
+      "relation_records": 31,
+      "unique_unordered_pairs": 26,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 127,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-nhung-52958138_chunk_23.ann.tsvx",
+      "events": 22,
+      "relation_records": 59,
+      "unique_unordered_pairs": 50,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 181,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 51
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-nhung-8772658_chunk_26.ann.tsvx",
+      "events": 23,
+      "relation_records": 65,
+      "unique_unordered_pairs": 56,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 197,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 53
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-nhung-940151_chunk_42.ann.tsvx",
+      "events": 19,
+      "relation_records": 55,
+      "unique_unordered_pairs": 45,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 126,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 39
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-phuong-33995032_chunk_3.ann.tsvx",
+      "events": 14,
+      "relation_records": 24,
+      "unique_unordered_pairs": 21,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 70,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 18
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-phuong-34952460_chunk_5.ann.tsvx",
+      "events": 18,
+      "relation_records": 34,
+      "unique_unordered_pairs": 26,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 127,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 24
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-phuong-40494593_chunk_0.ann.tsvx",
+      "events": 18,
+      "relation_records": 42,
+      "unique_unordered_pairs": 34,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 119,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 30
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-phuong-59851379_chunk_116.ann.tsvx",
+      "events": 23,
+      "relation_records": 68,
+      "unique_unordered_pairs": 56,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 197,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 50
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-phuong-611954_chunk_104.ann.tsvx",
+      "events": 15,
+      "relation_records": 26,
+      "unique_unordered_pairs": 20,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 85,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 14
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week2-phuong-8880987_chunk_2.ann.tsvx",
+      "events": 22,
+      "relation_records": 57,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 182,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 47
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-nhung-103948_chunk_29.ann.tsvx",
+      "events": 16,
+      "relation_records": 30,
+      "unique_unordered_pairs": 25,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 95,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 26
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-nhung-1100220_chunk_9.ann.tsvx",
+      "events": 14,
+      "relation_records": 20,
+      "unique_unordered_pairs": 18,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 73,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 18
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-nhung-12025263_chunk_7.ann.tsvx",
+      "events": 23,
+      "relation_records": 57,
+      "unique_unordered_pairs": 53,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 200,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 53
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-103948_chunk_23.ann.tsvx",
+      "events": 21,
+      "relation_records": 52,
+      "unique_unordered_pairs": 42,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 168,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 42
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-103948_chunk_24.ann.tsvx",
+      "events": 22,
+      "relation_records": 45,
+      "unique_unordered_pairs": 36,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 195,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-10579212_chunk_14.ann.tsvx",
+      "events": 24,
+      "relation_records": 63,
+      "unique_unordered_pairs": 56,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 220,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 51
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-10579212_chunk_16.ann.tsvx",
+      "events": 25,
+      "relation_records": 74,
+      "unique_unordered_pairs": 63,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 237,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 60
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-10579212_chunk_19.ann.tsvx",
+      "events": 20,
+      "relation_records": 45,
+      "unique_unordered_pairs": 41,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 149,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 41
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-1059855_chunk_13.ann.tsvx",
+      "events": 20,
+      "relation_records": 40,
+      "unique_unordered_pairs": 35,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 155,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 34
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-1100220_chunk_11.ann.tsvx",
+      "events": 22,
+      "relation_records": 56,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 182,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 42
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-1100220_chunk_7.ann.tsvx",
+      "events": 17,
+      "relation_records": 32,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 109,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 24
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-11344806_chunk_1.ann.tsvx",
+      "events": 19,
+      "relation_records": 60,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 122,
+      "labels": {
+        "CauseEffect": 10,
+        "EffectCause": 10,
+        "NoRel": 40
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-11395584_chunk_0.ann.tsvx",
+      "events": 28,
+      "relation_records": 85,
+      "unique_unordered_pairs": 76,
+      "all_unordered_pairs": 378,
+      "uncovered_pairs": 302,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 73
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-11395584_chunk_15.ann.tsvx",
+      "events": 25,
+      "relation_records": 64,
+      "unique_unordered_pairs": 54,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 246,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 58
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-11395584_chunk_24.ann.tsvx",
+      "events": 21,
+      "relation_records": 47,
+      "unique_unordered_pairs": 41,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 169,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 37
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-12242321_chunk_2.ann.tsvx",
+      "events": 17,
+      "relation_records": 28,
+      "unique_unordered_pairs": 23,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 113,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 20
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "conflict-week4-phuong-12773963_chunk_4.ann.tsvx",
+      "events": 19,
+      "relation_records": 34,
+      "unique_unordered_pairs": 29,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 142,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 24
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-nhung-54503723_chunk_60.ann.tsvx",
+      "events": 18,
+      "relation_records": 47,
+      "unique_unordered_pairs": 37,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 116,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 31
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-nhung-55140572_chunk_98.ann.tsvx",
+      "events": 20,
+      "relation_records": 41,
+      "unique_unordered_pairs": 33,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 157,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 29
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-nhung-68202451_chunk_34.ann.tsvx",
+      "events": 16,
+      "relation_records": 16,
+      "unique_unordered_pairs": 15,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 105,
+      "labels": {
+        "NoRel": 16
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-nhung-962356_chunk_17.ann.tsvx",
+      "events": 23,
+      "relation_records": 63,
+      "unique_unordered_pairs": 54,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 199,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 49
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-phuong-32912918_chunk_14.ann.tsvx",
+      "events": 14,
+      "relation_records": 26,
+      "unique_unordered_pairs": 22,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 69,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 22
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-phuong-3700841_chunk_5.ann.tsvx",
+      "events": 19,
+      "relation_records": 44,
+      "unique_unordered_pairs": 38,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 133,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 34
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-phuong-55140572_chunk_106.ann.tsvx",
+      "events": 14,
+      "relation_records": 29,
+      "unique_unordered_pairs": 23,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 68,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 17
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-phuong-65398595_chunk_0.ann.tsvx",
+      "events": 15,
+      "relation_records": 34,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 78,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 24
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-phuong-66710746_chunk_0.ann.tsvx",
+      "events": 12,
+      "relation_records": 14,
+      "unique_unordered_pairs": 11,
+      "all_unordered_pairs": 66,
+      "uncovered_pairs": 55,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 8
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-phuong-68235417_chunk_1.ann.tsvx",
+      "events": 20,
+      "relation_records": 58,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 141,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 44
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-phuong-8174794_chunk_24.ann.tsvx",
+      "events": 21,
+      "relation_records": 47,
+      "unique_unordered_pairs": 39,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 171,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 35
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week2-phuong-987057_chunk_0.ann.tsvx",
+      "events": 15,
+      "relation_records": 29,
+      "unique_unordered_pairs": 24,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 81,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-108257_chunk_21.ann.tsvx",
+      "events": 26,
+      "relation_records": 77,
+      "unique_unordered_pairs": 68,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 257,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 63
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-108257_chunk_75.ann.tsvx",
+      "events": 31,
+      "relation_records": 115,
+      "unique_unordered_pairs": 105,
+      "all_unordered_pairs": 465,
+      "uncovered_pairs": 360,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 103
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-108257_chunk_76.ann.tsvx",
+      "events": 23,
+      "relation_records": 67,
+      "unique_unordered_pairs": 61,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 192,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 63
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-11957981_chunk_0.ann.tsvx",
+      "events": 26,
+      "relation_records": 74,
+      "unique_unordered_pairs": 62,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 263,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 56
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-11957981_chunk_5.ann.tsvx",
+      "events": 20,
+      "relation_records": 42,
+      "unique_unordered_pairs": 36,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 154,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 36
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-1256043_chunk_0.ann.tsvx",
+      "events": 21,
+      "relation_records": 48,
+      "unique_unordered_pairs": 42,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 168,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 38
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-1256043_chunk_3.ann.tsvx",
+      "events": 17,
+      "relation_records": 37,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 109,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 19
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-1375455_chunk_6.ann.tsvx",
+      "events": 17,
+      "relation_records": 36,
+      "unique_unordered_pairs": 33,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 103,
+      "labels": {
+        "CauseEffect": 1,
+        "EffectCause": 1,
+        "NoRel": 34
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-1375455_chunk_8.ann.tsvx",
+      "events": 19,
+      "relation_records": 44,
+      "unique_unordered_pairs": 33,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 138,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 28
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-1427990_chunk_12.ann.tsvx",
+      "events": 18,
+      "relation_records": 39,
+      "unique_unordered_pairs": 32,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 121,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 25
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "disasters-week4-phuong-1427990_chunk_13.ann.tsvx",
+      "events": 15,
+      "relation_records": 29,
+      "unique_unordered_pairs": 23,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 82,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 21
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-nhung-33411940_chunk_24.ann.tsvx",
+      "events": 25,
+      "relation_records": 92,
+      "unique_unordered_pairs": 77,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 223,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 74
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-nhung-381602_chunk_19.ann.tsvx",
+      "events": 22,
+      "relation_records": 67,
+      "unique_unordered_pairs": 55,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 176,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 51
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-nhung-43971623_chunk_101.ann.tsvx",
+      "events": 23,
+      "relation_records": 68,
+      "unique_unordered_pairs": 55,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 198,
+      "labels": {
+        "CauseEffect": 11,
+        "EffectCause": 11,
+        "NoRel": 46
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-nhung-502730_chunk_6.ann.tsvx",
+      "events": 21,
+      "relation_records": 59,
+      "unique_unordered_pairs": 53,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 157,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 47
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-nhung-61263534_chunk_3.ann.tsvx",
+      "events": 23,
+      "relation_records": 58,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 204,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 48
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-nhung-63862683_chunk_49.ann.tsvx",
+      "events": 29,
+      "relation_records": 97,
+      "unique_unordered_pairs": 78,
+      "all_unordered_pairs": 406,
+      "uncovered_pairs": 328,
+      "labels": {
+        "CauseEffect": 16,
+        "EffectCause": 16,
+        "NoRel": 65
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-phuong-27155419_chunk_8.ann.tsvx",
+      "events": 16,
+      "relation_records": 33,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 93,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-phuong-30911176_chunk_5.ann.tsvx",
+      "events": 25,
+      "relation_records": 73,
+      "unique_unordered_pairs": 63,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 237,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 57
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-phuong-63983988_chunk_4.ann.tsvx",
+      "events": 31,
+      "relation_records": 128,
+      "unique_unordered_pairs": 111,
+      "all_unordered_pairs": 465,
+      "uncovered_pairs": 354,
+      "labels": {
+        "CauseEffect": 12,
+        "EffectCause": 12,
+        "NoRel": 104
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-phuong-74234_chunk_3.ann.tsvx",
+      "events": 24,
+      "relation_records": 62,
+      "unique_unordered_pairs": 51,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 225,
+      "labels": {
+        "CauseEffect": 10,
+        "EffectCause": 10,
+        "NoRel": 42
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-phuong-839297_chunk_8.ann.tsvx",
+      "events": 21,
+      "relation_records": 46,
+      "unique_unordered_pairs": 40,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 170,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 36
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week2-phuong-924687_chunk_13.ann.tsvx",
+      "events": 26,
+      "relation_records": 82,
+      "unique_unordered_pairs": 71,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 254,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 66
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_108.ann.tsvx",
+      "events": 34,
+      "relation_records": 120,
+      "unique_unordered_pairs": 109,
+      "all_unordered_pairs": 561,
+      "uncovered_pairs": 452,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 108
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_12.ann.tsvx",
+      "events": 26,
+      "relation_records": 96,
+      "unique_unordered_pairs": 87,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 238,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 80
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_161.ann.tsvx",
+      "events": 24,
+      "relation_records": 71,
+      "unique_unordered_pairs": 61,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 215,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 53
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_172.ann.tsvx",
+      "events": 24,
+      "relation_records": 53,
+      "unique_unordered_pairs": 45,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 231,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 39
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_175.ann.tsvx",
+      "events": 19,
+      "relation_records": 43,
+      "unique_unordered_pairs": 37,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 134,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 31
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_177.ann.tsvx",
+      "events": 24,
+      "relation_records": 56,
+      "unique_unordered_pairs": 48,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 228,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 50
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_189.ann.tsvx",
+      "events": 23,
+      "relation_records": 63,
+      "unique_unordered_pairs": 54,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 199,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 53
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_49.ann.tsvx",
+      "events": 31,
+      "relation_records": 124,
+      "unique_unordered_pairs": 102,
+      "all_unordered_pairs": 465,
+      "uncovered_pairs": 363,
+      "labels": {
+        "CauseEffect": 14,
+        "EffectCause": 14,
+        "NoRel": 96
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "economic_crisis-week4-phuong-10062100_chunk_85.ann.tsvx",
+      "events": 30,
+      "relation_records": 111,
+      "unique_unordered_pairs": 95,
+      "all_unordered_pairs": 435,
+      "uncovered_pairs": 340,
+      "labels": {
+        "CauseEffect": 12,
+        "EffectCause": 12,
+        "NoRel": 87
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-nhung-63374708_chunk_10.ann.tsvx",
+      "events": 20,
+      "relation_records": 59,
+      "unique_unordered_pairs": 50,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 140,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 47
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-nhung-63928828_chunk_7.ann.tsvx",
+      "events": 32,
+      "relation_records": 120,
+      "unique_unordered_pairs": 102,
+      "all_unordered_pairs": 496,
+      "uncovered_pairs": 394,
+      "labels": {
+        "CauseEffect": 13,
+        "EffectCause": 13,
+        "NoRel": 94
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-nhung-64778691_chunk_18.ann.tsvx",
+      "events": 19,
+      "relation_records": 46,
+      "unique_unordered_pairs": 37,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 134,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-nhung-67452988_chunk_2.ann.tsvx",
+      "events": 27,
+      "relation_records": 88,
+      "unique_unordered_pairs": 75,
+      "all_unordered_pairs": 351,
+      "uncovered_pairs": 276,
+      "labels": {
+        "CauseEffect": 10,
+        "EffectCause": 10,
+        "NoRel": 68
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-phuong-63366667_chunk_46.ann.tsvx",
+      "events": 27,
+      "relation_records": 106,
+      "unique_unordered_pairs": 85,
+      "all_unordered_pairs": 351,
+      "uncovered_pairs": 266,
+      "labels": {
+        "CauseEffect": 18,
+        "EffectCause": 18,
+        "NoRel": 70
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-phuong-63453597_chunk_29.ann.tsvx",
+      "events": 29,
+      "relation_records": 91,
+      "unique_unordered_pairs": 80,
+      "all_unordered_pairs": 406,
+      "uncovered_pairs": 326,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 77
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-phuong-63464796_chunk_21.ann.tsvx",
+      "events": 22,
+      "relation_records": 60,
+      "unique_unordered_pairs": 55,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 176,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 50
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-phuong-63554423_chunk_13.ann.tsvx",
+      "events": 26,
+      "relation_records": 82,
+      "unique_unordered_pairs": 71,
+      "all_unordered_pairs": 325,
+      "uncovered_pairs": 254,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 66
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-phuong-63640929_chunk_4.ann.tsvx",
+      "events": 20,
+      "relation_records": 60,
+      "unique_unordered_pairs": 49,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 141,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 44
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-phuong-63678830_chunk_12.ann.tsvx",
+      "events": 22,
+      "relation_records": 77,
+      "unique_unordered_pairs": 61,
+      "all_unordered_pairs": 231,
+      "uncovered_pairs": 170,
+      "labels": {
+        "CauseEffect": 13,
+        "EffectCause": 13,
+        "NoRel": 51
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-phuong-64033197_chunk_47.ann.tsvx",
+      "events": 20,
+      "relation_records": 48,
+      "unique_unordered_pairs": 38,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 152,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week2-phuong-64719181_chunk_1.ann.tsvx",
+      "events": 36,
+      "relation_records": 142,
+      "unique_unordered_pairs": 127,
+      "all_unordered_pairs": 630,
+      "uncovered_pairs": 503,
+      "labels": {
+        "CauseEffect": 14,
+        "EffectCause": 14,
+        "NoRel": 114
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week4-phuong-1073824_chunk_8.ann.tsvx",
+      "events": 19,
+      "relation_records": 38,
+      "unique_unordered_pairs": 34,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 137,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 34
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week4-phuong-1179505_chunk_4.ann.tsvx",
+      "events": 18,
+      "relation_records": 36,
+      "unique_unordered_pairs": 30,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 123,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 28
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week4-phuong-1516915_chunk_22.ann.tsvx",
+      "events": 32,
+      "relation_records": 109,
+      "unique_unordered_pairs": 93,
+      "all_unordered_pairs": 496,
+      "uncovered_pairs": 403,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 91
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week4-phuong-1516915_chunk_25.ann.tsvx",
+      "events": 25,
+      "relation_records": 61,
+      "unique_unordered_pairs": 54,
+      "all_unordered_pairs": 300,
+      "uncovered_pairs": 246,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 51
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "epidemics-week4-phuong-1516915_chunk_9.ann.tsvx",
+      "events": 23,
+      "relation_records": 60,
+      "unique_unordered_pairs": 45,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 208,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 42
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-nhung-31417932_chunk_7.ann.tsvx",
+      "events": 10,
+      "relation_records": 10,
+      "unique_unordered_pairs": 8,
+      "all_unordered_pairs": 45,
+      "uncovered_pairs": 37,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 6
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-nhung-34569548_chunk_13.ann.tsvx",
+      "events": 17,
+      "relation_records": 37,
+      "unique_unordered_pairs": 32,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 104,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 31
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-nhung-54525359_chunk_7.ann.tsvx",
+      "events": 23,
+      "relation_records": 67,
+      "unique_unordered_pairs": 57,
+      "all_unordered_pairs": 253,
+      "uncovered_pairs": 196,
+      "labels": {
+        "CauseEffect": 7,
+        "EffectCause": 7,
+        "NoRel": 53
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-nhung-588689_chunk_37.ann.tsvx",
+      "events": 20,
+      "relation_records": 54,
+      "unique_unordered_pairs": 45,
+      "all_unordered_pairs": 190,
+      "uncovered_pairs": 145,
+      "labels": {
+        "CauseEffect": 9,
+        "EffectCause": 9,
+        "NoRel": 36
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-nhung-68379595_chunk_1.ann.tsvx",
+      "events": 17,
+      "relation_records": 42,
+      "unique_unordered_pairs": 38,
+      "all_unordered_pairs": 136,
+      "uncovered_pairs": 98,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 36
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-nhung-8226511_chunk_21.ann.tsvx",
+      "events": 10,
+      "relation_records": 14,
+      "unique_unordered_pairs": 11,
+      "all_unordered_pairs": 45,
+      "uncovered_pairs": 34,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 10
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-nhung-8671557_chunk_64.ann.tsvx",
+      "events": 16,
+      "relation_records": 30,
+      "unique_unordered_pairs": 22,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 98,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 20
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-phuong-31417932_chunk_35.ann.tsvx",
+      "events": 10,
+      "relation_records": 21,
+      "unique_unordered_pairs": 14,
+      "all_unordered_pairs": 45,
+      "uncovered_pairs": 31,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 11
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-phuong-32529572_chunk_16.ann.tsvx",
+      "events": 14,
+      "relation_records": 33,
+      "unique_unordered_pairs": 25,
+      "all_unordered_pairs": 91,
+      "uncovered_pairs": 66,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 17
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-phuong-44519312_chunk_19.ann.tsvx",
+      "events": 18,
+      "relation_records": 35,
+      "unique_unordered_pairs": 31,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 122,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-phuong-66459947_chunk_5.ann.tsvx",
+      "events": 24,
+      "relation_records": 62,
+      "unique_unordered_pairs": 56,
+      "all_unordered_pairs": 276,
+      "uncovered_pairs": 220,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 54
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week2-phuong-67571488_chunk_15.ann.tsvx",
+      "events": 16,
+      "relation_records": 33,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 93,
+      "labels": {
+        "CauseEffect": 3,
+        "EffectCause": 3,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week4-phuong-1093599_chunk_12.ann.tsvx",
+      "events": 16,
+      "relation_records": 33,
+      "unique_unordered_pairs": 28,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 92,
+      "labels": {
+        "CauseEffect": 5,
+        "EffectCause": 5,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week4-phuong-1093599_chunk_18.ann.tsvx",
+      "events": 19,
+      "relation_records": 35,
+      "unique_unordered_pairs": 29,
+      "all_unordered_pairs": 171,
+      "uncovered_pairs": 142,
+      "labels": {
+        "CauseEffect": 4,
+        "EffectCause": 4,
+        "NoRel": 27
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week4-phuong-1093599_chunk_37.ann.tsvx",
+      "events": 21,
+      "relation_records": 54,
+      "unique_unordered_pairs": 42,
+      "all_unordered_pairs": 210,
+      "uncovered_pairs": 168,
+      "labels": {
+        "CauseEffect": 11,
+        "EffectCause": 11,
+        "NoRel": 32
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week4-phuong-1119188_chunk_9.ann.tsvx",
+      "events": 18,
+      "relation_records": 38,
+      "unique_unordered_pairs": 33,
+      "all_unordered_pairs": 153,
+      "uncovered_pairs": 120,
+      "labels": {
+        "CauseEffect": 2,
+        "EffectCause": 2,
+        "NoRel": 34
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week4-phuong-11357029_chunk_29.ann.tsvx",
+      "events": 16,
+      "relation_records": 35,
+      "unique_unordered_pairs": 27,
+      "all_unordered_pairs": 120,
+      "uncovered_pairs": 93,
+      "labels": {
+        "CauseEffect": 6,
+        "EffectCause": 6,
+        "NoRel": 23
+      },
+      "mention_offset_mismatches": 0
+    },
+    {
+      "path": "railway_accidents-week4-phuong-11357029_chunk_34.ann.tsvx",
+      "events": 15,
+      "relation_records": 31,
+      "unique_unordered_pairs": 21,
+      "all_unordered_pairs": 105,
+      "uncovered_pairs": 84,
+      "labels": {
+        "CauseEffect": 8,
+        "EffectCause": 8,
+        "NoRel": 15
+      },
+      "mention_offset_mismatches": 0
+    }
+  ]
+}

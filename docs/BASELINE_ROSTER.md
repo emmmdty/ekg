@@ -81,6 +81,18 @@ transformers==4.21.2`，与本项目 cu128 栈互斥，须独立 venv 且只能�
 
 **不可运行，进可得性表**：RESIJ、KnowQA、2025 two-stage ERE、MAQInstruct（口径可引用但无同协议复现）。
 
+**10-29多语料提案的来源候选补充（均非新分数行/非已复现）**：
+
+| 方法 | 原件/源码身份 | 已核用途与障碍 | 当前状态 |
+|---|---|---|---|
+| DiffusECI（AAAI2024） | 作者仓库实际拼写`hieum98/DisfusECI`，`0330e2851eb56198be5af49843b7906561ba75a3` | 真实扩散model/trainer及ESC/CTB/MECI reader；原ESC版本/折用途与正文不一致，CTB dev/test重用，metric加一平滑，许可未明；须独立selection/统一scorer及实际环境成本 | 来源候选；如适配走FR-016(b)差异表，不宣称已运行或恢复原分数 |
+| CRFIE（ACL2023） | `JZXXX/CRFIE`，`3cc7f975cc1dfc45af5a997c448d13bb78963f01`，MIT | 真实高阶关系标签因子/MFVI；原ACE等IE任务/候选/识别器/旧依赖不同 | A的直接机制强替代来源；未作native适配，不是已跑对手 |
+| ICGR（FindingsEMNLP2026） | 原全文已核；论文所指`malongxuan/ICGR`本轮API404 | 图补全/去噪/预测图修正覆盖原B宽泛创新；MAVEN方向三类不是native subtype三类 | 最近邻必报；实现可得性障碍，不重写冒称复现 |
+
+PPAT/SemDI本轮核查与新候选状态统一认R1 §25.146—§25.147及
+`research/20261029_eci_spec_review/`。SemDI已有处理件被核，旧行“未取数据”是此前快照，
+并不表示已取得权重或复现。原B被否决为独立贡献不取消第二方法研究目标；无新训练准入。
+
 **10-19补充代码障碍**：CaSR（2026）作者仓库当前`20804fc0f03adf9128605424a8e77a9f398c675e`
 仅有Partial数据/README/LICENSE，README明确只公开部分数据；无当前模型/trainer可供复用，
 不从论文重写后冒称复现，不列已跑成绩。仅核当前树，不声称全历史都无代码；机制仍属

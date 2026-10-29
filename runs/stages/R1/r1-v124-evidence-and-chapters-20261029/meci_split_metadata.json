@@ -1,0 +1,20 @@
+{
+  "source_identity_rule": "English Wikipedia numeric article ID before _chunk_; path metadata only, no dev/test content or label read",
+  "revision": "2fdddd3ed296e60d8122b042183554b1110d055e",
+  "chunks": {
+    "train": 263,
+    "dev": 88,
+    "test": 87
+  },
+  "article_id_counts": {
+    "train": 183,
+    "dev": 77,
+    "test": 75
+  },
+  "article_id_overlap": {
+    "train/dev": 28,
+    "train/test": 31,
+    "dev/test": 15
+  },
+  "heldout_labels_read": false
+}

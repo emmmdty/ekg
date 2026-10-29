@@ -1,0 +1,12 @@
+{
+  "status": "pass",
+  "relative_links": "pass",
+  "receipt_hashes": 7,
+  "paper_and_school_pdf_hashes": 10,
+  "additional_guideline_hashes": 3,
+  "conversion_hashes": 5,
+  "meci_sql_recount": "pass",
+  "production_code_modified": false,
+  "gpu_model_or_training_executed": false,
+  "scientific_method_pass_claimed": false
+}
