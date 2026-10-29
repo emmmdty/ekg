@@ -1,0 +1,24 @@
+{
+  "scope": "public train records only; final-valid manifest IDs/count/hash only, no source final-valid contents or outcomes",
+  "source_sha256": {
+    "maven_ere": "6a5519fe7c30448690adb13d49217c50d474fc57480eae10aecb29df7eb638b7",
+    "maven_arg": "a94f92c6ab509b58a8cab026d1984cf0b7095855a23e01f7e7d9c804e39a4761"
+  },
+  "counts": {
+    "docs": 2913,
+    "positive_mentions": 70775,
+    "negative_candidates": 323822
+  },
+  "frozen_split_sizes": {
+    "train": 2622,
+    "internal-dev": 291,
+    "final-valid": 710
+  },
+  "status": "blocked",
+  "findings_count": 7299,
+  "finding_definitions": {
+    "type_or_trigger_mismatch": "shared ID with different type or trigger string; further diagnosis separates fields",
+    "mention_id_set_mismatch": "document has unequal positive mention ID sets; not a count of missing mentions"
+  },
+  "raw_audit_sha256": "28db32a1aaceef2bb787ccf5733e344394fc2d2d87c54df4b7f462d1f2e68e42"
+}

@@ -9129,3 +9129,128 @@ receipt/manifest均核等。R1原文仅追加，生产代码/活SPEC/constitutio
 未改。R1一致性审计实际为`status=pass / findings=[] / 36 mapped`，但其研究状态仍为
 `preparation_partial_blocked`，没有把形式审计通过当科学准入。本次仅文档/JSON，
 未运行模型或pytest/ruff/smoke；核验记录保留于本轮`document_validation.json`。
+
+### 25.149 · 逐章启动条件、指标锚及相关学位论文审查（2026-10-29）
+
+**开工自审**：科研价值是把“有条件路线”转为能核查的数据—划分—指标—对手—
+目标—准入表，判断当前是否真能启动；对齐同C41-A-R/T087及拟议多语料主表。
+用户追加要求参考直接相关的国内外硕博研究，不由代理凭经验设成绩。需从学位论文
+具体实验、公开数据和协议取得依据；机构题录不冒充全文/原表核验。
+可行性：公开资料/源码与本地非模型文件可以CPU审查；没有新训练许可，不会用本轮
+文献数字宣称自己的可达成绩。无法验证的输入/运行/绝对目标须明确判为未准入，
+不得按“后续再补”把该章放行；MAVEN final-valid内容/结果不读。
+
+#### 学位论文与成绩锚：实际阅读层级
+
+取得两份直接相关博士论文全文：香港理工大学Mu Feiteng《Causality-centric narratives
+reasoning》（馆藏2025、扉页July 2024），PDF210页，SHA
+`7083e3c1dc916cb4a884774c24c6ab74177c186451e30482eb1d60a72f9cd9b6`；
+特伦托大学Paramita Mirza《Extracting Temporal and Causal Relations between Events》
+（2016），作者arXiv PDF171页，SHA
+`8a8ca67830ce789bb49e477bb2b3cdd182069a0c4a7020ec15e429fe60ef7565`。
+重点读Mu第4章的方法/实验及Mirza§6.4—6.6，渲染目视两份成绩表；非声称全篇逐字
+精读。原全文仅留临时缓存，来源可重取。
+
+| 来源/位置 | 直接核到的成绩或设计 | 对本计划的用途与边界 |
+|---|---|---|
+| Mu博士论文§4.3.1—3／PDF82—84；表4.3／PDF86、印刷60 | ESC五折、CTB十折；ESC后两topic作dev；seed42为其原设置；P/R/F1；BERT的ESC/CTB F1=50.9/50.1，CF-ECI_BERT=53.4/53.5，CF-ECI_BERTK=55.1/54.8 | 可借同backbone增量、公共强对手及两项关键消融组织；不是近期SOTA；不继承其seed或假定其dev解决了所有source问题 |
+| Mirza博士论文§6.4—6.6；表6.3／PDF92、印刷76 | 有向CLINK/CLINK-R/NO-REL；stratified10fold；CauseRelPro with-filter micro-F1=40.17%，原表corrected-FP=43.20%另列诊断 | 候选过滤会改任务分母；不能将修正FP诊断当可部署主成绩，不能混比现代句内无向binary |
+| 哈工大官方团队介绍/答辩页，范创博士2022 | 论文《文本情感事件因果关系识别研究》，多个相关具体问题组织为整体 | 只有官方介绍，未取得全文/原表；不声称核过该论文的实验分数，也不把梁斌的优秀论文奖归给范创 |
+| 国立中山大学官方硕士题录/摘要/目录，陈宥齐2026 | CRAB任务，摘要自报F1=78.7、Recall=83.2；Raw LLM/Dr.ECI/MRBalance对比 | 只核官方检索可见摘要；直连页面SSL/超时、全文和原表未取得；这些分数不进入本项目同协议锚 |
+
+Mu正文说明一套改进可加到不同backbone，并报告对应基干和独立消融；可借的是研究
+组织与证据，不以“博士分数也低”降低本项目超过强对照的要求。四篇作者提供硕士
+论文的原文/质量记录继续认§25.121/147，没有重跑转换或冒称新读四篇全文。
+该章以给定句子及事件对为输入，上述ESC成绩不是本提案ESC文档整体列的同协议锚；
+不得仅凭数据集同名把它与后面的ICGR整体成绩作增益比较。
+
+CRAB作者repo `agromanou/CRAB@21ed62fd4501f3faf51dab2eb9e93ba4db0f27e9`已核README：
+有作者数据下载入口，事件来源于新闻时间线、因果强度标签与多种推理任务；本轮未
+下载/审完CRAB原件、完整原表或陈宥齐的具体转换协议。不因摘要成绩较高替换现有
+三语料，不把相似任务名当相同候选/评分。
+
+#### 公共数据与可比划分：本轮实际取得与提案
+
+ESC作者固定revision全archive实际下载，38,668,892 bytes，SHA
+`bb3574fc793fceb79e281ca182adf7a52890b5869ccbf4f2f28512d4272eff58`，v0.9原XML258件。
+PPAT固定revision `66495d25a04dca1a3d7b86eb9271e53ff410421e`的5组train/test和dev
+共11件JSON已下载，逐件Git blob SHA1与该revision树一致，不执行pickle或第三方代码。
+按相对topic/文件名规范ID核全部membership：
+
+| 语料协议 | train / selection / outer-evaluation | 实际核查/准入身份 |
+|---|---|---|
+| MAVEN原冻结协议 | 2,622 / 291；final-valid710另封存 | 只读原train与原manifest，final-valid只看manifest元数据；不改划分 |
+| ESC提案，沿用PPAT五折 | fold0/1/2=186/25/47；fold3/4=187/25/46 | dev固定topic37/41；全部258原件覆盖一致；三部分doc互斥；233 outer-eval文档各恰一次；不是未见topic评估 |
+| CTB十折doc级透明提案 | f0/1=145/19/19；f2=146/18/19；f3—8=147/18/18；f9=146/19/18 | 183 source XML；eval=i、selection=(i+1)%10、其余train；分组及精确IDs已落盘；未用标签分折；不冒称原论文membership |
+
+CTB原作者zip及原始身份沿用§25.146。新提案沿十折框架，采用文档分组与独立selection，
+具体分配公开确定：按SHA256(`CTB-doccv-v1|filename`)排序后序号mod10。这是事前
+操作性设计，**不是借用他人的精确fold**；结果只能同协议重跑比较，原表分数不混入。
+新核PPAT所发树CTB只有5组，原option却指CTB_FOLD10_123；DiffusECI又缺独立test。
+不对这些差异假装“已精确复现”。MAVEN/ESC/CTB跨章共用各自同一套membership，
+比例不同不妨碍逐列可比。ESC/CTB完整候选、正式scorer和运行适配仍未准入。
+
+#### 第三研究章真实输入检查与已停止的错误路径
+
+完整解析两份公开train，不访问valid原件/结果：MAVEN-ERE与MAVEN-Arg均2913文档，
+但事件并非同一标注人口。ERE有73,939个mentions；Arg正例70,775、负候选323,822；
+共享mention ID70,605，ERE独有3334，Arg独有170；共享ID中5714个type不同，trigger
+字符串无不一致。所有已查Arg字符span与原文匹配，未观察到字符offset错误。
+文档ID错配为0；正例集合不同的文档1585。例：同ID的“action/venture”在ERE为
+Self_motion，在Arg为Motion；因此不是把“同文档”当“同事件/类型”的充分证据。
+
+进一步候选覆盖核查：ERE独有3334个ID也不在Arg negative_triggers中，ERE正例落入
+Arg负例的ID数为0。故不能靠简单重标现有候选修复覆盖；本轮**停止直接拼接Arg候选/
+类型与ERE关系作为同人口系统**。未擅自合并gold候选、映射类型或删除不匹配样本；
+该裁决不追溯改写旧Arg/E3各自原合同下的历史结果。
+
+按systematic-debugging先定位集合/类型/offset区别，再查替代。新取MAVEN作者
+BERT+CRF的README、utils、model及trainer，固定官方revision
+`71151f6da53bc9df9d6c5718dc81a2e1489651bf`。四件源码blob身份逐项匹配；model/utils/
+trainer只做静态检查。全句BIO可由同一ERE事件标注转换，无需额外人工标注；模型
+无labels路径可解码。完整ERE train表达性核查：73939 mentions、32431句；无无效
+span、无重叠token冲突；原BIO标签表覆盖所有当前ERE类型；无原token长度>510的句。
+原WordPiece长度/截断仍未核，不能由原token数推断真实Transformer覆盖。
+
+这给原文→预测span→同ERE关系评测提供同标注来源的公开代码路径；仍非实际前向/
+checkpoint或CUDA通过。原trainer有dev改best后评test逻辑，沿用时必须透明移除最终
+测试反馈；旧torch/transformers依赖与无标签输入/完整覆盖须另验，不重写作者模型
+冒称复现。第三章尚未准入，静态可表达不能替代真实系统评测。
+
+#### 每章分数目标：已有锚、研究目标与未知预测分开
+
+沿用当前关系研究合同已有的+1.0个百分点最小有意义增益作为**前瞻目标提案**，
+不是从学位论文的成绩保证推导，ESC/CTB及构建端点还须适用power/误差/资源门。
+令b_d为同协议名册内最强有效对照，a_d为第一方法，目标分别为
+`A≥b_d+1.0pp`，`B≥max(b_d,a_d)+1.0pp`；构建三元组目标暂参照pipeline+1.0pp，
+正式签发前仍须其主锚与有效性检查。此处没有把“尚未知道方法能否提高”当启动门，
+阻断来自输入/协议/具体干预合同与资源尚未验收；效果本应由实验检验。
+
+| 数据/条件 | 当前真正已有的分数锚 | 第一/第二方法的数值解释 | 能否当最终预期 |
+|---|---|---|---|
+| MAVEN native内部dev | 已跑强控制CE=33.580914%，身份/限制认PHASE_A | 仅以当前最强控制举例，A开发目标≥34.580914%；若A恰到此值，B递进目标≥35.580914% | 是可审的开发挑战值，不是710 final-valid的成绩预测；新强对照更高时事前固定公式仍认max |
+| ESC整体binary | §25.147已核ICGR原表65.0%，非本协议重跑 | **条件示例**：只有同协议有效锚也为65.0时，A/B最低目标才是66.0/67.0% | 目前不能作硬绝对验收；公开折分/方向/候选/训练条件并未证明相同 |
+| CTB句内binary | §25.147已核DiffusECI原表75.4%，非本协议重跑 | **条件示例**：只有同协议锚也为75.4时，A/B最低目标才是76.4/77.4% | 当前doc级透明提案改变划分/selection，原表不等于我们的有效锚 |
+| 预测事件节点的构建三元组 | 尚无同输入/同ERE标注/同scorer的pipeline测量 | 最强固定pipeline＋预声明增益；暂无可信硬绝对值 | 未取得绝对锚即不签发此项，不套SEAG的gold-window原分 |
+
+每列主F1及适用公共强对手优先，不能拿辅助错误数/图外观替代。MAVEN现行护栏和
+确认门不降低；同语料各方法共享划分、候选、输入、评分与独立selection。公共论文
+原表与统一重跑表分开。最终集规则事前固定、配置冻结后评估，不以开发集值冒充
+最终成绩预测；没有extra-seed/5090或跨机权重授权。
+
+**当前科研裁决**：公共取得和部分membership证据增加，第三章一条错误接线被前置
+排除并定位同ERE公开BIO替代；首章/第二章/系统仍都未获模型启动准入。具体逐章
+表、协议与目标解释见`research/20261029_eci_spec_review/ADMISSION_AND_BENCHMARKS.md`。
+不把上述建议改成原活SPEC，不用新表宣称科学目标完成，也不启动代码/模型或日历。
+
+本轮凭证：`runs/stages/R1/r1-v126-admission-and-theses-20261029/`，8件JSON＋manifest，
+manifest SHA `bfd23f89c47ae543f18628611dc3af5e5ff739fb9086d70bcea9b6dfb5ee9a14`。
+包含完整ESC/CTB提案ID列表、源blob收据、原train错配诊断、BIO表达性与学位来源；
+原第三方全文/源码/原件archive仅临时缓存，不提交/上传。SPEC提案更新0.4，活SPEC
+与constitution/旧结果保持；没有生产代码/模型执行，也没有新增任务队列或日历。
+
+**实际验证**：8件manifest记录、2份学位原PDF、4件CRF源码身份、ESC全部五折和CTB
+全部十折的文档分区、130个相对链接及原R1仅追加核验通过。
+R1一致性审查`status=pass / findings=[] / 36 mapped`，研究状态仍
+`preparation_partial_blocked`。三个Python文件仅AST，不执行第三方代码；未运行
+pytest/ruff/smoke（本轮只改文档/JSON），形式核验不等于科学门通过。

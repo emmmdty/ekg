@@ -1,0 +1,90 @@
+[
+  {
+    "path": "data/ESL_dev.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_dev.json",
+    "sha256": "1d8a7718f78fb96130d686a972f01d2dc4b6f750f00fb83915434b70bb083d51",
+    "blob_sha1": "29f843d24ff7ac0ba5fe98db35fbfbe50d0debff",
+    "bytes": 155303,
+    "records": 25
+  },
+  {
+    "path": "data/ESL_FOLD5/0/test.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/0/test.json",
+    "sha256": "26fd0f84d51fcd0e63c3a356d140296712432f77fc52df7348c05f1d965e72b7",
+    "blob_sha1": "bb969a8361111dca04de0d836c0ac230093ea990",
+    "bytes": 285173,
+    "records": 47
+  },
+  {
+    "path": "data/ESL_FOLD5/1/test.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/1/test.json",
+    "sha256": "eca46fd1da28e6f7d258f6434792d782b52bb6f63ed2c6d7908994dd10749720",
+    "blob_sha1": "6b6c83430e4e12730abdbe50c568295aff233d1e",
+    "bytes": 211356,
+    "records": 47
+  },
+  {
+    "path": "data/ESL_FOLD5/1/train.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/1/train.json",
+    "sha256": "6a42463b9b710985980603f26e6649bac794b6b5a3b0a6d6fdbd700a6451b9e7",
+    "blob_sha1": "e98c74a0b03d2148aec1ec1327f6d9722826403a",
+    "bytes": 915109,
+    "records": 186
+  },
+  {
+    "path": "data/ESL_FOLD5/2/test.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/2/test.json",
+    "sha256": "0fc62212b86c96229f70f663c580b083fb61a0e47ce815f4818646b4a8fb9a93",
+    "blob_sha1": "a3db6d08cd4559280fd97127ccef2a60c0c8400a",
+    "bytes": 230346,
+    "records": 47
+  },
+  {
+    "path": "data/ESL_FOLD5/3/test.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/3/test.json",
+    "sha256": "60a68a2abdd898061710d77b1cface84cb594e1d1cc1ff44ffc9e331b9d94d0d",
+    "blob_sha1": "831f2dc94a2f8c71dc095d41ce1a57948482135b",
+    "bytes": 164001,
+    "records": 46
+  },
+  {
+    "path": "data/ESL_FOLD5/2/train.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/2/train.json",
+    "sha256": "492d9b860821807280355e755cc3eceab46353aa6b5831cb61cf5e48b56acb7b",
+    "blob_sha1": "28ec9a6ca0bb7848b4d5d95ffc5d92e6b4d2ded3",
+    "bytes": 896119,
+    "records": 186
+  },
+  {
+    "path": "data/ESL_FOLD5/3/train.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/3/train.json",
+    "sha256": "2be4589bce3949eaf4988c364a340d75123cad16d18932a493a1273f5abcfba2",
+    "blob_sha1": "bfffbffd8a1c5df9a39bb444e3508a6b7b37e037",
+    "bytes": 962464,
+    "records": 187
+  },
+  {
+    "path": "data/ESL_FOLD5/4/test.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/4/test.json",
+    "sha256": "64d9d180be8ecbc0e9792b3b7bd2005ab6ff58a8d66477a73285a8285b112889",
+    "blob_sha1": "11611b22b5829baa9bd28046ae60011d78a20ebc",
+    "bytes": 235589,
+    "records": 46
+  },
+  {
+    "path": "data/ESL_FOLD5/4/train.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/4/train.json",
+    "sha256": "f537c60878dcd629e274fab08c93ae41fe25be35d00cb3eee35741b4583a5d0c",
+    "blob_sha1": "80a1fad876ef215db39375edbab5284e9bcccd50",
+    "bytes": 890876,
+    "records": 187
+  },
+  {
+    "path": "data/ESL_FOLD5/0/train.json",
+    "url": "https://raw.githubusercontent.com/HITsz-TMG/PPAT/66495d25a04dca1a3d7b86eb9271e53ff410421e/data/ESL_FOLD5/0/train.json",
+    "sha256": "5d932d08c881f395e8cddfe56465a948b04b44c809ee91c238e3ab2d7052d09a",
+    "blob_sha1": "62f268c691da1a838c00dca5f12ea95cd5c64b8e",
+    "bytes": 841292,
+    "records": 186
+  }
+]

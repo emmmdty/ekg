@@ -1,0 +1,8 @@
+{
+  "counts": {
+    "ERE_positive_in_Arg_negative": 0,
+    "ERE_positive_absent_from_all_Arg_candidates": 3334,
+    "Arg_positive_absent_from_ERE": 170
+  },
+  "scope": "public train; candidate coverage diagnosis only; no relabeling or candidate repair"
+}

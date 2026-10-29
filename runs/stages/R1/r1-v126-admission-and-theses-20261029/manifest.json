@@ -1,0 +1,47 @@
+{
+  "schema": "ekg.research_receipts.v1",
+  "date": "2026-10-29",
+  "status": "source and proposal receipts; not experiment admission",
+  "files": [
+    {
+      "path": "ctb_split_proposal.json",
+      "sha256": "a390de0b89d821ee6d9b46f68f8b91ecf2f234751d50b2329ba2d74dcdff7c1a",
+      "bytes": 52444
+    },
+    {
+      "path": "ere_bio_feasibility.json",
+      "sha256": "f34c21923022245b096d0965a2efe6fccbe046723990a18ed03a209a7a6eed76",
+      "bytes": 742
+    },
+    {
+      "path": "esc_split_proposal.json",
+      "sha256": "f30fcf625bb2c504ece5e1b28cbc45623c3affa8e33bff8d84498b71ace8ee33",
+      "bytes": 45154
+    },
+    {
+      "path": "maven_alignment_diagnosis.json",
+      "sha256": "16ab5f268c868cff56031b5d40eec3f086f36dda91557e7b6eca7dfb554b23db",
+      "bytes": 1261
+    },
+    {
+      "path": "maven_alignment_summary.json",
+      "sha256": "e90aa46fe0a73cb56a81bd6f1ce4a34c19c053c839bcc260e4ad065ddacec94a",
+      "bytes": 927
+    },
+    {
+      "path": "maven_candidate_coverage_diagnosis.json",
+      "sha256": "e5bd45c44f4180bc82d4dbdbb8bfa2e6a45ef03db544db1a31bb48a6e558fc21",
+      "bytes": 255
+    },
+    {
+      "path": "ppat_downloads.json",
+      "sha256": "a08171b861abab50a56243d5d2a5662ea6aae53a553009fcd9c5e31da031a62a",
+      "bytes": 4004
+    },
+    {
+      "path": "source_review.json",
+      "sha256": "5ef3cf3661d692f068bedb8bf3c9b4b5e06dc71b7dbfa3e498e2ec9d5b0dc079",
+      "bytes": 4860
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schema": "ekg.eci_admission.sources.v1",
+  "date": "2026-10-29",
+  "base_commit": "735b672101a77028e14952526627aa09d70c928d",
+  "scope": "primary thesis sections/tables, source files, full public-train structural and split audits; no model execution, training or final-valid contents/outcomes",
+  "theses": [
+    {
+      "id": "Chen_title",
+      "url": "https://etd.lis.nsysu.edu.tw/ETD-db/ETD-search-c/view_etd?URN=etd-0630126-163554",
+      "error": "<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1081)>"
+    },
+    {
+      "id": "Mirza_thesis",
+      "url": "https://arxiv.org/pdf/1604.08120",
+      "resolved_url": "https://arxiv.org/pdf/1604.08120",
+      "bytes": 1986014,
+      "sha256": "8a8ca67830ce789bb49e477bb2b3cdd182069a0c4a7020ec15e429fe60ef7565",
+      "pdf": true,
+      "pages": 171
+    },
+    {
+      "id": "Mu_thesis",
+      "url": "https://theses.lib.polyu.edu.hk/bitstream/200/13577/3/8024.pdf",
+      "resolved_url": "https://theses.lib.polyu.edu.hk/bitstream/200/13577/3/8024.pdf",
+      "bytes": 16763299,
+      "sha256": "7083e3c1dc916cb4a884774c24c6ab74177c186451e30482eb1d60a72f9cd9b6",
+      "pdf": true,
+      "pages": 210
+    }
+  ],
+  "thesis_locations": {
+    "Mu_thesis": "Chapter 4; section 4.3 pages 82-86 PDF; table 4.3 page 86 rendered and visually read; catalogue year 2025, title page July 2024",
+    "Mirza_thesis": "Chapter 6 sections 6.4-6.6; table 6.3 PDF page 92 rendered and visually read; author arXiv edition"
+  },
+  "official_metadata_only": [
+    {
+      "id": "FanChuang2022",
+      "url": "https://hlt.hitsz.edu.cn/info/1001/1245.htm",
+      "scope": "official defense description; no full thesis/table verified"
+    },
+    {
+      "id": "ChenYouQi2026",
+      "url": "https://etd.lis.nsysu.edu.tw/ETD-db/ETD-search-c/view_etd?URN=etd-0630126-163554",
+      "scope": "official indexed abstract/ToC; live download SSL/timeout; no full text or original table verified"
+    }
+  ],
+  "ESC_source_archive": {
+    "url": "https://codeload.github.com/tommasoc80/EventStoryLine/zip/46edefee5e82e0917b823abe0a18bf8c7770f15c",
+    "bytes": 38668892,
+    "sha256": "bb3574fc793fceb79e281ca182adf7a52890b5869ccbf4f2f28512d4272eff58"
+  },
+  "ESC_source_revision": "tommasoc80/EventStoryLine@46edefee5e82e0917b823abe0a18bf8c7770f15c",
+  "PPAT_revision": "HITsz-TMG/PPAT@66495d25a04dca1a3d7b86eb9271e53ff410421e",
+  "PPAT_all_11_source_blobs_checked": true,
+  "CTB_source_zip": {
+    "url": "https://raw.githubusercontent.com/paramitamirza/Causal-TimeBank/43b593a6bb0dde2dc2e4da7a07bb174f2f7c06ad/Causal-TimeBank-CAT.zip",
+    "sha256": "0bf4fed1206b273174a962913b8904b4cb069c9e24f60af38cef71a5bf7b4206"
+  },
+  "CRF_candidate": {
+    "repo": "THU-KEG/MAVEN-dataset",
+    "revision": "71151f6da53bc9df9d6c5718dc81a2e1489651bf",
+    "files": [
+      {
+        "path": "baselines/BERT+CRF/BERT-CRF-MAVEN/utils_maven.py",
+        "blob_sha1": "97c98bc8afe5565473d53f72dfb9174c284c111f",
+        "sha256": "b8fac17abd81d5ea79487835e4ce1b47ccd6218c2de0667d3438340b955efe45",
+        "bytes": 16452,
+        "validation": "AST only; no import/runtime"
+      },
+      {
+        "path": "baselines/BERT+CRF/BERT-CRF-MAVEN/bert_crf.py",
+        "blob_sha1": "ef98952e2bf0747a06c147f6cffd673e8ca4af91",
+        "sha256": "6440eec54f42e6c9535338830d946c3410ad8c66404111b660410e9395e179cd",
+        "bytes": 7018,
+        "validation": "AST only; no import/runtime"
+      },
+      {
+        "path": "baselines/BERT+CRF/BERT-CRF-MAVEN/run_maven.py",
+        "blob_sha1": "484bb0425c3b1f6fc30fde23776e1f542d839460",
+        "sha256": "ae52ac7f6fd07e21a0f3bd18412ca94bf933dd75fd96f0bb5fd49f79aecdcf82",
+        "bytes": 33909,
+        "validation": "AST only; no import/runtime"
+      },
+      {
+        "path": "baselines/BERT+CRF/README.md",
+        "blob_sha1": "971a8714523128d7f4a967637fbc99164705e693",
+        "sha256": "4907ffca4316c9c6403261bd7a726c357c095e7dceed6ae225ca3fd216061ac6",
+        "bytes": 1045,
+        "validation": "read"
+      }
+    ],
+    "scope": "same ERE event annotations to BIO is source-level representable; trainer/WordPiece/actual checkpoint/runtime remain unverified"
+  },
+  "CRAB": {
+    "repo": "agromanou/CRAB",
+    "revision": "21ed62fd4501f3faf51dab2eb9e93ba4db0f27e9",
+    "scope": "author README and official paper metadata only; no data download or task adaptation",
+    "paper": "https://aclanthology.org/2023.emnlp-main.940/"
+  },
+  "source_identity_limits": [
+    "CTB fold membership is prospective transparent adaptation, not original author membership",
+    "MAVEN final-valid only existing manifest metadata read",
+    "new absolute examples are conditional development targets, not measured or forecast results",
+    "no independent expert or multi-agent review",
+    "all method/system experimental admission remains NO-GO"
+  ]
+}

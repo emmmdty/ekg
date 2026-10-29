@@ -303,3 +303,9 @@ model/train/dev及无类型标签candidate reader；只分类提供的span，非
 SEAG §4.3有该类pipeline原文先例，不能照抄其gold-window输入/原表。来源与静态核查
 见R1 §25.148和`research/20261029_eci_spec_review/integrated_sources.json`；不增加方法
 主表的已跑家族计数，FR-016(a)/(b)须等真实复现/透明适配后标记。
+
+**10-29实际输入核查覆盖**：R1 §25.149完整train发现Arg/ERE事件人口及类型不同，
+不能直接混接Arg候选/类型与ERE关系。系统改审同官方revision的BERT+CRF：真实
+utils/model/trainer和全句无标签BIO输出路径；同ERE标注的类型/跨度表达性已核，
+WordPiece覆盖/旧依赖/运行/checkpoint与正式三元组锚未核。属于待适配候选，未新增
+已跑对手或复现保真度PASS；旧DMBERT来源事实保留，不能据此放行原错配接线。

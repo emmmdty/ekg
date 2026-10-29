@@ -1,0 +1,19 @@
+{
+  "status": "pass",
+  "scope": "source/metadata/proposal/document consistency only; no scientific admission",
+  "receipt_files_checked": 8,
+  "thesis_pdfs_checked": 2,
+  "CRF_source_files_checked": 4,
+  "ESC_all_five_fold_doc_partitions_checked": true,
+  "CTB_all_ten_fold_doc_partitions_checked": true,
+  "relative_links_checked": 130,
+  "R1_old_results_append_only": true,
+  "production_parent_spec_old_results_unchanged": true,
+  "r1_consistency": "pass",
+  "r1_scientific_status": "preparation_partial_blocked",
+  "MAVEN_Arg_ERE_direct_join_admitted": false,
+  "model_or_GPU_execution": false,
+  "all_new_chapter_experiments_admitted": false,
+  "CTB_membership_recomputed_from_original_zip": true,
+  "PPAT_all_release_receipt_hashes_rechecked": true
+}

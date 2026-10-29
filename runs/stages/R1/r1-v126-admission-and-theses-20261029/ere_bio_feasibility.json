@@ -1,0 +1,16 @@
+{
+  "scope": "source/read-only representability on complete public MAVEN-ERE train; no model execution",
+  "counts": {
+    "mentions": 73939,
+    "events": 67984,
+    "documents": 2913,
+    "sentences": 32431,
+    "sentence_tokens_over_510": 0
+  },
+  "unsupported_event_types": [],
+  "overlap_examples": [],
+  "public_code_revision": "THU-KEG/MAVEN-dataset@71151f6da53bc9df9d6c5718dc81a2e1489651bf",
+  "input_adaptation": "ERE tokens/sentences to official content format; same ERE event labels to BIO; inference all sentence tokens, not Arg candidates",
+  "status": "source_level_path_only",
+  "remaining": "WordPiece lengths/truncation, full official trainer/decoder path and actual runtime/checkpoint not validated; no training admitted"
+}

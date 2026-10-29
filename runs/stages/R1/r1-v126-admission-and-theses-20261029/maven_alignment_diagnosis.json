@@ -1,0 +1,60 @@
+{
+  "counts": {
+    "ere_only_mentions": 3334,
+    "arg_only_mentions": 170,
+    "shared_mentions": 70605,
+    "ere_mentions": 73939,
+    "type_diff": 5714
+  },
+  "examples": [
+    {
+      "doc_id": "364ed14fc610df6e25a2f446e2b2d2ab",
+      "mention_id": "d543773c55931d4745e794f1ff0a51db",
+      "ERE": [
+        "action",
+        "Self_motion"
+      ],
+      "Arg": [
+        "action",
+        "Motion"
+      ]
+    },
+    {
+      "doc_id": "364ed14fc610df6e25a2f446e2b2d2ab",
+      "mention_id": "e52fe3ae0d43ed54c49d5980771c1a8a",
+      "ERE": [
+        "venture",
+        "Self_motion"
+      ],
+      "Arg": [
+        "venture",
+        "Motion"
+      ]
+    },
+    {
+      "doc_id": "364ed14fc610df6e25a2f446e2b2d2ab",
+      "mention_id": "12e20e3919dcc9f8a1d82fad20200c61",
+      "ERE": [
+        "venture",
+        "Self_motion"
+      ],
+      "Arg": [
+        "venture",
+        "Motion"
+      ]
+    },
+    {
+      "doc_id": "364ed14fc610df6e25a2f446e2b2d2ab",
+      "mention_id": "e3d0b625f8d6c3f0e8a80671e9a0455c",
+      "ERE": [
+        "expedition",
+        "Self_motion"
+      ],
+      "Arg": [
+        "expedition",
+        "Motion"
+      ]
+    }
+  ],
+  "note": "diagnosis only; no remapping, type repair, candidate union or filtering performed"
+}
