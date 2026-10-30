@@ -1,0 +1,102 @@
+[
+  {
+    "file": "gvc_loader.py",
+    "url": "https://github.com/UKPLab/cdcr-beyond-corpus-tailored/blob/1f60cafbcf5eeb723c46ed68a1b3ee4fc0fcdc26/python/handwritten_baseline/pipeline/data/loader/gvc_loader.py",
+    "revision": "1f60cafbcf5eeb723c46ed68a1b3ee4fc0fcdc26",
+    "transport": "GitHub connector UTF8 content; SHA256 identifies retrieved text, not claimed upstream blob byte equivalence",
+    "sha256": "26eb1a75f7af7a5874da0cce8fb95b444b34025544948a39044032bf7caf5ff2",
+    "scope": "published loader explicitly drops EVENT==0 when configured",
+    "locators": [
+      {
+        "line": 23,
+        "text": "        self._drop_0_cluster = config[\"drop_0_cluster\"]"
+      },
+      {
+        "line": 41,
+        "text": "        if self._drop_0_cluster:"
+      },
+      {
+        "line": 42,
+        "text": "            mentions_action = mentions_action.loc[mentions_action[EVENT] != 0]"
+      }
+    ]
+  },
+  {
+    "file": "secure_extraction.py",
+    "url": "https://github.com/taolusi/SECURE/blob/f1f532753be49a6ccd17c949dc6b3b561c971d02/src/data/extraction_utils.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "transport": "GitHub connector UTF8 content; SHA256 identifies retrieved text, not claimed upstream blob byte equivalence",
+    "sha256": "e0d4c0da96b913fb8f1dd43368158b3670671265f3cb81377601fe6c312d3755",
+    "scope": "load_GVC passes the native coreference chain label through; no drop_0 branch",
+    "locators": [
+      {
+        "line": 265,
+        "text": "                    coref_chain.replace(\"(\", \"\").replace(\")\", \"\"),"
+      },
+      {
+        "line": 275,
+        "text": "def load_GVC(gvc_file, topic_mapping_file, split_file):"
+      },
+      {
+        "line": 348,
+        "text": "                    coref_chain.replace(\"(\", \"\").replace(\")\", \"\"),"
+      }
+    ]
+  },
+  {
+    "file": "lea_readme.txt",
+    "url": "https://github.com/conll/reference-coreference-scorers/blob/772e5a3fb76bea6c69e8cd7eb019b0eae5fcd970/LEA-README.rst",
+    "revision": "772e5a3fb76bea6c69e8cd7eb019b0eae5fcd970",
+    "transport": "GitHub connector UTF8 content; SHA256 identifies retrieved text, not claimed upstream blob byte equivalence",
+    "sha256": "d4078d71a4f7ee378a6da4cfe60a269745dc1777e08a76d6570302e098a6f422",
+    "scope": "official repository LEA integration into v8.01",
+    "locators": [
+      {
+        "line": 4,
+        "text": "Implementation of the **LEA** coreference evaluation metric integrated into the CoNLL official scorer v8.01."
+      }
+    ]
+  },
+  {
+    "file": "lea_scorer.txt",
+    "url": "https://github.com/conll/reference-coreference-scorers/blob/772e5a3fb76bea6c69e8cd7eb019b0eae5fcd970/lib/CorScorer.pm",
+    "revision": "772e5a3fb76bea6c69e8cd7eb019b0eae5fcd970",
+    "transport": "GitHub connector UTF8 content; SHA256 identifies retrieved text, not claimed upstream blob byte equivalence",
+    "sha256": "ef701de1c1d6a55c225aaca40c30aedd682306a53035f34730023bee81541e88",
+    "scope": "Eval dispatch lea and LEASUB singleton convention, static body read",
+    "locators": [
+      {
+        "line": 477,
+        "text": "  # 1. Include the non-detected key mentions into the response as singletons"
+      },
+      {
+        "line": 478,
+        "text": "  # 2. Discard the detected mentions not included in key resolved as singletons"
+      },
+      {
+        "line": 485,
+        "text": "  # 1. Include the non-detected key mentions into the response as singletons"
+      },
+      {
+        "line": 501,
+        "text": "  # 2. Discard the detected mentions not included in key resolved as singletons"
+      },
+      {
+        "line": 515,
+        "text": "# 3a. For computing precision: put twinless system mentions in key as singletons"
+      },
+      {
+        "line": 591,
+        "text": "  elsif ($scorer eq 'lea') {"
+      },
+      {
+        "line": 722,
+        "text": "sub LEASUB {"
+      },
+      {
+        "line": 736,
+        "text": "    if ($entitySize == 1) {    #singletons"
+      }
+    ]
+  }
+]

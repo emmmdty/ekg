@@ -1,0 +1,38 @@
+{
+  "scope": "metadata and label semantics only, not model results",
+  "native_keep_zero_population": "DCT/Lemma/SECURE lineage; original published GVC scores remain native references",
+  "published_alternative": "Bugert2021 AppendixD drops zero; uCDCR2026 AppendixGVC assigns unique singleton IDs; neither treats zero as a real incident identity",
+  "rows": [
+    {
+      "split": "train",
+      "original_mentions": 5313,
+      "raw_cluster_zero_mentions": 169,
+      "zero_documents": 85,
+      "nonzero_projection_mentions": 5144,
+      "original_clusters": 991,
+      "nonzero_clusters": 990,
+      "native_zero_bucket_positive_pairs": 14196
+    },
+    {
+      "split": "dev",
+      "original_mentions": 977,
+      "raw_cluster_zero_mentions": 44,
+      "zero_documents": 17,
+      "nonzero_projection_mentions": 933,
+      "original_clusters": 228,
+      "nonzero_clusters": 227,
+      "native_zero_bucket_positive_pairs": 946
+    },
+    {
+      "split": "test",
+      "original_mentions": 1008,
+      "raw_cluster_zero_mentions": 57,
+      "zero_documents": 24,
+      "nonzero_projection_mentions": 951,
+      "original_clusters": 194,
+      "nonzero_clusters": 193,
+      "native_zero_bucket_positive_pairs": 1596
+    }
+  ],
+  "prospective_resolution": "preserve native raw labels for published benchmark tracking, add fixed nonzero-mention projection sensitivity scoring on the same predictions; never claim zero is a real shared event"
+}

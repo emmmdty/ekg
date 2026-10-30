@@ -1,10 +1,13 @@
 # CDCR三方法章：指标与比较规范
 
-2026-10-30，前瞻规范v0.1；同C41-A-R/T087研究准备切片。适用给定事件提及的
+2026-10-30，前瞻规范v0.2；同C41-A-R/T087研究准备切片。适用给定事件提及的
 跨文档事件共指，不扩展为事件检测、关系抽取或完整事件图谱。本文规定如何评价，
 不启动模型实现、复现或训练，不改写旧MAVEN冻结协议。作者要求原论文有可查成绩
 即可收录，代码不作门槛。成绩唯一权威为[R1 §25.153](../../results/PHASE_R1.md)，
 逐表入口为[九表导航](NINE_TABLES.md)。
+
+本次总审查补充：[准备状态裁决](READINESS_AUDIT.md)、GVC特殊标签0的固定敏感性
+评测以及LEA实现身份。原分R130版本保留，补充证据见R1 §25.154/R131。
 
 ## 1. 共同结果组与判定顺序
 
@@ -57,6 +60,43 @@ CoNLL F1 = (MUC F1 + B³ F1 + CEAFₑ F1)/3。先用未四舍五入的各项F1�
 要求枚举整张二次方矩阵。下列诊断比例分母为零时记NA并报告人口；标准指标保留
 参考scorer本身的约定。pair F1直接以2TP/(2TP+FP+FN)计算：没有正预测但存在正标注
 时为零，三项全零时为NA；不因P无定义而隐去已有漏判的F1。
+
+### GVC特殊标签0：事前固定的附加视图
+
+原GVC没有数据创建者提供的官方split；采用的是Bugert等已发表的公开incident
+membership。标签0在原标注中是泛指/未解决链接桶，不是共享现实事件；不同公开
+论文有保留、删除或单例化的约定，来源见总审查第3节。
+
+为保留与DCT/Lemma/SECURE公开人口的native联系，原始文件与原标签不改。所有
+系统另在同一批完整预测上提供**GVC nonzero-mention projection**：固定选择gold
+标签非0的提及，将gold和预测簇投影到这个相同子集，删空簇，保留预测单例，重算
+完整CoNLL、MUC/B³/CEAFₑ及LEA的P/R/F1。这与“去gold单例人口”是两个视图，不能
+混名或合并。不重新训练、不追加gold标签、不通过该标识过滤推理候选。
+
+native结果注明特殊桶；非0结果不能直接与原包含0的论文成绩排名。簇0不进入现实
+身份案例解释，只凭该桶改善不能支持真实事件身份归并的机制结论。这个规则在
+任何新方法结果出现前声明，后续不得按哪种分数好看切换主列。
+
+### LEA固定实现与调用模板
+
+采用官方reference仓库的`LEA-scorer`分支固定commit
+`772e5a3fb76bea6c69e8cd7eb019b0eae5fcd970`，读取了
+[LEA说明](https://github.com/conll/reference-coreference-scorers/blob/772e5a3fb76bea6c69e8cd7eb019b0eae5fcd970/LEA-README.rst)
+与[CorScorer.pm的LEASUB](https://github.com/conll/reference-coreference-scorers/blob/772e5a3fb76bea6c69e8cd7eb019b0eae5fcd970/lib/CorScorer.pm)。
+该实现对gold单例仅在预测也为相同单例时记正确；保留原作者定义，不采用另一个
+库的默认删除规则。主三项仍绑定上文f49f3f8 revision，不因LEA分支改变主评分器。
+
+后续新项目的调用模板如下，两个external目录分别绑定上述不同revision：
+
+```bash
+perl external/reference-conll/scorer.pl muc outputs/gold.conll outputs/pred.conll none
+perl external/reference-conll/scorer.pl bcub outputs/gold.conll outputs/pred.conll none
+perl external/reference-conll/scorer.pl ceafe outputs/gold.conll outputs/pred.conll none
+perl external/reference-lea/scorer.pl lea outputs/gold.conll outputs/pred.conll none
+```
+
+四次调用输入同一份人口/分区/单例条件，记录各自源码和命令。这是已核源码入口，
+尚未运行新项目的CoNLL序列化/评分自检。
 
 ## 3. 各章的辅助指标、分母和受控比较
 
@@ -178,6 +218,6 @@ LLM文本提前生成时，冷启动完整成本与缓存后成本分开；离�
 以及以上事前评价定义。原表核查收据为
 `runs/stages/R1/r1-v130-full-metric-preparation-20261030/`。
 
-后续方法spec必须引用本规范，并将具体k/阈值开发规则、LEA实现revision与调用
-命令、LLM配置及模块消融逐项接线；这些执行参数不以看test成绩再定的方式补充。
+后续方法spec必须引用本规范，并将具体k/阈值开发规则、已绑定评分器的执行配置/
+序列化自检、LLM配置及模块消融逐项接线；执行参数不以看test成绩再定的方式补充。
 当前没有模型运行，不能把本次文献提取与规范检查说成评分程序已经验证。

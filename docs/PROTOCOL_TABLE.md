@@ -1,5 +1,12 @@
 # 统一评测协议表（论文第 2 章素材）
 
+**2026-10-30 总审查补充**：[准备审查](research/20261030_data_first_scope/READINESS_AUDIT.md)
+与更新的[指标规范](research/20261030_data_first_scope/METRIC_SPEC.md)明确GVC0不是现实事件
+身份桶；保留native并追加固定非0投影评价，主指标不按结果切换。LEA已绑原作者分支
+revision；文献原分与统一控制结果不默认可直接排名。共同对照包确定，尚未实现/运行。
+R1 §25.154/R131记证据，无模型训练/复现或父SPEC改动。
+
+
 **2026-10-30 完整指标规范覆盖**：新CDCR框架的
 [METRIC_SPEC](research/20261030_data_first_scope/METRIC_SPEC.md)事前定义CoNLL主指标、
 MUC/B³/CEAFₑ与LEA、三章诊断分母、完整提及人口/跨文档分区、单例、查询预算和

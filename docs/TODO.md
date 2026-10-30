@@ -1,5 +1,14 @@
 # EKG 实时状态
 
+**2026-10-30 全面准备审查最新裁决**：[总审查](research/20261030_data_first_scope/READINESS_AUDIT.md)
+保留CDCR三语料与三递进方法章；原件/原分/指标资料具备，但尚不是只剩自有方案实现：
+共同接线与精确公共配置、三份可编码方法spec、新范围正式规范仍需落实。GVC标签0
+实为泛指/未解决链接桶，原生报告保留并补固定非0敏感性评测，不能解释为共享现实
+身份；LEA原作者实现已绑定。证据只认R1 §25.154/R131。建议后续采用
+[独立轻量项目](research/20261030_data_first_scope/PROJECT_BOUNDARY.md)，本轮仅组织裁决，
+没有创建目录/仓库或迁移数据，不改父SPEC/封存，不启动模型。仍同C41-A-R/T087。
+
+
 **10-30完整指标准备完成**：[九表](research/20261030_data_first_scope/NINE_TABLES.md)
 已扩标准分项/P/R/F1，[指标规范](research/20261030_data_first_scope/METRIC_SPEC.md)
 定义逐章诊断分母、候选与分区Pairwise区别、单例/成本/归因与结论优先级。

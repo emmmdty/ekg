@@ -1,5 +1,12 @@
 # 外部对手名册与复现保真度计划
 
+**2026-10-30 总审查补充**：[准备审查](research/20261030_data_first_scope/READINESS_AUDIT.md)
+与更新的[指标规范](research/20261030_data_first_scope/METRIC_SPEC.md)明确GVC0不是现实事件
+身份桶；保留native并追加固定非0投影评价，主指标不按结果切换。LEA已绑原作者分支
+revision；文献原分与统一控制结果不默认可直接排名。共同对照包确定，尚未实现/运行。
+R1 §25.154/R131记证据，无模型训练/复现或父SPEC改动。
+
+
 **2026-10-30 完整指标版**：[九表导航](research/20261030_data_first_scope/NINE_TABLES.md)
 已扩MUC/B³/CEAFₑ/CoNLL/LEA及P/R/F1附表，唯一原分R1 §25.153、凭证R130。
 缺报不补造、不要求代码，CD-DCE原表算术问题†保留；不据文献表授予运行保真度。

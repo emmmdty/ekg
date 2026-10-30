@@ -1,0 +1,16 @@
+[
+  {
+    "id": "Bugert2021",
+    "url": "https://aclanthology.org/2021.cl-3.18.pdf",
+    "bytes": 982208,
+    "pages": 40,
+    "sha256": "6383f291f0abcb212ae23d6e0bbde949664ec6f84c905e0201cded89310c9235"
+  },
+  {
+    "id": "Lemma_current",
+    "url": "https://aclanthology.org/2023.findings-acl.100.pdf",
+    "bytes": 858042,
+    "pages": 13,
+    "sha256": "c87d95910d91149f81afda18c4fc7c529be2c3370c55ea38ea3cd7120b1d8959"
+  }
+]

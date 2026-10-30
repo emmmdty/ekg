@@ -1,0 +1,97 @@
+{
+  "date": "2026-10-30",
+  "question": "are all external conditions and thesis framework complete, leaving only own method implementation; should this be a separate project",
+  "decision": "retain CDCR/three corpora/three progressive method chapters; recommend a separate lightweight project; not yet only own-method implementation",
+  "ready": [
+    "unchanged public originals acquired and freshly hash verified",
+    "published split sources available; GVC split correctly attributed to Bugert et al. rather than corpus creator",
+    "public given-mention inputs and identity gold available",
+    "nine published comparator tables with main/component scores and provenance",
+    "shared outcome and chapter diagnostics defined",
+    "open LLM/model/source paths and declared adaptations available",
+    "three chapter problems and attribution design have public research basis"
+  ],
+  "corrected_now": [
+    "GVC zero bucket is generic/unresolved, not a physical event shared across splits",
+    "native GVC kept for literature connection; fixed nonzero sensitivity rescoring predeclared",
+    "LEA original integrated implementation pinned to 772e5a3fb76bea6c69e8cd7eb019b0eae5fcd970",
+    "minimum shared control package selected; does not replace broad literature tables"
+  ],
+  "not_completed": [
+    "common reader/scorer/serialized population and pipeline execution verification",
+    "exact common baseline configuration and later control outputs",
+    "three directly implementable module/network/objective/inference design specs",
+    "new-scope governing SPEC and project boundary adoption"
+  ],
+  "not_required_now": [
+    "proposed method effectiveness proof",
+    "reproduction of every published comparator",
+    "code availability for literature admission",
+    "new manual annotation",
+    "closed API purchase or additional seeds"
+  ],
+  "public_control_package": [
+    {
+      "id": "B0",
+      "name": "DCT-style raw text common pipeline",
+      "corpora": [
+        "ECB+",
+        "GVC",
+        "WEC-Eng"
+      ],
+      "role": "fixed cross-encoder/decoder for retrieval attribution; WEC transparent public adaptation"
+    },
+    {
+      "id": "B1",
+      "name": "SECURE-style same-open-teacher semantic assistance",
+      "corpora": [
+        "ECB+",
+        "GVC",
+        "WEC-Eng"
+      ],
+      "role": "same encoder and teacher controls; explicitly not original GPT4 reproduction"
+    },
+    {
+      "id": "H",
+      "name": "published lemma/train-only lemma association control",
+      "corpora": [
+        "ECB+",
+        "GVC",
+        "WEC-Eng"
+      ],
+      "role": "simple candidate and pipeline comparator"
+    },
+    {
+      "id": "W",
+      "name": "WEC original author pipeline",
+      "corpora": [
+        "WEC-Eng"
+      ],
+      "role": "native corpus anchor; original ECB result retained in literature only unless separately evaluated"
+    }
+  ],
+  "thesis_outline": {
+    "1": "introduction and scoped engineering problem",
+    "2": "related work, public data and uniform evaluation",
+    "3": "candidate retrieval under lexical variation",
+    "4": "pair discrimination of confusable events",
+    "5": "cluster-level merging, error chains, plus system validation",
+    "6": "conclusions and limitations"
+  },
+  "project_decision": {
+    "recommended": "separate lightweight research project cdcr-thesis",
+    "proposed_path": "/home/tjk/myProjects/masterProjects/cdcr-thesis",
+    "reason": "old normative FR001/002/008 and packaging/schema are tied to multi-task MAVEN and consumer prediction",
+    "created": false,
+    "old_results_reused_as_new_scores": false,
+    "migration_or_remote_transfer_executed": false
+  },
+  "execution": {
+    "model_code": false,
+    "baseline_reproduction": false,
+    "model_training_or_inference": false,
+    "new_repository": false,
+    "parent_SPEC_changed": false,
+    "old_final_valid_predictions_read": false
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "r1-v131-comprehensive-readiness-20261030",
+  "date": "2026-10-30",
+  "base_commit": "caa7a6fcb1da318b2d9ce027c9fe5c5a6d46f8aa",
+  "scope": "comprehensive research preparation audit, source-based data semantics correction, and project organization decision",
+  "artifacts": [
+    {
+      "path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/comparison_scope.json",
+      "sha256": "eea8c0ab9b5785fc36b0966f60d534f94c30383e7f10327dc31b6f9c2cc67454"
+    },
+    {
+      "path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/fresh_data_identity.json",
+      "sha256": "f826a2354550edbaec50e8504dcbfaf48534801baa9bd1596a2f39674aad4277"
+    },
+    {
+      "path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/gvc_zero_bucket_audit.json",
+      "sha256": "064c8196504f2708511f0aa4f7370ef5a5de32f10d0647f79b8922006a12ec4c"
+    },
+    {
+      "path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/new_primary_pdfs.json",
+      "sha256": "40df78ac7961ecd53b5858f617d8fb2a6a201b75eec935377b2cf50206cfb527"
+    },
+    {
+      "path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/readiness_decision.json",
+      "sha256": "e3d556cee96a6b70b420375040f1afca81017bdd31e75c41626081b83967a2ba"
+    },
+    {
+      "path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/source_receipts.json",
+      "sha256": "f5b845509c3576a38c264cd082fa1ad6bb7caa5d6b4ac50f14f2dbe723c03f06"
+    },
+    {
+      "path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/uCDCR2026_source.json",
+      "sha256": "499573faff87ce2a3c341559a11ef85e95d1f545fe9e8222fbaa730d21053238"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/research/20261030_data_first_scope/READINESS_AUDIT.md",
+      "sha256": "b2827950a09823b357207f3f1845614a9073477698a570dbce6ad19cf62ccdc6"
+    },
+    {
+      "path": "docs/research/20261030_data_first_scope/PROJECT_BOUNDARY.md",
+      "sha256": "48354c0a9728bbdff2f3e05177382f0cdf6841477d0ec16c5a68bd3f29484dc2"
+    },
+    {
+      "path": "docs/research/20261030_data_first_scope/METRIC_SPEC.md",
+      "sha256": "3a83b6c2281ba65cc3c81f62f9dbeb6a843de77e381c55b29c8742fb42935729"
+    }
+  ],
+  "no_model_runs_or_new_repository": true
+}

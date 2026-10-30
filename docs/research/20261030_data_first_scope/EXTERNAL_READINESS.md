@@ -1,5 +1,11 @@
 # 论文框架的外部条件审查
 
+**2026-10-30 总审查覆盖**：[READINESS_AUDIT](READINESS_AUDIT.md)给出准备状态与
+完整论文骨架；[PROJECT_BOUNDARY](PROJECT_BOUNDARY.md)建议后续独立轻量工程，
+本轮没有创建。GVC0语义/非0敏感性评价、LEA实现与共同公共包已补；材料齐备不等于
+公共接线、三章可编码设计和新范围规范已全部完成。原分/新审查事实见R1 §25.154。
+
+
 **2026-10-30 指标准备补充**：[完整九表](NINE_TABLES.md)现列标准分项，
 [P/R/F1及原文异常](../../results/PHASE_R1.md#fullmetrics-prf)在R1 §25.153；
 [METRIC_SPEC](METRIC_SPEC.md)为三章共同主辅指标、局部分母、人口/单例、消融与成本
