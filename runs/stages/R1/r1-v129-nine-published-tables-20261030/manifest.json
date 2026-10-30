@@ -1,0 +1,26 @@
+{
+  "schema": "ekg.published_benchmark_tables.v1",
+  "scope": "published own results, no code requirement or model reproduction",
+  "files": [
+    {
+      "path": "canonical_scores.json",
+      "bytes": 10671,
+      "sha256": "9b1341336dccffa807beff2ae5543a8ac1331feceb1591460250f1721c7b1990"
+    },
+    {
+      "path": "nine_tables.json",
+      "bytes": 29778,
+      "sha256": "ebb853fd6b1577cda6e6830559905ad31f6cd24d0feb45296129f6b5ba8b6b81"
+    },
+    {
+      "path": "paper_registry.json",
+      "bytes": 7362,
+      "sha256": "b2691f23d0056e31d9f194472fbc79faf85bbf50b90f32c59d31254e5cfcf614"
+    },
+    {
+      "path": "source_notes.json",
+      "bytes": 1699,
+      "sha256": "9c43b82cd6b4955ebdcf986f118bc678d9c00cfe9819e13036be9878403a953f"
+    }
+  ]
+}

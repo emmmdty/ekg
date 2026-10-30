@@ -1,0 +1,16 @@
+{
+  "status": "pass",
+  "tables": 9,
+  "rows": 48,
+  "unique_method_dataset_scores": 21,
+  "published_papers": 11,
+  "minimum_rows_per_table": 4,
+  "original_pdf_identities": 11,
+  "manifest_entries": 4,
+  "relative_links_checked": 134,
+  "all_nine_anchors_exist": true,
+  "canonical_score_consistency": true,
+  "R1_append_only": true,
+  "code_and_parent_SPEC_unchanged": true,
+  "models_or_baseline_reproduction_run": false
+}

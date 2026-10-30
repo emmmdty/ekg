@@ -1,0 +1,45 @@
+{
+  "inclusion": "published paper with directly verified test CoNLL result; no code requirement",
+  "reuse": "same methods and same original scores may appear in several chapters; WEC tables share complete-system anchors",
+  "comparability": "native published settings retained; not a unified reproduction leaderboard; component effects require controlled experiments later",
+  "source_checks": [
+    {
+      "paper": "Chen2023",
+      "finding": "original PDF reports ECB+ only; WEC 61.3 in later paper not treated as original own result"
+    },
+    {
+      "paper": "Gao2024",
+      "finding": "original own tables cover WEC-Eng and WEC-Zh; ECB 85.5 in later paper not treated as own original result"
+    },
+    {
+      "paper": "ACCI",
+      "finding": "main ECB headline 88.4 matches Table2 LH_Oracle/Base row; select explicit Held variant 86.2/85.2 from Tables2/4 consistently"
+    },
+    {
+      "paper": "CD_DCE",
+      "finding": "ECB 87.4 non-oracle selected, not oracle 88.5"
+    },
+    {
+      "paper": "ROEC_CKD",
+      "finding": "CoNLL 86.4/83.0 selected, not body B3 86.8/84.3"
+    },
+    {
+      "paper": "LemmaECR",
+      "finding": "LH+Dlong non-oracle selected; absent GitHub or large original training hardware does not exclude a literature score"
+    },
+    {
+      "paper": "SECURE",
+      "finding": "FCC scores not used for WEC; original three-run mean retained as background metadata"
+    },
+    {
+      "paper": "CohTP",
+      "finding": "CoNLL column selected; original teacher/temporal input settings retained"
+    }
+  ],
+  "execution": {
+    "baseline_reproductions": 0,
+    "model_calls": 0,
+    "code_or_data_changes": false,
+    "MAVEN_final_valid_read": false
+  }
+}

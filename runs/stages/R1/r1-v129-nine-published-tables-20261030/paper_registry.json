@@ -1,0 +1,180 @@
+[
+  {
+    "id": "DCT",
+    "title": "Focus on what matters: Applying Discourse Coherence Theory to Cross Document Coreference",
+    "year": 2021,
+    "venue": "EMNLP",
+    "url": "https://aclanthology.org/2021.emnlp-main.106/",
+    "role": "learned mention retrieval, cross-encoder and cluster merging",
+    "primary_pdf": {
+      "id": "DCT",
+      "url": "https://aclanthology.org/2021.emnlp-main.106.pdf",
+      "sha256": "8db204022fd37787ea2d16dd2f876926d834180e9dd3ca0c23856c8976366bde",
+      "bytes": 530943,
+      "pages": 12
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "LemmaECR",
+    "title": "2*n is better than n^2: Decomposing Event Coreference Resolution into Two Tractable Problems",
+    "year": 2023,
+    "venue": "Findings ACL",
+    "url": "https://aclanthology.org/2023.findings-acl.100/",
+    "role": "lemma candidate pruning plus discriminator, connected components",
+    "primary_pdf": {
+      "id": "LemmaECR",
+      "url": "https://aclanthology.org/2023.findings-acl.100.pdf",
+      "sha256": "c87d95910d91149f81afda18c4fc7c529be2c3370c55ea38ea3cd7120b1d8959",
+      "bytes": 858042,
+      "pages": 13
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "SECURE",
+    "title": "Synergetic Event Understanding: A Collaborative Approach to Cross-Document Event Coreference Resolution with Large Language Models",
+    "year": 2024,
+    "venue": "ACL",
+    "url": "https://aclanthology.org/2024.acl-long.164/",
+    "role": "LLM event understanding for retrieval and cross-encoding, cluster merge checking",
+    "primary_pdf": {
+      "id": "SECURE",
+      "url": "https://aclanthology.org/2024.acl-long.164.pdf",
+      "sha256": "82988758c649e880e8e3c851c8a197ff29f38d3c3e21c8848d14d3c5785da316",
+      "bytes": 1346889,
+      "pages": 18
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "ROEC_CKD",
+    "title": "Okay, Let's Do This! Modeling Event Coreference with Generated Rationales and Knowledge Distillation",
+    "year": 2024,
+    "venue": "NAACL",
+    "url": "https://aclanthology.org/2024.naacl-long.218/",
+    "role": "LLM rationale supervision and coreference knowledge distillation",
+    "primary_pdf": {
+      "id": "ROEC_CKD",
+      "url": "https://aclanthology.org/2024.naacl-long.218.pdf",
+      "sha256": "e283d53634f34d09e8f0311293fa6e330e7f1d3cf8a8a7a5b1d77b9bbe02ebfb",
+      "bytes": 970382,
+      "pages": 16
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "RCDA",
+    "title": "A Rationale-centric Counterfactual Data Augmentation Method for Cross-Document Event Coreference Resolution",
+    "year": 2024,
+    "venue": "NAACL",
+    "url": "https://aclanthology.org/2024.naacl-long.63/",
+    "role": "LLM-generated trigger/context counterfactual training augmentation",
+    "primary_pdf": {
+      "id": "RCDA",
+      "url": "https://aclanthology.org/2024.naacl-long.63.pdf",
+      "sha256": "04304e3f7793e7054a9e0fc37bb35da8e586905243dd256133cfc695a1479f18",
+      "bytes": 4472162,
+      "pages": 29
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "WEC",
+    "title": "WEC: Deriving a Large-scale Cross-document Event Coreference dataset from Wikipedia",
+    "year": 2021,
+    "venue": "NAACL",
+    "url": "https://aclanthology.org/2021.naacl-main.198/",
+    "role": "mention pair scorer plus average-link clustering",
+    "primary_pdf": {
+      "id": "WEC",
+      "url": "https://aclanthology.org/2021.naacl-main.198.pdf",
+      "sha256": "2e9b492507a0cbd4f641a35d2677d44f045e4a2925e259ae927a58dfd7d80694",
+      "bytes": 1226818,
+      "pages": 13
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "CD_DCE",
+    "title": "Employing Discourse Coherence Enhancement to Improve Cross-Document Event and Entity Coreference Resolution",
+    "year": 2025,
+    "venue": "ACL",
+    "url": "https://aclanthology.org/2025.acl-long.1134/",
+    "role": "coherent context construction and structured event interaction",
+    "primary_pdf": {
+      "id": "CD_DCE",
+      "url": "https://aclanthology.org/2025.acl-long.1134.pdf",
+      "sha256": "be57df7931b43bcdb2d484d69ca995071eeb3e9ebe46516aa30e041639389d0d",
+      "bytes": 415443,
+      "pages": 15
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "CohTP",
+    "title": "Incorporating Temporal Coherence to Cross-Document Event Coreference Resolution",
+    "year": 2026,
+    "venue": "ACL",
+    "url": "https://aclanthology.org/2026.acl-long.1345/",
+    "role": "temporal coherence graph, segmentation and final coreference",
+    "primary_pdf": {
+      "id": "CohTP",
+      "url": "https://aclanthology.org/2026.acl-long.1345.pdf",
+      "sha256": "46ff25112e6f8de64a4ac6c1742c9e819da8c30ebb26099f9c08bf95571504d2",
+      "pages": 18,
+      "bytes": 644551
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "Gao2024",
+    "title": "Enhancing Cross-Document Event Coreference Resolution by Discourse Structure and Semantic Information",
+    "year": 2024,
+    "venue": "LREC-COLING",
+    "url": "https://aclanthology.org/2024.lrec-main.523/",
+    "role": "RST and lexical-chain heterogeneous graph, pair scoring and agglomeration",
+    "primary_pdf": {
+      "id": "Gao2024",
+      "url": "https://aclanthology.org/2024.lrec-main.523.pdf",
+      "bytes": 2006636,
+      "pages": 15,
+      "sha256": "e4aa3719cd65f82cb387d081860e7d54ea6405e952677874391aac83c0ee8b30"
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "Chen2023",
+    "title": "Cross-Document Event Coreference Resolution on Discourse Structure",
+    "year": 2023,
+    "venue": "EMNLP",
+    "url": "https://aclanthology.org/2023.emnlp-main.294/",
+    "role": "global discourse-path representations for mention-pair decisions",
+    "primary_pdf": {
+      "id": "Chen2023",
+      "url": "https://aclanthology.org/2023.emnlp-main.294.pdf",
+      "bytes": 244433,
+      "pages": 11,
+      "sha256": "1cb4b5e6b2fd33f41a6bf1601578346ce4a1ee1752f9b61b01801ccb37585397"
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review"
+  },
+  {
+    "id": "ACCI",
+    "title": "Argument centric causal intervention for cross document event coreference resolution",
+    "year": 2026,
+    "venue": "Scientific Reports 16:2939",
+    "url": "https://www.nature.com/articles/s41598-025-32765-6",
+    "role": "argument-centric intervention with explicit Held backbone row",
+    "primary_pdf": {
+      "id": "ACCI",
+      "url": "https://www.nature.com/articles/s41598-025-32765-6.pdf",
+      "bytes": 3909194,
+      "sha256": "b07be000310b6cd8cb96907e462400a8cb1926d251987d6798813500c7bfc552",
+      "pages": 19
+    },
+    "read_scope": "own result table and relevant setup/mechanism; no claim of full appendix review",
+    "online_date": "2025-12-17",
+    "journal_collection_year": 2026
+  }
+]

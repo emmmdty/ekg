@@ -1,5 +1,10 @@
 # Tasks: EKG Thesis Research Program
 
+**2026-10-30 / T087当前切片完成**：作者确认的九张已发表成绩表见
+[九表导航](research/20261030_data_first_scope/NINE_TABLES.md)，原分只在R1 §25.152，
+来源R129。无代码照样收录可核原分论文，不启动复现/训练/模型实现。整条科研任务
+不据此标done，仍同一队列；后续按作者验收接续。
+
 **2026-10-30 / T087最新覆盖**：同一C41-A-R审查切片完成CDCR三语料/三方法章的
 外部条件、原表、LLM与公开发布件取舍，入口
 [EXTERNAL_READINESS](research/20261030_data_first_scope/EXTERNAL_READINESS.md)，证据R1

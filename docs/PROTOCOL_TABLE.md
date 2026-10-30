@@ -1,5 +1,9 @@
 # 统一评测协议表（论文第 2 章素材）
 
+**2026-10-30 九表文献锚定**：[逐章逐语料已发表成绩表](research/20261030_data_first_scope/NINE_TABLES.md)
+采用作者原CoNLL列，保留各自原条件；是文献参考表，不是统一重跑协议表。原分
+仅在R1 §25.152，无代码亦可收录。未拿后引重跑、oracle或其他指标补缺。
+
 **2026-10-30 外部条件审查接续**：[新框架协议说明](research/20261030_data_first_scope/EXTERNAL_READINESS.md)
 选官方CoNLL reference v8.01作新统一结果锚，原split/给定提及/保留单例/无gold
 主题阻断；SECURE native兼容分数单列。簇级对手可额外调用冻结scorer，须统一查询

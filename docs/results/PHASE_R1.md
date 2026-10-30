@@ -9531,3 +9531,181 @@ split完整ID集、13仓库pin/7模型元数据、116个相对链接及旧R1仅�
 36 mapped`，旧科研总体状态仍`preparation_partial_blocked`，不将本切片资料审查
 冒充全论文实验完成。未改父SPEC/constitution或生产代码；本轮不运行pytest/ruff/
 smoke和任何baseline模型，符合作者“先框架、暂不复现”的指令。
+
+### 25.152 · 三方法章×三语料的已发表成绩锚定表（2026-10-30）
+
+**开工自审**：作者已确认当前产物是九张已发表方法成绩表，而非代码准入名册。
+科研价值是为候选覆盖、语义精判、簇级归并三章各自确定公共比较对象和最终主指标
+锚点；对准同C41-A-R/T087，承接§25.150–151已经核过的原表，只补缺少的直接来源。
+可行性：原PDF与官方发表页可读取，公开实现是否存在不影响收录；采用同一主指标
+CoNLL F1并记录语料/split/input/oracle等原设定。只核作者自己的结果，不从其他论文
+的baseline行冒充直接核表；无原分的单元不填，方法可跨章重复。不运行模型、不
+复现、不写模型代码、不改数据或原sealed，也不反复要求先证明自有创新。
+
+#### 九表的共同口径
+
+以下每张表只列已发表论文中作者自己的方法及其原文CoNLL F1百分数，
+每行一个主分数，论文与Table/PDF页可追溯；**不要求GitHub或代码**。
+三章的最终任务相同，故这里锚定的是完整系统成绩，不是把这些数字改称召回率、
+pair F1或decoder单独增益。方法可跨章重复，WEC四篇是三章共用的完整系统对照。
+各论文原设定保留；这是一手文献成绩表，不冒称同协议统一重跑排名。
+
+<a id="published-ch3-ecb"></a>
+
+##### 第3章 · 候选覆盖 · ECB+
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 85.7 | Table 7，PDF第12页 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | 81.7 | Table 2，PDF第7页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 86.7 | Table 2，PDF第6页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 87.4 | Table 1，PDF第7页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 88.9 | Table 1，PDF第7页 |
+
+<a id="published-ch3-gvc"></a>
+
+##### 第3章 · 候选覆盖 · GVC
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 83.7 | Table 7，PDF第12页 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | 75.0 | Table 2，PDF第7页 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | 84.4 | Table 2，PDF第7页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 87.4 | Table 2，PDF第6页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 87.7 | Table 1，PDF第7页 |
+
+<a id="published-ch3-wec"></a>
+
+##### 第3章 · 候选覆盖 · WEC-Eng
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | 62.3 | Table 5，PDF第8页 |
+| [DIE-EC（2024）](https://aclanthology.org/2024.lrec-main.523/) | 65.0 | Table 3，PDF第7页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 65.9 | Table 1，PDF第7页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 66.7 | Table 1，PDF第7页 |
+
+<a id="published-ch4-ecb"></a>
+
+##### 第4章 · 语义精判 · ECB+
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 85.7 | Table 7，PDF第12页 |
+| [篇章结构模型–Longformer（2023）](https://aclanthology.org/2023.emnlp-main.294/) | 86.4 | Table 2，PDF第6页 |
+| [ROEC＋CKD（2024）](https://aclanthology.org/2024.naacl-long.218/) | 86.4 | Table 5，PDF第15页 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | 86.0 | Table 2，PDF第7页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 86.7 | Table 2，PDF第6页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 87.4 | Table 1，PDF第7页 |
+| [ACCI–Held（2026）](https://www.nature.com/articles/s41598-025-32765-6) | 86.2 | Table 2，PDF第11页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 88.9 | Table 1，PDF第7页 |
+
+<a id="published-ch4-gvc"></a>
+
+##### 第4章 · 语义精判 · GVC
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 83.7 | Table 7，PDF第12页 |
+| [ROEC＋CKD（2024）](https://aclanthology.org/2024.naacl-long.218/) | 83.0 | Table 6，PDF第15页 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | 84.4 | Table 2，PDF第7页 |
+| [ACCI–Held（2026）](https://www.nature.com/articles/s41598-025-32765-6) | 85.2 | Table 4，PDF第12页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 87.4 | Table 2，PDF第6页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 87.7 | Table 1，PDF第7页 |
+
+<a id="published-ch4-wec"></a>
+
+##### 第4章 · 语义精判 · WEC-Eng
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | 62.3 | Table 5，PDF第8页 |
+| [DIE-EC（2024）](https://aclanthology.org/2024.lrec-main.523/) | 65.0 | Table 3，PDF第7页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 65.9 | Table 1，PDF第7页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 66.7 | Table 1，PDF第7页 |
+
+<a id="published-ch5-ecb"></a>
+
+##### 第5章 · 簇级归并 · ECB+
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | 80.8 | Table 4，PDF第8页 |
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 85.7 | Table 7，PDF第12页 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | 81.7 | Table 2，PDF第7页 |
+| [篇章结构模型–Longformer（2023）](https://aclanthology.org/2023.emnlp-main.294/) | 86.4 | Table 2，PDF第6页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 86.7 | Table 2，PDF第6页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 87.4 | Table 1，PDF第7页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 88.9 | Table 1，PDF第7页 |
+
+<a id="published-ch5-gvc"></a>
+
+##### 第5章 · 簇级归并 · GVC
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 83.7 | Table 7，PDF第12页 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | 75.0 | Table 2，PDF第7页 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | 84.4 | Table 2，PDF第7页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 87.4 | Table 2，PDF第6页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 87.7 | Table 1，PDF第7页 |
+
+<a id="published-ch5-wec"></a>
+
+##### 第5章 · 簇级归并 · WEC-Eng
+
+| 已发表方法 | CoNLL F1（%） | 原文出处 |
+|---|---:|---|
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | 62.3 | Table 5，PDF第8页 |
+| [DIE-EC（2024）](https://aclanthology.org/2024.lrec-main.523/) | 65.0 | Table 3，PDF第7页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 65.9 | Table 1，PDF第7页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 66.7 | Table 1，PDF第7页 |
+
+#### 原设定脚注与收录判断
+
+1. LemmaECR取LH＋Dlong的非oracle行；CD-DCE的ECB取non-oracle行。
+2. ROEC＋CKD取附录CoNLL列；SECURE保留论文多次运行均值身份，未扩张本项目seed授权。
+3. ACCI取同一Held骨干：ECB Table2、GVC Table4；不把ECB主表与LH_Oracle同值的
+   headline行混入这个变体。期刊卷年为2026，在线发表于2025-12-17。
+4. Chen2023的星号表示Longformer encoder；其原文没有WEC原分，不将后引61.3填入。
+   DIE-EC取原WEC-Eng Table3，不取WEC-Zh Table4；原文未报ECB，不转抄后引85.5。
+5. WEC原模型的ECB结果使用预测文档分组；WEC列为给定提及的原任务结果。CD-DCE的
+   ECB/WEC encoder不同；CohTP保留其时间图/NLI/GPT等原始条件。全部行均有原条件
+   metadata，不以同名数据/同名CoNLL消去差异；不新增自造评价指标。
+6. WEC可直接核原分的共同对照较少，已取得四篇独立已发表来源；三张WEC表重复它们
+   是共同最终任务对标，不宣称三套不同的召回/精判/聚类专属原成绩。
+
+#### 论文目录与核查范围
+
+| 标识 | 已发表论文 | 年份／来源 |
+|---|---|---|
+| DCT | [Focus on what matters: Applying Discourse Coherence Theory to Cross Document Coreference](https://aclanthology.org/2021.emnlp-main.106/) | 2021 · EMNLP |
+| LemmaECR | [2*n is better than n^2: Decomposing Event Coreference Resolution into Two Tractable Problems](https://aclanthology.org/2023.findings-acl.100/) | 2023 · Findings ACL |
+| SECURE | [Synergetic Event Understanding: A Collaborative Approach to Cross-Document Event Coreference Resolution with Large Language Models](https://aclanthology.org/2024.acl-long.164/) | 2024 · ACL |
+| ROEC_CKD | [Okay, Let's Do This! Modeling Event Coreference with Generated Rationales and Knowledge Distillation](https://aclanthology.org/2024.naacl-long.218/) | 2024 · NAACL |
+| RCDA | [A Rationale-centric Counterfactual Data Augmentation Method for Cross-Document Event Coreference Resolution](https://aclanthology.org/2024.naacl-long.63/) | 2024 · NAACL |
+| WEC | [WEC: Deriving a Large-scale Cross-document Event Coreference dataset from Wikipedia](https://aclanthology.org/2021.naacl-main.198/) | 2021 · NAACL |
+| CD_DCE | [Employing Discourse Coherence Enhancement to Improve Cross-Document Event and Entity Coreference Resolution](https://aclanthology.org/2025.acl-long.1134/) | 2025 · ACL |
+| CohTP | [Incorporating Temporal Coherence to Cross-Document Event Coreference Resolution](https://aclanthology.org/2026.acl-long.1345/) | 2026 · ACL |
+| Gao2024 | [Enhancing Cross-Document Event Coreference Resolution by Discourse Structure and Semantic Information](https://aclanthology.org/2024.lrec-main.523/) | 2024 · LREC-COLING |
+| Chen2023 | [Cross-Document Event Coreference Resolution on Discourse Structure](https://aclanthology.org/2023.emnlp-main.294/) | 2023 · EMNLP |
+| ACCI | [Argument centric causal intervention for cross document event coreference resolution](https://www.nature.com/articles/s41598-025-32765-6) | 2026 · Scientific Reports 16:2939 |
+
+九表共48行，来自11篇已发表论文、21个唯一的“方法×语料”
+原分记录，每表至少四行；无缺分占位、无我方预期分、无模型复现。对已核原表复用
+上轮PDF身份/页图，只新增Chen2023、DIE-EC2024、ACCI原PDF和直接表格核查。
+新原表已实际渲染查看：Chen2023 Table2、DIE-EC Table3、ACCI Table1/2/3/4；
+ACCI补充HTML原表作为交叉核对。后续处理方式以本次代码不作收录门槛为准，旧运行
+依赖名册不限制这些文献表的对手范围。
+
+本轮凭证：`runs/stages/R1/r1-v129-nine-published-tables-20261030/`，4件JSON＋manifest，
+manifest SHA-256 `069fa5f2b508471c8e0de674c92e8d8cfffd0fe46a93d7eaaa4fcd72dbe97559`。
+包含论文/PDF身份目录、21个唯一原分、九表48行映射及来源条件说明；完整PDF不
+提交，仅保留引用与内容身份。九表导航放在原研究目录，未新增研究队列。
+
+**实际验证**：九个“章×语料”组合齐全，每表至少四个已发表方法；48行与21个
+canonical原分逐项一致，所有来源回链、原表页范围、11份原PDF哈希、4件manifest
+收据、134个相对链接及九个显式锚点核验通过。旧R1仅追加、父规范/生产代码保持，
+`git diff --check`通过。R1一致性`status=pass / findings=[] / 36 mapped`，旧总体
+科研状态仍`preparation_partial_blocked`，本次只验收文献锚定产物。未运行pytest/
+ruff/smoke、任何模型或baseline复现，未扩seed/机器/权限；表中不含我方预期分。
