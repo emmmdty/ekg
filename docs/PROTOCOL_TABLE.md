@@ -1,5 +1,10 @@
 # 统一评测协议表（论文第 2 章素材）
 
+**2026-10-30 外部条件审查接续**：[新框架协议说明](research/20261030_data_first_scope/EXTERNAL_READINESS.md)
+选官方CoNLL reference v8.01作新统一结果锚，原split/给定提及/保留单例/无gold
+主题阻断；SECURE native兼容分数单列。簇级对手可额外调用冻结scorer，须统一查询
+权限/预算；不能把未知边当负例。当前是框架设计，不把旧四章冻结协议或原分改名。
+
 **2026-10-30 数据优先提案覆盖**：当前优先推荐跨文档事件共指消解，三公共语料原件
 与递进问题框架见[新提案](research/20261030_data_first_scope/THESIS_FRAMEWORK.md)。
 数据/原split已核不等于reader/scorer/模型准入；gold主题阻断、单例与候选范围须事前

@@ -1,0 +1,92 @@
+[
+  {
+    "path": "data/ecb+/gpt4/elaboration-entityCoref_date_dev_data.json",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "git_blob": "7bf17710217964ae26c7f1c863250a14881b52b9",
+    "source_bytes": 940479,
+    "records": 1245,
+    "field_counts": {
+      "raw": 1245,
+      "elaboration-entityCoref_date": 1245
+    },
+    "missing_content_at_code_expected_key": 0,
+    "missing_after_field_alias": 0,
+    "empty_after_field_alias": 0,
+    "first_key": "2_2ecb_4_21_21"
+  },
+  {
+    "path": "data/ecb+/gpt4/elaboration-entityCoref_date_test_data.json",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "git_blob": "c7a01b93d436b5ddacaf1c7b9b0b8e44156b5c35",
+    "source_bytes": 1264263,
+    "records": 1780,
+    "field_counts": {
+      "raw": 1780,
+      "elaboration-entityCoref_date": 1780
+    },
+    "missing_content_at_code_expected_key": 0,
+    "missing_after_field_alias": 0,
+    "empty_after_field_alias": 0,
+    "first_key": "36_5ecb_1_12_12"
+  },
+  {
+    "path": "data/ecb+/gpt4/elaboration-entityCoref_date_training_data.json",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "git_blob": "3b7f9d8a49b5c7ca5f6ed346ca3e01c6cc8db390",
+    "source_bytes": 2761473,
+    "records": 3808,
+    "field_counts": {
+      "raw": 3808,
+      "elaboration-entityCoref_date": 3808
+    },
+    "missing_content_at_code_expected_key": 0,
+    "missing_after_field_alias": 0,
+    "empty_after_field_alias": 0,
+    "first_key": "1_12ecb_1_3_4"
+  },
+  {
+    "path": "data/gvc/gpt4/elaboration-entityCoref_date_dev_data.json",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "git_blob": "dad7016ed1a8b84f134f22a9db3bd0a16480d9c8",
+    "source_bytes": 614707,
+    "records": 977,
+    "field_counts": {
+      "raw": 977,
+      "coref_elaboration_date": 977
+    },
+    "missing_content_at_code_expected_key": 977,
+    "missing_after_field_alias": 0,
+    "empty_after_field_alias": 0,
+    "first_key": "551295_3a81fc725917cbf89cbfab9775e6ba50_1_1_1"
+  },
+  {
+    "path": "data/gvc/gpt4/elaboration-entityCoref_date_test_data.json",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "git_blob": "bedaa1731ef074249f68a9023a70c2f271ba6c58",
+    "source_bytes": 638151,
+    "records": 1008,
+    "field_counts": {
+      "raw": 1008,
+      "coref_elaboration_date": 1008
+    },
+    "missing_content_at_code_expected_key": 1008,
+    "missing_after_field_alias": 0,
+    "empty_after_field_alias": 0,
+    "first_key": "696569_8b96c7e08c7e0fe0acab6592bd5094cf_1_4_4"
+  },
+  {
+    "path": "data/gvc/gpt4/elaboration-entityCoref_date_training_data.json",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "git_blob": "5d1f1aac821bdab4a2210208a8ec757ed6a75608",
+    "source_bytes": 3334755,
+    "records": 5313,
+    "field_counts": {
+      "raw": 5313,
+      "coref_elaboration_date": 5313
+    },
+    "missing_content_at_code_expected_key": 5313,
+    "missing_after_field_alias": 0,
+    "empty_after_field_alias": 0,
+    "first_key": "717947_40b69cf630792394ef837aee6c959ece_1_6_6"
+  }
+]

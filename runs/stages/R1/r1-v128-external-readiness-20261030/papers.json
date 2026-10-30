@@ -1,0 +1,58 @@
+[
+  {
+    "id": "SECURE",
+    "url": "https://aclanthology.org/2024.acl-long.164.pdf",
+    "sha256": "82988758c649e880e8e3c851c8a197ff29f38d3c3e21c8848d14d3c5785da316",
+    "bytes": 1346889,
+    "pages": 18
+  },
+  {
+    "id": "ROEC_CKD",
+    "url": "https://aclanthology.org/2024.naacl-long.218.pdf",
+    "sha256": "e283d53634f34d09e8f0311293fa6e330e7f1d3cf8a8a7a5b1d77b9bbe02ebfb",
+    "bytes": 970382,
+    "pages": 16
+  },
+  {
+    "id": "DCT",
+    "url": "https://aclanthology.org/2021.emnlp-main.106.pdf",
+    "sha256": "8db204022fd37787ea2d16dd2f876926d834180e9dd3ca0c23856c8976366bde",
+    "bytes": 530943,
+    "pages": 12
+  },
+  {
+    "id": "LemmaECR",
+    "url": "https://aclanthology.org/2023.findings-acl.100.pdf",
+    "sha256": "c87d95910d91149f81afda18c4fc7c529be2c3370c55ea38ea3cd7120b1d8959",
+    "bytes": 858042,
+    "pages": 13
+  },
+  {
+    "id": "XAMR",
+    "url": "https://arxiv.org/pdf/2404.08656",
+    "sha256": "27aeac4f6ce422f89fd3da35492c8ddf5a98f5f10b758580e24a51392f94b0ee",
+    "bytes": 670060,
+    "pages": 13
+  },
+  {
+    "id": "CD_DCE",
+    "url": "https://aclanthology.org/2025.acl-long.1134.pdf",
+    "sha256": "be57df7931b43bcdb2d484d69ca995071eeb3e9ebe46516aa30e041639389d0d",
+    "bytes": 415443,
+    "pages": 15
+  },
+  {
+    "id": "RCDA",
+    "url": "https://aclanthology.org/2024.naacl-long.63.pdf",
+    "sha256": "04304e3f7793e7054a9e0fc37bb35da8e586905243dd256133cfc695a1479f18",
+    "bytes": 4472162,
+    "pages": 29
+  },
+  {
+    "id": "WEC",
+    "url": "https://aclanthology.org/2021.naacl-main.198.pdf",
+    "sha256": "2e9b492507a0cbd4f641a35d2677d44f045e4a2925e259ae927a58dfd7d80694",
+    "bytes": 1226818,
+    "pages": 13
+  }
+]

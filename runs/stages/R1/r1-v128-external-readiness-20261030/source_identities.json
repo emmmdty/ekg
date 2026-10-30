@@ -1,0 +1,429 @@
+[
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/models/run_pairwise_classification.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "85f10c45815ab3ac65ea1ab757cbb2ec57586be4",
+    "exact_blob_match": true,
+    "sha256": "2a0b85a7a12899e27f3b1a2e4ffe361ebf16ff7dee4cfcfaf3f86ec14c95455b",
+    "bytes": 45773,
+    "AST": "pass"
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/models/run_candidate_generation.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "6c47e896c5716f6873b53207244acd6a8e1ae658",
+    "exact_blob_match": true,
+    "sha256": "1e5547de2b10d8cb28895596995ed345bcbf8662ea59e5a994495552650bbe94",
+    "bytes": 23583,
+    "AST": "pass"
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/models/pairwise_classifier.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "df99cf9a56942a2e9b5ae9695959101a1034b8a8",
+    "exact_blob_match": true,
+    "sha256": "d2e9adb272d76c8b903546df4e82486c9eec7c28acb6b98bb152752d414aadb2",
+    "bytes": 14977,
+    "AST": "pass"
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/models/candidate_generator.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "b276d81efb0faf8ff5cd8f8a3c22fe3ea99e4323",
+    "exact_blob_match": true,
+    "sha256": "84c61d7e5ca15848a41e80ee9b9e6e16aa4fa2923b2d4f2808d4ca3dd0b6211b",
+    "bytes": 14121,
+    "AST": "pass"
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/models/nearest_neighbor.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "48b7d49048c2de60e6a2ecfc8afb87f0a05098d5",
+    "exact_blob_match": true,
+    "sha256": "25b7870a20fb3815094959176ab4b65f745dda9d50923e5e901dbf4174e01090",
+    "bytes": 17020,
+    "AST": "pass"
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/models/coref_scorer.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "4c4809bde73ec67d8b2e58a7b1729f4ff0b32465",
+    "exact_blob_match": true,
+    "sha256": "f6f134a31c4907018714ea30748a4af40eac105564ac26f7aa30f7c8fb62a649",
+    "bytes": 7039,
+    "AST": "pass"
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/data/make_dataset.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "769dfb4d7a98f2d469562b4e4c4a8c0db0e80d0d",
+    "exact_blob_match": true,
+    "sha256": "f50a9344ca784c334cc49e10ed2f7c595a394f0ea9086b22cc97ada114a263a6",
+    "bytes": 25266,
+    "AST": "pass"
+  },
+  {
+    "repo": "AlonEirew/cross-doc-event-coref",
+    "path": "src/cluster.py",
+    "revision": "f8abae3aac6197db30bc4ec9b502f605b3867e3e",
+    "blob": "6f48c48ffd619c5c0090f5c890438f131cafdbd9",
+    "exact_blob_match": true,
+    "sha256": "4d3d6cd87ec656920a8d727bbb4effb7664e2ce270ad489ab5e6eaef9e220dd8",
+    "bytes": 3908,
+    "AST": "pass"
+  },
+  {
+    "repo": "AlonEirew/cross-doc-event-coref",
+    "path": "src/utils/clustering_utils.py",
+    "revision": "f8abae3aac6197db30bc4ec9b502f605b3867e3e",
+    "blob": "848e152f6ee7890a2ec0c81eb30500d952e78c19",
+    "exact_blob_match": true,
+    "sha256": "c31309a8f4055e9a113079969fa04f563d828f5602820015978ae803ff763107",
+    "bytes": 1135,
+    "AST": "pass"
+  },
+  {
+    "repo": "AlonEirew/cross-doc-event-coref",
+    "path": "src/utils/eval_utils.py",
+    "revision": "f8abae3aac6197db30bc4ec9b502f605b3867e3e",
+    "blob": "7cd620249242632740cb9295a625a75cff589a4e",
+    "exact_blob_match": true,
+    "sha256": "4efc44f19d385425750f3981aa5ccfbbfccc1cc75d5c3d2c4e680a1942e03103",
+    "bytes": 511,
+    "AST": "pass"
+  },
+  {
+    "repo": "ahmeshaf/lemma_ce_coref",
+    "path": "heuristic.py",
+    "revision": "55cc6185b5ae901d9f5375bc90cb96820aa38581",
+    "blob": "1663acd10aac6ef8963e678c8603878d90404d8a",
+    "exact_blob_match": true,
+    "sha256": "29d903e31e2b9432125188c29c05a8156c7234e4515e306aa8d5d960f72e9f83",
+    "bytes": 14128,
+    "AST": "pass"
+  },
+  {
+    "repo": "ahmeshaf/lemma_ce_coref",
+    "path": "training.py",
+    "revision": "55cc6185b5ae901d9f5375bc90cb96820aa38581",
+    "blob": "99ff096f94e1276f42f8587b00ea67b02385afa2",
+    "exact_blob_match": true,
+    "sha256": "522c48195e90c1c83ddc2605f4969c2fed2a3ae900a89020fbe9346b101b7a0f",
+    "bytes": 5210,
+    "AST": "pass"
+  },
+  {
+    "repo": "ahmeshaf/lemma_ce_coref",
+    "path": "prediction.py",
+    "revision": "55cc6185b5ae901d9f5375bc90cb96820aa38581",
+    "blob": "bd43febbf5fd91e5f0e55458920feff3a9277793",
+    "exact_blob_match": true,
+    "sha256": "ffdcf12755193902d48a6fc3331949015be092a41b327b4b92a6083948d90732",
+    "bytes": 14475,
+    "AST": "pass"
+  },
+  {
+    "repo": "csu-signal/llama_cdcr",
+    "path": "requirements.txt",
+    "revision": "b37fd361c0facb74f5b7d9bcc4b966f84adc2424",
+    "blob": "e7aeccf7f4d82ee8f0af152d88251f9acc6353d8",
+    "exact_blob_match": true,
+    "sha256": "d22e9bb7966fc2ab6aab2ebb0f53f4de71658d5141b28fbabeb603aaa019eb13",
+    "bytes": 1509
+  },
+  {
+    "repo": "csu-signal/llama_cdcr",
+    "path": "prediction.py",
+    "revision": "b37fd361c0facb74f5b7d9bcc4b966f84adc2424",
+    "blob": "7945a5bd625442a12f5b6b81f780be82e2aa25cf",
+    "exact_blob_match": true,
+    "sha256": "759f4975df8962fe81db529b98d125deb899e0d9b115ea4e8154773e3d8d5542",
+    "bytes": 9396,
+    "AST": {
+      "status": "syntax_error",
+      "line": 40,
+      "message": "invalid syntax",
+      "source_line": "student_model_path = # Path for the trained student model. If not trained, use the Longformer base model"
+    }
+  },
+  {
+    "repo": "csu-signal/llama_cdcr",
+    "path": "clustering_IM_rationale.py",
+    "revision": "b37fd361c0facb74f5b7d9bcc4b966f84adc2424",
+    "blob": "df19adbae1346f94d5159d90b339635f5e39b059",
+    "exact_blob_match": true,
+    "sha256": "66e5f94608052aab4f9b564df7adf842550a984dc592b562118b8b29eb99887e",
+    "bytes": 15457,
+    "AST": "pass"
+  },
+  {
+    "repo": "csu-signal/llama_cdcr",
+    "path": "training.py",
+    "revision": "b37fd361c0facb74f5b7d9bcc4b966f84adc2424",
+    "blob": "5248adc85e6aa074cd02bae75f2c9859aeff96d8",
+    "exact_blob_match": true,
+    "sha256": "edb45845402470f9092dcb478a332b0b4b6bf102e483831aa3e8f2d3ce2c3064",
+    "bytes": 17447,
+    "AST": {
+      "status": "syntax_error",
+      "line": 60,
+      "message": "invalid syntax",
+      "source_line": "student_model_path = # Path for the trained student model from the ROEC Phase"
+    }
+  },
+  {
+    "repo": "ahmeshaf/gpt_coref",
+    "path": "project/scripts/coreference.py",
+    "revision": "5639eb84f9cd32c360ff2ee715eb937ed2cc3c8e",
+    "blob": "236524465443d4ca9128975076f29390e67e1d87",
+    "exact_blob_match": true,
+    "sha256": "e16d913aa185783f5c72c51fe9148a50adf7202a66724f9a93872191ec751f9d",
+    "bytes": 16530,
+    "AST": "pass"
+  },
+  {
+    "repo": "ahmeshaf/gpt_coref",
+    "path": "requirements.txt",
+    "revision": "5639eb84f9cd32c360ff2ee715eb937ed2cc3c8e",
+    "blob": "992d1dc2fd4078aa7e829f7a92cdd594b5e1998d",
+    "exact_blob_match": true,
+    "sha256": "abe17594dbd41950a046cbcf0aa148b37cc6e4f311ccf37947c8c311fc6bdb63",
+    "bytes": 925
+  },
+  {
+    "repo": "aviclu/CDLM",
+    "path": "cross_encoder/README.md",
+    "revision": "d40a09a91b3d6527f496fa74fa35fdf4e382e85a",
+    "blob": "24b88d07439013a942d0d2876d9f97d6c2fdd601",
+    "exact_blob_match": true,
+    "sha256": "4d0017bddd68405c4622b29068a8e0cea137e1266d385b44e0a414c39861c049",
+    "bytes": 2471
+  },
+  {
+    "repo": "hqyang/EasyECR",
+    "path": "easyecr/ecr_model/cluster/cluster_model.py",
+    "revision": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "blob": "c3d052ed9a81a4d40d384854010087e93a38f084",
+    "exact_blob_match": true,
+    "sha256": "3bc603f1bb57bae6947d44bf4094aa20ca135395b453990328fc7886a235ca15",
+    "bytes": 9810,
+    "AST": "pass"
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "README.md",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "bc1a022febe90c409a8b272fa768a34e91b85173",
+    "exact_blob_match": true,
+    "sha256": "1c20f475043e7eea5980f8dc3e176ee58c8a9521a756ab6a6242b44b7b175ec7",
+    "bytes": 5851
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "requirements.txt",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "b1293e8de532914e24a89bb5c8178bbf1a8272f7",
+    "exact_blob_match": true,
+    "sha256": "7c04c98de100eff7fb6050260810bbce0e3ec49e7371cc0352a9614b8a008252",
+    "bytes": 267
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "configs/candidate_generation_train.yaml",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "11b736c705beb42dd85b908d83d6f33717074025",
+    "exact_blob_match": true,
+    "sha256": "d8073f4bb6b2608a8230b6034013dd76a5ad17c3dc2ec645250026ef9ab8a8d1",
+    "bytes": 1289
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "configs/pairwise_classification_train.yaml",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "c012e48ef0ae712276c03b226cc89ff6309a96ba",
+    "exact_blob_match": true,
+    "sha256": "5d4c28ac2fe4e88ee340496c4a9af504d3be0f8bc247210d02d643ad8dad7230",
+    "bytes": 1562
+  },
+  {
+    "repo": "csu-signal/llama_cdcr",
+    "path": "README.md",
+    "revision": "b37fd361c0facb74f5b7d9bcc4b966f84adc2424",
+    "blob": "313b664685dd86d80ff376a30da903fc9db5a4be",
+    "exact_blob_match": true,
+    "sha256": "9af4e8a855d87cec93f63403dd67438a246598bcecffd094dcc5156b8ebe54d2",
+    "bytes": 4928
+  },
+  {
+    "repo": "ahmeshaf/gpt_coref",
+    "path": "README.md",
+    "revision": "5639eb84f9cd32c360ff2ee715eb937ed2cc3c8e",
+    "blob": "6ad5fdcf194032e817d43da1fe0b4f774fed3f31",
+    "exact_blob_match": true,
+    "sha256": "45c386e9162161b5fc4395b6c465cab888a4394248fcdcdfe5c1a8ec97e7f588",
+    "bytes": 7492
+  },
+  {
+    "repo": "ahmeshaf/gpt_coref",
+    "path": "project/README.md",
+    "revision": "5639eb84f9cd32c360ff2ee715eb937ed2cc3c8e",
+    "blob": "53cc7674f5278fde90033cd66e9489af504d965f",
+    "exact_blob_match": true,
+    "sha256": "fe1383bd98b6fc8d58b63dbd7910d63977ff96f916c10e1191d931e1d69fb804",
+    "bytes": 2349
+  },
+  {
+    "repo": "ahmeshaf/lemma_ce_coref",
+    "path": "README.md",
+    "revision": "55cc6185b5ae901d9f5375bc90cb96820aa38581",
+    "blob": "b7ed857e7e6c608e880557355bbaadcad7a9581e",
+    "exact_blob_match": true,
+    "sha256": "aaa60fafc789f36c6209107acc646fae77235570f8f48b4fb08935b26b584116",
+    "bytes": 2289
+  },
+  {
+    "repo": "Helw150/event_entity_coref_ecb_plus",
+    "path": "README.md",
+    "revision": "3c5c03a9c57bfa49bffebd0c54da44f6b53cb016",
+    "blob": "5e0747202fbdab77b6c120a2114cfa08b5e59ac5",
+    "exact_blob_match": true,
+    "sha256": "5e2dbe31c976ef65dfabe6e7a6b2c6b722681584a03e7682d437192c185b9dd5",
+    "bytes": 7871
+  },
+  {
+    "repo": "AlonEirew/cross-doc-event-coref",
+    "path": "README.md",
+    "revision": "f8abae3aac6197db30bc4ec9b502f605b3867e3e",
+    "blob": "a5955555e59b33a28d71921a589bcee51620c4b3",
+    "exact_blob_match": true,
+    "sha256": "9aa1da3808cbb9713d1ded4b71a94b4b39ab999d8aa0b47e2a6b388f69a87b94",
+    "bytes": 5892
+  },
+  {
+    "repo": "aviclu/CDLM",
+    "path": "README.md",
+    "revision": "d40a09a91b3d6527f496fa74fa35fdf4e382e85a",
+    "blob": "ab293331d6fe5bab033e7a2b9fdd73ea250a842b",
+    "exact_blob_match": true,
+    "sha256": "da02ae8093a844e0c9a0f99636b4a0c38bd9d8c7def83cfbe48b66c4af500e0b",
+    "bytes": 1963
+  },
+  {
+    "repo": "ariecattan/coref",
+    "path": "README.md",
+    "revision": "b81397a971ce520637f05c4bd332d5389af4e465",
+    "blob": "a607e2ec0d92c654c7fac7b3a790b1e72f796eba",
+    "exact_blob_match": true,
+    "sha256": "9e72e9aacb76e602e77893cc51bed3516034d10250e643d2424e5034b569c540",
+    "bytes": 5193
+  },
+  {
+    "repo": "hqyang/EasyECR",
+    "path": "README.md",
+    "revision": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "blob": "cca778f5f9260a573aab14456aeb177a956f54d3",
+    "exact_blob_match": true,
+    "sha256": "63132ec23184f79ebb0054068e85c2a8afdcaafe8ddfb7b4ade852e0aa821a15",
+    "bytes": 722
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/shared/classes.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "a5444abb6d61c38670873c5d67cd4cbb0fa89979",
+    "exact_blob_match": true,
+    "sha256": "444174aa93b5f2cd8a64bd7b7426d097a1fe72deff4ae142a212b9d0a9bc92df",
+    "bytes": 25781,
+    "AST": "pass"
+  },
+  {
+    "repo": "taolusi/SECURE",
+    "path": "src/data/build_features.py",
+    "revision": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "blob": "f81a4accfa82da59cc10f84b14f4c4e182612fd0",
+    "exact_blob_match": true,
+    "sha256": "ad3b1eca6cd48dd8f0b3dfe923c1757873ebc43e210dd514f7ef75408f62c5a7",
+    "bytes": 38896,
+    "AST": "pass"
+  },
+  {
+    "repo": "Danield21/Rationale4CDECR",
+    "path": "README.md",
+    "revision": "f88572fac4f50595abee730dfcf14ac8cfa916aa",
+    "blob": "0ef740ab83ce61021119bdf95ef1ae0c5f80c7a2",
+    "exact_blob_match": true,
+    "sha256": "bc696a1389200fe26bc5ec299f5933fa3f311f415d2dad85a6a22068ca6eaa39",
+    "bytes": 4345
+  },
+  {
+    "repo": "Danield21/Rationale4CDECR",
+    "path": "data_preparation/README.md",
+    "revision": "f88572fac4f50595abee730dfcf14ac8cfa916aa",
+    "blob": "4a2dbdf5b514c5146f60afa3263d99ee74812822",
+    "exact_blob_match": true,
+    "sha256": "25203a7b96be3ab6524b4243e3c052c0ffd5ed3f3384379348acb74d950d92fe",
+    "bytes": 2634
+  },
+  {
+    "repo": "Danield21/Rationale4CDECR",
+    "path": "feature_sets/README.md",
+    "revision": "f88572fac4f50595abee730dfcf14ac8cfa916aa",
+    "blob": "6402706ada086cee2f715ece046ebe652b8b4ac0",
+    "exact_blob_match": true,
+    "sha256": "a001d9a6ec654eb66db3353205d6cf7e873bc7b3995373a6882133e1777e5346",
+    "bytes": 2161
+  },
+  {
+    "repo": "Danield21/Rationale4CDECR",
+    "path": "configs/main/ecb/enhanced.json",
+    "revision": "f88572fac4f50595abee730dfcf14ac8cfa916aa",
+    "blob": "9d69c871ff04940e9e3a9edee035b625a2d3e287",
+    "exact_blob_match": true,
+    "sha256": "ffc72b595e0e1f2a7fd11cde0331717b1b5d707420e8754ca76d3967df3bd16a",
+    "bytes": 738
+  },
+  {
+    "repo": "Danield21/Rationale4CDECR",
+    "path": "configs/main/gvc/enhanced.json",
+    "revision": "f88572fac4f50595abee730dfcf14ac8cfa916aa",
+    "blob": "24150158872eb1905c2c4c666d72be3522b6fb46",
+    "exact_blob_match": true,
+    "sha256": "bbd1e36b6f70f0dadf645f5f6163829bb48141c331536f10ada5b0a706251cbc",
+    "bytes": 725
+  },
+  {
+    "repo": "Danield21/Rationale4CDECR",
+    "path": "src/all_models/crossencoder_trainer.py",
+    "revision": "f88572fac4f50595abee730dfcf14ac8cfa916aa",
+    "blob": "551ba77ddcaed5eafd9caa4b0368913f4179be6e",
+    "exact_blob_match": true,
+    "sha256": "9841e99570b93cde5fb692d10e9826ddc876673270aef4e3e39d3b9abc0ba5f3",
+    "bytes": 29711,
+    "AST": "pass"
+  },
+  {
+    "repo": "Danield21/Rationale4CDECR",
+    "path": "requirements.txt",
+    "revision": "f88572fac4f50595abee730dfcf14ac8cfa916aa",
+    "blob": "8fa289e3a97aff5a93c5bb004d5f96e4ad18d89e",
+    "exact_blob_match": true,
+    "sha256": "1ddb99fa92171f15ae65e8641b35fe94a8a679869f9a99339352a592161fe376",
+    "bytes": 269
+  },
+  {
+    "repo": "conll/reference-coreference-scorers",
+    "path": "README.rst",
+    "revision": "f49f3f8a0e1cdc5ceba7c2a33013897369df5543",
+    "blob": "fd1b52ec30a9637599ba988474047054ef584017",
+    "exact_blob_match": true,
+    "sha256": "4ecf1cfbc20f6c21d31226e4ccf1e51ed7421f653074848ac1ac9b70ea5d7fb0",
+    "bytes": 3313
+  }
+]

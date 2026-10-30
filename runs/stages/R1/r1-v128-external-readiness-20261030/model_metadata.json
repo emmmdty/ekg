@@ -1,0 +1,276 @@
+[
+  {
+    "id": "Abhijnan/ECB_KD_ROEC_Llama2",
+    "url": "https://huggingface.co/api/models/Abhijnan/ECB_KD_ROEC_Llama2",
+    "sha": "c105b09d6b7db15591884850c4f09cc64f5a43da",
+    "gated": false,
+    "private": false,
+    "license": "mit",
+    "files": [
+      {
+        "rfilename": ".gitattributes"
+      },
+      {
+        "rfilename": "README.md"
+      },
+      {
+        "rfilename": "added_tokens.json"
+      },
+      {
+        "rfilename": "config.json"
+      },
+      {
+        "rfilename": "linear.chkpt"
+      },
+      {
+        "rfilename": "merges.txt"
+      },
+      {
+        "rfilename": "pytorch_model.bin"
+      },
+      {
+        "rfilename": "special_tokens_map.json"
+      },
+      {
+        "rfilename": "teacher_to_student_layer.chkpt"
+      },
+      {
+        "rfilename": "tokenizer.json"
+      },
+      {
+        "rfilename": "tokenizer_config.json"
+      },
+      {
+        "rfilename": "vocab.json"
+      }
+    ],
+    "safetensors": null
+  },
+  {
+    "id": "Abhijnan/GVC_KD_ROEC_Llama2",
+    "url": "https://huggingface.co/api/models/Abhijnan/GVC_KD_ROEC_Llama2",
+    "sha": "fd68ce26687370284f6d1b3ed7bf5acf9e836c17",
+    "gated": false,
+    "private": false,
+    "license": null,
+    "files": [
+      {
+        "rfilename": ".gitattributes"
+      }
+    ],
+    "safetensors": null
+  },
+  {
+    "id": "Alon/wec",
+    "url": "https://huggingface.co/api/models/Alon/wec",
+    "sha": "f512fc0d3eb7ca26c387fb520292bf9deb71e85c",
+    "gated": false,
+    "private": false,
+    "license": "cc-by-sa-3.0",
+    "files": [
+      {
+        "rfilename": ".gitattributes"
+      },
+      {
+        "rfilename": "README.md"
+      },
+      {
+        "rfilename": "wec_model"
+      }
+    ],
+    "safetensors": null
+  },
+  {
+    "id": "biu-nlp/cdlm",
+    "url": "https://huggingface.co/api/models/biu-nlp/cdlm",
+    "sha": "c1058695d788d1e76eeddd3c6d434d110cb6164b",
+    "gated": false,
+    "private": false,
+    "license": "apache-2.0",
+    "files": [
+      {
+        "rfilename": ".gitattributes"
+      },
+      {
+        "rfilename": "README.md"
+      },
+      {
+        "rfilename": "added_tokens.json"
+      },
+      {
+        "rfilename": "config.json"
+      },
+      {
+        "rfilename": "merges.txt"
+      },
+      {
+        "rfilename": "pytorch_model.bin"
+      },
+      {
+        "rfilename": "special_tokens_map.json"
+      },
+      {
+        "rfilename": "tokenizer_config.json"
+      },
+      {
+        "rfilename": "training_args.bin"
+      },
+      {
+        "rfilename": "vocab.json"
+      }
+    ],
+    "safetensors": null
+  },
+  {
+    "id": "FacebookAI/roberta-large",
+    "url": "https://huggingface.co/api/models/FacebookAI/roberta-large",
+    "sha": "722cf37b1afa9454edce342e7895e588b6ff1d59",
+    "gated": false,
+    "private": false,
+    "license": "mit",
+    "files": [
+      {
+        "rfilename": ".gitattributes"
+      },
+      {
+        "rfilename": "README.md"
+      },
+      {
+        "rfilename": "config.json"
+      },
+      {
+        "rfilename": "flax_model.msgpack"
+      },
+      {
+        "rfilename": "merges.txt"
+      },
+      {
+        "rfilename": "model.onnx"
+      },
+      {
+        "rfilename": "model.safetensors"
+      },
+      {
+        "rfilename": "pytorch_model.bin"
+      },
+      {
+        "rfilename": "tf_model.h5"
+      },
+      {
+        "rfilename": "tokenizer.json"
+      },
+      {
+        "rfilename": "tokenizer_config.json"
+      },
+      {
+        "rfilename": "vocab.json"
+      }
+    ],
+    "safetensors": {
+      "parameters": {
+        "F32": 355412057,
+        "I64": 514
+      },
+      "total": 355412571
+    }
+  },
+  {
+    "id": "allenai/longformer-base-4096",
+    "url": "https://huggingface.co/api/models/allenai/longformer-base-4096",
+    "sha": "301e6a42cb0d9976a6d6a26a079fef81c18aa895",
+    "gated": false,
+    "private": false,
+    "license": "apache-2.0",
+    "files": [
+      {
+        "rfilename": ".gitattributes"
+      },
+      {
+        "rfilename": "README.md"
+      },
+      {
+        "rfilename": "config.json"
+      },
+      {
+        "rfilename": "merges.txt"
+      },
+      {
+        "rfilename": "pytorch_model.bin"
+      },
+      {
+        "rfilename": "rust_model.ot"
+      },
+      {
+        "rfilename": "tf_model.h5"
+      },
+      {
+        "rfilename": "tokenizer.json"
+      },
+      {
+        "rfilename": "vocab.json"
+      }
+    ],
+    "safetensors": null
+  },
+  {
+    "id": "Qwen/Qwen3-8B",
+    "url": "https://huggingface.co/api/models/Qwen/Qwen3-8B",
+    "sha": "b968826d9c46dd6066d109eabc6255188de91218",
+    "gated": false,
+    "private": false,
+    "license": "apache-2.0",
+    "files": [
+      {
+        "rfilename": ".gitattributes"
+      },
+      {
+        "rfilename": "LICENSE"
+      },
+      {
+        "rfilename": "README.md"
+      },
+      {
+        "rfilename": "config.json"
+      },
+      {
+        "rfilename": "generation_config.json"
+      },
+      {
+        "rfilename": "merges.txt"
+      },
+      {
+        "rfilename": "model-00001-of-00005.safetensors"
+      },
+      {
+        "rfilename": "model-00002-of-00005.safetensors"
+      },
+      {
+        "rfilename": "model-00003-of-00005.safetensors"
+      },
+      {
+        "rfilename": "model-00004-of-00005.safetensors"
+      },
+      {
+        "rfilename": "model-00005-of-00005.safetensors"
+      },
+      {
+        "rfilename": "model.safetensors.index.json"
+      },
+      {
+        "rfilename": "tokenizer.json"
+      },
+      {
+        "rfilename": "tokenizer_config.json"
+      },
+      {
+        "rfilename": "vocab.json"
+      }
+    ],
+    "safetensors": {
+      "parameters": {
+        "BF16": 8190735360
+      },
+      "total": 8190735360
+    }
+  }
+]

@@ -1,0 +1,67 @@
+{
+  "scope": "public summary metadata identity audit, not model/scorer reproduction",
+  "mapping_basis": "ECB+ int sentence filtering and official ecbplus shift; GVC skip DCT/NEWLINE/empty tokens and use within-sentence retained-token offsets",
+  "rows": [
+    {
+      "dataset": "ecb+",
+      "split": "dev",
+      "source_summary_records": 1245,
+      "original_mention_ids": 1245,
+      "missing": 0,
+      "extra": 0,
+      "missing_examples": [],
+      "extra_examples": []
+    },
+    {
+      "dataset": "ecb+",
+      "split": "test",
+      "source_summary_records": 1780,
+      "original_mention_ids": 1780,
+      "missing": 0,
+      "extra": 0,
+      "missing_examples": [],
+      "extra_examples": []
+    },
+    {
+      "dataset": "ecb+",
+      "split": "train",
+      "source_summary_records": 3808,
+      "original_mention_ids": 3808,
+      "missing": 0,
+      "extra": 0,
+      "missing_examples": [],
+      "extra_examples": []
+    },
+    {
+      "dataset": "gvc",
+      "split": "dev",
+      "source_summary_records": 977,
+      "original_mention_ids": 977,
+      "missing": 0,
+      "extra": 0,
+      "missing_examples": [],
+      "extra_examples": []
+    },
+    {
+      "dataset": "gvc",
+      "split": "test",
+      "source_summary_records": 1008,
+      "original_mention_ids": 1008,
+      "missing": 0,
+      "extra": 0,
+      "missing_examples": [],
+      "extra_examples": []
+    },
+    {
+      "dataset": "gvc",
+      "split": "train",
+      "source_summary_records": 5313,
+      "original_mention_ids": 5313,
+      "missing": 0,
+      "extra": 0,
+      "missing_examples": [],
+      "extra_examples": []
+    }
+  ],
+  "all_exact": true
+}

@@ -1,0 +1,16 @@
+{
+  "status": "pass",
+  "receipt_files": 8,
+  "source_blob_checks": 44,
+  "AST_pass": 19,
+  "known_optional_source_syntax_placeholders": 2,
+  "original_pdf_hashes": 8,
+  "exact_summary_split_id_sets": 6,
+  "repository_pins": 13,
+  "HF_model_metadata_records": 7,
+  "relative_links_checked": 116,
+  "R1_append_only": true,
+  "production_code_changed": false,
+  "parent_SPEC_constitution_changed": false,
+  "baseline_or_model_execution": false
+}

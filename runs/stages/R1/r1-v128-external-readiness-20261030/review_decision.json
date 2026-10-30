@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-30",
+  "scope": "framework external dependency review; official published metrics only; no baseline execution requested",
+  "decision": "retain gold-mention CDCR, ECB+/GVC/WEC-Eng, three progressive method chapters, LLM-assisted hybrid architecture",
+  "status": "external research resources identified; mandatory package avoids unreleased third-party artifacts; declared data/interface/environment adaptations remain implementation work",
+  "data_identity_receipt": "../r1-v127-data-first-scope-20261030/manifest.json",
+  "chapters": [
+    {
+      "chapter": 3,
+      "problem": "candidate coverage under lexical divergence",
+      "comparators": [
+        "lemma and train-only lemma synonym cache",
+        "DCT learned retrieval",
+        "SECURE semantic-augmented retrieval"
+      ],
+      "hold_fixed": [
+        "pair scorer",
+        "decoder"
+      ],
+      "final_outcome": "complete CoNLL F1 on all three corpora"
+    },
+    {
+      "chapter": 4,
+      "problem": "confusable distinct-event pair decisions",
+      "comparators": [
+        "raw cross encoder",
+        "SECURE enhanced cross encoder",
+        "CDLM pretrained cross encoder",
+        "fixed open LLM direct pair judgement"
+      ],
+      "hold_fixed": [
+        "candidate population",
+        "decoder",
+        "input assumptions"
+      ],
+      "final_outcome": "complete CoNLL F1 on all three corpora"
+    },
+    {
+      "chapter": 5,
+      "problem": "cluster bridging mistakes and fragmentation",
+      "comparators": [
+        "connected components",
+        "average/single/complete linkage as applicable",
+        "DCT/SECURE cluster merge check"
+      ],
+      "hold_fixed": [
+        "candidate seeds",
+        "pair scorer function",
+        "allowed extra query universe and budget"
+      ],
+      "final_outcome": "complete CoNLL F1 on all three corpora"
+    }
+  ],
+  "LLM": {
+    "role": "frozen semantic assistant plus explicit direct-LLM and no-LLM controls",
+    "model": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "gated": false,
+    "license": "apache-2.0",
+    "main_protocol": "same teacher/input rules across three corpora; public text and task-given mentions only; no test gold in prompts",
+    "public_GPT_summaries": "SECURE originals on ECB+/GVC native comparison only; WEC not published",
+    "external_API_required": false,
+    "full_parameter_LLM_training_required": false
+  },
+  "protocol": {
+    "main_metric": "mean of MUC/B3/CEAFe F1",
+    "evaluator": "conll/reference-coreference-scorers",
+    "revision": "f49f3f8a0e1cdc5ceba7c2a33013897369df5543",
+    "version": "8.01",
+    "population": "all given event mentions; all predicted output IDs; original public splits",
+    "singleton_policy": "retain; explicitly defined secondary no-singleton report only",
+    "gold_topic_blocking": false,
+    "paper_native_scorer": "separate compatibility/background reporting, not max-score selection",
+    "selection": "train/dev only; native published settings separately recorded; no per-epoch final-test feedback"
+  },
+  "known_adaptations": [
+    {
+      "id": "SECURE_GVC_summary_key",
+      "finding": "all GVC full-step JSON uses coref_elaboration_date while loader expects elaboration-entityCoref_date",
+      "resolution": "explicit content-preserving field alias; original file identity retained"
+    },
+    {
+      "id": "mention_coordinates",
+      "finding": "raw XML/CoNLL position strings differ from author processed IDs",
+      "resolution": "ECB int CSV sentence filter and ecbplus shift; GVC remove DCT/NEWLINE/empty and count retained tokens; exact six-split identity equality verified"
+    },
+    {
+      "id": "WEC_recent_LLM_rows",
+      "finding": "SECURE/CKD/RCDA have no original WEC result or auxiliary file release",
+      "resolution": "use official WEC/public multi-corpus implementations as core, same open teacher for explicitly named adaptations; leave unpublished source table cells null"
+    },
+    {
+      "id": "environment_separation",
+      "finding": "SECURE old torch/CUDA/transformers pins vs Qwen3 newer transformers",
+      "resolution": "separate execution environments and ID-bound JSON/cache interface; no install or execution this turn"
+    },
+    {
+      "id": "cluster_query_access",
+      "finding": "SECURE merge checker scores extra cross-cluster pairs beyond initial retrieval edges",
+      "resolution": "freeze scorer function and common query permissions/budget, count new calls; do not replace unseen scores with zero"
+    }
+  ],
+  "excluded_mandatory_dependencies": [
+    {
+      "method": "CohTP2026",
+      "reason": "official repository placeholder only"
+    },
+    {
+      "method": "CD-DCE2025",
+      "reason": "official CDCR repository placeholder only"
+    },
+    {
+      "method": "ROEC+CKD2024 immediate native execution",
+      "reason": "GVC HF link lacks weights; train/predict source has unfilled syntax placeholders; ECB model files exist"
+    },
+    {
+      "method": "LLM-RCDA default main training",
+      "reason": "main config CSV files absent from Git tree; README Drive archive not acquired; real code and other public data remain useful"
+    },
+    {
+      "method": "LemmaECR Dlong as required local-card baseline",
+      "reason": "paper uses 80GB A100; Dsmall supported as single-card comparator"
+    },
+    {
+      "method": "X-AMR gold graph comparison on all corpora",
+      "reason": "extra gold semantic graph unavailable across the three; not common input"
+    }
+  ],
+  "academic_basis": {
+    "url": "https://aclrollingreview.org/reviewerguidelines",
+    "sections": [
+      "H7 simple methods",
+      "H8 preferred methodology",
+      "H14 closed models",
+      "M2 reproducibility evidence",
+      "M4 motivated selection"
+    ],
+    "interpretation": "problem-appropriate model choice, fair relevant comparisons; no universal mandatory-LLM rule inferred; does not relax this project outcome criteria"
+  },
+  "recent_resource_context": [
+    {
+      "id": "uCDCR2026",
+      "url": "https://lrec.elra.info/lrec2026-main-328",
+      "code": "https://github.com/anastasia-zhukova/uCDCR",
+      "read_scope": "official abstract / author README search excerpt only; not full paper or downloaded unified data",
+      "use": "recent source on heterogeneous annotation/evaluation; do not replace original corpora or count aggregated copies as new independent datasets"
+    },
+    {
+      "id": "RECB2025",
+      "url": "https://aclanthology.org/2025.naacl-long.178/",
+      "read_scope": "official abstract only",
+      "use": "recent data context, not admitted fourth dataset"
+    },
+    {
+      "id": "M3EC2026",
+      "url": "https://aclanthology.org/2026.emnlp-main.2502/",
+      "read_scope": "official abstract only",
+      "use": "different multimodal extraction/coreference input; do not import task or score as text gold-mention benchmark"
+    }
+  ],
+  "execution": {
+    "baseline_reproductions": 0,
+    "model_inference": 0,
+    "GPU_jobs": 0,
+    "paid_API_calls": 0,
+    "new_model_code": false,
+    "parent_SPEC_changed": false,
+    "MAVEN_final_valid_read": false
+  },
+  "paper_reading_scope": "substantive method/setup/results excerpts, exact original table extraction and seven rendered original table pages; not claiming every appendix fully read or independent peer review"
+}

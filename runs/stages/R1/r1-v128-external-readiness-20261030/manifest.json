@@ -1,0 +1,46 @@
+{
+  "schema": "ekg.research_receipts.v1",
+  "scope": "framework source/dependency/metadata evidence only; no baseline or model execution",
+  "files": [
+    {
+      "path": "model_files.json",
+      "bytes": 15010,
+      "sha256": "e99a00dd98dc1c7e17a251a32d798201a2e0673836059f5fcb3b161f9cc3ac02"
+    },
+    {
+      "path": "model_metadata.json",
+      "bytes": 5655,
+      "sha256": "3a17a5e820bc546db4ef228d0ce5cf52c5db8f421b95348039756766c64abf41"
+    },
+    {
+      "path": "papers.json",
+      "bytes": 1670,
+      "sha256": "ae83d3a874708e8418532388ef1687d5334a680000ed7aaa4fc7cf496b9abdc7"
+    },
+    {
+      "path": "repository_inventory.json",
+      "bytes": 106725,
+      "sha256": "3672dc79f73c8dcddc153887fa4ca0b7ba3512f0488791c6fc58a30628f10239"
+    },
+    {
+      "path": "review_decision.json",
+      "bytes": 7344,
+      "sha256": "8799c29cf922425040c15732b65a754e478e298c5d5e66d3efbf1392b28bae22"
+    },
+    {
+      "path": "source_identities.json",
+      "bytes": 15251,
+      "sha256": "1c7d50bba16566adb639a1c336aa1147faebfca27b07848d043743612898186b"
+    },
+    {
+      "path": "summary_identity_alignment.json",
+      "bytes": 1658,
+      "sha256": "7fbdd538eea88c33157c9903f788d08f9448ca68a46b56a70e13154008f891a0"
+    },
+    {
+      "path": "summary_metadata_audit.json",
+      "bytes": 3053,
+      "sha256": "9946d0435fc546e1bedd1e1563522eb5536bd8234bc9eeb0c4227c000706dc01"
+    }
+  ]
+}

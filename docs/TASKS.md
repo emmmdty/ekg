@@ -1,5 +1,11 @@
 # Tasks: EKG Thesis Research Program
 
+**2026-10-30 / T087最新覆盖**：同一C41-A-R审查切片完成CDCR三语料/三方法章的
+外部条件、原表、LLM与公开发布件取舍，入口
+[EXTERNAL_READINESS](research/20261030_data_first_scope/EXTERNAL_READINESS.md)，证据R1
+§25.151。作者本轮要求暂不复现baseline；下一框架内方法设计，无模型/训练或旧R122。
+此处只更新接续，不将整条科研任务标done，不新增队列。
+
 
 **10-27当前接续覆盖**：R119一手源码、R120完整原train联合标签与独立三维网格核验、
 R121精确代数/estimand裁决已完成，证据及限制只见R1 §25.142–§25.144。普通full-Q

@@ -9391,3 +9391,143 @@ manifest SHA-256 `ca699dca8d8319b36acb9c72bb5900e6a9536b587fe8575645c65652b88ff5
 `status=pass / findings=[] / 36 mapped`，科研状态仍`preparation_partial_blocked`。
 本轮仅文档/JSON与公共原件元数据，未运行pytest/ruff/smoke、第三方模型或GPU任务；
 数据原件/静态语法可得与模型实际运行、方法效益分别报告。
+
+### 25.151 · 框架外部条件、近期对手与LLM定位审查（2026-10-30）
+
+**开工自审**：作者已确认，本轮验收框架中自有创新之外的研究条件：逐章公开对手、
+原论文主表/官方数据与协议、实现/权重/额外输入、近期LLM相关路线及资源依赖。
+科研价值是让同一CDCR主任务三章具备可执行的公共比较基础，避免中途才发现数据/
+教师/API/标注缺失。对准同C41-A-R/T087，证据承接§25.150的三原件与真实源代码，
+新增证据必须核原论文机制和原表，不以年代或LLM名词替代判断。
+可行性：本轮查官方文本、作者仓库/模型卡及CPU静态依赖，**不复现baseline，不
+写模型代码，不做GPU/LLM推理、API调用、训练或日历**；官方原分是当前资料锚，
+不混成统一重跑结果。由代理补齐/更换缺失外部条件，给出明确框架裁决。
+
+#### 逐章裁决与LLM定位
+
+**框架资料审查裁决：维持CDCR，三主语料不变，采用三个递进方法章与LLM辅助的
+混合架构。** 公开原始监督、标准评分、多个公共方法、基础权重与近期LLM比较已有
+来源；关键发布缺件不置于必需链路。每章的公共条件与既知适配见
+`research/20261030_data_first_scope/EXTERNAL_READINESS.md`，本次不再将“自有方法尚未
+验证”作为资料级框架的缺口。运行保真度仍是不同记录，本轮未尝试模型复现。
+
+- Ch3：lemma/训练集同义lemma、DCT检索、SECURE语义增强检索，固定后续精判与归并。
+- Ch4：原文cross-encoder、SECURE增强cross-encoder、适用的CDLM和固定开放LLM
+  直接判别，固定共同候选与decoder；ROEC/CKD/RCDA为直接机制对标来源。
+- Ch5：CC、适用的average/single/complete-link、**DCT/SECURE真实簇合并判别**。
+  新核`is_cluster_merge`与`transitive_closure_merge`表明后者对候选seed之外的簇间
+  提及对额外评分，不能将它强改为只读稀疏图再当忠实对手。固定scorer函数及额外
+  查询权限/预算，缓存/新调用计成本；原抽样上限与归一化细节在适配合同中保留。
+
+所有章均报告三语料完整CoNLL F1，辅以分项、覆盖/错误/成本；保留共同pipeline、
+逐章累加与适用的独立替换。第三层已有具体公共方法，不再只列普通聚类算法。
+主LLM采用公开Qwen3-8B冻结语义辅助，三个语料同revision/同输入规则；LLM直接
+判别和无LLM对照保留。SECURE原GPT输出用于原条件比较，其WEC扩展/换教师版本
+分别标明透明适配，不能冒充某作者原版全三列成绩。主方案不需要购买GPT调用或
+新人工gold；不全参训练8B模型，不引入gold实体/时间关系作必需推理输入。
+
+#### 已发表主指标原表核查
+
+以下均为作者自己方法原表的**CoNLL F1百分数**，不是本项目结果/统一协议重跑排名。
+“—”表示该原论文未在该主语料报告此项；不把FCC换成WEC，不用B³/Pairwise填空。
+
+| 方法/原条件 | ECB+ | GVC | WEC-Eng | 一手定位与条件 |
+|---|---:|---:|---:|---|
+| DCT，Held等2021 | 85.7 | 83.7 | — | EMNLP2021正文/附录Table7，PDF第12页event行；本轮回到原作者表，替代上轮EasyECR转述证据身份 |
+| LemmaECR LH＋Dsmall，2023 | 80.3 | 73.7 | — | Findings ACL2023 Table2，PDF第7页；non-oracle、小版本 |
+| LemmaECR LH＋Dlong，2023 | 81.7 | 75.0 | — | 同原表；oracle LH_Ora＋Dlong的87.4/76.1不进入有效主对照；原Dlong训练使用80GB A100 |
+| SECURE，ACL2024 | 86.7 | 87.4 | — | 原Table2，PDF第6页；本文Our method，三次独立运行均值；原文另报FCC 78.7，不移作WEC |
+| ROEC＋CKD，NAACL2024 | 86.4 | 83.0 | — | 原Appendix C Table5/6，PDF第15页；正文Table2的86.8/84.3是B³，不是CoNLL；原文是单次运行 |
+| LLM-RCDA，NAACL2024 | 86.0 | 84.4 | — | 原Table2，PDF第7页Enhanced System＋DA；原文另报FCC 70.3；非原baseline的84.2/82.1 |
+| WEC原pair模型，NAACL2021 | 80.8 | — | 62.3 | 原Table4/5，PDF第8页；WEC Lemma Baseline为53.1；ECB使用公开预测文档分组，WEC不具同主题结构 |
+| CD-DCE，ACL2025 | 87.4 | — | 65.9 | 原Table1，PDF第7页；ECB取non-oracle行，88.5为oracle，不混用；原表WEC为RoBERTa、ECB为Longformer |
+| CohTP，ACL2026 | 88.9 | 87.7 | 66.7 | 原Table1身份沿§25.150；官方仓库仍占位，不能计作可立即执行的对照 |
+
+DCT、LemmaECR、SECURE、ROEC/CKD、RCDA、WEC、CD-DCE以上七页原表已渲染并实际
+查看，主指标列与方法行确认。近年原分不是从摘要或其他论文转引；CohTP沿上一轮
+原表核查。原论文多seed均值不扩张本项目额外seed授权。多种原输入/候选/单例/
+decoder/selection差别仍保留；在当前“暂不复现”要求下先建立原文结果表，不用它
+直接证明未来新方法同协议胜出。
+
+#### 公共实现与权重：实核状态取代“仓库存在即可”
+
+本轮固定13个作者/官方仓库revision，读取44件实际源码/README/config并逐件Git
+blob核等。其中21件Python只作AST，19件通过、2件是ROEC/CKD作者未填路径的语法
+占位（`training.py:60`、`prediction.py:40`等），未执行。DCT仓库根README仍描述
+早期Barhom模型，新candidate generator/cross-encoder入口和config存在且被原
+DCT论文链接；不能照根README误选旧ELMo/论元路径。
+
+| 来源 | 关键实核发布状态 | 本框架处理 |
+|---|---|---|
+| SECURE `f1f53275…`，GPL-3.0 | 检索/判别/簇级merge/评测真实；ECB+/GVC/FCC摘要与处理件存在；checkpoint和摘要生成脚本未发布 | 近期主对照来源；公开训练路径不依赖作者best档，两个主语料的摘要无需重新调用GPT；WEC同开放教师透明扩展 |
+| ROEC/CKD `b37fd361…` | 模型/训练真实但部分路径未接；HF ECB仓库有encoder/linear/projection文件；GVC仓库仅`.gitattributes` | 不声称成品权重全部齐；移出必备开箱运行包，保留原分和蒸馏机制比较 |
+| LLM-RCDA `f88572fa…`，MIT | 模型/训练/公开处理件/若干增强CSV真实；main三配置指定的`train_aug.csv`均不在Git树，README另指Drive archive | Drive原main增强件未取得，暂不列发布件已齐的必需运行项；代码和原分仍有效，不能据目录名认全部输入齐 |
+| WEC原模型 `f8abae3a…`，Apache-2.0 | pair训练、average-link与官方CoNLL输出齐；HF存在`wec_model`，1,183,001,532字节 | WEC原任务锚；原件和基础encoder可得，不要求重做预训练 |
+| CDLM `d40a09a9…` | cross-encoder及公开预训练档可定位，HF权重文件595,000,986字节 | 表示控制，不将重新预训练当必需条件 |
+| CD-DCE `f9fab93f…` / CohTP `3843ad0…` | 前者仅README/占位，后者仅`Comming soon` | 近期原表/机制近邻，不等待发布，不从文字重写冒称原代码 |
+
+作者仓库无根license的情况如实记null，不把模型卡、子目录license或论文引用等同于
+整库授权；SECURE/RCDA/WEC有明确代码license。这里只记录发布信息，不作法律判断。
+
+HF官方模型元数据/文件树实核：RoBERTa-large、Longformer-base、CDLM、Qwen3-8B
+均public/ungated且有实质权重文件；ECB CKD完整，GVC CKD占位。模型文件元数据核查
+不是权重下载/重载。Qwen3-8B固定revision `b968826d9c46dd6066d109eabc6255188de91218`，
+Apache-2.0，8,190,735,360个BF16参数，五个实际safetensors分片可定位。单卡框架采用
+冻结教师/小batch/有界上下文与输出；不把全参8B训练、Lemma Dlong大显存版本或
+新增机器作为主包条件。实际显存/成本验收是后续实施工作，本轮没有GPU测量。
+
+#### 已提前解决的公共输入接线问题
+
+SECURE六个ECB+/GVC原全步骤摘要JSON已实读，原作者record数分别等于三split提及
+数：ECB+ 3,808/1,245/1,780，GVC 5,313/977/1,008。**不只比数量**：按原始标注
+生成对应作者坐标后，六split mention ID全集逐一相等，missing/extra均为0。
+
+发现六文件中GVC字段与loader预期不同：ECB用`elaboration-entityCoref_date`，GVC
+实际用`coref_elaboration_date`；GVC三split全部记录都如此。两个字段下内容均为
+非空字符串；声明内容不变的字段alias，保持原hash，不回退为空串，也无需新标注。
+原始ID不能直接拼接：ECB句子CSV尾空白须按原reader转int，plus文档句号有既定
+偏移；GVC须去DCT/NEWLINE/空token，按保留token位置计数。最初直接拼原坐标的
+审计映射失败源于本轮坐标假设，经作者源码与原token追溯后修正，**不是数据丢失**；
+最终精确匹配凭证保留。没有改写原件、训练、模型评分或访问旧MAVEN final-valid。
+
+SECURE旧`torch==1.12.1+cu113 / transformers==4.16`与Qwen3要求更新的库版本不能
+强塞同环境。方案规定分环境，通过带mention ID的JSON/缓存交换；CPU-only
+FAISS索引等兼容适配须记录，实际重跑阶段不盲目把旧包同步进服务器主环境。
+
+#### 官方评分与LLM学术依据
+
+官方`conll/reference-coreference-scorers`固定
+`f49f3f8a0e1cdc5ceba7c2a33013897369df5543`，README明确v8.01、MUC/B³/CEAFe及
+CoNLL输入方式；本框架统一结果采用该标准评分锚，SECURE原native scorer另记兼容
+报告。保留所有给定提及和单例，不用gold主题阻断；数据原split不变。原论文使用
+预测分组或其他人口时，保留其差异脚注，不以同名CoNLL自动宣称原表同条件。
+
+LLM不是强行装饰：SECURE提供LLM逐提及理解、任务模型判别的原文/代码/辅助输入；
+ROEC/CKD表明训练期蒸馏、推理期不输入解释是另一条已发表路线；RCDA表明训练期
+反事实增强有直接近邻。这些同时限定我们的机制比较。开放Qwen3用于统一三语料
+语义辅助与直接pair对照，无gold test提示、无付费API前提，最终用结构化decoder
+输出完整合法身份分区。只减少LLM逐对调用，不把整个精确检索算法称线性。
+
+ARR官方reviewer guidelines H7/H8/H14明确反对按方法简单、没采用个人偏好范式或
+无关闭源对照否定工作；M2/M4要求可复现资料和有动机的模型/benchmark选择。这是
+问题驱动取舍的学术依据，不是“所有论文必须用LLM”的统一规则，也不降低本项目
+有效主指标要求。CD-DCE2025的BERT/Longformer实践亦构成领域先例。本框架仍纳入
+LLM思想和直接对照，而非回避近期工作。
+
+另检到uCDCR（LREC2026官方摘要/作者资源说明）支持多语料及口径异质性的判断，
+RECB2025只核官方摘要，不冒称已取得第四数据；M3EC2026为多模态提取/共指，输入
+不同，不用其新年份/指标替换当前文本gold-mention任务。未穷尽全部2026研究。
+
+本轮凭证`runs/stages/R1/r1-v128-external-readiness-20261030/`，8件JSON＋manifest；
+manifest SHA-256 `e9bfd11f42aed9cb9fe273ed757b9bc2fdb584a75f17f8146470ba0ea4e3dd9f`。
+含8份原PDF身份、44件源码身份/AST、13仓库revision/相关发布件、7模型官方元数据/
+文件树、六摘要记录/字段及精确ID对齐、框架裁决。原PDF/第三方源码/完整辅助文本
+只作临时缓存/工具读取，不提交或上传；模型推理/训练/baseline复现均为零。
+
+**实际验证**：8件manifest收据、44件上游source blob、8份原PDF身份、6个辅助摘要
+split完整ID集、13仓库pin/7模型元数据、116个相对链接及旧R1仅追加核验通过。
+19件Python AST通过，另2件作者路径语法占位如实列为非必需发布缺口，未将其写成
+代码可直接运行。`git diff --check`通过，R1一致性`status=pass / findings=[] /
+36 mapped`，旧科研总体状态仍`preparation_partial_blocked`，不将本切片资料审查
+冒充全论文实验完成。未改父SPEC/constitution或生产代码；本轮不运行pytest/ruff/
+smoke和任何baseline模型，符合作者“先框架、暂不复现”的指令。

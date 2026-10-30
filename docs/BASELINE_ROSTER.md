@@ -1,5 +1,10 @@
 # 外部对手名册与复现保真度计划
 
+**2026-10-30 外部条件审查接续**：[逐章公共比较与发布件裁决](research/20261030_data_first_scope/EXTERNAL_READINESS.md)
+已核SECURE的检索/判别/簇级merge和公开LLM摘要，补齐近期LLM主比较来源；WEC统一
+开放教师版明确透明适配。CKD/RCDA默认发布缺件及CD-DCE/CohTP占位不列必需项。
+本轮只核作者原分与source，**没有新增FR-016运行通过状态**；数字只见R1 §25.151。
+
 **2026-10-30 新范围提案**：数据优先推荐跨文档事件共指消解，DCT/LemmaECR/
 CDCR-E2E等源码已定位，逐层比较与保真度待核项见
 [递进框架](research/20261030_data_first_scope/THESIS_FRAMEWORK.md)。

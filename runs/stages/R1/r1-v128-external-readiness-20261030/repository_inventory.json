@@ -1,0 +1,3407 @@
+[
+  {
+    "repo": "taolusi/SECURE",
+    "commit": "f1f532753be49a6ccd17c949dc6b3b561c971d02",
+    "tree_sha": "90cef17df7d610b2513948cb50914727b843eb48",
+    "branch": "main",
+    "license": "GPL-3.0",
+    "total_blob_files": 65,
+    "relevant_files": [
+      {
+        "path": "LICENSE",
+        "sha": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+        "size": 35149
+      },
+      {
+        "path": "README.md",
+        "sha": "bc1a022febe90c409a8b272fa768a34e91b85173",
+        "size": 5851
+      },
+      {
+        "path": "configs/build_features_config.json",
+        "sha": "491192d2eaa5c2c4a850e97635f83983a44b8d37",
+        "size": 2228
+      },
+      {
+        "path": "configs/candidate_generation_eval.yaml",
+        "sha": "c8054ebe7ca707a451de46bd92708ffa584759b5",
+        "size": 1346
+      },
+      {
+        "path": "configs/candidate_generation_train.yaml",
+        "sha": "11b736c705beb42dd85b908d83d6f33717074025",
+        "size": 1289
+      },
+      {
+        "path": "configs/pairwise_classification_eval.yaml",
+        "sha": "3a6901789e7a4eba4bdd148b4a1a057fee1eb277",
+        "size": 1568
+      },
+      {
+        "path": "configs/pairwise_classification_train.yaml",
+        "sha": "c012e48ef0ae712276c03b226cc89ff6309a96ba",
+        "size": 1562
+      },
+      {
+        "path": "data/ecb+/gpt4/elaboration-entityCoref_date_dev_data.json",
+        "sha": "7bf17710217964ae26c7f1c863250a14881b52b9",
+        "size": 940479
+      },
+      {
+        "path": "data/ecb+/gpt4/elaboration-entityCoref_date_test_data.json",
+        "sha": "c7a01b93d436b5ddacaf1c7b9b0b8e44156b5c35",
+        "size": 1264263
+      },
+      {
+        "path": "data/ecb+/gpt4/elaboration-entityCoref_date_training_data.json",
+        "sha": "3b7f9d8a49b5c7ca5f6ed346ca3e01c6cc8db390",
+        "size": 2761473
+      },
+      {
+        "path": "data/ecb+/gpt4/elaboration_dev_data.json",
+        "sha": "4046b4da7ddfa379df439a7a382d6ceebb4cfc22",
+        "size": 674783
+      },
+      {
+        "path": "data/ecb+/gpt4/elaboration_test_data.json",
+        "sha": "d877d1735f893fca9f204325dc09f31587914dc6",
+        "size": 909889
+      },
+      {
+        "path": "data/ecb+/gpt4/elaboration_training_data.json",
+        "sha": "cd2982530f32f6f5485d46eb8cbbe57977c11e13",
+        "size": 2015620
+      },
+      {
+        "path": "data/ecb+/gpt4/paraphrase_dev_data.json",
+        "sha": "091882598df4311efef702bc7b1107efe088a639",
+        "size": 1022836
+      },
+      {
+        "path": "data/ecb+/gpt4/paraphrase_test_data.json",
+        "sha": "d87c5ca37c797221d3e20d2fc2f62f1ebe51877d",
+        "size": 1492625
+      },
+      {
+        "path": "data/ecb+/gpt4/paraphrase_training_data.json",
+        "sha": "25948ff66f15c7a9c9d170b1108c66c8e568e917",
+        "size": 3204522
+      },
+      {
+        "path": "data/ecb+/processed/build_features_config.json",
+        "sha": "e92f7dffc0343f85e681c2ba06706ac8646f92f1",
+        "size": 2310
+      },
+      {
+        "path": "data/ecb+/processed/dev_statistics.txt",
+        "sha": "a3608e5555bfae9a943b236e8d4a4fbae9fd74d9",
+        "size": 140
+      },
+      {
+        "path": "data/ecb+/processed/test_statistics.txt",
+        "sha": "6a6ecbce9322864609f1e7f84b62d92fbbb1eb20",
+        "size": 140
+      },
+      {
+        "path": "data/ecb+/processed/train_statistics.txt",
+        "sha": "6365008d9e3e9d92307f209ae4140c5cb5c19f28",
+        "size": 140
+      },
+      {
+        "path": "data/fcc/gpt4/elaboration-entityCoref_date_dev_data.json",
+        "sha": "41201f6431f3ef601fc91f132774112e32d2e549",
+        "size": 507237
+      },
+      {
+        "path": "data/fcc/gpt4/elaboration-entityCoref_date_test_data.json",
+        "sha": "30de46e3b871e99834dceb3d2e5673b85b719b87",
+        "size": 772420
+      },
+      {
+        "path": "data/fcc/gpt4/elaboration-entityCoref_date_training_data.json",
+        "sha": "6c9c53a0e7ee76e4329b9da808f437421a9cae39",
+        "size": 1097010
+      },
+      {
+        "path": "data/fcc/gpt4/elaboration_dev_data.json",
+        "sha": "a7ecc2336437aeaa3d9cf3ff48816db2f65587b0",
+        "size": 390106
+      },
+      {
+        "path": "data/fcc/gpt4/elaboration_test_data.json",
+        "sha": "b6ab849062ccee076f5c006ae45a7d572d118045",
+        "size": 611815
+      },
+      {
+        "path": "data/fcc/gpt4/elaboration_training_data.json",
+        "sha": "a3d0c8938b025666bb1b849f01b1287182db5182",
+        "size": 920487
+      },
+      {
+        "path": "data/fcc/gpt4/paraphrase_dev_data.json",
+        "sha": "45988968baa6f9c0f8fa73c5bfc0b13fadb84f42",
+        "size": 587029
+      },
+      {
+        "path": "data/fcc/gpt4/paraphrase_test_data.json",
+        "sha": "ab191ce8749c9cd73b26a8d15f7059857439fba9",
+        "size": 904407
+      },
+      {
+        "path": "data/fcc/gpt4/paraphrase_training_data.json",
+        "sha": "f6ae138a9c31fe139679cca5890acb280d1d664c",
+        "size": 1297615
+      },
+      {
+        "path": "data/fcc/processed/event_type_map.json",
+        "sha": "ca56ebac6c8814b84f8700aa6e473af7deb07795",
+        "size": 208835
+      },
+      {
+        "path": "data/gvc/gpt4/elaboration-entityCoref_date_dev_data.json",
+        "sha": "dad7016ed1a8b84f134f22a9db3bd0a16480d9c8",
+        "size": 614707
+      },
+      {
+        "path": "data/gvc/gpt4/elaboration-entityCoref_date_test_data.json",
+        "sha": "bedaa1731ef074249f68a9023a70c2f271ba6c58",
+        "size": 638151
+      },
+      {
+        "path": "data/gvc/gpt4/elaboration-entityCoref_date_training_data.json",
+        "sha": "5d1f1aac821bdab4a2210208a8ec757ed6a75608",
+        "size": 3334755
+      },
+      {
+        "path": "data/gvc/gpt4/elaboration_dev_data.json",
+        "sha": "90d1d9e173a00288800b8415c26131f20e9e47a2",
+        "size": 482129
+      },
+      {
+        "path": "data/gvc/gpt4/elaboration_test_data.json",
+        "sha": "b2f8b4023ce59d1596ddea0933663736425e52e2",
+        "size": 489740
+      },
+      {
+        "path": "data/gvc/gpt4/elaboration_training_data.json",
+        "sha": "f57eff9ef138daf6448e341c806d17e2e9b74b68",
+        "size": 2579243
+      },
+      {
+        "path": "data/gvc/gpt4/paraphrase_dev_data.json",
+        "sha": "9194ad476592431b820fb31ff1384e1d01763f4c",
+        "size": 660234
+      },
+      {
+        "path": "data/gvc/gpt4/paraphrase_test_data.json",
+        "sha": "4b4c6f926f2105ebea3183d8f6ce043f500476f2",
+        "size": 663634
+      },
+      {
+        "path": "data/gvc/gpt4/paraphrase_training_data.json",
+        "sha": "caf310978252d40a9a1c7dcfbf3dcfbee5814eb6",
+        "size": 3598601
+      },
+      {
+        "path": "data/gvc/processed/event_type_map.json",
+        "sha": "f5444f13566d3b403996daa4bf4f458767a928bd",
+        "size": 80011
+      },
+      {
+        "path": "requirements.txt",
+        "sha": "b1293e8de532914e24a89bb5c8178bbf1a8272f7",
+        "size": 267
+      },
+      {
+        "path": "src/data/build_features.py",
+        "sha": "f81a4accfa82da59cc10f84b14f4c4e182612fd0",
+        "size": 38896
+      },
+      {
+        "path": "src/data/extraction_utils.py",
+        "sha": "538b74209e6c86a0765cf60c714e2cdf63bf636e",
+        "size": 29525
+      },
+      {
+        "path": "src/data/make_dataset.py",
+        "sha": "769dfb4d7a98f2d469562b4e4c4a8c0db0e80d0d",
+        "size": 25266
+      },
+      {
+        "path": "src/data/mention_data.py",
+        "sha": "720c3bf7e71bec9b08ff5b47806dec17ca6395ea",
+        "size": 1706
+      },
+      {
+        "path": "src/models/candidate_generator.py",
+        "sha": "b276d81efb0faf8ff5cd8f8a3c22fe3ea99e4323",
+        "size": 14121
+      },
+      {
+        "path": "src/models/coref_bcubed_scorer.py",
+        "sha": "7bea611570208c863b5e34af695040b799ff0e77",
+        "size": 2160
+      },
+      {
+        "path": "src/models/coref_scorer.py",
+        "sha": "4c4809bde73ec67d8b2e58a7b1729f4ff0b32465",
+        "size": 7039
+      },
+      {
+        "path": "src/models/nearest_neighbor.py",
+        "sha": "48b7d49048c2de60e6a2ecfc8afb87f0a05098d5",
+        "size": 17020
+      },
+      {
+        "path": "src/models/pairwise_classifier.py",
+        "sha": "df99cf9a56942a2e9b5ae9695959101a1034b8a8",
+        "size": 14977
+      },
+      {
+        "path": "src/models/run_candidate_generation.py",
+        "sha": "6c47e896c5716f6873b53207244acd6a8e1ae658",
+        "size": 23583
+      },
+      {
+        "path": "src/models/run_pairwise_classification.py",
+        "sha": "85f10c45815ab3ac65ea1ab757cbb2ec57586be4",
+        "size": 45773
+      },
+      {
+        "path": "src/shared/classes.py",
+        "sha": "a5444abb6d61c38670873c5d67cd4cbb0fa89979",
+        "size": 25781
+      }
+    ]
+  },
+  {
+    "repo": "csu-signal/llama_cdcr",
+    "commit": "b37fd361c0facb74f5b7d9bcc4b966f84adc2424",
+    "tree_sha": "0b91e8166e9de439c2999f3d8302a4592566a329",
+    "branch": "main",
+    "license": null,
+    "total_blob_files": 105,
+    "relevant_files": [
+      {
+        "path": "README.md",
+        "sha": "313b664685dd86d80ff376a30da903fc9db5a4be",
+        "size": 4928
+      },
+      {
+        "path": "cluster_analysis.py",
+        "sha": "0690a5454b3768664074017381f98207f566cc4d",
+        "size": 5539
+      },
+      {
+        "path": "clustering_IM_rationale.py",
+        "sha": "df19adbae1346f94d5159d90b339635f5e39b059",
+        "size": 15457
+      },
+      {
+        "path": "convert_llama_weights_to_hf.py",
+        "sha": "8d4789bb21b6e97dafa22c37b1a44d1bfd33c9a3",
+        "size": 12525
+      },
+      {
+        "path": "datasets/ecb/lh_prev_scores.csv",
+        "sha": "cbf34ca4f9f6f4d932720ee62a0c235144344164",
+        "size": 269853
+      },
+      {
+        "path": "datasets/ecb/lh_prev_scores_comparisons_hardneg.csv",
+        "sha": "9e0d672b3b55a0692d9284193f85a53c4e5ce96a",
+        "size": 1127674
+      },
+      {
+        "path": "datasets/ecb/lh_prev_scores_comparisons_hardneg_reverse.csv",
+        "sha": "77db5cce69be0106e8ed1d389dc5bbc24b8b6126",
+        "size": 729359
+      },
+      {
+        "path": "datasets/ecb/lh_prev_scores_comparisons_hardpos.csv",
+        "sha": "88a9ff90854fae94a32cd72084f5b7221bdd19af",
+        "size": 1794837
+      },
+      {
+        "path": "datasets/ecb/lh_prev_scores_comparisons_hardpos_reverse.csv",
+        "sha": "a00bd2c55c01b6a12fe012aa0580e3ffd07a0758",
+        "size": 25626
+      },
+      {
+        "path": "datasets/ecb/lh_prev_scores_full.csv",
+        "sha": "143c1ff5174bb8a55ab1521b5a28657bb43892c8",
+        "size": 336494
+      },
+      {
+        "path": "datasets/gvc/lh_prev_scores.csv",
+        "sha": "b2d0901902d7b0a10b7784710645b4b0cd902607",
+        "size": 851551
+      },
+      {
+        "path": "datasets/gvc/lh_prev_scores_comparisons_hardneg.csv",
+        "sha": "502b0af0f4d9aa49ab253450d20696e46be73ec9",
+        "size": 1015650
+      },
+      {
+        "path": "datasets/gvc/lh_prev_scores_comparisons_hardpos.csv",
+        "sha": "807e0ea54671d04bfc2c4dcbb0894884b5f9cac7",
+        "size": 1099874
+      },
+      {
+        "path": "datasets/gvc/lh_prev_scores_full.csv",
+        "sha": "1d3f82571933c7a85d18ae4ad0526b5ca85682e5",
+        "size": 964440
+      },
+      {
+        "path": "generate_inner_monologue_maps.py",
+        "sha": "219c8d1e093e04f3931518391ac659812858c298",
+        "size": 16028
+      },
+      {
+        "path": "generate_inner_monologues.py",
+        "sha": "b186171625a2dd60a01b33727dcc0eaab306c967",
+        "size": 17375
+      },
+      {
+        "path": "helper.py",
+        "sha": "64949c9db11d1c462f68a5f0789270590bb2df87",
+        "size": 29622
+      },
+      {
+        "path": "prediction.py",
+        "sha": "7945a5bd625442a12f5b6b81f780be82e2aa25cf",
+        "size": 9396
+      },
+      {
+        "path": "requirements.txt",
+        "sha": "e7aeccf7f4d82ee8f0af152d88251f9acc6353d8",
+        "size": 1509
+      },
+      {
+        "path": "teacher_student_modelling.py",
+        "sha": "a2ad8031d2960e902675fb488c66a495e3c75a4a",
+        "size": 15654
+      },
+      {
+        "path": "training.py",
+        "sha": "5248adc85e6aa074cd02bae75f2c9859aeff96d8",
+        "size": 17447
+      },
+      {
+        "path": "utils.py",
+        "sha": "64949c9db11d1c462f68a5f0789270590bb2df87",
+        "size": 29622
+      }
+    ]
+  },
+  {
+    "repo": "ahmeshaf/gpt_coref",
+    "commit": "5639eb84f9cd32c360ff2ee715eb937ed2cc3c8e",
+    "tree_sha": "bfc7552daf5f8b9fa7aa514b7d2c2e6cba42c821",
+    "branch": "main",
+    "license": "Apache-2.0",
+    "total_blob_files": 54,
+    "relevant_files": [
+      {
+        "path": "LICENSE",
+        "sha": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+        "size": 11357
+      },
+      {
+        "path": "README.md",
+        "sha": "6ad5fdcf194032e817d43da1fe0b4f774fed3f31",
+        "size": 7492
+      },
+      {
+        "path": "project/README.md",
+        "sha": "53cc7674f5278fde90033cd66e9489af504d965f",
+        "size": 2349
+      },
+      {
+        "path": "project/annotations/ecb/adjudication_tasks/dev/rs_agree.json",
+        "sha": "db874a0f23aad259fb35fd2b27be917f7c4260e4",
+        "size": 3097399
+      },
+      {
+        "path": "project/annotations/ecb/adjudication_tasks/dev/rs_agree_test.json",
+        "sha": "3810ac6a6422e544a6e5a75b603f69748a5d9d1f",
+        "size": 278196
+      },
+      {
+        "path": "project/annotations/ecb/adjudication_tasks/dev/rs_disagree.json",
+        "sha": "adb1d3356ac41f8b0d4bf0e966ad32b200e5daa9",
+        "size": 309321
+      },
+      {
+        "path": "project/annotations/ecb/adjudication_tasks/train/rs_agree.json",
+        "sha": "e818a74ea19aa26be26271056c10803f735c5585",
+        "size": 11375307
+      },
+      {
+        "path": "project/annotations/ecb/adjudication_tasks/train/rs_agree_test.json",
+        "sha": "1930059bbfbb9b1d27561dfb6ccaf5779190fe98",
+        "size": 350045
+      },
+      {
+        "path": "project/annotations/ecb/adjudication_tasks/train/rs_disagree.json",
+        "sha": "deec769c8166a444601683d28d117b5ac0abcafd",
+        "size": 2383571
+      },
+      {
+        "path": "project/annotations/ecb/ann1/demo.json",
+        "sha": "577a6137a012ee684701784c174609b563beaae7",
+        "size": 1232959
+      },
+      {
+        "path": "project/annotations/ecb/ann1/dev_rs.json",
+        "sha": "f9401c0c8a351712248c766a414a808695108a02",
+        "size": 3422941
+      },
+      {
+        "path": "project/annotations/ecb/ann1/dev_simulated.json",
+        "sha": "6928ef7fdde05e42f1f1a2127f9ba7ecd3f07b66",
+        "size": 3855185
+      },
+      {
+        "path": "project/annotations/ecb/ann1/dev_small_xamr.json",
+        "sha": "1679810a28c65baae2fbefb7965facfdd00e30e3",
+        "size": 335592
+      },
+      {
+        "path": "project/annotations/ecb/ann1/dev_xamr.json",
+        "sha": "dc3c6d0f9e67afa5c260139efded8cd386ee80f9",
+        "size": 3481899
+      },
+      {
+        "path": "project/annotations/ecb/ann1/test_common_xamr.json",
+        "sha": "ff1798667f0fd526c4bda5e1473b8b6e622a1471",
+        "size": 3313944
+      },
+      {
+        "path": "project/annotations/ecb/ann1/test_simulated.json",
+        "sha": "b761c4da8d0ea446ddaa69aef4d5b5b9fcadd446",
+        "size": 3655199
+      },
+      {
+        "path": "project/annotations/ecb/ann1/train_rs.json",
+        "sha": "d3d418befb6b4b9e67ef881cdd8f6104c7e9ef70",
+        "size": 13722272
+      },
+      {
+        "path": "project/annotations/ecb/ann1/train_simulated.json",
+        "sha": "03dee787f84ac535b72ce5bcee2bdd7b24dcbd5d",
+        "size": 11600471
+      },
+      {
+        "path": "project/annotations/ecb/ann1/train_xamr.json",
+        "sha": "a23ecc6873d2f422010f54071ea5ec2e53209374",
+        "size": 10311960
+      },
+      {
+        "path": "project/annotations/ecb/ann2/dev_rs.json",
+        "sha": "a74b3f28d37c8a38a25e707746bc764aac205ad1",
+        "size": 3401092
+      },
+      {
+        "path": "project/annotations/ecb/ann2/dev_simulated.json",
+        "sha": "2a33af41fc03dbd551d07b112aef3f6e6002713b",
+        "size": 3815288
+      },
+      {
+        "path": "project/annotations/ecb/ann2/dev_small_xamr.json",
+        "sha": "91b0aa6172db90d7c0680c2ac3ec24ce54bebd88",
+        "size": 333536
+      },
+      {
+        "path": "project/annotations/ecb/ann2/dev_xamr.json",
+        "sha": "b80ceba1a15389361c7218c1d4b5f37fb898fe06",
+        "size": 3460952
+      },
+      {
+        "path": "project/annotations/ecb/ann2/test_common_xamr.json",
+        "sha": "93e43616f4c34d94ea5c42ad1923e775ead6d760",
+        "size": 3294481
+      },
+      {
+        "path": "project/annotations/ecb/ann2/test_simulated.json",
+        "sha": "8cf10cca979bee25a5e21be05df81ff8af7c1637",
+        "size": 3604645
+      },
+      {
+        "path": "project/annotations/ecb/ann2/train_rs.json",
+        "sha": "fbee9eee2005c4ada15034fe544a729af168bc02",
+        "size": 13139702
+      },
+      {
+        "path": "project/annotations/ecb/ann2/train_simulated.json",
+        "sha": "3accb3f2d1b546c8d421fd7524858ce35c5f8ccd",
+        "size": 11492130
+      },
+      {
+        "path": "project/annotations/ecb/ann2/train_xamr.json",
+        "sha": "5b2bb53321feedcda96a68fbcbadb1a29dc1600c",
+        "size": 10272046
+      },
+      {
+        "path": "project/annotations/ecb/fix_annotations.py",
+        "sha": "ed71db74483547f8066d8b6ecdc0f64bdfd164ba",
+        "size": 687
+      },
+      {
+        "path": "project/annotations/ecb/fix_single.py",
+        "sha": "1a58f94e1db6683581a9cc3729b735c6fb849625",
+        "size": 1861
+      },
+      {
+        "path": "project/annotations/ecb/generate_simulated.py",
+        "sha": "3dd2cc47314d9e3beb826df858bc6d0ed32fb64b",
+        "size": 1143
+      },
+      {
+        "path": "project/annotations/ecb/gpt-4/dev_small_g1.json",
+        "sha": "9026f740dbd6e9216c745dc5402cea8d90b1b01d",
+        "size": 361684
+      },
+      {
+        "path": "project/annotations/ecb/gpt-4/dev_small_g2.json",
+        "sha": "29aed8b034a3121660e9841f376efd905133fc82",
+        "size": 362151
+      },
+      {
+        "path": "project/prodigy.json",
+        "sha": "3e4946f04b781c18c3f1d788c8506c5a1f4d05ad",
+        "size": 85
+      },
+      {
+        "path": "project/recipes/constants.py",
+        "sha": "ae76f1e121341392d494c5140ad1ead442fee08a",
+        "size": 10407
+      },
+      {
+        "path": "project/recipes/srl.py",
+        "sha": "23a84463a3d2b3f17df52559d0160dd839fe83b3",
+        "size": 8484
+      },
+      {
+        "path": "project/recipes/wsd.py",
+        "sha": "813f66b73596c63858cb212e1a22c94f178a46b5",
+        "size": 7666
+      },
+      {
+        "path": "project/scripts/analysis.py",
+        "sha": "84249c81080da0ac8a5d1b27dc6765bb0de1784f",
+        "size": 4232
+      },
+      {
+        "path": "project/scripts/coreference.py",
+        "sha": "236524465443d4ca9128975076f29390e67e1d87",
+        "size": 16530
+      },
+      {
+        "path": "project/scripts/gpt_pe.py",
+        "sha": "01d56d54b99b5548782230cd364f85250ceeca0c",
+        "size": 21150
+      },
+      {
+        "path": "project/scripts/gpt_xamr.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "project/scripts/parse_ecb.py",
+        "sha": "b8b9caee002f6ca86737d173ea62160ee7624979",
+        "size": 11805
+      },
+      {
+        "path": "project/scripts/parse_propbank.py",
+        "sha": "fa1d0988c3b608d698e6bc634377029a5677be1a",
+        "size": 3218
+      },
+      {
+        "path": "project/scripts/prompt.amr.txt",
+        "sha": "5c95f605ee2a3871c1decc5b306e494729975e27",
+        "size": 1724
+      },
+      {
+        "path": "project/scripts/prompt.amr_json.txt",
+        "sha": "e38affbefcbb51be544ddef27431affbe06df13f",
+        "size": 2741
+      },
+      {
+        "path": "project/scripts/prompt_xamr_g1.txt",
+        "sha": "b0dc9c02f5d285ea726bb30a417a61e933b2d673",
+        "size": 2287
+      },
+      {
+        "path": "project/scripts/prompt_xamr_g2.txt",
+        "sha": "d43367432916c121dc323d4498638e94e8077027",
+        "size": 2657
+      },
+      {
+        "path": "project/scripts/utils.py",
+        "sha": "0e08896d5a6d5f548f1bf9ce81757af5159387e7",
+        "size": 1790
+      },
+      {
+        "path": "requirements.txt",
+        "sha": "992d1dc2fd4078aa7e829f7a92cdd594b5e1998d",
+        "size": 925
+      }
+    ]
+  },
+  {
+    "repo": "ahmeshaf/lemma_ce_coref",
+    "commit": "55cc6185b5ae901d9f5375bc90cb96820aa38581",
+    "tree_sha": "600fb04f8a135f234fbe8be2f5f9969d6e78638e",
+    "branch": "main",
+    "license": null,
+    "total_blob_files": 85,
+    "relevant_files": [
+      {
+        "path": "README.md",
+        "sha": "b7ed857e7e6c608e880557355bbaadcad7a9581e",
+        "size": 2289
+      },
+      {
+        "path": "analysis.py",
+        "sha": "4d2e6525e7987c9bd098800ebe2ff975b19c17e0",
+        "size": 3320
+      },
+      {
+        "path": "datasets/ecb/add_predicted.py",
+        "sha": "5dfc621612b0289edcc73e1d7ee1d59c2c17e602",
+        "size": 665
+      },
+      {
+        "path": "helper.py",
+        "sha": "9127f93510de2638f4464e2c1bda29a21c1f4a73",
+        "size": 12091
+      },
+      {
+        "path": "heuristic.py",
+        "sha": "1663acd10aac6ef8963e678c8603878d90404d8a",
+        "size": 14128
+      },
+      {
+        "path": "models.py",
+        "sha": "c3e6511cda4d4e311d304a79e0aa4b8987247b91",
+        "size": 3928
+      },
+      {
+        "path": "prediction.py",
+        "sha": "bd43febbf5fd91e5f0e55458920feff3a9277793",
+        "size": 14475
+      },
+      {
+        "path": "test_eval.py",
+        "sha": "ec2396b32194463abcb7626b9eb5437f45241e8d",
+        "size": 421
+      },
+      {
+        "path": "training.py",
+        "sha": "99ff096f94e1276f42f8587b00ea67b02385afa2",
+        "size": 5210
+      }
+    ]
+  },
+  {
+    "repo": "Helw150/event_entity_coref_ecb_plus",
+    "commit": "3c5c03a9c57bfa49bffebd0c54da44f6b53cb016",
+    "tree_sha": "f5cf4bfaf6368186474548c3b2615fbd08dd9a4d",
+    "branch": "master",
+    "license": null,
+    "total_blob_files": 1136,
+    "relevant_files": [
+      {
+        "path": "README.md",
+        "sha": "5e0747202fbdab77b6c120a2114cfa08b5e59ac5",
+        "size": 7871
+      },
+      {
+        "path": "build_features_config.json",
+        "sha": "de5eb1bde95d4981d7dcf1930aa2370c19f437a4",
+        "size": 2248
+      },
+      {
+        "path": "config_files_readme.md",
+        "sha": "23d57fea819376a05141d5c2583a4f48f63abb9f",
+        "size": 4604
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_all.json",
+        "sha": "b29550ada1e888e3fbcd924ea01a6e6a03ddc940",
+        "size": 454
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_cd2cr.json",
+        "sha": "8516b0455578a5e03fc3ab3bdcae152ed1a4110c",
+        "size": 439
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_ecb_entities.json",
+        "sha": "c9847ee198154e06e2fff974f25a48e65ace8c3c",
+        "size": 446
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_ecb_events.json",
+        "sha": "1f4f746853a1456551d9a26d269ad5bb385bc45a",
+        "size": 447
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_ecb_fcc.json",
+        "sha": "5aff5b791a96e8f9bd74e1a0d7e807b8bc50d53d",
+        "size": 442
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_ecb_gvc.json",
+        "sha": "6700770c09067d43d4f060d11229536679ca73af",
+        "size": 442
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_fcc.json",
+        "sha": "72b9e64bdd820918c4b9771b257a336ff43cfc37",
+        "size": 434
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_gvc.json",
+        "sha": "cc74d7eff18da4cedb2360938513f82d30538b16",
+        "size": 434
+      },
+      {
+        "path": "configs/candidate_generator/train_generator_gvc_fcc.json",
+        "sha": "69c909cc36580d04deb8382f8968b8a8e8e7e41d",
+        "size": 421
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_all.json",
+        "sha": "8e5c345e59c9f84f780f2792f09ca0faf3f3c836",
+        "size": 707
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_cd2cr.json",
+        "sha": "51a6ae9905c25c60a1cca058ba2e27589bd05bdc",
+        "size": 686
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_ecb_entities.json",
+        "sha": "ef9a12988495748272aed95cb353055ca2573df4",
+        "size": 709
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_ecb_events.json",
+        "sha": "5cfe774a95b4bd64cbc495d6df72d6593874c989",
+        "size": 701
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_ecb_fcc.json",
+        "sha": "3dd83eecdf0324cc34a5c6d67d55914e01ba3001",
+        "size": 694
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_ecb_gvc.json",
+        "sha": "e715134bba77f8fd58c60c8059c1dad4b9b2f259",
+        "size": 694
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_fcc.json",
+        "sha": "fee04d1d7fbdca47416f27d8e96584a46522c38e",
+        "size": 689
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_gvc.json",
+        "sha": "abc6b1e14f401569b9b0e109cb14bf2c8f935e67",
+        "size": 689
+      },
+      {
+        "path": "configs/crossencoder/train_crossencoder_gvc_fcc.json",
+        "sha": "c43404ccd067d99ee99240af778460d6036e1ed5",
+        "size": 694
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_All_Entity_gold_mentions.json",
+        "sha": "97f0575bf37bd381dfa14fd03564c47552a80e2f",
+        "size": 2841366
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_All_Event_gold_mentions.json",
+        "sha": "be20494d93d283d1d0cf7d97605ebb6041d428ad",
+        "size": 2233955
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Dev_Entity_gold_mentions.json",
+        "sha": "872b903d5d0c840a18fa54013d1bb16d5b00a918",
+        "size": 507229
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Dev_Event_gold_mentions.json",
+        "sha": "eb1323dea81e2cd4d176c6581f11220bb53461dc",
+        "size": 405274
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Dev_corpus.txt",
+        "sha": "c14ab5a60ff913ab4bcb6788da0973d0f0a3ae0e",
+        "size": 261456
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Test_Entity_gold_mentions.json",
+        "sha": "8e9e7899f2b0dba4df59009dc919cafac52db202",
+        "size": 706880
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Test_Entity_pred_mentions.json",
+        "sha": "465f56b8404168b37ae8c842dc885fd7a1254f55",
+        "size": 636738
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Test_Event_gold_mentions.json",
+        "sha": "8f7ef0caebe7a27d462fd361526d312fba671e3b",
+        "size": 585935
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Test_Event_pred_mentions.json",
+        "sha": "619c00829e7a59def954d91667f00a2092719204",
+        "size": 533362
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Test_corpus.txt",
+        "sha": "08d5cec9eb4916c7b5133989d37ea32d1a6087e6",
+        "size": 364641
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Train_Entity_gold_mentions.json",
+        "sha": "ceec6d451f0b7dd7c028bf96a571384d3ffe73a5",
+        "size": 1627259
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Train_Event_gold_mentions.json",
+        "sha": "fa05257a4eb0e387af2117720e7b98371200d2b7",
+        "size": 1242748
+      },
+      {
+        "path": "data/interim/cybulska_setup/ECB_Train_corpus.txt",
+        "sha": "9741fc7e959abd4d4e1bca9d6a1caa57f893620b",
+        "size": 807513
+      },
+      {
+        "path": "data/interim/cybulska_setup/mention_stats.txt",
+        "sha": "1aacf393fbb49c1f9055575b1d27685db77f72d2",
+        "size": 1403
+      },
+      {
+        "path": "describe_data.json",
+        "sha": "62236cbbe3ff53489eb3b1b687e240e433fffa05",
+        "size": 165
+      },
+      {
+        "path": "doc_clustering/cluster_topics.py",
+        "sha": "4e10e9a9d24e53c9b156b764260f404c2ad431eb",
+        "size": 3697
+      },
+      {
+        "path": "doc_clustering/clustering_output_to_topics.py",
+        "sha": "5a9fda164040d1a16135ea4a86e0855b377880f2",
+        "size": 1311
+      },
+      {
+        "path": "doc_clustering/commands.md",
+        "sha": "433e0729fa767509606a007da01a09a127ae663b",
+        "size": 525
+      },
+      {
+        "path": "doc_clustering/load_dataset.py",
+        "sha": "2abfb3a4ce7070ee5f9f759369c8da461c77317c",
+        "size": 2109
+      },
+      {
+        "path": "lemma_baseline_config.json",
+        "sha": "25b8278831dd51dad678403d8ee23e4ac3155d4a",
+        "size": 338
+      },
+      {
+        "path": "scorer/README.rst",
+        "sha": "fd1b52ec30a9637599ba988474047054ef584017",
+        "size": 3313
+      },
+      {
+        "path": "src/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/all_models/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/all_models/bcubed_scorer.py",
+        "sha": "538eab882b770089cae5f36b445f426e96983de6",
+        "size": 2047
+      },
+      {
+        "path": "src/all_models/coarse.py",
+        "sha": "01aee6a37d53f6a2eb564e38aa5fdd112d522601",
+        "size": 6058
+      },
+      {
+        "path": "src/all_models/fine.py",
+        "sha": "df17169c23a4a5abcfc06fdf1874c15e085bb405",
+        "size": 5828
+      },
+      {
+        "path": "src/all_models/measure_context.py",
+        "sha": "d5dd5bae2c8c026bf96c8119a72e36a1af330dad",
+        "size": 5115
+      },
+      {
+        "path": "src/all_models/model_factory.py",
+        "sha": "8ff5420b69892619c80f97102b41cba72fa12a33",
+        "size": 5768
+      },
+      {
+        "path": "src/all_models/model_utils.py",
+        "sha": "c11d70fbec33e25630c2a762d56019057bdb6444",
+        "size": 88325
+      },
+      {
+        "path": "src/all_models/models.py",
+        "sha": "775f82cc2bbe9e4b6cb68b2b58301e42e41bf003",
+        "size": 5431
+      },
+      {
+        "path": "src/all_models/nearest_neighbor.py",
+        "sha": "0edff04297f1579d889ff041a5e2b8261996f5cf",
+        "size": 8868
+      },
+      {
+        "path": "src/all_models/predict_model.py",
+        "sha": "bf52d9ce24b015d289a088a02d016d67c7f9aa7f",
+        "size": 6815
+      },
+      {
+        "path": "src/all_models/same_lemma_baseline.py",
+        "sha": "f219c9d634210553ebbedee2e62cdd7f49ddd960",
+        "size": 5253
+      },
+      {
+        "path": "src/all_models/scorer.py",
+        "sha": "2af0ccfdfc1d88a35a1ce008035ce6ae05caf413",
+        "size": 4441
+      },
+      {
+        "path": "src/all_models/train_candidate_generation.py",
+        "sha": "d343129de1f586725a0fe7a9476e49806124b045",
+        "size": 12021
+      },
+      {
+        "path": "src/all_models/train_crossencoder.py",
+        "sha": "8a69bf9a8724ecace2e12413043bc673e197aaed",
+        "size": 23447
+      },
+      {
+        "path": "src/all_models/train_model.py",
+        "sha": "1d65bd7323825db356053d748d6db6cafe0fabb8",
+        "size": 19679
+      },
+      {
+        "path": "src/analysis/create_data_for_significance_tests.py",
+        "sha": "25d2db453fcae2f5216cfd2dcebbd1ef81e39419",
+        "size": 6983
+      },
+      {
+        "path": "src/analysis/test_significance.py",
+        "sha": "1d2483fcbb7c65efa679e0d1ea67ea4632b6f5c9",
+        "size": 8890
+      },
+      {
+        "path": "src/data/data_analysis.py",
+        "sha": "2ba774a476c7c4d8047ed5d3bb3a175af5a49595",
+        "size": 12547
+      },
+      {
+        "path": "src/data/load_predicted_mentions.py",
+        "sha": "ff76b4d099487e3cc3c6c0908670fe91505fbed9",
+        "size": 8061
+      },
+      {
+        "path": "src/data/make_dataset.py",
+        "sha": "810f38109f7b313dcecb7219fbe1446b23bb2d7a",
+        "size": 25299
+      },
+      {
+        "path": "src/data/make_gold_files.py",
+        "sha": "3a30c226bf2d97a2d3176e474f85711f6a9032a6",
+        "size": 2994
+      },
+      {
+        "path": "src/data/mention_data.py",
+        "sha": "7c738262cb1f0492fc236b258d0d36cf2af67cf0",
+        "size": 1636
+      },
+      {
+        "path": "src/features/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/features/allen_srl_reader.py",
+        "sha": "256308580807b6a7b17287921800d17eef7ca505",
+        "size": 3351
+      },
+      {
+        "path": "src/features/build_features.py",
+        "sha": "9b44f079d07a1b1fdd849d64e48a2da70171a142",
+        "size": 38009
+      },
+      {
+        "path": "src/features/count_coref_clusters.py",
+        "sha": "04232eb54d7ecf9498c850011df1145a879b29d0",
+        "size": 2623
+      },
+      {
+        "path": "src/features/create_elmo_embeddings.py",
+        "sha": "21f8f275213359a8eb8cac6cdba2729464a52913",
+        "size": 1037
+      },
+      {
+        "path": "src/features/extraction_utils.py",
+        "sha": "50ae352a432848314811cac770c3ac2dba5739bb",
+        "size": 29609
+      },
+      {
+        "path": "src/features/swirl_parsing.py",
+        "sha": "904e0528da852194ccfaa90d5426156dc74cdebb",
+        "size": 3849
+      },
+      {
+        "path": "src/shared/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/shared/classes.py",
+        "sha": "c6bc80b5ac2604f0b87bf3c2e97edee19f76fc4c",
+        "size": 25058
+      },
+      {
+        "path": "src/shared/eval_utils.py",
+        "sha": "31c6931188bbbf703861f850c37068b48bbb4799",
+        "size": 12698
+      },
+      {
+        "path": "src/visualization/tsne.py",
+        "sha": "7826523c3f0d773d509ad24a43134c837a0d9177",
+        "size": 4509
+      },
+      {
+        "path": "test_config.json",
+        "sha": "97f77dd608f5ea5e10bb356bba753aa990e3e2c0",
+        "size": 976
+      },
+      {
+        "path": "train_biencoder.json",
+        "sha": "38ce0e6c16154dcd9f73dd05ad667d34ba009db5",
+        "size": 417
+      },
+      {
+        "path": "train_config.json",
+        "sha": "91141bbe25076d984134e71265c6c41ab1fd47b8",
+        "size": 1284
+      },
+      {
+        "path": "train_crossencoder.json",
+        "sha": "853f3f88c615e6c01482797ca1686859db261dd7",
+        "size": 758
+      }
+    ]
+  },
+  {
+    "repo": "AlonEirew/cross-doc-event-coref",
+    "commit": "f8abae3aac6197db30bc4ec9b502f605b3867e3e",
+    "tree_sha": "716c9834fab49c0d316dba45ecb3104d48c57273",
+    "branch": "master",
+    "license": "Apache-2.0",
+    "total_blob_files": 49,
+    "relevant_files": [
+      {
+        "path": "LICENSE",
+        "sha": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+        "size": 11357
+      },
+      {
+        "path": "README.md",
+        "sha": "a5955555e59b33a28d71921a589bcee51620c4b3",
+        "size": 5892
+      },
+      {
+        "path": "datasets/pairs.txt",
+        "sha": "d6f1a443c6576437145d94783d11278ce63b5836",
+        "size": 351
+      },
+      {
+        "path": "gold_scorer/ecb/CD_dev_event_mention_dataset.txt",
+        "sha": "ece658910d72c5f631ff5501ddc70c1a5310de55",
+        "size": 28378
+      },
+      {
+        "path": "gold_scorer/ecb/CD_test_event_mention_dataset.txt",
+        "sha": "15619efa5eb4233b3a5fcaf9c6df7d77ee68278c",
+        "size": 40761
+      },
+      {
+        "path": "gold_scorer/gvc/CD_test_event_mention_based_dataset.txt",
+        "sha": "52442a8e7642f3744866905131c2146a89e56ae7",
+        "size": 51477
+      },
+      {
+        "path": "gold_scorer/meantime/CD_test_event_mention_based_dataset.txt",
+        "sha": "bbc6f89e0a807a5053891d5938448a4e1fb59437",
+        "size": 11863
+      },
+      {
+        "path": "gold_scorer/wec/CD_dev_event_mention_dataset.txt",
+        "sha": "8192c3f7f0f06164ada4cf3b983fa623cb91fa5e",
+        "size": 28292
+      },
+      {
+        "path": "gold_scorer/wec/CD_test_event_mention_dataset.txt",
+        "sha": "cbf3648379981188a70128773cab42e84bdd71a7",
+        "size": 42911
+      },
+      {
+        "path": "helper_scripts/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "helper_scripts/stats.py",
+        "sha": "b6f96aba90d67f3da033ac0e7ef93eff2a3d896f",
+        "size": 7331
+      },
+      {
+        "path": "helper_scripts/visualize.py",
+        "sha": "48c252053223a60e4aae280756aa06df9cc5a4c6",
+        "size": 5409
+      },
+      {
+        "path": "log.txt",
+        "sha": "35f0c652eacddafef8e4ae43b6aa413a8a0eea39",
+        "size": 3763
+      },
+      {
+        "path": "requirements.txt",
+        "sha": "3730bc4f1c189475dd9ad2326d03d817fa1c5bcc",
+        "size": 95
+      },
+      {
+        "path": "setup.py",
+        "sha": "7ac9662e4c07df5ca21fc9d9542eee07029fa09f",
+        "size": 166
+      },
+      {
+        "path": "src/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/cluster.py",
+        "sha": "6f48c48ffd619c5c0090f5c890438f131cafdbd9",
+        "size": 3908
+      },
+      {
+        "path": "src/coref_system/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/coref_system/pairwize_model.py",
+        "sha": "867810f470c8c80825b4f3a5be5f3d95af4aa323",
+        "size": 5001
+      },
+      {
+        "path": "src/coref_system/relation_extraction.py",
+        "sha": "0705ccd1abc1fb6af17934a950b61abe2f8371e8",
+        "size": 1865
+      },
+      {
+        "path": "src/dataobjs/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/dataobjs/cluster.py",
+        "sha": "b05788ace7367a6d22071e12fa0f526295f1a7ae",
+        "size": 5513
+      },
+      {
+        "path": "src/dataobjs/dataset.py",
+        "sha": "fd86196432d607790bb24ecaf555ec96308175a7",
+        "size": 7887
+      },
+      {
+        "path": "src/dataobjs/mention_data.py",
+        "sha": "a46d5a185b8586147e84c28182233903ecd06083",
+        "size": 9917
+      },
+      {
+        "path": "src/dataobjs/topics.py",
+        "sha": "8d624cc5706ef2e0dd3590878687c4656433efb3",
+        "size": 3076
+      },
+      {
+        "path": "src/generate_pairs_predictions.py",
+        "sha": "7af9a3bd00b126616a266f0811331eca0f892525",
+        "size": 3832
+      },
+      {
+        "path": "src/inference.py",
+        "sha": "63e0695d00e049ce0d61e7deb676169dd64e46b3",
+        "size": 1660
+      },
+      {
+        "path": "src/preprocess_embed.py",
+        "sha": "8c9d7f4e4da5fee68cf500bd076ce7f48e2baae2",
+        "size": 3087
+      },
+      {
+        "path": "src/preprocess_gen_pairs.py",
+        "sha": "5feeab197fd8e9d29adaf03d9d16483026fe6097",
+        "size": 3047
+      },
+      {
+        "path": "src/train.py",
+        "sha": "8e55018d8c3294513c61cc8dfb86c6bd722cfbb4",
+        "size": 7603
+      },
+      {
+        "path": "src/utils/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/utils/clustering_utils.py",
+        "sha": "848e152f6ee7890a2ec0c81eb30500d952e78c19",
+        "size": 1135
+      },
+      {
+        "path": "src/utils/embed_utils.py",
+        "sha": "661e84bc1afc44b2d2d65c0556faadcd7a4fe4e0",
+        "size": 5834
+      },
+      {
+        "path": "src/utils/eval_utils.py",
+        "sha": "7cd620249242632740cb9295a625a75cff589a4e",
+        "size": 511
+      },
+      {
+        "path": "src/utils/io_utils.py",
+        "sha": "a6059c56b2f508ee3346d6e57fa309891fbd2268",
+        "size": 2378
+      },
+      {
+        "path": "src/utils/log_utils.py",
+        "sha": "80a84779aa9b6d84d617ee2decf9a6ed1dbf7bd9",
+        "size": 325
+      },
+      {
+        "path": "src/utils/resources/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/utils/resources/stop_words_en.json",
+        "sha": "68e2abc10a93628dc5941ab4611eca479f8f6e55",
+        "size": 3148
+      },
+      {
+        "path": "src/utils/string_utils.py",
+        "sha": "f60a3a576495fc1150e1081f50e7c0730ecbb0de",
+        "size": 3863
+      },
+      {
+        "path": "tests/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "tests/test_data_utils.py",
+        "sha": "646f6d6e49ba18d0d95a3fc48d6c09d9d2048b7c",
+        "size": 1693
+      },
+      {
+        "path": "tests/test_embeddings.py",
+        "sha": "c92c87f5a5a4f30b3fade38d2f513d7aab145e49",
+        "size": 6093
+      },
+      {
+        "path": "tests/test_mentions_file.py",
+        "sha": "8ac903449edb524391b63072c74f23ed09cb5d37",
+        "size": 790
+      },
+      {
+        "path": "tests/test_res/Event_gold_mentions.json",
+        "sha": "b355583c2c883e0be1da15202be0980eee593f6e",
+        "size": 3810501
+      }
+    ]
+  },
+  {
+    "repo": "chenxinyu-nlp/CohTP",
+    "commit": "3843ad0a4dcdb9f4761f134894b935d4ed74d19b",
+    "tree_sha": "329ececa9b3c07ef9f381cb596ba4dd44c8be6a0",
+    "branch": "main",
+    "license": null,
+    "total_blob_files": 1,
+    "relevant_files": [
+      {
+        "path": "Comming soon",
+        "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+        "size": 1
+      }
+    ]
+  },
+  {
+    "repo": "chenxinyu-nlp/CDCR",
+    "commit": "f9fab93f74090ae18c852bc5fd23dfffd85f42ad",
+    "tree_sha": "ff4467092a1fd771e9b368c1eb7aca5c4e0354d1",
+    "branch": "main",
+    "license": null,
+    "total_blob_files": 2,
+    "relevant_files": [
+      {
+        "path": "README.md",
+        "sha": "77ecb8aee59ade0a35460df09c39f914d18b0d1d",
+        "size": 235
+      }
+    ]
+  },
+  {
+    "repo": "aviclu/CDLM",
+    "commit": "d40a09a91b3d6527f496fa74fa35fdf4e382e85a",
+    "tree_sha": "2a07fefeaf2ae563483d12d577f73795e5bf7428",
+    "branch": "main",
+    "license": null,
+    "total_blob_files": 122,
+    "relevant_files": [
+      {
+        "path": "README.md",
+        "sha": "ab293331d6fe5bab033e7a2b9fdd73ea250a842b",
+        "size": 1963
+      },
+      {
+        "path": "attention_analysis/ecb_data/ecb_qual_2k_entities.json",
+        "sha": "5b0f9617146fbb62ff5be7a4235a745916b5f390",
+        "size": 11219856
+      },
+      {
+        "path": "attention_analysis/ecb_data/ecb_qual_2k_events.json",
+        "sha": "ef5804778265f2a5c7682e5896d26f11819de410",
+        "size": 10973487
+      },
+      {
+        "path": "cross_encoder/README.md",
+        "sha": "24b88d07439013a942d0d2876d9f97d6c2fdd601",
+        "size": 2471
+      },
+      {
+        "path": "cross_encoder/configs/config_pairwise_long_reg_span.json",
+        "sha": "b964b5fb0d83cd3cff04ca4655b5f81540ff31fd",
+        "size": 1117
+      },
+      {
+        "path": "cross_encoder/conll.py",
+        "sha": "8469268b37f897178d0b89bc168c7fbea9182aef",
+        "size": 3776
+      },
+      {
+        "path": "cross_encoder/corpus.py",
+        "sha": "7e9ab1dc6d91077c19ebf107a5a4662026ea01ad",
+        "size": 6737
+      },
+      {
+        "path": "cross_encoder/coval/README.md",
+        "sha": "02d355db848d44c3ae368c6866609e0244a52461",
+        "size": 1862
+      },
+      {
+        "path": "cross_encoder/coval/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "cross_encoder/coval/arrau-scorer.py",
+        "sha": "9046454856f6aaecd6017c34a506473b9f383486",
+        "size": 3309
+      },
+      {
+        "path": "cross_encoder/coval/coval/arrau/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "cross_encoder/coval/coval/arrau/markable.py",
+        "sha": "7dfe43b63f166335c0186070e166617dc1c1e7a8",
+        "size": 1718
+      },
+      {
+        "path": "cross_encoder/coval/coval/arrau/reader.py",
+        "sha": "e80b3817c7079bcc2db9000ab2fdc1d1ec00e7d6",
+        "size": 8359
+      },
+      {
+        "path": "cross_encoder/coval/coval/conll/README.md",
+        "sha": "a2052e34ebf494b02fd40b5ab24bd519ccd74d78",
+        "size": 1861
+      },
+      {
+        "path": "cross_encoder/coval/coval/conll/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "cross_encoder/coval/coval/conll/mention.py",
+        "sha": "8bf39db489bffd938e4ae392af4936fbe7cbdc2b",
+        "size": 9272
+      },
+      {
+        "path": "cross_encoder/coval/coval/conll/reader.py",
+        "sha": "5983fb12311ae2ae4b4f7bb47159a9e1ec8e32b5",
+        "size": 16294
+      },
+      {
+        "path": "cross_encoder/coval/coval/conll/util.py",
+        "sha": "ea748a7a7ed2b6edd5230d42cb8a0cd75a4eec16",
+        "size": 4252
+      },
+      {
+        "path": "cross_encoder/coval/coval/eval/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "cross_encoder/coval/coval/eval/evaluator.py",
+        "sha": "79ecb932943f119b1395179a108a2f96b8fa5467",
+        "size": 7331
+      },
+      {
+        "path": "cross_encoder/coval/requirements.txt",
+        "sha": "48682a6dade8b08829c74a1f36f69deb57c55120",
+        "size": 20
+      },
+      {
+        "path": "cross_encoder/coval/scorer.py",
+        "sha": "1814644798f86ad73101ec105d27a41c053da014",
+        "size": 2070
+      },
+      {
+        "path": "cross_encoder/coval/setup.py",
+        "sha": "bf62d0fd2bf45c3a6c283ee93daa449ede051de3",
+        "size": 1074
+      },
+      {
+        "path": "cross_encoder/coval/unittests.py",
+        "sha": "dfef3aebdcf0d57d6aee3d276607019abe92ee74",
+        "size": 10420
+      },
+      {
+        "path": "cross_encoder/dataset.py",
+        "sha": "dd2b7969830cdd461e3ba0262c250a3f8720ca66",
+        "size": 13958
+      },
+      {
+        "path": "cross_encoder/evaluator.py",
+        "sha": "2ed2f0e8629fc839b89dfb643f38ac15140f29a7",
+        "size": 1459
+      },
+      {
+        "path": "cross_encoder/get_ecb_data.py",
+        "sha": "4d29b9da8785dbc7e3fd4f5c28d483c98f9c882a",
+        "size": 12075
+      },
+      {
+        "path": "cross_encoder/models.py",
+        "sha": "44fa433d54655d93a2ed179bf2e9c7f7b53b24c7",
+        "size": 6285
+      },
+      {
+        "path": "cross_encoder/predict_long.py",
+        "sha": "8cf231ed13b043fc677ef9234d54e78a184542d7",
+        "size": 8202
+      },
+      {
+        "path": "cross_encoder/predict_long_test.py",
+        "sha": "d24e41f403001c667e4a4c82adcbc5432f0206ef",
+        "size": 9206
+      },
+      {
+        "path": "cross_encoder/requirements.txt",
+        "sha": "069918b21ae806ecd992d1af640ba2e78c26a130",
+        "size": 269
+      },
+      {
+        "path": "cross_encoder/run_scorer_long.py",
+        "sha": "c995e6fe39951ed33cc8af47dc66424bc4be2227",
+        "size": 2481
+      },
+      {
+        "path": "cross_encoder/run_scorer_long_test.py",
+        "sha": "bb48ba39dea95d96c493cf51e4535d12c002fb0f",
+        "size": 1740
+      },
+      {
+        "path": "cross_encoder/train.py",
+        "sha": "d572782d818e81607115acaa7240eefa5b1587e0",
+        "size": 12638
+      },
+      {
+        "path": "cross_encoder/utils.py",
+        "sha": "c80fa33d830680468765aa5913b980f2bab66332",
+        "size": 4830
+      },
+      {
+        "path": "pretraining/README.md",
+        "sha": "cedade34f8b30f14fb64101d44ce23da80acff1d",
+        "size": 1042
+      },
+      {
+        "path": "pretraining/cdmlm_data_collector.py",
+        "sha": "19363205afaae8763c932b6b09cc217ea31ab6f5",
+        "size": 7771
+      },
+      {
+        "path": "pretraining/corpus_preprocessing.py",
+        "sha": "6ae6c5acdcd2e89a1592f67c6a44a6ba1bc69d25",
+        "size": 10483
+      },
+      {
+        "path": "pretraining/requirements.txt",
+        "sha": "8e74721dd1110422ed09c7aed0bf9fdddd75e5a4",
+        "size": 230
+      },
+      {
+        "path": "pretraining/run_language_modeling.py",
+        "sha": "bf22456c7941c8ca8e82343c3f0283d504490b88",
+        "size": 8153
+      }
+    ]
+  },
+  {
+    "repo": "ariecattan/coref",
+    "commit": "b81397a971ce520637f05c4bd332d5389af4e465",
+    "tree_sha": "e7be4b4df88cb9e417941d15b539e55f1b8bbc1e",
+    "branch": "master",
+    "license": null,
+    "total_blob_files": 33,
+    "relevant_files": [
+      {
+        "path": "README.md",
+        "sha": "a607e2ec0d92c654c7fac7b3a790b1e72f796eba",
+        "size": 5193
+      },
+      {
+        "path": "configs/config_clustering.json",
+        "sha": "e8085744fb7396b1393179a38df01440812f5a08",
+        "size": 826
+      },
+      {
+        "path": "configs/config_pairwise.json",
+        "sha": "cbe3b30c6cc023d6cdd5e9ff9971920602a30e27",
+        "size": 900
+      },
+      {
+        "path": "configs/config_span_scorer.json",
+        "sha": "ac1b332b44b42c03b7fbe7cfcd2c85468b89b431",
+        "size": 599
+      },
+      {
+        "path": "conll.py",
+        "sha": "8469268b37f897178d0b89bc168c7fbea9182aef",
+        "size": 3776
+      },
+      {
+        "path": "corpus.py",
+        "sha": "d4dbb53695ab30124174f4852b9f9017772985de",
+        "size": 6736
+      },
+      {
+        "path": "evaluator.py",
+        "sha": "fdcdada76937db9067a9244c4221dc0b2f6c9968",
+        "size": 1499
+      },
+      {
+        "path": "get_ecb_data.py",
+        "sha": "7d5d5830508b3e91f87ae0ac8a09b20c11c6a190",
+        "size": 12125
+      },
+      {
+        "path": "model_utils.py",
+        "sha": "d5d724adde5e40b81c84effbce1966be8dedb32a",
+        "size": 5182
+      },
+      {
+        "path": "models.py",
+        "sha": "b0c3495eb119ae0b06cc0365bd80768e5bf1e32b",
+        "size": 4225
+      },
+      {
+        "path": "predict.py",
+        "sha": "1cbb736760c68320155922e9d2b98d61e1fcbd11",
+        "size": 8431
+      },
+      {
+        "path": "requirements.txt",
+        "sha": "55257ae613d5f7ab500988b5f710443fd8cd4ff2",
+        "size": 95
+      },
+      {
+        "path": "run_scorer.py",
+        "sha": "874705c0230271a8b166ca9a1e0593827b5ebb69",
+        "size": 2562
+      },
+      {
+        "path": "spans.py",
+        "sha": "87e458438b761e988cf3e043891c7c2d8145ecf0",
+        "size": 7162
+      },
+      {
+        "path": "train_pairwise_scorer.py",
+        "sha": "fce2e5c94e0e5ea3c2a4c9362c29ba5e08b2c7cc",
+        "size": 11025
+      },
+      {
+        "path": "train_span_scorer.py",
+        "sha": "ffbc1f65bf23ccca2d30ed8d456a574b962264f7",
+        "size": 7154
+      },
+      {
+        "path": "tuned_threshold.py",
+        "sha": "c52d31058b8b1104251f3da0f50622d9c46dd602",
+        "size": 10057
+      },
+      {
+        "path": "utils.py",
+        "sha": "c80fa33d830680468765aa5913b980f2bab66332",
+        "size": 4830
+      }
+    ]
+  },
+  {
+    "repo": "hqyang/EasyECR",
+    "commit": "f6cd779fbddc7ced2b14397041f83d92713115a9",
+    "tree_sha": "428b96b0bec144f8d723c2036a030e6be976f4da",
+    "branch": "main",
+    "license": null,
+    "total_blob_files": 330,
+    "relevant_files": [
+      {
+        "path": "README.md",
+        "sha": "cca778f5f9260a573aab14456aeb177a956f54d3",
+        "size": 722
+      },
+      {
+        "path": "config/model_dataset/chatgpt_ecbplus.yaml",
+        "sha": "0dc087238abeea4676e620dd6d68756ae9066743",
+        "size": 1029
+      },
+      {
+        "path": "config/model_dataset/cluster_ecr_model_ecbplus.yaml",
+        "sha": "d984e9e80359925749fc52dab4233dd869c8fd0e",
+        "size": 2130
+      },
+      {
+        "path": "config/model_dataset/corefprompt_ace2005eng.yaml",
+        "sha": "8d06da42445b95b42146327965d9d3ca854d3d15",
+        "size": 5679
+      },
+      {
+        "path": "config/model_dataset/corefprompt_kbpmix.yaml",
+        "sha": "f3531278e74706fd0ef6ae1a6ba18a4ee4975a23",
+        "size": 5507
+      },
+      {
+        "path": "config/model_dataset/corefprompt_mavenere.yaml",
+        "sha": "da2b970dc19d8f144daccd8d9510d53d7eea5824",
+        "size": 5732
+      },
+      {
+        "path": "config/model_dataset/crl_ecbplus.yaml",
+        "sha": "b2058bef9654b4e1cde16719f403c6f2eec803db",
+        "size": 4060
+      },
+      {
+        "path": "config/model_dataset/crl_fcct.yaml",
+        "sha": "33adedf32ffe1b0fd3371a4fa9bff9f6eb599c87",
+        "size": 2451
+      },
+      {
+        "path": "config/model_dataset/crl_gvc.yaml",
+        "sha": "600f28d12751bd1eb4a1ce4dd204864ddd302c4d",
+        "size": 2479
+      },
+      {
+        "path": "config/model_dataset/crl_wec.yaml",
+        "sha": "c6a697c6e37e9e0c9f247b2e62515ef96cab6496",
+        "size": 2538
+      },
+      {
+        "path": "config/model_dataset/end_to_end_ecbplus.yaml",
+        "sha": "c201b62a2b013abe7f9f7de177eea8167ee6a238",
+        "size": 2262
+      },
+      {
+        "path": "config/model_dataset/end_to_end_fcct.yaml",
+        "sha": "6ac7034a3b1147ad09ecabcbe08e166b5dd32e46",
+        "size": 2318
+      },
+      {
+        "path": "config/model_dataset/end_to_end_gvc.yaml",
+        "sha": "c93619b89a0a0360aa07d1110bef15ca45544843",
+        "size": 2375
+      },
+      {
+        "path": "config/model_dataset/end_to_end_wec.yaml",
+        "sha": "3ab3fe71330e451f751c19130c3e524eef6719cf",
+        "size": 2408
+      },
+      {
+        "path": "config/model_dataset/focus_on_what_matters_ecbplus.yaml",
+        "sha": "fe01a7fad6ce9e306157b06e1a627fb249231b46",
+        "size": 4154
+      },
+      {
+        "path": "config/model_dataset/focus_on_what_matters_fcct.yaml",
+        "sha": "d5e0bd61079a349745e6d471ca2464e24ce53bd4",
+        "size": 4249
+      },
+      {
+        "path": "config/model_dataset/focus_on_what_matters_gvc.yaml",
+        "sha": "0ac72606e7ff04a9bc4c639f9818315b4ac286ef",
+        "size": 4278
+      },
+      {
+        "path": "config/model_dataset/focus_on_what_matters_mix_2n_ecbplus.yaml",
+        "sha": "008d78847d66b18f46ffb72fefdb5186cd506547",
+        "size": 2930
+      },
+      {
+        "path": "config/model_dataset/focus_on_what_matters_wec.yaml",
+        "sha": "57ded3680504ae79d60c1039b57d2a2ed29bc625",
+        "size": 4358
+      },
+      {
+        "path": "config/model_dataset/global_local_topic_ace2005eng.yaml",
+        "sha": "e0e4c704969b882d9fbfeec1d48fd6020b583450",
+        "size": 2212
+      },
+      {
+        "path": "config/model_dataset/global_local_topic_kbpmix.yaml",
+        "sha": "98ec08932ebe35ce6e6dfaa9f683807e10e9c9d1",
+        "size": 2375
+      },
+      {
+        "path": "config/model_dataset/global_local_topic_mavenere.yaml",
+        "sha": "ee8ce3965aef75706b4e77a4df531f6602d32252",
+        "size": 2298
+      },
+      {
+        "path": "config/model_dataset/lemma_distance_discourse_coherence_theory.yaml",
+        "sha": "ed1376107a59cdd63c517c2c651b608ccaa23756",
+        "size": 2955
+      },
+      {
+        "path": "config/model_dataset/lemma_distance_ecbplus.yaml",
+        "sha": "d9df36bdbe4c710adbe490aaa0f7bacd210a5d16",
+        "size": 1114
+      },
+      {
+        "path": "config/model_dataset/lemma_distance_end_to_end_ecbplus.yaml",
+        "sha": "d0d7bca4b16f5236c24c9830186c8bc5506aea74",
+        "size": 2870
+      },
+      {
+        "path": "config/model_dataset/two_n_is_better_than_n2_ecbplus.yaml",
+        "sha": "ed126913d6526d46ec14fe390ced7d9375f745d6",
+        "size": 2787
+      },
+      {
+        "path": "config/model_dataset/two_n_is_better_than_n2_ecbplus_first2sentece.yaml",
+        "sha": "13ac69988bcd94273e58d76d1aeb457dde90d4cb",
+        "size": 2825
+      },
+      {
+        "path": "config/model_dataset/two_n_is_better_than_n2_ecbplus_sentence.yaml",
+        "sha": "14edcc5a2e91c1e5201c71da0a0283ece854faa3",
+        "size": 2809
+      },
+      {
+        "path": "config/model_dataset/two_n_is_better_than_n2_fcct.yaml",
+        "sha": "c25a7dfb58dc67fdb6fe9e9ff9efcf3d182cb3b7",
+        "size": 2881
+      },
+      {
+        "path": "config/model_dataset/two_n_is_better_than_n2_gvc.yaml",
+        "sha": "d7f3803edd0fcf831391998f41e31aac20583ba9",
+        "size": 2942
+      },
+      {
+        "path": "config/model_dataset/two_n_is_better_than_n2_mix_focus_ecbplus.yaml",
+        "sha": "ade50e236de230dcacb372f8c1f31b3cc2934530",
+        "size": 3969
+      },
+      {
+        "path": "config/model_dataset/two_n_is_better_than_n2_wec.yaml",
+        "sha": "94669ff5d27d06f7c278d3402954a5fe8787a0e0",
+        "size": 3008
+      },
+      {
+        "path": "easyecr/__init__.py",
+        "sha": "d3a5940371bbdca4933ac044781929263690f8d7",
+        "size": 90
+      },
+      {
+        "path": "easyecr/common/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/common/common_path.py",
+        "sha": "d899edc1c760c381e7012e37d2e874329f5b09f8",
+        "size": 498
+      },
+      {
+        "path": "easyecr/conf_loader/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/conf_loader/load_conf.py",
+        "sha": "1ed78002c7267878f51190188e595b95fd2ee1f3",
+        "size": 813
+      },
+      {
+        "path": "easyecr/ecr_data/__init__.py",
+        "sha": "3fae194be24378a32eedc638f3ccd341b5ea6fbf",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_data/data_converter/__init__.py",
+        "sha": "0431bbdf59db1fa86545712d624a69e67a15c71c",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_data/data_converter/data_converter.py",
+        "sha": "7166782cffc400b01b44b8285b9fb4546d8f7f39",
+        "size": 15766
+      },
+      {
+        "path": "easyecr/ecr_data/data_structure/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/ecr_data/data_structure/data_structure.py",
+        "sha": "27a1b4c0a11f6d14549f53e356321adbef9c2ccb",
+        "size": 16814
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/__init__.py",
+        "sha": "f37cd663a01b6cecfe083a98eeedfc74da58c5d0",
+        "size": 89
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/ace/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/ace/ace.py",
+        "sha": "101685f9209355274b29fdce50f287b44b288724",
+        "size": 9862
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/base_ecr_dataset/__init__.py",
+        "sha": "ba628e8a2394a9459f93437546fc4e1841e95608",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/base_ecr_dataset/base_ecr_dataset.py",
+        "sha": "dc367317603edd81879baad57972a3540f08745c",
+        "size": 945
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/ecb_plus/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/ecb_plus/ecb_plus.py",
+        "sha": "af884f512869e939037637bc9af60acf281e3a2f",
+        "size": 13528
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/fcc/__init__.py",
+        "sha": "35831d7ed4661f843a5fe318d756188564562261",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/fcc/fcc.py",
+        "sha": "87fdc310f19df6ab71ca45f93572ae52724a3e6b",
+        "size": 6317
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/fcc_t/__init__.py",
+        "sha": "bcea27941a74c9e453122d65dbd0f741d9841739",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/fcc_t/fcc_t.py",
+        "sha": "fbdd1795bc605ac324388f18800e33629f108d36",
+        "size": 9349
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/gvc/__init__.py",
+        "sha": "bcea27941a74c9e453122d65dbd0f741d9841739",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/gvc/gvc.py",
+        "sha": "45f3f15f7a8e05f15920bf7054e7733e39d793dc",
+        "size": 13990
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/gvc/gvc_split.py",
+        "sha": "304a86dfca29c10e8b44a738f2a0d592bbb68d28",
+        "size": 2525
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/idea_car/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/idea_car/idea_car.py",
+        "sha": "dc20412037ca190bdc2801cc95ea50469b32624b",
+        "size": 5371
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/kbp/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/kbp/kbp_2015.py",
+        "sha": "6bcf7decd68c38df82faa7b29123010b168fece8",
+        "size": 6102
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/kbp/kbp_2016.py",
+        "sha": "940cb446dcb670ff456517e7c4455644073c5668",
+        "size": 9132
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/kbp/kbp_2017.py",
+        "sha": "e1d748b41856bd62552e997e1a7b49d302d713e5",
+        "size": 5599
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/kbp/kbp_eng_mix.py",
+        "sha": "95551d58efab8285dbdee1e32f45c5c1717d6900",
+        "size": 7112
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/kbp/source_reader.py",
+        "sha": "5bb92f7b716999dee54eb8133c7a6bae8ce3651d",
+        "size": 8671
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/maven/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/maven/maven.py",
+        "sha": "94dd15d1f7a5cfcd783f22b0d84fce3db448fbdf",
+        "size": 8375
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/maven_ere/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/maven_ere/maven_ere.py",
+        "sha": "6ecb46510618b40b41bd49956c2ca169e42f1d9c",
+        "size": 8611
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/wec/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "easyecr/ecr_data/datasets/wec/wec_eng.py",
+        "sha": "1fc6338bddc18240eac508db1aeeb96d4498dabf",
+        "size": 8474
+      },
+      {
+        "path": "easyecr/ecr_evaluate/__init__.py",
+        "sha": "ddfb108547cebbbb4d31304f1bf378c21d3724bf",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_evaluate/coval_clone/__init__.py",
+        "sha": "40fe753bb1644f3a73cd2aeb044bdcd8865c28e8",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_evaluate/ecr_evaluate.py",
+        "sha": "1172030704cbf1d82adee6ada2a4a94f96402ec8",
+        "size": 6710
+      },
+      {
+        "path": "easyecr/ecr_model/__init__.py",
+        "sha": "6b548f1658b01d902244b799684f5e4abaaa6157",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_model/aggregation/__init__.py",
+        "sha": "921265e420987d25c7dbb6ffcc8d1442c7b90943",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_model/aggregation/aggregation.py",
+        "sha": "43da308881cadbfe28dfed83355f2b27f83329a5",
+        "size": 4251
+      },
+      {
+        "path": "easyecr/ecr_model/cluster/cluster_model.py",
+        "sha": "c3d052ed9a81a4d40d384854010087e93a38f084",
+        "size": 9810
+      },
+      {
+        "path": "easyecr/ecr_model/data/__init__.py",
+        "sha": "86c1886ad01cf292503699e78d5d63a8033c4aa9",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_model/data/end_to_end_event_coreference_dataset.py",
+        "sha": "b10ab1fec5be9b067f505ed291e28d7fa974286f",
+        "size": 10642
+      },
+      {
+        "path": "easyecr/ecr_model/data/event_coreference_dataset.py",
+        "sha": "dd188b13bbf7ff409d46cb315020828aef2343ad",
+        "size": 24135
+      },
+      {
+        "path": "easyecr/ecr_model/ecr_tagger/__init__.py",
+        "sha": "8dfe4066971cbfeaa0c41210d9c15ce13c46c760",
+        "size": 89
+      },
+      {
+        "path": "easyecr/ecr_model/ecr_tagger/contextualized_representation_tagger.py",
+        "sha": "e85f13e59ee686acb1b071359cbe995653c4a1be",
+        "size": 6414
+      },
+      {
+        "path": "easyecr/ecr_model/ecr_tagger/doc_tagger.py",
+        "sha": "5aff333a54d682f1b0bbc1f2abf7961f62a4f0cc",
+        "size": 1046
+      },
+      {
+        "path": "easyecr/ecr_model/ecr_tagger/ecr_tagger.py",
+        "sha": "49b04ccbe2a1a06dbf7ce79fd8fcbd2d507e5bdc",
+        "size": 620
+      },
+      {
+        "path": "easyecr/ecr_model/event_extraction_model/__init__.py",
+        "sha": "52e49fbaf2efea7ea18f11f05057f1a40d2f85e3",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_model/event_extraction_model/event_extraction_api.py",
+        "sha": "e9b2bfc51591a6fa9256c2fd9f7fb9da5176e6d3",
+        "size": 2634
+      },
+      {
+        "path": "easyecr/ecr_model/framework/ecr_framework.py",
+        "sha": "c5de6c1f8256586b2fa764904a9ff54fd3411d01",
+        "size": 6701
+      },
+      {
+        "path": "easyecr/ecr_model/model/__init__.py",
+        "sha": "2d7f83d0ceb99e97d312c94fe87888ed8f935be1",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_model/model/cluster_model.py",
+        "sha": "5c8405de74c96298ca4b18accfd1e14a96f7eb6b",
+        "size": 667
+      },
+      {
+        "path": "easyecr/ecr_model/model/common_ecr_models.py",
+        "sha": "28e2569e377279f06a66c3ec97e107c0dc3d583b",
+        "size": 2051
+      },
+      {
+        "path": "easyecr/ecr_model/model/ecr_model.py",
+        "sha": "3eef6942ab51ca6575280b82bfea7a1bb66a008d",
+        "size": 2808
+      },
+      {
+        "path": "easyecr/ecr_model/model/ecr_model_backup.py",
+        "sha": "64758a291262014a25269f644aca8c4863d08840",
+        "size": 10179
+      },
+      {
+        "path": "easyecr/ecr_model/model/end_to_end_event_coreference_pl_module.py",
+        "sha": "0114f2c01bd056d9ba38bd262d05cb276acdcc2c",
+        "size": 7293
+      },
+      {
+        "path": "easyecr/ecr_model/model/event_coreference_pl_module.py",
+        "sha": "574117b5b69205a8e6b7b325baaada75f0cd186f",
+        "size": 7386
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/__init__.py",
+        "sha": "acd9dbca4ffe394dd9b469482a5d7670420be1e9",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/cluster_ecr_model.py",
+        "sha": "a5387b6deedd763ec6421a219848ecc97fb5b5d5",
+        "size": 18595
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/contrastive_representation_learning.py",
+        "sha": "0223a6a8e34b7bdf2b00fb570971a24f67b8a4b0",
+        "size": 35084
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/corefprompt.py",
+        "sha": "885623f85a7e08669dc4544c7d382520336029b0",
+        "size": 91077
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/corefprompt_backup.py",
+        "sha": "f1adee60eaa68de6506bc8e36847e02f46f56eb5",
+        "size": 103651
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/crl_ecr_model.py",
+        "sha": "f3e5328507244075b10aba11467302d545aaece6",
+        "size": 16285
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/demo.py",
+        "sha": "95e16656c3ab520577eacfb92bc4712f9f6f8936",
+        "size": 14524
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/discourse_coherence_theory_ecr_model.py",
+        "sha": "19627569625a265ce835ea146fa11a3b20908a44",
+        "size": 17425
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/end_to_end.py",
+        "sha": "ff229cf15065d7259d7e9437e14a810946123d90",
+        "size": 18801
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/global_local_topic.py",
+        "sha": "adc15d56fe665598ab6b3e7fd97cdfecc2beb916",
+        "size": 65491
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/lemma_distance_ecr_model.py",
+        "sha": "7cfbfbf39cbaef563c8d589b527226a387002fd2",
+        "size": 19943
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/pl_ecr_complex_tagger.py",
+        "sha": "23683effd02baddc687b71d2981dc29cd65dc754",
+        "size": 2424
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/pl_ecr_model.py",
+        "sha": "1bcd7ed08cd0bac5d251fba0ebdcbbd0affda0f2",
+        "size": 6120
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/readme.md",
+        "sha": "db29f954f4890fa70583d89f4d9137e1c9c876b2",
+        "size": 524
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/sample_simi.py",
+        "sha": "7ca233925d34177fb11afef1af9997f12751f3cb",
+        "size": 20950
+      },
+      {
+        "path": "easyecr/ecr_model/model/pl_ecr_models/trigger_detection.py",
+        "sha": "28ba2704db5ff368f9f4349a2eba8de7864805f9",
+        "size": 17979
+      },
+      {
+        "path": "easyecr/ecr_model/model/simple_ecr_models/__init__.py",
+        "sha": "3ee6b76902cabda8990fc37a01f409f46614ddeb",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_model/model/simple_ecr_models/chatgpt_distance.py",
+        "sha": "99c306e7a9dee90a9e50e00aaec6fccbe1a5830c",
+        "size": 2637
+      },
+      {
+        "path": "easyecr/ecr_model/model/simple_ecr_models/corefprompt_prepare.py",
+        "sha": "36dc95bbc2fc75838b0e82b2de584b0fc3ab568f",
+        "size": 76
+      },
+      {
+        "path": "easyecr/ecr_model/model/simple_ecr_models/embedding_distance.py",
+        "sha": "9e3cb0a56315243b8b4b9a8bb3a7b0186ee8a722",
+        "size": 1626
+      },
+      {
+        "path": "easyecr/ecr_model/model/simple_ecr_models/lemma_distance.py",
+        "sha": "fffaa92938aed962bbdf61eb049f59b3fa8bf2cb",
+        "size": 5674
+      },
+      {
+        "path": "easyecr/ecr_model/model/simple_ecr_models/omni_argument_extraction.py",
+        "sha": "cb24ecba5264dc438243fbd4cc47c02f2f525a32",
+        "size": 28502
+      },
+      {
+        "path": "easyecr/ecr_model/model/simple_ecr_models/sgpt_text_encoder_repr.py",
+        "sha": "0693ce00530b4f9ba75c1ed0b2cbad558d35d478",
+        "size": 4044
+      },
+      {
+        "path": "easyecr/ecr_model/model/simple_ecr_models/simple_ecr_models.py",
+        "sha": "e792ff1b4e433bbee6557ba635ee3c85eed7f26c",
+        "size": 7282
+      },
+      {
+        "path": "easyecr/ecr_model/sample_generator/__init__.py",
+        "sha": "f91f23039b5d5da01e82d5da518443e3d3ccbc7b",
+        "size": 90
+      },
+      {
+        "path": "easyecr/ecr_model/sample_generator/sample_generator.py",
+        "sha": "ce3c9bbfd5383edf24a1b7f95663787897a35943",
+        "size": 12615
+      },
+      {
+        "path": "easyecr/pipeline/__init__.py",
+        "sha": "15f47336bf6ec945454f386bddc971e334b635f2",
+        "size": 90
+      },
+      {
+        "path": "easyecr/pipeline/chatgpt.py",
+        "sha": "d9f0bf1efe363463a1c6af239414565a46f9efa8",
+        "size": 5621
+      },
+      {
+        "path": "easyecr/pipeline/cluster_ecr_model_pipeline.py",
+        "sha": "1e468f67a57d6717576020bdc8666bbb45e44f64",
+        "size": 6155
+      },
+      {
+        "path": "easyecr/pipeline/contrastive_representation_learning.py",
+        "sha": "35b5bc5c1c7b3fb26b2d07b9c42ba8690f980a6a",
+        "size": 6960
+      },
+      {
+        "path": "easyecr/pipeline/crl_pipeline.py",
+        "sha": "ec4ea80b96f21e26ef914d5b64e7d5575eda10d8",
+        "size": 8902
+      },
+      {
+        "path": "easyecr/pipeline/example_emnlp2022.py",
+        "sha": "ac4b8d33a3b38cc1594a1051edeca572fd3ccb71",
+        "size": 6952
+      },
+      {
+        "path": "easyecr/pipeline/example_emnlp2023.py",
+        "sha": "6a7f28296898a2a1ec058991ff78bb1db4f02220",
+        "size": 11422
+      },
+      {
+        "path": "easyecr/pipeline/focus_on_what_matters_mix_2n_ecbplus_pipeline.py",
+        "sha": "421d10077919b987d7607ae8553860db34dda27f",
+        "size": 9860
+      },
+      {
+        "path": "easyecr/pipeline/focus_on_what_matters_pipeline.py",
+        "sha": "b3c6e5ab940f3567ea590edb369ba9aa66b5a630",
+        "size": 11089
+      },
+      {
+        "path": "easyecr/pipeline/lemma_distance_discourse_coherence_theory_pipeline.py",
+        "sha": "a86984a465a15c34f371efe92592048f08b7b1cc",
+        "size": 8962
+      },
+      {
+        "path": "easyecr/pipeline/lemma_distance_end_to_end_pipeline.py",
+        "sha": "44015b6f8aafa9cdc1cf5d0fe1e993c4b5f42f1f",
+        "size": 9148
+      },
+      {
+        "path": "easyecr/pipeline/lemma_distance_pipeline.py",
+        "sha": "f8e3ff7423569692e73f3ef6a67c16819398b4c3",
+        "size": 5837
+      },
+      {
+        "path": "easyecr/pipeline/load_lemma_data.py",
+        "sha": "622c5ca3fcb352295414da554f8a382f85ceeeb1",
+        "size": 2103
+      },
+      {
+        "path": "easyecr/pipeline/over_predicted_mention_pipeline.py",
+        "sha": "565157ffcadf21a816aa20afe0b5bbf1b12f24fd",
+        "size": 7463
+      },
+      {
+        "path": "easyecr/pipeline/two_n_is_better_than_n2_mix_focus_pipeline.py",
+        "sha": "339fbf313f5fc2977d61007c71d153a8cb1eb252",
+        "size": 9743
+      },
+      {
+        "path": "easyecr/pipeline/two_n_is_better_than_n2_pipeline.py",
+        "sha": "7589329385407be7c2f224d475aa8c195272cd7d",
+        "size": 10502
+      },
+      {
+        "path": "easyecr/pipeline/what_happens_before_and_after.py",
+        "sha": "35b5bc5c1c7b3fb26b2d07b9c42ba8690f980a6a",
+        "size": 6960
+      },
+      {
+        "path": "easyecr/utils/__init__.py",
+        "sha": "c6b9e1008b641467d1d1e001fdc747493c2b17fc",
+        "size": 90
+      },
+      {
+        "path": "easyecr/utils/chatgpt_client.py",
+        "sha": "0add22bce7e90fa996ad5831a09ce6eeb8ef98db",
+        "size": 1281
+      },
+      {
+        "path": "easyecr/utils/cluster_utils.py",
+        "sha": "e8d3ef3370509627d47d328be77241dd41fccd0c",
+        "size": 465
+      },
+      {
+        "path": "easyecr/utils/common_metrics.py",
+        "sha": "72b3bcdb35267acc342b4316ba4cb4d073a0381b",
+        "size": 979
+      },
+      {
+        "path": "easyecr/utils/file_utils.py",
+        "sha": "5198183e99117aa3c8f5c408b0c8fa5b59f608bc",
+        "size": 2079
+      },
+      {
+        "path": "easyecr/utils/http_utils.py",
+        "sha": "81fb5dea26a337a9ca254b882afaec6c9d4eb01d",
+        "size": 470
+      },
+      {
+        "path": "easyecr/utils/learn.py",
+        "sha": "6bd9310f3d11f71e589bb59af73b1810b7af06c6",
+        "size": 242
+      },
+      {
+        "path": "easyecr/utils/load_data.py",
+        "sha": "7ffc316220f54a91e7e6585e556a6d4790b8db03",
+        "size": 1762
+      },
+      {
+        "path": "easyecr/utils/log_utils.py",
+        "sha": "795a4517a0d7cd408c3b96b62de76ef1ee0680eb",
+        "size": 787
+      },
+      {
+        "path": "easyecr/utils/object_utils.py",
+        "sha": "43ad65ebbffa6ac0d96ab0366b0dbeb88e8f8105",
+        "size": 1412
+      },
+      {
+        "path": "easyecr/utils/print_metrics.py",
+        "sha": "864118b5cd9a45d1924b941f90c57d588d04bf8d",
+        "size": 1309
+      },
+      {
+        "path": "easyecr/utils/text_encoder.py",
+        "sha": "7350d1e6e12530a9a9de4a883a1b192ccf1bf2ba",
+        "size": 4162
+      },
+      {
+        "path": "external_code/__init__.py",
+        "sha": "34584ad86a2fe40c6aedea8f0a39c70a25ab3d36",
+        "size": 90
+      },
+      {
+        "path": "external_code/coval/CoVal.egg-info/SOURCES.txt",
+        "sha": "197f514cfbd8575b2e71311b4518ac7a153b4005",
+        "size": 411
+      },
+      {
+        "path": "external_code/coval/CoVal.egg-info/dependency_links.txt",
+        "sha": "d3f5a12faa99758192ecc4ed3fc22c9249232e86",
+        "size": 2
+      },
+      {
+        "path": "external_code/coval/CoVal.egg-info/requires.txt",
+        "sha": "335f1c674364b77511aa5c8b09da0ae72f3267fc",
+        "size": 22
+      },
+      {
+        "path": "external_code/coval/CoVal.egg-info/top_level.txt",
+        "sha": "211706fa6ef6a15180ef2f40bbf7cc8b9489864b",
+        "size": 7
+      },
+      {
+        "path": "external_code/coval/README.md",
+        "sha": "5f523c28cb7fe021984b6dedb77b81daec6c47e1",
+        "size": 1912
+      },
+      {
+        "path": "external_code/coval/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/arrau-scorer.py",
+        "sha": "a2780388acb19b4a97457b9a611393df0605b6f7",
+        "size": 3559
+      },
+      {
+        "path": "external_code/coval/build/__init__.py",
+        "sha": "34584ad86a2fe40c6aedea8f0a39c70a25ab3d36",
+        "size": 90
+      },
+      {
+        "path": "external_code/coval/build/lib/__init__.py",
+        "sha": "34584ad86a2fe40c6aedea8f0a39c70a25ab3d36",
+        "size": 90
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/arrau/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/arrau/markable.py",
+        "sha": "7ff128d3f090f0fa22e3ac12acd8692d17d4947a",
+        "size": 1763
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/arrau/reader.py",
+        "sha": "0fb8c1b2b02485f980c526cffa064296f6e201f4",
+        "size": 8585
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/conll/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/conll/mention.py",
+        "sha": "49a69dfeaccee10499cc123ecb721a8a009a7497",
+        "size": 9536
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/conll/reader.py",
+        "sha": "549720e2c877f62452e8888f0ab87b4003ae9b4f",
+        "size": 16762
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/conll/util.py",
+        "sha": "bb2900d33dd2faa92ba298281d62ec32929fac8f",
+        "size": 5653
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/eval/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/build/lib/coval/eval/evaluator.py",
+        "sha": "79a4cf1d4fa7ead441cca2f622e05eab46d2fcd9",
+        "size": 7549
+      },
+      {
+        "path": "external_code/coval/coval/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/coval/arrau/README.md",
+        "sha": "ce146af717048cc01524be4a64db784cb88d3c49",
+        "size": 5240
+      },
+      {
+        "path": "external_code/coval/coval/arrau/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/coval/arrau/markable.py",
+        "sha": "7ff128d3f090f0fa22e3ac12acd8692d17d4947a",
+        "size": 1763
+      },
+      {
+        "path": "external_code/coval/coval/arrau/reader.py",
+        "sha": "0fb8c1b2b02485f980c526cffa064296f6e201f4",
+        "size": 8585
+      },
+      {
+        "path": "external_code/coval/coval/conll/README.md",
+        "sha": "ee048539b33d2358f22e32f98e41768a73bcf760",
+        "size": 1921
+      },
+      {
+        "path": "external_code/coval/coval/conll/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/coval/conll/mention.py",
+        "sha": "49a69dfeaccee10499cc123ecb721a8a009a7497",
+        "size": 9536
+      },
+      {
+        "path": "external_code/coval/coval/conll/reader.py",
+        "sha": "f2881247abf3cde892011f88bcc7aee4f6094815",
+        "size": 17977
+      },
+      {
+        "path": "external_code/coval/coval/conll/util.py",
+        "sha": "bb2900d33dd2faa92ba298281d62ec32929fac8f",
+        "size": 5653
+      },
+      {
+        "path": "external_code/coval/coval/eval/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "external_code/coval/coval/eval/evaluator.py",
+        "sha": "79a4cf1d4fa7ead441cca2f622e05eab46d2fcd9",
+        "size": 7549
+      },
+      {
+        "path": "external_code/coval/requirements.txt",
+        "sha": "335f1c674364b77511aa5c8b09da0ae72f3267fc",
+        "size": 22
+      },
+      {
+        "path": "external_code/coval/scorer.py",
+        "sha": "9a66bf1889bb5e835eb327b2e3b8ebe926797111",
+        "size": 3286
+      },
+      {
+        "path": "external_code/coval/setup.py",
+        "sha": "81319b6022f3dd0192d57fdb8b38713e2019b25f",
+        "size": 1107
+      },
+      {
+        "path": "external_code/coval/unittests.py",
+        "sha": "8e7e0ce678e508c96a6f134940b394ab9ee5927d",
+        "size": 10786
+      },
+      {
+        "path": "requirements.txt",
+        "sha": "f46fe219643166dfd8574a0d2e1d04c56866e7b1",
+        "size": 400
+      }
+    ]
+  },
+  {
+    "repo": "Danield21/Rationale4CDECR",
+    "commit": "f88572fac4f50595abee730dfcf14ac8cfa916aa",
+    "tree_sha": "0c256ff4b9f46b360d615fb4b3744a8399a0776f",
+    "license": "MIT",
+    "branch": "main",
+    "total_blob_files": 417,
+    "relevant_files": [
+      {
+        "path": "LICENSE",
+        "sha": "7d8084bcf513dfcc367dea3926e0ab4027a21195",
+        "size": 1066
+      },
+      {
+        "path": "LLM_evaluate/doc_template/scorer.py",
+        "sha": "0758e79b7a97c354e77d18316c2f9c70a0292e36",
+        "size": 7514
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test36_ans.txt",
+        "sha": "861fc1545e6d4b1184d7ea35643669611ab08e9c",
+        "size": 6921
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test37_ans.txt",
+        "sha": "0e6ab8902d07a915943fe5a83ff680d8409b751a",
+        "size": 7311
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test38_ans.txt",
+        "sha": "ce82c8a7583a4b815073db53c201529222cc1414",
+        "size": 5591
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test39_ans.txt",
+        "sha": "621a1375be0e309462820eb400dc62303beb34ad",
+        "size": 5858
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test40_ans.txt",
+        "sha": "5faa8d8d57f1cd9ae6ca7eb6e3471d40e2d538ca",
+        "size": 5037
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test41_ans.txt",
+        "sha": "6a92a6316908e04506e6370806661adbe71a972e",
+        "size": 9757
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test42_ans.txt",
+        "sha": "8b74e52ab46ee0ca59a3997eff7e8224b7baa562",
+        "size": 5610
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test43_ans.txt",
+        "sha": "ba4e930a1ce6b610f0fa370b74e74e16414c172e",
+        "size": 9714
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test44_ans.txt",
+        "sha": "59d45387e01ad9aee73cf973ba4464dee900531c",
+        "size": 12001
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/aligned_response/test45_ans.txt",
+        "sha": "f80b69475c689a8903a09f0deeade9c835ff4103",
+        "size": 9515
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test-41_ans.txt",
+        "sha": "6a92a6316908e04506e6370806661adbe71a972e",
+        "size": 9757
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test-42_ans.txt",
+        "sha": "041c77201c77962f422ec395fda152a5ed576411",
+        "size": 5608
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test-43_ans.txt",
+        "sha": "ba4e930a1ce6b610f0fa370b74e74e16414c172e",
+        "size": 9714
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test-44_ans.txt",
+        "sha": "59d45387e01ad9aee73cf973ba4464dee900531c",
+        "size": 12001
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test-45_ans.txt",
+        "sha": "f80b69475c689a8903a09f0deeade9c835ff4103",
+        "size": 9515
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test_36_ans.txt",
+        "sha": "861fc1545e6d4b1184d7ea35643669611ab08e9c",
+        "size": 6921
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test_37_ans.txt",
+        "sha": "0e6ab8902d07a915943fe5a83ff680d8409b751a",
+        "size": 7311
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test_38_ans.txt",
+        "sha": "ce82c8a7583a4b815073db53c201529222cc1414",
+        "size": 5591
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test_39_ans.txt",
+        "sha": "621a1375be0e309462820eb400dc62303beb34ad",
+        "size": 5858
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/claude2/raw_response/test_40_ans.txt",
+        "sha": "5faa8d8d57f1cd9ae6ca7eb6e3471d40e2d538ca",
+        "size": 5037
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test36_ans.txt",
+        "sha": "7fe5123afc80663633074d7e4c21d5403919d9a2",
+        "size": 6860
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test37_ans.txt",
+        "sha": "4162fc5deaa03541dde7e3f1725924bfecb6fab2",
+        "size": 8929
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test38_ans.txt",
+        "sha": "e450244dd669515077338a2d0661975efa13e0d1",
+        "size": 5329
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test39_ans.txt",
+        "sha": "d2d111d4664605a54f78e451971c806c2a28de35",
+        "size": 5717
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test40_ans.txt",
+        "sha": "2747d45c87ee3cb56f05fc2775efe8c654c201f8",
+        "size": 4979
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test41_ans.txt",
+        "sha": "4ca1e8426a2b67afd44d44668923def12ded47c9",
+        "size": 9049
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test42_ans.txt",
+        "sha": "4d254a4ace6e2584984bb2027579f666d657f997",
+        "size": 5412
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test43_ans.txt",
+        "sha": "64c1f02738d1a394249aa25537a3ad20a1e4d030",
+        "size": 10851
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test44_ans.txt",
+        "sha": "6c2fe8f99835ceddf1d592a4e053ab4294b68678",
+        "size": 9999
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/aligned_response/test45_ans.txt",
+        "sha": "28927c9d2382ac4dd462021a723c8f6ac015d314",
+        "size": 10805
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_36_ans.txt",
+        "sha": "7fe5123afc80663633074d7e4c21d5403919d9a2",
+        "size": 6860
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_37_ans.txt",
+        "sha": "4162fc5deaa03541dde7e3f1725924bfecb6fab2",
+        "size": 8929
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_38_ans.txt",
+        "sha": "e450244dd669515077338a2d0661975efa13e0d1",
+        "size": 5329
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_39_ans.txt",
+        "sha": "d2d111d4664605a54f78e451971c806c2a28de35",
+        "size": 5717
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_40_ans.txt",
+        "sha": "2747d45c87ee3cb56f05fc2775efe8c654c201f8",
+        "size": 4979
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_41_ans.txt",
+        "sha": "4ca1e8426a2b67afd44d44668923def12ded47c9",
+        "size": 9049
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_42_ans.txt",
+        "sha": "4d254a4ace6e2584984bb2027579f666d657f997",
+        "size": 5412
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_43_ans.txt",
+        "sha": "64c1f02738d1a394249aa25537a3ad20a1e4d030",
+        "size": 10851
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_44_ans.txt",
+        "sha": "6c2fe8f99835ceddf1d592a4e053ab4294b68678",
+        "size": 9999
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/llm_response/gpt4/raw_response/test_45_ans.txt",
+        "sha": "28927c9d2382ac4dd462021a723c8f6ac015d314",
+        "size": 10805
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-36.inside.txt",
+        "sha": "4ff4b1b360d465639ced5ff1992441d21e333af4",
+        "size": 6897
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-37.inside.txt",
+        "sha": "e4a874317dfc6433663ba29df2fc8a66f931b0b8",
+        "size": 9477
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-38.inside.txt",
+        "sha": "4856645a9fa64bfbca727da5c4924110c8496a7c",
+        "size": 5526
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-39.inside.txt",
+        "sha": "6e2df30c7b4e634b5845c930e7b700c9b4f8ebce",
+        "size": 5867
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-40.inside.txt",
+        "sha": "46d49c1c421263e9d3186528388749c0d3436d3b",
+        "size": 5127
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-41.inside.txt",
+        "sha": "07cf8ca95b2cc0a312b31a60d17dbd3b492f46fb",
+        "size": 10621
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-42.inside.txt",
+        "sha": "b8fb1e3723a01248c429ee0bfc8dd05754090e99",
+        "size": 5597
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-43.inside.txt",
+        "sha": "732957f259517d3e98fb6219e065489f4fafe0cf",
+        "size": 11200
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-44.inside.txt",
+        "sha": "f354902e29b6973555868c0df9d90046131fad9d",
+        "size": 11776
+      },
+      {
+        "path": "LLM_evaluate/doc_template/zero_shot/prompt/test-45.inside.txt",
+        "sha": "d4db3f0c27e5b716d5940ebcc853da28d7bd94ec",
+        "size": 11245
+      },
+      {
+        "path": "LLM_evaluate/pairwise/dataset/test_pair.csv",
+        "sha": "15bcd56af23d7ebdec215f165afbcf416bb002db",
+        "size": 19262005
+      },
+      {
+        "path": "README.md",
+        "sha": "0ef740ab83ce61021119bdf95ef1ae0c5f80c7a2",
+        "size": 4345
+      },
+      {
+        "path": "calculate_ms/calculate_ms.py",
+        "sha": "e82749aae0e003687f1ac48392e0295199154b68",
+        "size": 3956
+      },
+      {
+        "path": "calculate_ms/requirements.txt",
+        "sha": "60db9cda57b8ea555fc28cc027a813ae37db2d89",
+        "size": 107
+      },
+      {
+        "path": "configs/AD_ratio/fcc_events_ratio_0.json",
+        "sha": "9ee43dde3e2b2e13868c1e2cfe682f44af37e5db",
+        "size": 725
+      },
+      {
+        "path": "configs/AD_ratio/fcc_events_ratio_1.json",
+        "sha": "d58a9cd85259014974d6ca924f1c52da1123bbde",
+        "size": 725
+      },
+      {
+        "path": "configs/AD_ratio/fcc_events_ratio_3.json",
+        "sha": "380274c18204abce468f3bc648552cd53c215fcd",
+        "size": 725
+      },
+      {
+        "path": "configs/AD_ratio/fcc_events_ratio_5.json",
+        "sha": "351b734e9ca8f3efc9c87fc3ad9807dc7418343d",
+        "size": 725
+      },
+      {
+        "path": "configs/ablation_study/CAD.json",
+        "sha": "3a00105e7baf149ab3ade38f02fd08e76923fd5e",
+        "size": 723
+      },
+      {
+        "path": "configs/ablation_study/CIA.json",
+        "sha": "6981e896a31823e9580faa5321dc514c4f9a1436",
+        "size": 723
+      },
+      {
+        "path": "configs/ablation_study/ORI.json",
+        "sha": "2675943fcd33d2bfeeb8491351723aa686ec28af",
+        "size": 723
+      },
+      {
+        "path": "configs/ablation_study/RMCT.json",
+        "sha": "f503f86a3d601a4663fd2b815d02c78c37309a4e",
+        "size": 725
+      },
+      {
+        "path": "configs/ablation_study/TAD.json",
+        "sha": "c6654460eac89dd1df19c8f1c2308b0709a73838",
+        "size": 724
+      },
+      {
+        "path": "configs/ablation_study/TIA.json",
+        "sha": "99b9d2aa5eb1910a0d043383f5acc6470a680e02",
+        "size": 723
+      },
+      {
+        "path": "configs/bi_encoder/ecb/candidate_generator_train_config.json",
+        "sha": "4a932568330500bb36e5710cd7ae8786b0b94750",
+        "size": 433
+      },
+      {
+        "path": "configs/main/ecb/baseline.json",
+        "sha": "a02c9f94324f9adcea400061e34c4c78a2d55fb8",
+        "size": 738
+      },
+      {
+        "path": "configs/main/ecb/enhanced.json",
+        "sha": "9d69c871ff04940e9e3a9edee035b625a2d3e287",
+        "size": 738
+      },
+      {
+        "path": "configs/main/fcc/baseline.json",
+        "sha": "d16c286d31bf5f91664095fd98baab9fecfd135e",
+        "size": 726
+      },
+      {
+        "path": "configs/main/fcc/enhanced.json",
+        "sha": "0f013353c74a264fb087a987de48741e3963e973",
+        "size": 726
+      },
+      {
+        "path": "configs/main/gvc/baseline.json",
+        "sha": "82e1f3f28dbf5ebbddb4866bb9a8920c4efb83f7",
+        "size": 725
+      },
+      {
+        "path": "configs/main/gvc/enhanced.json",
+        "sha": "24150158872eb1905c2c4c666d72be3522b6fb46",
+        "size": 725
+      },
+      {
+        "path": "configs/ood_test/ecb_cross_fcc/baseline.json",
+        "sha": "739f6349fd528e7c1b648ce5c0c81a1be5d08cdd",
+        "size": 712
+      },
+      {
+        "path": "configs/ood_test/ecb_cross_fcc/enhanced.json",
+        "sha": "aea8c19a60c530efcc54d4c82f95af9d64e13da8",
+        "size": 712
+      },
+      {
+        "path": "configs/ood_test/fcc_cross_ecb/baseline.json",
+        "sha": "f8151c5c72708cfe5c1d79124d99391adba73ed3",
+        "size": 743
+      },
+      {
+        "path": "configs/ood_test/fcc_cross_ecb/enhanced.json",
+        "sha": "183d02f6b3d724c46edbebb5fa03603151bdb099",
+        "size": 743
+      },
+      {
+        "path": "configs/retrieved_data/main/ecb/dev_pair_generation.json",
+        "sha": "bbf6f22dbf0f0c10c6d65d3f9d63ac6678755743",
+        "size": 295
+      },
+      {
+        "path": "configs/retrieved_data/main/ecb/test_pair_generation.json",
+        "sha": "428ecc3b803619d1aaf470500e2848a9b07c0f4b",
+        "size": 296
+      },
+      {
+        "path": "configs/retrieved_data/main/ecb/train_pair_generation.json",
+        "sha": "db2f377ba2b888091cb25427665ce9c31c0b09e0",
+        "size": 301
+      },
+      {
+        "path": "conll_eval/helper.py",
+        "sha": "ed09e586304f7f1eafe114f1bde978d2ab2d3815",
+        "size": 12221
+      },
+      {
+        "path": "data_preparation/README.md",
+        "sha": "4a2dbdf5b514c5146f60afa3263d99ee74812822",
+        "size": 2634
+      },
+      {
+        "path": "doc_clustering/cluster_topics.py",
+        "sha": "4e10e9a9d24e53c9b156b764260f404c2ad431eb",
+        "size": 3697
+      },
+      {
+        "path": "doc_clustering/clustering_output_to_topics.py",
+        "sha": "5a9fda164040d1a16135ea4a86e0855b377880f2",
+        "size": 1311
+      },
+      {
+        "path": "doc_clustering/commands.md",
+        "sha": "433e0729fa767509606a007da01a09a127ae663b",
+        "size": 525
+      },
+      {
+        "path": "doc_clustering/load_dataset.py",
+        "sha": "2abfb3a4ce7070ee5f9f759369c8da461c77317c",
+        "size": 2109
+      },
+      {
+        "path": "feature_sets/README.md",
+        "sha": "6402706ada086cee2f715ece046ebe652b8b4ac0",
+        "size": 2161
+      },
+      {
+        "path": "feature_sets/all_sents/build_features_config.json",
+        "sha": "e7acf4096d89c7473015e2bf7c0e8fe2e0436cc7",
+        "size": 2283
+      },
+      {
+        "path": "feature_sets/all_sents/dev_statistics.txt",
+        "sha": "a3608e5555bfae9a943b236e8d4a4fbae9fd74d9",
+        "size": 140
+      },
+      {
+        "path": "feature_sets/all_sents/test_statistics.txt",
+        "sha": "6a6ecbce9322864609f1e7f84b62d92fbbb1eb20",
+        "size": 140
+      },
+      {
+        "path": "feature_sets/all_sents/train_statistics.txt",
+        "sha": "6365008d9e3e9d92307f209ae4140c5cb5c19f28",
+        "size": 140
+      },
+      {
+        "path": "feature_sets/fcc/build_features_config.json",
+        "sha": "950ca2a13dd9685b4aa7de8e29c32800208b2927",
+        "size": 2283
+      },
+      {
+        "path": "feature_sets/fcc/dev_statistics.txt",
+        "sha": "ace176fb1b1b183aea0ad37532216d746871e8a4",
+        "size": 135
+      },
+      {
+        "path": "feature_sets/fcc/test_statistics.txt",
+        "sha": "c0868dc15e63ebc02a2f51eff96f0d5220a94557",
+        "size": 136
+      },
+      {
+        "path": "feature_sets/fcc/train_statistics.txt",
+        "sha": "3fb577c93b7432a2551aa80e549999fa15e680b4",
+        "size": 136
+      },
+      {
+        "path": "feature_sets/gvc/build_features_config.json",
+        "sha": "63b2b450f7f7d40610e77f385b9a2faffeb06ca3",
+        "size": 2283
+      },
+      {
+        "path": "feature_sets/gvc/dev_statistics.txt",
+        "sha": "ecf148a6d28877e510855b379d19ff5c45817b2a",
+        "size": 135
+      },
+      {
+        "path": "feature_sets/gvc/test_statistics.txt",
+        "sha": "0c576f2af10679675288e66c7f6be375da6852ed",
+        "size": 136
+      },
+      {
+        "path": "feature_sets/gvc/train_statistics.txt",
+        "sha": "e9dc80b6805236edce720e00f9f4f46e86e7b974",
+        "size": 138
+      },
+      {
+        "path": "requirements.txt",
+        "sha": "8fa289e3a97aff5a93c5bb004d5f96e4ad18d89e",
+        "size": 269
+      },
+      {
+        "path": "retrieved_data/AD_ratio/fcc_after_aug_k_5_aug_ratio_0.csv",
+        "sha": "4e658a26cb438c8ea162bfe59a0ad5e324041644",
+        "size": 11754616
+      },
+      {
+        "path": "retrieved_data/AD_ratio/fcc_after_aug_k_5_aug_ratio_1.csv",
+        "sha": "6bf2c80d5389c2d5014e5fd4f3c60f4ecefd2384",
+        "size": 23208793
+      },
+      {
+        "path": "retrieved_data/AD_ratio/fcc_after_aug_k_5_aug_ratio_3.csv",
+        "sha": "5be6f07ba582c18935f535fda23bb30cadcd836c",
+        "size": 46117304
+      },
+      {
+        "path": "retrieved_data/AD_ratio/fcc_after_aug_k_5_aug_ratio_5.csv",
+        "sha": "6711855e3f94d1650c6dae65ff25f6949a45cb3f",
+        "size": 69026436
+      },
+      {
+        "path": "retrieved_data/ablation_study/CAD.csv",
+        "sha": "301bb4dad2f823947ac65bee74900b3e476b6d8a",
+        "size": 54591532
+      },
+      {
+        "path": "retrieved_data/ablation_study/CIA.csv",
+        "sha": "6dc9eba90c2efff5a9d19fc606ec7140b9602e75",
+        "size": 53925660
+      },
+      {
+        "path": "retrieved_data/ablation_study/ORI.csv",
+        "sha": "ddecc83b533d233aaea77f4ded0f657488215ed1",
+        "size": 18719224
+      },
+      {
+        "path": "retrieved_data/ablation_study/RMCT.csv",
+        "sha": "f6d9d5e14aab28708c48ffbe03677f3e58c98db5",
+        "size": 56240773
+      },
+      {
+        "path": "retrieved_data/ablation_study/TCAD.csv",
+        "sha": "021b8ddd889e921b243e832a129816970144be64",
+        "size": 69707430
+      },
+      {
+        "path": "retrieved_data/ablation_study/TIA.csv",
+        "sha": "46362e6385ccc86735bdd540cebc2344b7f90009",
+        "size": 54452314
+      },
+      {
+        "path": "src/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/all_models/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/all_models/bcubed_scorer.py",
+        "sha": "538eab882b770089cae5f36b445f426e96983de6",
+        "size": 2047
+      },
+      {
+        "path": "src/all_models/coarse.py",
+        "sha": "d91929ed4cd1660a5accd78707e914a446450df3",
+        "size": 6107
+      },
+      {
+        "path": "src/all_models/crossencoder_trainer.py",
+        "sha": "551ba77ddcaed5eafd9caa4b0368913f4179be6e",
+        "size": 29711
+      },
+      {
+        "path": "src/all_models/fine.py",
+        "sha": "0b4cb54afc1d1991d9f730fb49084784317acdd3",
+        "size": 6459
+      },
+      {
+        "path": "src/all_models/generated_pairs.py",
+        "sha": "c494a8c0f23ebb1e3a78dc6f2f992598e1a639e1",
+        "size": 6446
+      },
+      {
+        "path": "src/all_models/measure_context.py",
+        "sha": "d5dd5bae2c8c026bf96c8119a72e36a1af330dad",
+        "size": 5115
+      },
+      {
+        "path": "src/all_models/model_factory.py",
+        "sha": "8ff5420b69892619c80f97102b41cba72fa12a33",
+        "size": 5768
+      },
+      {
+        "path": "src/all_models/model_utils.py",
+        "sha": "c11d70fbec33e25630c2a762d56019057bdb6444",
+        "size": 88325
+      },
+      {
+        "path": "src/all_models/models.py",
+        "sha": "775f82cc2bbe9e4b6cb68b2b58301e42e41bf003",
+        "size": 5431
+      },
+      {
+        "path": "src/all_models/nearest_neighbor.py",
+        "sha": "d09bf056e68e8ebf87c6670d4f6cb9c6d2a59f4c",
+        "size": 10590
+      },
+      {
+        "path": "src/all_models/predict_model.py",
+        "sha": "ca1746bfc5a4161352d82a7f2090b22a74b7e5a4",
+        "size": 6934
+      },
+      {
+        "path": "src/all_models/same_lemma_baseline.py",
+        "sha": "f219c9d634210553ebbedee2e62cdd7f49ddd960",
+        "size": 5253
+      },
+      {
+        "path": "src/all_models/scorer.py",
+        "sha": "66915d7b1b59e6c8e88f65eb519d9df737c57f6d",
+        "size": 4514
+      },
+      {
+        "path": "src/all_models/train_candidate_generation.py",
+        "sha": "a83788d59a79d75fc0be744614cda660a8c90f50",
+        "size": 12614
+      },
+      {
+        "path": "src/all_models/train_crossencoder.py",
+        "sha": "cb147f051506350947bd488b6bd7e662b1ae524e",
+        "size": 25334
+      },
+      {
+        "path": "src/all_models/train_model.py",
+        "sha": "01d129fb5bd19c85a056402b67745786a06500b0",
+        "size": 20031
+      },
+      {
+        "path": "src/analysis/create_data_for_significance_tests.py",
+        "sha": "25d2db453fcae2f5216cfd2dcebbd1ef81e39419",
+        "size": 6983
+      },
+      {
+        "path": "src/analysis/test_significance.py",
+        "sha": "1d2483fcbb7c65efa679e0d1ea67ea4632b6f5c9",
+        "size": 8890
+      },
+      {
+        "path": "src/data/data_analysis.py",
+        "sha": "2ba774a476c7c4d8047ed5d3bb3a175af5a49595",
+        "size": 12547
+      },
+      {
+        "path": "src/data/load_predicted_mentions.py",
+        "sha": "ff76b4d099487e3cc3c6c0908670fe91505fbed9",
+        "size": 8061
+      },
+      {
+        "path": "src/data/make_dataset.py",
+        "sha": "810f38109f7b313dcecb7219fbe1446b23bb2d7a",
+        "size": 25299
+      },
+      {
+        "path": "src/data/make_gold_files.py",
+        "sha": "3a30c226bf2d97a2d3176e474f85711f6a9032a6",
+        "size": 2994
+      },
+      {
+        "path": "src/data/mention_data.py",
+        "sha": "7c738262cb1f0492fc236b258d0d36cf2af67cf0",
+        "size": 1636
+      },
+      {
+        "path": "src/features/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/features/allen_srl_reader.py",
+        "sha": "256308580807b6a7b17287921800d17eef7ca505",
+        "size": 3351
+      },
+      {
+        "path": "src/features/build_features.py",
+        "sha": "fdd5bad482285bebc4b4d1ad072dd76668a4753b",
+        "size": 38015
+      },
+      {
+        "path": "src/features/count_coref_clusters.py",
+        "sha": "04232eb54d7ecf9498c850011df1145a879b29d0",
+        "size": 2623
+      },
+      {
+        "path": "src/features/create_elmo_embeddings.py",
+        "sha": "21f8f275213359a8eb8cac6cdba2729464a52913",
+        "size": 1037
+      },
+      {
+        "path": "src/features/extraction_utils.py",
+        "sha": "18365ce0ed666185706ae4446ee47fe95c8554ed",
+        "size": 29611
+      },
+      {
+        "path": "src/features/swirl_parsing.py",
+        "sha": "904e0528da852194ccfaa90d5426156dc74cdebb",
+        "size": 3849
+      },
+      {
+        "path": "src/shared/__init__.py",
+        "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size": 0
+      },
+      {
+        "path": "src/shared/classes.py",
+        "sha": "c6bc80b5ac2604f0b87bf3c2e97edee19f76fc4c",
+        "size": 25058
+      },
+      {
+        "path": "src/shared/eval_utils.py",
+        "sha": "31c6931188bbbf703861f850c37068b48bbb4799",
+        "size": 12698
+      },
+      {
+        "path": "src/visualization/tsne.py",
+        "sha": "7826523c3f0d773d509ad24a43134c837a0d9177",
+        "size": 4509
+      },
+      {
+        "path": "utils/__init__.py",
+        "sha": "1f84c00098df7f09ee022fde9478fb0625937c59",
+        "size": 253
+      },
+      {
+        "path": "utils/data_analysis_func.py",
+        "sha": "ce84e89cf79c4aa8b777a3699c1ad02551512ca2",
+        "size": 3906
+      },
+      {
+        "path": "utils/data_clean_func.py",
+        "sha": "c6c3ec5ef82ab8cae6fa8300d99f7caa6557a09c",
+        "size": 364
+      },
+      {
+        "path": "utils/data_construct_func.py",
+        "sha": "e9bccdd2258ef367bd4df853c68d6d13e99445dc",
+        "size": 5051
+      }
+    ]
+  },
+  {
+    "repo": "conll/reference-coreference-scorers",
+    "commit": "f49f3f8a0e1cdc5ceba7c2a33013897369df5543",
+    "tree_sha": "221417932da34b7d54a8eb57860516e55864eb83",
+    "branch": "master",
+    "license": "NOASSERTION",
+    "total_blob_files": 64,
+    "relevant_files": [
+      {
+        "path": "LICENSE",
+        "sha": "3d4b3694f832268bb738730ed5a01b537add28e5",
+        "size": 165
+      },
+      {
+        "path": "README.rst",
+        "sha": "fd1b52ec30a9637599ba988474047054ef584017",
+        "size": 3313
+      }
+    ]
+  }
+]
