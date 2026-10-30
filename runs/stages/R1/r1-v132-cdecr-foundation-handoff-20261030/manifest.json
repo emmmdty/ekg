@@ -1,0 +1,27 @@
+{
+  "id": "r1-v132-cdecr-foundation-handoff-20261030",
+  "base_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+  "artifacts": [
+    {
+      "path": "runs/stages/R1/r1-v132-cdecr-foundation-handoff-20261030/acceptance_requirements.json",
+      "sha256": "32f052f69c98db41197a051dfc6e120a08d8fa7b7560b69af456ad3e687ff7dc"
+    },
+    {
+      "path": "runs/stages/R1/r1-v132-cdecr-foundation-handoff-20261030/handoff_scope.json",
+      "sha256": "3b1a6381a0731cd5779b07d3f3054fbd1a978c09c8c8d5c897fa88d258cfdb35"
+    },
+    {
+      "path": "runs/stages/R1/r1-v132-cdecr-foundation-handoff-20261030/raw_transfer_reference.json",
+      "sha256": "23e6fb667e4522e46425fe9ffc7b8ed9d984bd22f1ba4f2fdcfcf11b13866a39"
+    },
+    {
+      "path": "runs/stages/R1/r1-v132-cdecr-foundation-handoff-20261030/transfer_source_whitelist.json",
+      "sha256": "fe1eb98a21a4409e99ed471897de5c3ce5be62b1575439edae280f543544ead0"
+    }
+  ],
+  "handoff_document": {
+    "path": "docs/research/20261030_data_first_scope/DEEPSEEK_FOUNDATION_HANDOFF.md",
+    "sha256": "2b87d2ba5804222531615f4157276d363d13c627b021f4a9839ec88871a8efff"
+  },
+  "execution": "assignment only, no deployment"
+}

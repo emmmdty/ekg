@@ -1,5 +1,13 @@
 # EKG 实时状态
 
+**2026-10-30 作者指定DeepSeek建设CDECR**：交接入口
+[DeepSeek建设委托与验收](research/20261030_data_first_scope/DEEPSEEK_FOUNDATION_HANDOFF.md)。
+短名`cdecr`对应跨文档事件共指，按功能分模块；三端共用一份Python版本/依赖锁与
+数据机制。DeepSeek负责三端扫描、独立建仓/数据/环境建设，本代理本轮只出具任务
+及复审要求，未SSH/安装/创建新项目。后续作者交回实施结果再复审；此委托覆盖
+旧拟名与旧数据路径复用建议，不扩张研究训练/多seed/旧checkpoint搬运权限。
+
+
 **2026-10-30 全面准备审查最新裁决**：[总审查](research/20261030_data_first_scope/READINESS_AUDIT.md)
 保留CDCR三语料与三递进方法章；原件/原分/指标资料具备，但尚不是只剩自有方案实现：
 共同接线与精确公共配置、三份可编码方法spec、新范围正式规范仍需落实。GVC标签0

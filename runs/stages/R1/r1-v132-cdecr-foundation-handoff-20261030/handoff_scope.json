@@ -1,0 +1,28 @@
+{
+  "project": "cdecr",
+  "expanded_name": "Cross-Document Event Coreference Resolution",
+  "author_latest_preferences": [
+    "short research-topic abbreviation, no thesis suffix",
+    "functional code and artifact names, not numbered thesis chapters",
+    "one project with independent functional modules and explicit pipeline contracts",
+    "one Python definition/lock/dependency set/install path across all three machines",
+    "one raw manifest/relative layout/reader/audit mechanism across all three machines"
+  ],
+  "roles": {
+    "this_agent": "write assignment, migration whitelist and independent review requirements only",
+    "DeepSeek": "scan before install, create independent project, rebuild and verify data/environments on all three machines",
+    "later_review": "author returns implementation and evidence for Codex review"
+  },
+  "roots": {
+    "local": "~/myProjects/masterProjects/cdecr",
+    "gpu-4090": "/data/TJK/cdecr",
+    "gpu-5090": "/mnt/aidata/tongjiakai/cdecr"
+  },
+  "local_GPU_execution": false,
+  "research_training_or_LLM_generation": false,
+  "scan_by_this_agent": false,
+  "new_project_or_env_created_by_this_agent": false,
+  "no_runtime_dependency_on_old_project": true,
+  "fresh_git_history": true,
+  "remote_origin_not_required_for_foundation": "new-repo git bundle can deploy without publishing or reusing ekg origin"
+}

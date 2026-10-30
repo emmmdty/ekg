@@ -1,0 +1,156 @@
+[
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "docs/research/20261030_data_first_scope/THESIS_FRAMEWORK.md",
+    "sha256_at_source_commit": "02922da7e8750186b5f5a8ebd9381be61b995718d550c55e6437a3be4879cd44",
+    "bytes": 9709,
+    "action": "curate current scope/protocol/references, rewrite all runtime links"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "docs/research/20261030_data_first_scope/READINESS_AUDIT.md",
+    "sha256_at_source_commit": "b2827950a09823b357207f3f1845614a9073477698a570dbce6ad19cf62ccdc6",
+    "bytes": 10080,
+    "action": "curate current scope/protocol/references, rewrite all runtime links"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "docs/research/20261030_data_first_scope/METRIC_SPEC.md",
+    "sha256_at_source_commit": "3a83b6c2281ba65cc3c81f62f9dbeb6a843de77e381c55b29c8742fb42935729",
+    "bytes": 16094,
+    "action": "curate current scope/protocol/references, rewrite all runtime links"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "docs/research/20261030_data_first_scope/EXTERNAL_READINESS.md",
+    "sha256_at_source_commit": "5790309f72678b1dd05df26cd5354267dd8fcf430ca1725ee456f6b269c506cb",
+    "bytes": 14124,
+    "action": "curate current scope/protocol/references, rewrite all runtime links"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/canonical_full_metrics.json",
+    "sha256_at_source_commit": "55a451e28ad42686318523ba1348eddde5cb895380ec1d5dd113e1ab05cc45ca",
+    "bytes": 30010,
+    "action": "preserve selected original values and provenance; rebuild current tables"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/nine_full_tables.json",
+    "sha256_at_source_commit": "2c5130b463c25d8005468029f80268b8e5eb173d18bff0c49665b80568090636",
+    "bytes": 4014,
+    "action": "preserve selected original values and provenance; rebuild current tables"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/source_registry.json",
+    "sha256_at_source_commit": "b2691f23d0056e31d9f194472fbc79faf85bbf50b90f32c59d31254e5cfcf614",
+    "bytes": 7362,
+    "action": "preserve selected original values and provenance; rebuild current tables"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/extraction_receipts.json",
+    "sha256_at_source_commit": "9bc77b5028eb6c9ab11fb967584687f42e8e392cddf275158f2d499724f72641",
+    "bytes": 10914,
+    "action": "preserve selected original values and provenance; rebuild current tables"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/source_coverage.json",
+    "sha256_at_source_commit": "81230464dfda6390efb0d68231d9c66ff4bcc772c7e213501c04ddc125eff912",
+    "bytes": 735,
+    "action": "preserve selected original values and provenance; rebuild current tables"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/metric_definition_sources.json",
+    "sha256_at_source_commit": "e6f8b4d062cedcd59937a73fa9bb2a1648ea02581663311c893e861ce467108b",
+    "bytes": 437,
+    "action": "preserve selected original values and provenance; rebuild current tables"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v127-data-first-scope-20261030/dataset_inventory.json",
+    "sha256_at_source_commit": "e2d054de8a81ad0f322ab12586a950566c2b8e83d647ae3f57293685aefcd001",
+    "bytes": 3037,
+    "action": "convert original inventory/population/source identities to new relative paths"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v127-data-first-scope-20261030/ecb_audit.json",
+    "sha256_at_source_commit": "d8513251836db3e644e3c2c308997b3176ce2447f9ed86e54f841d5563d5e285",
+    "bytes": 23442,
+    "action": "convert original inventory/population/source identities to new relative paths"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v127-data-first-scope-20261030/gvc_audit.json",
+    "sha256_at_source_commit": "206412c2ffbed8e7d4b8302266e3ec17d7374a15ff5d9e19b6f197a2abb88a50",
+    "bytes": 22128,
+    "action": "convert original inventory/population/source identities to new relative paths"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v127-data-first-scope-20261030/wec_audit.json",
+    "sha256_at_source_commit": "81fb94767c2c67b289f0cde5d95a62d2797ed1a6e432f7a316a27e47c519e70e",
+    "bytes": 1852,
+    "action": "convert original inventory/population/source identities to new relative paths"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v127-data-first-scope-20261030/repository_pins.json",
+    "sha256_at_source_commit": "c4d13a2117133d4dda29b6ddf62d04b14ccc15c12bc90c930f78da86407c0001",
+    "bytes": 1303,
+    "action": "convert original inventory/population/source identities to new relative paths"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v128-external-readiness-20261030/source_identities.json",
+    "sha256_at_source_commit": "1c7d50bba16566adb639a1c336aa1147faebfca27b07848d043743612898186b",
+    "bytes": 15251,
+    "action": "select required source identity/adaptation fields only"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v128-external-readiness-20261030/review_decision.json",
+    "sha256_at_source_commit": "8799c29cf922425040c15732b65a754e478e298c5d5e66d3efbf1392b28bae22",
+    "bytes": 7344,
+    "action": "select required source identity/adaptation fields only"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/gvc_zero_bucket_audit.json",
+    "sha256_at_source_commit": "064c8196504f2708511f0aa4f7370ef5a5de32f10d0647f79b8922006a12ec4c",
+    "bytes": 1448,
+    "action": "preserve GVC zero semantics and LEA source identity"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "runs/stages/R1/r1-v131-comprehensive-readiness-20261030/source_receipts.json",
+    "sha256_at_source_commit": "f5b845509c3576a38c264cd082fa1ad6bb7caa5d6b4ac50f14f2dbe723c03f06",
+    "bytes": 4013,
+    "action": "preserve GVC zero semantics and LEA source identity"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "docs/results/PHASE_R1.md",
+    "sha256_at_source_commit": "4c7634d7ca37b9884d23fd4ff0000c43e2ffbc82e91745d37c4b41f48b008a81",
+    "bytes": 801605,
+    "action": "extract only sections 25.153 and 25.154 from this pinned version; never copy whole historical result page"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "pyproject.toml",
+    "sha256_at_source_commit": "65d0797f03e1908863e58aa8cecbf2196198accff5609afd665e2e0058e9be2e",
+    "bytes": 4501,
+    "action": "read-only historical compatibility reference; do not copy dependency set"
+  },
+  {
+    "source_commit": "6d0cb790b5b2fac535a6d8cb390692b40da4761b",
+    "source_path": "docs/GPU_RUNBOOK.md",
+    "sha256_at_source_commit": "68b60dca43a0033e9730e40ff54821680ccbd7e1af195dbafcb675a7dd6254be",
+    "bytes": 18135,
+    "action": "read-only lessons; historical facts are not current scans"
+  }
+]

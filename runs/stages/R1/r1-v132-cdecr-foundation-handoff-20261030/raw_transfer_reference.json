@@ -1,0 +1,95 @@
+[
+  {
+    "path": "data/raw/research/cdcr-20261030/ecb/ECB.zip",
+    "bytes": 4470858,
+    "sha256": "fe6ac2d76d8f7015f773ccc969927d7f3c33b331ed643b71efe31f28373eca90",
+    "upstream_git_blob_sha1": "ae1578e6feb9ab465f74905794666c3368f3e813",
+    "source_path": "data/raw/research/cdcr-20261030/ecb/ECB.zip",
+    "target_relative_path": "data/raw/ecb/ECB.zip",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/ecb/selected_sentences.csv",
+    "bytes": 23008,
+    "sha256": "afee49e0f5fe5084eec690e934aaade842d5eeff7a5704a36f59e7a49505f434",
+    "upstream_git_blob_sha1": "527886b5fe84f709da048935fec0a1ce4c827299",
+    "source_path": "data/raw/research/cdcr-20261030/ecb/selected_sentences.csv",
+    "target_relative_path": "data/raw/ecb/selected_sentences.csv",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/gvc/gold.conll",
+    "bytes": 9486746,
+    "sha256": "a90cbc3f3810d5bd8aebcc4d3f3a0aa9785089325b717790d8290715515b0c3d",
+    "upstream_git_blob_sha1": "6d3e4db65836a546f5a1fc6211687ead359228fc",
+    "source_path": "data/raw/research/cdcr-20261030/gvc/gold.conll",
+    "target_relative_path": "data/raw/gvc/gold.conll",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/gvc/train.csv",
+    "bytes": 1760,
+    "sha256": "2fda6c25d13535c3811320e30f6dcd5d8452d74464d154a4e09c6ac7ce8662b8",
+    "upstream_git_blob_sha1": "61dd6b37a95417de66f7f428791e8952a2bddada",
+    "source_path": "data/raw/research/cdcr-20261030/gvc/train.csv",
+    "target_relative_path": "data/raw/gvc/train.csv",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/gvc/dev.csv",
+    "bytes": 360,
+    "sha256": "e0b8e6001b06ce162eeb4e368d9eb751fe6751255135731d127f39634c14f5f8",
+    "upstream_git_blob_sha1": "7a9b4c08549c16cfef3f52381c00b79c6506ac62",
+    "source_path": "data/raw/research/cdcr-20261030/gvc/dev.csv",
+    "target_relative_path": "data/raw/gvc/dev.csv",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/gvc/test.csv",
+    "bytes": 330,
+    "sha256": "d413352a044c84a3ef963dd9e359aa9958e22c178d45fb3ebec3ea6b45bded96",
+    "upstream_git_blob_sha1": "fed8b059466c77c774e9ea2f0faf6503fecdccf5",
+    "source_path": "data/raw/research/cdcr-20261030/gvc/test.csv",
+    "target_relative_path": "data/raw/gvc/test.csv",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/gvc/gvc_doc_to_event.csv",
+    "bytes": 20416,
+    "sha256": "e94923d7d7e29e1dbcbdd618a5065941ecb2916a1320ff16bcf769d7e7161df6",
+    "upstream_git_blob_sha1": "139cab96b15f091d6e244f46ab04ebee3e104b5b",
+    "source_path": "data/raw/research/cdcr-20261030/gvc/gvc_doc_to_event.csv",
+    "target_relative_path": "data/raw/gvc/gvc_doc_to_event.csv",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/wec/Train_Event_gold_mentions.json",
+    "bytes": 90177027,
+    "sha256": "719e8e476a05b9c6abb01cd51f641c3ace67c6214e60f076dc5d1f26ef63c3a5",
+    "upstream_git_blob_sha1": "0960fb702f7c5f0e13377db1d1d636850859fb61",
+    "upstream_lfs_sha256": "719e8e476a05b9c6abb01cd51f641c3ace67c6214e60f076dc5d1f26ef63c3a5",
+    "source_path": "data/raw/research/cdcr-20261030/wec/Train_Event_gold_mentions.json",
+    "target_relative_path": "data/raw/wec/Train_Event_gold_mentions.json",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/wec/Dev_Event_gold_mentions_validated.json",
+    "bytes": 2713689,
+    "sha256": "08ab71161aa693445cdce555a891440d84ffebfcf8fdf3ebd635f606466bbf80",
+    "upstream_git_blob_sha1": "ed9e801d3fdc20a3aaa836199f2629ed8529890b",
+    "upstream_lfs_sha256": null,
+    "source_path": "data/raw/research/cdcr-20261030/wec/Dev_Event_gold_mentions_validated.json",
+    "target_relative_path": "data/raw/wec/Dev_Event_gold_mentions_validated.json",
+    "action": "physical copy, never old-project symlink/hardlink"
+  },
+  {
+    "path": "data/raw/research/cdcr-20261030/wec/Test_Event_gold_mentions_validated.json",
+    "bytes": 4093981,
+    "sha256": "5213803a51b47151ec3caa5d41c995169cf0635eb8ae86fd7bfa784f39b5521a",
+    "upstream_git_blob_sha1": "45eea41fab237212ea845b5b30cdb7fc0e712c57",
+    "upstream_lfs_sha256": null,
+    "source_path": "data/raw/research/cdcr-20261030/wec/Test_Event_gold_mentions_validated.json",
+    "target_relative_path": "data/raw/wec/Test_Event_gold_mentions_validated.json",
+    "action": "physical copy, never old-project symlink/hardlink"
+  }
+]

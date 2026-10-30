@@ -1,0 +1,100 @@
+[
+  {
+    "id": "A01",
+    "requirement": "三端扫描先于安装",
+    "pass_condition": "三端有带时间的安装前扫描，版本选择引用实际硬件/软件；无猜测值充数",
+    "required_evidence": "三端扫描JSON/文本、命令与退出码，统一环境决策",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A02",
+    "requirement": "独立项目与历史",
+    "pass_condition": "三目标目录正确，Git全新历史，无旧.git/任务队列/实验混入",
+    "required_evidence": "根目录树、首提交说明、HEAD、Git状态、移交清单",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A03",
+    "requirement": "功能模块边界",
+    "pass_condition": "SPEC定义数据→检索→pair→归并→评价接口，能缓存和独立运行；命名无章号",
+    "required_evidence": "SPEC、CLI/接口说明；本轮未实现的研究模块明确列出",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A04",
+    "requirement": "一份环境声明",
+    "pass_condition": "三端Python/uv/实际依赖版本与选定构建一致，同pyproject/lock及安装入口",
+    "required_evidence": "三端解释器路径/版本、包清单规范化比较、文件hash和安装日志",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A05",
+    "requirement": "隔离且可重建",
+    "pass_condition": "三个新venv不指旧项目/系统site-packages；按lock从空环境能安装",
+    "required_evidence": "sys.prefix/sys.path、包解析路径、重建记录；不要只提交freeze列表",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A06",
+    "requirement": "一份数据机制",
+    "pass_condition": "三端同manifest和10件同hash原件；同reader同人口、无旧数据路径链接",
+    "required_evidence": "三端verify/audit输出，传输前后hash、相对文件列表、跨度/ID/split检查",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A07",
+    "requirement": "资料保真与清洁",
+    "pass_condition": "当前研究、九表/来源/缺报/原文异常保留；旧结果不充新成绩",
+    "required_evidence": "迁入源→目标及hash清单，当前文献表检查与provenance",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A08",
+    "requirement": "本地CPU基础验证",
+    "pass_condition": "包可安装导入；数据、ID检查及评分fixture通过；本地未调用CUDA",
+    "required_evidence": "CPU测试/静态检查/评分器自检的完整退出码，失败/skip明示",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A09",
+    "requirement": "4090真实CUDA诊断",
+    "pass_condition": "从新venv在空闲可用卡执行小张量运算、同步/结果及轻量反向检查，无CUDA kernel/ABI错误",
+    "required_evidence": "准确命令/CWD/预期输出、卡UUID、Torch构建/设备能力与原始日志",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A10",
+    "requirement": "5090真实CUDA诊断",
+    "pass_condition": "同A09，验证真实设备及当前构建兼容性，不能仅`import torch`",
+    "required_evidence": "同A09；不照搬旧GPU能力/驱动结论",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A11",
+    "requirement": "同一代码可双端运行",
+    "pass_condition": "同代码提交、lock、数据机制在两端完成相同CPU数据/评分检查；最终HEAD同步",
+    "required_evidence": "三端身份对照表、两端检查输出；允许硬件元数据和浮点容差内差异",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A12",
+    "requirement": "无ekg运行依赖",
+    "pass_condition": "runtime无import ekg、旧根绝对路径、回指symlink、外部editable/.pth注入",
+    "required_evidence": "新venv路径检查；清空继承PYTHONPATH后从项目外CWD运行；干净checkout/独立venv的CPU验证",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A13",
+    "requirement": "旧项目未受影响",
+    "pass_condition": "旧代码/lock/环境包未被安装/同步修改；不动旧数据、权重、日志",
+    "required_evidence": "安装前后源文件/选定包metadata对照、实际修改路径清单",
+    "implementation_status": "not_executed_by_this_agent"
+  },
+  {
+    "id": "A14",
+    "requirement": "Git与复审交付",
+    "pass_condition": "提交清楚、无未说明脏改动/凭据/大数据；证据能定位被测版本与命令",
+    "required_evidence": "提交列表、三端HEAD/status、验收矩阵、日志索引与已知问题",
+    "implementation_status": "not_executed_by_this_agent"
+  }
+]

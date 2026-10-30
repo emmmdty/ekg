@@ -1,0 +1,11 @@
+{
+  "status": "pass",
+  "scope": "handoff document, source whitelist, data identities, role/acceptance definitions; not implementation verification",
+  "whitelisted_committed_sources": 22,
+  "raw_files_hash_verified": 10,
+  "acceptance_requirements": 14,
+  "local_doc_links_checked": 3,
+  "prior_results_append_only": true,
+  "old_parent_specs_and_production_code_unchanged": true,
+  "SSH_scans_installation_and_new_project_creation": "not performed by this agent"
+}
