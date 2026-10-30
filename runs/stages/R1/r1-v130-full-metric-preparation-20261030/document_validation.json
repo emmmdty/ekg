@@ -1,0 +1,24 @@
+{
+  "status": "pass",
+  "scope": "literature extraction, table projection, documentation and provenance; not model evaluation",
+  "tables": 9,
+  "table_rows": 48,
+  "canonical_rows": 21,
+  "paper_PDF_identity_checks": 11,
+  "metric_definition_PDF_identity_checks": 2,
+  "local_links_checked": 33,
+  "append_only_R1": true,
+  "source_arithmetic_anomalies_preserved": [
+    {
+      "id": "CD_DCE__ECB+",
+      "status": "original_paper_internal_arithmetic_inconsistency",
+      "printed_component_mean": 87.89999999999999,
+      "printed_CoNLL": 87.4,
+      "action": "preserve all original values; flag in every expanded occurrence; not sole strict target anchor; no invented corrected result"
+    }
+  ],
+  "r1_consistency": {
+    "status": "pass",
+    "findings": []
+  }
+}

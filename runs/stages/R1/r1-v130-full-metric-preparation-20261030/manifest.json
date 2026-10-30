@@ -1,0 +1,47 @@
+{
+  "id": "r1-v130-full-metric-preparation-20261030",
+  "date": "2026-10-30",
+  "parent_receipt": "r1-v129-nine-published-tables-20261030",
+  "base_commit": "bad4205e6aced0beb7da8cf46cd105ed8f8c587c",
+  "scope": "original-paper metric extraction and prospective per-chapter evaluation specification; no models run",
+  "artifacts": [
+    {
+      "path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/canonical_full_metrics.json",
+      "sha256": "55a451e28ad42686318523ba1348eddde5cb895380ec1d5dd113e1ab05cc45ca"
+    },
+    {
+      "path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/extraction_receipts.json",
+      "sha256": "9bc77b5028eb6c9ab11fb967584687f42e8e392cddf275158f2d499724f72641"
+    },
+    {
+      "path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/metric_definition_sources.json",
+      "sha256": "e6f8b4d062cedcd59937a73fa9bb2a1648ea02581663311c893e861ce467108b"
+    },
+    {
+      "path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/metric_spec.json",
+      "sha256": "7759f955a1dbde939d10414ce5933dbc0cdd0191fb733f581b0871b32b83a256"
+    },
+    {
+      "path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/nine_full_tables.json",
+      "sha256": "2c5130b463c25d8005468029f80268b8e5eb173d18bff0c49665b80568090636"
+    },
+    {
+      "path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/source_coverage.json",
+      "sha256": "81230464dfda6390efb0d68231d9c66ff4bcc772c7e213501c04ddc125eff912"
+    },
+    {
+      "path": "runs/stages/R1/r1-v130-full-metric-preparation-20261030/source_registry.json",
+      "sha256": "b2691f23d0056e31d9f194472fbc79faf85bbf50b90f32c59d31254e5cfcf614"
+    }
+  ],
+  "metric_spec_document": {
+    "path": "docs/research/20261030_data_first_scope/METRIC_SPEC.md",
+    "sha256": "f5c7597ecdeb9defbabda128224a7024bbbdfd610b177194fc93c03fbddecf27"
+  },
+  "boundaries": {
+    "old_R1_append_only": true,
+    "model_reproduction_training_inference": false,
+    "parent_SPEC_changed": false,
+    "extra_seeds_or_resources": false
+  }
+}

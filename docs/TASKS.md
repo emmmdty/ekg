@@ -1,5 +1,11 @@
 # Tasks: EKG Thesis Research Program
 
+**2026-10-30 / T087指标准备补充完成**：
+[完整九表](research/20261030_data_first_scope/NINE_TABLES.md)与
+[逐章规范](research/20261030_data_first_scope/METRIC_SPEC.md)补齐主辅指标/分母/单例/
+pair范围/消融/成本；原分及来源问题只见R1 §25.153，凭证R130。仍同一科研队列，
+本次仅完成文献与评价规范准备，不把整条任务标done，不启动复现或模型实现。
+
 **2026-10-30 / T087当前切片完成**：作者确认的九张已发表成绩表见
 [九表导航](research/20261030_data_first_scope/NINE_TABLES.md)，原分只在R1 §25.152，
 来源R129。无代码照样收录可核原分论文，不启动复现/训练/模型实现。整条科研任务

@@ -1,5 +1,11 @@
 # EKG 实时状态
 
+**10-30完整指标准备完成**：[九表](research/20261030_data_first_scope/NINE_TABLES.md)
+已扩标准分项/P/R/F1，[指标规范](research/20261030_data_first_scope/METRIC_SPEC.md)
+定义逐章诊断分母、候选与分区Pairwise区别、单例/成本/归因与结论优先级。
+原数R1 §25.153、R130；CD-DCE原表异常如实标识。无模型复现/训练；下一方法spec
+引用该口径，不再等实验后决定指标，不改父SPEC或旧封存。
+
 **10-30九表文献锚定完成**：第3/4/5章×ECB+/GVC/WEC的已发表CoNLL表见
 [九表导航](research/20261030_data_first_scope/NINE_TABLES.md)，原分/脚注/出处统一在R1
 §25.152，R129保存机器可读来源。**代码不作收录门槛**；无模型复现/训练或新代码。

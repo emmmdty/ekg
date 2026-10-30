@@ -1,0 +1,19 @@
+{
+  "unique_records": 21,
+  "published_papers": 11,
+  "tables": 9,
+  "displayed_rows": 48,
+  "records_with_component_PR": 16,
+  "records_with_LEA": 10,
+  "records_with_paper_pairwise_F1": 3,
+  "source_anomalies": [
+    {
+      "id": "CD_DCE__ECB+",
+      "status": "original_paper_internal_arithmetic_inconsistency",
+      "printed_component_mean": 87.89999999999999,
+      "printed_CoNLL": 87.4,
+      "action": "preserve all original values; flag in every expanded occurrence; not sole strict target anchor; no invented corrected result"
+    }
+  ],
+  "missingness_not_a_framework_requirement": "published tables may omit PR or LEA; our future outputs must report the predefined group, no code requirement for literature admission"
+}

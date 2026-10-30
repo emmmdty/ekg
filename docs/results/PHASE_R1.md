@@ -9709,3 +9709,191 @@ canonical原分逐项一致，所有来源回链、原表页范围、11份原PDF
 `git diff --check`通过。R1一致性`status=pass / findings=[] / 36 mapped`，旧总体
 科研状态仍`preparation_partial_blocked`，本次只验收文献锚定产物。未运行pytest/
 ruff/smoke、任何模型或baseline复现，未扩seed/机器/权限；表中不含我方预期分。
+
+### 25.153 · 完整指标组与逐章评测规范准备（2026-10-30）
+
+**开工自审**：作者指出准备阶段应完整整理主指标和辅助指标。本轮科研价值是在
+已有九表与21个唯一原分基础上，补每个方法/语料匹配原条件的标准分项及P/R/F1，
+并前置三章诊断指标的分母、计算与主次判据，避免后续临时定评价；对准同C41-A-R/
+T087。可行性：11篇一手PDF和官方评测说明可读，只作原文/元数据核查与规范文档；
+未报告的量保留null/“—”，尤其不拿oracle、不同encoder、不同列或其他论文重跑
+行补缺。不运行模型/复现/训练，不写模型代码、不改父SPEC/旧封存/数据和final-valid。
+
+#### 本次整理结果与缺失口径
+
+九张表扩充为MUC、B³、CEAFₑ、CoNLL与LEA五组F1；原文有P/R的另列全量附表。
+21个唯一原分中，16条有三个标准分项P/R/F1，10条同时报告LEA；5条只有标准分项
+F1。未报告的字段写“—”，不反推、不借其他方法/变体补分。原版九表保留，以下为最新展开版。
+
+**原文异常†**：CD-DCE ECB+非oracle的Table7同时印有MUC89.9、B³87.5、CEAFₑ86.3、
+CoNLL87.4，前三项均值约87.9，与CoNLL不符，超过显示精度可以解释的范围。主表
+Table1同印CoNLL87.4。保持全部原文数字，不臆定哪格有误；每次出现均加†，不作唯一
+严格达标锚。此处的均值仅是算术核查，绝不是替作者修正的实验结果。
+
+所有分数单位为%；每行是原论文完整系统，原split/encoder/oracle/LLM和运行统计条件
+沿用§25.152及R129。下表不是三个模块各自的发表成绩，也不把原文异协议排成统一重跑名次。
+
+<a id="fullmetrics-ch3-ecb"></a>
+
+##### 第3章 · 候选覆盖 · ECB+（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 87.5 | 86.6 | 82.9 | 85.7 | 74.0 | Table 7，PDF第12页 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | 83.5 | 82.4 | 79.1 | 81.7 | 71.9 | Table 5，PDF第12页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 88.2 | 87.8 | 84.1 | 86.7 | 79.3 | Table 2，PDF第6页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 89.9 | 87.5 | 86.3 | 87.4† | — | Table 7，PDF第13页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 90.5 | 89.4 | 86.7 | 88.9 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-ch3-gvc"></a>
+
+##### 第3章 · 候选覆盖 · GVC（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 91.5 | 83.0 | 76.7 | 83.7 | 80.6 | Table 7，PDF第12页 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | 87.4 | 77.7 | 59.9 | 75.0 | 68.6 | Table 4，PDF第12页 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | 91.3 | 85.8 | 76.0 | 84.4 | 80.2 | Table 2，PDF第7页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 92.8 | 87.2 | 82.1 | 87.4 | 83.2 | Table 2，PDF第6页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 93.5 | 87.3 | 82.4 | 87.7 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-ch3-wec"></a>
+
+##### 第3章 · 候选覆盖 · WEC-Eng（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | 80.7 | 60.2 | 45.9 | 62.3 | — | Table 5，PDF第8页 |
+| [DIE-EC（2024）](https://aclanthology.org/2024.lrec-main.523/) | 81.8 | 65.8 | 47.3 | 65.0 | — | Table 3，PDF第7页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 82.5 | 67.1 | 48.2 | 65.9 | — | Table 7，PDF第13页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 83.1 | 68.0 | 49.1 | 66.7 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-ch4-ecb"></a>
+
+##### 第4章 · 语义精判 · ECB+（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 87.5 | 86.6 | 82.9 | 85.7 | 74.0 | Table 7，PDF第12页 |
+| [篇章结构模型–Longformer（2023）](https://aclanthology.org/2023.emnlp-main.294/) | 88.3 | 87.3 | 83.6 | 86.4 | — | Table 2，PDF第6页 |
+| [ROEC＋CKD（2024）](https://aclanthology.org/2024.naacl-long.218/) | 87.9 | 86.8 | 84.5 | 86.4 | — | Table 5，PDF第15页 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | 87.5 | 87.0 | 83.4 | 86.0 | 78.5 | Table 2，PDF第7页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 88.2 | 87.8 | 84.1 | 86.7 | 79.3 | Table 2，PDF第6页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 89.9 | 87.5 | 86.3 | 87.4† | — | Table 7，PDF第13页 |
+| [ACCI–Held（2026）](https://www.nature.com/articles/s41598-025-32765-6) | 88.1 | 86.8 | 83.6 | 86.2 | 78.5 | Table 2，PDF第11页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 90.5 | 89.4 | 86.7 | 88.9 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-ch4-gvc"></a>
+
+##### 第4章 · 语义精判 · GVC（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 91.5 | 83.0 | 76.7 | 83.7 | 80.6 | Table 7，PDF第12页 |
+| [ROEC＋CKD（2024）](https://aclanthology.org/2024.naacl-long.218/) | 92.9 | 84.3 | 71.7 | 83.0 | — | Table 6，PDF第15页 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | 91.3 | 85.8 | 76.0 | 84.4 | 80.2 | Table 2，PDF第7页 |
+| [ACCI–Held（2026）](https://www.nature.com/articles/s41598-025-32765-6) | 92.6 | 86.6 | 76.4 | 85.2 | 81.7 | Table 4，PDF第12页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 92.8 | 87.2 | 82.1 | 87.4 | 83.2 | Table 2，PDF第6页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 93.5 | 87.3 | 82.4 | 87.7 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-ch4-wec"></a>
+
+##### 第4章 · 语义精判 · WEC-Eng（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | 80.7 | 60.2 | 45.9 | 62.3 | — | Table 5，PDF第8页 |
+| [DIE-EC（2024）](https://aclanthology.org/2024.lrec-main.523/) | 81.8 | 65.8 | 47.3 | 65.0 | — | Table 3，PDF第7页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 82.5 | 67.1 | 48.2 | 65.9 | — | Table 7，PDF第13页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 83.1 | 68.0 | 49.1 | 66.7 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-ch5-ecb"></a>
+
+##### 第5章 · 簇级归并 · ECB+（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | 83.0 | 81.3 | 78.0 | 80.8 | — | Table 4，PDF第8页 |
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 87.5 | 86.6 | 82.9 | 85.7 | 74.0 | Table 7，PDF第12页 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | 83.5 | 82.4 | 79.1 | 81.7 | 71.9 | Table 5，PDF第12页 |
+| [篇章结构模型–Longformer（2023）](https://aclanthology.org/2023.emnlp-main.294/) | 88.3 | 87.3 | 83.6 | 86.4 | — | Table 2，PDF第6页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 88.2 | 87.8 | 84.1 | 86.7 | 79.3 | Table 2，PDF第6页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 89.9 | 87.5 | 86.3 | 87.4† | — | Table 7，PDF第13页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 90.5 | 89.4 | 86.7 | 88.9 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-ch5-gvc"></a>
+
+##### 第5章 · 簇级归并 · GVC（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | 91.5 | 83.0 | 76.7 | 83.7 | 80.6 | Table 7，PDF第12页 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | 87.4 | 77.7 | 59.9 | 75.0 | 68.6 | Table 4，PDF第12页 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | 91.3 | 85.8 | 76.0 | 84.4 | 80.2 | Table 2，PDF第7页 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | 92.8 | 87.2 | 82.1 | 87.4 | 83.2 | Table 2，PDF第6页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 93.5 | 87.3 | 82.4 | 87.7 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-ch5-wec"></a>
+
+##### 第5章 · 簇级归并 · WEC-Eng（完整指标组）
+
+| 已发表方法 | MUC F1 | B³ F1 | CEAFₑ F1 | CoNLL F1（主） | LEA F1 | 原表 |
+|---|---:|---:|---:|---:|---:|---|
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | 80.7 | 60.2 | 45.9 | 62.3 | — | Table 5，PDF第8页 |
+| [DIE-EC（2024）](https://aclanthology.org/2024.lrec-main.523/) | 81.8 | 65.8 | 47.3 | 65.0 | — | Table 3，PDF第7页 |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | 82.5 | 67.1 | 48.2 | 65.9 | — | Table 7，PDF第13页 |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | 83.1 | 68.0 | 49.1 | 66.7 | — | Table 12，PDF第15页 |
+
+<a id="fullmetrics-prf"></a>
+
+#### 唯一方法×语料的P/R/F1附表
+
+每格顺序统一为**P/R/F1**；DCT等原表R/P/F1已按表头转换。各项F1保持原印值，
+不以显示精度下的P/R重算替换。CoNLL没有另造一组P/R；它是三个分项F1的均值。
+
+| 已发表方法 | 语料 | MUC P/R/F1 | B³ P/R/F1 | CEAFₑ P/R/F1 | LEA P/R/F1 |
+|---|---|---|---|---|---|
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | ECB+ | 88.1/87.0/87.5 | 87.7/85.6/86.6 | 85.8/80.3/82.9 | 73.2/74.9/74.0 |
+| [DCT（2021）](https://aclanthology.org/2021.emnlp-main.106/) | GVC | 91.2/91.8/91.5 | 83.8/82.2/83.0 | 77.9/75.5/76.7 | 82.3/79.0/80.6 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | ECB+ | 87.3/80.0/83.5 | 85.4/79.6/82.4 | 75.5/83.1/79.1 | 73.3/70.5/71.9 |
+| [LemmaECR–Dlong（2023）](https://aclanthology.org/2023.findings-acl.100/) | GVC | 91.1/84.0/87.4 | 76.4/79.0/77.7 | 52.5/69.6/59.9 | 63.9/74.1/68.6 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | ECB+ | 87.1/89.4/88.2 | 86.5/89.1/87.8 | 85.5/82.7/84.1 | 78.5/79.7/79.3 |
+| [SECURE（2024）](https://aclanthology.org/2024.acl-long.164/) | GVC | 93.2/92.4/92.8 | 87.4/87.0/87.2 | 80.7/83.6/82.1 | 83.0/83.4/83.2 |
+| [ROEC＋CKD（2024）](https://aclanthology.org/2024.naacl-long.218/) | ECB+ | 92.0/84.1/87.9 | 91.7/82.4/86.8 | 80.5/88.9/84.5 | —/—/— |
+| [ROEC＋CKD（2024）](https://aclanthology.org/2024.naacl-long.218/) | GVC | 94.2/91.6/92.9 | 82.1/86.7/84.3 | 68.1/75.8/71.7 | —/—/— |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | ECB+ | 88.6/86.4/87.5 | 88.4/85.7/87.0 | 82.2/84.7/83.4 | 79.6/77.4/78.5 |
+| [LLM-RCDA（2024）](https://aclanthology.org/2024.naacl-long.63/) | GVC | 92.1/90.4/91.3 | 86.8/84.8/85.8 | 73.2/78.9/76.0 | 80.7/79.8/80.2 |
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | ECB+ | 81.8/84.2/83.0 | 81.7/80.8/81.3 | 79.5/76.7/78.0 | —/—/— |
+| [WEC原模型（2021）](https://aclanthology.org/2021.naacl-main.198/) | WEC-Eng | 83.6/78.0/80.7 | 55.3/66.1/60.2 | 40.3/53.4/45.9 | —/—/— |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/)† | ECB+ | —/—/89.9 | —/—/87.5 | —/—/86.3 | —/—/— |
+| [CD-DCE（2025）](https://aclanthology.org/2025.acl-long.1134/) | WEC-Eng | —/—/82.5 | —/—/67.1 | —/—/48.2 | —/—/— |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | ECB+ | —/—/90.5 | —/—/89.4 | —/—/86.7 | —/—/— |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | GVC | —/—/93.5 | —/—/87.3 | —/—/82.4 | —/—/— |
+| [CohTP（2026）](https://aclanthology.org/2026.acl-long.1345/) | WEC-Eng | —/—/83.1 | —/—/68.0 | —/—/49.1 | —/—/— |
+| [DIE-EC（2024）](https://aclanthology.org/2024.lrec-main.523/) | WEC-Eng | 85.8/78.2/81.8 | 62.4/69.6/65.8 | 39.5/58.9/47.3 | —/—/— |
+| [篇章结构模型–Longformer（2023）](https://aclanthology.org/2023.emnlp-main.294/) | ECB+ | 87.2/89.4/88.3 | 86.4/88.3/87.3 | 84.0/83.2/83.6 | —/—/— |
+| [ACCI–Held（2026）](https://www.nature.com/articles/s41598-025-32765-6) | ECB+ | 86.4/89.9/88.1 | 84.4/89.2/86.8 | 85.8/81.5/83.6 | 76.7/80.4/78.5 |
+| [ACCI–Held（2026）](https://www.nature.com/articles/s41598-025-32765-6) | GVC | 92.8/92.4/92.6 | 85.0/88.3/86.6 | 75.6/77.2/76.4 | 84.0/79.6/81.7 |
+
+#### 原文额外Pairwise列
+
+CohTP Table1（PDF第7页）另外报告Pairwise F1：ECB+77.4、GVC80.4、WEC-Eng59.7。
+这是论文原定义的额外列，当前不擅自等同于第4章固定候选上的条件pair F1；也不能
+拿它替换CoNLL主列。P/R未在该匹配表中报告。无其他论文数值为填表而移植。
+
+#### 评测规范交付
+
+[完整指标规范](../research/20261030_data_first_scope/METRIC_SPEC.md)已规定共同主指标/
+标准分项、三章局部诊断的分母与输入、单例和全人口、成本、累计/单模块消融以及
+主辅结论优先级；不以辅助指标改善替代最终任务改善，不因原文缺LEA/P/R剔除论文。
+规范是新框架的前瞻设计，没有改写旧MAVEN冻结协议/父SPEC或启动实现。
+
+本轮凭证：`runs/stages/R1/r1-v130-full-metric-preparation-20261030/`，7件研究JSON＋manifest；
+manifest SHA-256 `751171586d1e44723b9cbb13d781370d6f693f2fcda774354391213b0d57f86e`。逐字段保留原列序、匹配原行、Table/页及缺报状态，
+附2篇指标定义原PDF身份；未提交完整PDF，不把原文异常抹掉。
+
+**实际验证**：九个章×语料组合、48个展示行与21个canonical组逐项相符；原行数字
+回查匹配、11篇方法原PDF及2篇指标原PDF身份通过；33个导航相对链接及新增锚点
+有效，原R1仅追加。R1一致性`pass / findings=[] / 36 mapped`，该检查仅证明文档
+一致性；旧科研总体状态未据此改成完成。新指标规范/数值表检查不等于评分程序
+运行验收；本轮没有模型代码、pytest/ruff/smoke、复现或训练。

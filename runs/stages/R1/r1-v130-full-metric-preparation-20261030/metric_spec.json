@@ -1,0 +1,121 @@
+{
+  "status": "prospective_evaluation_contract_not_model_execution",
+  "document": "docs/research/20261030_data_first_scope/METRIC_SPEC.md",
+  "task": "gold-mention cross-document event coreference",
+  "datasets": [
+    "ECB+",
+    "GVC",
+    "WEC-Eng"
+  ],
+  "primary": {
+    "name": "CoNLL F1",
+    "formula": "mean(MUC.F1,B3.F1,CEAFe.F1)",
+    "aggregation": "one complete split partition per corpus; no averaging per-document F1",
+    "selection": "train/dev only"
+  },
+  "standard_components": {
+    "MUC": [
+      "P",
+      "R",
+      "F1"
+    ],
+    "B3": [
+      "P",
+      "R",
+      "F1"
+    ],
+    "CEAFe": [
+      "P",
+      "R",
+      "F1"
+    ],
+    "LEA": [
+      "P",
+      "R",
+      "F1"
+    ]
+  },
+  "reference_scorer": {
+    "version": "8.01",
+    "revision": "f49f3f8a0e1cdc5ceba7c2a33013897369df5543",
+    "applies_to": [
+      "MUC",
+      "B3",
+      "CEAFe"
+    ],
+    "LEA_implementation_revision": "to be recorded in execution configuration before scoring, definition source P16-1060"
+  },
+  "population": {
+    "mentions": "all given mentions including singletons",
+    "pairs": "unique unordered distinct-mention pairs; within and cross document; cross-document stratum separate",
+    "gold_blocking_at_inference": false,
+    "supplementary_singleton_view": "fixed gold-nonsingleton mention subset; project both partitions; retain predicted singleton fragments",
+    "zero_denominator": "diagnostic ratios NA plus counts; standard metrics use native scorer rules; pair F1=2TP/(2TP+FP+FN), zero if missed positives, NA only all TP/FP/FN zero"
+  },
+  "chapters": [
+    {
+      "chapter": 3,
+      "fixed": [
+        "pair scorer",
+        "decoder"
+      ],
+      "diagnostics": [
+        "candidate-pair recall@k micro",
+        "mention recall@k macro",
+        "mention hit@k",
+        "unique candidate count and reduction",
+        "cross-document candidate recall"
+      ],
+      "pair_recall_denominator": "all gold coreferent pairs before retrieval",
+      "is_final_metric_upper_bound": false
+    },
+    {
+      "chapter": 4,
+      "fixed": [
+        "candidate IDs/hash",
+        "decoder"
+      ],
+      "diagnostics": [
+        "candidate-conditioned pair P/R/F1",
+        "same-lemma negative FPR",
+        "different-lemma positive FNR"
+      ],
+      "pair_recall_denominator": "gold positive pairs within common candidate set",
+      "evaluate_negative_subsampling": false
+    },
+    {
+      "chapter": 5,
+      "fixed": [
+        "seed candidates",
+        "pair scorer function",
+        "existing pair scores",
+        "extra query permissions and budget"
+      ],
+      "diagnostics": [
+        "full partition pairwise P/R/F1",
+        "overmerge FP and undermerge FN counts",
+        "predicted nonsingleton cluster impurity rate",
+        "gold nonsingleton cluster fragmentation rate"
+      ],
+      "pair_recall_denominator": "all gold coreferent pairs across full mention population",
+      "unknown_pair_as_negative": false
+    }
+  ],
+  "required_costs": [
+    "unique candidates",
+    "pair forward calls",
+    "LLM calls",
+    "input and output tokens",
+    "component and total wall time",
+    "peak GPU memory",
+    "cold and cache costs",
+    "hardware batch precision context concurrency"
+  ],
+  "source_policy": {
+    "literature_requires_code": false,
+    "missing_original_fields": "null, never impute",
+    "paper_protocol_difference": "retain, do not claim unified rerun ranking",
+    "CD_DCE_ECB_arithmetic": "flag preserved original values, not sole strict target anchor"
+  },
+  "no_new_training_inference_or_seeds": true
+}

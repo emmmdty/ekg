@@ -1,0 +1,464 @@
+[
+  {
+    "id": "DCT__ECB+",
+    "original_values": [
+      87.0,
+      88.1,
+      87.5,
+      85.6,
+      87.7,
+      86.6,
+      80.3,
+      85.8,
+      82.9,
+      85.7,
+      74.9,
+      73.2,
+      74.0
+    ],
+    "matched_original_lines": [
+      "ECB+     87.0   88.1   87.5   85.6   87.7    86.6   80.3 85.8    82.9    85.7   74.9   73.2   74.0"
+    ],
+    "layout_page_sha256": "8a9dee7e2e376ecd70905c076b6a11e6073d761870c6017ac405a0a3e77f24e3",
+    "original_column_order": "RP",
+    "pdf_page": 12,
+    "table": "Table 7"
+  },
+  {
+    "id": "DCT__GVC",
+    "original_values": [
+      91.8,
+      91.2,
+      91.5,
+      82.2,
+      83.8,
+      83.0,
+      75.5,
+      77.9,
+      76.7,
+      83.7,
+      79.0,
+      82.3,
+      80.6
+    ],
+    "matched_original_lines": [
+      "Event     GVC      91.8   91.2   91.5   82.2   83.8    83.0   75.5 77.9    76.7    83.7   79.0   82.3   80.6"
+    ],
+    "layout_page_sha256": "8a9dee7e2e376ecd70905c076b6a11e6073d761870c6017ac405a0a3e77f24e3",
+    "original_column_order": "RP",
+    "pdf_page": 12,
+    "table": "Table 7"
+  },
+  {
+    "id": "LemmaECR__ECB+",
+    "original_values": [
+      80.0,
+      87.3,
+      83.5,
+      79.6,
+      85.4,
+      82.4,
+      83.1,
+      75.5,
+      79.1,
+      70.5,
+      73.3,
+      71.9,
+      81.7
+    ],
+    "matched_original_lines": [
+      "LH + Dlong                  80.0      87.3       83.5    79.6    85.4       82.4    83.1    75.5    79.1   70.5   73.3   71.9     81.7"
+    ],
+    "layout_page_sha256": "3b8ff7ee3350ee17f5e281f23c351d727a1dd9b644f117ac09f0ca7512298134",
+    "original_column_order": "RP",
+    "pdf_page": 12,
+    "table": "Table 5"
+  },
+  {
+    "id": "LemmaECR__GVC",
+    "original_values": [
+      84.0,
+      91.1,
+      87.4,
+      79.0,
+      76.4,
+      77.7,
+      69.6,
+      52.5,
+      59.9,
+      74.1,
+      63.9,
+      68.6,
+      75.0
+    ],
+    "matched_original_lines": [
+      "LH + Dlong               84.0       91.1       87.4    79.0    76.4       77.7    69.6    52.5    59.9    74.1   63.9   68.6     75.0"
+    ],
+    "layout_page_sha256": "3b8ff7ee3350ee17f5e281f23c351d727a1dd9b644f117ac09f0ca7512298134",
+    "original_column_order": "RP",
+    "pdf_page": 12,
+    "table": "Table 4"
+  },
+  {
+    "id": "SECURE__ECB+",
+    "original_values": [
+      89.4,
+      87.1,
+      88.2,
+      89.1,
+      86.5,
+      87.8,
+      82.7,
+      85.5,
+      84.1,
+      86.7,
+      79.7,
+      78.5,
+      79.3
+    ],
+    "matched_original_lines": [
+      "Our method                   89.4    87.1   88.2   89.1    86.5   87.8    82.7   85.5    84.1     86.7     79.7    78.5   79.3"
+    ],
+    "layout_page_sha256": "d5bc10596b6517ec518060436a318eaf5632492271fb820052c07bb056dc1032",
+    "original_column_order": "RP",
+    "pdf_page": 6,
+    "table": "Table 2"
+  },
+  {
+    "id": "SECURE__GVC",
+    "original_values": [
+      92.4,
+      93.2,
+      92.8,
+      87.0,
+      87.4,
+      87.2,
+      83.6,
+      80.7,
+      82.1,
+      87.4,
+      83.4,
+      83.0,
+      83.2
+    ],
+    "matched_original_lines": [
+      "Our method                   92.4    93.2   92.8   87.0    87.4   87.2    83.6   80.7    82.1     87.4     83.4    83.0   83.2"
+    ],
+    "layout_page_sha256": "d5bc10596b6517ec518060436a318eaf5632492271fb820052c07bb056dc1032",
+    "original_column_order": "RP",
+    "pdf_page": 6,
+    "table": "Table 2"
+  },
+  {
+    "id": "ROEC_CKD__ECB+",
+    "original_values": [
+      84.1,
+      92.0,
+      87.9,
+      82.4,
+      91.7,
+      86.8,
+      88.9,
+      80.5,
+      84.5,
+      86.4
+    ],
+    "matched_original_lines": [
+      "Long+ROEC,+KD (ours)                    84.1    92.0   87.9          82.4   91.7     86.8   88.9    80.5    84.5     86.4"
+    ],
+    "layout_page_sha256": "70f3676eb42881df41c6da54a8bb4f3b7415f530682c0dac7ca995ef0a2e9132",
+    "original_column_order": "RP",
+    "pdf_page": 15,
+    "table": "Table 5"
+  },
+  {
+    "id": "ROEC_CKD__GVC",
+    "original_values": [
+      91.6,
+      94.2,
+      92.9,
+      86.7,
+      82.1,
+      84.3,
+      75.8,
+      68.1,
+      71.7,
+      83.0
+    ],
+    "matched_original_lines": [
+      "Long+ROEC,+KD (ours)                    91.6    94.2   92.9          86.7   82.1     84.3   75.8    68.1    71.7     83.0"
+    ],
+    "layout_page_sha256": "70f3676eb42881df41c6da54a8bb4f3b7415f530682c0dac7ca995ef0a2e9132",
+    "original_column_order": "RP",
+    "pdf_page": 15,
+    "table": "Table 6"
+  },
+  {
+    "id": "RCDA__ECB+",
+    "original_values": [
+      86.4,
+      88.6,
+      87.5,
+      85.7,
+      88.4,
+      87.0,
+      84.7,
+      82.2,
+      83.4,
+      77.4,
+      79.6,
+      78.5,
+      86.0
+    ],
+    "matched_original_lines": [
+      "Enhanced System+DA        86.4   88.6   87.5   85.7   88.4   87.0   84.7    82.2   83.4   77.4   79.6   78.5   86.0*"
+    ],
+    "layout_page_sha256": "13538ecac285b4fb1070b37b16aacd8d3914c1d798fa95f30f3fd74dd2f70fd2",
+    "original_column_order": "RP",
+    "pdf_page": 7,
+    "table": "Table 2"
+  },
+  {
+    "id": "RCDA__GVC",
+    "original_values": [
+      90.4,
+      92.1,
+      91.3,
+      84.8,
+      86.8,
+      85.8,
+      78.9,
+      73.2,
+      76.0,
+      79.8,
+      80.7,
+      80.2,
+      84.4
+    ],
+    "matched_original_lines": [
+      "Enhanced System+DA        90.4   92.1   91.3   84.8   86.8   85.8   78.9    73.2   76.0   79.8   80.7   80.2    84.4"
+    ],
+    "layout_page_sha256": "13538ecac285b4fb1070b37b16aacd8d3914c1d798fa95f30f3fd74dd2f70fd2",
+    "original_column_order": "RP",
+    "pdf_page": 7,
+    "table": "Table 2"
+  },
+  {
+    "id": "WEC__ECB+",
+    "original_values": [
+      84.2,
+      81.8,
+      83.0,
+      80.8,
+      81.7,
+      81.3,
+      76.7,
+      79.5,
+      78.0,
+      80.8
+    ],
+    "matched_original_lines": [
+      "Our model                                 84.2    81.8    83            80.8   81.7    81.3        76.7       79.5    78      80.8"
+    ],
+    "layout_page_sha256": "9f9b455ff5e616c927bfb6ed1fb9c49d0d23f221c5a9cfa026895372c49405cd",
+    "original_column_order": "RP",
+    "pdf_page": 8,
+    "table": "Table 4"
+  },
+  {
+    "id": "WEC__WEC-Eng",
+    "original_values": [
+      78.0,
+      83.6,
+      80.7,
+      66.1,
+      55.3,
+      60.2,
+      53.4,
+      40.3,
+      45.9,
+      62.3
+    ],
+    "matched_original_lines": [
+      "Our model                    78      83.6       80.7             66.1   55.3    60.2          53.4       40.3       45.9      62.3"
+    ],
+    "layout_page_sha256": "9f9b455ff5e616c927bfb6ed1fb9c49d0d23f221c5a9cfa026895372c49405cd",
+    "original_column_order": "RP",
+    "pdf_page": 8,
+    "table": "Table 5"
+  },
+  {
+    "id": "CD_DCE__ECB+",
+    "original_values": [
+      89.9,
+      87.5,
+      86.3,
+      87.4
+    ],
+    "matched_original_lines": [
+      "Ours(non-oracle)                       89.9               87.5              86.3                 87.4"
+    ],
+    "layout_page_sha256": "6a17d9ffb7164dc07574d4daff96efe8492b2ceae9db4e667e962f5e498852fc",
+    "original_column_order": "F1",
+    "pdf_page": 13,
+    "table": "Table 7"
+  },
+  {
+    "id": "CD_DCE__WEC-Eng",
+    "original_values": [
+      82.5,
+      67.1,
+      48.2,
+      65.9
+    ],
+    "matched_original_lines": [
+      "Ours                                   82.5       67.1                      48.2                 65.9"
+    ],
+    "layout_page_sha256": "6a17d9ffb7164dc07574d4daff96efe8492b2ceae9db4e667e962f5e498852fc",
+    "original_column_order": "F1",
+    "pdf_page": 13,
+    "table": "Table 7"
+  },
+  {
+    "id": "CohTP__ECB+",
+    "original_values": [
+      90.5,
+      89.4,
+      86.7,
+      88.9
+    ],
+    "matched_original_lines": [
+      "CD-DCE                                                   CohTP            90.5    89.4    86.7     88.9"
+    ],
+    "layout_page_sha256": "1eea4b07de4acac1e43909bc9db5b60c56d5a74876bd2d7c1e00552196388565",
+    "original_column_order": "F1",
+    "pdf_page": 15,
+    "table": "Table 12"
+  },
+  {
+    "id": "CohTP__GVC",
+    "original_values": [
+      93.5,
+      87.3,
+      82.4,
+      87.7
+    ],
+    "matched_original_lines": [
+      "CohTP            93.5    87.3    82.4     87.7"
+    ],
+    "layout_page_sha256": "1eea4b07de4acac1e43909bc9db5b60c56d5a74876bd2d7c1e00552196388565",
+    "original_column_order": "F1",
+    "pdf_page": 15,
+    "table": "Table 12"
+  },
+  {
+    "id": "CohTP__WEC-Eng",
+    "original_values": [
+      83.1,
+      68.0,
+      49.1,
+      66.7
+    ],
+    "matched_original_lines": [
+      "CTCR      183.6                                                 CohTP            83.1    68.0    49.1     66.7"
+    ],
+    "layout_page_sha256": "1eea4b07de4acac1e43909bc9db5b60c56d5a74876bd2d7c1e00552196388565",
+    "original_column_order": "F1",
+    "pdf_page": 15,
+    "table": "Table 12"
+  },
+  {
+    "id": "Gao2024__WEC-Eng",
+    "original_values": [
+      78.2,
+      85.8,
+      81.8,
+      69.6,
+      62.4,
+      65.8,
+      58.9,
+      39.5,
+      47.3,
+      65.0
+    ],
+    "matched_original_lines": [
+      "Our model           78.2   85.8   81.8          69.6     62.4   65.8         58.9    39.5    47.3           65.0"
+    ],
+    "layout_page_sha256": "9bc8a8b8995151a48ad73c6f951ac1f20fe836635e3c20d303fb7f76c351bbe6",
+    "original_column_order": "RP",
+    "pdf_page": 7,
+    "table": "Table 3"
+  },
+  {
+    "id": "Chen2023__ECB+",
+    "original_values": [
+      87.2,
+      89.4,
+      88.3,
+      86.4,
+      88.3,
+      87.3,
+      84.0,
+      83.2,
+      83.6,
+      86.4
+    ],
+    "matched_original_lines": [
+      "Ours(Longformer)*            87.2    89.4    88.3    86.4    88.3    87.3    84.0    83.2 83.6        86.4"
+    ],
+    "layout_page_sha256": "5539a375b3394522bde4e8997850cf45a7c07c36393dbc981798d36a55def68e",
+    "original_column_order": "PR",
+    "pdf_page": 6,
+    "table": "Table 2"
+  },
+  {
+    "id": "ACCI__ECB+",
+    "original_values": [
+      86.4,
+      89.9,
+      88.1,
+      84.4,
+      89.2,
+      86.8,
+      85.8,
+      81.5,
+      83.6,
+      76.7,
+      80.4,
+      78.5,
+      86.2
+    ],
+    "matched_original_lines": [
+      "ACCI                   86.4       89.9       88.1       84.4    89.2    86.8       85.8       81.5       83.6       76.7       80.4       78.5   86.2"
+    ],
+    "layout_page_sha256": "36b7b4fd9feab3508c5512dad3abe822be2cc1e09acb6ce913454d73b6426523",
+    "original_column_order": "PR",
+    "pdf_page": 11,
+    "table": "Table 2"
+  },
+  {
+    "id": "ACCI__GVC",
+    "original_values": [
+      92.8,
+      92.4,
+      92.6,
+      85.0,
+      88.3,
+      86.6,
+      75.6,
+      77.2,
+      76.4,
+      84.0,
+      79.6,
+      81.7,
+      85.2
+    ],
+    "matched_original_lines": [
+      "ACCI               92.8     92.4   92.6    85.0   88.3   86.6   75.6   77.2   76.4   84.0   79.6   81.7   85.2"
+    ],
+    "layout_page_sha256": "901b580950222c7f47504eaeed53de5f26c8c213568390675bbe4873344bd009",
+    "original_column_order": "PR",
+    "pdf_page": 12,
+    "table": "Table 4"
+  }
+]

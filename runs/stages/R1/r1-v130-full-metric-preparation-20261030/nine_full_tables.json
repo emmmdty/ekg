@@ -1,0 +1,194 @@
+[
+  {
+    "chapter": 3,
+    "chapter_problem": "候选覆盖",
+    "dataset": "ECB+",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch3-ecb",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "DCT__ECB+",
+      "LemmaECR__ECB+",
+      "SECURE__ECB+",
+      "CD_DCE__ECB+",
+      "CohTP__ECB+"
+    ]
+  },
+  {
+    "chapter": 3,
+    "chapter_problem": "候选覆盖",
+    "dataset": "GVC",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch3-gvc",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "DCT__GVC",
+      "LemmaECR__GVC",
+      "RCDA__GVC",
+      "SECURE__GVC",
+      "CohTP__GVC"
+    ]
+  },
+  {
+    "chapter": 3,
+    "chapter_problem": "候选覆盖",
+    "dataset": "WEC-Eng",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch3-wec",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "WEC__WEC-Eng",
+      "Gao2024__WEC-Eng",
+      "CD_DCE__WEC-Eng",
+      "CohTP__WEC-Eng"
+    ]
+  },
+  {
+    "chapter": 4,
+    "chapter_problem": "语义精判",
+    "dataset": "ECB+",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch4-ecb",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "DCT__ECB+",
+      "Chen2023__ECB+",
+      "ROEC_CKD__ECB+",
+      "RCDA__ECB+",
+      "SECURE__ECB+",
+      "CD_DCE__ECB+",
+      "ACCI__ECB+",
+      "CohTP__ECB+"
+    ]
+  },
+  {
+    "chapter": 4,
+    "chapter_problem": "语义精判",
+    "dataset": "GVC",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch4-gvc",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "DCT__GVC",
+      "ROEC_CKD__GVC",
+      "RCDA__GVC",
+      "ACCI__GVC",
+      "SECURE__GVC",
+      "CohTP__GVC"
+    ]
+  },
+  {
+    "chapter": 4,
+    "chapter_problem": "语义精判",
+    "dataset": "WEC-Eng",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch4-wec",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "WEC__WEC-Eng",
+      "Gao2024__WEC-Eng",
+      "CD_DCE__WEC-Eng",
+      "CohTP__WEC-Eng"
+    ]
+  },
+  {
+    "chapter": 5,
+    "chapter_problem": "簇级归并",
+    "dataset": "ECB+",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch5-ecb",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "WEC__ECB+",
+      "DCT__ECB+",
+      "LemmaECR__ECB+",
+      "Chen2023__ECB+",
+      "SECURE__ECB+",
+      "CD_DCE__ECB+",
+      "CohTP__ECB+"
+    ]
+  },
+  {
+    "chapter": 5,
+    "chapter_problem": "簇级归并",
+    "dataset": "GVC",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch5-gvc",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "DCT__GVC",
+      "LemmaECR__GVC",
+      "RCDA__GVC",
+      "SECURE__GVC",
+      "CohTP__GVC"
+    ]
+  },
+  {
+    "chapter": 5,
+    "chapter_problem": "簇级归并",
+    "dataset": "WEC-Eng",
+    "score_scope": "complete published system, not isolated component effect",
+    "id": "fullmetrics-ch5-wec",
+    "metrics": [
+      "MUC_F1",
+      "B3_F1",
+      "CEAFe_F1",
+      "CoNLL_F1",
+      "LEA_F1"
+    ],
+    "row_ids": [
+      "WEC__WEC-Eng",
+      "Gao2024__WEC-Eng",
+      "CD_DCE__WEC-Eng",
+      "CohTP__WEC-Eng"
+    ]
+  }
+]
